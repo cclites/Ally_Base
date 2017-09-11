@@ -40,10 +40,10 @@ trait IsUserRole
             $user->update($user_attributes);
         }
         else {
-            $user = User::forceCreate(
+            $user = User::forceCreate(array_merge(
                 $user_attributes,
                 ['role_type' => $this->getRoleType()]
-            );
+            ));
         }
 
         if (!$user) {

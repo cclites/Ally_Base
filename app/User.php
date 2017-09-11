@@ -30,7 +30,7 @@ class User extends Authenticatable
     public function role()
     {
         if ($this->getRoleClass()) {
-            return $this->hasMany($this->getRoleClass());
+            return $this->hasOne($this->getRoleClass(), 'id', 'id');
         }
         return null;
     }
