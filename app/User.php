@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'email', 'password', 'firstname', 'lastname', 'date_of_birth', 'access_group_id', 'active'
     ];
 
     /**
@@ -26,4 +26,50 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function role()
+    {
+        if ($this->getRoleClass()) {
+            return $this->hasMany($this->getRoleClass());
+        }
+        return null;
+    }
+
+    public function getRoleClass($type = null)
+    {
+        if (!$type) $type = $this->role_type;
+
+        switch ($type) {
+            case 'admin':
+                return Admin::class;
+            case 'caregiver':
+                return Caregiver::class;
+            case 'client':
+                return Client::class;
+            case 'office_user':
+                return OfficeUser::class;
+        }
+
+        return null;
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function bankAccounts()
+    {
+        return $this->hasMany(BankAccount::class);
+    }
+
+    public function creditCards()
+    {
+        return $this->hasMany(CreditCard::class);
+    }
+
+    public function phoneNumbers()
+    {
+        return $this->hasMany(PhoneNumber::class);
+    }
 }
