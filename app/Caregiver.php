@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Traits\IsUserRole;
+use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
 class Caregiver extends Model
@@ -31,5 +32,15 @@ class Caregiver extends Model
     public function upcomingPayments()
     {
         return $this->hasMany(PaymentQueue::class);
+    }
+
+    public function setSsnAttribute($value)
+    {
+        $this->attributes['ssn'] = Crypt::encrypt($value);
+    }
+
+    public function getSsnAttribute()
+    {
+        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 }

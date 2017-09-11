@@ -12,4 +12,14 @@ class CreditCard extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function setNumberAttribute($value)
+    {
+        $this->attributes['number'] = Crypt::encrypt($value);
+    }
+
+    public function getNumberAttribute()
+    {
+        return empty($this->attributes['number']) ? null : Crypt::decrypt($this->attributes['number']);
+    }
 }

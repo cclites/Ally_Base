@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
 class BankAccount extends Model
@@ -29,5 +30,23 @@ class BankAccount extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function setRoutingNumberAttribute($value)
+    {
+        $this->attributes['routing_number'] = Crypt::encrypt($value);
+    }
 
+    public function getRoutingNumberAttribute()
+    {
+        return empty($this->attributes['routing_number']) ? null : Crypt::decrypt($this->attributes['routing_number']);
+    }
+
+    public function setAccountNumberAttribute($value)
+    {
+        $this->attributes['account_number'] = Crypt::encrypt($value);
+    }
+
+    public function getAccountNumberAttribute()
+    {
+        return empty($this->attributes['account_number']) ? null : Crypt::decrypt($this->attributes['account_number']);
+    }
 }
