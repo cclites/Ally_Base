@@ -25,15 +25,17 @@ trait IsUserRole
 
     public function fill(array $attributes = [])
     {
-        $this->attributes = $attributes;
+        foreach($attributes as $key => $value) {
+            $this->setAttribute($key, $value);
+        }
     }
 
     public function save(array $options = [])
     {
         $this->setIncrementing(false);
 
-        $role_attributes = array_intersect_key($this->attributes, $this->fillable);
-        $user_attributes = array_diff_key($this->attributes, $this->fillable);
+        $role_attributes = array_intersect_key($this->attributes, array_flip($this->fillable));
+        $user_attributes = array_diff_key($this->attributes, array_flip($this->fillable));
 
         if ($this->id) {
             $user = $this->user;
