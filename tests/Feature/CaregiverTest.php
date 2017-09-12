@@ -5,10 +5,6 @@ namespace Tests\Feature;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
-use App\Client;
-use App\Exceptions\ExistingBankAccountException;
-use App\OfficeUser;
-use Beta\B;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
