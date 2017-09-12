@@ -13,15 +13,17 @@ use Faker\Generator as Faker;
 |
 */
 
-function userFactory(Faker $faker) {
-    return [
-        'firstname' => $faker->firstName,
-        'lastname' => $faker->lastName,
-        'email' => $faker->unique()->safeEmail,
-        'password' => $password = bcrypt('demo'),
-        'remember_token' => str_random(10),
-        'date_of_birth' => $faker->date('Y-m-d', '-20 years'),
-    ];
+if (!function_exists('userFactory')) {
+    function userFactory(Faker $faker) {
+        return [
+            'firstname' => $faker->firstName,
+            'lastname' => $faker->lastName,
+            'email' => $faker->unique()->safeEmail,
+            'password' => $password = bcrypt('demo'),
+            'remember_token' => str_random(10),
+            'date_of_birth' => $faker->date('Y-m-d', '-20 years'),
+        ];
+    }
 }
 
 $factory->define(\App\Admin::class, function(Faker $faker) {
