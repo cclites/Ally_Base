@@ -28,6 +28,7 @@ trait IsUserRole
         foreach($attributes as $key => $value) {
             $this->setAttribute($key, $value);
         }
+        return $this;
     }
 
     public function save(array $options = [])
