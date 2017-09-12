@@ -59,4 +59,28 @@ trait IsUserRole
 
         return parent::save($options);
     }
+
+    /*
+     * Forward User Relationship Methods to User Model
+     */
+
+    public function addresses()
+    {
+        return $this->user->addresses();
+    }
+
+    public function bankAccounts()
+    {
+        return $this->user->bankAccounts();
+    }
+
+    public function creditCards()
+    {
+        return $this->user->creditCards();
+    }
+
+    public function phoneNumbers()
+    {
+        return $this->user->phoneNumbers();
+    }
 }
