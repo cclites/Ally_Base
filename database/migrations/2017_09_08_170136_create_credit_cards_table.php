@@ -19,8 +19,8 @@ class CreateCreditCardsTable extends Migration {
 			$table->string('nickname', 45)->nullable();
 			$table->string('name_on_card', 45)->nullable();
 			$table->binary('number', 65535)->nullable();
-			$table->boolean('expiration_month')->nullable();
-			$table->date('expiration_year')->nullable();
+			$table->tinyInteger('expiration_month')->unsigned()->nullable();
+			$table->smallInteger('expiration_year')->unsigned()->nullable();
 			$table->timestamps();
 		});
 	}
