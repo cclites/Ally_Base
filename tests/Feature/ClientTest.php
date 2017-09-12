@@ -12,7 +12,7 @@ use App\PhoneNumber;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class ClientRelationshipTest extends TestCase
+class ClientTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -22,6 +22,11 @@ class ClientRelationshipTest extends TestCase
     {
         parent::setUp();
         $this->client = factory(Client::class)->create();
+    }
+
+    public function testClientCanBeCreated()
+    {
+        $this->assertTrue(true);
     }
 
     public function testClientCanHaveCreditCards()
