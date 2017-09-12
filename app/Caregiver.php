@@ -35,6 +35,11 @@ class Caregiver extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
+    public function businesses()
+    {
+        return $this->belongsToMany(Business::class, 'business_caregivers');
+    }
+
     public function deposits()
     {
         return $this->hasMany(Deposit::class);
