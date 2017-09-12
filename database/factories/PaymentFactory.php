@@ -13,3 +13,11 @@ use Faker\Generator as Faker;
 |
 */
 
+$factory->define(\App\Payment::class, function(Faker $faker) {
+    return [
+        'amount' => $faker->randomFloat(2, 0, 500),
+        'transaction_id' => $faker->randomAscii,
+        'transaction_code' => mt_rand(0,5),
+        'success' => $faker->randomElement([0,1,1]),
+    ];
+});
