@@ -14,6 +14,11 @@ class Schedule extends Model
         parent::__construct($attributes);
     }
 
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'schedule_activities');
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);
@@ -27,11 +32,6 @@ class Schedule extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
-    }
-
-    public function activities()
-    {
-        return $this->belongsToMany(Activity::class, 'schedule_activities');
     }
 
     public function exceptions()

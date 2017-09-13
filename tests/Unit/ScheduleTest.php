@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Activity;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -259,15 +260,22 @@ class ScheduleTest extends TestCase
 
     public function testScheduleCanHaveActivities()
     {
+        $business = factory(Business::class)->create();
+        $activity1 = factory(Activity::class)->create(['business_id' => $business->id]);
+        $activity2 = factory(Activity::class)->create(['business_id' => $business->id]);
+        $schedule = $this->prepASchedule();
 
+        $schedule->activities()->attach($activity1);
+        $schedule->activities()->attach($activity2);
+
+        $this->assertCount(2, $schedule->activities);
     }
 
     protected function getrrule($freq, $byday, $interval=1) {
         return sprintf('FREQ=%s;BYDAY=%s;INTERVAL=%d', strtoupper($freq), strtoupper($byday), $interval);
     }
 
-
-    protected function prepScheduleAndExceptions()
+    protected function prepASchedule()
     {
         $startdate = '2017-01-06';
         $enddate   = '2017-04-30';
@@ -278,6 +286,12 @@ class ScheduleTest extends TestCase
                  'start_date' => $startdate,
                  'end_date'   => $enddate
              ] + $this->scheduleAttributes);
+        return $schedule;
+    }
+
+    protected function prepScheduleAndExceptions()
+    {
+        $schedule = $this->prepASchedule();
 
         $exception1 = new ScheduleException([
             'date' => '2017-01-13'
