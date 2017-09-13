@@ -6,6 +6,7 @@ use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Schedule;
+use App\ScheduleException;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -240,7 +241,55 @@ class ScheduleTest extends TestCase
         $this->assertCount(5, $occurrences);
     }
 
+    public function testScheduleCanHaveExceptions()
+    {
+        $schedule = $this->prepScheduleAndExceptions();
+        $this->assertCount(2, $schedule->exceptions);
+    }
+
+    public function testScheduleExceptionIsExcludedInOccurrences()
+    {
+        $schedule = $this->prepScheduleAndExceptions();
+        $invalid = ['2017-01-13', '2017-01-27'];
+
+        foreach($schedule->getOccurrences() as $occurrence) {
+            $this->assertNotContains($occurrence->format('Y-m-d'), $invalid);
+        }
+    }
+
+    public function testScheduleCanHaveActivities()
+    {
+
+    }
+
     protected function getrrule($freq, $byday, $interval=1) {
         return sprintf('FREQ=%s;BYDAY=%s;INTERVAL=%d', strtoupper($freq), strtoupper($byday), $interval);
+    }
+
+
+    protected function prepScheduleAndExceptions()
+    {
+        $startdate = '2017-01-06';
+        $enddate   = '2017-04-30';
+        $rrule     = $this->getrrule('weekly', 'fr');
+
+        $schedule = factory(Schedule::class)->create([
+                 'rrule'      => $rrule,
+                 'start_date' => $startdate,
+                 'end_date'   => $enddate
+             ] + $this->scheduleAttributes);
+
+        $exception1 = new ScheduleException([
+            'date' => '2017-01-13'
+        ]);
+
+        $exception2 = new ScheduleException([
+            'date' => '2017-01-27'
+        ]);
+
+        $schedule->exceptions()->save($exception1);
+        $schedule->exceptions()->save($exception2);
+
+        return $schedule;
     }
 }
