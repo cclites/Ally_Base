@@ -13,7 +13,7 @@ class Autocomplete {
 	 * @return array
 	 * @throws Exception
 	 */
-	public static function getAllCities( $countrycode = 'ch' ) {
+	public static function getAllCities( $countrycode = 'us' ) {
 
 		$cities = array();
 
