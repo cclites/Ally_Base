@@ -38,10 +38,10 @@ class Geocode {
 	public static function getCoordinates($address) {
 		if ($result = self::getResult($address)) {
 			if (!empty($result['geometry']['location']['lat'])) {
-				$object = new GeocodeCoordinates();
-				$object->latitude = $result['geometry']['location']['lat'];
-				$object->longitude = $result['geometry']['location']['lng'];
-				return $object;
+				return new GeocodeCoordinates(
+				    $result['geometry']['location']['lat'],
+                    $result['geometry']['location']['lng']
+                );
 			}
 		}
 		return false;
