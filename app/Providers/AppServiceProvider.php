@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
+        \App\GMaps\API::setKey(env('GMAPS_API_KEY'));
     }
 
     /**
