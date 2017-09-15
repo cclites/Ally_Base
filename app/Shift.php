@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shift extends Model
 {
+    public $timestamps = false;
+
     public function client()
     {
         return $this->belongsTo(Client::class);
