@@ -26,7 +26,17 @@ class Shift extends Model
 
     public function activities()
     {
-        return $this->belongsToMany(Activity::class)->withPivot(['completed']);
+        return $this->belongsToMany(Activity::class, 'shift_activities')->withPivot(['completed', 'other']);
+    }
+
+    public function otherActivities()
+    {
+        return $this->hasMany(ShiftActivity::class)->select(['id', 'other', 'completed']);
+    }
+
+    public function allActivities()
+    {
+        return $this->activities->merge($this->otherActivities);
     }
 
     public function issues()
