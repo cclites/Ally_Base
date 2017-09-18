@@ -8,11 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
+    <title>{{ env('APP_NAME', 'AllyMS') }} Dashboard</title>
+
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="/demo/assets/images/favicon.png">
-    <title>Material Pro Admin Template - The Most Complete & Trusted Bootstrap 4 Admin Template</title>
-    <!-- Bootstrap Core CSS -->
-    <link href="/demo/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap & FontAwesome CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <!-- chartist CSS -->
     {{--<link href="../assets/plugins/chartist-js/dist/chartist.min.css" rel="stylesheet">--}}
@@ -20,12 +23,10 @@
     {{--<link href="../assets/plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">--}}
     {{--<!--This page css - Morris CSS -->--}}
     {{--<link href="../assets/plugins/c3-master/c3.min.css" rel="stylesheet">--}}
-    <!-- Custom CSS -->
-    <link href="/demo/css/style.css" rel="stylesheet">
-    <!-- You can change the theme colors from here -->
-    <link href="/demo/css/colors/blue.css" id="theme" rel="stylesheet">
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+
+    <!-- App CSS -->
+    <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
+
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
@@ -605,9 +606,6 @@
                                 <div id="lastmonthchart"></div>
                             </div>
                         </div>
-                        <div class="">
-                            <button class="right-side-toggle btn-success btn btn-circle btn-sm pull-right m-l-10"><i class="ti-settings text-white"></i></button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -622,64 +620,7 @@
 
             </div>
             <!-- ============================================================== -->
-            <!-- End PAge Content -->
-            <!-- ============================================================== -->
-            <!-- ============================================================== -->
-            <!-- Right sidebar -->
-            <!-- ============================================================== -->
-            <!-- .right-sidebar -->
-            <div class="right-sidebar">
-                <div class="slimscrollright">
-                    <div class="rpanel-title"> Service Panel <span><i class="ti-close right-side-toggle"></i></span> </div>
-                    <div class="r-panel-body">
-                        <ul id="themecolors" class="m-t-20">
-                            <li><b>With Light sidebar</b></li>
-                            <li><a href="javascript:void(0)" data-theme="default" class="default-theme">1</a></li>
-                            <li><a href="javascript:void(0)" data-theme="green" class="green-theme">2</a></li>
-                            <li><a href="javascript:void(0)" data-theme="red" class="red-theme">3</a></li>
-                            <li><a href="javascript:void(0)" data-theme="blue" class="blue-theme working">4</a></li>
-                            <li><a href="javascript:void(0)" data-theme="purple" class="purple-theme">5</a></li>
-                            <li><a href="javascript:void(0)" data-theme="megna" class="megna-theme">6</a></li>
-                            <li class="d-block m-t-30"><b>With Dark sidebar</b></li>
-                            <li><a href="javascript:void(0)" data-theme="default-dark" class="default-dark-theme">7</a></li>
-                            <li><a href="javascript:void(0)" data-theme="green-dark" class="green-dark-theme">8</a></li>
-                            <li><a href="javascript:void(0)" data-theme="red-dark" class="red-dark-theme">9</a></li>
-                            <li><a href="javascript:void(0)" data-theme="blue-dark" class="blue-dark-theme">10</a></li>
-                            <li><a href="javascript:void(0)" data-theme="purple-dark" class="purple-dark-theme">11</a></li>
-                            <li><a href="javascript:void(0)" data-theme="megna-dark" class="megna-dark-theme ">12</a></li>
-                        </ul>
-                        <ul class="m-t-20 chatonline">
-                            <li><b>Chat option</b></li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/1.jpg" alt="user-img" class="img-circle"> <span>Varun Dhavan <small class="text-success">online</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/2.jpg" alt="user-img" class="img-circle"> <span>Genelia Deshmukh <small class="text-warning">Away</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/3.jpg" alt="user-img" class="img-circle"> <span>Ritesh Deshmukh <small class="text-danger">Busy</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/4.jpg" alt="user-img" class="img-circle"> <span>Arijit Sinh <small class="text-muted">Offline</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/5.jpg" alt="user-img" class="img-circle"> <span>Govinda Star <small class="text-success">online</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/6.jpg" alt="user-img" class="img-circle"> <span>John Abraham<small class="text-success">online</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/7.jpg" alt="user-img" class="img-circle"> <span>Hritik Roshan<small class="text-success">online</small></span></a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"><img src="/demo/assets/images/users/8.jpg" alt="user-img" class="img-circle"> <span>Pwandeep rajan <small class="text-success">online</small></span></a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!-- ============================================================== -->
-            <!-- End Right sidebar -->
+            <!-- End Page Content -->
             <!-- ============================================================== -->
         </div>
         <!-- ============================================================== -->
@@ -688,7 +629,7 @@
         <!-- ============================================================== -->
         <!-- footer -->
         <!-- ============================================================== -->
-        <footer class="footer"> © 2017 Material Pro Admin by wrappixel.com </footer>
+        <footer class="footer"> © 2017 {{ env('APP_NAME', 'AllyMS') }}</footer>
         <!-- ============================================================== -->
         <!-- End footer -->
         <!-- ============================================================== -->
@@ -700,27 +641,23 @@
 <!-- ============================================================== -->
 <!-- End Wrapper -->
 <!-- ============================================================== -->
-<!-- ============================================================== -->
-<!-- All Jquery -->
-<!-- ============================================================== -->
-<script src="/demo/assets/plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap tether Core JavaScript -->
-<script src="/demo/assets/plugins/bootstrap/js/popper.min.js"></script>
-<script src="/demo/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 
 {{--<!-- slimscrollbar scrollbar JavaScript -->--}}
 <script src="/demo/js/jquery.slimscroll.js"></script>
-{{--<!--Wave Effects -->--}}
-{{--<script src="js/waves.js"></script>--}}
-<!--Menu sidebar -->
-<script src="/demo/js/sidebarmenu.js"></script>
+
 {{--<!--stickey kit -->--}}
 <script src="/demo/assets/plugins/sticky-kit-master/dist/sticky-kit.min.js"></script>
 <script src="/demo/assets/plugins/sparkline/jquery.sparkline.min.js"></script>
 
-<!--Custom JavaScript -->
-<script src="/demo/js/custom.js"></script>
-{{--<script src="/demo/js/custom.stripped.js"></script>--}}
+<!-- App JavaScript -->
+<script src="{{ asset(mix('js/app.js')) }}"></script>
+
+<!-- Page Level JavaScript -->
+@stack('scripts')
 <!-- ============================================================== -->
 <!-- This page plugins -->
 <!-- ============================================================== -->

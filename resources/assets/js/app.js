@@ -6,6 +6,8 @@
  */
 
 require('./bootstrap');
+require('./custom');
+require('./sidebarmenu');
 
 window.Vue = require('vue');
 
