@@ -215,9 +215,8 @@ File: scss
             margin-bottom: 0px; 
         }
         .breadcrumb-item+.breadcrumb-item::before {
-            content: "\e649";
-           
-            font-family: themify;
+            content: "\f101";
+            font-family: FontAwesome;
             color: $light-text;
             font-size: 11px;
         }

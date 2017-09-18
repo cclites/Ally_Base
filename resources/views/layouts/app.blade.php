@@ -79,13 +79,13 @@
                 <ul class="navbar-nav mr-auto mt-md-0">
                     <!-- This is  -->
                     <li class="nav-item"> <a class="nav-link nav-toggler hidden-md-up text-muted" href="javascript:void(0)"><i class="mdi mdi-menu"></i></a> </li>
-                    <li class="nav-item"> <a class="nav-link sidebartoggler hidden-sm-down text-muted" href="javascript:void(0)"><i class="ti-menu"></i></a> </li>
+                    <li class="nav-item"> <a class="nav-link sidebartoggler hidden-sm-down text-muted" href="javascript:void(0)"><i class="mdi mdi-menu"></i></a> </li>
                     <!-- ============================================================== -->
                     <!-- Search -->
                     <!-- ============================================================== -->
-                    <li class="nav-item hidden-sm-down search-box"> <a class="nav-link hidden-sm-down text-muted" href="javascript:void(0)"><i class="ti-search"></i></a>
+                    <li class="nav-item hidden-sm-down search-box"> <a class="nav-link hidden-sm-down text-muted" href="javascript:void(0)"><i class="fa fa-search"></i></a>
                         <form class="app-search">
-                            <input type="text" class="form-control" placeholder="Search & enter"> <a class="srh-btn"><i class="ti-close"></i></a> </form>
+                            <input type="text" class="form-control" placeholder="Search & enter"> <a class="srh-btn"><i class="fa fa-times"></i></a> </form>
                     </li>
                     <!-- ============================================================== -->
                     <!-- Messages -->
@@ -210,19 +210,19 @@
                                         </a>
                                         <!-- Message -->
                                         <a href="#">
-                                            <div class="btn btn-success btn-circle"><i class="ti-calendar"></i></div>
+                                            <div class="btn btn-success btn-circle"><i class="fa fa-calendar"></i></div>
                                             <div class="mail-contnet">
                                                 <h5>Event today</h5> <span class="mail-desc">Just a reminder that you have event</span> <span class="time">9:10 AM</span> </div>
                                         </a>
                                         <!-- Message -->
                                         <a href="#">
-                                            <div class="btn btn-info btn-circle"><i class="ti-settings"></i></div>
+                                            <div class="btn btn-info btn-circle"><i class="fa fa-gears"></i></div>
                                             <div class="mail-contnet">
                                                 <h5>Settings</h5> <span class="mail-desc">You can customize this template as you want</span> <span class="time">9:08 AM</span> </div>
                                         </a>
                                         <!-- Message -->
                                         <a href="#">
-                                            <div class="btn btn-primary btn-circle"><i class="ti-user"></i></div>
+                                            <div class="btn btn-primary btn-circle"><i class="fa fa-user"></i></div>
                                             <div class="mail-contnet">
                                                 <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:02 AM</span> </div>
                                         </a>
@@ -302,11 +302,11 @@
                                     </div>
                                 </li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#"><i class="ti-user"></i> My Profile</a></li>
-                                <li><a href="#"><i class="ti-wallet"></i> My Balance</a></li>
-                                <li><a href="#"><i class="ti-email"></i> Inbox</a></li>
+                                <li><a href="#"><i class="fa fa-user"></i> My Profile</a></li>
+                                <li><a href="#"><i class="fa fa-money"></i> My Balance</a></li>
+                                <li><a href="#"><i class="fa fa-email"></i> Inbox</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#"><i class="ti-settings"></i> Account Setting</a></li>
+                                <li><a href="#"><i class="fa fa-gears"></i> Account Setting</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="#"><i class="fa fa-power-off"></i> Logout</a></li>
                             </ul>
@@ -338,8 +338,8 @@
                 <div class="profile-img"> <img src="/demo/assets/images/users/profile.png" alt="user" /> </div>
                 <!-- User profile text-->
                 <div class="profile-text"> <a href="#" class="dropdown-toggle u-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Markarn Doe</a>
-                    <div class="dropdown-menu animated flipInY"> <a href="#" class="dropdown-item"><i class="ti-user"></i> My Profile</a> <a href="#" class="dropdown-item"><i class="ti-wallet"></i> My Balance</a> <a href="#" class="dropdown-item"><i class="ti-email"></i> Inbox</a>
-                        <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"><i class="ti-settings"></i> Account Setting</a>
+                    <div class="dropdown-menu animated flipInY"> <a href="#" class="dropdown-item"><i class="fa fa-user"></i> My Profile</a> <a href="#" class="dropdown-item"><i class="fa fa-money"></i> My Balance</a> <a href="#" class="dropdown-item"><i class="fa fa-email"></i> Inbox</a>
+                        <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"><i class="fa fa-gears"></i> Account Setting</a>
                         <div class="dropdown-divider"></div> <a href="login.html" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a> </div>
                 </div>
             </div>
@@ -561,7 +561,7 @@
         <!-- End Sidebar scroll-->
         <!-- Bottom points-->
         <div class="sidebar-footer">
-            <!-- item--><a href="" class="link" data-toggle="tooltip" title="Settings"><i class="ti-settings"></i></a>
+            <!-- item--><a href="" class="link" data-toggle="tooltip" title="Settings"><i class="fa fa-gears"></i></a>
             <!-- item--><a href="" class="link" data-toggle="tooltip" title="Email"><i class="mdi mdi-gmail"></i></a>
             <!-- item--><a href="" class="link" data-toggle="tooltip" title="Logout"><i class="mdi mdi-power"></i></a> </div>
         <!-- End Bottom points-->
