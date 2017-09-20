@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>{{ env('APP_NAME', 'AllyMS') }} Dashboard</title>
+    <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'AllyMS') }}</title>
 
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="/demo/assets/images/favicon.png">
@@ -31,6 +31,8 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    @stack('head')
 </head>
 
 <body class="fix-header fix-sidebar card-no-border">
@@ -582,10 +584,9 @@
             <!-- ============================================================== -->
             <div class="row page-titles">
                 <div class="col-md-5 col-8 align-self-center">
-                    <h3 class="text-themecolor">Dashboard</h3>
+                    <h3 class="text-themecolor">@yield('title', 'Dashboard')</h3>
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard</li>
+                        @yield('breadcrumbs')
                     </ol>
                 </div>
                 <div class="col-md-7 col-4 align-self-center">
@@ -617,7 +618,7 @@
             <!-- ============================================================== -->
             <!-- Row -->
             <div class="row">
-
+                @yield('content')
             </div>
             <!-- ============================================================== -->
             <!-- End Page Content -->
@@ -629,7 +630,7 @@
         <!-- ============================================================== -->
         <!-- footer -->
         <!-- ============================================================== -->
-        <footer class="footer"> © 2017 {{ env('APP_NAME', 'AllyMS') }}</footer>
+        <footer class="footer"> © {{ date('Y') }} {{ env('APP_NAME', 'AllyMS') }}</footer>
         <!-- ============================================================== -->
         <!-- End footer -->
         <!-- ============================================================== -->
