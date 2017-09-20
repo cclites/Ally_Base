@@ -10,6 +10,9 @@
     <meta name="author" content="">
     <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'AllyMS') }}</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="/demo/assets/images/favicon.png">
 
@@ -616,10 +619,7 @@
             <!-- ============================================================== -->
             <!-- Start Page Content -->
             <!-- ============================================================== -->
-            <!-- Row -->
-            <div class="row">
-                @yield('content')
-            </div>
+            @yield('content')
             <!-- ============================================================== -->
             <!-- End Page Content -->
             <!-- ============================================================== -->
