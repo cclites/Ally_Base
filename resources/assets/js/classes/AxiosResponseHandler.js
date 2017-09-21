@@ -57,7 +57,7 @@ class AxiosResponseHandler {
         if (!field) {
             return Object.keys(this.formErrors).length > 0;
         }
-        return this.formErrors[field] !== undefined;
+        return this.formErrors.hasOwnProperty(field);
     }
 
     getFormError(field = null) {
@@ -83,7 +83,10 @@ class AxiosResponseHandler {
             return;
         }
 
-        delete this.formErrors[field];
+        if (Vue) {
+            return Vue.delete(this.formErrors, field);
+        }
+        return delete this.formErrors[field];
     }
 
 }
