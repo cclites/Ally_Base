@@ -36,8 +36,16 @@
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane active" id="profile" role="tabpanel">
-            <client-profile :user="{{ Auth::user() }}" :client="{{ Auth::user()->role }}"></client-profile>
-            <change-password></change-password>
+            <div class="row">
+                <div class="col-lg-12">
+                    <client-profile :user="{{ Auth::user() }}" :client="{{ Auth::user()->role }}"></client-profile>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <change-password></change-password>
+                </div>
+            </div>
         </div>
         <div class="tab-pane" id="addresses" role="tabpanel">
 
