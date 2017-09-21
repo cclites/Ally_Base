@@ -1,0 +1,91 @@
+class AxiosResponseHandler {
+
+    constructor() {
+        this.error = {};
+        this.formErrors = {};
+        this.response = {};
+    }
+
+    handleResponse(response, alert = true) {
+        this.response = response;
+        if (alert && this.getMessage()) {
+            this.handleAlert('success', this.getMessage());
+        }
+    }
+
+    handleError(error, alert = true) {
+        this.error = error;
+        this.response = error.response;
+        if (this.response.data.errors) {
+            this.formErrors = this.response.data.errors;
+        }
+        if (alert) {
+            if (this.hasFormError()) {
+                this.handleAlert('error', this.getFormError());
+            }
+            else if (this.getMessage()) {
+                this.handleAlert('error', this.getMessage());
+            }
+            else {
+                this.handleAlert('error', 'Unknown error');
+            }
+        }
+    }
+
+    handleAlert(type, message) {
+        console.log('ALERT RECEIVED.  TYPE: ' + type + ' MESSAGE: ' + message);
+    }
+
+    getStatusCode() {
+        return (this.response && this.response.status) ? this.response.status : 0;
+    }
+
+    getResponseData() {
+        return (this.response && this.response.data) ? this.response.data : null;
+    }
+
+    getMessage() {
+        let data = this.getResponseData();
+        return (data.message) ? data.message : null;
+    }
+
+    hasError() {
+        return Object.keys(this.error) > 0;
+    }
+
+    hasFormError(field = null) {
+        if (!field) {
+            return Object.keys(this.formErrors).length > 0;
+        }
+        return this.formErrors[field] !== undefined;
+    }
+
+    getFormError(field = null) {
+        if (!this.hasFormError(field)) {
+            return null;
+        }
+        if (!field) {
+            field = Object.keys(this.formErrors)[0];
+        }
+        let formError = this.formErrors[field];
+        if (Array.isArray(formError)) {
+            if (formError.length === 0) {
+                return 'Unknown error when processing ' + field;
+            }
+            return formError[0];
+        }
+        return formError;
+    }
+
+    clearFormError(field = null) {
+        if (!field) {
+            this.formErrors = {};
+            return;
+        }
+
+        delete this.formErrors[field];
+    }
+
+}
+
+export default AxiosResponseHandler;

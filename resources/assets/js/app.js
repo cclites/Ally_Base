@@ -9,6 +9,10 @@ require('./bootstrap');
 require('./custom');
 require('./sidebarmenu');
 
+import Form from './classes/Form';
+window.Form = Form;
+
+window.moment = require('moment');
 window.Vue = require('vue');
 
 import BootstrapVue from 'bootstrap-vue'
@@ -21,6 +25,8 @@ Vue.use(BootstrapVue);
  */
 
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
+Vue.component('change-password', require('./components/ChangePassword.vue'));
+Vue.component('input-help', require('./components/InputHelp.vue'));
 
 const app = new Vue({
     el: '#main-wrapper'
