@@ -27,7 +27,7 @@ class AxiosResponseHandler {
                 this.handleAlert('error', this.getMessage());
             }
             else {
-                this.handleAlert('error', 'Unknown error');
+                this.handleAlert('error', 'Please refresh and try again.');
             }
         }
     }
