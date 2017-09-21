@@ -11,6 +11,13 @@
 |
 */
 
+Auth::loginUsingId(4);
+
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/profile', 'ProfileController@index');
+Route::post('/profile', 'ProfileController@update');
+Route::post('/password', 'ProfileController@password');
+

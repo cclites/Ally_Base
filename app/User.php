@@ -72,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PhoneNumber::class);
     }
+
+    public function changePassword($password)
+    {
+        return $this->update(['password' => bcrypt($password)]);
+    }
 }
