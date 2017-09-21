@@ -14,10 +14,9 @@ class Form {
         }
 
         this.handler = null;
-        this.resetOnSuccess = true;
+        this.resetOnSuccess = false;
         this.alertOnResponse = true;
     }
-
 
     /**
      * Fetch all relevant data for the form.
