@@ -33,7 +33,7 @@ class AxiosResponseHandler {
     }
 
     handleAlert(type, message) {
-        console.log('ALERT RECEIVED.  TYPE: ' + type + ' MESSAGE: ' + message);
+        alerts.addMessage(type, message);
     }
 
     getStatusCode() {

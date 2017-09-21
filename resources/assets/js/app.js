@@ -27,7 +27,30 @@ Vue.use(BootstrapVue);
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 Vue.component('input-help', require('./components/InputHelp.vue'));
+Vue.component('message', require('./components/Message.vue'));
+
+Vue.filter('date', value => {
+    return moment.utc(value).local().format('L')
+});
+
+Vue.filter('datetime', value => {
+    return moment.utc(value).local().format('L LT');
+});
+
+Vue.filter('capitalize', value => {
+    if (! value && value !== 0) {
+        return '';
+    }
+
+    return value.toString().charAt(0).toUpperCase()
+        + value.slice(1);
+});
+
+Vue.filter('nl2br', value => {
+    return value.toString().replace(/(?:\r\n|\r|\n)/g, '<br />');
+});
 
 const app = new Vue({
     el: '#main-wrapper'
 });
+require('./alerts');
