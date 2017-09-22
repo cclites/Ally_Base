@@ -3,13 +3,119 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 
 class PhoneNumber extends Model
 {
+    const DEFAULT_REGION = 'US';
+
     protected $table = 'phone_numbers';
+    protected $guarded = ['id'];
+
+    /**
+     * @var \libphonenumber\PhoneNumberUtil
+     */
+    protected $phoneNumberUtil;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->phoneNumberUtil = PhoneNumberUtil::getInstance();
+    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Output the full phone number in a formatted or unformatted manner
+     *
+     * @param bool $formatted
+     *
+     * @return string
+     */
+    public function number($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL)
+    {
+        if ($formatted) {
+            return $this->format($this->number(false), null, $format);
+        }
+        return '+' . $this->country_code  . $this->national_number . ($this->extension ? 'x' . $this->extension : '');
+    }
+
+    /**
+     * Input a new phone number, will be parsed into database fields automatically
+     *
+     * @param $number
+     * @param null $extension
+     *
+     * @return $this
+     */
+    public function input($number, $extension=null)
+    {
+        $parsed = $this->parse($number, $extension);
+        $this->country_code = $parsed->getCountryCode();
+        $this->national_number = $parsed->getNationalNumber();
+        $this->extension = $parsed->getExtension();
+        return $this;
+    }
+
+    /**
+     * Parse a phone number
+     *
+     * @param $number
+     * @param null $extension
+     *
+     * @return \libphonenumber\PhoneNumber
+     */
+    public function parse($number, $extension=null)
+    {
+        if ($extension) $number .= ' x' . ltrim($extension, 'x');
+        return $this->phoneNumberUtil->parse($number, self::DEFAULT_REGION);
+    }
+
+    /**
+     * Reformat a phone number
+     *
+     * @param $number
+     * @param null $extension
+     * @param int $format
+     *
+     * @return string
+     */
+    public function format($number, $extension=null, $format = PhoneNumberFormat::INTERNATIONAL)
+    {
+        $parsed = $this->parse($number, $extension);
+        return $this->phoneNumberUtil->format($parsed, $format);
+    }
+
+    /**
+     * Check to see if the phone number is possible (enough digits, etc)
+     *
+     * @return bool
+     */
+    public function isPossible()
+    {
+        $parsed = $this->parse($this->number(false));
+        return $this->phoneNumberUtil->isPossibleNumber($parsed);
+    }
+
+    /**
+     * Check to see if the phone number seems valid (correct region, area code, etc)
+     *
+     * @param null $region
+     *
+     * @return bool
+     */
+    public function isValid($region = null)
+    {
+        $parsed = $this->parse($this->number(false));
+        if ($region) {
+            return $this->phoneNumberUtil->isValidNumberForRegion($parsed, $region);
+        }
+        return $this->phoneNumberUtil->isValidNumber($parsed);
+    }
+
+
 }

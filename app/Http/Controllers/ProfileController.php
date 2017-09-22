@@ -73,4 +73,16 @@ class ProfileController extends Controller
 
         return new ErrorResponse(500, 'Unable to save address.');
     }
+
+    public function phone(Request $request, $type)
+    {
+        $data = $request->validate([
+            'number' => 'required',
+            'address2' => 'nullable',
+            'city' => 'required',
+            'state' => 'required',
+            'country' => 'required|size:2',
+            'zip' => 'required|min:5'
+        ]);
+    }
 }

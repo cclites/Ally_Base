@@ -17,7 +17,9 @@ class CreatePhoneNumbersTable extends Migration {
 			$table->increments('id');
 			$table->integer('user_id')->unsigned()->index('fk_phone_numbers_user_id_idx');
 			$table->string('type', 16)->nullable();
-			$table->string('number', 45)->nullable();
+            $table->char('country_code', 3)->nullable();
+            $table->string('national_number', 45)->nullable();
+            $table->string('extension', 10)->nullable();
 			$table->timestamps();
 		});
 	}
