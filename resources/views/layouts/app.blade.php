@@ -9,32 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'AllyMS') }}</title>
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-
-    <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/demo/assets/images/favicon.png">
-
-    <!-- Bootstrap & FontAwesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
-    <!-- chartist CSS -->
-    {{--<link href="../assets/plugins/chartist-js/dist/chartist.min.css" rel="stylesheet">--}}
-    {{--<link href="../assets/plugins/chartist-js/dist/chartist-init.css" rel="stylesheet">--}}
-    {{--<link href="../assets/plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">--}}
-    {{--<!--This page css - Morris CSS -->--}}
-    {{--<link href="../assets/plugins/c3-master/c3.min.css" rel="stylesheet">--}}
-
-    <!-- App CSS -->
-    <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
-
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+    @include('layouts.partials.head')
     @stack('head')
 </head>
 
@@ -317,7 +292,10 @@
                                 <li role="separator" class="divider"></li>
                                 <li><a href="#"><i class="fa fa-gears"></i> Account Setting</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#"><i class="fa fa-power-off"></i> Logout</a></li>
+                                <li><a href="{{ url('/logout') }}"
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="fa fa-power-off"></i> Logout
+                                    </a></li>
                             </ul>
                         </div>
                     </li>
@@ -349,7 +327,10 @@
                 <div class="profile-text"> <a href="#" class="dropdown-toggle u-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">{{ Auth::check() ? Auth::user()->name() : 'Guest' }}</a>
                     <div class="dropdown-menu animated flipInY"> <a href="#" class="dropdown-item"><i class="fa fa-user"></i> My Profile</a> <a href="#" class="dropdown-item"><i class="fa fa-usd"></i> My Balance</a> <a href="#" class="dropdown-item"><i class="fa fa-envelope"></i> Inbox</a>
                         <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"><i class="fa fa-gears"></i> Account Setting</a>
-                        <div class="dropdown-divider"></div> <a href="login.html" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a> </div>
+                        <div class="dropdown-divider"></div> <a href="{{ url('/logout') }}"
+                                                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fa fa-power-off"></i> Logout
+                        </a> </div>
                 </div>
             </div>
             <!-- End User profile text-->
@@ -572,7 +553,10 @@
         <div class="sidebar-footer">
             <!-- item--><a href="" class="link" data-toggle="tooltip" title="Settings"><i class="fa fa-gears"></i></a>
             <!-- item--><a href="" class="link" data-toggle="tooltip" title="Email"><i class="mdi mdi-gmail"></i></a>
-            <!-- item--><a href="" class="link" data-toggle="tooltip" title="Logout"><i class="mdi mdi-power"></i></a> </div>
+            <!-- item--><a href="{{ url('/logout') }}"
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="mdi mdi-power"></i>
+            </a> </div>
         <!-- End Bottom points-->
     </aside>
     <!-- ============================================================== -->
@@ -631,13 +615,7 @@
         <!-- ============================================================== -->
         <!-- End Container fluid  -->
         <!-- ============================================================== -->
-        <!-- ============================================================== -->
-        <!-- footer -->
-        <!-- ============================================================== -->
-        <footer class="footer"> © {{ date('Y') }} {{ env('APP_NAME', 'AllyMS') }}</footer>
-        <!-- ============================================================== -->
-        <!-- End footer -->
-        <!-- ============================================================== -->
+        @include('layouts.partials.footer')
     </div>
     <!-- ============================================================== -->
     <!-- End Page wrapper  -->
@@ -647,37 +625,16 @@
 <!-- End Wrapper -->
 <!-- ============================================================== -->
 
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 
-{{--<!-- slimscrollbar scrollbar JavaScript -->--}}
-<script src="/demo/js/jquery.slimscroll.js"></script>
 
-{{--<!--stickey kit -->--}}
-<script src="/demo/assets/plugins/sticky-kit-master/dist/sticky-kit.min.js"></script>
-<script src="/demo/assets/plugins/sparkline/jquery.sparkline.min.js"></script>
+<form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
+    {{ csrf_field() }}
+</form>
 
-<!-- App JavaScript -->
-<script src="{{ asset(mix('js/app.js')) }}"></script>
+@include('layouts.partials.scripts')
 
 <!-- Page Level JavaScript -->
 @stack('scripts')
-<!-- ============================================================== -->
-<!-- This page plugins -->
-<!-- ============================================================== -->
-<!-- chartist chart -->
-{{--<script src="/demo/assets/plugins/chartist-js/dist/chartist.min.js"></script>--}}
-{{--<script src="/demo/assets/plugins/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>--}}
-{{--<!--c3 JavaScript -->--}}
-{{--<script src="/demo/assets/plugins/d3/d3.min.js"></script>--}}
-{{--<script src="/demo/assets/plugins/c3-master/c3.min.js"></script>--}}
-<!-- Chart JS -->
-{{--<script src="/demo/dashboard1.js"></script>--}}
-<!-- ============================================================== -->
-<!-- Style switcher -->
-<!-- ============================================================== -->
-{{--<script src="/demo/assets/plugins/styleswitcher/jQuery.style.switcher.js"></script>--}}
 </body>
 
 </html>

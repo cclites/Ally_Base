@@ -11,18 +11,20 @@
 |
 */
 
-Auth::loginUsingId(4);
+//Auth::loginUsingId(4);
 
 Route::get('/', function () {
-    return view('welcome');
+    return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });
 
+Auth::routes();
+
 Route::group(['middleware' => 'auth'], function() {
+    Route::get('/home', 'HomeController@index')->name('home');
+
     Route::get('/profile', 'ProfileController@index');
     Route::post('/profile', 'ProfileController@update');
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::post('/profile/phone/{type}', 'ProfileController@phone');
 });
-
-
