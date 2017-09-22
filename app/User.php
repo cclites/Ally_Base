@@ -27,6 +27,11 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function name()
+    {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
     public function role()
     {
         if ($this->getRoleClass()) {

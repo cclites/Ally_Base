@@ -306,8 +306,8 @@
                                     <div class="dw-user-box">
                                         <div class="u-img"><img src="/demo/assets/images/users/1.jpg" alt="user"></div>
                                         <div class="u-text">
-                                            <h4>Steave Jobs</h4>
-                                            <p class="text-muted">varun@gmail.com</p><a href="profile.html" class="btn btn-rounded btn-danger btn-sm">View Profile</a></div>
+                                            <h4>{{ Auth::check() ? Auth::user()->name() : 'Guest' }}</h4>
+                                            <p class="text-muted">{{ Auth::check() ? Auth::user()->email : 'Not logged in' }}</p></div>
                                     </div>
                                 </li>
                                 <li role="separator" class="divider"></li>
@@ -346,7 +346,7 @@
                 <!-- User profile image -->
                 <div class="profile-img"> <img src="/demo/assets/images/users/profile.png" alt="user" /> </div>
                 <!-- User profile text-->
-                <div class="profile-text"> <a href="#" class="dropdown-toggle u-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">Markarn Doe</a>
+                <div class="profile-text"> <a href="#" class="dropdown-toggle u-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">{{ Auth::check() ? Auth::user()->name() : 'Guest' }}</a>
                     <div class="dropdown-menu animated flipInY"> <a href="#" class="dropdown-item"><i class="fa fa-user"></i> My Profile</a> <a href="#" class="dropdown-item"><i class="fa fa-usd"></i> My Balance</a> <a href="#" class="dropdown-item"><i class="fa fa-envelope"></i> Inbox</a>
                         <div class="dropdown-divider"></div> <a href="#" class="dropdown-item"><i class="fa fa-gears"></i> Account Setting</a>
                         <div class="dropdown-divider"></div> <a href="login.html" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a> </div>
