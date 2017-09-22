@@ -22,4 +22,16 @@ class Client extends Model
     {
         return $this->hasMany(PaymentQueue::class);
     }
+
+    public function evvAddress()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'id')
+            ->where('type', 'evv');
+    }
+
+    public function evvPhone()
+    {
+        return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
+            ->where('type', 'evv');
+    }
 }
