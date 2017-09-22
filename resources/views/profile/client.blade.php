@@ -38,7 +38,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-profile :user="{{ Auth::user() }}" :client="{{ Auth::user()->role }}"></client-profile>
+                    <client-profile :user="{{ $user }}" :client="{{ $user->role }}"></client-profile>
                 </div>
             </div>
             <div class="row">
@@ -50,10 +50,10 @@
         <div class="tab-pane" id="addresses" role="tabpanel">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
-                    <user-address title="Service Address" type="evv" :address="{{ Auth::user()->addresses->where('type', 'evv')->first() ?? '{}' }}"></user-address>
+                    <user-address title="Service Address" type="evv" :address="{{ $user->addresses->where('type', 'evv')->first() ?? '{}' }}"></user-address>
                 </div>
                 <div class="col-md-6 col-sm-12">
-                    <user-address title="Billing Address" type="billing" :address="{{ Auth::user()->addresses->where('type', 'billing')->first() ?? '{}' }}"></user-address>
+                    <user-address title="Billing Address" type="billing" :address="{{ $user->addresses->where('type', 'billing')->first() ?? '{}' }}"></user-address>
                 </div>
             </div>
         </div>
