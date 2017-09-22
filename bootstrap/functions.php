@@ -1,8 +1,13 @@
 <?php
 
-function filter_phone($input) {
-    if (!$input) return null;
-    return preg_replace("/[^\dx]/", "", $input);
+function json_phone(\App\User $user, $type) {
+    if ($phoneNumber = $user->phoneNumbers->where('type', $type)->first()) {
+        return sprintf('{number: \'%s\', extension: %s}',
+            $phoneNumber->numberOnly(),
+            $phoneNumber->extension ? (int) $phoneNumber->extension : 'null'
+            );
+    }
+    return '{}';
 }
 
 function filter_date($input, $to_format='Y-m-d') {

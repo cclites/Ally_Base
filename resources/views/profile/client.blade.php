@@ -58,7 +58,14 @@
             </div>
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
-
+            <div class="row">
+                <div class="col-lg-6 col-sm-12">
+                    <phone-number title="Service Number" type="evv" :phone="{{ json_phone($user, 'evv') }}"></phone-number>
+                </div>
+                <div class="col-lg-6 col-sm-12">
+                    <phone-number title="Billing Number" type="billing" :phone="{{ json_phone($user, 'billing') }}"></phone-number>
+                </div>
+            </div>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
 

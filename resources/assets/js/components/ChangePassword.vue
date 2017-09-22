@@ -18,7 +18,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="5" sm="4" xs="12">
-                    <b-form-group label="Confirm Password" label-for="password">
+                    <b-form-group label="Confirm Password" label-for="password_confirmation">
                         <b-form-input
                                 id="password_confirmation"
                                 name="password_confirmation"

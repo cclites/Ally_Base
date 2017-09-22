@@ -34,6 +34,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
+Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 
 Vue.filter('date', value => {

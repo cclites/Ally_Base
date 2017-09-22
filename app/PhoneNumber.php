@@ -36,12 +36,29 @@ class PhoneNumber extends Model
      *
      * @return string
      */
-    public function number($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL)
+    public function number($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL, $includeExtension = true)
     {
         if ($formatted) {
-            return $this->format($this->number(false), null, $format);
+            return $this->format($this->number(false, 0, $includeExtension), null, $format);
         }
-        return '+' . $this->country_code  . $this->national_number . ($this->extension ? 'x' . $this->extension : '');
+        $number = '+' . $this->country_code  . $this->national_number;
+        if ($includeExtension && $this->extension) {
+            $number .= ' x' . $this->extension;
+        }
+        return $number;
+    }
+
+    /**
+     * Output the number without the extension
+     *
+     * @param bool $formatted
+     * @param int $format
+     *
+     * @return string
+     */
+    public function numberOnly($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL)
+    {
+        return $this->number($formatted, $format, false);
     }
 
     /**

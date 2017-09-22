@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Address;
+use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
@@ -77,12 +79,25 @@ class ProfileController extends Controller
     public function phone(Request $request, $type)
     {
         $data = $request->validate([
-            'number' => 'required',
-            'address2' => 'nullable',
-            'city' => 'required',
-            'state' => 'required',
-            'country' => 'required|size:2',
-            'zip' => 'required|min:5'
+            'number' => ['required', new PhonePossible()],
+            'extension' => 'nullable|numeric',
         ]);
+
+        $phone = auth()->user()->phoneNumbers->where('type', $type)->first();
+        if ($phone) {
+            if ($phone->input($data['number'], $data['extension'])->save()) {
+                return new SuccessResponse('Your phone number has been saved.');
+            }
+        }
+        else {
+            $phone = new PhoneNumber();
+            $phone->type = $type;
+            $phone->input($data['number'], $data['extension']);
+            if (auth()->user()->phoneNumbers()->save($phone)) {
+                return new SuccessResponse('Your phone number has been saved.');
+            }
+        }
+
+        return new ErrorResponse(500, 'Unable to save phone number.');
     }
 }

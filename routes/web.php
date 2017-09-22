@@ -22,6 +22,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile', 'ProfileController@update');
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
+    Route::post('/profile/phone/{type}', 'ProfileController@phone');
 });
 
 
