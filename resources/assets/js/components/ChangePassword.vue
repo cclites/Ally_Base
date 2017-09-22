@@ -68,7 +68,7 @@
                 else {
                     // Update auth'd password
                     this.form.resetOnSuccess = true;
-                    this.form.post('/password');
+                    this.form.post('/profile/password');
                 }
             }
 

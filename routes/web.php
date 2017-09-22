@@ -20,7 +20,8 @@ Route::get('/', function () {
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/profile', 'ProfileController@index');
     Route::post('/profile', 'ProfileController@update');
-    Route::post('/password', 'ProfileController@password');
+    Route::post('/profile/password', 'ProfileController@password');
+    Route::post('/profile/address/{type}', 'ProfileController@address');
 });
 
 

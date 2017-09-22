@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Address;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
-use SebastianBergmann\GlobalState\RuntimeException;
 
 class ProfileController extends Controller
 {
@@ -43,5 +43,33 @@ class ProfileController extends Controller
             return new SuccessResponse('Your password has been updated.');
         }
         return new ErrorResponse(500, 'Unable to update password.');
+    }
+
+    public function address(Request $request, $type)
+    {
+        $data = $request->validate([
+            'address1' => 'required',
+            'address2' => 'nullable',
+            'city' => 'required',
+            'state' => 'required',
+            'country' => 'required|size:2',
+            'zip' => 'required|min:5'
+        ]);
+
+        $address = auth()->user()->addresses->where('type', $type)->first();
+        if ($address) {
+            if ($address->update($data)) {
+                return new SuccessResponse('Your address has been saved.');
+            }
+        }
+        else {
+            $address = new Address($data);
+            $address->type = $type;
+            if (auth()->user()->addresses()->save($address)) {
+                return new SuccessResponse('Your address has been saved.');
+            }
+        }
+
+        return new ErrorResponse(500, 'Unable to save address.');
     }
 }
