@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\PhoneNumber;
 use Illuminate\Contracts\Validation\Rule;
 use libphonenumber\PhoneNumberUtil;
 
@@ -28,7 +29,8 @@ class PhonePossible implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->phoneNumberUtil->isPossibleNumber($value);
+        $number = $this->phoneNumberUtil->parse($value, PhoneNumber::DEFAULT_REGION);
+        return $this->phoneNumberUtil->isPossibleNumber($number);
     }
 
     /**

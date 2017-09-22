@@ -13,6 +13,7 @@ class PhoneValid extends PhonePossible
      */
     public function passes($attribute, $value)
     {
-        return $this->phoneNumberUtil->isValidNumber($value);
+        $number = $this->phoneNumberUtil->parse($value, PhoneNumber::DEFAULT_REGION);
+        return $this->phoneNumberUtil->isValidNumber($number);
     }
 }
