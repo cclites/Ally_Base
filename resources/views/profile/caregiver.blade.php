@@ -1,0 +1,1 @@
+@extends('profile.office_user')
