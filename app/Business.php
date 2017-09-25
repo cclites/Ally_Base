@@ -38,17 +38,7 @@ class Business extends Model
 
     public function clients()
     {
-        return $this->belongsToMany(Client::class, 'business_clients')
-            ->withTimestamps()
-            ->withPivot([
-                'business_fee',
-                'default_payment_type',
-                'default_payment_id',
-                'backup_payment_type',
-                'backup_payment_id',
-                'created_at',
-                'updated_at'
-            ]);
+        return $this->hasMany(Client::class);
     }
 
     public function caregivers()

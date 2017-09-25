@@ -15,7 +15,8 @@ class CreateBusinessesTable extends Migration {
 		Schema::create('businesses', function(Blueprint $table)
 		{
 			$table->increments('id');
-			$table->string('type', 45)->nullable()->default('Registry');
+			$table->string('name', 64)->unique();
+			$table->string('type', 45)->default('Registry');
 			$table->integer('bank_account_id')->unsigned()->nullable()->index('fk_businesses_bank_account_id_idx');
 			$table->boolean('active')->nullable();
 			$table->string('address1')->nullable();

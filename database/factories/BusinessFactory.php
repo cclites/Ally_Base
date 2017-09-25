@@ -23,6 +23,7 @@ $factory->define(\App\Activity::class, function(Faker $faker) {
 
 $factory->define(\App\Business::class, function(Faker $faker) {
     return [
+        'name' => $faker->company,
         'type' => 'Registry',
         'address1' => $faker->streetAddress,
         'address2' => null,

@@ -11,7 +11,14 @@ class Client extends Model
 
     protected $table = 'clients';
     public $timestamps = false;
-    public $fillable = [];
+    public $fillable = [
+        'business_id',
+        'business_fee',
+        'default_payment_type',
+        'default_payment_id',
+        'backup_payment_type',
+        'backup_payment_id',
+    ];
 
     public function payments()
     {
@@ -33,5 +40,10 @@ class Client extends Model
     {
         return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
             ->where('type', 'evv');
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
 }

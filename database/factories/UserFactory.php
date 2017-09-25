@@ -37,7 +37,13 @@ $factory->define(\App\Caregiver::class, function(Faker $faker) {
 });
 
 $factory->define(\App\Client::class, function(Faker $faker) {
-    return array_merge(userFactory($faker), []);
+    if (!\App\Business::first()) {
+        factory(\App\Business::class, 3)->create();
+    }
+    return array_merge(userFactory($faker), [
+        'business_id' => \App\Business::inRandomOrder()->value('id'),
+        'business_fee' => mt_rand(100,900) / 100,
+    ]);
 });
 
 $factory->define(\App\OfficeUser::class, function(Faker $faker) {
