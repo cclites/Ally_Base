@@ -20,8 +20,8 @@ class PhoneNumber extends Model
 
     public function __construct(array $attributes = [])
     {
-        parent::__construct($attributes);
         $this->phoneNumberUtil = PhoneNumberUtil::getInstance();
+        parent::__construct($attributes);
     }
 
     public function user()
@@ -134,5 +134,14 @@ class PhoneNumber extends Model
         return $this->phoneNumberUtil->isValidNumber($parsed);
     }
 
+    public function setNumberAttribute($value)
+    {
+        $this->input($value);
+    }
+
+    public function getNumberAttribute()
+    {
+        return $this->number();
+    }
 
 }
