@@ -17,10 +17,12 @@ class CreateBankAccountsTable extends Migration {
 			$table->increments('id');
 			$table->integer('user_id')->unsigned()->nullable()->index('fk_bank_accounts_user_id_idx');
 			$table->string('nickname', 45)->nullable();
-			$table->binary('routing_number', 65535)->nullable();
-			$table->binary('account_number', 65535)->nullable();
-			$table->string('account_type', 45)->nullable()->default('Checking');
-			$table->boolean('verified')->nullable()->default(1);
+			$table->binary('routing_number', 65535);
+			$table->binary('account_number', 65535);
+			$table->string('account_type', 45)->default('checking');
+			$table->string('account_holder_type', 45)->default('personal');
+			$table->string('name_on_account');
+			$table->boolean('verified')->default(0);
 			$table->timestamps();
 		});
 	}
