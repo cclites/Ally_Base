@@ -19,3 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // caregiver shift routes
 Route::get('/caregiver/greeting', 'Api\CaregiverShiftController@greeting');
+Route::post('/caregiver/checkin', 'Api\CaregiverShiftController@checkin');
