@@ -2,6 +2,12 @@
 
 @section('title', 'Edit Client')
 
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('business.clients.index') }}">Clients</a></li>
+    <li class="breadcrumb-item active">{{ $client->name() }}</li>
+@endsection
+
 @section('content')
     <!-- Nav tabs -->
     <ul class="nav nav-pills with-padding-bottom" role="tablist">
