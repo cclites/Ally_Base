@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
+use App\Address;
+use App\User;
+use Illuminate\Http\Request;
+
+/**
+ * Class AddressController
+ * Not meant to be called directly, used by other controllers.
+ *
+ * @package App\Http\Controllers
+ */
+class AddressController
+{
+    public function update(Request $request, User $user, $type, $reference = 'The address')
+    {
+        $data = $request->validate([
+            'address1' => 'required',
+            'address2' => 'nullable',
+            'city' => 'required',
+            'state' => 'required',
+            'country' => 'required|size:2',
+            'zip' => 'required|min:5'
+        ]);
+
+        $address = $user->addresses->where('type', $type)->first();
+        if ($address) {
+            if ($address->update($data)) {
+                return new SuccessResponse($reference . ' has been saved.');
+            }
+        }
+        else {
+            $address = new Address($data);
+            $address->type = $type;
+            if ($user->addresses()->save($address)) {
+                return new SuccessResponse($reference . ' has been saved.');
+            }
+        }
+
+        return new ErrorResponse(500, $reference . ' could not be saved.');
+    }
+}

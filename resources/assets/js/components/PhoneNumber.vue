@@ -48,7 +48,8 @@
             'title': null,
             'type': null,
             'phone': {},
-            'user': {}
+            'user': {},
+            'action': {},
         },
 
         data() {
@@ -68,13 +69,8 @@
         methods: {
 
             saveNumber() {
-                if (this.user && this.user.id) {
-                    // Update another's phone number
-                }
-                else {
-                    // Update auth'd phone number
-                    this.form.post('/profile/phone/' + this.type);
-                }
+                let action = (this.action) ? this.action : '/profile/phone/' + this.type;
+                this.form.post(action);
             },
 
             handleKeyDown(target) {

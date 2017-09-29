@@ -50,54 +50,13 @@ class ProfileController extends Controller
 
     public function address(Request $request, $type)
     {
-        $data = $request->validate([
-            'address1' => 'required',
-            'address2' => 'nullable',
-            'city' => 'required',
-            'state' => 'required',
-            'country' => 'required|size:2',
-            'zip' => 'required|min:5'
-        ]);
-
-        $address = auth()->user()->addresses->where('type', $type)->first();
-        if ($address) {
-            if ($address->update($data)) {
-                return new SuccessResponse('Your address has been saved.');
-            }
-        }
-        else {
-            $address = new Address($data);
-            $address->type = $type;
-            if (auth()->user()->addresses()->save($address)) {
-                return new SuccessResponse('Your address has been saved.');
-            }
-        }
-
-        return new ErrorResponse(500, 'Unable to save address.');
+        $user = auth()->user();
+        return (new AddressController())->update($request, $user, $type, 'Your address');
     }
 
     public function phone(Request $request, $type)
     {
-        $data = $request->validate([
-            'number' => ['required', new PhonePossible()],
-            'extension' => 'nullable|numeric',
-        ]);
-
-        $phone = auth()->user()->phoneNumbers->where('type', $type)->first();
-        if ($phone) {
-            if ($phone->input($data['number'], $data['extension'])->save()) {
-                return new SuccessResponse('Your phone number has been saved.');
-            }
-        }
-        else {
-            $phone = new PhoneNumber();
-            $phone->type = $type;
-            $phone->input($data['number'], $data['extension']);
-            if (auth()->user()->phoneNumbers()->save($phone)) {
-                return new SuccessResponse('Your phone number has been saved.');
-            }
-        }
-
-        return new ErrorResponse(500, 'Unable to save phone number.');
+        $user = auth()->user();
+        return (new PhoneController())->update($request, $user, $type, 'Your phone number');
     }
 }

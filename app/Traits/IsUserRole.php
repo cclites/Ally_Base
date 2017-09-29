@@ -15,6 +15,11 @@ trait IsUserRole
         return $this->belongsTo(User::class, 'id', 'id');
     }
 
+    public function name()
+    {
+        return $this->user->name();
+    }
+
     public function __get($name) {
         $parentValue = parent::__get($name);
         if ($parentValue === null) {

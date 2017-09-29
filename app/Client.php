@@ -46,4 +46,9 @@ class Client extends Model
     {
         return $this->belongsTo(Business::class);
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }
