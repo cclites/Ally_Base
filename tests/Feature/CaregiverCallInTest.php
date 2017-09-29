@@ -36,4 +36,18 @@ class CaregiverCallInTest extends TestCase
         $response->assertSuccessful();
         $response->assertSee('Returning to the main menu');
     }
+
+    public function testSeeCheckedInResponse()
+    {
+        $response = $this->post('/api/caregiver/check-in', ['Digits' => 1]);
+        $response->assertSuccessful();
+        $response->assertSee('You have checked in');
+    }
+
+    public function testSeeEnterCaregiverIdResponse()
+    {
+        $response = $this->post('/api/caregiver/check-in', ['Digits' => 2]);
+        $response->assertSuccessful();
+        $response->assertSee('enter your caregiver ID');
+    }
 }
