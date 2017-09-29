@@ -159,7 +159,7 @@ class ScheduleCreator
             $i=0;
             while ( ! in_array($weekdayId, $bydays)) {
                 $i++;
-                $weekdayNo += $i;
+                $weekdayNo++;
                 if ($weekdayNo >= 7) {
                     $weekdayNo -= 7;
                 }

@@ -75,9 +75,10 @@
                     selectable: this.selectable,
                     selectHelper: this.selectHelper,
                     aspectRatio: 2,
-                    timeFormat: 'HH:mm',
+                    timeFormat: 'h:mma',
                     events: this.events,
                     eventSources: this.eventSources,
+                    allDaySlot: false,
 
                     eventRender(...args) {
                         if (this.sync) {
