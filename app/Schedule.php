@@ -2,12 +2,15 @@
 
 namespace App;
 
+use App\Scheduling\RuleGenerator;
 use Illuminate\Database\Eloquent\Model;
-use When\When;
 
 class Schedule extends Model
 {
+    const FOREVER_ENDDATE = '2100-12-31';
+
     protected $table = 'schedules';
+    protected $guarded = ['id'];
 
     public function __construct(array $attributes = [])
     {
@@ -37,6 +40,49 @@ class Schedule extends Model
     public function exceptions()
     {
         return $this->hasMany(ScheduleException::class);
+    }
+
+    public function isRecurring()
+    {
+        return !$this->isSingle();
+    }
+
+    public function isSingle()
+    {
+        return (strlen($this->rrule) === 0);
+    }
+
+    /**
+     * Create a schedule exception
+     *
+     * @param $date
+     *
+     * @return \App\ScheduleException|false
+     */
+    public function createException($date)
+    {
+        $exception = new ScheduleException(['date' => $date]);
+        if ($this->exceptions()->save($exception)) {
+            return $exception;
+        }
+        return false;
+    }
+
+    /**
+     * Close the schedule on all days on and after the specified $date
+     *
+     * @param $date
+     */
+    public function closeSchedule($date) {
+        $last_date = (new \DateTime($date))
+            ->sub(new \DateInterval('P1D'))
+            ->format('Y-m-d');
+
+        if ($last_date < $this->start_date) {
+            return $this->delete();
+        }
+
+        return $this->update(['end_date' => $last_date]);
     }
 
     /**
@@ -70,15 +116,25 @@ class Schedule extends Model
         if ($start_date > $this->getEndDateTime()) {
             return [];
         }
-
-        if ($this->getEndDateTime() < $end_date) {
-            $end_date = $this->getEndDateTime();
+        else if ($end_date < $this->getStartDateTime()) {
+            return [];
         }
+        else if ($this->isSingle()) {
+            $occurrences = [];
+            if ($this->getStartDateTime() >= $start_date && $this->getStartDateTime() <= $end_date) {
+                $occurrences[] = new \DateTime($this->start_date . ' ' . $this->time, new \DateTimeZone('UTC'));
+            }
+        }
+        else {
+            if ($this->getEndDateTime() < $end_date) {
+                $end_date = $this->getEndDateTime();
+            }
 
-        $when = new When();
-        $occurrences = $when->startDate($this->getStartDateTime())
-            ->rrule($this->rrule)
-            ->getOccurrencesBetween($start_date, $end_date, $limit);
+            $when = new RuleGenerator();
+            $occurrences = $when->startDate($this->getStartDateTime())
+                                ->rrule($this->rrule)
+                                ->getOccurrencesBetween($start_date, $end_date, $limit);
+        }
 
         return $this->filterExceptions($occurrences);
     }
@@ -107,5 +163,26 @@ class Schedule extends Model
         return array_filter($dates, function($date) use ($exceptionsArray) {
             return !in_array($date->format('Y-m-d'), $exceptionsArray);
         });
+    }
+
+    /**
+     * Define the model parameters for a single event
+     *
+     * @param $date
+     * @param $time
+     * @param $duration
+     *
+     * @return $this
+     */
+    public function setSingleEvent($date, $time, $duration)
+    {
+        $this->start_date = $date;
+        $this->end_date = (new \DateTime($date . ' ' . $time))
+            ->add(new \DateInterval('PT' . $duration . 'M'))
+            ->format('Y-m-d');
+        $this->time = $time;
+        $this->duration = $duration;
+        $this->rrule = null;
+        return $this;
     }
 }

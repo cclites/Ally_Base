@@ -3,6 +3,7 @@
 namespace App\Responses;
 
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Http\JsonResponse;
 
 class ErrorResponse implements Responsable
 {

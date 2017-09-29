@@ -79,7 +79,8 @@
             'title': '',
             'type': '',
             'user': null,
-            'address': null
+            'address': null,
+            'action': null,
         },
 
         data() {
@@ -103,7 +104,8 @@
         methods: {
 
             saveAddress() {
-                this.form.post('/profile/address/' + this.type);
+                let action = (this.action) ? this.action : '/profile/address/' + this.type;
+                this.form.post(action);
             }
 
         }

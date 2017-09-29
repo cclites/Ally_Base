@@ -14,14 +14,13 @@ window.Form = Form;
 import Countries from './classes/Countries';
 window.Countries = Countries;
 
-window.moment = require('moment');
 window.Vue = require('vue');
 
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue);
 
-import vSelect from "vue-select"
-Vue.component('v-select', vSelect);
+// import vSelect from "vue-select"
+// Vue.component('v-select', vSelect);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -30,10 +29,16 @@ Vue.component('v-select', vSelect);
  */
 
 // App Components
-Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('change-password', require('./components/ChangePassword.vue'));
+Vue.component('client-edit', require('./components/ClientEdit.vue'));
+Vue.component('client-list', require('./components/ClientList.vue'));
+Vue.component('client-profile', require('./components/ClientProfile.vue'));
+Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
+Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
+Vue.component('full-calendar', require('./components/FullCalendar.vue'));
 Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
+Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 

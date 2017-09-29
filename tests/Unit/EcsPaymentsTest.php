@@ -1,0 +1,119 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\BankAccount;
+use App\CreditCard;
+use App\Exceptions\PaymentMethodDeclined;
+use App\Exceptions\PaymentMethodError;
+use App\Gateway\ECSPayment;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class EcsPaymentsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected $testCard = '4111111111111111';
+    protected $testAccount = '123123123';
+    protected $testRouting = '123123123';
+
+    protected $card;
+    protected $account;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->card = new CreditCard([
+            'number' => $this->testCard,
+            'expiration_month' => 10,
+            'expiration_year' => 2025,
+            'name_on_card' => 'John Smith',
+        ]);
+        $this->account = new BankAccount([
+            'account_number' => $this->testAccount,
+            'routing_number' => $this->testRouting,
+            'account_type' => 'checking',
+            'account_holder_type' => 'personal',
+            'name_on_account' => 'John Smith'
+        ]);
+    }
+
+    /**
+     * A basic test example.
+     *
+     * @return void
+     */
+    public function testCreditCardValidation()
+    {
+        $ecs = new ECSPayment();
+        $transaction = $ecs->validateCard($this->card, 999);
+        $this->assertTrue($transaction->success);
+        $this->assertTrue($transaction->cvv_pass);
+    }
+
+    public function testCreditCardPayment()
+    {
+        $ecs = new ECSPayment();
+        $transaction = $ecs->chargeCard($this->card, 100.50);
+        $this->assertTrue($transaction->success);
+        $this->assertEquals(100.50, $transaction->amount);
+    }
+
+    public function testAchValidation()
+    {
+        $ecs = new ECSPayment();
+        $transaction = $ecs->validateAccount($this->account);
+        $this->assertTrue($transaction->success);
+    }
+
+    public function testAchPayment()
+    {
+        $ecs = new ECSPayment();
+        $transaction = $ecs->chargeAccount($this->account, 25.00);
+        $this->assertTrue($transaction->success);
+        $this->assertEquals(25.00, $transaction->amount);
+    }
+
+    public function testAchDeposit()
+    {
+        $ecs = new ECSPayment();
+        $transaction = $ecs->depositFunds($this->account, 25.00);
+        $this->assertTrue($transaction->success);
+        $this->assertEquals(25.00, $transaction->amount);
+    }
+
+    public function testCCDeclinedThrowsException()
+    {
+        $ecs = new ECSPayment();
+        $this->expectException(PaymentMethodDeclined::class);
+        $transaction = $ecs->chargeCard($this->card, 0.50);
+    }
+
+    public function testACHDeclinedThrowsException()
+    {
+        $ecs = new ECSPayment();
+        $this->expectException(PaymentMethodDeclined::class);
+        $transaction = $ecs->chargeAccount($this->account, 0.50);
+    }
+
+    public function testInvalidCCThrowsException()
+    {
+        $ecs = new ECSPayment();
+        $card = clone $this->card;
+        $card->number = '41111111234';
+
+        $this->expectException(PaymentMethodError::class);
+        $transaction = $ecs->validateCard($card);
+    }
+
+    public function testInvalidBankAccountThrowsException()
+    {
+        $ecs = new ECSPayment();
+        $account = clone $this->account;
+        $account->account_number = '41111111234';
+
+        $this->expectException(PaymentMethodError::class);
+        $transaction = $ecs->validateAccount($account);
+    }
+}

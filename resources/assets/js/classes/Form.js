@@ -75,16 +75,6 @@ class Form {
 
 
     /**
-     * Send a DELETE request to the given URL.
-     * .
-     * @param {string} url
-     */
-    delete(url) {
-        return this.submit('delete', url);
-    }
-
-
-    /**
      * Submit the form.
      *
      * @param {string} method
