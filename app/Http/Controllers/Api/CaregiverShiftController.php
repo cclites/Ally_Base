@@ -37,10 +37,18 @@ class CaregiverShiftController extends Controller
             case 2:
                 return $this->checkOutResponse();
         }
+        return $this->mainMenuResponse();
+    }
+
+    /**
+     * Return main menu response.
+     */
+    private function mainMenuResponse()
+    {
         $response = new Twiml();
         $response->say('Returning to the main menu');
-        $response->redirect('/api/caregiver/greeting');
-        return $response;
+        $response->redirect('/api/caregiver/greeting', ['method' => 'GET']);
+        return response($response)->header('Content-Type', 'text/xml');
     }
 
     /**
