@@ -29,16 +29,37 @@ Vue.use(BootstrapVue);
  */
 
 // App Components
+Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
+Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
+
+Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
+Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
+
 Vue.component('change-password', require('./components/ChangePassword.vue'));
+
+Vue.component('check-in', require('./components/CheckIn.vue'));
+Vue.component('check-out', require('./components/CheckOut.vue'));
+
+Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-list', require('./components/ClientList.vue'));
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
+
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
+
+Vue.component('dashboard-metric', require('./components/DashboardMetric.vue'));
+
 Vue.component('full-calendar', require('./components/FullCalendar.vue'));
+
 Vue.component('input-help', require('./components/InputHelp.vue'));
+
 Vue.component('message', require('./components/Message.vue'));
+
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
+
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 

@@ -22,11 +22,25 @@ Auth::routes();
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/home', 'HomeController@index')->name('home');
 
-    Route::get('/profile', 'ProfileController@index');
+    Route::get('/profile', 'ProfileController@index')->name('profile');
     Route::post('/profile', 'ProfileController@update');
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::post('/profile/phone/{type}', 'ProfileController@phone');
+});
+
+Route::group([
+    'middleware' => ['auth', 'roles'],
+    'roles' => ['caregiver'],
+], function() {
+    Route::get('schedule', 'ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
+    Route::get('check-in', 'ShiftController@checkIn')->name('check_in');
+    Route::get('check-out', 'ShiftController@checkOut')->name('check_out');
+
+    Route::get('reports/payments', 'Caregivers\ReportsController@payments')->name('caregivers.reports.payments');
+    Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
+    Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 });
 
 Route::group([
@@ -35,9 +49,13 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['office_user'],
 ], function() {
+    Route::resource('caregivers', 'Business\CaregiverController');
+    Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
+    Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
+    Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::resource('clients', 'Business\ClientController');
     Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
-    Route::post('/clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
+    Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
     Route::get('clients/{id}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
     Route::post('clients/{id}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
     Route::post('clients/{id}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');
@@ -47,4 +65,8 @@ Route::group([
     Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
 
+    Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
+    Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
+    Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
+    Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
 });

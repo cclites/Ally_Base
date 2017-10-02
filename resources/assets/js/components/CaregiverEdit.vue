@@ -64,22 +64,22 @@
 <script>
     export default {
         props: {
-            'client': {},
+            'caregiver': {},
         },
 
         data() {
             return {
                 form: new Form({
-                    firstname: this.client.user.firstname,
-                    lastname: this.client.user.lastname,
-                    email: this.client.user.email,
-                    date_of_birth: moment(this.client.user.date_of_birth).format('L')
+                    firstname: this.caregiver.user.firstname,
+                    lastname: this.caregiver.user.lastname,
+                    email: this.caregiver.user.email,
+                    date_of_birth: moment(this.caregiver.user.date_of_birth).format('L')
                 })
             }
         },
 
         mounted() {
-            if (!this.client) {
+            if (!this.caregiver) {
                 form: new Form({
                     firstname: null,
                     lastname: null,
@@ -92,7 +92,7 @@
         methods: {
 
             saveProfile() {
-                this.form.patch('/business/clients/' + this.client.id);
+                this.form.patch('/business/caregivers/' + this.caregiver.id);
             }
 
         }

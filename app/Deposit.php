@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Deposit extends Model
 {
     protected $table = 'deposits';
+    protected $guarded = ['id'];
 
     public function caregiver()
     {
@@ -18,13 +19,13 @@ class Deposit extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function reference()
+    public function method()
     {
         return $this->morphTo();
     }
 
-    public function method()
+    public function payments()
     {
-        return $this->morphTo();
+        return $this->belongsToMany(Payment::class, 'deposit_payments');
     }
 }

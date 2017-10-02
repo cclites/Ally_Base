@@ -1,14 +1,5 @@
 <template>
     <b-card>
-        <b-row>
-            <b-col lg="6">
-                <a href="/business/clients/create" class="btn btn-info">Add Client</a>
-            </b-col>
-            <b-col lg="6" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
-            </b-col>
-        </b-row>
-
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -21,10 +12,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <b-btn size="sm" :href="'/business/clients/' + row.item.id">
-                        <i class="fa fa-edit"></i>
-                    </b-btn>
+
                 </template>
             </b-table>
         </div>
@@ -43,7 +31,11 @@
 <script>
     export default {
         props: {
-            'clients': Array,
+            'deposits': {
+                default() {
+                    return [];
+                }
+            },
         },
 
         data() {
@@ -59,18 +51,13 @@
                 selectedItem: {},
                 fields: [
                     {
-                        key: 'firstname',
-                        label: 'First Name',
+                        key: 'date',
+                        label: 'Date',
                         sortable: true,
                     },
                     {
-                        key: 'lastname',
-                        label: 'Last Name',
-                        sortable: true,
-                    },
-                    {
-                        key: 'email',
-                        label: 'Email Address',
+                        key: 'amount',
+                        label: 'Amount Deposited',
                         sortable: true,
                     },
                     'actions'
@@ -84,12 +71,11 @@
 
         computed: {
             items() {
-                return this.clients.map(function(client) {
+                return this.deposits.map(function(deposit) {
                     return {
-                        id: client.id,
-                        firstname: client.user.firstname,
-                        lastname: client.user.lastname,
-                        email: client.user.email
+                        id: deposit.id,
+                        date: moment(deposit.created_at).format('L'),
+                        amount: '$' + deposit.amount,
                     }
                 })
             },
@@ -100,7 +86,7 @@
                 this.selectedItem = item;
                 this.modalDetails.data = JSON.stringify(item, null, 2);
                 this.modalDetails.index = index;
-//                this.$root.$emit('bv::show::modal','clientEditModal', button);
+//                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
                 this.editModalVisible = true;
             },
             resetModal() {

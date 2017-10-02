@@ -19,7 +19,9 @@
                             <input-help :form="createForm" field="createType" text="Create one event or an event that repeats."></input-help>
                         </b-form-group>
                     </b-col>
-                    <div v-if="createType">
+                </b-row>
+                <div v-if="createType">
+                    <b-row>
                         <b-col lg="12">
                             <b-form-group label="Start Date" label-for="date">
                                 <b-form-input
@@ -32,6 +34,8 @@
                                 <input-help :form="createForm" field="date" text="Confirm the starting date."></input-help>
                             </b-form-group>
                         </b-col>
+                    </b-row>
+                    <b-row>
                         <b-col sm="6">
                             <b-form-group label="Start Time" label-for="time">
                                 <b-form-select
@@ -56,8 +60,39 @@
                                 <input-help :form="createForm" field="duration" text="Confirm the ending time."></input-help>
                             </b-form-group>
                         </b-col>
-                    </div>
-                    <div v-if="createType == 'recurring'">
+                    </b-row>
+                    <b-row>
+                        <b-col sm="7">
+                            <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
+                                <b-form-select
+                                        id="caregiver_id"
+                                        name="caregiver_id"
+                                        v-model="createForm.caregiver_id"
+                                        @input="updateDefaultRate()"
+                                >
+                                    <option value="">--Not Assigned--</option>
+                                    <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.lastname }}, {{ caregiver.firstname }}</option>
+                                </b-form-select>
+                                <input-help :form="createForm" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="5">
+                            <b-form-group label="Caregiver Rate" label-for="scheduled_rate">
+                                <b-form-input
+                                        id="scheduled_rate"
+                                        name="scheduled_rate"
+                                        type="number"
+                                        step="any"
+                                        v-model="createForm.scheduled_rate"
+                                >
+                                </b-form-input>
+                                <input-help :form="createForm" field="scheduled_rate" text="Set the caregiver's hourly rate"></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                </div>
+                <div v-if="createType == 'recurring'">
+                    <b-row>
                         <b-col lg="12">
                             <b-form-group label="Recurring Period" label-for="interval_type">
                                 <b-form-select
@@ -95,8 +130,9 @@
                                 <input-help :form="createForm" field="end_date" text="Repeat the schedule until this date."></input-help>
                             </b-form-group>
                         </b-col>
-                    </div>
-                </b-row>
+                    </b-row>
+                </div>
+
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="createModal=false">Close</b-btn>
@@ -112,97 +148,134 @@
                         Loading Schedule Data..
                     </b-col>
                </b-row>
-                <b-row v-else>
-                    <b-col lg="12">
-                        <b-form-group label="Edit Choice" label-for="editType">
-                            <b-form-select
-                                id="editType"
-                                name="editType"
-                                v-model="editType"
-                                >
-                                <option value="single">Single Occurrence</option>
-                                <option value="all">All Future Events</option>
-                            </b-form-select>
-                            <input-help :form="editForm" field="editType" text="Select which type of modification you wish to make."></input-help>
-                        </b-form-group>
-                    </b-col>
-                    <div v-if="editType">
+                <div v-else>
+                    <b-row>
                         <b-col lg="12">
-                            <b-form-group label="Selected Date" label-for="date">
-                                <b-form-input
-                                        id="date"
-                                        name="date"
-                                        type="text"
-                                        v-model="editForm.selected_date"
-                                        readonly
-                                >
-                                </b-form-input>
-                                <input-help :form="editForm" field="date" text="Confirm the date you wish to edit."></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col sm="6">
-                            <b-form-group label="Start Time" label-for="time">
+                            <b-form-group label="Edit Choice" label-for="editType">
                                 <b-form-select
-                                        id="time"
-                                        name="time"
-                                        :options="startTimes"
-                                        v-model="editForm.time"
+                                        id="editType"
+                                        name="editType"
+                                        v-model="editType"
                                 >
+                                    <option value="single">Single Occurrence</option>
+                                    <option value="all">All Future Events</option>
                                 </b-form-select>
-                                <input-help :form="editForm" field="time" text="Confirm the starting time."></input-help>
+                                <input-help :form="editForm" field="editType" text="Select which type of modification you wish to make."></input-help>
                             </b-form-group>
                         </b-col>
-                        <b-col sm="6">
-                            <b-form-group label="End Time" label-for="duration">
-                                <b-form-select
-                                        id="duration"
-                                        name="duration"
-                                        :options="endTimes"
-                                        v-model="editForm.duration"
-                                >
-                                </b-form-select>
-                                <input-help :form="editForm" field="duration" text="Confirm the ending time."></input-help>
-                            </b-form-group>
-                        </b-col>
+                    </b-row>
+                    <div v-if="editType">
+                        <b-row>
+                            <b-col lg="12">
+                                <b-form-group label="Selected Date" label-for="date">
+                                    <b-form-input
+                                            id="date"
+                                            name="date"
+                                            type="text"
+                                            v-model="editForm.selected_date"
+                                            readonly
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="editForm" field="date" text="Confirm the date you wish to edit."></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col sm="6">
+                                <b-form-group label="Start Time" label-for="time">
+                                    <b-form-select
+                                            id="time"
+                                            name="time"
+                                            :options="startTimes"
+                                            v-model="editForm.time"
+                                    >
+                                    </b-form-select>
+                                    <input-help :form="editForm" field="time" text="Confirm the starting time."></input-help>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6">
+                                <b-form-group label="End Time" label-for="duration">
+                                    <b-form-select
+                                            id="duration"
+                                            name="duration"
+                                            :options="endTimes"
+                                            v-model="editForm.duration"
+                                    >
+                                    </b-form-select>
+                                    <input-help :form="editForm" field="duration" text="Confirm the ending time."></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col sm="7">
+                                <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
+                                    <b-form-select
+                                        id="caregiver_id"
+                                        name="caregiver_id"
+                                        v-model="editForm.caregiver_id"
+                                        @input="updateDefaultRate()"
+                                        >
+                                        <option value="">--Not Assigned--</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.lastname }}, {{ caregiver.firstname }}</option>
+                                    </b-form-select>
+                                    <input-help :form="editForm" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="5">
+                                <b-form-group label="Caregiver Rate" label-for="scheduled_rate">
+                                    <b-form-input
+                                        id="scheduled_rate"
+                                        name="scheduled_rate"
+                                        type="number"
+                                        step="any"
+                                        v-model="editForm.scheduled_rate"
+                                        >
+                                    </b-form-input>
+                                    <input-help :form="editForm" field="scheduled_rate" text="Set the caregiver's hourly rate"></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                     </div>
                     <div v-if="editType == 'all'">
-                        <b-col lg="12">
-                            <b-form-group label="Recurring Period" label-for="interval_type">
-                                <b-form-select
-                                        id="interval_type"
-                                        name="interval_type"
-                                        v-model="editForm.interval_type"
-                                >
-                                    <option value="weekly">Weekly</option>
-                                    <option value="biweekly">Bi-weekly</option>
-                                    <option value="monthly">Monthly</option>
-                                </b-form-select>
-                                <input-help :form="editForm" field="interval_type" text="Select how often the schedule repeats."></input-help>
-                            </b-form-group>
-                            <div class="form-check" v-if="editForm.interval_type == 'weekly' || editForm.interval_type == 'biweekly'">
-                                <input-help :form="editForm" field="bydays" text="Select the days of the week below."></input-help>
-                                <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek">
-                                    <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="editForm.bydays" :value="item">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">{{ index }}</span>
-                                </label>
-                            </div>
-                            <p v-else>
-                                The schedule will repeat every month on the {{ dayOfMonth(editForm.selected_date) }}.
-                            </p>
-                            <b-form-group label="End date" label-for="end_date">
-                                <b-form-input
-                                    id="end_date"
-                                    name="end_date"
-                                    type="text"
-                                    v-model="editForm.end_date"
+                        <b-row>
+                            <b-col lg="12">
+                                <b-form-group label="Recurring Period" label-for="interval_type">
+                                    <b-form-select
+                                            id="interval_type"
+                                            name="interval_type"
+                                            v-model="editForm.interval_type"
                                     >
-                                </b-form-input>
-                                <input-help :form="editForm" field="end_date" text="Repeat the schedule until this date."></input-help>
-                            </b-form-group>
-                        </b-col>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly">Bi-weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </b-form-select>
+                                    <input-help :form="editForm" field="interval_type" text="Select how often the schedule repeats."></input-help>
+                                </b-form-group>
+                                <div class="form-check" v-if="editForm.interval_type == 'weekly' || editForm.interval_type == 'biweekly'">
+                                    <input-help :form="editForm" field="bydays" text="Select the days of the week below."></input-help>
+                                    <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek">
+                                        <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="editForm.bydays" :value="item">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ index }}</span>
+                                    </label>
+                                </div>
+                                <p v-else>
+                                    The schedule will repeat every month on the {{ dayOfMonth(editForm.selected_date) }}.
+                                </p>
+                                <b-form-group label="End date" label-for="end_date">
+                                    <b-form-input
+                                            id="end_date"
+                                            name="end_date"
+                                            type="text"
+                                            v-model="editForm.end_date"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="editForm" field="end_date" text="Repeat the schedule until this date."></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                     </div>
-                </b-row>
+                </div>
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="editModal=false">Close</b-btn>
@@ -219,6 +292,7 @@
         props: {
             client: {},
             schedules: {},
+            caregivers: {},
         },
 
         data() {
@@ -290,6 +364,8 @@
                     start_date: this.selectedEvent.format('L'),
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
+                    caregiver_id: null,
+                    scheduled_rate: null,
                 });
             },
 
@@ -301,6 +377,8 @@
                     duration: 60,
                     interval_type: null,
                     bydays: [],
+                    caregiver_id: null,
+                    scheduled_rate: null,
                 });
             },
 
@@ -309,6 +387,8 @@
                     selected_date: moment(this.selectedEvent.start).format('L'),
                     time: this.selectedSchedule.time,
                     duration: this.selectedSchedule.duration,
+                    caregiver_id: this.selectedSchedule.caregiver_id,
+                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                 });
             },
 
@@ -320,6 +400,8 @@
                     duration: this.selectedSchedule.duration,
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
+                    caregiver_id: this.selectedSchedule.caregiver_id,
+                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                 });
             },
 
@@ -390,6 +472,23 @@
                     this.editModal = false;
                 }
             },
+
+            updateDefaultRate() {
+                let form = this.createForm;
+                if (this.editModal) {
+                    form = this.editForm;
+                }
+                if (!form.caregiver_id) {
+                    form.scheduled_rate = null;
+                    return;
+                }
+                for (let key in this.caregivers) {
+                    let caregiver = this.caregivers[key];
+                    if (caregiver.id == form.caregiver_id) {
+                        form.scheduled_rate = caregiver.default_rate;
+                    }
+                }
+            }
         },
 
         watch: {

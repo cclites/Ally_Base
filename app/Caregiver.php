@@ -55,6 +55,11 @@ class Caregiver extends Model
         return $this->hasMany(PaymentQueue::class);
     }
 
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
     public function setSsnAttribute($value)
     {
         $this->attributes['ssn'] = Crypt::encrypt($value);

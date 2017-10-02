@@ -18,8 +18,6 @@ class CreateDepositsTable extends Migration {
 			$table->string('deposit_type', 45);
 			$table->integer('caregiver_id')->unsigned()->nullable()->index('fk_deposits_caregiver_id_idx');
 			$table->integer('business_id')->unsigned()->nullable()->index('fk_deposits_business_id_idx');
-			$table->string('reference_type', 45)->nullable();
-			$table->string('reference_id', 45)->nullable();
 			$table->string('method_type', 45)->nullable();
 			$table->string('method_id', 45)->nullable();
 			$table->decimal('amount', 9)->nullable();

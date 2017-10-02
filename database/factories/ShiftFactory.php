@@ -15,8 +15,8 @@ use Faker\Generator as Faker;
 
 $factory->define(\App\Shift::class, function(Faker $faker) {
     $duration = mt_rand(90, 240);
-    $start = $faker->dateTime->format('Y-m-d H:i:s');
-    $end = (mt_rand(0,9) === 0) ? null : date('Y-m-d H:i:s', strtotime($start . ' +' . $duration . ' minutes'));
+    $start = date('Y-m-d H:i:s', time() - mt_rand(1200, 86400*90));
+    $end = date('Y-m-d H:i:s', strtotime($start . ' +' . $duration . ' minutes'));
     $latitude = $faker->randomFloat(4, 32, 46);
     $longitude = $faker->randomFloat(4, -118, -74);
 

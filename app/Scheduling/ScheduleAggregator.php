@@ -4,7 +4,7 @@ namespace App\Scheduling;
 
 class ScheduleAggregator
 {
-    protected $data;
+    protected $data = [];
 
     public function add($title, $schedule)
     {

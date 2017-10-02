@@ -92,6 +92,8 @@ class ScheduleCreator
             'duration' => $this->data['duration'],
             'rrule' => $rule,
             'notes' => $this->data['notes'] ?? null,
+            'caregiver_id' => $this->data['caregiver_id'] ?? null,
+            'scheduled_rate' => $this->data['scheduled_rate'] ?? null,
         ];
     }
 
