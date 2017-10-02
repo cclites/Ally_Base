@@ -3,7 +3,7 @@
 @section('title', 'Check In')
 
 @section('content')
-    @if($_GET['checked_out'])
+    @if(isset($_GET['checked_out']))
         <div class="row">
             <div class="col-lg-6">
                 <div class="alert alert-success" role="alert">
