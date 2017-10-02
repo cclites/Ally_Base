@@ -159,11 +159,6 @@
 
             cal.fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
 
-            setTimeout(function() {
-                console.log('changeView called');
-                cal.fullCalendar('changeView', 'listMonth');
-            }, 3000);
-
         },
 
         methods: {

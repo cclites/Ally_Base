@@ -32,6 +32,7 @@ Vue.use(BootstrapVue);
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
+Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

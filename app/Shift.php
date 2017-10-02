@@ -24,6 +24,11 @@ class Shift extends Model
         return $this->belongsTo(Business::class);
     }
 
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class);
+    }
+
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'shift_activities')->withPivot(['completed', 'other']);

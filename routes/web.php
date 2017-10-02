@@ -69,4 +69,7 @@ Route::group([
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
     Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
+
+    Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
 });

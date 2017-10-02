@@ -5,6 +5,7 @@ namespace App\Scheduling;
 class ScheduleAggregator
 {
     protected $data = [];
+    protected $activeSchedules = [];
 
     public function add($title, $schedule)
     {
@@ -14,6 +15,12 @@ class ScheduleAggregator
         ];
     }
 
+    public function addActiveSchedules($active = [])
+    {
+        $active = (array) $active;
+        $this->activeSchedules = array_merge($this->activeSchedules, $active);
+    }
+
     public function events($start_date, $end_date, $timezone='UTC', $limitPerEvent = 300)
     {
         $events = [];
@@ -21,7 +28,7 @@ class ScheduleAggregator
             $title       = $event['title'];
             $schedule    = $event['schedule'];
             $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $timezone, $limitPerEvent);
-            $events      = array_merge($events, array_map(function ($date) use ($schedule, $title) {
+            $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
                 $end = clone $date;
                 $end->add(new \DateInterval('PT' . $schedule->duration . 'M'));
                 return [
@@ -30,6 +37,7 @@ class ScheduleAggregator
                     'start'       => $date,
                     'end'         => $end,
                     'duration'    => $schedule->duration,
+                    'checked_in'=> in_array($schedule->id, $this->activeSchedules)
                 ];
             }, $occurrences));
         }

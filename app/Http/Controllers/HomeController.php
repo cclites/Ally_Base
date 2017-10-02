@@ -23,6 +23,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+        if (auth()->user()->role_type == 'office_user') return redirect()->route('business.schedule');
+        if (auth()->user()->role_type == 'caregiver') return redirect()->route('schedule');
         return view('home');
     }
 }

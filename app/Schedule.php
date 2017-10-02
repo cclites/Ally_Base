@@ -42,6 +42,11 @@ class Schedule extends Model
         return $this->hasMany(ScheduleException::class);
     }
 
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
     public function isRecurring()
     {
         return !$this->isSingle();

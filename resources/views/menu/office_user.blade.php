@@ -1,6 +1,9 @@
 <li>
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li>
+<li>
+    <a class="has-arrow" href="/business/schedule" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule </span></a>
+</li>
 <li> <a class="has-arrow" href="{{ route('business.clients.index') }}" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Clients</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.clients.index') }}">Client List</a></li>
