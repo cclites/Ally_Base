@@ -218,11 +218,7 @@
                                     </div>
                                 </li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="#"><i class="fa fa-user"></i> My Profile</a></li>
-                                <li><a href="#"><i class="fa fa-usd"></i> My Balance</a></li>
-                                <li><a href="#"><i class="fa fa-envelope"></i> Inbox</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#"><i class="fa fa-gears"></i> Account Setting</a></li>
+                                <li><a href="{{ route('profile') }}"><i class="fa fa-user"></i> My Profile</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{{ url('/logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

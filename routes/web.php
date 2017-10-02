@@ -22,7 +22,7 @@ Auth::routes();
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/home', 'HomeController@index')->name('home');
 
-    Route::get('/profile', 'ProfileController@index');
+    Route::get('/profile', 'ProfileController@index')->name('profile');
     Route::post('/profile', 'ProfileController@update');
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');

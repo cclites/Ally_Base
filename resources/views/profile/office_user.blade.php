@@ -45,9 +45,6 @@
         <div class="tab-pane" id="phones" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Mobile Number" type="mobile" :phone="{{ json_phone($user, 'mobile') }}"></phone-number>
-                </div>
-                <div class="col-lg-6 col-sm-12">
                     <phone-number title="Work Number" type="work" :phone="{{ json_phone($user, 'work') }}"></phone-number>
                 </div>
                 <div class="col-lg-6 col-sm-12">
