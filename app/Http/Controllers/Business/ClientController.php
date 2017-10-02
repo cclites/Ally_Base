@@ -115,7 +115,7 @@ class ClientController extends BaseController
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
         if ($client->update($data)) {
-            return new CreatedResponse('The client has been updated.');
+            return new SuccessResponse('The client has been updated.');
         }
         return new ErrorResponse(500, 'The client could not be updated.');
     }
