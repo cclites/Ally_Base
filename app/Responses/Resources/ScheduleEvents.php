@@ -14,7 +14,7 @@ class ScheduleEvents implements Responsable
             'all' => [],
         ];
 
-    public function __construct($events, $routeName, $routeParams = [])
+    public function __construct($events, $routeName=null, $routeParams = [])
     {
         $this->events = $events;
         $this->routeName = $routeName;

@@ -34,6 +34,7 @@ Vue.component('business-scheduled-payments', require('./components/BusinessSched
 
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 

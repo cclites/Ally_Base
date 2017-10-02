@@ -30,6 +30,20 @@ Route::group(['middleware' => 'auth'], function() {
 });
 
 Route::group([
+    'middleware' => ['auth', 'roles'],
+    'roles' => ['caregiver'],
+], function() {
+    Route::get('schedule', 'ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
+    Route::get('check-in', 'ShiftController@checkIn')->name('check_in');
+    Route::get('check-out', 'ShiftController@checkOut')->name('check_out');
+
+    Route::get('reports/payments', 'Caregivers\ReportsController@payments')->name('caregivers.reports.payments');
+    Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
+    Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
+});
+
+Route::group([
     'as' => 'business.',
     'prefix' => 'business',
     'middleware' => ['auth', 'roles'],
