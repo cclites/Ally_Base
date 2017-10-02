@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Caregiver;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Scheduling\ScheduleAggregator;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
@@ -30,7 +31,7 @@ class CaregiverController extends BaseController
      */
     public function create()
     {
-        //
+        return view('business.caregivers.create');
     }
 
     /**
@@ -41,7 +42,24 @@ class CaregiverController extends BaseController
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'email' => 'required|email',
+            'date_of_birth' => 'nullable',
+            'ssn' => 'nullable',
+            'password' => 'required|confirmed',
+        ]);
+
+        if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+        $data['password'] = bcrypt($data['password']);
+
+        $caregiver = new Caregiver($data);
+        if ($this->business()->caregivers()->save($caregiver)) {
+            return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id]);
+        }
+
+        return new ErrorResponse(500, 'The caregiver could not be created.');
     }
 
     /**
