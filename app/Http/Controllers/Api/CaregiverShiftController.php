@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Twilio\Twiml;
+use App\Caregiver;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -101,6 +102,7 @@ class CaregiverShiftController extends Controller
     private function checkInCaregiver()
     {
         $response = new Twiml;
+        $shift = Caregiver::find(3)->startShift();
         $response->say('You have checked in.  Please remember to call back and check-out. Good bye.');
         return response($response)->header('Content-Type', 'text/xml');
     }

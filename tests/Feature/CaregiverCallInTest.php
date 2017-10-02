@@ -44,6 +44,17 @@ class CaregiverCallInTest extends TestCase
         $response->assertSee('You have checked in');
     }
 
+    /**
+     * @depends testSeeCheckedInResponse
+     */
+    public function testStartShift()
+    {
+        $this->assertDatabaseHas('shifts', [
+            'caregiver_id' => 3,
+            'checked_out_time' => null,
+        ]);
+    }
+
     public function testSeeEnterCaregiverIdResponse()
     {
         $response = $this->post('/api/caregiver/check-in', ['Digits' => 2]);
