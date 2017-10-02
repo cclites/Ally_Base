@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Profile"
+    <b-card header="New Client"
         header-bg-variant="info"
         header-text-variant="white"
         >
@@ -54,7 +54,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button id="save-profile" variant="success" type="submit">Create &amp; Continue</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -63,23 +63,10 @@
 
 <script>
     export default {
-        props: {
-            'client': {},
-        },
+        props: {},
 
         data() {
             return {
-                form: new Form({
-                    firstname: this.client.user.firstname,
-                    lastname: this.client.user.lastname,
-                    email: this.client.user.email,
-                    date_of_birth: moment(this.client.user.date_of_birth).format('L')
-                })
-            }
-        },
-
-        mounted() {
-            if (!this.client) {
                 form: new Form({
                     firstname: null,
                     lastname: null,
@@ -89,10 +76,17 @@
             }
         },
 
+        mounted() {
+        },
+
         methods: {
 
             saveProfile() {
-                this.form.patch('/business/clients/' + this.client.id);
+                this.form.post('/business/clients')
+                    .then(function(response) {
+                        let data = response.data.data;
+                        window.location = '/business/clients/' + data.id;
+                    });
             }
 
         }

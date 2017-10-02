@@ -25,4 +25,9 @@ class BaseController extends Controller
         return $this->business;
     }
 
+    protected function hasCaregiver($id)
+    {
+        return $this->business()->caregivers()->where('caregivers.id', $id)->exists();
+    }
+
 }

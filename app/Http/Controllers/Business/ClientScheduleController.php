@@ -161,6 +161,8 @@ class ClientScheduleController extends BaseController
                 throw new \Exception('Unable to close previous schedule');
             }
 
+            dd($data, $creator->make());
+
             if (!$newSchedule = $creator->recreate($schedule)) {
                 throw new \Exception('Unable to create new schedule after closing old schedule.');
             }

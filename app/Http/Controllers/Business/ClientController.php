@@ -49,9 +49,12 @@ class ClientController extends BaseController
             'business_fee' => 'nullable|numeric',
         ]);
 
+        if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+        $data['password'] = bcrypt(random_bytes(32));
+
         $client = new Client($data);
         if ($this->business()->clients()->save($client)) {
-            return new CreatedResponse('The client has been created.');
+            return new CreatedResponse('The client has been created.', ['id' => $client->id]);
         }
 
         return new ErrorResponse(500, 'The client could not be created.');

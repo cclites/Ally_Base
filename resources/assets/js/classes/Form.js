@@ -88,12 +88,12 @@ class Form {
                     this.handler = new AxiosResponseHandler();
                     this.handler.handleResponse(response, this.alertOnResponse);
                     if (this.resetOnSuccess) this.reset();
-                    resolve(this.handler);
+                    resolve(response);
                 })
                 .catch(error => {
                     this.handler = new AxiosResponseHandler();
                     this.handler.handleError(error, this.alertFromResponse);
-                    reject(this.handler);
+                    reject(error);
                 });
         });
     }
