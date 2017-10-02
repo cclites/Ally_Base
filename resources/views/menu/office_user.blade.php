@@ -18,5 +18,6 @@
         <li><a href="{{ route('business.reports.payments') }}">Payment History</a></li>
         <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
         <li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>
+        <li><a href="{{ route('business.reports.deposits') }}">Deposit History</a></li>
     </ul>
 </li>

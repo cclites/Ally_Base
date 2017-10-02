@@ -12,10 +12,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <b-btn size="sm" :href="'/business/caregivers/' + row.item.id">
-                        <i class="fa fa-edit"></i>
-                    </b-btn>
+
                 </template>
             </b-table>
         </div>
@@ -69,8 +66,8 @@
                         sortable: true,
                     },
                     {
-                        key: 'fee',
-                        label: 'Business Fee',
+                        key: 'business_allotment',
+                        label: 'Business Allotment',
                         sortable: true,
                     },
                     'actions'
@@ -84,7 +81,15 @@
 
         computed: {
             items() {
-                return this.payments;
+                return this.payments.map(function(payment) {
+                    return {
+                        id: payment.id,
+                        date: moment(payment.date).format('L'),
+                        client_name: payment.client_name,
+                        amount: '$' + payment.amount,
+                        business_allotment: '$' + payment.business_allotment,
+                    }
+                })
             },
         },
 

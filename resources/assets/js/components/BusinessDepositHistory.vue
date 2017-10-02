@@ -31,7 +31,7 @@
 <script>
     export default {
         props: {
-            'payments': {
+            'deposits': {
                 default() {
                     return [];
                 }
@@ -56,18 +56,8 @@
                         sortable: true,
                     },
                     {
-                        key: 'client_name',
-                        label: 'Client',
-                        sortable: true,
-                    },
-                    {
                         key: 'amount',
-                        label: 'Amount',
-                        sortable: true,
-                    },
-                    {
-                        key: 'business_allotment',
-                        label: 'Business Allotment',
+                        label: 'Amount Deposited',
                         sortable: true,
                     },
                     'actions'
@@ -81,13 +71,11 @@
 
         computed: {
             items() {
-                return this.payments.map(function(payment) {
+                return this.deposits.map(function(deposit) {
                     return {
-                        id: payment.id,
-                        date: moment(payment.date).format('L'),
-                        client_name: payment.client_name,
-                        amount: '$' + payment.amount,
-                        business_allotment: '$' + payment.business_allotment,
+                        id: deposit.id,
+                        date: moment(deposit.created_at).format('L'),
+                        amount: '$' + deposit.amount,
                     }
                 })
             },
