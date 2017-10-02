@@ -61,7 +61,7 @@
             <payment-method title="Primary Payment Method" />
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
-            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
+            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
         </div>
     </div>
 @endsection

@@ -89,6 +89,8 @@ class ClientScheduleController extends BaseController
             'duration' => 'required|integer',
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
+            'caregiver_id' => 'nullable|integer',
+            'scheduled_rate' => 'nullable|numeric'
         ], [
             'bydays.required_if' => 'At least one day of the week is required.',
         ]);
@@ -139,6 +141,8 @@ class ClientScheduleController extends BaseController
             'duration' => 'required|integer',
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
+            'caregiver_id' => 'nullable|integer',
+            'scheduled_rate' => 'nullable|numeric'
         ]);
 
         $data['selected_date'] = filter_date($data['selected_date']);
@@ -160,8 +164,6 @@ class ClientScheduleController extends BaseController
             if (!$schedule->closeSchedule($data['selected_date'])) {
                 throw new \Exception('Unable to close previous schedule');
             }
-
-            dd($data, $creator->make());
 
             if (!$newSchedule = $creator->recreate($schedule)) {
                 throw new \Exception('Unable to create new schedule after closing old schedule.');
@@ -222,13 +224,17 @@ class ClientScheduleController extends BaseController
         $data = $request->validate([
             'start_date' => 'required|date',
             'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer'
+            'duration' => 'required|integer',
+            'caregiver_id' => 'nullable|integer',
+            'scheduled_rate' => 'nullable|numeric'
         ]);
 
         $data['start_date'] = filter_date($data['start_date']);
         $schedule = new Schedule([
             'business_id' => $this->business()->id,
             'notes' => $data['notes'] ?? null,
+            'caregiver_id' => $data['caregiver_id'] ?? null,
+            'scheduled_rate' => $data['scheduled_rate'] ?? null,
         ]);
         $schedule->setSingleEvent($data['start_date'], $data['time'], $data['duration']);
         if ($client->schedules()->save($schedule)) {
@@ -238,7 +244,7 @@ class ClientScheduleController extends BaseController
     }
 
     /**
-     * "Update" a single event: Create a schedule exception then a new single event with the new data
+     * "Update" a single event
      *
      * @param \Illuminate\Http\Request $request
      * @param $client_id
@@ -259,11 +265,22 @@ class ClientScheduleController extends BaseController
         $data = $request->validate([
             'selected_date' => 'required|date',
             'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer'
+            'duration' => 'required|integer',
+            'caregiver_id' => 'nullable|integer',
+            'scheduled_rate' => 'nullable|numeric'
         ]);
 
         $data['selected_date'] = filter_date($data['selected_date']);
 
+        if ($schedule->isSingle()) {
+            $schedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
+            $schedule->caregiver_id = $data['caregiver_id'] ?? null;
+            $schedule->scheduled_rate = $data['scheduled_rate'] ?? null;
+            $schedule->save();
+            return new SuccessResponse('The selected date has been updated.', ['old_id' => $schedule->id, 'new_id' => $schedule->id]);
+        }
+
+        // Recurring: Create a schedule exception then a new single event with the new data
         try {
             DB::beginTransaction();
 
@@ -273,6 +290,8 @@ class ClientScheduleController extends BaseController
 
             $newSchedule = $schedule->replicate(['id', 'rrule']);
             $newSchedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
+            $newSchedule->caregiver_id = $data['caregiver_id'] ?? null;
+            $newSchedule->scheduled_rate = $data['scheduled_rate'] ?? null;
             if (!$newSchedule->save()) {
                 throw new \Exception('Unable to create new single event after exception.');
             }

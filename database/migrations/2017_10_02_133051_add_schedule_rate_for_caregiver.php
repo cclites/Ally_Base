@@ -14,7 +14,7 @@ class AddScheduleRateForCaregiver extends Migration
     public function up()
     {
         Schema::table('schedules', function (Blueprint $table) {
-            $table->decimal('scheduled_rate');
+            $table->decimal('scheduled_rate')->nullable();
         });
     }
 

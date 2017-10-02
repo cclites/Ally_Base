@@ -45,7 +45,8 @@ class Business extends Model
     {
         return $this->belongsToMany(Caregiver::class, 'business_caregivers')
             ->withPivot([
-                'type'
+                'type',
+                'default_rate'
             ]);
     }
 
