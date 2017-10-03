@@ -55,6 +55,7 @@ class ShiftController extends Controller
         $shift = new Shift([
             'client_id' => $schedule->client_id,
             'business_id' => $schedule->business_id,
+            'schedule_id' => $schedule->id,
             'checked_in_time' => (new \DateTime())->format('Y-m-d H:i:s'),
             'checked_in_latitude' => 39.9526, // needs to pull from request
             'checked_in_longitude' => 75.1652, // needs to pull from request
