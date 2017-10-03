@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Check In"
+    <b-card header="Clock Out"
         header-bg-variant="info"
         header-text-variant="white"
         >
@@ -47,7 +47,6 @@
                 form: new Form({
                     schedule_id: 1,
                 }),
-                countries: new Countries()
             }
         },
 
@@ -57,8 +56,8 @@
 
         methods: {
 
-            checkOut() {
-                window.location = '/check-in?checked_out=1';
+            clockOut() {
+                window.location = '/clock-in?clocked_out=1';
             }
 
         },

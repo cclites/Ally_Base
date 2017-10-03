@@ -35,8 +35,8 @@ Route::group([
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('check-in', 'ShiftController@checkIn')->name('check_in');
-    Route::get('check-out', 'ShiftController@checkOut')->name('check_out');
+    Route::get('clock-in', 'ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-out', 'ShiftController@clockOut')->name('clock_out');
 
     Route::get('reports/payments', 'Caregivers\ReportsController@payments')->name('caregivers.reports.payments');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');

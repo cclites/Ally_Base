@@ -41,8 +41,8 @@ Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'
 
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 
-Vue.component('check-in', require('./components/CheckIn.vue'));
-Vue.component('check-out', require('./components/CheckOut.vue'));
+Vue.component('clock-in', require('./components/ClockIn.vue'));
+Vue.component('clock-out', require('./components/ClockOut.vue'));
 
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));

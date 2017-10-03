@@ -1,9 +1,9 @@
 <template>
-    <b-card header="Check In"
+    <b-card header="Clock In"
         header-bg-variant="info"
         header-text-variant="white"
         >
-        <form @submit.prevent="checkIn()" @keydown="form.clearError($event.target.name)">
+        <form @submit.prevent="clockIn()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">
                     <b-form-group label="Current Time" label-for="time">
@@ -46,7 +46,6 @@
                 form: new Form({
                     schedule_id: null,
                 }),
-                countries: new Countries()
             }
         },
 
@@ -56,8 +55,8 @@
 
         methods: {
 
-            checkIn() {
-                window.location = '/check-out';
+            clockIn() {
+                window.location = '/clock-out';
             }
 
         },

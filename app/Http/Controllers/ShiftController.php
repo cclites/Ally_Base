@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 class ShiftController extends Controller
 {
-    public function checkIn()
+    public function clockIn()
     {
-        return view('caregivers.check_in');
+        return view('caregivers.clock_in');
     }
 
-    public function checkOut()
+    public function clockOut()
     {
-        return view('caregivers.check_out');
+        return view('caregivers.clock_out');
     }
 
 }
