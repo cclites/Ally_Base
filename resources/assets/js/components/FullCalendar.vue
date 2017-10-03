@@ -47,7 +47,7 @@
 
             defaultView: {
                 default() {
-                    return 'listMonth'
+                    return 'month'
                 },
             },
 

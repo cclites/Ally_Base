@@ -33,7 +33,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'listDay'
+                    right:  'listDay,agendaWeek,month'
                 }
             }
         },
