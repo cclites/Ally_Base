@@ -84,7 +84,9 @@ class Schedule extends Model
             ->format('Y-m-d');
 
         if ($last_date < $this->start_date) {
-            return $this->delete();
+            if (!$this->shifts()->exists()) {
+                return $this->delete();
+            }
         }
 
         return $this->update(['end_date' => $last_date]);
