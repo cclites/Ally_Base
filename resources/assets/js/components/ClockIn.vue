@@ -14,8 +14,9 @@
                             id="schedule_id"
                             name="schedule_id"
                             v-model="form.schedule_id"
+                            required
                             >
-                            <option>Demo Client - 10:00AM</option>
+                            <option v-for="item in events" :value="item.id">{{ getTitle(item) }}</option>
 
                         </b-form-select>
                         <input-help :form="form" field="" text=""></input-help>
@@ -34,11 +35,7 @@
 <script>
     export default {
         props: {
-            'title': '',
-            'type': '',
-            'user': null,
-            'address': null,
-            'action': null,
+            'events': {},
         },
 
         data() {
@@ -56,7 +53,14 @@
         methods: {
 
             clockIn() {
-                window.location = '/clock-out';
+                this.form.post('/clock-in')
+                    .then(function(response) {
+                        window.location = '/clock-out';
+                    });
+            },
+
+            getTitle(item) {
+                return item.title + ' ' + moment.utc(item.start).format('LT') + ' - ' + moment.utc(item.end).format('LT');
             }
 
         },
