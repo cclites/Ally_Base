@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <full-calendar ref="calendar" :events="events" :header="header" />
+        <full-calendar ref="calendar" :events="events" default-view="agendaWeek" :header="header" />
     </b-card>
 </template>
 
