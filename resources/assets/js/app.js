@@ -31,6 +31,7 @@ Vue.use(BootstrapVue);
 // App Components
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 
@@ -61,6 +62,8 @@ Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
 
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
+
+Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));

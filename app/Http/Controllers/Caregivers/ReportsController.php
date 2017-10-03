@@ -13,6 +13,15 @@ class ReportsController extends Controller
 
     public function shifts()
     {
-        return view('caregivers.reports.shifts');
+        $shifts = auth()->user()->role
+            ->shifts()
+            ->whereNotNull('checked_out_time')
+            ->orderBy('checked_in_time', 'DESC')
+            ->get();
+        $shifts = $shifts->map(function($shift) {
+            $shift->client_name = ($shift->client) ? $shift->client->name() : '';
+            return $shift;
+        });
+        return view('caregivers.reports.shifts', compact('shifts'));
     }
 }

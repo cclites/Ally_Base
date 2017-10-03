@@ -70,6 +70,16 @@ class ReportsController extends BaseController
 
     public function shifts()
     {
-        return view('business.reports.shifts');
+        $shifts = $this->business()
+            ->shifts()
+            ->whereNotNull('checked_out_time')
+            ->orderBy('checked_in_time', 'DESC')
+            ->get();
+        $shifts = $shifts->map(function($shift) {
+            $shift->client_name = ($shift->client) ? $shift->client->name() : '';
+            $shift->caregiver_name = ($shift->caregiver) ? $shift->caregiver->name() : '';
+            return $shift;
+        });
+        return view('business.reports.shifts', compact('shifts'));
     }
 }
