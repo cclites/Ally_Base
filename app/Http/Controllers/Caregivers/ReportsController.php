@@ -6,14 +6,9 @@ use App\Http\Controllers\Controller;
 
 class ReportsController extends Controller
 {
-    public function payments()
+    public function deposits()
     {
-        return view('caregivers.reports.payments');
-    }
-
-    public function scheduled()
-    {
-        return view('caregivers.reports.scheduled');
+        return view('caregivers.reports.deposits');
     }
 
     public function shifts()

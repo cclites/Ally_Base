@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Deposit History')
+
 @section('content')
     <div class="row">
         <div class="col-lg-4">

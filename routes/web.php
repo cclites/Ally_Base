@@ -40,7 +40,7 @@ Route::group([
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
 
-    Route::get('reports/payments', 'Caregivers\ReportsController@payments')->name('caregivers.reports.payments');
+    Route::get('reports/deposits', 'Caregivers\ReportsController@deposits')->name('caregivers.reports.deposits');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 });
