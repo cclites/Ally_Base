@@ -4,29 +4,30 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <form @submit.prevent="saveAddress()" @keydown="form.clearError($event.target.name)">
-            <b-row>
-                <b-col lg="12">
-                    <b-form-group label="Payment Type" label-for="type">
-                        <b-form-select
-                            id="type"
-                            name="type"
-                            v-model="type"
-                            :options="types"
-                            >
-                        </b-form-select>
-                    </b-form-group>
-                    <credit-card-form v-if="type == 'credit_card'" :form="form" />
-                </b-col>
-            </b-row>
-        </form>
+        <b-row>
+            <b-col lg="12">
+                <b-form-group label="Payment Type" label-for="type">
+                    <b-form-select
+                        id="type"
+                        name="type"
+                        v-model="type"
+                        :options="types"
+                        >
+                    </b-form-select>
+                </b-form-group>
+                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" />
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
 <script>
     export default {
         props: {
-            'title': null,
+            'title': {},
+            'method': {},
+            'source': {},
+            'client': {},
         },
 
         data() {
@@ -41,19 +42,30 @@
                         'text': 'Bank Account'
                     }
                 ],
-                type: 'credit_card',
-                form: new Form({
-
-                }),
+                type: null,
+                submitted: false,
+                existing_card: {},
+                existing_account: {},
             }
         },
 
         mounted() {
-            console.log('Component mounted.')
+            if (this.method) {
+                if (this.method.account_type) {
+                    console.log('BANK ACCOUNT FOUND');
+                    this.type = 'bank_account';
+                    this.existing_account = this.method;
+                }
+                else if (this.method.expiration_year) {
+                    console.log('CREDIT CARD FOUND');
+                    this.type = 'credit_card';
+                    this.existing_card = this.method;
+                }
+            }
         },
 
         methods: {
 
-        }
+        },
     }
 </script>

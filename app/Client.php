@@ -51,4 +51,14 @@ class Client extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    public function defaultPayment()
+    {
+        return $this->morphTo('default_payment');
+    }
+
+    public function backupPayment()
+    {
+        return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+    }
 }

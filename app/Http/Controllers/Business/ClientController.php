@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -158,5 +159,16 @@ class ClientController extends BaseController
         }
 
         return (new PhoneController())->update($request, $client->user, $type, 'The client\'s phone number');
+    }
+
+    public function paymentMethod(Request $request, $client_id, $type)
+    {
+        $client = Client::findOrFail($client_id);
+
+        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method');
     }
 }

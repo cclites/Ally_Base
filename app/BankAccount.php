@@ -15,8 +15,8 @@ class BankAccount extends Model
     protected $hidden = ['account_number', 'routing_number'];
     protected $appends = ['last_four'];
     protected static $accountTypes = [
-        'Checking',
-        'Saving'
+        'checking',
+        'savings'
     ];
 
     public function bankAccount()
