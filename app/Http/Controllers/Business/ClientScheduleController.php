@@ -228,7 +228,8 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ]);
 
         $data['start_date'] = filter_date($data['start_date']);
@@ -269,7 +270,8 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ]);
 
         $data['selected_date'] = filter_date($data['selected_date']);
