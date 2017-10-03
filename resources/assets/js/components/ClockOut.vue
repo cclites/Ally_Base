@@ -41,6 +41,20 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
+                    <b-form-group label="Were there any injuries on your shift?" label-for="injuries">
+                        <b-form-select
+                            id="injuries"
+                            name="injuries"
+                            >
+                            <option>No</option>
+                            <option>Yes</option>
+                        </b-form-select>
+                        <input-help :form="form" field="injuries" text="Indicate if you or someone else suffered an injury."></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
                     <b-form-group label="Comments / Notes" label-for="caregiver_comments">
                         <b-form-textarea id="caregiver_comments"
                                          v-model="form.caregiver_comments"
