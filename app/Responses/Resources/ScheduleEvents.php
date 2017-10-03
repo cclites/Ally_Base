@@ -69,7 +69,7 @@ class ScheduleEvents implements Responsable
             );
             if (!empty($array['checked_in'])) {
                 $backgroundColor = $this->getBackgroundColor('current', $array['title']);
-                $array['title'] .= ': Checked In';
+                $array['title'] .= ': Clocked In';
             }
             elseif($array['end']->format('U') < time()) {
                 $backgroundColor = $this->getBackgroundColor('past', $array['title']);
