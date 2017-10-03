@@ -12,9 +12,19 @@ class Schedule extends Model
     protected $table = 'schedules';
     protected $guarded = ['id'];
 
-    public function __construct(array $attributes = [])
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
     {
-        parent::__construct($attributes);
+        parent::boot();
+
+        // For closed schedules before they start
+        static::addGlobalScope('age', function ($builder) {
+            $builder->whereColumn('start_date', '<=', 'end_date');
+        });
     }
 
     public function activities()
