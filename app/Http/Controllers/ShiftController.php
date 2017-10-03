@@ -58,7 +58,7 @@ class ShiftController extends Controller
             'schedule_id' => $schedule->id,
             'checked_in_time' => (new \DateTime())->format('Y-m-d H:i:s'),
             'checked_in_latitude' => 39.9526, // needs to pull from request
-            'checked_in_longitude' => 75.1652, // needs to pull from request
+            'checked_in_longitude' => -75.1652, // needs to pull from request
         ]);
         if ($this->caregiver()->shifts()->save($shift)) {
             \Session::flash('sucess', 'You have successfully clocked in.');
@@ -85,7 +85,7 @@ class ShiftController extends Controller
         $update = $shift->update(array_merge($data, [
             'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
             'checked_out_latitude' => 39.9526, // needs to pull from request
-            'checked_out_longitude' => 75.1652, // needs to pull from request
+            'checked_out_longitude' => -75.1652, // needs to pull from request
         ]));
 
         if ($update) {
