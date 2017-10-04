@@ -5,6 +5,6 @@
 </li>
 <li>
     <a href="/documents" aria-expanded="false">
-        <i class="mdi mdi-gauge"></i><span class="hide-menu">Documnents</span>
+        <i class="fa fa-file-text"></i><span class="hide-menu">Documnents</span>
     </a>
 </li>
