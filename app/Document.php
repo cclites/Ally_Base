@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
+    protected $guarded = ['id', 'user_id'];
+
     /**
      * User who uploaded the document.
      */

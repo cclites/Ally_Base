@@ -83,4 +83,5 @@ Route::group([
     'roles' => ['client', 'caregiver'],
 ], function() {
     Route::get('documents', 'DocumentController@index');
+    Route::post('documents', 'DocumentController@store');
 });
