@@ -90,6 +90,20 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <b-form-group label="Schedule Notes" label-for="notes">
+                                <b-form-textarea
+                                        id="notes"
+                                        name="notes"
+                                        :rows="3"
+                                        v-model="createForm.notes"
+                                >
+                                </b-form-textarea>
+                                <input-help :form="createForm" field="notes" text="Enter any notes relating to this scheduled shift."></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
                 </div>
                 <div v-if="createType == 'recurring'">
                     <b-row>
@@ -235,6 +249,20 @@
                                 </b-form-group>
                             </b-col>
                         </b-row>
+                        <b-row>
+                            <b-col lg="12">
+                                <b-form-group label="Schedule Notes" label-for="notes">
+                                    <b-form-textarea
+                                            id="notes"
+                                            name="notes"
+                                            :rows="3"
+                                            v-model="editForm.notes"
+                                    >
+                                    </b-form-textarea>
+                                    <input-help :form="editForm" field="notes" text="Enter any notes relating to this scheduled shift."></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                     </div>
                     <div v-if="editType == 'all'">
                         <b-row>
@@ -366,6 +394,7 @@
                     duration: 60,
                     caregiver_id: null,
                     scheduled_rate: null,
+                    notes: null,
                 });
             },
 
@@ -379,6 +408,7 @@
                     bydays: [],
                     caregiver_id: null,
                     scheduled_rate: null,
+                    notes: null,
                 });
             },
 
@@ -389,6 +419,7 @@
                     duration: this.selectedSchedule.duration,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     scheduled_rate: this.selectedSchedule.scheduled_rate,
+                    notes: this.selectedSchedule.notes,
                 });
             },
 
@@ -402,6 +433,7 @@
                     bydays: this.selectedSchedule.bydays,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     scheduled_rate: this.selectedSchedule.scheduled_rate,
+                    notes: this.selectedSchedule.notes,
                 });
             },
 

@@ -12,9 +12,19 @@ class Schedule extends Model
     protected $table = 'schedules';
     protected $guarded = ['id'];
 
-    public function __construct(array $attributes = [])
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
     {
-        parent::__construct($attributes);
+        parent::boot();
+
+        // For closed schedules before they start
+        static::addGlobalScope('age', function ($builder) {
+            $builder->whereColumn('start_date', '<=', 'end_date');
+        });
     }
 
     public function activities()
@@ -40,6 +50,11 @@ class Schedule extends Model
     public function exceptions()
     {
         return $this->hasMany(ScheduleException::class);
+    }
+
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
     }
 
     public function isRecurring()
@@ -79,7 +94,9 @@ class Schedule extends Model
             ->format('Y-m-d');
 
         if ($last_date < $this->start_date) {
-            return $this->delete();
+            if (!$this->shifts()->exists()) {
+                return $this->delete();
+            }
         }
 
         return $this->update(['end_date' => $last_date]);

@@ -31,16 +31,19 @@ Vue.use(BootstrapVue);
 // App Components
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
+Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 
-Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
+Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 
-Vue.component('check-in', require('./components/CheckIn.vue'));
-Vue.component('check-out', require('./components/CheckOut.vue'));
+Vue.component('clock-in', require('./components/ClockIn.vue'));
+Vue.component('clock-out', require('./components/ClockOut.vue'));
 
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
@@ -59,6 +62,8 @@ Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
 
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
+
+Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));

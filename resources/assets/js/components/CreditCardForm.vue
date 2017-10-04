@@ -1,25 +1,52 @@
 <template>
-    <div>
-        <b-form-group label="Nickname" label-for="name">
+    <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
+        <b-form-group label="Nickname" label-for="nickname">
             <b-form-input
-                    id="name"
-                    name="name"
+                    id="nickname"
+                    name="nickname"
                     type="text"
-                    v-model="form.name"
+                    v-model="form.nickname"
             >
             </b-form-input>
-            <input-help :form="form" field="name" text="Optionally provide a nickname for this card."></input-help>
+            <input-help :form="form" field="nickname" text="Optionally provide a nickname for this card."></input-help>
         </b-form-group>
-        <b-form-group label="Card Number" label-for="number">
+        <b-form-group label="Name on Card" label-for="name_on_card">
             <b-form-input
-                    id="number"
-                    name="number"
-                    type="text"
-                    v-model="form.number"
-            >
+                id="name_on_card"
+                name="name_on_card"
+                type="text"
+                v-model="form.name_on_card"
+                >
             </b-form-input>
-            <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
+            <input-help :form="form" field="name_on_card" text="Please enter your name, as it appears on the card."></input-help>
         </b-form-group>
+        <b-row>
+            <b-col lg="7">
+                <b-form-group label="Card Number" label-for="number">
+                    <b-form-input
+                            id="number"
+                            name="number"
+                            type="text"
+                            v-model="form.number"
+                    >
+                    </b-form-input>
+                    <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
+                </b-form-group>
+            </b-col>
+            <b-col lg="5">
+                <b-form-group label="CVV" label-for="cvv">
+                    <b-form-input
+                            id="cvv"
+                            name="cvv"
+                            type="text"
+                            v-model="form.cvv"
+                    >
+                    </b-form-input>
+                    <input-help :form="form" field="cvv" text="The code on the back of the card"></input-help>
+                </b-form-group>
+            </b-col>
+        </b-row>
+
         <b-form-group label="Card Expiration" label-for="">
             <b-row>
                 <b-col lg="6">
@@ -28,7 +55,7 @@
                             :options="months"
                     >
                     </b-form-select>
-                    <input-help :form="form" field="number" text="Expiration Month"></input-help>
+                    <input-help :form="form" field="expiration_month" text="Expiration Month"></input-help>
                 </b-col>
                 <b-col lg="6">
                     <b-form-select
@@ -36,18 +63,22 @@
                             :options="years"
                     >
                     </b-form-select>
-                    <input-help :form="form" field="number" text="Expiration Month"></input-help>
+                    <input-help :form="form" field="expiration_year" text="Expiration Year"></input-help>
                 </b-col>
             </b-row>
         </b-form-group>
-
-    </div>
+        <b-form-group>
+            <b-button variant="success" type="submit" size="">Save Credit Card</b-button>
+        </b-form-group>
+    </form>
 </template>
 
 <script>
     export default {
         props: {
-            'form': {},
+            'client': {},
+            'card': {},
+            'source': {},
         },
 
         data() {
@@ -55,6 +86,14 @@
                 'year': [],
                 'months': [],
                 'years': [],
+                'form': new Form({
+                    nickname: this.card.nickname,
+                    name_on_card: this.card.name_on_card,
+                    number: (this.card.last_four) ? '************ ' + this.card.last_four : '',
+                    expiration_month: _.padStart(this.card.expiration_month, 2, '0'),
+                    expiration_year: this.card.expiration_year,
+                    cvv: null,
+                }),
             }
         },
 
@@ -71,7 +110,14 @@
         },
 
         methods: {
-
+            submit() {
+                var component = this;
+                this.form.post('/business/clients/' + this.client.id + '/payment/' + this.source)
+                    .then(function(response) {
+                        component.form.number = '************ ' + component.form.number.slice(-4);
+                        component.form.cvv = null;
+                    });
+            }
         }
     }
 </script>

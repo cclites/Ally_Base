@@ -3,7 +3,7 @@
 
 
 <!-- Favicon icon -->
-<link rel="icon" type="image/png" sizes="16x16" href="/demo/assets/images/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
 <!-- Bootstrap & FontAwesome CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">

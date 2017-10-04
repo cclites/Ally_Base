@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Shift extends Model
 {
     public $timestamps = false;
+    protected $guarded = ['id'];
 
     public function client()
     {
@@ -22,6 +23,11 @@ class Shift extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class);
     }
 
     public function activities()

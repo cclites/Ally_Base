@@ -3,5 +3,5 @@
 @section('title', 'Shift History')
 
 @section('content')
-    <p>Coming soon</p>
+    <business-shift-history :shifts="{{ $shifts }}"></business-shift-history>
 @endsection

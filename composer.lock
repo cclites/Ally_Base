@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0f8f8386bbb21ca18644c6ddb19e0b2b",
-    "content-hash": "16e906c58ef4d0b3efe07288e94938c4",
+    "hash": "129a24107f2aa1023797594a4a91336d",
+    "content-hash": "b06663ca257601c43acef06539f6eebd",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -433,6 +433,57 @@
             ],
             "description": "Locale functions required by libphonenumber-for-php",
             "time": "2017-04-07 18:45:42"
+        },
+        {
+            "name": "inacho/php-credit-card-validator",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/inacho/php-credit-card-validator.git",
+                "reference": "e71ea730a9059ea75cc6d94e7c42993eacf44dc1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/inacho/php-credit-card-validator/zipball/e71ea730a9059ea75cc6d94e7c42993eacf44dc1",
+                "reference": "e71ea730a9059ea75cc6d94e7c42993eacf44dc1",
+                "shasum": ""
+            },
+            "require": {
+                "lib-pcre": ">=7.3",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Inacho\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ignacio de Tomás",
+                    "email": "nacho@inacho.es"
+                }
+            ],
+            "description": "Validates popular debit and credit cards numbers against regular expressions and Luhn algorithm. Also validates the CVC and the expiration date",
+            "keywords": [
+                "card",
+                "cards",
+                "credit",
+                "creditcard",
+                "creditcards",
+                "cvc",
+                "debit",
+                "laravel",
+                "validator"
+            ],
+            "time": "2015-07-03 19:13:29"
         },
         {
             "name": "jakub-onderka/php-console-color",

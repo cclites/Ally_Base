@@ -35,10 +35,12 @@ Route::group([
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('check-in', 'ShiftController@checkIn')->name('check_in');
-    Route::get('check-out', 'ShiftController@checkOut')->name('check_out');
+    Route::get('clock-in', 'ShiftController@index')->name('shift.index');
+    Route::post('clock-in', 'ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
+    Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
 
-    Route::get('reports/payments', 'Caregivers\ReportsController@payments')->name('caregivers.reports.payments');
+    Route::get('reports/deposits', 'Caregivers\ReportsController@deposits')->name('caregivers.reports.deposits');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 });
@@ -64,9 +66,13 @@ Route::group([
     Route::patch('clients/{id}/schedule/{schedule_id}/single', 'Business\ClientScheduleController@updateSingle')->name('clients.schedule.update.single');
     Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
+    Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
 
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
     Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
+
+    Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
 });

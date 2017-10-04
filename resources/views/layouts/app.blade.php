@@ -171,31 +171,13 @@
                                         <a href="#">
                                             <div class="btn btn-danger btn-circle"><i class="fa fa-link"></i></div>
                                             <div class="mail-contnet">
-                                                <h5>Luanch Admin</h5> <span class="mail-desc">Just see the my new admin!</span> <span class="time">9:30 AM</span> </div>
-                                        </a>
-                                        <!-- Message -->
-                                        <a href="#">
-                                            <div class="btn btn-success btn-circle"><i class="fa fa-calendar"></i></div>
-                                            <div class="mail-contnet">
-                                                <h5>Event today</h5> <span class="mail-desc">Just a reminder that you have event</span> <span class="time">9:10 AM</span> </div>
-                                        </a>
-                                        <!-- Message -->
-                                        <a href="#">
-                                            <div class="btn btn-info btn-circle"><i class="fa fa-gears"></i></div>
-                                            <div class="mail-contnet">
-                                                <h5>Settings</h5> <span class="mail-desc">You can customize this template as you want</span> <span class="time">9:08 AM</span> </div>
-                                        </a>
-                                        <!-- Message -->
-                                        <a href="#">
-                                            <div class="btn btn-primary btn-circle"><i class="fa fa-user"></i></div>
-                                            <div class="mail-contnet">
-                                                <h5>Pavan kumar</h5> <span class="mail-desc">Just see the my admin!</span> <span class="time">9:02 AM</span> </div>
+                                                <h5>Demo Notification</h5> <span class="mail-desc">Sample notification here</span> <span class="time">9:30 AM</span> </div>
                                         </a>
                                     </div>
                                 </li>
-                                <li>
-                                    <a class="nav-link text-center" href="javascript:void(0);"> <strong>Check all notifications</strong> <i class="fa fa-angle-right"></i> </a>
-                                </li>
+                                {{--<li>--}}
+                                    {{--<a class="nav-link text-center" href="javascript:void(0);"> <strong>Check all notifications</strong> <i class="fa fa-angle-right"></i> </a>--}}
+                                {{--</li>--}}
                             </ul>
                         </div>
                     </li>
@@ -288,24 +270,24 @@
                     </ol>
                 </div>
                 <div class="col-md-7 col-4 align-self-center">
-                    <div class="d-flex m-t-10 justify-content-end">
-                        <div class="d-flex m-r-20 m-l-10 hidden-md-down">
-                            <div class="chart-text m-r-10">
-                                <h6 class="m-b-0"><small>THIS MONTH</small></h6>
-                                <h4 class="m-t-0 text-info">$58,356</h4></div>
-                            <div class="spark-chart">
-                                <div id="monthchart"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex m-r-20 m-l-10 hidden-md-down">
-                            <div class="chart-text m-r-10">
-                                <h6 class="m-b-0"><small>LAST MONTH</small></h6>
-                                <h4 class="m-t-0 text-primary">$48,356</h4></div>
-                            <div class="spark-chart">
-                                <div id="lastmonthchart"></div>
-                            </div>
-                        </div>
-                    </div>
+                    {{--<div class="d-flex m-t-10 justify-content-end">--}}
+                        {{--<div class="d-flex m-r-20 m-l-10 hidden-md-down">--}}
+                            {{--<div class="chart-text m-r-10">--}}
+                                {{--<h6 class="m-b-0"><small>THIS MONTH</small></h6>--}}
+                                {{--<h4 class="m-t-0 text-info">$58,356</h4></div>--}}
+                            {{--<div class="spark-chart">--}}
+                                {{--<div id="monthchart"></div>--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                        {{--<div class="d-flex m-r-20 m-l-10 hidden-md-down">--}}
+                            {{--<div class="chart-text m-r-10">--}}
+                                {{--<h6 class="m-b-0"><small>LAST MONTH</small></h6>--}}
+                                {{--<h4 class="m-t-0 text-primary">$48,356</h4></div>--}}
+                            {{--<div class="spark-chart">--}}
+                                {{--<div id="lastmonthchart"></div>--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                    {{--</div>--}}
                 </div>
             </div>
             <!-- ============================================================== -->
@@ -314,6 +296,7 @@
             <!-- ============================================================== -->
             <!-- Start Page Content -->
             <!-- ============================================================== -->
+            @include('layouts.partials.messages')
             @yield('content')
             <!-- ============================================================== -->
             <!-- End Page Content -->

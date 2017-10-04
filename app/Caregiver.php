@@ -82,4 +82,15 @@ class Caregiver extends Model
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
+
+    public function isClockedIn()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->exists();
+    }
+
+    public function getActiveShift()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->first();
+    }
+
 }

@@ -69,4 +69,14 @@ class Business extends Model
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
 }

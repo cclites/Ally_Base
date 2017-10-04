@@ -90,7 +90,8 @@ class ClientScheduleController extends BaseController
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ], [
             'bydays.required_if' => 'At least one day of the week is required.',
         ]);
@@ -142,7 +143,8 @@ class ClientScheduleController extends BaseController
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ]);
 
         $data['selected_date'] = filter_date($data['selected_date']);
@@ -226,7 +228,8 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ]);
 
         $data['start_date'] = filter_date($data['start_date']);
@@ -267,15 +270,19 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric'
+            'scheduled_rate' => 'nullable|numeric',
+            'notes' => 'nullable',
         ]);
 
         $data['selected_date'] = filter_date($data['selected_date']);
 
         if ($schedule->isSingle()) {
             $schedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
-            $schedule->caregiver_id = $data['caregiver_id'] ?? null;
-            $schedule->scheduled_rate = $data['scheduled_rate'] ?? null;
+            $schedule->fill([
+                'caregiver_id' => $data['caregiver_id'] ?? null,
+                'scheduled_rate' => $data['scheduled_rate'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
             $schedule->save();
             return new SuccessResponse('The selected date has been updated.', ['old_id' => $schedule->id, 'new_id' => $schedule->id]);
         }
@@ -290,8 +297,11 @@ class ClientScheduleController extends BaseController
 
             $newSchedule = $schedule->replicate(['id', 'rrule']);
             $newSchedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
-            $newSchedule->caregiver_id = $data['caregiver_id'] ?? null;
-            $newSchedule->scheduled_rate = $data['scheduled_rate'] ?? null;
+            $newSchedule->fill([
+                'caregiver_id' => $data['caregiver_id'] ?? null,
+                'scheduled_rate' => $data['scheduled_rate'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
             if (!$newSchedule->save()) {
                 throw new \Exception('Unable to create new single event after exception.');
             }

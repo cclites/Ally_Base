@@ -58,7 +58,14 @@
             </div>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
-            <payment-method title="Primary Payment Method" />
+            <div class="row">
+                <div class="col-lg-6 col-sm-12">
+                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" />
+                </div>
+                <div class="col-lg-6 col-sm-12">
+                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" />
+                </div>
+            </div>
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
