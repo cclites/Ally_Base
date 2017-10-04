@@ -10,9 +10,10 @@ class DocumentController extends Controller
     /**
      * List documents.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('documents.index');
+        $documents = $request->user()->documents;
+        return view('documents.index', compact('documents'));
     }
 
     /**
