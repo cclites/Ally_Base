@@ -51,7 +51,8 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
-                        <b-button id="save-profile" variant="success" type="submit">Complete Check In</b-button>
+                        <b-button id="manual-clock-in" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock In</b-button>
+                        <b-button id="complete-clock-in" variant="success" type="submit">Complete Clock In</b-button>
                     </b-col>
                 </b-row>
             </form>
@@ -77,6 +78,7 @@
                     debugMode: false,
                 }),
                 allowDebug: true,
+                showManual: false,
                 stats: [],
             }
         },
@@ -119,7 +121,15 @@
                         else {
                             window.location = '/clock-out';
                         }
+                    })
+                    .catch(function(error) {
+                       component.showManual = true;
                     });
+            },
+
+            manualSubmit() {
+                this.form.manual = 1;
+                this.submitForm();
             },
 
             getTitle(item) {
