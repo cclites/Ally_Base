@@ -64,7 +64,9 @@
             </div>
         </div>
         <div class="tab-pane" id="care-plan" role="tabpanel">
-            <!-- Care plan placeholder -->
+            <!-- Care Plan Placeholder -->
+            <h4>Care Plan coming soon</h4>
+            <p>This will be where you can set the activities and other care requirements for a client.</p>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
@@ -81,6 +83,8 @@
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <!-- Documents placeholder -->
+            <h4>Documents coming soon</h4>
+            <p>This will be where you upload and manage important documents relating to a client.</p>
         </div>
     </div>
 @endsection
