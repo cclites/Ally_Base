@@ -55,27 +55,28 @@ class ShiftController extends Controller
             $geocode = ($address) ? $address->getGeocode() : null;
 
             return [
-                'stats' =>
+                'stats' => [
                     [
                         'key' => 'evv_latitude',
                         'value' => ($geocode) ? $geocode->latitude : null,
                     ],
-                [
-                    'key' => 'evv_longitude',
-                    'value' => ($geocode) ? $geocode->longitude : null,
-                ],
-                [
-                    'key' => 'your_latitude',
-                    'value' => $request->input('latitude'),
-                ],
-                [
-                    'key' => 'your_longitude',
-                    'value' => $request->input('longitude'),
-                ],
-                [
-                    'key' => 'distance_meters',
-                    'value' => ($geocode) ? $geocode->distanceTo($request->input('latitude'), $request->input('longitude'), 'm') : null,
-                ],
+                    [
+                        'key' => 'evv_longitude',
+                        'value' => ($geocode) ? $geocode->longitude : null,
+                    ],
+                    [
+                        'key' => 'your_latitude',
+                        'value' => $request->input('latitude'),
+                    ],
+                    [
+                        'key' => 'your_longitude',
+                        'value' => $request->input('longitude'),
+                    ],
+                    [
+                        'key' => 'distance_meters',
+                        'value' => ($geocode) ? $geocode->distanceTo($request->input('latitude'), $request->input('longitude'), 'm') : null,
+                    ],
+                ]
             ];
         }
 
