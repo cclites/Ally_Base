@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Document;
 use Illuminate\Http\Request;
+use App\Responses\SuccessResponse;
 
 class DocumentController extends Controller
 {
@@ -21,15 +23,14 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        $file = $request->file('document');
+        $file = $request->file('file');
         $file->store('documents');
-        $request->user()->documents()->create([
+        User::find($request->input('user_id'))->documents()->create([
             'name' => $request->input('name'),
             'filename' => $file->hashName(),
             'original_filename' => $file->getClientOriginalName(),
             'type' => $request->input('type'),
         ]);
-        $request->session()->flash('status', 'Document uploaded.');
-        return redirect('/documents');
+        return new SuccessResponse('Document uploaded.');
     }
 }

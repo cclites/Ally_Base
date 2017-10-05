@@ -58,8 +58,10 @@
             <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
-            <document-list :initial-documents="{{ $caregiver->user->documents->toJson() }}">
-            </document-list>
+            <document-list
+                :initial-documents="{{ $caregiver->user->documents->toJson() }}"
+                :user-id="{{ $caregiver->user->id }}"
+            ></document-list>
         </div>
     </div>
 @endsection
