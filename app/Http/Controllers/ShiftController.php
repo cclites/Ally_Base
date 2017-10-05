@@ -74,7 +74,7 @@ class ShiftController extends Controller
                 ],
                 [
                     'key' => 'distance_meters',
-                    'value' => ($geocode) ? $geocode->distance($request->input('latitude'), $request->input('longitude'), 'm') : null,
+                    'value' => ($geocode) ? $geocode->distanceTo($request->input('latitude'), $request->input('longitude'), 'm') : null,
                 ],
             ];
         }
