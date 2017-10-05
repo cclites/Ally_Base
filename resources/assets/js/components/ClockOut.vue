@@ -100,6 +100,8 @@
                     caregiver_comments: null,
                     mileage: 0,
                     other_expenses: 0.00,
+                    latitude: null,
+                    longitude: null,
                     activities: [],
                 }),
             }
@@ -111,6 +113,28 @@
 
         methods: {
             clockOut() {
+                if (!navigator.geolocation) {
+                    alert('Location services are not supported on your device.');
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    this.form.latitude = position.coords.latitude;
+                    this.form.longitude = position.coords.longitude;
+                    console.log(position.coords);
+                    this.submitForm();
+                }.bind(this), function(error) {
+                    this.form.latitude = null;
+                    this.form.longitude = null;
+                    console.log(error);
+                    this.submitForm();
+                }.bind(this), {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            },
+
+            submitForm() {
                 this.form.post('/clock-out')
                     .then(function(response) {
                         window.location = '/clock-in'

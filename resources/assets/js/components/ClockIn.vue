@@ -42,6 +42,9 @@
             return {
                 form: new Form({
                     schedule_id: null,
+                    latitude: null,
+                    longitude: null,
+                    manual: 0,
                 }),
             }
         },
@@ -53,6 +56,28 @@
         methods: {
 
             clockIn() {
+                if (!navigator.geolocation) {
+                    alert('Location services are not supported on your device.');
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    this.form.latitude = position.coords.latitude;
+                    this.form.longitude = position.coords.longitude;
+                    console.log(position.coords);
+                    this.submitForm();
+                }.bind(this), function(error) {
+                    this.form.latitude = null;
+                    this.form.longitude = null;
+                    console.log(error);
+                    this.submitForm();
+                }.bind(this), {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            },
+
+            submitForm() {
                 this.form.post('/clock-in')
                     .then(function(response) {
                         window.location = '/clock-out';
