@@ -34,8 +34,8 @@ class PaymentMethodController
             $class = BankAccount::class;
             $data = $request->validate([
                 'nickname' => 'nullable',
-                'account_number' => 'required|confirmed|numeric|min:8',
-                'routing_number' => 'required|confirmed|numeric|size:9',
+                'account_number' => 'required|confirmed|numeric',
+                'routing_number' => 'required|confirmed|numeric|digits:9',
                 'account_type' => 'required|in:checking,savings',
                 'account_holder_type' => 'required|in:business,personal',
                 'name_on_account' => 'required',
