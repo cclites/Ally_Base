@@ -31,6 +31,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -69,6 +72,9 @@
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
 
+        </div>
+        <div class="tab-pane" id="documents" role="tabpanel">
+            <document-list></document-list>
         </div>
     </div>
 @endsection

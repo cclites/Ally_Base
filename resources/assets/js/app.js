@@ -67,6 +67,7 @@ Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
+Vue.component('document-list', require('./components/DocumentList.vue'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L')

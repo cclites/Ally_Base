@@ -13,7 +13,7 @@ class DocumentController extends Controller
     public function index(Request $request)
     {
         $documents = $request->user()->documents;
-        return view('documents.index', compact('documents'));
+        return $documents;
     }
 
     /**
