@@ -74,7 +74,8 @@
 
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
-            <document-list></document-list>
+            <document-list :initial-documents="{{ $user->documents->toJson() }}">
+            </document-list>
         </div>
     </div>
 @endsection

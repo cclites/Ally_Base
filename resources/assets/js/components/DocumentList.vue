@@ -10,15 +10,11 @@
 </template>
 <script>
     export default {
+        props: ['initialDocuments'],
         data() {
             return {
-                documents: [],
+                documents: this.initialDocuments,
             };
-        },
-        mounted() {
-            axios.get('/documents').then((response) => {
-                this.documents = response.data;
-            });
         },
     }
 </script>
