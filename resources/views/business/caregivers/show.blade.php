@@ -23,6 +23,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -53,6 +56,10 @@
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
+        </div>
+        <div class="tab-pane" id="documents" role="tabpanel">
+            <document-list :initial-documents="{{ $caregiver->user->documents->toJson() }}">
+            </document-list>
         </div>
     </div>
 @endsection

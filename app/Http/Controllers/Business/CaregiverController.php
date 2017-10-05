@@ -75,7 +75,8 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-//        $caregiver->load(['user', 'addresses', 'phoneNumbers']);
+//        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents']);
+        $caregiver->load(['user.documents']);
         $schedules = $caregiver->schedules()->get();
 
         return view('business.caregivers.show', compact('caregiver', 'schedules'));

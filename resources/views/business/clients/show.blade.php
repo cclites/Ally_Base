@@ -80,7 +80,8 @@
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
-            <!-- Documents placeholder -->
+            <document-list :initial-documents="{{ $client->user->documents->toJson() }}">
+            </document-list>
         </div>
     </div>
 @endsection
