@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Caregiver')
+@section('title', $caregiver->name())
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
