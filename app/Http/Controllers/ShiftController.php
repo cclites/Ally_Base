@@ -146,12 +146,15 @@ class ShiftController extends Controller
             }
         }
 
-        $update = $shift->update(array_merge($data, [
+        $update = $shift->update([
             'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
             'checked_out_latitude' => $data['latitude'], // needs to pull from request
             'checked_out_longitude' => $data['longitude'], // needs to pull from request
             'verified' => ($shift->verified && !$manual), // both check in and check out must have used EVV to be verified
-        ]));
+            'caregiver_comments' => $data['caregiver_comments'] ?? null,
+            'mileage' => $data['mileage'] ?? null,
+            'other_expenses' => $data['other_expenses'] ?? null,
+        ]);
 
         if ($update) {
             return new SuccessResponse('You have successfully clocked out.');
