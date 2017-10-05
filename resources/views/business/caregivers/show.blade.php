@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Caregiver')
+@section('title', $caregiver->name())
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -25,6 +25,12 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
         </li>
     </ul>
 
@@ -54,7 +60,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="schedule" role="schedule">
+        <div class="tab-pane" id="schedule" role="tabpanel">
             <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
@@ -62,6 +68,16 @@
                 :initial-documents="{{ $caregiver->user->documents->toJson() }}"
                 :user-id="{{ $caregiver->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="availability" role="tabpanel">
+            <!-- Availability Placeholder -->
+            <h4>Availability coming soon</h4>
+            <p>This will be where caregivers can set their days and hours of availability.</p>
+        </div>
+        <div class="tab-pane" id="preferences" role="tabpanel">
+            <!-- Preferences Placeholder -->
+            <h4>Preferences coming soon</h4>
+            <p>This will be where caregivers can set their environment preferences.</p>
         </div>
     </div>
 @endsection

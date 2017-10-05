@@ -27,20 +27,29 @@ class AddressController
             'zip' => 'required|min:5'
         ]);
 
+        \DB::beginTransaction();
         $address = $user->addresses->where('type', $type)->first();
         if ($address) {
             if ($address->update($data)) {
-                return new SuccessResponse($reference . ' has been saved.');
+                if ($type != 'evv' || $geocode = $address->getGeocode(true)) {
+                    \DB::commit();
+                    return new SuccessResponse($reference . ' has been saved.');
+                }
             }
         }
         else {
             $address = new Address($data);
             $address->type = $type;
             if ($user->addresses()->save($address)) {
-                return new SuccessResponse($reference . ' has been saved.');
+                if ($type != 'evv' || $geocode = $address->getGeocode(true)) {
+                    \DB::commit();
+                    return new SuccessResponse($reference . ' has been saved.');
+                }
             }
         }
 
+        \DB::rollBack();
+        if (isset($geocode)) return new ErrorResponse(400, 'Unable to obtain geocoordinates for address.  Please verify and try again.');
         return new ErrorResponse(500, $reference . ' could not be saved.');
     }
 }
