@@ -49,6 +49,36 @@ class ShiftController extends Controller
             return redirect()->route('clocked_in')->with('error', 'You are already clocked in.');
         }
 
+        if ($request->input('debugMode')) {
+            $schedule = Schedule::find($request->input('schedule_id'));
+            $address = ($schedule) ? $schedule->client->evvAddress : null;
+            $geocode = ($address) ? $address->getGeocode() : null;
+
+            return [
+                'stats' =>
+                    [
+                        'key' => 'evv_latitude',
+                        'value' => ($geocode) ? $geocode->latitude : null,
+                    ],
+                [
+                    'key' => 'evv_longitude',
+                    'value' => ($geocode) ? $geocode->longitude : null,
+                ],
+                [
+                    'key' => 'your_latitude',
+                    'value' => $request->input('latitude'),
+                ],
+                [
+                    'key' => 'your_longitude',
+                    'value' => $request->input('longitude'),
+                ],
+                [
+                    'key' => 'distance_meters',
+                    'value' => ($geocode) ? $geocode->distance($request->input('latitude'), $request->input('longitude'), 'm') : null,
+                ],
+            ];
+        }
+
         $data = $request->validate([
             'schedule_id' => 'exists:schedules,id',
             'latitude' => 'numeric|required_unless:manual,1',
