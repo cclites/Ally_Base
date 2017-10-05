@@ -52,6 +52,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
+Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
 
 Vue.component('dashboard-metric', require('./components/DashboardMetric.vue'));
 

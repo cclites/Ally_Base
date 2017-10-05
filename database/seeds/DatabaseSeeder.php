@@ -125,5 +125,24 @@ class DatabaseSeeder extends Seeder
 
             \DB::commit();
         }
+
+        // Demo activities
+        $activities = [
+            'Bathing - Shower',
+            'Bathing - Bed',
+            'Shave',
+            'Mouth Care',
+            'Incontinence Care',
+            'Medication Reminders',
+            'Turning',
+            'Feeding',
+        ];
+        for ($i = 0; $i < count($activities)-1; $i++) {
+            \App\Activity::create([
+                'code' => str_pad($i+1, 3, 0,STR_PAD_LEFT),
+                'name' => $activities[$i],
+                'business_id' => $business->id,
+            ]);
+        }
     }
 }
