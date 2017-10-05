@@ -37,7 +37,8 @@ class ShiftController extends Controller
             return redirect()->route('shift.index');
         }
         $shift = $this->caregiver()->getActiveShift();
-        return view('caregivers.clock_out', compact('shift'));
+        $activities = $shift->business->activities->sortBy('code');
+        return view('caregivers.clock_out', compact('shift', 'activities'));
     }
 
     public function clockIn(Request $request)
@@ -104,7 +105,8 @@ class ShiftController extends Controller
             $aggregator->add($title, $schedule);
         }
 
-        $start = new \DateTime('-4 hours');
+
+        $start = new \DateTime('-8 hours');
         $end = new \DateTime('+12 hours'); // determine if event's end time has passed in view
 
         $events = new ScheduleEventsResponse($aggregator->events($start, $end));

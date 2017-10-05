@@ -12,7 +12,7 @@
     </div>
     <div class="row">
         <div class="col-lg-6">
-            <clock-out :shift="{{ $shift }}"></clock-out>
+            <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}"></clock-out>
         </div>
         <div class="col-lg-6">
             @if(env('GMAPS_API_KEY'))

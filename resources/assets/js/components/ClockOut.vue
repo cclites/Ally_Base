@@ -67,7 +67,20 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">I am finished with my shift.</b-button>
+                    <h5>Activities Performed</h5>
+                        <div class="form-check">
+                            <input-help :form="form" field="" text=""></input-help>
+                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
+                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                            </label>
+                        </div>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-button id="clock-out-submit" variant="success" type="submit">I am finished with my shift.</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -78,6 +91,7 @@
     export default {
         props: {
             'shift': {},
+            'activities': {},
         },
 
         data() {
@@ -86,6 +100,7 @@
                     caregiver_comments: null,
                     mileage: 0,
                     other_expenses: 0.00,
+                    activities: [],
                 }),
             }
         },
