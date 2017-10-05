@@ -110,10 +110,11 @@
             },
 
             submitForm() {
+                var component = this;
                 this.form.post('/clock-in')
                     .then(function(response) {
                         if (response.data.stats) {
-                            this.stats = response.data.stats;
+                            component.stats = response.data.stats;
                         }
                         else {
                             window.location = '/clock-out';
