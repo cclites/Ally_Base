@@ -14,7 +14,6 @@ class CaregiverShiftController extends Controller
 {
     /**
      * Return caregiver call in greeting in TwiML.
-     * TODO: replace placeholder text with real greeting
      */
     public function greeting(Request $request, PhoneNumber $phoneNumber)
     {
@@ -30,7 +29,7 @@ class CaregiverShiftController extends Controller
             'action' => '/api/caregiver/check-in-or-out',
         ]);
         $gather->say(
-            "Hello and thank you for calling Kevin's Home Care Agency. " .
+            "Hello and thank you for calling {$schedule->client->business->name}. " .
             "Press 1 to check in. Press 2 to check out."
         );
         return response($response)->header('Content-Type', 'text/xml');
@@ -152,8 +151,14 @@ class CaregiverShiftController extends Controller
         $start = new \DateTime('-390 minutes');
         $end = new \DateTime('-210 minutes');
         $occurrences = $aggregator->events($start, $end);
+        if (empty($occurrences)) {
+            return false;
+        }
+        $scheduleIds = array_map(function($occurrence) {
+            return $occurrence['schedule_id'];
+        }, $occurrences);
 
-        return empty($occurrences) ? false : $occurrences;
+        return Schedule::with('client.business')->whereIn('id', $scheduleIds)->first();
     }
 
     /**
