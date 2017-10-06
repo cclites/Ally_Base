@@ -21,6 +21,7 @@
     </b-card>
 </template>
 <script>
+    import FormDataForm from '../classes/FormDataForm';
     export default {
         props: ['initialDocuments', 'userId'],
         data() {
@@ -37,14 +38,16 @@
                 this.file = file;
             },
             upload() {
-                var formData = new FormData();
+                let formData = new FormData();
                 formData.append('file', this.file);
                 formData.append('user_id', this.userId);
-                axios.post('/business/documents', formData, {
+                let form = new FormDataForm(formData);
+                form.setOptions({
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                form.post('/business/documents');
             },
         },
     }

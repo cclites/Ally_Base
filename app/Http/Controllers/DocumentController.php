@@ -20,6 +20,7 @@ class DocumentController extends Controller
 
     /**
      * Upload and save new document.
+     * TODO: add validation and error checking
      */
     public function store(Request $request)
     {
