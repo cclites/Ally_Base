@@ -26,7 +26,7 @@ class AddDefaultValueForRateForCaregivers extends Migration
     public function down()
     {
         Schema::table('business_caregivers', function (Blueprint $table) {
-            $table->dropColumn('default_rate');
+//            $table->dropColumn('default_rate');
         });
     }
 }

@@ -16,6 +16,7 @@
                     </b-form-select>
                 </b-form-group>
                 <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" />
+                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :client="client" />
             </b-col>
         </b-row>
     </b-card>

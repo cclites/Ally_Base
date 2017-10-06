@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Client')
+@section('title', $client->name())
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -21,10 +21,16 @@
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
+            <a class="nav-link" data-toggle="tab" href="#care-plan" role="tab">Care Plan</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Scheduling</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
     </ul>
 
@@ -57,6 +63,11 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane" id="care-plan" role="tabpanel">
+            <!-- Care Plan Placeholder -->
+            <h4>Care Plan coming soon</h4>
+            <p>This will be where you can set the activities and other care requirements for a client.</p>
+        </div>
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
@@ -69,6 +80,11 @@
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
+        </div>
+        <div class="tab-pane" id="documents" role="tabpanel">
+            <!-- Documents placeholder -->
+            <h4>Documents coming soon</h4>
+            <p>This will be where you upload and manage important documents relating to a client.</p>
         </div>
     </div>
 @endsection

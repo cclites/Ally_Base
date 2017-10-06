@@ -3,6 +3,16 @@
   max-height: 50px;
 }
 
+/* Smaller device adjustments */
+@media (max-width:768px) {
+  .container-fluid {
+    padding: 0 15px;
+  }
+  .fc-scroller {
+    min-height: 320px;
+  }
+}
+
 /* Alerts */
 #alerts {
   z-index: 9999;

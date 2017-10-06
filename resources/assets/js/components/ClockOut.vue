@@ -67,7 +67,21 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">I am finished with my shift.</b-button>
+                    <h5>Activities Performed</h5>
+                        <div class="form-check">
+                            <input-help :form="form" field="" text=""></input-help>
+                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
+                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                            </label>
+                        </div>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock In</b-button>
+                    <b-button id="complete-clock-out" variant="success" type="submit">I am finished with my shift.</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -78,6 +92,7 @@
     export default {
         props: {
             'shift': {},
+            'activities': {},
         },
 
         data() {
@@ -86,7 +101,12 @@
                     caregiver_comments: null,
                     mileage: 0,
                     other_expenses: 0.00,
+                    latitude: null,
+                    longitude: null,
+                    manual: 0,
+                    activities: [],
                 }),
+                showManual: false,
             }
         },
 
@@ -96,11 +116,42 @@
 
         methods: {
             clockOut() {
+                if (!navigator.geolocation) {
+                    alert('Location services are not supported on your device.');
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    this.form.latitude = position.coords.latitude;
+                    this.form.longitude = position.coords.longitude;
+                    console.log(position.coords);
+                    this.submitForm();
+                }.bind(this), function(error) {
+                    this.form.latitude = null;
+                    this.form.longitude = null;
+                    console.log(error);
+                    this.submitForm();
+                }.bind(this), {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            },
+
+            submitForm() {
+                var component = this;
                 this.form.post('/clock-out')
                     .then(function(response) {
                         window.location = '/clock-in'
+                    })
+                    .catch(function(error) {
+                        component.showManual = true;
                     });
-            }
+            },
+
+            manualSubmit() {
+                this.form.manual = 1;
+                this.submitForm();
+            },
         },
 
         computed: {

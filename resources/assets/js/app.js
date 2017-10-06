@@ -29,6 +29,8 @@ Vue.use(BootstrapVue);
  */
 
 // App Components
+Vue.component('activity-list', require('./components/ActivityList.vue'));
+
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
@@ -52,6 +54,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
+Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
 
 Vue.component('dashboard-metric', require('./components/DashboardMetric.vue'));
 
