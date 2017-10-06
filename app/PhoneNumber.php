@@ -29,6 +29,11 @@ class PhoneNumber extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'user_id');
+    }
+
     /**
      * Output the full phone number in a formatted or unformatted manner
      *

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use Twilio\Twiml;
+use App\Schedule;
 use App\Caregiver;
+use App\PhoneNumber;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -13,9 +15,15 @@ class CaregiverShiftController extends Controller
      * Return caregiver call in greeting in TwiML.
      * TODO: replace placeholder text with real greeting
      */
-    public function greeting()
+    public function greeting(Request $request, PhoneNumber $phoneNumber)
     {
         $response = new Twiml;
+        $number = $phoneNumber->input($request->input('From'))->numberOnly();
+        $schedule = $this->scheduleForNumber($number);
+        if (! $schedule) {
+            $response->say("Hello. There is no shift scheduled for $number within 90 minutes of now.");
+            return $this->response($response);
+        }
         $gather = $response->gather([
             'numDigits' => 1,
             'action' => '/api/caregiver/check-in-or-out',
@@ -118,6 +126,28 @@ class CaregiverShiftController extends Controller
             'action' => '/api/caregiver/enter-id',
         ]);
         $gather->say('Please enter your caregiver ID now');
+        return response($response)->header('Content-Type', 'text/xml');
+    }
+
+    /**
+     * Find schedule for number with 90 minutes of now.
+     */
+    private function scheduleForNumber($number)
+    {
+        $number = (new PhoneNumber)->input($number)->national_number;
+        $number = PhoneNumber::with('client.schedules')
+            ->where('national_number', $number)->first();
+        if (empty($number->user->role->schedules)) {
+            return false;
+        }
+        return $number->user->role->schedules;
+    }
+
+    /**
+     * All twiml responses need the text/xml content-type.
+     */
+    private function response($response)
+    {
         return response($response)->header('Content-Type', 'text/xml');
     }
 }
