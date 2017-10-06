@@ -28,9 +28,6 @@
             return {
                 documents: this.initialDocuments,
                 file: {},
-                form: new Form({
-                    file: this.file,
-                }),
             };
         },
         methods: {
@@ -47,7 +44,13 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-                form.post('/business/documents');
+                form.post('/business/documents').then(this.refreshList);
+            },
+            refreshList() {
+                axios.get('/business/users/' + this.userId + '/documents')
+                    .then((response) => {
+                        this.documents = response.data;
+                    });
             },
         },
     }

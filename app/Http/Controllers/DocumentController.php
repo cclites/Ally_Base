@@ -11,11 +11,11 @@ class DocumentController extends Controller
 {
     /**
      * List documents.
+     * TODO: check permissions
      */
-    public function index(Request $request)
+    public function index(User $user)
     {
-        $documents = $request->user()->documents;
-        return $documents;
+        return $user->documents;
     }
 
     /**

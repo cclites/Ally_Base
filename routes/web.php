@@ -78,6 +78,6 @@ Route::group([
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
 
-    Route::get('documents', 'DocumentController@index');
+    Route::get('users/{user}/documents', 'DocumentController@index');
     Route::post('documents', 'DocumentController@store');
 });
