@@ -8,6 +8,7 @@ use App\Caregiver;
 use App\PhoneNumber;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Scheduling\ScheduleAggregator;
 
 class CaregiverShiftController extends Controller
 {
@@ -136,11 +137,23 @@ class CaregiverShiftController extends Controller
     {
         $number = (new PhoneNumber)->input($number)->national_number;
         $number = PhoneNumber::with('client.schedules')
-            ->where('national_number', $number)->first();
+            ->where('national_number', $number)
+            ->first();
         if (empty($number->user->role->schedules)) {
             return false;
         }
-        return $number->user->role->schedules;
+        $schedules = $number->client->schedules;
+        $aggregator = new ScheduleAggregator();
+        foreach($schedules as $schedule) {
+            $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
+            $aggregator->add($title, $schedule);
+        }
+        // TODO: change -390 and -210 to -90 and +90
+        $start = new \DateTime('-390 minutes');
+        $end = new \DateTime('-210 minutes');
+        $occurrences = $aggregator->events($start, $end);
+
+        return empty($occurrences) ? false : $occurrences;
     }
 
     /**
