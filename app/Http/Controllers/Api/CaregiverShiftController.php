@@ -28,10 +28,7 @@ class CaregiverShiftController extends Controller
             'numDigits' => 1,
             'action' => '/api/caregiver/check-in-or-out',
         ]);
-        $gather->say(
-            "Hello and thank you for calling {$schedule->client->business->name}. " .
-            "Press 1 to check in. Press 2 to check out."
-        );
+        $gather->say(view('caregivers.voice.greeting', compact('schedule'))->render());
         return response($response)->header('Content-Type', 'text/xml');
     }
 
@@ -158,7 +155,8 @@ class CaregiverShiftController extends Controller
             return $occurrence['schedule_id'];
         }, $occurrences);
 
-        return Schedule::with('client.business')->whereIn('id', $scheduleIds)->first();
+        return Schedule::with(['caregiver.user', 'client.business', 'client.user'])
+            ->whereIn('id', $scheduleIds)->first();
     }
 
     /**
