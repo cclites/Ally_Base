@@ -82,10 +82,13 @@ class ShiftController extends Controller
 
         $data = $request->validate([
             'schedule_id' => 'exists:schedules,id',
-            'latitude' => 'numeric|required_unless:manual,1',
-            'longitude' => 'numeric|required_unless:manual,1',
+            'latitude' => 'numeric|nullable|required_unless:manual,1',
+            'longitude' => 'numeric|nullable|required_unless:manual,1',
             'manual' => 'nullable',
-        ]);
+        ], [
+                'latitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
+                'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
+            ]);
 
         $schedule = Schedule::findOrFail($request->input('schedule_id'));
 
@@ -128,9 +131,12 @@ class ShiftController extends Controller
             'caregiver_comments' => 'nullable',
             'mileage' => 'nullable|numeric',
             'other_expenses' => 'nullable|numeric',
-            'latitude' => 'numeric|required_unless:manual,1',
-            'longitude' => 'numeric|required_unless:manual,1',
+            'latitude' => 'numeric|nullable|required_unless:manual,1',
+            'longitude' => 'numeric|nullable|required_unless:manual,1',
             'manual' => 'nullable',
+        ], [
+            'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
+            'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
         ]);
 
         $shift = $this->caregiver()->getActiveShift();

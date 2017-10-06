@@ -22,7 +22,7 @@ class Address extends Model
      */
     public function getGeocode($forceUpdate = false)
     {
-        if ($this->forceUpdate || (!$this->latitude && !$this->longitude)) {
+        if ($forceUpdate || (!$this->latitude && !$this->longitude)) {
             $fullAddress = $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
             if (!$geocode = Geocode::getCoordinates($fullAddress)) {
                 return false;

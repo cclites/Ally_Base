@@ -80,7 +80,8 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="clock-out-submit" variant="success" type="submit">I am finished with my shift.</b-button>
+                    <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock In</b-button>
+                    <b-button id="complete-clock-out" variant="success" type="submit">I am finished with my shift.</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -102,8 +103,10 @@
                     other_expenses: 0.00,
                     latitude: null,
                     longitude: null,
+                    manual: 0,
                     activities: [],
                 }),
+                showManual: false,
             }
         },
 
@@ -135,11 +138,20 @@
             },
 
             submitForm() {
+                var component = this;
                 this.form.post('/clock-out')
                     .then(function(response) {
                         window.location = '/clock-in'
+                    })
+                    .catch(function(error) {
+                        component.showManual = true;
                     });
-            }
+            },
+
+            manualSubmit() {
+                this.form.manual = 1;
+                this.submitForm();
+            },
         },
 
         computed: {
