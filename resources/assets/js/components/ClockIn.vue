@@ -29,6 +29,7 @@
                                     v-model="form.schedule_id"
                                     required
                             >
+                                <option value="">--Select a Shift--</option>
                                 <option v-for="item in events" :value="item.id">{{ getTitle(item) }}</option>
 
                             </b-form-select>
