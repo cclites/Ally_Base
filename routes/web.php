@@ -77,13 +77,8 @@ Route::group([
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
-});
 
-// clients and caregivers should have access to document routes
-Route::group([
-    'middleware' => ['auth', 'roles'],
-    'roles' => ['client', 'caregiver'],
-], function() {
-    Route::get('documents', 'DocumentController@index');
-    Route::post('documents', 'DocumentController@store');
+    Route::get('users/{user}/documents', 'Business\DocumentController@index');
+    Route::post('documents', 'Business\DocumentController@store');
+    Route::get('documents/{document}/download', 'Business\DocumentController@download');
 });

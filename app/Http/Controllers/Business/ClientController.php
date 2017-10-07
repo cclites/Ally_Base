@@ -73,7 +73,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $client->load(['user', 'addresses', 'phoneNumbers', 'bankAccounts', 'creditCards']);
+        $client->load(['user', 'addresses', 'phoneNumbers', 'bankAccounts', 'creditCards', 'user.documents']);
         $schedules = $client->schedules()->get();
         $caregivers = $this->business()->caregivers->map(function($caregiver) {
             return [

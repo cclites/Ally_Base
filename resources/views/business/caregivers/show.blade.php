@@ -24,6 +24,9 @@
             <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
         </li>
         <li class="nav-item">
@@ -59,6 +62,12 @@
         </div>
         <div class="tab-pane" id="schedule" role="tabpanel">
             <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
+        </div>
+        <div class="tab-pane" id="documents" role="tabpanel">
+            <document-list
+                :initial-documents="{{ $caregiver->user->documents->toJson() }}"
+                :user-id="{{ $caregiver->user->id }}"
+            ></document-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
             <!-- Availability Placeholder -->

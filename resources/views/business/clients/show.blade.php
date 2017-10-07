@@ -82,9 +82,10 @@
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
-            <!-- Documents placeholder -->
-            <h4>Documents coming soon</h4>
-            <p>This will be where you upload and manage important documents relating to a client.</p>
+            <document-list
+                :initial-documents="{{ $client->user->documents->toJson() }}"
+                :user-id="{{ $client->user->id }}"
+            ></document-list>
         </div>
     </div>
 @endsection
