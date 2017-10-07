@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
 use App\User;
 use App\Document;
 use Illuminate\Http\Request;
 use App\Responses\SuccessResponse;
 
-class DocumentController extends Controller
+class DocumentController extends BaseController
 {
     /**
      * List documents.
