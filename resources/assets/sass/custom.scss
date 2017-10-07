@@ -3,6 +3,10 @@
   max-height: 50px;
 }
 
+.nav-link .mdi-account-circle {
+  font-size: 30px;
+}
+
 /* Smaller device adjustments */
 @media (max-width:768px) {
   .container-fluid {
