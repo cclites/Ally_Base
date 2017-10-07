@@ -80,4 +80,5 @@ Route::group([
 
     Route::get('users/{user}/documents', 'DocumentController@index');
     Route::post('documents', 'DocumentController@store');
+    Route::get('documents/{document}/download', 'DocumentController@download');
 });

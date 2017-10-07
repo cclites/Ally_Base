@@ -34,4 +34,14 @@ class DocumentController extends Controller
         ]);
         return new SuccessResponse('Document uploaded.');
     }
+
+    /**
+     * Download document.
+     * TODO: check permissions
+     */
+    public function download(Document $document)
+    {
+        $path = storage_path('app/documents/' . $document->filename);
+        return response()->download($path, $document->original_filename);
+    }
 }

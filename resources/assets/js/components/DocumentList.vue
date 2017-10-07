@@ -14,7 +14,11 @@
             <thead><tr><th>File</th></tr></thead>
             <tbody>
                 <tr v-for="document in documents">
-                    <td>{{ document.original_filename }}</td>
+                    <td>
+                        <a :href="'/business/documents/'+document.id+'/download'">
+                            {{ document.original_filename }}
+                        </a>
+                    </td>
                 </tr>
             </tbody>
         </table>
