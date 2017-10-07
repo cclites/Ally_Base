@@ -12,6 +12,19 @@
                 </b-col>
             </b-row>
             <b-row>
+                <b-col lg="12">
+                    <h5>Activities Performed</h5>
+                        <div class="form-check">
+                            <input-help :form="form" field="" text=""></input-help>
+                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
+                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                            </label>
+                        </div>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="6">
                     <b-form-group label="Recorded Mileage" label-for="mileage">
                         <b-form-input
@@ -63,19 +76,6 @@
                         </b-form-textarea>
                         <input-help :form="form" field="other_expenses" text="Enter any important notes or comments about your shift."></input-help>
                     </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="12">
-                    <h5>Activities Performed</h5>
-                        <div class="form-check">
-                            <input-help :form="form" field="" text=""></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                            </label>
-                        </div>
                 </b-col>
             </b-row>
             <b-row>
