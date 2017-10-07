@@ -54,7 +54,7 @@ class CaregiverShiftController extends Controller
             return $this->response($response);
         }
         catch(\Exception $e) {
-            Log::error('Error Code: ' . $e->getCode() . ' Message: ' . $e->getMessage() . ' Line: ' . $e->getFile() . ':' . $e->getLine());
+            \Log::error('Error Code: ' . $e->getCode() . ' Message: ' . $e->getMessage() . ' Line: ' . $e->getFile() . ':' . $e->getLine());
             $response->say("Unknown error.  Please hang up and try again.");
             return $this->response($response);
         }
