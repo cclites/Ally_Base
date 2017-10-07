@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <full-calendar ref="calendar" :events="events" @event-selected="clockIn" />
+        <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="clockIn" />
     </b-card>
 </template>
 
