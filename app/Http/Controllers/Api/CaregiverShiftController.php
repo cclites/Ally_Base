@@ -165,7 +165,8 @@ class CaregiverShiftController extends Controller
             'client_id' => $schedule->client_id,
             'business_id' => $schedule->business_id,
             'schedule_id' => $schedule->id,
-            'checked_in_number' => $this->number->id,
+            'checked_in_time' => (new \DateTime())->format('Y-m-d H:i:s'),
+            'checked_in_number' => $this->number->national_number,
             'verified' => true,
         ]);
 
@@ -199,7 +200,7 @@ class CaregiverShiftController extends Controller
 
         $update = $shift->update([
             'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'checked_out_number' => $this->number->id,
+            'checked_out_number' => $this->number->national_number,
         ]);
 
         if ($update) {
