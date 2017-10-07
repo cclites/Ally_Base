@@ -1,7 +1,12 @@
 <template>
     <div>
         <b-card>
-            <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="viewDetails" />
+            <b-row>
+                <b-col lg="12" class="text-center">
+                    <h4>Press Appointment to Clock In</h4>
+                </b-col>
+            </b-row>
+            <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="viewDetails" :header="header" />
         </b-card>
         <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal">
             <b-container fluid>
@@ -54,6 +59,11 @@
                     'Thursday': 'th',
                     'Friday': 'fr',
                     'Saturday': 'sa',
+                },
+                header: {
+                    left:   'prev,next today',
+                    center: 'title',
+                    right:  'listWeek,agendaWeek'
                 }
             }
         },
