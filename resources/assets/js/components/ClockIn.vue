@@ -133,7 +133,7 @@
             },
 
             getTitle(item) {
-                return item.title + ' ' + moment.utc(item.start).format('LT') + ' - ' + moment.utc(item.end).format('LT');
+                return item.title + ' ' + moment.utc(item.start).local().format('LT') + ' - ' + moment.utc(item.end).local().format('LT');
             }
 
         },
