@@ -33,6 +33,7 @@ class CaregiverShiftController extends Controller
         $response = new Twiml;
         try {
             if ($shift = $this->activeShiftForNumber($this->number)) {
+                $schedule = $shift->schedule;
                 $gather = $response->gather([
                     'numDigits' => 1,
                     'action' => route('telefony.check_out', [], false),
