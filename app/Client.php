@@ -63,6 +63,14 @@ class Client extends Model
         return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
     }
 
+    /**
+     * Aggregate schedules for this client and return an array of events
+     *
+     * @param string|\DateTime $start
+     * @param string|\DateTime $end
+     *
+     * @return array
+     */
     public function getEvents($start, $end)
     {
         $aggregator = new ScheduleAggregator();

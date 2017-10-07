@@ -21,6 +21,14 @@ class ScheduleAggregator
         $this->activeSchedules = array_merge($this->activeSchedules, $active);
     }
 
+    /**
+     * @param string|\DateTime $start_date
+     * @param string|\DateTime $end_date
+     * @param string $timezone
+     * @param int $limitPerEvent
+     *
+     * @return array
+     */
     public function events($start_date, $end_date, $timezone='UTC', $limitPerEvent = 300)
     {
         $events = [];

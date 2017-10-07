@@ -87,6 +87,14 @@ class Caregiver extends Model
         return $this->shifts()->whereNull('checked_out_time')->first();
     }
 
+    /**
+     * Aggregate schedules for this caregiver and return an array of events
+     *
+     * @param string|\DateTime $start
+     * @param string|\DateTime $end
+     *
+     * @return array
+     */
     public function getEvents($start, $end)
     {
         $aggregator = new ScheduleAggregator();
