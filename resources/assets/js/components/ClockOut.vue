@@ -80,7 +80,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock In</b-button>
+                    <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock Out</b-button>
                     <b-button id="complete-clock-out" variant="success" type="submit">I am finished with my shift.</b-button>
                 </b-col>
             </b-row>
