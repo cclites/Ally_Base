@@ -12637,7 +12637,7 @@ namespace  {
              * Create and return an un-saved model instance.
              *
              * @param array $attributes
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function make($attributes = array())
@@ -12776,7 +12776,7 @@ namespace  {
              *
              * @param mixed $id
              * @param array $columns
-             * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null 
+             * @return $this|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null 
              * @static 
              */ 
             public static function find($id, $columns = array())
@@ -12789,7 +12789,7 @@ namespace  {
              *
              * @param \Illuminate\Contracts\Support\Arrayable|array $ids
              * @param array $columns
-             * @return \Illuminate\Database\Eloquent\Collection 
+             * @return $this[]|\Illuminate\Database\Eloquent\Collection 
              * @static 
              */ 
             public static function findMany($ids, $columns = array())
@@ -12802,7 +12802,7 @@ namespace  {
              *
              * @param mixed $id
              * @param array $columns
-             * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection 
+             * @return $this|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection
              * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
              * @static 
              */ 
@@ -12816,7 +12816,7 @@ namespace  {
              *
              * @param mixed $id
              * @param array $columns
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function findOrNew($id, $columns = array())
@@ -12829,7 +12829,7 @@ namespace  {
              *
              * @param array $attributes
              * @param array $values
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function firstOrNew($attributes, $values = array())
@@ -12842,7 +12842,7 @@ namespace  {
              *
              * @param array $attributes
              * @param array $values
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function firstOrCreate($attributes, $values = array())
@@ -12855,7 +12855,7 @@ namespace  {
              *
              * @param array $attributes
              * @param array $values
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function updateOrCreate($attributes, $values = array())
@@ -13082,7 +13082,7 @@ namespace  {
              * Create a new instance of the model being queried.
              *
              * @param array $attributes
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function newModelInstance($attributes = array())
@@ -13150,7 +13150,7 @@ namespace  {
             /**
              * Get the model instance being queried.
              *
-             * @return \Illuminate\Database\Eloquent\Model 
+             * @return $this|\Illuminate\Database\Eloquent\Model
              * @static 
              */ 
             public static function getModel()
