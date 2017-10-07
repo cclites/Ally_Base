@@ -165,9 +165,7 @@ class ShiftController extends Controller
         if ($update) {
             return new SuccessResponse('You have successfully clocked out.');
         }
-        else {
-            return new ErrorResponse(500, 'There was an error clocking out.');
-        }
+        return new ErrorResponse(500, 'There was an error clocking out.');
     }
 
     protected function getRecentEvents()
