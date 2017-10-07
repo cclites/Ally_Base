@@ -395,6 +395,7 @@
                     caregiver_id: null,
                     scheduled_rate: null,
                     notes: null,
+                    utc_offset: this.getUserUtcOffset(),
                 });
             },
 
@@ -409,31 +410,34 @@
                     caregiver_id: null,
                     scheduled_rate: null,
                     notes: null,
+                    utc_offset: this.getUserUtcOffset(),
                 });
             },
 
             makeEditSingleForm() {
                 this.editForm = new Form({
                     selected_date: moment(this.selectedEvent.start).format('L'),
-                    time: this.selectedSchedule.time,
+                    time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
+                    utc_offset: this.getUserUtcOffset(),
                 });
             },
 
             makeEditAllForm() {
                 this.editForm = new Form({
                     selected_date: moment(this.selectedEvent.start).format('L'),
-                    end_date: (this.selectedSchedule.end_date == '2100-12-31') ? null : moment(this.selectedSchedule.end_date).format('L'),
-                    time: this.selectedSchedule.time,
+                    end_date: this.getLocalMomentObject(this.selectedSchedule.end_date, this.selectedSchedule.time).format('L'),
+                    time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
+                    utc_offset: this.getUserUtcOffset(),
                 });
             },
 
@@ -476,6 +480,7 @@
                 let component = this;
                 let deleteForm = new Form({
                     selected_date: this.editForm.selected_date,
+                    utc_offset: this.getUserUtcOffset(),
                 });
                 deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
                     .then(function(response) {
@@ -490,6 +495,7 @@
                 let component = this;
                 let deleteForm = new Form({
                     selected_date: this.editForm.selected_date,
+                    utc_offset: this.getUserUtcOffset(),
                 });
                 deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + this.selectedSchedule.id + '/delete')
                     .then(function(response) {
@@ -520,6 +526,18 @@
                         form.scheduled_rate = caregiver.default_rate;
                     }
                 }
+            },
+
+            getUserUtcOffset() {
+                return moment().local().format('Z');
+            },
+
+            getLocalMomentObject(server_date, server_time) {
+                let timestamp = server_date + 'T' + server_time + '+00:00';
+                console.log(timestamp);
+                let obj = moment(timestamp).local();
+                console.log(obj);
+                return obj;
             }
         },
 
@@ -531,7 +549,7 @@
             createType(val) {
                 if (val == 'single') this.makeCreateSingleForm();
                 else this.makeCreateRecurringForm()
-            }
+            },
         },
 
         computed: {

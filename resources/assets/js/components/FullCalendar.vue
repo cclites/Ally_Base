@@ -76,6 +76,7 @@
                     selectHelper: this.selectHelper,
                     aspectRatio: 2,
                     timeFormat: 'h:mma',
+                    timezone: 'local', // translate event times into user's local timezone
                     events: this.events,
                     eventSources: this.eventSources,
                     allDaySlot: false,

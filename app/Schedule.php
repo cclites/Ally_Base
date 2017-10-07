@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
+    /**
+     * A far-future date, that likely won't ever be chosen directly, to represent a never-ending schedule
+     */
     const FOREVER_ENDDATE = '2100-12-31';
 
     protected $table = 'schedules';
