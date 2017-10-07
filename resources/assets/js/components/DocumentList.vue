@@ -26,11 +26,12 @@
 </template>
 <script>
     import FormDataForm from '../classes/FormDataForm';
+    import _ from 'lodash';
     export default {
         props: ['initialDocuments', 'userId'],
         data() {
             return {
-                documents: this.initialDocuments,
+                documents: _.orderBy(this.initialDocuments, 'updated_at', 'desc'),
                 file: {},
             };
         },
@@ -53,7 +54,7 @@
             refreshList() {
                 axios.get('/business/users/' + this.userId + '/documents')
                     .then((response) => {
-                        this.documents = response.data;
+                        this.documents = _.orderBy(response.data, 'updated_at', 'desc');
                     });
             },
         },
