@@ -172,12 +172,12 @@ class CaregiverShiftController extends Controller
         ]);
 
         if ($schedule->caregiver->isClockedIn()) {
-            $response->say('You are already clocked in.  Please clock out first and then clock in.');
+            $response->say('You are already clocked in.  Please clock out first.');
             return $this->response($response);
         }
 
         if ($schedule->caregiver->shifts()->save($shift)) {
-            $response->say('You have clocked in.  Please remember to call back and check-out. Good bye.');
+            $response->say('You have successfully clocked in.  Please remember to call back and check-out at the end of your shift. Good bye.');
         }
         else {
             $response->say('There was an error clocking in.  Please hang up and try again.');
