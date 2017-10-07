@@ -8,7 +8,6 @@ use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Scheduling\ScheduleAggregator;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use Illuminate\Http\Request;
 
@@ -161,19 +160,13 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $aggregator = new ScheduleAggregator();
-        foreach($caregiver->schedules as $schedule) {
-            $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
-            $aggregator->add($title, $schedule);
-        }
-
         $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
         $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
 
         if (strlen($start) > 10) $start = substr($start, 0, 10);
         if (strlen($end) > 10) $end = substr($end, 0, 10);
 
-        $events = new ScheduleEventsResponse($aggregator->events($start, $end));
+        $events = new ScheduleEventsResponse($caregiver->getEvents($start, $end));
         return $events;
 
     }

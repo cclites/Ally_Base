@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\ExistingBankAccountException;
+use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -29,13 +30,6 @@ class Caregiver extends Model
         }
 
         return $this->update(['bank_account_id' => $account->id]);
-    }
-
-    public function startShift()
-    {
-        $shift = new Shift();
-        $shift->checked_in_time = Carbon::now();
-        return $this->shifts()->save($shift);
     }
 
     public function bankAccount()
@@ -91,6 +85,17 @@ class Caregiver extends Model
     public function getActiveShift()
     {
         return $this->shifts()->whereNull('checked_out_time')->first();
+    }
+
+    public function getEvents($start, $end)
+    {
+        $aggregator = new ScheduleAggregator();
+        foreach($this->schedules as $schedule) {
+            $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
+            $aggregator->add($title, $schedule);
+        }
+
+        return $aggregator->events($start, $end);
     }
 
 }

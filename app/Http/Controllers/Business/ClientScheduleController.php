@@ -10,7 +10,6 @@ use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
-use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use DB;
 use Illuminate\Http\Request;
@@ -32,19 +31,13 @@ class ClientScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $aggregator = new ScheduleAggregator();
-        foreach($client->schedules as $schedule) {
-            $title = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            $aggregator->add($title, $schedule);
-        }
-
         $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
         $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
 
         if (strlen($start) > 10) $start = substr($start, 0, 10);
         if (strlen($end) > 10) $end = substr($end, 0, 10);
 
-        $events = new ScheduleEventsResponse($aggregator->events($start, $end), 'business.clients.schedule.show', ['id' => $client->id]);
+        $events = new ScheduleEventsResponse($client->getEvents($start, $end), 'business.clients.schedule.show', ['id' => $client->id]);
         return $events;
     }
 

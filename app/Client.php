@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,13 +34,13 @@ class Client extends Model
     public function evvAddress()
     {
         return $this->hasOne(Address::class, 'user_id', 'id')
-            ->where('type', 'evv');
+                    ->where('type', 'evv');
     }
 
     public function evvPhone()
     {
         return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
-            ->where('type', 'evv');
+                    ->where('type', 'evv');
     }
 
     public function business()
@@ -60,5 +61,16 @@ class Client extends Model
     public function backupPayment()
     {
         return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+    }
+
+    public function getEvents($start, $end)
+    {
+        $aggregator = new ScheduleAggregator();
+        foreach($this->schedules as $schedule) {
+            $title = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
+            $aggregator->add($title, $schedule);
+        }
+
+        return $aggregator->events($start, $end);
     }
 }

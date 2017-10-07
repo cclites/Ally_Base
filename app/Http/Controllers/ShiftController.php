@@ -6,7 +6,6 @@ use App\Client;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
-use App\Scheduling\ScheduleAggregator;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Shift;
 use Illuminate\Http\Request;
@@ -173,17 +172,10 @@ class ShiftController extends Controller
 
     protected function getRecentEvents()
     {
-        $aggregator = new ScheduleAggregator();
-        foreach($this->caregiver()->schedules as $schedule) {
-            $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
-            $aggregator->add($title, $schedule);
-        }
-
-
         $start = new \DateTime('-8 hours');
         $end = new \DateTime('+12 hours'); // determine if event's end time has passed in view
 
-        $events = new ScheduleEventsResponse($aggregator->events($start, $end));
+        $events = new ScheduleEventsResponse($this->caregiver()->getEvents($start, $end));
         return $events;
     }
 }

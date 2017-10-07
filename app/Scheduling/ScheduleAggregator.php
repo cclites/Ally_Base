@@ -37,7 +37,9 @@ class ScheduleAggregator
                     'start'       => $date,
                     'end'         => $end,
                     'duration'    => $schedule->duration,
-                    'checked_in'=> in_array($schedule->id, $this->activeSchedules)
+                    'checked_in'  => in_array($schedule->id, $this->activeSchedules),
+                    'client_id'   => $schedule->client_id,
+                    'caregiver_id'=> $schedule->caregiver_id,
                 ];
             }, $occurrences));
         }
