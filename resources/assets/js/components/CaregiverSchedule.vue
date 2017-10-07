@@ -1,7 +1,33 @@
 <template>
-    <b-card>
-        <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="clockIn" />
-    </b-card>
+    <div>
+        <b-card>
+            <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="viewDetails" />
+        </b-card>
+        <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal">
+            <b-container fluid>
+                <b-row>
+                    <table class="table">
+                        <tr>
+                            <th>Start:</th>
+                            <td>{{ viewStartTime }}</td>
+                        </tr>
+                        <tr>
+                            <th>End:</th>
+                            <td>{{ viewEndTime }}</td>
+                        </tr>
+                        <tr>
+                            <th>Client:</th>
+                            <th>{{ viewTitle }}</th>
+                        </tr>
+                    </table>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="viewModal=false">Close</b-btn>
+                <b-btn variant="info" @click="clockIn()">Clock In</b-btn>
+            </div>
+        </b-modal>
+    </div>
 </template>
 
 <script>
@@ -12,8 +38,7 @@
 
         data() {
             return {
-                createModal: false,
-                editModal: false,
+                viewModal: false,
                 selectedSchedule: null,
                 selectedEvent: null,
                 editForm: new Form(),
@@ -41,14 +66,18 @@
             refreshEvents(hideModals = true) {
                 this.$refs.calendar.fireMethod('refetchEvents');
                 if (hideModals) {
-                    this.createModal = false;
-                    this.editModal = false;
+                    this.viewModal = false;
                 }
             },
 
-            clockIn(event, jsEvent, view) {
+            viewDetails(event, jsEvent, view) {
                 console.log(event);
-                window.location = '/clock-in/' + event.id;
+                this.selectedEvent = event;
+                this.viewModal = true;
+            },
+
+            clockIn() {
+                window.location = '/clock-in/' + this.selectedEvent.id;
             }
         },
 
@@ -62,6 +91,21 @@
                     return '/business/caregivers/' + this.caregiver.id + '/schedule';
                 }
                 return '/schedule/events';
+            },
+
+            viewStartTime() {
+                if (!this.selectedEvent) return '';
+                return moment(this.selectedEvent.start).local().format('L LT');
+            },
+
+            viewEndTime() {
+                if (!this.selectedEvent) return '';
+                return moment(this.selectedEvent.end).local().format('L LT');
+            },
+
+            viewTitle() {
+                if (!this.selectedEvent) return '';
+                return this.selectedEvent.title;
             }
 
         }
