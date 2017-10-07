@@ -1,6 +1,10 @@
 <?php
 namespace App\Traits;
 
+use App\Address;
+use App\BankAccount;
+use App\CreditCard;
+use App\PhoneNumber;
 use App\User;
 
 trait IsUserRole
@@ -72,21 +76,26 @@ trait IsUserRole
 
     public function addresses()
     {
-        return $this->user->addresses();
+        return $this->hasMany(Address::class, 'user_id', 'id');
     }
 
     public function bankAccounts()
     {
-        return $this->user->bankAccounts();
+        return $this->hasMany(BankAccount::class, 'user_id', 'id');
     }
 
     public function creditCards()
     {
-        return $this->user->creditCards();
+        return $this->hasMany(CreditCard::class, 'user_id', 'id');
     }
 
     public function phoneNumbers()
     {
-        return $this->user->phoneNumbers();
+        return $this->hasMany(PhoneNumber::class, 'user_id', 'id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'user_id', 'id');
     }
 }
