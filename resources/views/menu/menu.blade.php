@@ -4,4 +4,6 @@
     @include('menu.office_user')
 @elseif(Auth::user()->role_type == 'caregiver')
     @include('menu.caregiver')
+@elseif(Auth::user()->role_type == 'client')
+    @include('menu.client')
 @endif

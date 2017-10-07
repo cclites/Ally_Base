@@ -16,3 +16,5 @@
         <li><a href="{{ route('caregivers.reports.deposits') }}">Deposit History</a></li>
     </ul>
 </li>
+<li> <a class="has-arrow" href="/documents" aria-expanded="false"><i class="fa fa-file-text"></i><span class="hide-menu">Documents</span></a>
+</li>

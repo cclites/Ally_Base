@@ -1,0 +1,18 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Document extends Model
+{
+    protected $guarded = ['id', 'user_id'];
+
+    /**
+     * User who uploaded the document.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

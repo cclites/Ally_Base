@@ -6,6 +6,7 @@ use App\Exceptions\ExistingBankAccountException;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Caregiver extends Model
 {
@@ -28,6 +29,13 @@ class Caregiver extends Model
         }
 
         return $this->update(['bank_account_id' => $account->id]);
+    }
+
+    public function startShift()
+    {
+        $shift = new Shift();
+        $shift->checked_in_time = Carbon::now();
+        return $this->shifts()->save($shift);
     }
 
     public function bankAccount()
