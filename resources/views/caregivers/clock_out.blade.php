@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="alert alert-success" role="alert">
-                <strong>Checked in.</strong> You are currently checked in.  Check out below.
+                <strong>Clocked in.</strong> You are currently clocked in.  Clock out below.
             </div>
         </div>
     </div>
