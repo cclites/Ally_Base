@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <full-calendar ref="calendar" :events="events" />
+        <full-calendar ref="calendar" :events="events" @event-selected="clockIn" />
     </b-card>
 </template>
 
@@ -45,6 +45,11 @@
                     this.editModal = false;
                 }
             },
+
+            clockIn(event, jsEvent, view) {
+                console.log(event);
+                window.location = '/clock-in/' + event.id;
+            }
         },
 
         watch: {

@@ -66,6 +66,7 @@
     export default {
         props: {
             'events': {},
+            'selected': {}
         },
 
         data() {
@@ -84,7 +85,9 @@
         },
 
         mounted() {
-
+            if (this.selected) {
+                this.form.schedule_id = this.selected;
+            }
         },
 
         methods: {

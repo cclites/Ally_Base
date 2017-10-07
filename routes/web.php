@@ -35,8 +35,8 @@ Route::group([
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('clock-in', 'ShiftController@index')->name('shift.index');
-    Route::post('clock-in', 'ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-in/{schedule_id?}', 'ShiftController@index')->name('shift.index');
+    Route::post('clock-in/{schedule_id?}', 'ShiftController@clockIn')->name('clock_in');
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
 

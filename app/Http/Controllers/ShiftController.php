@@ -23,13 +23,13 @@ class ShiftController extends Controller
         return auth()->user()->role;
     }
 
-    public function index()
+    public function index($schedule_id = null)
     {
         if ($this->caregiver()->isClockedIn()) {
             return redirect()->route('clocked_in');
         }
         $events = $this->getRecentEvents()->toArray();
-        return view('caregivers.clock_in', compact('events'));
+        return view('caregivers.clock_in', compact('events', 'schedule_id'));
     }
 
     public function clockedIn()
@@ -85,9 +85,9 @@ class ShiftController extends Controller
             'longitude' => 'numeric|nullable|required_unless:manual,1',
             'manual' => 'nullable',
         ], [
-                'latitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
-                'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
-            ]);
+            'latitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
+            'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
+        ]);
 
         $schedule = Schedule::findOrFail($request->input('schedule_id'));
 
