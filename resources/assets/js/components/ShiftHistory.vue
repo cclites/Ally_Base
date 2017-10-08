@@ -19,9 +19,6 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
-                <template slot="actions" scope="row">
-
-                </template>
             </b-table>
         </div>
 
@@ -73,7 +70,11 @@
                         label: 'Hours',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'verified',
+                        label: 'Verified',
+                        sortable: true,
+                    },
                 ]
             }
         },
@@ -93,6 +94,7 @@
                         date: start.local().format('L LTS'),
                         client_name: shift.client_name,
                         hours: hours,
+                        verified: (shift.verified) ? 'Verified' : 'Unverified'
                     }
                 })
             },
