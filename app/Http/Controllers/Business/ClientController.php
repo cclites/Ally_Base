@@ -75,14 +75,14 @@ class ClientController extends BaseController
 
         $client->load(['user', 'addresses', 'phoneNumbers', 'bankAccounts', 'creditCards', 'user.documents']);
         $schedules = $client->schedules()->get();
-        $caregivers = $this->business()->caregivers->map(function($caregiver) {
-            return [
-                'id' => $caregiver->id,
-                'firstname' => $caregiver->firstname,
-                'lastname' => $caregiver->lastname,
-                'default_rate' => $caregiver->pivot->default_rate,
-            ];
-        });
+        $caregivers = $this->business()->caregivers()
+              ->with('user')
+              ->where('business_id', $this->business()->id)
+              ->get()
+              ->sortBy('user.lastname')
+              ->map(function($caregiver) {
+                  return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
+              });
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers'));
     }

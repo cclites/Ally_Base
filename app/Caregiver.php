@@ -42,6 +42,18 @@ class Caregiver extends Model
         return $this->belongsToMany(Business::class, 'business_caregivers');
     }
 
+    public function clients()
+    {
+        return $this->belongsToMany(Client::class, 'client_caregivers')
+                    ->withTimestamps()
+                    ->withPivot([
+                        'caregiver_hourly_rate',
+                        'caregiver_daily_rate',
+                        'provider_hourly_fee',
+                        'provider_daily_fee',
+                    ]);
+    }
+
     public function deposits()
     {
         return $this->hasMany(Deposit::class);

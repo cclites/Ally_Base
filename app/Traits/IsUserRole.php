@@ -24,6 +24,11 @@ trait IsUserRole
         return $this->user->name();
     }
 
+    public function nameLastFirst()
+    {
+        return $this->user->nameLastFirst();
+    }
+
     public function __get($name) {
         $parentValue = parent::__get($name);
         if ($parentValue === null) {

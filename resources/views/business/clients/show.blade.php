@@ -69,6 +69,10 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane" id="caregivers" role="tabpanel">
+            <!-- Care Plan Placeholder -->
+            <client-caregivers :list="{{ $caregivers }}" :client_id="{{ $client->id }}"></client-caregivers>
+        </div>
         <div class="tab-pane" id="care-plan" role="tabpanel">
             <!-- Care Plan Placeholder -->
             <h4>Care Plan coming soon</h4>
@@ -85,7 +89,7 @@
             </div>
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
-            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}" :caregivers="{{ $caregivers }}"></client-schedule>
+            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list

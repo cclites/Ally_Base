@@ -48,6 +48,19 @@ class Client extends Model
         return $this->belongsTo(Business::class);
     }
 
+    public function caregivers()
+    {
+        return $this->belongsToMany(Caregiver::class, 'client_caregivers')
+            ->with('user')
+            ->withTimestamps()
+            ->withPivot([
+                'caregiver_hourly_rate',
+                'caregiver_daily_rate',
+                'provider_hourly_fee',
+                'provider_daily_fee',
+            ]);
+    }
+
     public function schedules()
     {
         return $this->hasMany(Schedule::class);

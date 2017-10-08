@@ -221,7 +221,7 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col sm="7">
+                            <b-col sm="12">
                                 <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                                     <b-form-select
                                         id="caregiver_id"
@@ -230,22 +230,9 @@
                                         @input="updateDefaultRate()"
                                         >
                                         <option value="">--Not Assigned--</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.lastname }}, {{ caregiver.firstname }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
                                     <input-help :form="editForm" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
-                                </b-form-group>
-                            </b-col>
-                            <b-col sm="5">
-                                <b-form-group label="Caregiver Rate" label-for="scheduled_rate">
-                                    <b-form-input
-                                        id="scheduled_rate"
-                                        name="scheduled_rate"
-                                        type="number"
-                                        step="any"
-                                        v-model="editForm.scheduled_rate"
-                                        >
-                                    </b-form-input>
-                                    <input-help :form="editForm" field="scheduled_rate" text="Set the caregiver's hourly rate"></input-help>
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -320,7 +307,6 @@
         props: {
             client: {},
             schedules: {},
-            caregivers: {},
         },
 
         data() {
@@ -343,7 +329,8 @@
                     'Thursday': 'th',
                     'Friday': 'fr',
                     'Saturday': 'sa',
-                }
+                },
+                caregivers: {},
             }
         },
 
@@ -355,6 +342,7 @@
         methods: {
 
             createSchedule(date, jsEvent, view) {
+                this.loadCaregivers();
                 this.createModal = true;
                 this.createType = null;
                 this.selectedEvent = date;
@@ -366,6 +354,7 @@
 
             editSchedule(event, jsEvent, view) {
                 var component = this;
+                component.loadCaregivers();
                 component.resetEdit();
                 component.selectedEvent = event;
                 axios.get(this.events + '/' + event.id)
@@ -392,7 +381,7 @@
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
                     caregiver_id: null,
-                    scheduled_rate: null,
+//                    scheduled_rate: null,
                     notes: null,
                     utc_offset: this.getUserUtcOffset(),
                 });
@@ -407,7 +396,7 @@
                     interval_type: null,
                     bydays: [],
                     caregiver_id: null,
-                    scheduled_rate: null,
+//                    scheduled_rate: null,
                     notes: null,
                     utc_offset: this.getUserUtcOffset(),
                 });
@@ -419,7 +408,7 @@
                     time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     caregiver_id: this.selectedSchedule.caregiver_id,
-                    scheduled_rate: this.selectedSchedule.scheduled_rate,
+//                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
                     utc_offset: this.getUserUtcOffset(),
                 });
@@ -434,7 +423,7 @@
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
                     caregiver_id: this.selectedSchedule.caregiver_id,
-                    scheduled_rate: this.selectedSchedule.scheduled_rate,
+//                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
                     utc_offset: this.getUserUtcOffset(),
                 });
@@ -537,6 +526,11 @@
                 let obj = moment(timestamp).local();
                 console.log(obj);
                 return obj;
+            },
+
+            loadCaregivers() {
+                axios.get('/business/clients/' + this.client.id + '/caregivers')
+                    .then(response => this.caregivers = response.data);
             }
         },
 
