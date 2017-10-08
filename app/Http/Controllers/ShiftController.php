@@ -163,6 +163,13 @@ class ShiftController extends Controller
         ]);
 
         if ($update) {
+            // Attach activities
+            if ($activities = $request->input('activities')) {
+                $shift->activities()->attach($activities, ['completed' => 1]);
+            }
+
+            // Attach issues TODO
+
             return new SuccessResponse('You have successfully clocked out.');
         }
         return new ErrorResponse(500, 'There was an error clocking out.');
