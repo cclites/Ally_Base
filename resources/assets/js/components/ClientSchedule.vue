@@ -367,16 +367,15 @@
             editSchedule(event, jsEvent, view) {
                 var component = this;
                 component.resetEdit();
-                component.editModal = true;
                 component.selectedEvent = event;
                 axios.get(this.events + '/' + event.id)
                     .then(function(response) {
                         console.log(response.data);
                         component.selectedSchedule = response.data;
+                        component.editModal = true;
                     })
                     .catch(function(error) {
-                        console.log('Error accessing schedule');
-                        component.editModal = false;
+                        alert('Error loading schedule details');
                     });
 
             },
