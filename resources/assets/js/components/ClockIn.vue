@@ -79,7 +79,7 @@
                     manual: 0,
                     debugMode: false,
                 }),
-                allowDebug: true,
+                allowDebug: false,
                 showManual: false,
                 stats: [],
             }
