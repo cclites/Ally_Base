@@ -62,7 +62,7 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col sm="7">
+                        <b-col sm="12">
                             <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                                 <b-form-select
                                         id="caregiver_id"
@@ -74,19 +74,6 @@
                                     <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
                                 </b-form-select>
                                 <input-help :form="createForm" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col sm="5">
-                            <b-form-group label="Caregiver Rate" label-for="scheduled_rate">
-                                <b-form-input
-                                        id="scheduled_rate"
-                                        name="scheduled_rate"
-                                        type="number"
-                                        step="any"
-                                        v-model="createForm.scheduled_rate"
-                                >
-                                </b-form-input>
-                                <input-help :form="createForm" field="scheduled_rate" text="Set the caregiver's hourly rate"></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
