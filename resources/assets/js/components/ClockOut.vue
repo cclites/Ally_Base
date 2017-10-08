@@ -156,7 +156,7 @@
                 var component = this;
                 this.form.post('/clock-out')
                     .then(function(response) {
-                        window.location = '/clock-in'
+                        window.location = '/clock-in?clocked_out=1'
                     })
                     .catch(function(error) {
                         component.showManual = true;

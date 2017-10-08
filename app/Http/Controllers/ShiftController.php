@@ -113,9 +113,7 @@ class ShiftController extends Controller
             'verified' => !$manual
         ]);
         if ($this->caregiver()->shifts()->save($shift)) {
-            \Session::flash('sucess', 'You have successfully clocked in.');
             return new SuccessResponse('You have successfully clocked in.');
-            return redirect()->route('clocked_in')->with('status', 'You have successfully clocked in!');
         }
         return redirect()->back()->with('error', 'System Error: Unable to clock in.');
     }
@@ -138,6 +136,10 @@ class ShiftController extends Controller
             'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
         ]);
+
+        // Force null values to 0
+        if (!$data['other_expenses']) $data['other_expenses'] = 0;
+        if (!$data['mileage']) $data['mileage'] = 0;
 
         $shift = $this->caregiver()->getActiveShift();
         $client = $shift->client;

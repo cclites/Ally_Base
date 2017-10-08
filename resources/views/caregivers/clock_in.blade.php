@@ -3,6 +3,16 @@
 @section('title', 'Clock In')
 
 @section('content')
+    @if(isset($_GET['clocked_out']))
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="alert alert-success" role="alert">
+                    <strong>Clocked out.</strong> You have successfully clocked out.
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-lg-6">
             <clock-in :events="{{ json_encode($events) }}" selected="{{ $schedule_id }}"></clock-in>
