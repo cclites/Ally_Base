@@ -71,7 +71,7 @@
                                         @input="updateDefaultRate()"
                                 >
                                     <option value="">--Not Assigned--</option>
-                                    <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.lastname }}, {{ caregiver.firstname }}</option>
+                                    <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
                                 </b-form-select>
                                 <input-help :form="createForm" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
                             </b-form-group>
