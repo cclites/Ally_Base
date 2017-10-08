@@ -124,7 +124,14 @@
 
         mounted() {
             axios.get('/business/clients/' + this.client_id + '/caregivers')
-                .then(response => this.items = response.data);
+                .then(response => {
+                    if (Array.isArray(response.data)) {
+                        this.items = response.data;
+                    }
+                    else {
+                        this.items = [];
+                    }
+                });
         },
 
         methods: {
