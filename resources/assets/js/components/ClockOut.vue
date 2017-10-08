@@ -59,8 +59,10 @@
                             id="injuries"
                             name="injuries"
                             v-model="form.caregiver_injury"
+                            required
                         >
-                            <option selected>No</option>
+                            <option value="">--Please indicate--</option>
+                            <option value="0">No</option>
                             <option value="1">Yes, I was injured.</option>
                         </b-form-select>
                         <input-help :form="form" field="caregiver_injury" text="Indicate if you suffered an injury."></input-help>
