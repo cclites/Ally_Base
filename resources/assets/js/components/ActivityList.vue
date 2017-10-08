@@ -35,7 +35,7 @@
             </b-col>
         </b-row>
 
-        <b-modal id="editActivity" title="Edit Activity" v-model="activityModal">
+        <b-modal id="editActivity" :title="modalTitle" v-model="activityModal">
             <b-container fluid>
                 <b-row>
                     <b-form-group label="Activity Code" label-for="code">
@@ -108,7 +108,12 @@
         },
 
         computed: {
-
+            modalTitle() {
+                if (this.selectedItem.id) {
+                    return 'Edit Activity';
+                }
+                return 'Create Activity';
+            }
         },
 
         methods: {
