@@ -51,7 +51,7 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['office_user'],
 ], function() {
-    Route::get('activities', 'Business\ActivityController@index')->name('activities.index');
+    Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
     Route::resource('caregivers', 'Business\CaregiverController');
     Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');

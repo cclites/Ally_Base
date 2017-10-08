@@ -38,7 +38,7 @@ class Business extends Model
 
     public function activities()
     {
-        return $this->hasMany(Activity::class);
+        return $this->hasMany(Activity::class)->orderBy('code');
     }
 
     public function clients()

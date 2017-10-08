@@ -2,7 +2,7 @@
     <b-card>
         <b-row>
             <b-col lg="6">
-                <!--<a href="/business/caregivers/create" class="btn btn-info">Add Activity</a>-->
+                <b-btn variant="info" @click="createActivity()">Add Activity</b-btn>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -21,10 +21,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <!--<b-btn size="sm" :href="'/business/caregivers/' + row.item.id">-->
-                        <!--<i class="fa fa-edit"></i>-->
-                    <!--</b-btn>-->
+                    <b-btn size="sm" @click.stop="editActivity(row.item)">Edit</b-btn>
                 </template>
             </b-table>
         </div>
@@ -37,6 +34,38 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <b-modal id="editActivity" title="Edit Activity" v-model="activityModal">
+            <b-container fluid>
+                <b-row>
+                    <b-form-group label="Activity Code" label-for="code">
+                        <b-form-input
+                            id="code"
+                            name="code"
+                            type="text"
+                            v-model="form.code"
+                            >
+                        </b-form-input>
+                        <input-help :form="form" field="code" text="Enter a numerical code for this activity."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Activity Name" label-for="name">
+                        <b-form-input
+                            id="name"
+                            name="name"
+                            type="text"
+                            v-model="form.name"
+                            >
+                        </b-form-input>
+                        <input-help :form="form" field="name" text="Enter the display name for this activity."></input-help>
+                    </b-form-group>
+               </b-row>
+            </b-container>
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="activityModal=false">Close</b-btn>
+               <b-btn variant="danger" @click="deleteActivity()" v-if="selectedItem.id">Delete</b-btn>
+               <b-btn variant="info" @click="saveActivity()">Save</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
@@ -53,10 +82,10 @@
                 currentPage: 1,
                 sortBy: null,
                 sortDesc: false,
-                editModalVisible: false,
                 filter: null,
-                modalDetails: { index:'', data:'' },
+                activityModal: false,
                 selectedItem: {},
+                form: new Form(),
                 fields: [
                     {
                         key: 'code',
@@ -69,7 +98,8 @@
                         sortable: true,
                     },
                     'actions'
-                ]
+                ],
+                items: this.activities,
             }
         },
 
@@ -78,18 +108,63 @@
         },
 
         computed: {
-            items() {
-                return this.activities;
-            },
+
         },
 
         methods: {
-            details(item, index, button) {
+            editActivity(item) {
                 this.selectedItem = item;
-                this.modalDetails.data = JSON.stringify(item, null, 2);
-                this.modalDetails.index = index;
-//                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
-                this.editModalVisible = true;
+                this.activityModal = true;
+                this.form = new Form({
+                    code: this.selectedItem.code,
+                    name: this.selectedItem.name,
+                });
+            },
+            createActivity() {
+                this.selectedItem = {};
+                this.activityModal = true;
+                this.form = new Form({
+                    code: null,
+                    name: null,
+                });
+            },
+            saveActivity() {
+                var component = this;
+                if (component.selectedItem.id) {
+                    component.form.patch('/business/activities/' + component.selectedItem.id)
+                        .then(function(response) {
+                            component.activityModal = false;
+                            component.items.map(function(activity) {
+                                if (activity.id == component.selectedItem.id) {
+                                    activity.code = component.form.code;
+                                    activity.name = component.form.name;
+                                }
+                                return activity;
+                            })
+                        });
+                }
+                else {
+                    component.form.post('/business/activities')
+                        .then(function(response) {
+                            component.activityModal = false;
+                            component.items.unshift({
+                                id: response.data.data.id,
+                                code: component.form.code,
+                                name: component.form.name,
+                            })
+                        });
+                }
+            },
+            deleteActivity() {
+                if (confirm('Are you sure you wish to delete this activity?')) {
+                    let component = this;
+                    let form = new Form();
+                    form.submit('delete', '/business/activities/' + component.selectedItem.id)
+                        .then(function(response) {
+                            component.items = component.items.filter(activity => activity.id != component.selectedItem.id);
+                            component.activityModal = false;
+                        });
+                }
             },
             resetModal() {
                 this.modalDetails.data = '';
