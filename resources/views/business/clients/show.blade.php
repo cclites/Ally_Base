@@ -21,6 +21,9 @@
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care-plan" role="tab">Care Plan</a>
         </li>
         <li class="nav-item">
@@ -55,11 +58,14 @@
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
             <div class="row">
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-12 col-lg-6 col-xlg-4">
                     <phone-number title="Service Number" type="evv" action="{{ route('business.clients.phone', [$client->id, 'evv']) }}" :phone="{{ json_phone($client->user, 'evv') }}"></phone-number>
                 </div>
-                <div class="col-lg-6 col-sm-12">
+                <div class="col-12 col-lg-6 col-xlg-4">
                     <phone-number title="Billing Number" type="billing" action="{{ route('business.clients.phone', [$client->id, 'billing']) }}" :phone="{{ json_phone($client->user, 'billing') }}"></phone-number>
+                </div>
+                <div class="col-12 col-lg-6 col-xlg-4">
+                    <phone-number title="Home Number" type="home" action="{{ route('business.clients.phone', [$client->id, 'home']) }}" :phone="{{ json_phone($client->user, 'home') }}"></phone-number>
                 </div>
             </div>
         </div>
