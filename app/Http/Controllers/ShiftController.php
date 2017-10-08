@@ -8,6 +8,7 @@ use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Shift;
+use App\ShiftIssue;
 use Illuminate\Http\Request;
 
 
@@ -168,7 +169,15 @@ class ShiftController extends Controller
                 $shift->activities()->attach($activities, ['completed' => 1]);
             }
 
-            // Attach issues TODO
+            // Attach issues
+            $issueText = trim($request->input('issue_text'));
+            if ($request->input('caregiver_injury') || $issueText) {
+                $issue = new ShiftIssue([
+                    'caregiver_injury' => $request->input('caregiver_injury'),
+                    'comments' => $issueText,
+                ]);
+                $shift->issues()->save($issue);
+            }
 
             return new SuccessResponse('You have successfully clocked out.');
         }

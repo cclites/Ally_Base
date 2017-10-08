@@ -84,6 +84,10 @@
                         <p v-if="!selectedItem.issues || !selectedItem.issues.length">
                             No issues reported
                         </p>
+                        <p else v-for="issue in selectedItem.issues">
+                            <strong v-if="issue.caregiver_injury">The caregiver reported an injury to themselves.<br /></strong>
+                            {{ issue.comments }}
+                        </p>
                     </b-col>
                 </b-row>
                 <h4>Activities Performed</h4>

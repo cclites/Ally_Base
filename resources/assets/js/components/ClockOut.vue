@@ -54,15 +54,26 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Were there any injuries on your shift?" label-for="injuries">
+                    <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
                         <b-form-select
                             id="injuries"
                             name="injuries"
-                            >
-                            <option>No</option>
-                            <option>Yes</option>
+                            v-model="form.caregiver_injury"
+                        >
+                            <option selected>No</option>
+                            <option value="1">Yes, I was injured.</option>
                         </b-form-select>
-                        <input-help :form="form" field="injuries" text="Indicate if you or someone else suffered an injury."></input-help>
+                        <input-help :form="form" field="caregiver_injury" text="Indicate if you suffered an injury."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Were there any other issues on your shift?" label-for="issue_text">
+                        <b-textarea
+                                id="issue_text"
+                                name="issue_text"
+                                v-model="form.issue_text"
+                                :rows="2"
+                        >
+                        </b-textarea>
+                        <input-help :form="form" field="issue_text" text="Add comments about any issues or injuries on your shift."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -105,6 +116,8 @@
                     longitude: null,
                     manual: 0,
                     activities: [],
+                    caregiver_injury: 0,
+                    issue_text: null,
                 }),
                 showManual: false,
             }
