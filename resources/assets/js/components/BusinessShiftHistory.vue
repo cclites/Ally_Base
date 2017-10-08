@@ -114,8 +114,7 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Clock In</th>
-                                <th></th>
+                                <th colspan="2">Clock In</th>
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
@@ -145,8 +144,7 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Clock Out</th>
-                                <th></th>
+                                <th colspan="2">Clock Out</th>
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
