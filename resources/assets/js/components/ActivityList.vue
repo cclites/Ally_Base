@@ -21,7 +21,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click.stop="editActivity(row.item)" v-if="row.item.business_id">Edit</b-btn>
+                    <b-btn size="sm" @click.stop="editActivity(row.item)" v-if="row.item.business_id || row.item.new">Edit</b-btn>
                 </template>
             </b-table>
         </div>
@@ -156,6 +156,7 @@
                                 id: response.data.data.id,
                                 code: component.form.code,
                                 name: component.form.name,
+                                new: true,
                             })
                         });
                 }
