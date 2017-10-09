@@ -22,7 +22,9 @@ class CaregiverShiftController extends Controller
     public function __construct(Request $request, PhoneNumber $phoneNumber)
     {
         $this->request = $request;
-        $this->number = $phoneNumber->input($request->input('From'));
+        if ($request->input('From')) {
+            $this->number = $phoneNumber->input($request->input('From'));
+        }
     }
 
     /**
