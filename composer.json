@@ -11,6 +11,7 @@
         "inacho/php-credit-card-validator": "^1.0",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
+        "s-ichikawa/laravel-sendgrid-driver": "^2.0",
         "tplaner/when": "^2.1",
         "twilio/sdk": "^5.14"
     },
