@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <full-calendar ref="calendar" :events="events" default-view="agendaWeek" :header="header" />
+        <full-calendar ref="calendar" :events="events" default-view="agendaWeek" :header="header" @event-selected="alert('Coming soon! Please manage scheduling from the Client section')" @day-click="alert('Coming soon! Please manage scheduling from the Client section')"  />
     </b-card>
 </template>
 
@@ -50,6 +50,9 @@
                     this.editModal = false;
                 }
             },
+            alert(message) {
+                alert(message)
+            }
         },
 
         watch: {
