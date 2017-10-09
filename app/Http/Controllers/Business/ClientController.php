@@ -24,6 +24,18 @@ class ClientController extends BaseController
         return view('business.clients.index', compact('clients'));
     }
 
+    public function listNames()
+    {
+        return $this->business()->clients()->with(['user'])->get()->map(function($client) {
+            return [
+                'id' => $client->id,
+                'firstname' => $client->user->firstname,
+                'lastname' => $client->user->lastname,
+                'name' => $client->nameLastFirst(),
+            ];
+        });
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -57,6 +57,8 @@ Route::group([
     Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
+
+    Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
     Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
     Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
@@ -79,6 +81,7 @@ Route::group([
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
+    Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
     Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
     Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');

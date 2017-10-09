@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Responses\ErrorResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
+use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use Illuminate\Http\Request;
 
@@ -36,6 +38,25 @@ class ScheduleController extends BaseController
 
         $events = new ScheduleEventsResponse($aggregator->events($start, $end));
         return $events;
+    }
+
+    /**
+     * Retrieve the details of a schedule
+     *
+     * @param $client_id
+     * @param $schedule_id
+     *
+     * @return \Illuminate\Contracts\Support\Responsable
+     */
+    public function show($schedule_id)
+    {
+        $schedule = Schedule::findOrFail($schedule_id);
+
+        if ($schedule->business_id != $this->business()->id) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        return new ScheduleResponse($schedule);
     }
 
 }

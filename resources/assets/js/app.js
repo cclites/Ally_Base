@@ -16,7 +16,7 @@ window.Countries = Countries;
 
 window.Vue = require('vue');
 
-import BootstrapVue from 'bootstrap-vue'
+import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
 // import vSelect from "vue-select"
@@ -54,6 +54,9 @@ Vue.component('client-list', require('./components/ClientList.vue'));
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
 
+Vue.component('create-schedule-modal', require('./components/CreateScheduleModal.vue'));
+Vue.component('edit-schedule-modal', require('./components/EditScheduleModal.vue'));
+
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
 
@@ -74,7 +77,7 @@ Vue.component('user-address', require('./components/UserAddress.vue'));
 Vue.component('document-list', require('./components/DocumentList.vue'));
 
 Vue.filter('date', value => {
-    return moment.utc(value).local().format('L')
+    return moment.utc(value).local().format('L');
 });
 
 Vue.filter('datetime', value => {
@@ -86,8 +89,7 @@ Vue.filter('capitalize', value => {
         return '';
     }
 
-    return value.toString().charAt(0).toUpperCase()
-        + value.slice(1);
+    return value.toString().charAt(0).toUpperCase() + value.slice(1);
 });
 
 Vue.filter('nl2br', value => {
