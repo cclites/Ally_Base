@@ -40,7 +40,8 @@ class ShiftController extends Controller
         }
         $shift = $this->caregiver()->getActiveShift();
         $activities = $shift->business->activities->sortBy('code');
-        return view('caregivers.clock_out', compact('shift', 'activities'));
+        $notes = $shift->schedule->notes;
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes'));
     }
 
     public function clockIn(Request $request)
