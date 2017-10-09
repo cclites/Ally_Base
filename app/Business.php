@@ -38,7 +38,9 @@ class Business extends Model
 
     public function activities()
     {
-        return $this->hasMany(Activity::class)->orderBy('code');
+        return $this->hasMany(Activity::class)
+            ->orWhereNull('business_id')
+            ->orderBy('code');
     }
 
     public function clients()

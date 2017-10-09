@@ -6,6 +6,7 @@ use App\Activity;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidActivityCode;
 use Illuminate\Http\Request;
 
 class ActivityController extends BaseController
@@ -30,7 +31,7 @@ class ActivityController extends BaseController
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code' => 'required|numeric',
+            'code' => ['required', 'numeric', new ValidActivityCode($this->business()->id)],
             'name' => 'required'
         ]);
 
@@ -55,7 +56,7 @@ class ActivityController extends BaseController
         }
 
         $data = $request->validate([
-            'code' => 'required|numeric',
+            'code' => ['required', 'numeric', new ValidActivityCode($this->business()->id, $activity->id)],
             'name' => 'required'
         ]);
 

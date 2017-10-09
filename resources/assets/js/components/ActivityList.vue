@@ -21,7 +21,7 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click.stop="editActivity(row.item)">Edit</b-btn>
+                    <b-btn size="sm" @click.stop="editActivity(row.item)" v-if="row.item.business_id">Edit</b-btn>
                 </template>
             </b-table>
         </div>
@@ -182,4 +182,4 @@
             }
         }
     }
-</script>
+</script
