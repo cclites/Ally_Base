@@ -268,7 +268,7 @@ class CaregiverShiftController extends Controller
             return $this->finalizeCheckOut();
         }
 
-        if ($activity = $shift->business->activities()->where('code', $code)->first()) {
+        if ($activity = $shift->business->findActivity($code)) {
             $gather = $response->gather([
                 'numDigits' => 1,
                 'action' => route('telefony.record_activity', [$activity->id]),

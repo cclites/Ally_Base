@@ -18,7 +18,7 @@ class ActivityController extends BaseController
      */
     public function index()
     {
-        $activities = $this->business()->activities;
+        $activities = $this->business()->allActivities();
         return view('business.activities.index', compact('activities'));
     }
 

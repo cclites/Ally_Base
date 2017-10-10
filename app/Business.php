@@ -39,8 +39,23 @@ class Business extends Model
     public function activities()
     {
         return $this->hasMany(Activity::class)
-            ->orWhereNull('business_id')
             ->orderBy('code');
+    }
+
+    public function allActivities()
+    {
+        return $this->activities->merge(Activity::whereNull('business_id')->get())->sortBy('code')->values();
+    }
+
+    public function findActivity($code)
+    {
+        $activity = Activity::where(function ($q) {
+            $q->where('business_id', $this->business_id)
+                ->orWhereNull('business_id');
+        })
+            ->where('code', $code)
+            ->first();
+        return $activity;
     }
 
     public function clients()

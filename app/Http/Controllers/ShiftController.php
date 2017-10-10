@@ -39,7 +39,7 @@ class ShiftController extends Controller
             return redirect()->route('shift.index');
         }
         $shift = $this->caregiver()->getActiveShift();
-        $activities = $shift->business->activities->sortBy('code');
+        $activities = $shift->business->allActivities();
         $notes = $shift->schedule->notes;
         return view('caregivers.clock_out', compact('shift', 'activities', 'notes'));
     }
