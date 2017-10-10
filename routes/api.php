@@ -26,4 +26,5 @@ Route::post('/caregiver/check-for-injury', 'Api\CaregiverShiftController@checkFo
 Route::post('/caregiver/check-for-activities', 'Api\CaregiverShiftController@checkForActivitiesResponse')->name('telefony.check_for_activities');
 Route::post('/caregiver/confirm-activity', 'Api\CaregiverShiftController@confirmActivity')->name('telefony.confirm_activity');
 Route::post('/caregiver/record-activity/{id}', 'Api\CaregiverShiftController@recordActivity')->name('telefony.record_activity');
+Route::post('/caregiver/finalize-check-out', 'Api\CaregiverShiftController@finalizeCheckOut')->name('telefony.finalize_check_out');
 
