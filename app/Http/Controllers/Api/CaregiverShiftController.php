@@ -247,6 +247,8 @@ class CaregiverShiftController extends Controller
         ]);
 
         $gather->say('Please enter the numerical code of any activity performed on your shift followed by a # key. If you are finished recording activities press the * key to finalize your clock out.');
+
+        return $this->response($response);
     }
 
     public function confirmActivity() {
