@@ -190,7 +190,7 @@ class CaregiverShiftController extends Controller
         }
 
         if ($schedule->caregiver->shifts()->save($shift)) {
-            $response->say('You have successfully clocked in.  Please remember to call back and check-out at the end of your shift. Good bye.');
+            $response->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
         }
         else {
             $response->say('There was an error clocking in.  Please hang up and try again.');
@@ -236,8 +236,8 @@ class CaregiverShiftController extends Controller
                 $shift->issues()->save($issue);
 
                 $response = new Twiml;
+                $response->say('We will be in touch with you shortly regarding your injury.  Please continue clocking out.');
                 $response->redirect(route('telefony.check_for_activities'));
-                $response->say('We will be in touch with you shortly regarding your injury.');
                 return $this->response($response);
             case 2:
                 return $this->checkForActivitiesResponse();
@@ -262,11 +262,14 @@ class CaregiverShiftController extends Controller
     public function confirmActivity() {
         $shift = $this->activeShiftForNumber($this->number);
         $code = $this->request->input('Digits');
-        $response = new Twiml;
+
+        \Log::info('Telefony activity code entered: ' . $code);
 
         if (!strlen($code)) {
             return $this->finalizeCheckOut();
         }
+
+        $response = new Twiml;
 
         if ($activity = $shift->business->findActivity($code)) {
             $gather = $response->gather([
