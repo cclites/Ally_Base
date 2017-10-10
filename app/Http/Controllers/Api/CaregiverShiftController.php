@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Activity;
 use App\Client;
 use App\Exceptions\TelefonyMessageException;
 use App\Shift;
+use App\ShiftIssue;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Twilio\Twiml;
 use App\Schedule;
 use App\Caregiver;
@@ -194,13 +197,101 @@ class CaregiverShiftController extends Controller
      */
     private function checkOutFirstCaregiver()
     {
-        $response = new Twiml;
         $shift = $this->activeShiftForNumber($this->number);
 
         if (!$shift) {
+            $response = new Twiml;
             $response->say('The active shift could not be found.  Please hang up and try again.');
             return $this->response($response);
         }
+
+        return $this->checkForInjuryResponse();
+    }
+
+    private function checkForInjuryResponse() {
+        $response = new Twiml;
+        $gather = $response->gather([
+            'numDigits' => 1,
+            'action' => route('telefony.check_for_injury'),
+        ]);
+        $schedule = $this->scheduledShiftForNumber($this->number);
+        $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury or 2 if you were not injured.');
+        return $this->response($response);
+    }
+
+    public function checkForInjuryAction() {
+        switch ($this->request->input('Digits')) {
+            case 1:
+                $shift = $this->activeShiftForNumber($this->number);
+                $issue = new ShiftIssue();
+                $issue->caregiver_injury = true;
+                $issue->comments = 'Injury recorded via Telefony System';
+                $shift->issues()->save($issue);
+
+                $response = new Twiml;
+                $response->redirect(route('telefony.check_for_activities'));
+                $response->say('We will be in touch with you shortly regarding your injury.');
+                return $this->response($response);
+            case 2:
+                return $this->checkForActivitiesResponse();
+        }
+
+        return $this->checkForInjuryResponse();
+    }
+
+    public function checkForActivitiesResponse() {
+        $response = new Twiml;
+        $gather = $response->gather([
+            'finishOnKey' => '#',
+            'action' => route('telefony.confirm_activity'),
+        ]);
+
+        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a # key. If you are finished recording activities press the * key to finalize your clock out.');
+    }
+
+    public function confirmActivity() {
+        $shift = $this->activeShiftForNumber($this->number);
+        $code = $this->request->input('Digits');
+        $response = new Twiml;
+
+        if ($code == '*') {
+            return $this->finalizeCheckOut();
+        }
+
+        if ($activity = Activity::whereBusinessId($shift->business_id)->whereCode($code)->first()) {
+            Session::put('current_activity_id', $activity->id);
+            $gather = $response->gather([
+                'numDigits' => 1,
+                'action' => route('telefony.record_activity'),
+            ]);
+            $gather->say(
+                sprintf('You have entered %s.  If this is correct, Press 1. If this is incorrect, Press 2.', $activity->name)
+            );
+            return $this->response($response);
+        }
+
+        $response->redirect(route('telefony.check_for_activities'));
+        $response->say('You have entered an invalid activity code.');
+        return $this->response($response);
+    }
+
+    public function recordActivity() {
+        $response = new Twiml;
+
+        if ($activity_id = Session::get('current_activity_id')) {
+            $shift = $this->activeShiftForNumber($this->number);
+            $shift->activites()->attach($activity_id);
+            $response->redirect(route('telefony.check_for_activities'));
+            $response->say('The activity has been recorded.');
+            return $this->response($response);
+        }
+
+        return $this->checkForActivitiesResponse();
+    }
+
+    private function finalizeCheckOut() {
+        $response = new Twiml;
+        $shift = $this->activeShiftForNumber($this->number);
 
         $update = $shift->update([
             'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
@@ -213,10 +304,7 @@ class CaregiverShiftController extends Controller
         else {
             $response->say('There was an error clocking out.  Please hang up and try again.');
         }
-
-        return $this->response($response);
     }
-
 
     /**
      * Return select caregiver response.
