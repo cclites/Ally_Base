@@ -48,6 +48,7 @@ class CaregiverShiftController extends Controller
             if ($shift = $this->activeShiftForNumber($this->number)) {
                 $schedule = $shift->schedule;
                 $gather = $response->gather([
+                    'timeout' => 15,
                     'numDigits' => 1,
                     'action' => route('telefony.check_out', [], false),
                 ]);
@@ -56,6 +57,7 @@ class CaregiverShiftController extends Controller
             else {
                 $schedule = $this->scheduledShiftForNumber($this->number);
                 $gather = $response->gather([
+                    'timeout' => 15,
                     'numDigits' => 1,
                     'action' => route('telefony.check_in', [], false),
                 ]);
@@ -218,6 +220,7 @@ class CaregiverShiftController extends Controller
     private function checkForInjuryResponse() {
         $response = new Twiml;
         $gather = $response->gather([
+            'timeout' => 15,
             'numDigits' => 1,
             'action' => route('telefony.check_for_injury'),
         ]);
@@ -273,6 +276,7 @@ class CaregiverShiftController extends Controller
 
         if ($activity = $shift->business->findActivity($code)) {
             $gather = $response->gather([
+                'timeout' => 10,
                 'numDigits' => 1,
                 'action' => route('telefony.record_activity', [$activity->id]),
             ]);
