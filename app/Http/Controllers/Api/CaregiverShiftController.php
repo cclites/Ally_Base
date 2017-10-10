@@ -224,7 +224,6 @@ class CaregiverShiftController extends Controller
             'numDigits' => 1,
             'action' => route('telefony.check_for_injury'),
         ]);
-        $schedule = $this->scheduledShiftForNumber($this->number);
         $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury. Press 2 if you were not injured.');
         return $this->response($response);
     }
@@ -239,7 +238,7 @@ class CaregiverShiftController extends Controller
                 $shift->issues()->save($issue);
 
                 $response = new Twiml;
-                $response->say('We will be in touch with you shortly regarding your injury.  Please continue clocking out.');
+                $response->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
                 $response->redirect(route('telefony.check_for_activities'));
                 return $this->response($response);
             case 2:
