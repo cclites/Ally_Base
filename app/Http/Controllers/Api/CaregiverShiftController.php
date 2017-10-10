@@ -261,7 +261,7 @@ class CaregiverShiftController extends Controller
             return $this->finalizeCheckOut();
         }
 
-        if ($activity = $shift->business->activities()->whereCode($code)->first()) {
+        if ($activity = $shift->business->activities()->where('code_id', $code)->first()) {
             Session::put('current_activity_id', $activity->id);
             $gather = $response->gather([
                 'numDigits' => 1,
@@ -284,6 +284,7 @@ class CaregiverShiftController extends Controller
         if ($activity_id = Session::get('current_activity_id')) {
             $shift = $this->activeShiftForNumber($this->number);
             $shift->activites()->attach($activity_id);
+            Session::remove('current_activity_id');
             $response->redirect(route('telefony.check_for_activities'));
             $response->say('The activity has been recorded.');
             return $this->response($response);
