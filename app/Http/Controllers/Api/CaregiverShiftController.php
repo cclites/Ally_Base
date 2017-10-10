@@ -17,6 +17,13 @@ use App\PhoneNumber;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+/**
+ * Class CaregiverShiftController
+ * @package App\Http\Controllers\Api
+ *
+ * NOTE: Sessions are not supported, use request parameters or cache
+ *
+ */
 class CaregiverShiftController extends Controller
 {
     protected $number;
@@ -262,10 +269,9 @@ class CaregiverShiftController extends Controller
         }
 
         if ($activity = $shift->business->activities()->where('code', $code)->first()) {
-            Session::put('current_activity_id', $activity->id);
             $gather = $response->gather([
                 'numDigits' => 1,
-                'action' => route('telefony.record_activity'),
+                'action' => route('telefony.record_activity', [$activity->id]),
             ]);
             $gather->say(
                 sprintf('You have entered %s.  If this is correct, Press 1. If this is incorrect, Press 2.', $activity->name)
@@ -278,23 +284,18 @@ class CaregiverShiftController extends Controller
         return $this->response($response);
     }
 
-    public function recordActivity() {
+    public function recordActivity($activity_id) {
         $response = new Twiml;
 
         if ($this->request->input('Digits') == 1) {
-            if ($activity_id = Session::get('current_activity_id')) {
-                \Log::info('current_activity_id: ' . $activity_id);
-                Session::remove('current_activity_id');
-                $shift = $this->activeShiftForNumber($this->number);
-                $shift->activites()->attach($activity_id);
-                $response->say('The activity has been recorded.');
-                $response->redirect(route('telefony.check_for_activities'));
-                return $this->response($response);
-            }
-            else {
-                \Log::info('current_activity_id not found');
-            }
+            Session::remove('current_activity_id');
+            $shift = $this->activeShiftForNumber($this->number);
+            $shift->activites()->attach($activity_id);
+            $response->say('The activity has been recorded.');
+            $response->redirect(route('telefony.check_for_activities'));
+            return $this->response($response);
         }
+
         return $this->checkForActivitiesResponse();
     }
 
@@ -412,7 +413,7 @@ class CaregiverShiftController extends Controller
                 throw new TelefonyMessageException('There is no caregiver assigned to this schedule.');
         }
 
-        Cache::set($cacheKey, $schedule->id, 5);
+        Cache::put($cacheKey, $schedule->id, 5);
         return $schedule;
     }
 
