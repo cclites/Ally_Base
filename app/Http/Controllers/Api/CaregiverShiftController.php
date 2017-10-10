@@ -254,7 +254,7 @@ class CaregiverShiftController extends Controller
             'action' => route('telefony.confirm_activity'),
         ]);
 
-        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. If you are finished recording activities press the * key to finalize your clock out.');
+        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. If you are finished recording activities press the # to finalize your clock out.');
 
         return $this->response($response);
     }
@@ -264,7 +264,7 @@ class CaregiverShiftController extends Controller
         $code = $this->request->input('Digits');
         $response = new Twiml;
 
-        if ($code == '*') {
+        if (!strlen($code)) {
             return $this->finalizeCheckOut();
         }
 
@@ -314,6 +314,8 @@ class CaregiverShiftController extends Controller
         else {
             $response->say('There was an error clocking out.  Please hang up and try again.');
         }
+
+        return $this->response($response);
     }
 
     /**
