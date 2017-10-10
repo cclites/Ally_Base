@@ -393,7 +393,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'firstname' => $firstname,
             'lastname' => $lastname,
             'ccnumber' => $card->number,
-            'ccexp' => $card->expiration_month . substr($card->expiration_year, -2),
+            'ccexp' => str_pad($card->expiration_month, 2, '0', STR_PAD_LEFT) . substr($card->expiration_year, -2),
             'cvv' => $cvv ?? '',
             'payment' => 'creditcard'
         ]);
