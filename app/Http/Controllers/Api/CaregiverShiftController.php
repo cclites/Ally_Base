@@ -281,15 +281,20 @@ class CaregiverShiftController extends Controller
     public function recordActivity() {
         $response = new Twiml;
 
-        if ($activity_id = Session::get('current_activity_id')) {
-            Session::remove('current_activity_id');
-            $shift = $this->activeShiftForNumber($this->number);
-            $shift->activites()->attach($activity_id);
-            $response->say('The activity has been recorded.');
-            $response->redirect(route('telefony.check_for_activities'));
-            return $this->response($response);
+        if ($this->request->input('Digits') == 1) {
+            if ($activity_id = Session::get('current_activity_id')) {
+                \Log::info('current_activity_id: ' . $activity_id);
+                Session::remove('current_activity_id');
+                $shift = $this->activeShiftForNumber($this->number);
+                $shift->activites()->attach($activity_id);
+                $response->say('The activity has been recorded.');
+                $response->redirect(route('telefony.check_for_activities'));
+                return $this->response($response);
+            }
+            else {
+                \Log::info('current_activity_id not found');
+            }
         }
-
         return $this->checkForActivitiesResponse();
     }
 
