@@ -261,7 +261,7 @@ class CaregiverShiftController extends Controller
             return $this->finalizeCheckOut();
         }
 
-        if ($activity = Activity::whereBusinessId($shift->business_id)->whereCode($code)->first()) {
+        if ($activity = $shift->business->activities()->whereCode($code)->first()) {
             Session::put('current_activity_id', $activity->id);
             $gather = $response->gather([
                 'numDigits' => 1,
@@ -273,8 +273,8 @@ class CaregiverShiftController extends Controller
             return $this->response($response);
         }
 
-        $response->redirect(route('telefony.check_for_activities'));
         $response->say('You have entered an invalid activity code.');
+        $response->redirect(route('telefony.check_for_activities'));
         return $this->response($response);
     }
 
