@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Scheduling\RuleGenerator;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
@@ -133,6 +134,9 @@ class Schedule extends Model
         $start_date->setTimezone(new \DateTimeZone('UTC'));
         $end_date->setTimezone(new \DateTimeZone('UTC'));
 
+        // Subtract the duration of the event to allow for events that may have already started but not finished
+        $start_date = Carbon::instance($start_date)->subMinute($this->duration);
+
         if ($start_date > $this->getEndDateTime()) {
             return [];
         }
@@ -159,11 +163,21 @@ class Schedule extends Model
         return $this->filterExceptions($occurrences);
     }
 
+    /**
+     * Get the starting time of the first event
+     *
+     * @return \DateTime
+     */
     public function getStartDateTime()
     {
         return new \DateTime($this->start_date . ' ' . $this->time, new \DateTimeZone('UTC'));
     }
 
+    /**
+     * Get the starting time of the last event
+     *
+     * @return \DateTime
+     */
     public function getEndDateTime()
     {
         $end = new \DateTime($this->end_date . ' ' . $this->time, new \DateTimeZone('UTC'));

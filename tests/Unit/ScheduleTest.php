@@ -8,6 +8,8 @@ use App\Caregiver;
 use App\Client;
 use App\Schedule;
 use App\ScheduleException;
+use Carbon\Carbon;
+use DateTime;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -269,6 +271,39 @@ class ScheduleTest extends TestCase
         $schedule->activities()->attach($activity2);
 
         $this->assertCount(2, $schedule->activities);
+    }
+
+    public function testScheduleIncludesOccurrencesThatHaveStartedButNotFinished() {
+        $rrule = 'FREQ=MONTHLY;BYMONTHDAY=2;INTERVAL=1';
+        $startdate = '2017-01-02';
+        $enddate = '2017-03-31';
+        $time = '09:00:00';
+        $duration = 240;
+        $test_duration = 30; // must be less than duration
+
+        $schedule = factory(Schedule::class)->make([
+                'rrule' => $rrule,
+                'start_date' => $startdate,
+                'end_date' => $enddate,
+                'time' => $time,
+                'duration' => $duration
+            ] + $this->scheduleAttributes);
+
+        $start = new Carbon($startdate . ' ' . $time);
+        $start->addMinutes($test_duration);
+        $end = new Carbon($startdate . ' ' . $time);
+        $end->addDays(1);
+
+        $occurrences = $schedule->getOccurrencesBetween($start, $end);
+        $this->assertCount(1, $occurrences, 'Failed matching initial past start time');
+
+        $start->addMinutes($duration - $test_duration - 1);
+        $occurrences = $schedule->getOccurrencesBetween($start, $end);
+        $this->assertCount(1, $occurrences, 'Failed matching far past start time');
+
+        $start->addMinutes(2);
+        $occurrences = $schedule->getOccurrencesBetween($start, $end);
+        $this->assertCount(0, $occurrences, 'Failed asserting 0 occurrences after end time');
     }
 
     protected function getrrule($freq, $byday, $interval=1) {
