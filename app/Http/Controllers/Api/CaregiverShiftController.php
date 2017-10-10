@@ -369,8 +369,8 @@ class CaregiverShiftController extends Controller
             throw new TelefonyMessageException('The number you have called from was not recognized in our system.');
         }
 
-        $start = new \DateTime('-4 hours');
-        $end = new \DateTime('+12 hours'); // determine if event's end time has passed in view
+        $start = new \DateTime('-1 hours');
+        $end = new \DateTime('+1 hours');
 
         $events = $client->getEvents($start, $end);
         if (empty($events)) {
