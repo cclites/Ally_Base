@@ -220,11 +220,15 @@ class CaregiverShiftController extends Controller
     private function checkForInjuryResponse() {
         $response = new Twiml;
         $gather = $response->gather([
-            'timeout' => 15,
+            'timeout' => 5,
             'numDigits' => 1,
             'action' => route('telefony.check_for_injury'),
         ]);
         $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury. Press 2 if you were not injured.');
+
+        // Redirect loop if nothing is entered
+        $response->redirect(route('telefony.check_for_injury'));
+
         return $this->response($response);
     }
 
@@ -281,6 +285,10 @@ class CaregiverShiftController extends Controller
             $gather->say(
                 sprintf('You have entered %s.  If this is correct, Press 1. If this is incorrect, Press 2.', $activity->name)
             );
+
+            // Redirect back if nothing is entered
+            $response->redirect(route('telefony.check_for_activities'));
+
             return $this->response($response);
         }
 
