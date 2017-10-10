@@ -215,7 +215,7 @@ class CaregiverShiftController extends Controller
             'action' => route('telefony.check_for_injury'),
         ]);
         $schedule = $this->scheduledShiftForNumber($this->number);
-        $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury or 2 if you were not injured.');
+        $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury. Press 2 if you were not injured.');
         return $this->response($response);
     }
 
@@ -247,7 +247,7 @@ class CaregiverShiftController extends Controller
             'action' => route('telefony.confirm_activity'),
         ]);
 
-        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a # key. If you are finished recording activities press the * key to finalize your clock out.');
+        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. If you are finished recording activities press the * key to finalize your clock out.');
 
         return $this->response($response);
     }
