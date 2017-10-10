@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\CheckActive;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\TwilioRequestValidator;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -61,5 +62,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'roles' => CheckRole::class,
         'active' => CheckActive::class,
+        'twilio' => TwilioRequestValidator::class,
     ];
 }

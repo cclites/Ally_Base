@@ -21,6 +21,7 @@ class CaregiverShiftController extends Controller
 
     public function __construct(Request $request, PhoneNumber $phoneNumber)
     {
+        $this->middleware('twilio');
         $this->request = $request;
         if ($request->input('From')) {
             $this->number = $phoneNumber->input($request->input('From'));
