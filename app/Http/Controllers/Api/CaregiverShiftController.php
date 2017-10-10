@@ -290,7 +290,7 @@ class CaregiverShiftController extends Controller
         if ($this->request->input('Digits') == 1) {
             Session::remove('current_activity_id');
             $shift = $this->activeShiftForNumber($this->number);
-            $shift->activites()->attach($activity_id);
+            $shift->activities()->attach($activity_id);
             $response->say('The activity has been recorded.');
             $response->redirect(route('telefony.check_for_activities'));
             return $this->response($response);
@@ -335,7 +335,7 @@ class CaregiverShiftController extends Controller
      *
      * @param \App\PhoneNumber $number
      *
-     * @return \Illuminate\Database\Eloquent\Model|null|static
+     * @return Shift|null|static
      */
     private function activeShiftForNumber(PhoneNumber $number)
     {
