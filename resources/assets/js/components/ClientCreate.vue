@@ -53,6 +53,24 @@
                 </b-col>
             </b-row>
             <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Client Type" label-for="client_type">
+                        <b-form-select
+                                id="client_type"
+                                name="client_type"
+                                v-model="form.client_type"
+                        >
+                            <option value="">--Select--</option>
+                            <option value="private_pay">Private Pay</option>
+                            <option value="medicaid">Medicaid</option>
+                            <option value="VA">VA</option>
+                            <option value="LTCI">LTC Insurance</option>
+                        </b-form-select>
+                        <input-help :form="form" field="client_type" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Create &amp; Continue</b-button>
                 </b-col>
@@ -72,6 +90,7 @@
                     lastname: null,
                     email: null,
                     date_of_birth: null,
+                    client_type: '',
                 })
             }
         },

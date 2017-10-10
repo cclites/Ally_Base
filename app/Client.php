@@ -15,6 +15,7 @@ class Client extends Model
     public $fillable = [
         'business_id',
         'business_fee',
+        'client_type',
         'default_payment_type',
         'default_payment_id',
         'backup_payment_type',

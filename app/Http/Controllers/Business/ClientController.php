@@ -60,6 +60,7 @@ class ClientController extends BaseController
             'email' => 'required|email',
             'date_of_birth' => 'nullable',
             'business_fee' => 'nullable|numeric',
+            'client_type' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
@@ -123,6 +124,7 @@ class ClientController extends BaseController
             'email' => 'required|email',
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
+            'client_type' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
