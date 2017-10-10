@@ -242,6 +242,7 @@ class CaregiverShiftController extends Controller
     public function checkForActivitiesResponse() {
         $response = new Twiml;
         $gather = $response->gather([
+            'timeout' => 30,
             'finishOnKey' => '#',
             'action' => route('telefony.confirm_activity'),
         ]);
