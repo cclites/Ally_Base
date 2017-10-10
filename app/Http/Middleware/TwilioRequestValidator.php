@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Responses\ErrorResponse;
 use Closure;
+use Illuminate\Http\Response;
 use Twilio\Security\RequestValidator;
 
 class TwilioRequestValidator
@@ -30,7 +30,7 @@ class TwilioRequestValidator
         if ($isValid) {
             return $next($request);
         } else {
-            return new ErrorResponse(403, 'Access denied');
+            return new Response('Access denied', 403);
         }
     }
 }
