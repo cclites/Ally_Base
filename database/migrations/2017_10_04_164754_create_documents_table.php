@@ -17,7 +17,7 @@ class CreateDocumentsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned()->nullable();
             $table->string('name')->nullable();
-            $table->string('filename');
+            $table->string('filename')->nullable();
             $table->string('type')->nullable();
             $table->timestamps();
 

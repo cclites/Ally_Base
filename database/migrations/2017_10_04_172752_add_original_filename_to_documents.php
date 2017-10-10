@@ -14,7 +14,7 @@ class AddOriginalFilenameToDocuments extends Migration
     public function up()
     {
         Schema::table('documents', function(Blueprint $table) {
-            $table->string('original_filename')->after('filename');
+            $table->string('original_filename')->after('filename')->nullable();
         });
     }
 
