@@ -258,6 +258,9 @@ class CaregiverShiftController extends Controller
 
         $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. If you are finished recording activities press the # to finalize your clock out.');
 
+        // Finalize if no digits are entered
+        $response->redirect(route('telefony.finalize_check_out'));
+
         return $this->response($response);
     }
 
@@ -266,10 +269,6 @@ class CaregiverShiftController extends Controller
         $code = $this->request->input('Digits');
 
         \Log::info('Telefony activity code entered: ' . $code);
-
-        if (!strlen($code)) {
-            return $this->finalizeCheckOut();
-        }
 
         $response = new Twiml;
 
@@ -305,7 +304,7 @@ class CaregiverShiftController extends Controller
         return $this->checkForActivitiesResponse();
     }
 
-    private function finalizeCheckOut() {
+    public function finalizeCheckOut() {
         $response = new Twiml;
         $shift = $this->activeShiftForNumber($this->number);
 
