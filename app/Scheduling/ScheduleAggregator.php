@@ -2,6 +2,8 @@
 
 namespace App\Scheduling;
 
+use Carbon\Carbon;
+
 class ScheduleAggregator
 {
     protected $data = [];
@@ -39,13 +41,19 @@ class ScheduleAggregator
             $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
                 $end = clone $date;
                 $end->add(new \DateInterval('PT' . $schedule->duration . 'M'));
+
+                // checked in logic
+                $now = new Carbon();
+                $diff = $now->diffInMinutes(Carbon::instance($date));
+                $checked_in = ($diff < ($schedule->duration) * 1.2) && in_array($schedule->id, $this->activeSchedules);
+
                 return [
                     'schedule_id' => $schedule->id,
                     'title'       => $title,
                     'start'       => $date,
                     'end'         => $end,
                     'duration'    => $schedule->duration,
-                    'checked_in'  => in_array($schedule->id, $this->activeSchedules),
+                    'checked_in'  => $checked_in,
                     'client_id'   => $schedule->client_id,
                     'caregiver_id'=> $schedule->caregiver_id,
                 ];
