@@ -12,7 +12,12 @@ export default {
         createSchedule(date, jsEvent, view) {
             this.createModal = true;
             this.createType = null;
-            this.selectedEvent = date;
+            if (date) {
+                this.selectedEvent = date;
+            }
+            else {
+                this.selectedEvent = moment().local();
+            }
         },
 
         editSchedule(event, jsEvent, view) {
