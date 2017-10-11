@@ -260,10 +260,35 @@ class CaregiverShiftController extends Controller
             'action' => route('telefony.confirm_activity'),
         ]);
 
-        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. If you are finished recording activities press the # to finalize your clock out.');
+        $gather->say('Please enter the numerical code of any activity performed on your shift followed by a #. 
+        If you are finished recording activities press the # to finalize your clock out.  
+        To hear the list of activities press 0 followed by the #.');
 
         // Finalize if no digits are entered
         $response->redirect(route('telefony.finalize_check_out'));
+
+        return $this->response($response);
+    }
+
+    public function sayAllActivities() {
+        $response = new Twiml;
+        $gather = $response->gather([
+            'timeout' => 10,
+            'finishOnKey' => '#',
+            'action' => route('telefony.confirm_activity'),
+        ]);
+
+        $gather->say('The activity codes are as follows.');
+
+        $shift = $this->activeShiftForNumber($this->number);
+        foreach($shift->business->allActivities() as $activity) {
+            $gather->say($activity->code . ' ' . $activity->name);
+        }
+
+        $gather->say('To repeat this list, press 0 followed by the #.');
+
+        // Finalize if no digits are entered
+        $response->redirect(route('telefony.check_for_activities'));
 
         return $this->response($response);
     }
@@ -273,6 +298,10 @@ class CaregiverShiftController extends Controller
         $code = $this->request->input('Digits');
 
         \Log::info('Telefony activity code entered: ' . $code);
+
+        if ($code == 0) {
+            return $this->sayAllActivities();
+        }
 
         $response = new Twiml;
 
