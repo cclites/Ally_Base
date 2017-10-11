@@ -15,7 +15,7 @@
                 <b-col lg="12">
                     <h5>Activities Performed</h5>
                         <div class="form-check">
-                            <input-help :form="form" field="" text=""></input-help>
+                            <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
                             <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
                                 <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-indicator"></span>
@@ -87,7 +87,7 @@
                                          :rows="3"
                                          >
                         </b-form-textarea>
-                        <input-help :form="form" field="other_expenses" text="Enter any important notes or comments about your shift."></input-help>
+                        <input-help :form="form" field="caregiver_comments" text="Enter any important notes or comments about your shift."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>

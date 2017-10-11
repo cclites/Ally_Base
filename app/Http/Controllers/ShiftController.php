@@ -144,8 +144,23 @@ class ShiftController extends Controller
 
         $shift = $this->caregiver()->getActiveShift();
         $client = $shift->client;
+
         if (!$shift || !$client) {
             return new ErrorResponse(400, 'Could not find an active shift.');
+        }
+
+        // If not private pay, ADL and comments are required
+        if ($client->client_type != 'private_pay') {
+            $request->validate(
+                [
+                    'caregiver_comments' => 'required',
+                    'activities' => 'min:1',
+                ],
+                [
+                    'caregiver_comments.required' => 'Care notes are required for this client.',
+                    'activities.min' => 'A minimum of one activity is required for this client.',
+                ]
+            );
         }
 
         $manual = !empty($data['manual']);
