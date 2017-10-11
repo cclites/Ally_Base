@@ -316,6 +316,15 @@ class CaregiverShiftController extends Controller
         $response = new Twiml;
         $shift = $this->activeShiftForNumber($this->number);
 
+        // If not private pay, one ADL is required
+        if ($shift->client->client_type != 'private_pay') {
+            if (!$shift->activities->count()) {
+                $response->say('You must record at least one activity for this client.');
+                $response->redirect(route('telefony.check_for_activities'));
+                return $this->response($response);
+            }
+        }
+
         $update = $shift->update([
             'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
             'checked_out_number' => $this->number->national_number,
