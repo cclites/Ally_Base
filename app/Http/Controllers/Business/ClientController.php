@@ -10,6 +10,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ClientController extends BaseController
 {
@@ -57,7 +58,7 @@ class ClientController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'date_of_birth' => 'nullable',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -121,7 +122,7 @@ class ClientController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',

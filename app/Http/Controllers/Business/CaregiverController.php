@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CaregiverController extends BaseController
 {
@@ -45,7 +46,7 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users',
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
             'password' => 'required|confirmed',
@@ -108,7 +109,7 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
         ]);
 
