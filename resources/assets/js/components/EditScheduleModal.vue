@@ -86,7 +86,6 @@
                                         id="caregiver_id"
                                         name="caregiver_id"
                                         v-model="form.caregiver_id"
-                                        @input="updateDefaultRate()"
                                 >
                                     <option value="">--Not Assigned--</option>
                                     <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
