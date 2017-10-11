@@ -73,6 +73,11 @@
                         label: 'Email Address',
                         sortable: true,
                     },
+                    {
+                        key: 'client_type',
+                        label: 'Type',
+                        sortable: true,
+                    },
                     'actions'
                 ]
             }
@@ -89,7 +94,8 @@
                         id: client.id,
                         firstname: client.user.firstname,
                         lastname: client.user.lastname,
-                        email: client.user.email
+                        email: client.user.email,
+                        client_type: _.upperFirst(_.replace(client.client_type, '_', ' ')),
                     }
                 })
             },
