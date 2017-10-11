@@ -32,7 +32,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <div v-if="createType && client_id">
+            <div v-show="createType && client_id">
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Start Date" label-for="date">
@@ -41,6 +41,7 @@
                                     name="date"
                                     type="text"
                                     v-model="form.start_date"
+                                    class="datepicker"
                             >
                             </b-form-input>
                             <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
@@ -103,7 +104,7 @@
                     </b-col>
                 </b-row>
             </div>
-            <div v-if="createType == 'recurring'">
+            <div v-show="createType == 'recurring'">
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Recurring Period" label-for="interval_type">
@@ -137,6 +138,7 @@
                                     name="end_date"
                                     type="text"
                                     v-model="form.end_date"
+                                    class="datepicker"
                             >
                             </b-form-input>
                             <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
@@ -170,6 +172,13 @@
                 createType: null,
                 form: new Form(),
             }
+        },
+
+        mounted() {
+            jQuery('.datepicker').datepicker({
+                autoclose: true,
+                todayHighlight: true
+            });
         },
 
         methods: {

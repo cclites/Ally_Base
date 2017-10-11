@@ -1,12 +1,12 @@
 <template>
     <b-modal id="editScheduleModal" title="Edit Schedule" v-model="editModel">
         <b-container fluid>
-            <b-row  v-if="!selectedSchedule">
+            <b-row v-if="!selectedSchedule">
                 <b-col lg="12" class="text-center">
                     Loading Schedule Data..
                 </b-col>
             </b-row>
-            <div v-else>
+            <div v-hide="!selectedSchedule">
                 <b-row v-if="!this.client">
                     <b-col lg="12">
                         <b-form-group label="Client" label-for="client_id">
@@ -37,7 +37,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <div v-if="editType">
+                <div v-show="editType">
                     <b-row>
                         <b-col lg="12">
                             <b-form-group label="Selected Date" label-for="date">
@@ -110,7 +110,7 @@
                         </b-col>
                     </b-row>
                 </div>
-                <div v-if="editType == 'all'">
+                <div v-show="editType == 'all'">
                     <b-row>
                         <b-col lg="12">
                             <b-form-group label="Recurring Period" label-for="interval_type">
@@ -142,6 +142,7 @@
                                         name="end_date"
                                         type="text"
                                         v-model="form.end_date"
+                                        class="datepicker"
                                 >
                                 </b-form-input>
                                 <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
@@ -178,6 +179,13 @@
                 editType: null,
                 form: new Form(),
             }
+        },
+
+        mounted() {
+            jQuery('.datepicker').datepicker({
+                autoclose: true,
+                todayHighlight: true
+            });
         },
 
         methods: {
@@ -236,6 +244,10 @@
                     notes: this.selectedSchedule.notes,
                     utc_offset: this.getUserUtcOffset(),
                 });
+
+                if (this.form.end_date == '12/31/2100') {
+                    this.form.end_date = null;
+                }
             },
 
 
