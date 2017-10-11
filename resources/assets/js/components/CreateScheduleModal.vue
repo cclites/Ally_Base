@@ -1,7 +1,7 @@
 <template>
     <b-modal id="createScheduleModal" title="Create Schedule" v-model="createModel">
         <b-container fluid>
-            <b-row>
+            <b-row v-if="!this.client">
                 <b-col lg="12">
                     <b-form-group label="Client" label-for="client_id">
                         <b-form-select
