@@ -6,7 +6,7 @@
                     Loading Schedule Data..
                 </b-col>
             </b-row>
-            <div v-hide="!selectedSchedule">
+            <div v-show="selectedSchedule">
                 <b-row v-if="!this.client">
                     <b-col lg="12">
                         <b-form-group label="Client" label-for="client_id">
