@@ -278,7 +278,7 @@ class CaregiverShiftController extends Controller
             'action' => route('telefony.confirm_activity'),
         ]);
 
-        $gather->say('The activity codes are as follows.  You may enter them at any time followed by the # sign.
+        $gather->say('The activity codes are as follows.  You may enter them at any time followed by the #.
            To stop the read-out and go back, press # at any time');
 
         $shift = $this->activeShiftForNumber($this->number);
