@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scheduling\CostCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -95,6 +96,14 @@ class Shift extends Model
 
         if ($now >= $end) return 0;
         return round($now->diffInMinutes($end) / 60, 2);
+    }
+
+    /**
+     * @return \App\Scheduling\CostCalculator
+     */
+    public function costs()
+    {
+        return new CostCalculator($this);
     }
 
     public function isVerified()
