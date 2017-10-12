@@ -86,7 +86,7 @@
                 ],
                 items: this.caregivers.map(function(caregiver) {
                         return {
-                            _rowVariant: (caregiver.total > 38) ? (caregiver.total > 40 ? 'danger' : 'warning') : '',
+                            _rowVariant: (caregiver.total >= 36) ? (caregiver.total > 40 ? 'danger' : 'warning') : '',
                             id: caregiver.user.id,
                             firstname: caregiver.user.firstname,
                             lastname: caregiver.user.lastname,
