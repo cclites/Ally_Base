@@ -5,6 +5,7 @@ namespace App;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class Client extends Model
 {
@@ -12,6 +13,7 @@ class Client extends Model
 
     protected $table = 'clients';
     public $timestamps = false;
+    public $hidden = ['ssn'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -20,6 +22,7 @@ class Client extends Model
         'default_payment_id',
         'backup_payment_type',
         'backup_payment_id',
+        'ssn'
     ];
 
     public function payments()
@@ -94,5 +97,25 @@ class Client extends Model
         }
 
         return $aggregator->events($start, $end);
+    }
+
+    /**
+     * Encrypt ssn on entry
+     *
+     * @param $value
+     */
+    public function setSsnAttribute($value)
+    {
+        $this->attributes['ssn'] = Crypt::encrypt($value);
+    }
+
+    /**
+     * Decrypt ssn on retrieval
+     *
+     * @return null|string
+     */
+    public function getSsnAttribute()
+    {
+        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 }
