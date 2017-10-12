@@ -6,9 +6,11 @@ use App\Activity;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Schedule;
 use App\Shift;
 use App\ShiftActivity;
 use App\ShiftIssue;
+use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -103,5 +105,110 @@ class ShiftTest extends TestCase
 
         $this->assertCount(1, $this->shift->issues);
         $this->assertInstanceOf(ShiftIssue::class, $this->shift->issues->first());
+    }
+
+    public function testShiftCanCalculateRemainingHours()
+    {
+        $schedule = Schedule::create([
+            'start_date' => '2017-10-11',
+            'end_date' => '2017-10-11',
+            'time' => '12:00:00',
+            'duration' => 300,
+            'business_id' => $this->business->id,
+            'rrule' => null,
+            'client_id' => $this->client->id,
+        ]);
+
+        $shift = factory(Shift::class)->create([
+            'checked_in_time' => '2017-10-11 12:00:00',
+            'checked_out_time' => null,
+            'schedule_id' => $schedule->id,
+        ]);
+
+        // Mock the time as 1:00PM
+        Carbon::setTestNow(new Carbon('2017-10-11 13:00:00'));
+        $this->assertEquals(4, $shift->remaining());
+    }
+
+    public function testShiftCanCalculateRemainingHoursOnALateShift()
+    {
+        $schedule = Schedule::create([
+            'start_date' => '2017-10-11',
+            'end_date' => '2017-10-11',
+            'time' => '12:00:00',
+            'duration' => 300,
+            'business_id' => $this->business->id,
+            'rrule' => null,
+            'client_id' => $this->client->id,
+        ]);
+
+        // Shift clocked in 100m late
+        $shift = factory(Shift::class)->create([
+            'checked_in_time' => '2017-10-11 13:40:00',
+            'checked_out_time' => null,
+            'schedule_id' => $schedule->id,
+        ]);
+
+        // Mock the time as 1:00PM
+        Carbon::setTestNow(new Carbon('2017-10-11 14:00:00'));
+        $this->assertEquals(3, $shift->remaining());
+    }
+
+    public function testShiftHasRemainingHoursOnDifferentDay()
+    {
+        $schedule = Schedule::create([
+            'start_date' => '2017-10-11',
+            'end_date' => '2017-10-12',
+            'time' => '20:00:00',
+            'duration' => 480,
+            'business_id' => $this->business->id,
+            'rrule' => null,
+            'client_id' => $this->client->id,
+        ]);
+
+        $shift = factory(Shift::class)->create([
+            'checked_in_time' => '2017-10-11 20:10:00',
+            'checked_out_time' => null,
+            'schedule_id' => $schedule->id,
+        ]);
+
+        // Mock the time as 1:30AM the next day
+        Carbon::setTestNow(new Carbon('2017-10-12 01:30:00'));
+
+        $this->assertEquals(2.5, $shift->remaining());
+    }
+
+    public function testShiftHasRemainingHoursOnDifferentDayOnALateShift()
+    {
+        $schedule = Schedule::create([
+            'start_date' => '2017-10-11',
+            'end_date' => '2017-10-12',
+            'time' => '20:00:00',
+            'duration' => 480,
+            'business_id' => $this->business->id,
+            'rrule' => null,
+            'client_id' => $this->client->id,
+        ]);
+
+        // Shift clocked in 70m late
+        $shift = factory(Shift::class)->create([
+            'checked_in_time' => '2017-10-11 21:10:00',
+            'checked_out_time' => null,
+            'schedule_id' => $schedule->id,
+        ]);
+
+        // Mock the time as 1:30AM the next day
+        Carbon::setTestNow(new Carbon('2017-10-12 01:30:00'));
+
+        $this->assertEquals(2.5, $shift->remaining());
+    }
+
+    public function testShiftCheckedOutHasZeroHoursRemaining()
+    {
+        $shift = factory(Shift::class)->create([
+            'checked_in_time' => '2017-10-11 12:00:00',
+            'checked_out_time' => '2017-10-11 13:00:00',
+        ]);
+        $this->assertEquals(0, $shift->remaining());
     }
 }

@@ -52,14 +52,49 @@ class Shift extends Model
         return $this->hasMany(ShiftIssue::class);
     }
 
+    /**
+     * Return the number of hours worked
+     *
+     * @return float
+     */
     public function duration()
     {
-        if (!$this->checked_out_time) return false;
-
         $date1 = new Carbon($this->checked_in_time);
-        $date2 = new Carbon($this->checked_out_time);
+
+        if ($this->checked_out_time) {
+            $date2 = new Carbon($this->checked_out_time);
+        }
+        else {
+            $date2 = new Carbon();
+        }
 
         return round($date1->diffInMinutes($date2) / 60, 2);
+    }
+
+    public function scheduledEndTime()
+    {
+        $shiftStart = new Carbon($this->checked_in_time);
+        $scheduleStart = new Carbon($this->schedule->time);
+        if ($scheduleStart->diffInMinutes($shiftStart) > 60 && $scheduleStart > $shiftStart) {
+            $scheduleStart->subDay();
+        }
+        $end = $scheduleStart->copy()->addMinutes($this->schedule->duration);
+        return $end;
+    }
+
+    /**
+     * Return the number of hours remaining in the shift (as scheduled)
+     *
+     * @return int
+     */
+    public function remaining()
+    {
+        if ($this->checked_out_time) return 0;
+        $end = $this->scheduledEndTime();
+        $now = Carbon::now();
+
+        if ($now >= $end) return 0;
+        return round($now->diffInMinutes($end) / 60, 2);
     }
 
     public function isVerified()
