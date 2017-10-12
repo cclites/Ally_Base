@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Caregiver;
 use App\Deposit;
 use App\Payment;
 use App\PaymentQueue;
@@ -36,18 +37,51 @@ class ReportsController extends BaseController
             })->get();
 
         // Calculate total hours worked for Medicaid clients
-        $hours = 0;
+        $hours = '0';
         foreach($shifts as $shift) {
-            $hours += $shift->duration();
+            $hours = bcadd($hours, $shift->duration(), 2);
         }
 
         // Calculate total ally fee
-        $feePct = config('ally.medicaid_fee');
-        $allyFee = 0;
+        $totalAllyFee = '0';
         foreach($shifts as $shift) {
-
+            $totalAllyFee = bcadd($totalAllyFee, $shift->costs()->getAllyFee(), 2);
         }
 
+        // Calculate total owed
+        $totalOwed = '0';
+        foreach($shifts as $shift) {
+            $totalOwed = bcadd(
+                $totalOwed,
+                bcadd($shift->costs()->getAllyFee(), $shift->costs()->getCaregiverCost(), 2),
+                2
+            );
+        }
+
+        // Calculate caregiver totals
+        $caregivers = [];
+        $groupedByCaregiver = $shifts->groupBy('caregiver_id');
+        foreach($groupedByCaregiver as $caregiver_id => $caregiverShifts) {
+            $caregiver = Caregiver::with('user')->find($caregiver_id);
+            $caregiver = [
+                'id' => $caregiver->id,
+                'firstname' => $caregiver->user->firstname,
+                'lastname' => $caregiver->user->lastname,
+                'hours' => '0',
+                'wages' => '0',
+                'provider_fee' => '0',
+                'ally_fee' => '0',
+            ];
+            foreach($caregiverShifts as $shift) {
+                $caregiver['hours'] = bcadd($caregiver['hours'], $shift->duration(), 2);
+                $caregiver['wages'] = bcadd($caregiver['wages'], $shift->costs()->getCaregiverCost(), 2);
+                $caregiver['provider_fee'] = bcadd($caregiver['provider_fee'], $shift->costs()->getProviderFee(), 2);
+                $caregiver['ally_fee'] = bcadd($caregiver['ally_fee'], $shift->costs()->getAllyFee(), 2);
+            }
+            $caregivers[] = $caregiver;
+        }
+
+        return view('business.reports.medicaid', compact('hours', 'totalAllyFee', 'totalOwed', 'caregivers'));
     }
 
     public function overtime(Request $request)
