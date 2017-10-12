@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Client;
+use App\Exceptions\InvalidScheduleParameters;
+use App\Exceptions\UnverifiedLocationException;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Scheduling\ClockIn;
+use App\Scheduling\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 use Illuminate\Http\Request;
@@ -14,8 +18,6 @@ use Illuminate\Http\Request;
 
 class ShiftController extends Controller
 {
-    const MAXIMUM_DISTANCE_METERS = 100;
-
     /**
      * @return \App\Caregiver
      */
@@ -91,32 +93,23 @@ class ShiftController extends Controller
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
         ]);
 
-        $schedule = Schedule::findOrFail($request->input('schedule_id'));
-
-        $client = Client::find($schedule->client_id);
-        if (!$client) return new ErrorResponse(400, 'Schedule does not have a client assigned to it.');
-
-        $manual = !empty($data['manual']);
-        if (!$manual) {
-            if (!$client->evvAddress) return new ErrorResponse(400, 'Client does not have a service (EVV) address.  You will need to manually clock in.');
-            if ($client->evvAddress->distanceTo($data['latitude'], $data['longitude'], 'm') > self::MAXIMUM_DISTANCE_METERS) {
-                return new ErrorResponse(400, 'Your location does not match the service address.  You will need to manually clock in.');
+        try {
+            $schedule = Schedule::find($request->input('schedule_id'));
+            $clockIn = new ClockIn($this->caregiver());
+            if (!empty($data['manual'])) $clockIn->setManual();
+            $clockIn->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
+            $shift = $clockIn->clockIn($schedule);
+            if ($shift) {
+                return new SuccessResponse('You have successfully clocked in.');
             }
+            return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
         }
-
-        $shift = new Shift([
-            'client_id' => $schedule->client_id,
-            'business_id' => $schedule->business_id,
-            'schedule_id' => $schedule->id,
-            'checked_in_time' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'checked_in_latitude' => $data['latitude'], // needs to pull from request
-            'checked_in_longitude' => $data['longitude'], // needs to pull from request
-            'verified' => !$manual
-        ]);
-        if ($this->caregiver()->shifts()->save($shift)) {
-            return new SuccessResponse('You have successfully clocked in.');
+        catch (UnverifiedLocationException $e) {
+            return new ErrorResponse(400, $e->getMessage() . ' You will need to manually clock in.');
         }
-        return redirect()->back()->with('error', 'System Error: Unable to clock in.');
+        catch (InvalidScheduleParameters $e) {
+            return new ErrorResponse(400, $e->getMessage());
+        }
     }
 
     public function clockOut(Request $request)
@@ -138,19 +131,14 @@ class ShiftController extends Controller
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
         ]);
 
-        // Force null values to 0
-        if (!$data['other_expenses']) $data['other_expenses'] = 0;
-        if (!$data['mileage']) $data['mileage'] = 0;
-
+        // Get active shift
         $shift = $this->caregiver()->getActiveShift();
-        $client = $shift->client;
-
-        if (!$shift || !$client) {
+        if (!$shift || !$shift->client) {
             return new ErrorResponse(400, 'Could not find an active shift.');
         }
 
         // If not private pay, ADL and comments are required
-        if ($client->client_type != 'private_pay') {
+        if ($shift->client->client_type != 'private_pay') {
             $request->validate(
                 [
                     'caregiver_comments' => 'required',
@@ -163,43 +151,34 @@ class ShiftController extends Controller
             );
         }
 
-        $manual = !empty($data['manual']);
-        if (!$manual) {
-            if (!$client->evvAddress) return new ErrorResponse(400, 'Client does not have a service (EVV) address.  You will need to manually clock out.');
-            if ($client->evvAddress->distanceTo($data['latitude'], $data['longitude'], 'm') > self::MAXIMUM_DISTANCE_METERS) {
-                return new ErrorResponse(400, 'Your location does not match the service address.  You will need to manually clock out.');
+        try {
+            $clockOut = new ClockOut($this->caregiver());
+            if (!empty($data['manual'])) $clockOut->setManual();
+            if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses']);
+            if ($data['mileage']) $clockOut->setOtherExpenses($data['mileage']);
+            if ($data['caregiver_comments']) $clockOut->setOtherExpenses($data['caregiver_comments']);
+            $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
+            $activities = $data['activities'] ?? [];
+            if ($clockOut->clockOut($shift, $activities)) {
+                // Attach issues
+                $issueText = trim($request->input('issue_text'));
+                if ($request->input('caregiver_injury') || $issueText) {
+                    $issue = new ShiftIssue([
+                        'caregiver_injury' => $request->input('caregiver_injury'),
+                        'comments' => $issueText,
+                    ]);
+                    $shift->issues()->save($issue);
+                }
+                return new SuccessResponse('You have successfully clocked out.');
             }
+            return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
         }
-
-        $update = $shift->update([
-            'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'checked_out_latitude' => $data['latitude'], // needs to pull from request
-            'checked_out_longitude' => $data['longitude'], // needs to pull from request
-            'verified' => ($shift->verified && !$manual), // both check in and check out must have used EVV to be verified
-            'caregiver_comments' => $data['caregiver_comments'] ?? null,
-            'mileage' => $data['mileage'] ?? null,
-            'other_expenses' => $data['other_expenses'] ?? null,
-        ]);
-
-        if ($update) {
-            // Attach activities
-            if ($activities = $request->input('activities')) {
-                $shift->activities()->attach($activities, ['completed' => 1]);
-            }
-
-            // Attach issues
-            $issueText = trim($request->input('issue_text'));
-            if ($request->input('caregiver_injury') || $issueText) {
-                $issue = new ShiftIssue([
-                    'caregiver_injury' => $request->input('caregiver_injury'),
-                    'comments' => $issueText,
-                ]);
-                $shift->issues()->save($issue);
-            }
-
-            return new SuccessResponse('You have successfully clocked out.');
+        catch (UnverifiedLocationException $e) {
+            return new ErrorResponse(400, $e->getMessage() . ' You will need to manually clock in.');
         }
-        return new ErrorResponse(500, 'There was an error clocking out.');
+        catch (InvalidScheduleParameters $e) {
+            return new ErrorResponse(400, $e->getMessage());
+        }
     }
 
     protected function getRecentEvents()

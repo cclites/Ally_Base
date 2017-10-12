@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Activity;
 use App\Client;
 use App\Exceptions\TelefonyMessageException;
+use App\Scheduling\ClockIn;
+use App\Scheduling\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
@@ -177,28 +179,25 @@ class CaregiverShiftController extends Controller
         $response = new Twiml;
 
         $schedule = $this->scheduledShiftForNumber($this->number);
-        $shift = new Shift([
-            'client_id' => $schedule->client_id,
-            'business_id' => $schedule->business_id,
-            'schedule_id' => $schedule->id,
-            'checked_in_time' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'checked_in_number' => $this->number->national_number,
-            'verified' => true,
-        ]);
 
         if ($schedule->caregiver->isClockedIn()) {
             $response->say('You are already clocked in.  Please clock out first.');
             return $this->response($response);
         }
 
-        if ($schedule->caregiver->shifts()->save($shift)) {
-            $response->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
+        try {
+            $clockIn = new ClockIn($schedule->caregiver);
+            $clockIn->setNumber($this->number->national_number);
+            if ($clockIn->clockIn($schedule)) {
+                $response->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
+                return $this->response($response);
+            }
         }
-        else {
-            $response->say('There was an error clocking in.  Please hang up and try again.');
-        }
+        catch (\Exception $e) {}
 
+        $response->say('There was an error clocking in.  Please hang up and try again.');
         return $this->response($response);
+
     }
 
     /**
@@ -355,18 +354,17 @@ class CaregiverShiftController extends Controller
             }
         }
 
-        $update = $shift->update([
-            'checked_out_time' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'checked_out_number' => $this->number->national_number,
-        ]);
-
-        if ($update) {
-            $response->say('You have successfully clocked out.  Thank you. Good bye.');
+        try {
+            $clockOut = new ClockOut($shift->caregiver);
+            $clockOut->setNumber($this->number->national_number);
+            if ($clockOut->clockOut($shift)) {
+                $response->say('You have successfully clocked out.  Thank you. Good bye.');
+                return $this->response($response);
+            }
         }
-        else {
-            $response->say('There was an error clocking out.  Please hang up and try again.');
-        }
+        catch(\Exception $e) {}
 
+        $response->say('There was an error clocking out.  Please hang up and try again.  You do not have to re-enter any activities.');
         return $this->response($response);
     }
 

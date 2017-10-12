@@ -11,6 +11,45 @@ use Illuminate\Http\Request;
 
 class ReportsController extends BaseController
 {
+    public function medicaid(Request $request)
+    {
+        if (!$offset = $request->input('offset')) {
+            $offset = "America/New_York";
+        }
+
+        if (!$week = $request->input('week')) {
+            $week = Carbon::now($offset)->weekOfYear;
+        }
+
+        if (!$year = $request->input('year')) {
+            $year = Carbon::now($offset)->year;
+        }
+
+        $weekStart = (new Carbon())->setISODate($year, $week, 1)->setTime(0,0,0);
+        $weekEnd = (new Carbon())->setISODate($year, $week, 7)->setTime(23,59,59);
+
+        $shifts = $this->business()->shifts()
+            ->whereBetween('checked_in_time', [$weekStart, $weekEnd])
+            ->whereNotNull('checked_out_time')
+            ->whereHas('client', function($q) {
+                $q->where('client_type', 'medicaid');
+            })->get();
+
+        // Calculate total hours worked for Medicaid clients
+        $hours = 0;
+        foreach($shifts as $shift) {
+            $hours += $shift->duration();
+        }
+
+        // Calculate total ally fee
+        $feePct = config('ally.medicaid_fee');
+        $allyFee = 0;
+        foreach($shifts as $shift) {
+
+        }
+
+    }
+
     public function overtime(Request $request)
     {
         if (!$offset = $request->input('offset')) {
