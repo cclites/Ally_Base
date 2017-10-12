@@ -33,6 +33,7 @@ Vue.component('activity-list', require('./components/ActivityList.vue'));
 
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));

@@ -5,9 +5,71 @@ namespace App\Http\Controllers\Business;
 use App\Deposit;
 use App\Payment;
 use App\PaymentQueue;
+use App\Schedule;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ReportsController extends BaseController
 {
+    public function overtime(Request $request)
+    {
+        if (!$offset = $request->input('offset')) {
+            $offset = "America/New_York";
+        }
+
+        if (!$week = $request->input('week')) {
+            $week = Carbon::now($offset)->weekOfYear;
+        }
+
+        if (!$year = $request->input('year')) {
+            $year = Carbon::now($offset)->year;
+        }
+
+        $weekStart = (new Carbon())->setISODate($year, $week, 1)->setTime(0,0,0);
+        $weekEnd = (new Carbon())->setISODate($year, $week, 7)->setTime(23,59,59);
+        $caregivers = [];
+
+        foreach($this->business()->caregivers as $caregiver) {
+
+            $hours = [
+                'user' => $caregiver->user,
+                'worked' => 0,
+                'scheduled' => 0,
+            ];
+
+            // Calculate total number of hours in finished shifts
+            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
+                ->whereNotNull('checked_out_time')->get()
+                ->each(function($shift) use ($hours) {
+                    $hours['worked'] += $shift->duration();
+                });
+
+            // Calculate number of hours in current shift
+            $lastShiftEnd = new Carbon();
+            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
+                ->whereNull('checked_out_time')->get()
+                ->each(function($shift) use ($hours, $lastShiftEnd) {
+                    $hours['worked'] += $shift->duration();
+                    $hours['scheduled'] += $shift->remaining();
+                    $lastShiftEnd = $shift->scheduledEndTime();
+                });
+
+            // Calculate number of hours in future shifts
+            $events = $caregiver->getEvents($lastShiftEnd, $weekEnd);
+            foreach($events as $event) {
+                $schedule = Schedule::find($event['schedule_id']);
+                $hours['scheduled'] += round($schedule->duration / 60, 2);
+            }
+
+            $hours['total'] = $hours['scheduled'] + $hours['worked'];
+
+            // Aggregate
+            $caregivers[] = $hours;
+        }
+
+        return view('business.reports.overtime', compact('caregivers'));
+    }
+
     public function deposits()
     {
         $deposits = Deposit::where('business_id', $this->business()->id)

@@ -31,5 +31,6 @@
         <li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>
         <li><a href="{{ route('business.reports.deposits') }}">Registry Referral Deposits</a></li>
         <li><a href="javascript:void()">Medicaid Payroll</a></li>
+        <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
     </ul>
 </li>
