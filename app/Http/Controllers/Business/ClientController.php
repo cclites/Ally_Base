@@ -9,6 +9,7 @@ use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidSSN;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -63,13 +64,11 @@ class ClientController extends BaseController
                 'date_of_birth' => 'nullable',
                 'business_fee' => 'nullable|numeric',
                 'client_type' => 'required',
-                'ssn' => 'nullable|regex:#(\d{3})-(\d{2})-(\d{4})#',
-            ],
-            [
-                'ssn.regex' => 'Invalid format for the social security number. Expecting ###-##-####',
+                'ssn' => ['nullable', new ValidSSN()]
             ]
         );
 
+        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt(random_bytes(32));
 
@@ -104,6 +103,8 @@ class ClientController extends BaseController
                   return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
               });
 
+        $client->hasSsn = (strlen($client->ssn) == 11);
+
         return view('business.clients.show', compact('client', 'schedules', 'caregivers'));
     }
 
@@ -132,8 +133,10 @@ class ClientController extends BaseController
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
+            'ssn' => ['nullable', new ValidSSN()]
         ]);
 
+        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
         if ($client->update($data)) {

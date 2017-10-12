@@ -28,6 +28,20 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
+                    <b-form-group label="Client Type" label-for="client_type">
+                        <b-form-select
+                                id="client_type"
+                                name="client_type"
+                                v-model="form.client_type"
+                        >
+                            <option value="">--Select--</option>
+                            <option value="private_pay">Private Pay</option>
+                            <option value="medicaid">Medicaid</option>
+                            <option value="VA">VA</option>
+                            <option value="LTCI">LTC Insurance</option>
+                        </b-form-select>
+                        <input-help :form="form" field="client_type" text=""></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -50,23 +64,15 @@
                         </b-form-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Client Type" label-for="client_type">
-                        <b-form-select
-                            id="client_type"
-                            name="client_type"
-                            v-model="form.client_type"
-                            >
-                            <option value="">--Select--</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
-                        </b-form-select>
-                        <input-help :form="form" field="client_type" text=""></input-help>
+                    <b-form-group label="Social Security Number" label-for="ssn">
+                        <b-form-input
+                                id="ssn"
+                                name="ssn"
+                                type="text"
+                                v-model="form.ssn"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -93,6 +99,7 @@
                     email: this.client.user.email,
                     date_of_birth: moment(this.client.user.date_of_birth).format('L'),
                     client_type: this.client.client_type,
+                    ssn: (this.client.hasSsn) ? '***-**-****' : '',
                 })
             }
         },
@@ -104,6 +111,7 @@
                     lastname: null,
                     email: null,
                     date_of_birth: null,
+                    ssn: null,
                 })
             }
         },
@@ -111,7 +119,11 @@
         methods: {
 
             saveProfile() {
-                this.form.patch('/business/clients/' + this.client.id);
+                let component = this;
+                this.form.patch('/business/clients/' + this.client.id)
+                    .then(function(response) {
+                        if (component.form.ssn) component.form.ssn = '***-**-****';
+                    })
             }
 
         }
