@@ -15,6 +15,7 @@ class Caregiver extends Model
 
     protected $table = 'caregivers';
     public $timestamps = false;
+    public $hidden = ['ssn'];
     public $fillable = ['ssn', 'bank_account_id'];
 
     public function setBankAccount(BankAccount $account)
