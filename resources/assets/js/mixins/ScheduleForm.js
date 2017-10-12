@@ -17,11 +17,6 @@ export default {
         };
     },
 
-    mounted() {
-        this.loadClients();
-        this.loadCaregivers();
-    },
-
     methods: {
         dayOfMonth(date) {
             return moment(date).format('Do');

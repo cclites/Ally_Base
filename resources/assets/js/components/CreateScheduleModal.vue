@@ -209,7 +209,6 @@
                 });
             },
 
-
             submitForm() {
                 var component = this;
                 if (this.createType == 'single') {
@@ -234,6 +233,10 @@
             createModel(val) {
                 this.createType = null;
                 this.$emit('update:model', val);
+                if (val) {
+                    this.loadCaregivers();
+                    this.loadClients();
+                }
             },
             createType(val) {
                 if (val == 'single') this.makeCreateSingleForm();

@@ -276,6 +276,10 @@
             editModel(val) {
                 this.editType = null;
                 this.$emit('update:model', val);
+                if (val) {
+                    this.loadCaregivers();
+                    this.loadClients();
+                }
             },
 
             editType(val) {
