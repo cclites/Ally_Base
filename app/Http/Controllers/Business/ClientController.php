@@ -55,14 +55,20 @@ class ClientController extends BaseController
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'email' => 'required|email|unique:users',
-            'date_of_birth' => 'nullable',
-            'business_fee' => 'nullable|numeric',
-            'client_type' => 'required',
-        ]);
+        $data = $request->validate(
+            [
+                'firstname' => 'required',
+                'lastname' => 'required',
+                'email' => 'required|email|unique:users',
+                'date_of_birth' => 'nullable',
+                'business_fee' => 'nullable|numeric',
+                'client_type' => 'required',
+                'ssn' => 'nullable|regex:#(\d{3})-(\d{2})-(\d{4})#',
+            ],
+            [
+                'ssn.regex' => 'Invalid format for the social security number. Expecting ###-##-####',
+            ]
+        );
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt(random_bytes(32));
