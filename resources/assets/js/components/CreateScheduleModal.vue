@@ -284,6 +284,9 @@
                 if (val == 'single') this.makeCreateSingleForm();
                 else this.makeCreateRecurringForm()
             },
+            client_id(val) {
+                this.loadCaregivers();
+            }
         },
 
         mixins: [
