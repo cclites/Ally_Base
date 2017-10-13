@@ -223,7 +223,7 @@ class CaregiverShiftController extends Controller
             'numDigits' => 1,
             'action' => route('telefony.check_for_injury'),
         ]);
-        $gather->say('Did you suffer any injuries during your shift? Press 1 if you suffered an injury. Press 2 if you were not injured.');
+        $gather->say('Were you injured on your shift? Press 1 if there were no injuries. Press 2 if you suffered an injury or unusual circumstances.');
 
         // Redirect loop if nothing is entered
         $response->redirect(route('telefony.check_for_injury'));
