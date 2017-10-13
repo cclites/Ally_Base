@@ -43,7 +43,7 @@
                         <input-help :form="form" field="client_type" text=""></input-help>
                     </b-form-group>
                     <b-row>
-                        <b-col sm="9">
+                        <b-col xlg="8" lg="6" sm="12">
                             <b-form-group label="Ally Onboard Status" label-for="onboard_status">
                                 <b-form-select
                                         id="onboard_status"
@@ -57,12 +57,14 @@
                                 <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
                             </b-form-group>
                         </b-col>
-                        <b-col sm="3">
-                            <b-form-group label="Email" v-if="client.onboard_status=='needs_agreement'">
-                                <b-button  variant="info" @click="sendConfirmation()">Send Email</b-button>
+                        <b-col xlg="4" lg="6" sm="12">
+                            <b-form-group v-if="client.onboard_status=='needs_agreement'">
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Send Confirmation Email</b-button>
                             </b-form-group>
-                            <b-form-group label="Email" v-if="client.onboard_status=='emailed_reconfirmation'">
-                                <b-button  variant="info" @click="sendConfirmation()">Resend Email</b-button>
+                            <b-form-group v-if="client.onboard_status=='emailed_reconfirmation'">
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Resend Confirmation</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
