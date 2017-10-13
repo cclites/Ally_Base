@@ -49,6 +49,7 @@
                                         id="onboard_status"
                                         name="onboard_status"
                                         v-model="form.onboard_status"
+                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
                                 >
                                     <option value="">--Select--</option>
                                     <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
