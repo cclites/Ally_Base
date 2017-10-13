@@ -49,6 +49,8 @@ Vue.component('change-password', require('./components/ChangePassword.vue'));
 Vue.component('clock-in', require('./components/ClockIn.vue'));
 Vue.component('clock-out', require('./components/ClockOut.vue'));
 
+Vue.component('client-confirmation', require('./components/ClientConfirmation.vue'));
+
 Vue.component('client-caregivers', require('./components/ClientCaregivers.vue'));
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));

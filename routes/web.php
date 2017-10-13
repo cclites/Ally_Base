@@ -19,6 +19,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::group(['middleware' => 'guest'], function() {
+    Route::get('/reconfirm/saved', 'ConfirmationController@saved')->name('reconfirm.saved');
+    Route::get('/reconfirm/{encrypted_id}', 'ConfirmationController@reconfirm')->name('reconfirm.encrypted_id');
+    Route::post('/reconfirm/{encrypted_id}', 'ConfirmationController@store')->name('reconfirm.store');
+});
+
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/home', 'HomeController@index')->name('home');
 

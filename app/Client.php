@@ -6,10 +6,12 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
+use App\Traits\HiddenIdTrait;
 
 class Client extends Model
 {
     use IsUserRole;
+    use HiddenIdTrait;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -124,4 +126,5 @@ class Client extends Model
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
+
 }

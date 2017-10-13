@@ -6,6 +6,7 @@ use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PhoneController;
+use App\Mail\ClientReconfirmation;
 use App\OnboardStatusHistory;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -214,8 +215,15 @@ class ClientController extends BaseController
         return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method');
     }
 
-    public function sendConfirmationEmail()
+    public function sendConfirmationEmail($client_id)
     {
-        return new ErrorResponse(400, 'This functionality is not implemented yet.');
+        $client = Client::findOrFail($client_id);
+
+        if (\Mail::to($client)->send(new ClientReconfirmation($client, $this->business()))) {
+            $history = new OnboardStatusHistory(['status' => 'emailed_reconfirmation']);
+            $client->onboardStatusHistory()->save($history);
+            return new SuccessResponse('The re-confirmation email has been sent.');
+        }
+        return new ErrorResponse(500, 'Error sending email.');
     }
 }
