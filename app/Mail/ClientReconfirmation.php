@@ -11,9 +11,9 @@ class ClientReconfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $client;
-    protected $business;
-    protected $url;
+    public $client;
+    public $business;
+    public $url;
 
     /**
      * Create a new message instance.
