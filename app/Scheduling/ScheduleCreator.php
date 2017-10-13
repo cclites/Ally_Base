@@ -93,7 +93,8 @@ class ScheduleCreator
             'rrule' => $rule,
             'notes' => $this->data['notes'] ?? null,
             'caregiver_id' => $this->data['caregiver_id'] ?? null,
-            'scheduled_rate' => $this->data['scheduled_rate'] ?? null,
+            'caregiver_rate' => $this->data['caregiver_rate'] ?? null,
+            'provider_fee' => $this->data['provider_fee'] ?? null,
         ];
     }
 
