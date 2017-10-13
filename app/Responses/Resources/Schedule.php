@@ -40,7 +40,8 @@ class Schedule implements Responsable
             'client_id' => $this->schedule->client_id,
             'caregiver_id' => $this->schedule->caregiver_id,
             'business_id' => $this->schedule->business_id,
-            'scheduled_rate' => $this->schedule->scheduled_rate,
+            'caregiver_rate' => $this->schedule->caregiver_rate,
+            'provider_fee' => $this->schedule->provider_fee,
             'notes' => $this->schedule->notes,
         ];
     }

@@ -38,7 +38,10 @@ class ClockIn extends ClockBase
             }
         }
 
-        $this->fillRates($shift, $schedule->client);
+        $shift->fill([
+            'caregiver_rate' => $schedule->getCaregiverRate(),
+            'provider_fee' => $schedule->getProviderFee()
+        ]);
 
         if ($this->caregiver->shifts()->save($shift)) {
             return $shift;
@@ -46,28 +49,4 @@ class ClockIn extends ClockBase
         return false;
     }
 
-    protected function fillRates(Shift $shift, Client $client)
-    {
-        $relation = $client->caregivers()->find($this->caregiver->id);
-
-        if (!$relation) {
-            $caregiver_rate = 0;
-            $provider_fee = 0;
-        }
-        else {
-            if ($shift->all_day) {
-                $caregiver_rate = $relation->pivot->caregiver_daily_rate;
-                $provider_fee = $relation->pivot->provider_daily_fee;
-            }
-            else {
-                $caregiver_rate = $relation->pivot->caregiver_hourly_rate;
-                $provider_fee = $relation->pivot->provider_hourly_fee;
-            }
-        }
-
-        $shift->fill([
-            'caregiver_rate' => $caregiver_rate,
-            'provider_fee' => $provider_fee
-        ]);
-    }
 }

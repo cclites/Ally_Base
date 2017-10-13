@@ -95,6 +95,47 @@
                         </b-col>
                     </b-row>
                     <b-row>
+                        <b-col sm="12">
+                            <div class="form-check">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="rate_override" v-model="overrideRate" value="1">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Override Default Rates?</span>
+                                </label>
+                            </div>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="overrideRate">
+                        <b-col sm="6">
+                            <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
+                                <b-form-input
+                                        id="caregiver_rate"
+                                        name="caregiver_rate"
+                                        type="number"
+                                        step="any"
+                                        v-model="form.caregiver_rate"
+                                        :placeholder="selectedCaregiver.pivot.caregiver_hourly_rate"
+                                >
+                                </b-form-input>
+                                <input-help :form="form" field="caregiver_rate" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="6">
+                            <b-form-group label="Provider Fee" label-for="provider_fee">
+                                <b-form-input
+                                        id="provider_fee"
+                                        name="provider_fee"
+                                        type="number"
+                                        step="any"
+                                        v-model="form.provider_fee"
+                                        :placeholder="selectedCaregiver.pivot.provider_hourly_fee"
+                                >
+                                </b-form-input>
+                                <input-help :form="form" field="provider_fee" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
                         <b-col lg="12">
                             <b-form-group label="Schedule Notes" label-for="notes">
                                 <b-form-textarea
@@ -224,10 +265,15 @@
                     time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     caregiver_id: this.selectedSchedule.caregiver_id,
-//                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
                     utc_offset: this.getUserUtcOffset(),
+                    caregiver_rate: this.selectedSchedule.caregiver_rate,
+                    provider_fee: this.selectedSchedule.provider_fee,
                 });
+
+                if (this.form.caregiver_rate || this.form.provider_fee) {
+                    this.overrideRate = true;
+                }
             },
 
             makeEditAllForm() {
@@ -239,13 +285,18 @@
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
                     caregiver_id: this.selectedSchedule.caregiver_id,
-//                    scheduled_rate: this.selectedSchedule.scheduled_rate,
                     notes: this.selectedSchedule.notes,
                     utc_offset: this.getUserUtcOffset(),
+                    caregiver_rate: this.selectedSchedule.caregiver_rate,
+                    provider_fee: this.selectedSchedule.provider_fee,
                 });
 
                 if (this.form.end_date == '12/31/2100') {
                     this.form.end_date = null;
+                }
+
+                if (this.form.caregiver_rate || this.form.provider_fee) {
+                    this.overrideRate = true;
                 }
             },
 
@@ -277,8 +328,7 @@
                 this.editType = null;
                 this.$emit('update:model', val);
                 if (val) {
-                    this.loadCaregivers();
-                    this.loadClients();
+                    this.loadClientData();
                 }
             },
 

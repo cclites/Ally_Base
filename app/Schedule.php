@@ -219,4 +219,38 @@ class Schedule extends Model
         $this->rrule = null;
         return $this;
     }
+
+    /**
+     * Calculate the caregiver scheduled rate
+     *
+     * @return int|mixed
+     */
+    public function getCaregiverRate()
+    {
+        if ((string) $this->caregiver_rate !== "") return $this->caregiver_rate;
+        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
+            if ($this->all_day) {
+                return $relation->pivot->caregiver_daily_rate;
+            }
+            return $relation->pivot->caregiver_hourly_rate;
+        }
+        return 0;
+    }
+
+    /**
+     * Calculate the provider scheduled fee
+     *
+     * @return int|mixed
+     */
+    public function getProviderFee()
+    {
+        if ((string) $this->provider_fee !== "") return $this->provider_fee;
+        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
+            if ($this->all_day) {
+                return $relation->pivot->provider_daily_fee;
+            }
+            return $relation->pivot->provider_hourly_fee;
+        }
+        return 0;
+    }
 }
