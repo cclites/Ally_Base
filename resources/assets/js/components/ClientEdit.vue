@@ -42,6 +42,30 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text=""></input-help>
                     </b-form-group>
+                    <b-row>
+                        <b-col sm="9">
+                            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
+                                <b-form-select
+                                        id="onboard_status"
+                                        name="onboard_status"
+                                        v-model="form.onboard_status"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
+                                    <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="3">
+                            <b-form-group label="Email" v-if="client.onboard_status=='needs_agreement'">
+                                <b-button  variant="info" @click="sendConfirmation()">Send Email</b-button>
+                            </b-form-group>
+                            <b-form-group label="Email" v-if="client.onboard_status=='emailed_reconfirmation'">
+                                <b-button  variant="info" @click="sendConfirmation()">Resend Email</b-button>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -86,9 +110,12 @@
 </template>
 
 <script>
+    import ClientForm from '../mixins/ClientForm';
+
     export default {
         props: {
             'client': {},
+            'lastStatusDate' : {},
         },
 
         data() {
@@ -100,7 +127,8 @@
                     date_of_birth: moment(this.client.user.date_of_birth).format('L'),
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
-                })
+                    onboard_status: this.client.onboard_status,
+                }),
             }
         },
 
@@ -112,6 +140,7 @@
                     email: null,
                     date_of_birth: null,
                     ssn: null,
+                    onboard_status: null,
                 })
             }
         },
@@ -123,11 +152,37 @@
                 this.form.patch('/business/clients/' + this.client.id)
                     .then(function(response) {
                         if (component.form.ssn) component.form.ssn = '***-**-****';
+                        if (component.form.wasModified('onboard_status')) {
+                            component.client.onboard_status = component.form.onboard_status;
+                            component.lastStatusDate = moment.utc().format();
+                        }
                     })
+            },
+
+            sendConfirmation() {
+                let component = this;
+                let form = new Form();
+                form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
+                    .then(function(response) {
+                        component.lastStatusDate = moment.utc().format();
+                    });
             }
 
-        }
+        },
 
+        computed: {
+            onboardStatusText() {
+                if (this.lastStatusDate) {
+                    if (this.form.onboard_status === 'emailed_reconfirmation') {
+                        return 'The confirmation email was sent at ' + moment.utc(this.lastStatusDate).local().format('L LT');
+                    }
+                    return 'The status was last updated at ' + moment.utc(this.lastStatusDate).local().format('L LT');
+                }
+                return 'Select the Ally Agreement status of the client.';
+            }
+        },
+
+        mixins: [ClientForm],
 
     }
 </script>

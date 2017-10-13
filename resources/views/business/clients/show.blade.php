@@ -42,7 +42,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-edit :client="{{ $client }}"></client-edit>
+                    <client-edit :client="{{ $client }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
                 </div>
             </div>
         </div>

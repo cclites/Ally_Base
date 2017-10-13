@@ -22,7 +22,8 @@ class Client extends Model
         'default_payment_id',
         'backup_payment_type',
         'backup_payment_id',
-        'ssn'
+        'ssn',
+        'onboard_status'
     ];
 
     public function payments()
@@ -78,6 +79,11 @@ class Client extends Model
     public function backupPayment()
     {
         return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+    }
+
+    public function onboardStatusHistory()
+    {
+        return $this->hasMany(OnboardStatusHistory::class);
     }
 
     /**
