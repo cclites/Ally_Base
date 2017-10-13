@@ -234,6 +234,8 @@ class CaregiverShiftController extends Controller
     public function checkForInjuryAction() {
         switch ($this->request->input('Digits')) {
             case 1:
+                return $this->checkForActivitiesResponse();
+            case 2:
                 $shift = $this->activeShiftForNumber($this->number);
                 $issue = new ShiftIssue();
                 $issue->caregiver_injury = true;
@@ -244,8 +246,6 @@ class CaregiverShiftController extends Controller
                 $response->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
                 $response->redirect(route('telefony.check_for_activities'));
                 return $this->response($response);
-            case 2:
-                return $this->checkForActivitiesResponse();
         }
 
         return $this->checkForInjuryResponse();
