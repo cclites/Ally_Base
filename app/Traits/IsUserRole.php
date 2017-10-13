@@ -24,6 +24,11 @@ trait IsUserRole
         return $this->user->name();
     }
 
+    public function getNameAttribute()
+    {
+        return $this->name();
+    }
+
     public function nameLastFirst()
     {
         return $this->user->nameLastFirst();

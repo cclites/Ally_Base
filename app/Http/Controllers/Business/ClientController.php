@@ -219,11 +219,9 @@ class ClientController extends BaseController
     {
         $client = Client::findOrFail($client_id);
 
-        if (\Mail::to($client)->send(new ClientReconfirmation($client, $this->business()))) {
-            $history = new OnboardStatusHistory(['status' => 'emailed_reconfirmation']);
-            $client->onboardStatusHistory()->save($history);
-            return new SuccessResponse('The re-confirmation email has been sent.');
-        }
-        return new ErrorResponse(500, 'Error sending email.');
+        \Mail::to($client)->send(new ClientReconfirmation($client, $this->business()));
+        $history = new OnboardStatusHistory(['status' => 'emailed_reconfirmation']);
+        $client->onboardStatusHistory()->save($history);
+        return new SuccessResponse('The re-confirmation email has been sent.');
     }
 }
