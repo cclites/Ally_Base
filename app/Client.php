@@ -5,13 +5,17 @@ namespace App;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
+use App\Traits\HiddenIdTrait;
 
 class Client extends Model
 {
     use IsUserRole;
+    use HiddenIdTrait;
 
     protected $table = 'clients';
     public $timestamps = false;
+    public $hidden = ['ssn'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -20,6 +24,8 @@ class Client extends Model
         'default_payment_id',
         'backup_payment_type',
         'backup_payment_id',
+        'ssn',
+        'onboard_status'
     ];
 
     public function payments()
@@ -77,6 +83,11 @@ class Client extends Model
         return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
     }
 
+    public function onboardStatusHistory()
+    {
+        return $this->hasMany(OnboardStatusHistory::class);
+    }
+
     /**
      * Aggregate schedules for this client and return an array of events
      *
@@ -95,4 +106,25 @@ class Client extends Model
 
         return $aggregator->events($start, $end);
     }
+
+    /**
+     * Encrypt ssn on entry
+     *
+     * @param $value
+     */
+    public function setSsnAttribute($value)
+    {
+        $this->attributes['ssn'] = Crypt::encrypt($value);
+    }
+
+    /**
+     * Decrypt ssn on retrieval
+     *
+     * @return null|string
+     */
+    public function getSsnAttribute()
+    {
+        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+    }
+
 }

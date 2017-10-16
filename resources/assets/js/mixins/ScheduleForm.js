@@ -14,6 +14,7 @@ export default {
                 'Friday': 'fr',
                 'Saturday': 'sa',
             },
+            overrideRate: false,
         };
     },
 
@@ -44,13 +45,18 @@ export default {
             }
         },
 
-        loadClients() {
+        loadClientData() {
             if (!this.client) {
                 let component = this;
                 axios.get('/business/clients/list')
                     .then(response => {
                         component.clients = response.data;
+                        this.loadCaregivers();
                     });
+            }
+            else {
+                // Load caregivers immediately
+                this.loadCaregivers();
             }
         },
 
@@ -89,11 +95,28 @@ export default {
             return endTimes;
         },
 
+        selectedCaregiver() {
+            if (this.form.caregiver_id) {
+                for(let index in this.caregivers) {
+                    let caregiver = this.caregivers[index];
+                    if (caregiver.id == this.form.caregiver_id) {
+                        return caregiver;
+                    }
+                }
+            }
+            return {
+                pivot: {}
+            };
+        }
+
     },
 
     watch: {
-        client_id(val) {
-            this.loadCaregivers();
-        }
+        overrideRate(val) {
+            if (!val) {
+                this.form.caregiver_rate = null;
+                this.form.provider_fee = null;
+            }
+        },
     }
 }

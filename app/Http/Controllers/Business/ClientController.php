@@ -6,9 +6,12 @@ use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PhoneController;
+use App\Mail\ClientReconfirmation;
+use App\OnboardStatusHistory;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidSSN;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -55,20 +58,29 @@ class ClientController extends BaseController
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'email' => 'required|email|unique:users',
-            'date_of_birth' => 'nullable',
-            'business_fee' => 'nullable|numeric',
-            'client_type' => 'required',
-        ]);
+        $data = $request->validate(
+            [
+                'firstname' => 'required',
+                'lastname' => 'required',
+                'email' => 'required|email|unique:users',
+                'date_of_birth' => 'nullable',
+                'business_fee' => 'nullable|numeric',
+                'client_type' => 'required',
+                'ssn' => ['nullable', new ValidSSN()],
+                'onboard_status' => 'required',
+            ]
+        );
 
+        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt(random_bytes(32));
 
         $client = new Client($data);
         if ($this->business()->clients()->save($client)) {
+            $history = new OnboardStatusHistory([
+                'status' => $data['onboard_status']
+            ]);
+            $client->onboardStatusHistory()->save($history);
             return new CreatedResponse('The client has been created.', ['id' => $client->id]);
         }
 
@@ -98,7 +110,10 @@ class ClientController extends BaseController
                   return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
               });
 
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers'));
+        $client->hasSsn = (strlen($client->ssn) == 11);
+        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+
+        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate'));
     }
 
     public function edit(Client $client)
@@ -126,11 +141,24 @@ class ClientController extends BaseController
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
+            'ssn' => ['nullable', new ValidSSN()],
+            'onboard_status' => 'required',
         ]);
 
+        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
+        $addOnboardRecord = false;
+        if ($client->onboard_status != $data['onboard_status']) {
+            $addOnboardRecord = true;
+        }
+
         if ($client->update($data)) {
+            $history = new OnboardStatusHistory([
+                'status' => $data['onboard_status']
+            ]);
+            $client->onboardStatusHistory()->save($history);
+
             return new SuccessResponse('The client has been updated.');
         }
         return new ErrorResponse(500, 'The client could not be updated.');
@@ -185,5 +213,15 @@ class ClientController extends BaseController
         }
 
         return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method');
+    }
+
+    public function sendConfirmationEmail($client_id)
+    {
+        $client = Client::findOrFail($client_id);
+
+        \Mail::to($client)->send(new ClientReconfirmation($client, $this->business()));
+        $history = new OnboardStatusHistory(['status' => 'emailed_reconfirmation']);
+        $client->onboardStatusHistory()->save($history);
+        return new SuccessResponse('The re-confirmation email has been sent.');
     }
 }

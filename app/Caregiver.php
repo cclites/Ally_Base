@@ -80,21 +80,41 @@ class Caregiver extends Model
         return $this->hasMany(Shift::class);
     }
 
+    /**
+     * Encrypt ssn on entry
+     *
+     * @param $value
+     */
     public function setSsnAttribute($value)
     {
         $this->attributes['ssn'] = Crypt::encrypt($value);
     }
 
+    /**
+     * Decrypt ssn on retrieval
+     *
+     * @return null|string
+     */
     public function getSsnAttribute()
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
+    /**
+     * Check if the caregiver is currently clocked in to a shift
+     *
+     * @return bool
+     */
     public function isClockedIn()
     {
         return $this->shifts()->whereNull('checked_out_time')->exists();
     }
 
+    /**
+     * If clocked in, return the active shift model
+     *
+     * @return \App\Shift|null
+     */
     public function getActiveShift()
     {
         return $this->shifts()->whereNull('checked_out_time')->first();

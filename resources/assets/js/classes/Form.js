@@ -31,6 +31,9 @@ class Form {
         return data;
     }
 
+    wasModified(field) {
+        return (this[field] !== this.originalData[field]);
+    }
 
     /**
      * Reset the form fields.

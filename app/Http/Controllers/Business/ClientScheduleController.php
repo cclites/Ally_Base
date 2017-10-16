@@ -85,7 +85,8 @@ class ClientScheduleController extends BaseController
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric',
+            'caregiver_rate' => 'nullable|numeric',
+            'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
         ], [
             'bydays.required_if' => 'At least one day of the week is required.',
@@ -141,7 +142,8 @@ class ClientScheduleController extends BaseController
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric',
+            'caregiver_rate' => 'nullable|numeric',
+            'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
         ]);
 
@@ -231,7 +233,8 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric',
+            'caregiver_rate' => 'nullable|numeric',
+            'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
         ]);
 
@@ -241,7 +244,8 @@ class ClientScheduleController extends BaseController
             'business_id' => $this->business()->id,
             'notes' => $data['notes'] ?? null,
             'caregiver_id' => $data['caregiver_id'] ?? null,
-            'scheduled_rate' => $data['scheduled_rate'] ?? null,
+            'caregiver_rate' => $data['caregiver_rate'] ?? null,
+            'provider_fee' => $data['provider_fee'] ?? null,
         ]);
         $schedule->setSingleEvent($data['start_date'], $data['time'], $data['duration']);
         if ($client->schedules()->save($schedule)) {
@@ -275,7 +279,8 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
-            'scheduled_rate' => 'nullable|numeric',
+            'caregiver_rate' => 'nullable|numeric',
+            'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
         ]);
 
@@ -285,7 +290,8 @@ class ClientScheduleController extends BaseController
             $schedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
             $schedule->fill([
                 'caregiver_id' => $data['caregiver_id'] ?? null,
-                'scheduled_rate' => $data['scheduled_rate'] ?? null,
+                'caregiver_rate' => $data['caregiver_rate'] ?? null,
+                'provider_fee' => $data['provider_fee'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
             $schedule->save();
@@ -304,7 +310,8 @@ class ClientScheduleController extends BaseController
             $newSchedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
             $newSchedule->fill([
                 'caregiver_id' => $data['caregiver_id'] ?? null,
-                'scheduled_rate' => $data['scheduled_rate'] ?? null,
+                'caregiver_rate' => $data['caregiver_rate'] ?? null,
+                'provider_fee' => $data['provider_fee'] ?? null,
                 'notes' => $data['notes'] ?? null,
             ]);
             if (!$newSchedule->save()) {
