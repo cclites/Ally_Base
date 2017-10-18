@@ -44,6 +44,8 @@ Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 
+Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
+
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 
 Vue.component('clock-in', require('./components/ClockIn.vue'));
