@@ -14,6 +14,8 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.caregivers.index') }}">Caregiver List</a></li>
         <li><a href="{{ route('business.caregivers.create') }}">Add Caregiver</a></li>
+        <li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>
+
     </ul>
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-medkit"></i><span class="hide-menu">Care Plans</span></a>
