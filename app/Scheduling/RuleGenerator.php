@@ -6,14 +6,17 @@ use When\When;
 
 class RuleGenerator extends When
 {
+    const LOCAL_DATETIME_FORMAT = 'Ymd\THis';
+    const UTC_DATETIME_FORMAT = 'Ymd\THis\Z';
+
     //make rrule format
     public function getRule()
     {
         $rrule = array();
 
-        if($this->freq) $rrule['FREQ']=$this->freq;
-        if($this->until) $rrule['UNTIL']=$this->until->format('Ymd\THis\Z');
-        if($this->count) $rrule['COUNT']=$this->count;
+        if($this->freq) $rrule['FREQ'] =$this->freq;
+        if($this->until) $rrule['UNTIL'] = self::getLocalTime($this->until);
+        if($this->count) $rrule['COUNT'] = $this->count;
         if($this->interval) $rrule['INTERVAL']=$this->interval;
 //        $byday = array();
 //        array_walk($this->byday, function($item, $key) use (&$byday) {$byday[]=substr($item, -2, 2);});
@@ -98,4 +101,13 @@ class RuleGenerator extends When
         return null;
     }
 
+    public static function getLocalTime(\DateTime $date) {
+        return $date->format(self::LOCAL_DATETIME_FORMAT);
+    }
+
+    public static function getUTCDate(\DateTime $date) {
+        $date = clone $date;
+        $date->setTimezone(new \DateTimeZone('UTC'));
+        return $date->format(self::UTC_DATETIME_FORMAT);
+    }
 }

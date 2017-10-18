@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleGenerator;
+use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -107,13 +109,46 @@ class Schedule extends Model
     }
 
     /**
+     * Output full RRULE, append UNTIL rule based on end time in database.
+     * @return mixed
+     */
+    public function rrule()
+    {
+        return ($this->attributes['rrule']) ?
+            $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()) // add an hour to handle DST shifts
+            : null;
+    }
+
+    /**
+     * Mutate to use the rrule() method
+     *
+     * @return mixed
+     */
+    public function getRruleAttribute()
+    {
+        return $this->rrule();
+    }
+
+    /**
+     * Produce a human readable string describing the schedule timing
+     *
+     * @param array $opts
+     * @return string
+     */
+    public function humanReadable($opts = [])
+    {
+        $parser = new RuleParser($this->getStartDateTime(), $this->rrule());
+        return $parser->humanReadable($opts);
+    }
+
+    /**
      * @param int $limit
      *
      * @return \DateTime[]
      */
     public function getOccurrences($limit = 100)
     {
-        return $this->getOccurrencesBetween($this->getStartDateTime(), $this->getEndDateTime(), 'UTC', $limit);
+        return $this->getOccurrencesBetween($this->getStartDateTime(), $this->getEndDateTime(), $limit);
     }
 
     /**
@@ -124,15 +159,10 @@ class Schedule extends Model
      *
      * @return \DateTime[]
      */
-    public function getOccurrencesBetween($start_date, $end_date, $timezone='UTC', $limit = 100)
+    public function getOccurrencesBetween($start_date, $end_date, $limit = 100)
     {
-        if (is_string($timezone)) $timezone = new \DateTimeZone($timezone);
-        if (is_string($start_date)) $start_date = new \DateTime($start_date . ' 00:00:00', $timezone);
-        if (is_string($end_date)) $end_date = new \DateTime($end_date . ' 23:59:59', $timezone);
-
-        // Convert to UTC for consistency
-        $start_date->setTimezone(new \DateTimeZone('UTC'));
-        $end_date->setTimezone(new \DateTimeZone('UTC'));
+        if (is_string($start_date)) $start_date = new Carbon($start_date . ' 00:00:00', $this->getTimezone());
+        if (is_string($end_date)) $end_date = new Carbon($end_date . ' 23:59:59', $this->getTimezone());
 
         // Subtract the duration of the event to allow for events that may have already started but not finished
         $start_date = Carbon::instance($start_date)->subMinute($this->duration);
@@ -146,21 +176,21 @@ class Schedule extends Model
         else if ($this->isSingle()) {
             $occurrences = [];
             if ($this->getStartDateTime() >= $start_date && $this->getStartDateTime() <= $end_date) {
-                $occurrences[] = new \DateTime($this->start_date . ' ' . $this->time, new \DateTimeZone('UTC'));
+                $occurrences[] = new Carbon($this->start_date . ' ' . $this->time, $this->getTimezone());
             }
         }
         else {
-            if ($this->getEndDateTime() < $end_date) {
-                $end_date = $this->getEndDateTime();
-            }
-
-            $when = new RuleGenerator();
-            $occurrences = $when->startDate($this->getStartDateTime())
-                                ->rrule($this->rrule)
-                                ->getOccurrencesBetween($start_date, $end_date, $limit);
+            $parser = new RuleParser($this->getStartDateTime(), $this->rrule());
+            $occurrences = $parser->getOccurrencesBetween($start_date, $end_date, $limit);
         }
 
         return $this->filterExceptions($occurrences);
+    }
+
+    public function getTimezone()
+    {
+        if (!$this->business->timezone) throw new MissingTimezoneException;
+        return $this->business->timezone;
     }
 
     /**
@@ -170,7 +200,7 @@ class Schedule extends Model
      */
     public function getStartDateTime()
     {
-        return new \DateTime($this->start_date . ' ' . $this->time, new \DateTimeZone('UTC'));
+        return new Carbon($this->start_date . ' ' . $this->time, $this->getTimezone());
     }
 
     /**
@@ -180,10 +210,7 @@ class Schedule extends Model
      */
     public function getEndDateTime()
     {
-        $end = new \DateTime($this->end_date . ' ' . $this->time, new \DateTimeZone('UTC'));
-        // Add one second to always include this as the last occurrence (needed for getOccurrencesBetween calculation)
-        $end->add(new \DateInterval('PT1S'));
-        return $end;
+        return new Carbon($this->end_date . ' ' . $this->time, $this->getTimezone());
     }
 
     /**
