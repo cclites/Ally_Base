@@ -114,9 +114,9 @@ class Schedule extends Model
      */
     public function rrule()
     {
-        return ($this->attributes['rrule']) ?
-            $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()) // add an hour to handle DST shifts
-            : null;
+        if (!$this->attributes['rrule']) return null;
+        return ($this->end_date == self::FOREVER_ENDDATE) ? $this->attributes['rrule']
+            : $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()); // add an hour to handle DST shifts
     }
 
     /**

@@ -16,22 +16,10 @@ function filter_date($input, $to_format='Y-m-d') {
     return $carbon->format($to_format);
 }
 
-/**
- * Handle input of ISO, output to separate date and time fields (for database entry)
- *
- * @param $iso_input
- * @param null|string $output_utc_offset  Leave null to keep the same timezone as input
- * @param string $output_date_format
- * @param string $output_time_format
- *
- * @return array
- */
-function split_date_and_time($iso_input, $output_utc_offset = null, $output_date_format='Y-m-d', $output_time_format='H:i:s') {
-    $datetime = \Carbon\Carbon::createFromFormat(DATE_ISO8601, $iso_input);
-    if ($output_utc_offset) $datetime->setTimezone(new DateTimeZone($output_utc_offset));
-    $date = $datetime->format($output_date_format);
-    $time = $datetime->format($output_time_format);
-    return [$date, $time];
+function filter_dates(...$dates) {
+    return array_map(function($date) {
+        return filter_date($date);
+    }, $dates);
 }
 
 /**
@@ -44,7 +32,7 @@ function split_date_and_time($iso_input, $output_utc_offset = null, $output_date
  * @param string $output_date_format
  * @return string
  */
-function api_date_and_time($date, $time, $timezone='UTC', $output_timezone = null, $output_date_format='c') {
+function api_date_and_time($date, $time, $timezone='UTC', $output_timezone = null, $output_date_format=DATE_ISO8601) {
     $datetime = new \Carbon\Carbon($date . ' ' . $time, $timezone);
     if ($output_timezone) $datetime->setTimezone(new DateTimeZone($output_timezone));
     return $datetime->format($output_date_format);
