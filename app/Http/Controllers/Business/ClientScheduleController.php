@@ -7,6 +7,7 @@ use App\Exceptions\InvalidScheduleParameters;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidStartDate;
 use App\Rules\ValidTimezoneOrOffset;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
@@ -83,7 +84,7 @@ class ClientScheduleController extends BaseController
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
-            'bydays' => 'required_if:interval_type,weekly,biweekly',
+            'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('start_date'))],
             'caregiver_id' => 'nullable|integer',
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
