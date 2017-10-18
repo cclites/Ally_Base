@@ -79,7 +79,6 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'start_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
             'end_date' => 'nullable|date',
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
@@ -93,12 +92,8 @@ class ClientScheduleController extends BaseController
             'bydays.required_if' => 'At least one day of the week is required.',
         ]);
 
-        list($data['start_date'], $data['time']) = filter_date_and_time($data['start_date'], $data['time'], $data['utc_offset']);
-
-        if ($data['end_date']) {
-            list($data['end_date']) = filter_date_and_time($data['end_date'], $data['time'], $data['utc_offset']);
-        }
-        else {
+        list($data['start_date'], $data['end_date']) = filter_dates($data['start_date'], $data['end_date']);
+        if (!$data['end_date']) {
             $data['end_date'] = Schedule::FOREVER_ENDDATE;
         }
 
@@ -136,7 +131,6 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'selected_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
             'end_date' => 'nullable|date',
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
@@ -148,12 +142,8 @@ class ClientScheduleController extends BaseController
             'notes' => 'nullable',
         ]);
 
-        list($data['selected_date'], $data['time']) = filter_date_and_time($data['selected_date'], $data['time'], $data['utc_offset']);
-
-        if ($data['end_date']) {
-            list($data['end_date']) = filter_date_and_time($data['end_date'], $data['time'], $data['utc_offset']);
-        }
-        else {
+        list($data['selected_date'], $data['end_date']) = filter_dates($data['selected_date'], $data['end_date']);
+        if (!$data['end_date']) {
             $data['end_date'] = Schedule::FOREVER_ENDDATE;
         }
 
@@ -203,10 +193,9 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'selected_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
         ]);
 
-        list($data['selected_date']) = filter_date_and_time($data['selected_date'], $schedule->time, $data['utc_offset']);
+        $data['selected_date'] = filter_date($data['selected_date']);
 
         if ($schedule->closeSchedule($data['selected_date'])) {
             return new SuccessResponse('The schedule has been deleted for ' . $data['selected_date'] . ' and later.');
@@ -230,7 +219,6 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'start_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
@@ -239,7 +227,7 @@ class ClientScheduleController extends BaseController
             'notes' => 'nullable',
         ]);
 
-        list($data['start_date'], $data['time']) = filter_date_and_time($data['start_date'], $data['time'], $data['utc_offset']);
+        $data['start_date'] = filter_date($data['start_date']);
 
         $schedule = new Schedule([
             'business_id' => $this->business()->id,
@@ -276,7 +264,6 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'selected_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
             'caregiver_id' => 'nullable|integer',
@@ -285,7 +272,7 @@ class ClientScheduleController extends BaseController
             'notes' => 'nullable',
         ]);
 
-        list($data['selected_date'], $data['time']) = filter_date_and_time($data['selected_date'], $data['time'], $data['utc_offset']);
+        $data['selected_date'] = filter_date($data['selected_date']);
 
         if ($schedule->isSingle()) {
             $schedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
@@ -348,12 +335,11 @@ class ClientScheduleController extends BaseController
 
         $data = $request->validate([
             'selected_date' => 'required|date',
-            'utc_offset' => ['required', new ValidTimezoneOrOffset()],
         ]);
 
-        list($data['selected_date']) = filter_date_and_time($data['selected_date'], $schedule->time, $data['utc_offset']);
+        $data['selected_date'] = filter_date($data['selected_date']);
 
-        if ($schedule->createException(filter_date($data['selected_date']))) {
+        if ($schedule->createException($data['selected_date'])) {
             return new SuccessResponse('The selected date has been deleted.');
         }
         return new ErrorResponse(500, 'Could not delete the selected date.');

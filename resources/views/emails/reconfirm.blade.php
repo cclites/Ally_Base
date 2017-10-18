@@ -1,6 +1,6 @@
 <p>Hi {{ $client->firstname }},</p>
 
-<p>We are now processing transactions on behalf of {{ $business->name }}.  Could you please verify and approve that your information <a href="{{ $url }}">here</a> is correct?</p>
+<p>We are now processing transactions on behalf of {{ $business->name }}.  Could you please verify and approve that your information is correct?</p>
 
 <p>Click here to confirm your information:  <a href="{{ $url }}">{{ $url }}</a></p>
 
