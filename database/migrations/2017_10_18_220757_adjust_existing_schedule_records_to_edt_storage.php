@@ -21,7 +21,7 @@ class AdjustExistingScheduleRecordsToEdtStorage extends Migration
 
             if ($schedule->end_date != \App\Schedule::FOREVER_ENDDATE) {
                 $end = new \Carbon\Carbon($schedule->end_date . ' ' . $schedule->time, 'UTC');
-                $start->subHours(4);
+                $end->subHours(4);
                 $schedule->end_date = $end->format('Y-m-d');
             }
 
