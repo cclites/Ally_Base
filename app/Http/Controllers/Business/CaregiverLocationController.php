@@ -30,7 +30,7 @@ class CaregiverLocationController extends BaseController
         if (empty($data['distance'])) $data['distance'] = self::DEFAULT_DISTANCE;
 
         $client = Client::with('evvAddress')->find($data['client_id']);
-        if ($this->business()->id != $client->id) {
+        if ($this->business()->id != $client->business_id) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
         if (!$client->evvAddress) {
