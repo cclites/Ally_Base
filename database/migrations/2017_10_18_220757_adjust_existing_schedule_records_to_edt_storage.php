@@ -16,12 +16,12 @@ class AdjustExistingScheduleRecordsToEdtStorage extends Migration
         $schedules = \App\Schedule::all();
         $count = 0;
         foreach($schedules as $schedule) {
-            $start = new \Carbon\Carbon($schedule->start_date, $schedule->time, 'UTC');
-            $start->setTimezone('America/New_York');
+            $start = new \Carbon\Carbon($schedule->start_date . ' ' . $schedule->time, 'UTC');
+            $start->subHours(4);
 
             if ($schedule->end_date != \App\Schedule::FOREVER_ENDDATE) {
-                $end = new \Carbon\Carbon($schedule->end_date, $schedule->time, 'UTC');
-                $start->setTimezone('America/New_York');
+                $end = new \Carbon\Carbon($schedule->end_date . ' ' . $schedule->time, 'UTC');
+                $start->subHours(4);
                 $schedule->end_date = $end->format('Y-m-d');
             }
 
