@@ -14,7 +14,7 @@ class AlterAddTimezoneToBusinesses extends Migration
     public function up()
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->string('timezone')->nullable();
+            $table->string('timezone')->default('America/New_York');
         });
     }
 
