@@ -45,36 +45,19 @@ class CaregiverShiftController extends Controller
      */
     public function greeting()
     {
-        $response = new Twiml;
-        try {
-            if ($shift = $this->activeShiftForNumber($this->number)) {
-                $schedule = $shift->schedule;
-                $gather = $response->gather([
-                    'timeout' => 15,
-                    'numDigits' => 1,
-                    'action' => route('telefony.check_out', [], false),
-                ]);
-                $gather->say(view('caregivers.voice.greeting_clock_out', compact('schedule'))->render());
-            }
-            else {
-                $schedule = $this->scheduledShiftForNumber($this->number);
-                $gather = $response->gather([
-                    'timeout' => 15,
-                    'numDigits' => 1,
-                    'action' => route('telefony.check_in', [], false),
-                ]);
-                $gather->say(view('caregivers.voice.greeting_clock_in', compact('schedule'))->render());
-            }
+        if ($shift = $this->activeShiftForNumber($this->number)) {
+            $response = new Twiml;
+            $schedule = $shift->schedule;
+            $gather = $response->gather([
+                'timeout' => 15,
+                'numDigits' => 1,
+                'action' => route('telefony.check_out', [], false),
+            ]);
+            $gather->say(view('caregivers.voice.greeting_clock_out', compact('schedule'))->render());
             return $this->response($response);
         }
-        catch(TelefonyMessageException $e) {
-            $response->say($e->getMessage());
-            return $this->response($response);
-        }
-        catch(\Exception $e) {
-            \Log::error('Error Code: ' . $e->getCode() . ' Message: ' . $e->getMessage() . ' Line: ' . $e->getFile() . ':' . $e->getLine());
-            $response->say("Unknown error.  Please hang up and try again.");
-            return $this->response($response);
+        else {
+            return $this->checkForNextShift();
         }
     }
 
@@ -119,9 +102,31 @@ class CaregiverShiftController extends Controller
             case 1:
                 return $this->checkOutFirstCaregiver();
             case 2:
-                return $this->enterCaregiverResponse();
+                return $this->checkForNextShift();
+//                return $this->enterCaregiverResponse();
         }
         return $this->checkOutResponse();
+    }
+
+    public function checkForNextShift()
+    {
+        $response = new Twiml;
+        try {
+            $schedule = $this->scheduledShiftForNumber($this->number);
+            // no TelefonyMessageException, so $schedule was found
+            $this->forceCheckout();
+            $gather = $response->gather([
+                'timeout' => 15,
+                'numDigits' => 1,
+                'action' => route('telefony.check_in', [], false),
+            ]);
+            $gather->say(view('caregivers.voice.greeting_clock_in', compact('schedule'))->render());
+            return $this->response($response);
+        }
+        catch(TelefonyMessageException $e) {
+            $response->say($e->getMessage());
+            return $this->response($response);
+        }
     }
 
     /**
@@ -189,6 +194,7 @@ class CaregiverShiftController extends Controller
             $clockIn = new ClockIn($schedule->caregiver);
             $clockIn->setNumber($this->number->national_number);
             if ($clockIn->clockIn($schedule)) {
+                $this->removeScheduledShiftCache($this->number->national_number);
                 $response->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                 return $this->response($response);
             }
@@ -368,6 +374,14 @@ class CaregiverShiftController extends Controller
         return $this->response($response);
     }
 
+    public function forceCheckout() {
+        if ($shift = $this->activeShiftForNumber($this->number)) {
+            $clockOut = new ClockOut($shift->caregiver);
+            $issue = new ShiftIssue(['Auto clock out by the next scheduled caregiver using Telefony.']);
+            $clockOut->setManual()->clockOut($shift, [], [$issue]);
+        }
+    }
+
     /**
      * Return select caregiver response.
      */
@@ -416,10 +430,9 @@ class CaregiverShiftController extends Controller
     private function scheduledShiftForNumber(PhoneNumber $number)
     {
         $national_number = $number->national_number;
-        $cacheKey = 'twilio_schedule_' . $national_number;
 
-        if (Cache::has($cacheKey)) {
-            $schedule_id = Cache::get($cacheKey);
+        if ($this->hasScheduledShiftCached($national_number)) {
+            $schedule_id = $this->getScheduledShiftCache($national_number);
             return Schedule::find($schedule_id);
         }
 
@@ -465,9 +478,36 @@ class CaregiverShiftController extends Controller
                 throw new TelefonyMessageException('There is no caregiver assigned to this schedule.');
         }
 
-        Cache::put($cacheKey, $schedule->id, 5);
+        $this->setScheduledShiftCache($national_number, $schedule->id);
+
         return $schedule;
     }
+
+    protected function hasScheduledShiftCached($national_number)
+    {
+        $cacheKey = 'twilio_schedule_' . $national_number;
+        return Cache::has($cacheKey);
+    }
+
+    protected function setScheduledShiftCache($national_number, $schedule_id)
+    {
+        $cacheKey = 'twilio_schedule_' . $national_number;
+        Cache::put($cacheKey, $schedule_id, 5);
+    }
+
+    protected function getScheduledShiftCache($national_number)
+    {
+        $cacheKey = 'twilio_schedule_' . $national_number;
+        Cache::get($cacheKey);
+    }
+
+    protected function removeScheduledShiftCache($national_number)
+    {
+        $cacheKey = 'twilio_schedule_' . $national_number;
+        Cache::forget($cacheKey);
+    }
+
+
 
     /**
      * All twiml responses need the text/xml content-type.
