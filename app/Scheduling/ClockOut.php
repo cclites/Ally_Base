@@ -52,6 +52,7 @@ class ClockOut extends ClockBase
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,
             'mileage' => $this->mileage,
+            'verified' => ($shift->verified && !$this->manual) ? true : false,
         ]);
 
         return $update;
