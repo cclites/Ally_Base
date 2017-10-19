@@ -498,7 +498,7 @@ class CaregiverShiftController extends Controller
     protected function getScheduledShiftCache($national_number)
     {
         $cacheKey = 'twilio_schedule_' . $national_number;
-        Cache::get($cacheKey);
+        return Cache::get($cacheKey);
     }
 
     protected function removeScheduledShiftCache($national_number)
