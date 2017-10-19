@@ -377,8 +377,10 @@ class CaregiverShiftController extends Controller
     public function forceCheckout() {
         if ($shift = $this->activeShiftForNumber($this->number)) {
             $clockOut = new ClockOut($shift->caregiver);
-            $issue = new ShiftIssue(['Auto clock out by the next scheduled caregiver using Telefony.']);
-            $clockOut->setManual()->clockOut($shift, [], [$issue]);
+            $issue = new ShiftIssue(['comments' => 'Auto clock out by the next scheduled caregiver using Telefony.']);
+            $clockOut->setManual()
+                ->clockOut($shift);
+            $clockOut->attachIssue($shift, $issue);
         }
     }
 
