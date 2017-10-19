@@ -455,8 +455,8 @@ class CaregiverShiftController extends Controller
         // Find the closest event to the current time
         $now = new Carbon();
         usort($events, function($a, $b) use ($now) {
-            $diffA = $now->diffInSeconds(Carbon::instance($a->start));
-            $diffB = $now->diffInSeconds(Carbon::instance($b->start));
+            $diffA = $now->diffInSeconds(Carbon::instance($a['start']));
+            $diffB = $now->diffInSeconds(Carbon::instance($b['start']));
             if ($diffA == $diffB) {
                 return 0;
             }
