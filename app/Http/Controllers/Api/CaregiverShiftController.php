@@ -267,9 +267,9 @@ class CaregiverShiftController extends Controller
         ]);
 
         $this->say(
-            'Please enter the numerical code of any activity performed on your shift followed by a #. 
-        If you are finished recording activities press the # to finalize your clock out.  
-        To hear the list of activities press 0 followed by the #.',
+            'Please enter the numerical code of any activity performed on your shift followed by a pound sign. 
+        If you are finished recording activities press the pound sign to finalize your clock out.  
+        To hear the list of activities press 0 followed by the pound sign.',
             $gather
         );
 
@@ -287,8 +287,8 @@ class CaregiverShiftController extends Controller
         ]);
 
         $this->say(
-            'The activity codes are as follows.  You may enter them at any time followed by the #.
-           To stop the read-out and go back, press # at any time',
+            'The activity codes are as follows.  You may enter them at any time followed by the pound sign.
+           To stop the read-out and go back, press pound sign at any time',
             $gather
         );
 
@@ -302,7 +302,7 @@ class CaregiverShiftController extends Controller
         }
 
         $this->say(
-            'To repeat this list, press 0 followed by the #.',
+            'To repeat this list, press 0 followed by the pound sign.',
             $gather
         );
 
@@ -404,7 +404,7 @@ class CaregiverShiftController extends Controller
             'action' => '/api/caregiver/enter-id',
         ]);
         $this->say(
-            'Please enter your caregiver ID now',
+            'Please enter your caregiver ID.',
             $gather
         );
         return $this->response();
