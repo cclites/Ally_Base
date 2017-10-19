@@ -377,8 +377,10 @@ class CaregiverShiftController extends Controller
     public function forceCheckout() {
         if ($shift = $this->activeShiftForNumber($this->number)) {
             $clockOut = new ClockOut($shift->caregiver);
-            $issue = new ShiftIssue(['Auto clock out by the next scheduled caregiver using Telefony.']);
-            $clockOut->setManual()->clockOut($shift, [], [$issue]);
+            $issue = new ShiftIssue(['comments' => 'Auto clock out by the next scheduled caregiver using Telefony.']);
+            $clockOut->setManual()
+                ->clockOut($shift);
+            $clockOut->attachIssue($shift, $issue);
         }
     }
 
@@ -455,8 +457,8 @@ class CaregiverShiftController extends Controller
         // Find the closest event to the current time
         $now = new Carbon();
         usort($events, function($a, $b) use ($now) {
-            $diffA = $now->diffInSeconds(Carbon::instance($a->start));
-            $diffB = $now->diffInSeconds(Carbon::instance($b->start));
+            $diffA = $now->diffInSeconds(Carbon::instance($a['start']));
+            $diffB = $now->diffInSeconds(Carbon::instance($b['start']));
             if ($diffA == $diffB) {
                 return 0;
             }
@@ -498,7 +500,7 @@ class CaregiverShiftController extends Controller
     protected function getScheduledShiftCache($national_number)
     {
         $cacheKey = 'twilio_schedule_' . $national_number;
-        Cache::get($cacheKey);
+        return Cache::get($cacheKey);
     }
 
     protected function removeScheduledShiftCache($national_number)
