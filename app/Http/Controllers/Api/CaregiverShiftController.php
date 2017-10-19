@@ -294,8 +294,9 @@ class CaregiverShiftController extends Controller
 
         $shift = $this->activeShiftForNumber($this->number);
         foreach($shift->business->allActivities() as $activity) {
+            $codeReadout = implode(',,', str_split($activity->code));
             $this->say(
-                $activity->code . ' ' . $activity->name,
+                $codeReadout . ', ' . $activity->name,
                 $gather
             );
         }
