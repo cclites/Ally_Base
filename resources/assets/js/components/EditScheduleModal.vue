@@ -236,7 +236,6 @@
                 let component = this;
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
-                    utc_offset: this.getUserUtcOffset(),
                 });
                 deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
                     .then(function(response) {
@@ -251,7 +250,6 @@
                 let component = this;
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
-                    utc_offset: this.getUserUtcOffset(),
                 });
                 deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + this.selectedSchedule.id + '/delete')
                     .then(function(response) {
@@ -261,12 +259,11 @@
 
             makeEditSingleForm() {
                 this.form = new Form({
-                    selected_date: moment(this.selectedEvent.start).format('L'),
-                    time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
+                    selected_date: moment(this.selectedEvent.start).format(this.display.date_format),
+                    time: moment(this.selectedEvent.start).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: this.selectedSchedule.caregiver_rate,
                     provider_fee: this.selectedSchedule.provider_fee,
                 });
@@ -278,15 +275,14 @@
 
             makeEditAllForm() {
                 this.form = new Form({
-                    selected_date: moment(this.selectedEvent.start).format('L'),
-                    end_date: this.getLocalMomentObject(this.selectedSchedule.end_date, this.selectedSchedule.time).format('L'),
-                    time: this.getLocalMomentObject(this.selectedSchedule.start_date, this.selectedSchedule.time).format('HH:mm:ss'),
+                    selected_date: moment(this.selectedEvent.start).format(this.display.date_format),
+                    end_date: moment(this.selectedSchedule.end_date).format(this.display.date_format),
+                    time: moment(this.selectedEvent.start).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: this.selectedSchedule.caregiver_rate,
                     provider_fee: this.selectedSchedule.provider_fee,
                 });
@@ -302,15 +298,15 @@
 
 
             submitForm() {
-                var component = this;
-                if (this.editType == 'single') {
-                    this.form.patch('/business/clients/' + this.client_id + '/schedule/' + + this.selectedSchedule.id + '/single')
+                let component = this;
+                if (component.editType === 'single') {
+                    component.form.patch('/business/clients/' + component.client_id + '/schedule/' + + component.selectedSchedule.id + '/single')
                         .then(function(response) {
                             component.refreshEvents();
                         });
                 }
                 else {
-                    this.form.patch('/business/clients/' + this.client_id + '/schedule/' + this.selectedSchedule.id)
+                    component.form.patch('/business/clients/' + component.client_id + '/schedule/' + component.selectedSchedule.id)
                         .then(function(response) {
                             component.refreshEvents();
                         });
@@ -333,7 +329,7 @@
             },
 
             editType(val) {
-                if (val == 'single') this.makeEditSingleForm();
+                if (val === 'single') this.makeEditSingleForm();
                 else this.makeEditAllForm();
             },
 

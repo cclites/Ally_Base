@@ -27,8 +27,8 @@ class Schedule implements Responsable
 
         return [
             'id' => $this->schedule->id,
-            'start_date' => $this->schedule->start_date,
-            'end_date' => $this->schedule->end_date,
+            'start_date' => api_date_and_time($this->schedule->start_date, $this->schedule->time, $this->schedule->getTimezone()),
+            'end_date' => api_date_and_time($this->schedule->end_date, $this->schedule->time, $this->schedule->getTimezone()),
             'time' => $this->schedule->time,
             'duration' => $this->schedule->duration,
             'single' => $this->schedule->isSingle(),

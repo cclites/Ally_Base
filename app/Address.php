@@ -43,4 +43,10 @@ class Address extends Model
         $geocode = $this->getGeocode();
         return $geocode->distanceTo($latitude, $longitude, $units);
     }
+
+    public function distanceToAddress(Address $address, $units = 'm')
+    {
+        $geocode = $address->getGeocode();
+        return $this->distanceTo($geocode->latitude, $geocode->longitude, $units);
+    }
 }

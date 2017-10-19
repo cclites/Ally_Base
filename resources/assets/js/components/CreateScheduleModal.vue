@@ -225,12 +225,11 @@
         methods: {
             makeCreateSingleForm() {
                 this.form = new Form({
-                    start_date: this.selectedEvent.format('L'),
+                    start_date: this.selectedEvent.format(this.display.date_format),
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
                     caregiver_id: null,
                     notes: null,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: null,
                     provider_fee: null,
                 });
@@ -238,7 +237,7 @@
 
             makeCreateRecurringForm() {
                 this.form = new Form({
-                    start_date: this.selectedEvent.format('L'),
+                    start_date: this.selectedEvent.format(this.display.date_format),
                     end_date: null,
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
@@ -246,22 +245,21 @@
                     bydays: [],
                     caregiver_id: null,
                     notes: null,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: null,
                     provider_fee: null,
                 });
             },
 
             submitForm() {
-                var component = this;
-                if (this.createType == 'single') {
-                    this.form.post('/business/clients/' + this.client_id + '/schedule/single')
+                let component = this;
+                if (component.createType === 'single') {
+                    component.form.post('/business/clients/' + component.client_id + '/schedule/single')
                         .then(function(response) {
                             component.refreshEvents();
                         });
                 }
                 else {
-                    this.form.post('/business/clients/' + this.client_id + '/schedule')
+                    component.form.post('/business/clients/' + component.client_id + '/schedule')
                         .then(function(response) {
                             component.refreshEvents();
                         });
@@ -281,7 +279,7 @@
                 }
             },
             createType(val) {
-                if (val == 'single') this.makeCreateSingleForm();
+                if (val === 'single') this.makeCreateSingleForm();
                 else this.makeCreateRecurringForm()
             },
             client_id(val) {

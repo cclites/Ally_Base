@@ -36,14 +36,15 @@ class ScheduleAggregator
         $events = [];
         foreach($this->data as $event) {
             $title       = $event['title'];
+            /** @var \App\Schedule $schedule */
             $schedule    = $event['schedule'];
-            $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $timezone, $limitPerEvent);
+            $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $limitPerEvent);
             $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
                 $end = clone $date;
                 $end->add(new \DateInterval('PT' . $schedule->duration . 'M'));
 
                 // checked in logic
-                $now = new Carbon();
+                $now = Carbon::now();
                 $diff = $now->diffInMinutes(Carbon::instance($date));
                 $checked_in = ($diff < ($schedule->duration) * 1.2) && in_array($schedule->id, $this->activeSchedules);
 
