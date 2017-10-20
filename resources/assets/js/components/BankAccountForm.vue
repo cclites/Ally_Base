@@ -27,6 +27,7 @@
                             id="routing_number"
                             name="routing_number"
                             type="text"
+                            autocomplete="off"
                             v-model="form.routing_number"
                     >
                     </b-form-input>
@@ -39,6 +40,7 @@
                             id="routing_number_confirmation"
                             name="routing_number_confirmation"
                             type="text"
+                            autocomplete="off"
                             v-model="form.routing_number_confirmation"
                     >
                     </b-form-input>
@@ -53,6 +55,7 @@
                             id="account_number"
                             name="account_number"
                             type="text"
+                            autocomplete="off"
                             v-model="form.account_number"
                     >
                     </b-form-input>
@@ -65,6 +68,7 @@
                             id="account_number_confirmation"
                             name="account_number_confirmation"
                             type="text"
+                            autocomplete="off"
                             v-model="form.account_number_confirmation"
                     >
                     </b-form-input>
