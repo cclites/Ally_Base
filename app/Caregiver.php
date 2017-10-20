@@ -2,14 +2,14 @@
 
 namespace App;
 
+use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
-class Caregiver extends Model
+class Caregiver extends Model implements UserRole
 {
     use IsUserRole;
 

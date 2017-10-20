@@ -9,11 +9,14 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Traits\Request\PaymentMethodUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class CaregiverController extends BaseController
 {
+    use PaymentMethodUpdate;
+
     /**
      * Display a listing of the resource.
      *
@@ -75,8 +78,8 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-//        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents']);
-        $caregiver->load(['user.documents']);
+//        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
+        $caregiver->load(['user.documents', 'bankAccount']);
         $schedules = $caregiver->schedules()->get();
 
         return view('business.caregivers.show', compact('caregiver', 'schedules'));
@@ -171,5 +174,22 @@ class CaregiverController extends BaseController
         $events = new ScheduleEventsResponse($caregiver->getEvents($start, $end));
         return $events;
 
+    }
+
+    public function bankAccount(Request $request, $caregiver_id)
+    {
+        $caregiver = Caregiver::findOrFail($caregiver_id);
+
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $existing = $caregiver->bankAccount;
+        $account = $this->updateBankAccount($request, $caregiver, $existing);
+        if ($account) {
+            if (!$existing) $caregiver->update(['bank_account_id' => $account->id]);
+            return new SuccessResponse('The bank account has been saved.');
+        }
+        return new ErrorResponse(500, 'The bank account could not be saved.');
     }
 }
