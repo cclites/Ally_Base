@@ -109,6 +109,7 @@
 <script>
     export default {
         props: {
+            'caregiver': {},
             'client': {},
             'account': {},
             'source': {},
@@ -146,8 +147,15 @@
 
         methods: {
             submit() {
-                var component = this;
-                this.form.post('/business/clients/' + this.client.id + '/payment/' + this.source)
+                let component = this;
+                let url;
+                if (component.client) {
+                    url = '/business/clients/' + component.client.id + '/payment/' + component.source;
+                }
+                if (component.caregiver) {
+                    url = '/business/caregivers/' + component.caregiver.id + '/bank_account';
+                }
+                this.form.post(url)
                     .then(function(response) {
                         component.form.account_number = '*****' + component.form.account_number.slice(-4);
                         component.form.account_number_confirmation = '';

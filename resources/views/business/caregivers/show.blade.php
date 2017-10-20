@@ -21,6 +21,9 @@
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
         </li>
         <li class="nav-item">
@@ -57,6 +60,18 @@
                 </div>
                 <div class="col-lg-6 col-sm-12">
                     <phone-number title="Home Number" type="billing" action="{{ route('business.caregivers.phone', [$caregiver->id, 'home']) }}" :phone="{{ json_phone($caregiver->user, 'home') }}"></phone-number>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="bankaccount" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-6 col-sm-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">Bank Account</div>
+                        <div class="card-body">
+                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :caregiver="{{ $caregiver }}" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
