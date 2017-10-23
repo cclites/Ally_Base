@@ -11,6 +11,23 @@ class Shift extends Model
     public $timestamps = false;
     protected $guarded = ['id'];
 
+    ///////////////////////////////////////
+    /// Shift Statuses
+    ///////////////////////////////////////
+
+    const CLOCKED_IN = 'CLOCKED_IN';
+    const CLOCKED_OUT = 'CLOCKED_OUT';
+    const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
+    const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Verified shift that needs to be authorized for payment
+    const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
+    const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
+    const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
+    const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
+
+    //////////////////////////////////////
+    /// Relationship Methods
+    //////////////////////////////////////
+
     public function client()
     {
         return $this->belongsTo(Client::class);
@@ -53,6 +70,10 @@ class Shift extends Model
         return $this->hasMany(ShiftIssue::class);
     }
 
+    //////////////////////////////////////
+    /// Model Methods
+    //////////////////////////////////////
+
     /**
      * Return the number of hours worked
      *
@@ -72,6 +93,11 @@ class Shift extends Model
         return round($date1->diffInMinutes($date2) / 60, 2);
     }
 
+    /**
+     * Get the scheduled end time of the shift
+     *
+     * @return Carbon
+     */
     public function scheduledEndTime()
     {
         $shiftStart = new Carbon($this->checked_in_time);
@@ -86,7 +112,7 @@ class Shift extends Model
     /**
      * Return the number of hours remaining in the shift (as scheduled)
      *
-     * @return int
+     * @return float|int
      */
     public function remaining()
     {
@@ -99,6 +125,8 @@ class Shift extends Model
     }
 
     /**
+     * Return an instance of the CostCalculator for this shift
+     *
      * @return \App\Scheduling\CostCalculator
      */
     public function costs()
@@ -106,6 +134,9 @@ class Shift extends Model
         return new CostCalculator($this);
     }
 
+    /**
+     * @return bool
+     */
     public function isVerified()
     {
         return (bool) $this->verified;
