@@ -17,6 +17,7 @@ class CreateSystemExceptionsTable extends Migration
             $table->increments('id');
             $table->string('title')->nullable();
             $table->text('description')->nullable();
+            $table->string('reference_url')->nullable();
             $table->string('reference_type')->nullable();
             $table->string('reference_id')->nullable();
             $table->timestamp('acknowledged_at')->nullable();
