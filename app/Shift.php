@@ -70,6 +70,11 @@ class Shift extends Model
         return $this->hasMany(ShiftIssue::class);
     }
 
+    public function exceptions()
+    {
+        return $this->morphMany(SystemException::class, 'reference');
+    }
+
     //////////////////////////////////////
     /// Model Methods
     //////////////////////////////////////
