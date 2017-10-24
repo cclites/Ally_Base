@@ -89,7 +89,7 @@ class ScheduledPaymentsReport implements Report
             $this->rows = $shifts->map(function(Shift $shift) {
                 return [
                     'shift_id' => $shift->id,
-                    'shift_time' => (new Carbon($shift->clocked_in_time))->format(DATE_ISO8601),
+                    'shift_time' => (new Carbon($shift->checked_in_time))->format(DATE_ISO8601),
                     'shift_hours' => $shift->duration(),
                     'client' => [
                         'id' => $shift->client->id,
