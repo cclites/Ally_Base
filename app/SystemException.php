@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class SystemException extends Model
@@ -29,5 +30,15 @@ class SystemException extends Model
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    public function acknowledge($note = '', $user_id = null)
+    {
+        if (!$user_id) $user_id = \Auth::id();
+        return $this->update([
+            'acknowledged_at' => Carbon::now(),
+            'acknowledged_by' => $user_id,
+            'notes' => $note,
+        ]);
+    }
 
 }
