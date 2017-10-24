@@ -159,13 +159,16 @@ class ReportsController extends BaseController
         $month_sum = Payment::where('business_id', $this->business()->id)
                             ->where('created_at', '>=', $year_start)
                              ->sum('business_allotment');
+        $month_sum = number_format($month_sum, 2);
         $year_sum = Payment::where('business_id', $this->business()->id)
                             ->where('created_at', '>=', $year_start)
                             ->sum('business_allotment');
+        $year_sum = number_format($year_sum, 2);
 
         $report = new ScheduledPaymentsReport();
         $report->between($year_start, null);
         $scheduled_sum = $report->sum('business_allotment');
+        $scheduled_sum = number_format($scheduled_sum, 2);
 
         $payments = Payment::where('business_id', $this->business()->id)
                            ->orderBy('created_at', 'DESC')
@@ -189,12 +192,17 @@ class ReportsController extends BaseController
         $month_sum = Payment::where('business_id', $this->business()->id)
                             ->where('created_at', '>=', $year_start)
                             ->sum('business_allotment');
+        $month_sum = number_format($month_sum, 2);
+
         $year_sum = Payment::where('business_id', $this->business()->id)
                            ->where('created_at', '>=', $year_start)
                            ->sum('business_allotment');
+        $year_sum = number_format($year_sum, 2);
 
         $report = new ScheduledPaymentsReport();
         $scheduled_sum = $report->sum('business_allotment');
+        $scheduled_sum = number_format($scheduled_sum, 2);
+
         $payments = $report->rows();
         return view('business.reports.scheduled', compact('payments', 'month_sum', 'year_sum', 'scheduled_sum'));
     }
