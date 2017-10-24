@@ -1,5 +1,12 @@
 <?php
 
+function collection_only_values($collection, $values = []) {
+    return $collection->map(function($item) use ($values)
+    {
+        return array_intersect_key($item->toArray(), array_flip($values));
+    });
+}
+
 function json_phone(\App\User $user, $type) {
     if ($phoneNumber = $user->phoneNumbers->where('type', $type)->first()) {
         return sprintf('{number: \'%s\', extension: %s}',
