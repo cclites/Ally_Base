@@ -45,13 +45,13 @@ function api_date_and_time($date, $time, $timezone='UTC', $output_timezone = nul
     return $datetime->format($output_date_format);
 }
 
-function todays_date($format = 'Y-m-d') {
-    return local_date('now', $format);
+function todays_date($format = 'Y-m-d', $to_timezone = 'America/New_York') {
+    return local_date('now', $format, $to_timezone);
 }
 
-function local_date($input, $to_format='m/d/Y', $from_timezone='UTC') {
+function local_date($input, $to_format='m/d/Y', $to_timezone = 'America/New_York', $from_timezone='UTC') {
     $carbon = new \Carbon\Carbon($input, $from_timezone);
-    $carbon->timezone('America/New_York');
+    $carbon->timezone($to_timezone);
     return $carbon->format($to_format);
 }
 
