@@ -6,6 +6,7 @@ use App\Caregiver;
 use App\Deposit;
 use App\Payment;
 use App\PaymentQueue;
+use App\Reports\ScheduledPaymentsReport;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -153,14 +154,19 @@ class ReportsController extends BaseController
 
     public function payments()
     {
+        $year_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
+
         $month_sum = Payment::where('business_id', $this->business()->id)
-                            ->where('created_at', '>', date('Y-m-d H:i:s', strtotime(date('Y-m').'-01')))
+                            ->where('created_at', '>=', $year_start)
                              ->sum('business_allotment');
         $year_sum = Payment::where('business_id', $this->business()->id)
-                            ->where('created_at', '>', date('Y-m-d H:i:s', strtotime(date('Y').'-01-01')))
+                            ->where('created_at', '>=', $year_start)
                             ->sum('business_allotment');
-        $scheduled_sum = PaymentQueue::where('business_id', $this->business()->id)
-                             ->sum('business_allotment');
+
+        $report = new ScheduledPaymentsReport();
+        $report->between($year_start, null);
+        $scheduled_sum = $report->sum('business_allotment');
+
         $payments = Payment::where('business_id', $this->business()->id)
                            ->orderBy('created_at', 'DESC')
                            ->get()
@@ -179,27 +185,17 @@ class ReportsController extends BaseController
 
     public function scheduled()
     {
+        $year_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
         $month_sum = Payment::where('business_id', $this->business()->id)
-                            ->where('created_at', '>', date('Y-m-d H:i:s', strtotime('first day of this month 00:00:00')))
+                            ->where('created_at', '>=', $year_start)
                             ->sum('business_allotment');
         $year_sum = Payment::where('business_id', $this->business()->id)
-                           ->where('created_at', '>', date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00')))
+                           ->where('created_at', '>=', $year_start)
                            ->sum('business_allotment');
-        $scheduled_sum = PaymentQueue::where('business_id', $this->business()->id)
-                                     ->sum('business_allotment');
-        $payments = PaymentQueue::where('business_id', $this->business()->id)
-                                ->orderBy('created_at', 'DESC')
-                                ->get()
-                                ->map(function(PaymentQueue $payment) {
-                                    return [
-                                        'id' => $payment->id,
-                                        'client_name' => ($payment->client) ? $payment->client->lastname . ', ' . $payment->client->firstname : '',
-                                        'amount' => $payment->amount,
-                                        'business_allotment' => $payment->business_allotment,
-                                        'success' => $payment->success,
-                                        'date' => $payment->created_at->format(\DateTime::ISO8601),
-                                    ];
-                                });
+
+        $report = new ScheduledPaymentsReport();
+        $scheduled_sum = $report->sum('business_allotment');
+        $payments = $report->rows();
         return view('business.reports.scheduled', compact('payments', 'month_sum', 'year_sum', 'scheduled_sum'));
     }
 

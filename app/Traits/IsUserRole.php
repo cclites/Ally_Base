@@ -9,6 +9,12 @@ use App\User;
 
 trait IsUserRole
 {
+    public function __construct()
+    {
+        parent::__construct();
+        if (empty($this->with)) $this->with = ['user'];
+    }
+
     public function getRoleType()
     {
         return snake_case(class_basename(get_called_class()));
