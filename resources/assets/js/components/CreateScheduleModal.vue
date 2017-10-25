@@ -37,11 +37,10 @@
                     <b-col lg="12">
                         <b-form-group label="Start Date" label-for="date">
                             <b-form-input
-                                    id="date"
-                                    name="date"
                                     type="text"
-                                    v-model="form.start_date"
+                                    id="create-start-date"
                                     class="datepicker"
+                                    v-model="form.start_date"
                             >
                             </b-form-input>
                             <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
@@ -216,9 +215,10 @@
         },
 
         mounted() {
-            jQuery('.datepicker').datepicker({
-                autoclose: true,
-                todayHighlight: true
+            let dateSelector = jQuery('#create-start-date');
+            let component = this;
+            dateSelector.datepicker().on("changeDate", function() {
+                component.form.start_date = dateSelector.val();
             });
         },
 
