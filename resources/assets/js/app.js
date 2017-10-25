@@ -78,6 +78,8 @@ Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
+Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
+
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 Vue.component('document-list', require('./components/DocumentList.vue'));
