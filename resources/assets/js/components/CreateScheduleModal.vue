@@ -174,11 +174,10 @@
                         </div>
                         <b-form-group label="End date" label-for="end_date">
                             <b-form-input
-                                    id="end_date"
-                                    name="end_date"
+                                    id="create-end-date"
+                                    class="datepicker"
                                     type="text"
                                     v-model="form.end_date"
-                                    class="datepicker"
                             >
                             </b-form-input>
                             <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
@@ -215,10 +214,22 @@
         },
 
         mounted() {
-            let dateSelector = jQuery('#create-start-date');
+            let startDate = jQuery('#create-start-date');
+            let endDate = jQuery('#create-end-date');
             let component = this;
-            dateSelector.datepicker().on("changeDate", function() {
-                component.form.start_date = dateSelector.val();
+            startDate.datepicker({
+                forceParse: false,
+                autoclose: true,
+                todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.start_date = startDate.val();
+            });
+            endDate.datepicker({
+                forceParse: false,
+                autoclose: true,
+                todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.end_date = endDate.val();
             });
         },
 
