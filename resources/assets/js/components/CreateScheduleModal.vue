@@ -37,11 +37,10 @@
                     <b-col lg="12">
                         <b-form-group label="Start Date" label-for="date">
                             <b-form-input
-                                    id="date"
-                                    name="date"
                                     type="text"
-                                    v-model="form.start_date"
+                                    id="create-start-date"
                                     class="datepicker"
+                                    v-model="form.start_date"
                             >
                             </b-form-input>
                             <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
@@ -175,11 +174,10 @@
                         </div>
                         <b-form-group label="End date" label-for="end_date">
                             <b-form-input
-                                    id="end_date"
-                                    name="end_date"
+                                    id="create-end-date"
+                                    class="datepicker"
                                     type="text"
                                     v-model="form.end_date"
-                                    class="datepicker"
                             >
                             </b-form-input>
                             <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
@@ -216,9 +214,22 @@
         },
 
         mounted() {
-            jQuery('.datepicker').datepicker({
+            let startDate = jQuery('#create-start-date');
+            let endDate = jQuery('#create-end-date');
+            let component = this;
+            startDate.datepicker({
+                forceParse: false,
                 autoclose: true,
                 todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.start_date = startDate.val();
+            });
+            endDate.datepicker({
+                forceParse: false,
+                autoclose: true,
+                todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.end_date = endDate.val();
             });
         },
 

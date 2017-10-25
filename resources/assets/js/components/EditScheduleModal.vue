@@ -178,7 +178,7 @@
                             </p>
                             <b-form-group label="End date" label-for="end_date">
                                 <b-form-input
-                                        id="end_date"
+                                        id="edit-end-date"
                                         name="end_date"
                                         type="text"
                                         v-model="form.end_date"
@@ -222,9 +222,14 @@
         },
 
         mounted() {
-            jQuery('.datepicker').datepicker({
+            let endDate = jQuery('#edit-end-date');
+            let component = this;
+            endDate.datepicker({
+                forceParse: false,
                 autoclose: true,
                 todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.end_date = endDate.val();
             });
         },
 

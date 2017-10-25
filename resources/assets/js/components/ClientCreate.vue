@@ -122,11 +122,7 @@
         methods: {
 
             saveProfile() {
-                this.form.post('/business/clients')
-                    .then(function(response) {
-                        let data = response.data.data;
-                        window.location = '/business/clients/' + data.id;
-                    });
+                this.form.post('/business/clients');
             }
 
         },
