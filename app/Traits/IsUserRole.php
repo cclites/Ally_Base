@@ -9,9 +9,9 @@ use App\User;
 
 trait IsUserRole
 {
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         if (empty($this->with)) $this->with = ['user'];
     }
 
