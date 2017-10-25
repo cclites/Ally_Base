@@ -99,6 +99,7 @@ Route::group([
     Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
+    Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

@@ -38,8 +38,9 @@ class ExceptionController extends BaseController
      * @param  \App\SystemException  $exception
      * @return \Illuminate\Http\Response
      */
-    public function show(SystemException $exception)
+    public function show($exception_id)
     {
+        $exception = SystemException::findOrFail($exception_id);
         if ($this->business()->id != $exception->business_id) {
             return new ErrorResponse(403, 'You do not have access to this exception.');
         }

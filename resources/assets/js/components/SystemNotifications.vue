@@ -23,7 +23,7 @@
                     </div>
                 </li>
                 <li>
-                    <a class="nav-link text-center" href="javascript:void(0);"> <strong>View all exceptions</strong> <i class="fa fa-angle-right"></i> </a>
+                    <a class="nav-link text-center" href="/business/exceptions"> <strong>View all exceptions</strong> <i class="fa fa-angle-right"></i> </a>
                 </li>
             </ul>
         </div>
