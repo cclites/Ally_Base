@@ -115,11 +115,7 @@
         methods: {
 
             saveProfile() {
-                this.form.post('/business/caregivers')
-                    .then(function(response) {
-                        let data = response.data.data;
-                        window.location = '/business/caregivers/' + data.id;
-                    });
+                this.form.post('/business/caregivers');
             }
 
         }
