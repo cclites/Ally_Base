@@ -91,6 +91,13 @@ class AxiosResponseHandler {
         return formError;
     }
 
+    addFormError(field, message) {
+        if (!this.hasFormError(field)) {
+            this.formErrors[field] = [];
+        }
+        this.formErrors[field].push(message);
+    }
+
     clearFormError(field = null) {
         if (!field) {
             this.formErrors = {};
