@@ -91,6 +91,7 @@
     </b-card>
 </template>
 
+
 <script>
     export default {
         props: {},
