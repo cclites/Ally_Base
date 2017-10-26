@@ -60,8 +60,8 @@ class ExceptionController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this exception.');
         }
 
-        if ($exception->acknowledge($request->input('note', ''))) {
-            return new SuccessResponse('You have successfully acknowlegded the exception.');
+        if ($exception->acknowledge($request->input('notes', ''))) {
+            return new SuccessResponse('You have successfully acknowlegded the exception.', [], route('business.exceptions.index'));
         }
 
         return new ErrorResponse(500, 'Error updating exception.');
