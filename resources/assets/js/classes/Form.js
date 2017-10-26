@@ -32,8 +32,21 @@ class Form {
         return data;
     }
 
-    wasModified(field) {
-        return (this[field] !== this.originalData[field]);
+    /**
+     * Check if the form, or form field, was modified (is dirty)
+     *
+     * @param field
+     * @returns {boolean}
+     */
+    wasModified(field=null) {
+        if (field) return (this[field] !== this.originalData[field]);
+        for (let property in this.originalData) {
+            if (this[property] !== this.originalData[property]) return true;
+        }
+        return false;
+    }
+    isDirty(field=null) {
+        return this.wasModified(field);
     }
 
     /**
