@@ -8,9 +8,8 @@ class AxiosResponseHandler {
 
     handleResponse(response, alert = true) {
         this.response = response;
-        if (alert && this.getMessage()) {
-            this.handleAlert('success', this.getMessage());
-        }
+        if (alert && this.getMessage()) this.handleAlert('success', this.getMessage());
+        if (this.hasRedirect()) this.handleRedirect();
     }
 
     handleError(error, alert = true) {
@@ -30,9 +29,14 @@ class AxiosResponseHandler {
                 this.handleAlert('error', 'Please refresh and try again.');
             }
         }
+        if (this.hasRedirect()) this.handleRedirect();
     }
 
     handleAlert(type, message) {
+        if (this.hasRedirect()) {
+            alerts.flashMessage(type, message);
+            return;
+        }
         alerts.addMessage(type, message);
     }
 
@@ -47,6 +51,16 @@ class AxiosResponseHandler {
     getMessage() {
         let data = this.getResponseData();
         return (data.message) ? data.message : null;
+    }
+
+    hasRedirect() {
+        let data = this.getResponseData();
+        return data.hasOwnProperty('redirect');
+    }
+
+    handleRedirect() {
+        let data = this.getResponseData();
+        window.location = data.redirect;
     }
 
     hasError() {

@@ -156,10 +156,9 @@ class ShiftController extends Controller
             if (!empty($data['manual'])) $clockOut->setManual();
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses']);
             if ($data['mileage']) $clockOut->setOtherExpenses($data['mileage']);
-            if ($data['caregiver_comments']) $clockOut->setOtherExpenses($data['caregiver_comments']);
+            if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
             $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
-            $activities = $data['activities'] ?? [];
-            if ($clockOut->clockOut($shift, $activities)) {
+            if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues
                 $issueText = trim($request->input('issue_text'));
                 if ($request->input('caregiver_injury') || $issueText) {

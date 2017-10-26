@@ -14,6 +14,10 @@ export default {
                 'Friday': 'fr',
                 'Saturday': 'sa',
             },
+            display: {
+                date_format: 'MM/DD/YYYY',
+                time_format: 'h:mm A',
+            },
             overrideRate: false,
         };
     },
@@ -21,18 +25,6 @@ export default {
     methods: {
         dayOfMonth(date) {
             return moment(date).format('Do');
-        },
-
-        getUserUtcOffset() {
-            return moment().local().format('Z');
-        },
-
-        getLocalMomentObject(server_date, server_time) {
-            let timestamp = server_date + 'T' + server_time + '+00:00';
-            console.log(timestamp);
-            let obj = moment(timestamp).local();
-            console.log(obj);
-            return obj;
         },
 
         loadCaregivers() {
@@ -74,7 +66,7 @@ export default {
             for (let i = 0; i<rounds; i++) {
                 startTimes.push({
                     value: date.format('HH:mm:ss'),
-                    text: date.format('LT')
+                    text: date.format(this.display.time_format)
                 });
                 date.add(this.interval, 'minutes');
             }
@@ -88,7 +80,7 @@ export default {
             for (let i = 0; i<rounds; i++) {
                 endTimes.push({
                     value: i * this.interval,
-                    text: date.format('LT')
+                    text: date.format(this.display.time_format)
                 });
                 date.add(this.interval, 'minutes');
             }

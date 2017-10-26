@@ -2,13 +2,14 @@
 
 namespace App;
 
+use App\Contracts\UserRole;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\HiddenIdTrait;
 
-class Client extends Model
+class Client extends Model implements UserRole
 {
     use IsUserRole;
     use HiddenIdTrait;

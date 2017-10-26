@@ -11,9 +11,6 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
-                <template slot="actions" scope="row">
-
-                </template>
             </b-table>
         </div>
 
@@ -56,21 +53,35 @@
                         sortable: true,
                     },
                     {
+                        key: 'hours',
+                        label: 'Hours',
+                        sortable: true,
+                    },
+                    {
                         key: 'client_name',
                         label: 'Client',
                         sortable: true,
                     },
                     {
-                        key: 'amount',
-                        label: 'Amount',
+                        key: 'caregiver_name',
+                        label: 'Caregiver',
                         sortable: true,
                     },
                     {
                         key: 'business_allotment',
-                        label: 'Business Allotment',
+                        label: 'Provider Fee',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'total_payment',
+                        label: 'Estimated Total',
+                        sortable: true,
+                    },
+                    {
+                        key: 'status',
+                        label: 'Status',
+                        sortable: true,
+                    },
                 ]
             }
         },
@@ -83,11 +94,14 @@
             items() {
                 return this.payments.map(function(payment) {
                     return {
-                        id: payment.id,
-                        date: moment(payment.date).format('L'),
-                        client_name: payment.client_name,
-                        amount: '$' + payment.amount,
+                        id: payment.shift_id,
+                        date: moment(payment.shift_time).format('L'),
+                        hours: payment.shift_hours,
+                        client_name: payment.client.name,
+                        caregiver_name: payment.caregiver.name,
+                        total_payment: '$' + payment.total_payment,
                         business_allotment: '$' + payment.business_allotment,
+                        status: payment.status,
                     }
                 })
             },

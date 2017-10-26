@@ -59,10 +59,13 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
+    Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
+    Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');
     Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
+    Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
@@ -94,6 +97,10 @@ Route::group([
 
     Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
     Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+
+    Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
+    Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
+    Route::post('exceptions/{id}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

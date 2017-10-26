@@ -27,6 +27,7 @@
                             id="number"
                             name="number"
                             type="text"
+                            autocomplete="off"
                             v-model="form.number"
                     >
                     </b-form-input>
@@ -39,6 +40,7 @@
                             id="cvv"
                             name="cvv"
                             type="text"
+                            autocomplete="off"
                             v-model="form.cvv"
                     >
                     </b-form-input>

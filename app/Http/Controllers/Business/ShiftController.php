@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Events\UnverifiedShiftApproved;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shift;
@@ -40,6 +41,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update(['verified' => true])) {
+            event(new UnverifiedShiftApproved($shift));
             return new SuccessResponse('The shift has been verified');
         }
 

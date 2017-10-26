@@ -32,6 +32,8 @@ Vue.use(BootstrapVue);
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
+Vue.component('business-exception', require('./components/BusinessException.vue'));
+Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
 Vue.component('business-medicaid-report-caregivers', require('./components/BusinessMedicaidReportCaregivers.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
@@ -43,6 +45,8 @@ Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
+
+Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 
 Vue.component('change-password', require('./components/ChangePassword.vue'));
 
@@ -75,6 +79,8 @@ Vue.component('message', require('./components/Message.vue'));
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
+
+Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));

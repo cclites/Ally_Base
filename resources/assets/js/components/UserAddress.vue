@@ -91,7 +91,7 @@
                     city: this.address.city,
                     state: this.address.state,
                     zip: this.address.zip,
-                    country: this.address.country,
+                    country: (this.address.country) ? this.address.country : 'US',
                 }),
                 countries: new Countries()
             }

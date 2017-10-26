@@ -37,11 +37,10 @@
                     <b-col lg="12">
                         <b-form-group label="Start Date" label-for="date">
                             <b-form-input
-                                    id="date"
-                                    name="date"
                                     type="text"
-                                    v-model="form.start_date"
+                                    id="create-start-date"
                                     class="datepicker"
+                                    v-model="form.start_date"
                             >
                             </b-form-input>
                             <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
@@ -175,11 +174,10 @@
                         </div>
                         <b-form-group label="End date" label-for="end_date">
                             <b-form-input
-                                    id="end_date"
-                                    name="end_date"
+                                    id="create-end-date"
+                                    class="datepicker"
                                     type="text"
                                     v-model="form.end_date"
-                                    class="datepicker"
                             >
                             </b-form-input>
                             <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
@@ -216,21 +214,33 @@
         },
 
         mounted() {
-            jQuery('.datepicker').datepicker({
+            let startDate = jQuery('#create-start-date');
+            let endDate = jQuery('#create-end-date');
+            let component = this;
+            startDate.datepicker({
+                forceParse: false,
                 autoclose: true,
                 todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.start_date = startDate.val();
+            });
+            endDate.datepicker({
+                forceParse: false,
+                autoclose: true,
+                todayHighlight: true
+            }).on("changeDate", function() {
+                component.form.end_date = endDate.val();
             });
         },
 
         methods: {
             makeCreateSingleForm() {
                 this.form = new Form({
-                    start_date: this.selectedEvent.format('L'),
+                    start_date: this.selectedEvent.format(this.display.date_format),
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
                     caregiver_id: null,
                     notes: null,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: null,
                     provider_fee: null,
                 });
@@ -238,7 +248,7 @@
 
             makeCreateRecurringForm() {
                 this.form = new Form({
-                    start_date: this.selectedEvent.format('L'),
+                    start_date: this.selectedEvent.format(this.display.date_format),
                     end_date: null,
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
@@ -246,22 +256,21 @@
                     bydays: [],
                     caregiver_id: null,
                     notes: null,
-                    utc_offset: this.getUserUtcOffset(),
                     caregiver_rate: null,
                     provider_fee: null,
                 });
             },
 
             submitForm() {
-                var component = this;
-                if (this.createType == 'single') {
-                    this.form.post('/business/clients/' + this.client_id + '/schedule/single')
+                let component = this;
+                if (component.createType === 'single') {
+                    component.form.post('/business/clients/' + component.client_id + '/schedule/single')
                         .then(function(response) {
                             component.refreshEvents();
                         });
                 }
                 else {
-                    this.form.post('/business/clients/' + this.client_id + '/schedule')
+                    component.form.post('/business/clients/' + component.client_id + '/schedule')
                         .then(function(response) {
                             component.refreshEvents();
                         });
@@ -281,7 +290,7 @@
                 }
             },
             createType(val) {
-                if (val == 'single') this.makeCreateSingleForm();
+                if (val === 'single') this.makeCreateSingleForm();
                 else this.makeCreateRecurringForm()
             },
             client_id(val) {

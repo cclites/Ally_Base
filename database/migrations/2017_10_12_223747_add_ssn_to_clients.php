@@ -14,7 +14,7 @@ class AddSsnToClients extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->binary('ssn', 65535);
+            $table->binary('ssn', 65535)->nullable();
         });
     }
 

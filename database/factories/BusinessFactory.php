@@ -21,7 +21,14 @@ $factory->define(\App\Activity::class, function(Faker $faker) {
     ];
 });
 
-$factory->define(\App\Business::class, function(Faker $faker) {
+$companies = [];
+$factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
+    // Ensure a unique company name when creating multiple
+    $company = $faker->company;
+    while(in_array($company, $companies)) {
+        $company = $faker->company;
+    }
+    $companies[] = $company;
     return [
         'name' => $faker->company,
         'type' => 'Registry',
@@ -34,5 +41,6 @@ $factory->define(\App\Business::class, function(Faker $faker) {
         'phone1' => $faker->phoneNumber,
         'phone2' => $faker->phoneNumber,
         'default_commission_rate' => mt_rand(500, 9000) / 100,
+        'timezone' => $faker->randomElement(['America/Los_Angeles', 'America/Phoenix', 'UTC', 'America/New_York']),
     ];
 });
