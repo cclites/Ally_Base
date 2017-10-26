@@ -13,6 +13,7 @@ trait IsUserRole
     {
         parent::__construct($attributes);
         if (empty($this->with)) $this->with = ['user'];
+        $this->append(['firstname', 'lastname', 'email', 'name', 'nameLastFirst']);
     }
 
     public function getRoleType()
@@ -23,6 +24,21 @@ trait IsUserRole
     public function user()
     {
         return $this->belongsTo(User::class, 'id', 'id');
+    }
+
+    public function getFirstNameAttribute()
+    {
+        return $this->user->firstname;
+    }
+
+    public function getLastNameAttribute()
+    {
+        return $this->user->lastname;
+    }
+
+    public function getEmailAttribute()
+    {
+        return $this->user->email;
     }
 
     public function name()
@@ -38,6 +54,11 @@ trait IsUserRole
     public function nameLastFirst()
     {
         return $this->user->nameLastFirst();
+    }
+
+    public function getNameLastFirstAttribute()
+    {
+        return $this->nameLastFirst();
     }
 
     public function __get($name) {
