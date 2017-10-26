@@ -154,35 +154,13 @@
                 <!-- ============================================================== -->
                 <ul class="navbar-nav my-lg-0">
                     <!-- ============================================================== -->
-                    <!-- Notifications -->
+                    <!-- Exceptions -->
                     <!-- ============================================================== -->
-                    {{--<li class="nav-item dropdown">--}}
-                        {{--<a class="nav-link dropdown-toggle text-muted text-muted" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-message"></i>--}}
-                            {{--<div class="notify"> <span class="heartbit"></span> <span class="point"></span> </div>--}}
-                        {{--</a>--}}
-                        {{--<div class="dropdown-menu dropdown-menu-right mailbox scale-up">--}}
-                            {{--<ul>--}}
-                                {{--<li>--}}
-                                    {{--<div class="drop-title">Notifications</div>--}}
-                                {{--</li>--}}
-                                {{--<li>--}}
-                                    {{--<div class="message-center">--}}
-                                        {{--<!-- Message -->--}}
-                                        {{--<a href="#">--}}
-                                            {{--<div class="btn btn-danger btn-circle"><i class="fa fa-link"></i></div>--}}
-                                            {{--<div class="mail-contnet">--}}
-                                                {{--<h5>Demo Notification</h5> <span class="mail-desc">Sample notification here</span> <span class="time">9:30 AM</span> </div>--}}
-                                        {{--</a>--}}
-                                    {{--</div>--}}
-                                {{--</li>--}}
-                                {{--<li>--}}
-                                    {{--<a class="nav-link text-center" href="javascript:void(0);"> <strong>Check all notifications</strong> <i class="fa fa-angle-right"></i> </a>--}}
-                                {{--</li>--}}
-                            {{--</ul>--}}
-                        {{--</div>--}}
-                    {{--</li>--}}
+                    @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user']))
+                        <system-notifications></system-notifications>
+                    @endif
                     <!-- ============================================================== -->
-                    <!-- End Notifications -->
+                    <!-- End Exceptions -->
                     <!-- ============================================================== -->
                     <!-- ============================================================== -->
                     <!-- Profile -->
