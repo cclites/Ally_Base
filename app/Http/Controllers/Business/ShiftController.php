@@ -6,31 +6,73 @@ use App\Events\UnverifiedShiftApproved;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shift;
+use Illuminate\Http\Request;
 
 class ShiftController extends BaseController
 {
-    public function show($shift_id)
+    public function show(Request $request, $shift_id)
     {
         $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        // Include distances
+        // Load shift data into array before loading client info
         $data = $shift->toArray();
+
+        // Calculate distances
+        $checked_in_distance = null;
+        $checked_out_distance = null;
         if ($address = $shift->client->evvAddress) {
             if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $data['checked_in_distance'] = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
+                $checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
             }
             if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $data['checked_out_distance'] = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
+                $checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
             }
         }
 
-        $data['client_name'] = $shift->client->name();
-        $data['caregiver_name'] = $shift->caregiver->name();
 
-        return $data;
+        if ($request->expectsJson()) {
+            $data += [
+                'checked_in_distance' => $checked_in_distance,
+                'checked_out_distance' => $checked_out_distance,
+                'client_name' => $shift->client->name(),
+                'caregiver_name' => $shift->caregiver->name(),
+            ];
+
+            return $data;
+        }
+
+        $activities = $shift->business->allActivities();
+
+        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+    }
+
+    public function update(Request $request, $shift_id) {
+        $shift = Shift::findOrFail($shift_id);
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        $data = $request->validate([
+            'caregiver_comments' => 'nullable',
+            'mileage' => 'nullable|numeric',
+            'other_expenses' => 'nullable|numeric',
+            'checked_in_time' => 'required|date',
+            'checked_out_time' => 'required|date',
+            'verified' => 'boolean',
+        ]);
+
+        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
+        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+
+        if ($shift->update($data)) {
+            $shift->activities()->sync($request->input('activities', []));
+            $term = ($data['verified']) ? 'verified' : 'modified';
+            return new SuccessResponse('You have successfully ' . $term . ' this shift.');
+        }
+        return new ErrorResponse(500, 'The shift could not be updated.');
     }
 
     public function verify($shift_id)

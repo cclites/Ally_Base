@@ -97,6 +97,7 @@ Route::group([
 
     Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
     Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+    Route::post('shifts/{id}', 'Business\ShiftController@update')->name('shifts.update');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
     Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
