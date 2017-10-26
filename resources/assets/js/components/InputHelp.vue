@@ -13,7 +13,7 @@
             'text': '',
         },
         watch: {
-            'form.addedErrors': function() {
+            'form.errorMods': function() {
                 this.$forceUpdate();
             }
         }

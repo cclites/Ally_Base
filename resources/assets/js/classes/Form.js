@@ -16,7 +16,7 @@ class Form {
         this.handler = new AxiosResponseHandler();
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
-        this.addedErrors = 0;
+        this.errorMods = 0;
     }
 
     /**
@@ -138,7 +138,8 @@ class Form {
      */
     clearError(field = null) {
         if (this.handler) {
-            return this.handler.clearFormError(field);
+            this.handler.clearFormError(field);
+            this.errorMods++;
         }
     }
 
@@ -152,7 +153,7 @@ class Form {
     addError(field, message) {
         if (this.handler) {
             this.handler.addFormError(field, message);
-            this.addedErrors++;
+            this.errorMods++;
         }
     }
 }
