@@ -21,7 +21,7 @@ class ExceptionController extends BaseController
             ->orderBy('created_at')
             ->get();
 
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() && $request->input('json')) {
             return collection_only_values($exceptions, ['id', 'title', 'description', 'created_at']);
         }
 

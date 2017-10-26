@@ -46,7 +46,7 @@
         methods: {
             loadNotifications() {
                 let component = this;
-                axios.get('/business/exceptions')
+                axios.get('/business/exceptions?json=1')
                     .then(function(response) {
                         component.notifications = response.data;
                     });
