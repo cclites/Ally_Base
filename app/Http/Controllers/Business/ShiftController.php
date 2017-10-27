@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Business;
 
 use App\Events\UnverifiedShiftApproved;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shift;
+use App\ShiftIssue;
 use Illuminate\Http\Request;
 
 class ShiftController extends BaseController
@@ -88,5 +90,45 @@ class ShiftController extends BaseController
         }
 
         return new ErrorResponse('The shift could not be verified');
+    }
+
+    public function storeIssue(Request $request, $shift_id)
+    {
+        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        $data = $request->validate([
+            'caregiver_injury' => 'boolean',
+            'client_injury' => 'boolean',
+            'comments' => 'nullable',
+        ]);
+
+        $issue = new ShiftIssue($data);
+        if ($shift->issues()->save($issue)) {
+            return new CreatedResponse('The issue has been created successfully.', $issue->toArray());
+        }
+        return new ErrorResponse(500, 'Unable to create issue.');
+    }
+
+    public function updateIssue(Request $request, $shift_id, $issue_id)
+    {
+        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        $issue = $shift->issues()->where('id', $issue_id)->firstOrFail();
+        $data = $request->validate([
+            'caregiver_injury' => 'boolean',
+            'client_injury' => 'boolean',
+            'comments' => 'nullable',
+        ]);
+
+        if ($issue->update($data)) {
+            return new SuccessResponse('The issue has been updated successfully.', $issue->toArray());
+        }
+        return new ErrorResponse(500, 'Unable to update issue.');
     }
 }

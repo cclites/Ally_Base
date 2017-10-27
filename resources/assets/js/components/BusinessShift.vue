@@ -112,7 +112,7 @@
             <b-col lg="12">
                 <h5>
                     Shift Issues
-                    <b-btn size="sm" variant="info">Add an Issue</b-btn>
+                    <b-btn size="sm" variant="info" @click="createIssue()">Add an Issue</b-btn>
                 </h5>
                 <div class="table-responsive" v-if="issues.length">
                     <table class="table table-bordered">
@@ -121,6 +121,7 @@
                             <th>Caregiver Injury</th>
                             <th>Client Injury</th>
                             <th>Comments</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -128,6 +129,7 @@
                             <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
                             <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
                             <td>{{ issue.comments }}</td>
+                            <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
                         </tr>
                         </tbody>
                     </table>
@@ -206,6 +208,8 @@
             </b-col>
         </b-row>
         </form>
+
+        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="issues"></business-issue-modal>
     </b-card>
 </template>
 
@@ -235,6 +239,8 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
+                issueModal: false,
+                selectedIssue: null,
             }
         },
         mounted() {
@@ -247,6 +253,14 @@
             this.form.activities = this.getShiftActivityList();
         },
         methods: {
+            createIssue() {
+                this.selectedIssue = null;
+                this.issueModal = true;
+            },
+            editIssue(issue) {
+                this.selectedIssue = issue;
+                this.issueModal = true;
+            },
             getClockedInMoment() {
                 return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY h:mm A');
             },
