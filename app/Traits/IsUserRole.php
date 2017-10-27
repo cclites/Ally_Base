@@ -158,28 +158,6 @@ trait IsUserRole
     }
 
     ///////////////////////////////////////////
-    /// Delete & Restore Forwarding
-    ///////////////////////////////////////////
-
-    public function delete()
-    {
-        $this->user->delete();
-        return parent::delete();
-    }
-
-    public function forceDelete()
-    {
-        $this->user->forceDelete();
-        return parent::forceDelete();
-    }
-
-    public function restore()
-    {
-        $this->user->restore();
-        return SoftDeletes::restore();
-    }
-
-    ///////////////////////////////////////////
     /// Forwarded Relationship Methods
     ///////////////////////////////////////////
 

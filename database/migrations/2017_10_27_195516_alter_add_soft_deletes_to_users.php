@@ -6,7 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 
 class AlterAddSoftDeletesToUsers extends Migration
 {
-    protected $tables = ['users', 'admins', 'caregivers', 'clients', 'office_users'];
+    // skip users table, not needed
+    protected $tables = ['admins', 'caregivers', 'clients', 'office_users'];
 
     /**
      * Run the migrations.
