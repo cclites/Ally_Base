@@ -11,9 +11,9 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
-                <template slot="actions" scope="row">
+                <!--<template slot="actions" scope="row">-->
 
-                </template>
+                <!--</template>-->
             </b-table>
         </div>
 
@@ -70,7 +70,7 @@
                         label: 'Business Allotment',
                         sortable: true,
                     },
-                    'actions'
+//                    'actions'
                 ]
             }
         },

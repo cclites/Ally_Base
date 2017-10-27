@@ -16,7 +16,8 @@
     </div>
     <div class="row">
         <div class="col-lg-12">
-
+            <h2>Coming Soon</h2>
+            <p>Metrics above do not reflect real deposit amounts.</p>
         </div>
     </div>
 @endsection

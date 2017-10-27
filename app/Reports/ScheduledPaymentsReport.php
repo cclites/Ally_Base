@@ -54,13 +54,13 @@ class ScheduledPaymentsReport implements Report
     public function between($start = null, $end = null)
     {
         if ($start && $end) {
-            $this->query->whereBetween('clocked_in_time', [$start, $end]);
+            $this->query->whereBetween('checked_in_time', [$start, $end]);
         }
         elseif ($start) {
-            $this->query->where('clocked_in_time', '>=', $start);
+            $this->query->where('checked_in_time', '>=', $start);
         }
         else {
-            $this->query->where('clocked_in_time', '<=', $end);
+            $this->query->where('checked_in_time', '<=', $end);
         }
         return $this;
     }
