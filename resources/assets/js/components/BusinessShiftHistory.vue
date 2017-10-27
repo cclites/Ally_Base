@@ -28,7 +28,8 @@
                     </span>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click.stop="details(row.item)">Details</b-btn>
+                    <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit &amp; Details</b-btn>
+                    <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
                 </template>
             </b-table>
         </div>
