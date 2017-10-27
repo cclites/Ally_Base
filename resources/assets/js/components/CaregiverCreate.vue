@@ -46,7 +46,7 @@
                                 v-model="form.ssn"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
+                        <input-help :form="form" field="ssn" text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
