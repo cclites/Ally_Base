@@ -6,9 +6,12 @@ use App\BankAccount;
 use App\CreditCard;
 use App\PhoneNumber;
 use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
 {
+    use SoftDeletes;
+
     /**
      * IsUserRole constructor.
      * @param array $attributes
@@ -152,6 +155,28 @@ trait IsUserRole
         );
 
         return parent::save($options);
+    }
+
+    ///////////////////////////////////////////
+    /// Delete & Restore Forwarding
+    ///////////////////////////////////////////
+
+    public function delete()
+    {
+        $this->user->delete();
+        return parent::delete();
+    }
+
+    public function forceDelete()
+    {
+        $this->user->forceDelete();
+        return parent::forceDelete();
+    }
+
+    public function restore()
+    {
+        $this->user->restore();
+        return SoftDeletes::restore();
     }
 
     ///////////////////////////////////////////
