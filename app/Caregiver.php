@@ -16,7 +16,7 @@ class Caregiver extends Model implements UserRole
     protected $table = 'caregivers';
     public $timestamps = false;
     public $hidden = ['ssn'];
-    public $fillable = ['ssn', 'bank_account_id'];
+    public $fillable = ['ssn', 'bank_account_id', 'title'];
 
     public function setBankAccount(BankAccount $account)
     {

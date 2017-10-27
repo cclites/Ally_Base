@@ -16,6 +16,8 @@ window.Countries = Countries;
 
 window.Vue = require('vue');
 
+// Vue Third Party Components
+
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
@@ -29,14 +31,20 @@ Vue.use(BootstrapVue);
  */
 
 // App Components
+Vue.component('date-picker', require('./components/DatePicker.vue'));
+Vue.component('time-picker', require('./components/TimePicker.vue'));
+
+
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-exception', require('./components/BusinessException.vue'));
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
+Vue.component('business-issue-modal', require('./components/BusinessIssueModal.vue'));
 Vue.component('business-medicaid-report-caregivers', require('./components/BusinessMedicaidReportCaregivers.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
+Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));

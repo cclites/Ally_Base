@@ -50,6 +50,16 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
+                    <b-form-group label="Title" label-for="title">
+                        <b-form-input
+                            id="title"
+                            name="title"
+                            type="text"
+                            v-model="form.title"
+                            >
+                        </b-form-input>
+                        <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
+                    </b-form-group>
                     <b-form-group label="Email Address" label-for="email">
                         <b-form-input
                             id="email"
@@ -105,6 +115,7 @@
                     ssn: null,
                     password: null,
                     password_confirmation: null,
+                    title: null,
                 })
             }
         },

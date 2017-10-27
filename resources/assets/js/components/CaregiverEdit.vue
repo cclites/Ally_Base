@@ -28,6 +28,16 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
+                    <b-form-group label="Title" label-for="title">
+                        <b-form-input
+                                id="title"
+                                name="title"
+                                type="text"
+                                v-model="form.title"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -70,9 +80,10 @@
         data() {
             return {
                 form: new Form({
-                    firstname: this.caregiver.user.firstname,
-                    lastname: this.caregiver.user.lastname,
-                    email: this.caregiver.user.email,
+                    firstname: this.caregiver.firstname,
+                    lastname: this.caregiver.lastname,
+                    email: this.caregiver.email,
+                    title: this.caregiver.title,
                     date_of_birth: moment(this.caregiver.user.date_of_birth).format('L')
                 })
             }
