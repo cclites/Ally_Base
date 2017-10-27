@@ -9,6 +9,10 @@ class Deposit extends Model
     protected $table = 'deposits';
     protected $guarded = ['id'];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class);

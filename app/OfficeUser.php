@@ -14,6 +14,10 @@ class OfficeUser extends Model implements UserRole
     public $timestamps = false;
     public $fillable = [];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function businesses()
     {
         return $this->belongsToMany(Business::class, 'business_office_users');

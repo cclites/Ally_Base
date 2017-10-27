@@ -29,6 +29,10 @@ class Client extends Model implements UserRole
         'onboard_status'
     ];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -89,24 +93,9 @@ class Client extends Model implements UserRole
         return $this->hasMany(OnboardStatusHistory::class);
     }
 
-    /**
-     * Aggregate schedules for this client and return an array of events
-     *
-     * @param string|\DateTime $start
-     * @param string|\DateTime $end
-     *
-     * @return array
-     */
-    public function getEvents($start, $end)
-    {
-        $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
-            $title = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            $aggregator->add($title, $schedule);
-        }
-
-        return $aggregator->events($start, $end);
-    }
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
 
     /**
      * Encrypt ssn on entry
@@ -126,6 +115,29 @@ class Client extends Model implements UserRole
     public function getSsnAttribute()
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Aggregate schedules for this client and return an array of events
+     *
+     * @param string|\DateTime $start
+     * @param string|\DateTime $end
+     *
+     * @return array
+     */
+    public function getEvents($start, $end)
+    {
+        $aggregator = new ScheduleAggregator();
+        foreach($this->schedules as $schedule) {
+            $title = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
+            $aggregator->add($title, $schedule);
+        }
+
+        return $aggregator->events($start, $end);
     }
 
 }

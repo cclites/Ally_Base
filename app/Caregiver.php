@@ -18,20 +18,9 @@ class Caregiver extends Model implements UserRole
     public $hidden = ['ssn'];
     public $fillable = ['ssn', 'bank_account_id', 'title'];
 
-    public function setBankAccount(BankAccount $account)
-    {
-        if ($account->id && $account->user_id != $this->id) {
-            throw new ExistingBankAccountException('Bank account is owned by another user.');
-        }
-
-        if (!$account->id) {
-            if (!$this->bankAccounts()->save($account)) {
-                throw new \Exception('Unable to save bank account to database.');
-            }
-        }
-
-        return $this->update(['bank_account_id' => $account->id]);
-    }
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
 
     public function bankAccount()
     {
@@ -80,6 +69,10 @@ class Caregiver extends Model implements UserRole
         return $this->hasMany(Shift::class);
     }
 
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
     /**
      * Encrypt ssn on entry
      *
@@ -98,6 +91,33 @@ class Caregiver extends Model implements UserRole
     public function getSsnAttribute()
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Set the caregiver's primary deposit account
+     *
+     * @param \App\BankAccount $account
+     * @return bool
+     * @throws \App\Exceptions\ExistingBankAccountException
+     * @throws \Exception
+     */
+    public function setBankAccount(BankAccount $account)
+    {
+        if ($account->id && $account->user_id != $this->id) {
+            throw new ExistingBankAccountException('Bank account is owned by another user.');
+        }
+
+        if (!$account->id) {
+            if (!$this->bankAccounts()->save($account)) {
+                throw new \Exception('Unable to save bank account to database.');
+            }
+        }
+
+        return $this->update(['bank_account_id' => $account->id]);
     }
 
     /**
