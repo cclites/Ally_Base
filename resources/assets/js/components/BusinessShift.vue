@@ -7,27 +7,27 @@
         <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)">
         <b-row>
             <b-col lg="6">
-                <b-form-group label="Client" label-for="client">
-                    <b-form-input 
-                        id="client" 
-                        name="client" 
-                        type="text" 
-                        :value="client.name"
-                        disabled
-                        >
-                    </b-form-input>
+                <b-form-group label="Client" label-for="client_id">
+                    <b-form-select
+                            id="client_id"
+                            name="client_id"
+                            v-model="form.client_id"
+                    >
+                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="client_id" text=""></input-help>
                 </b-form-group>
             </b-col>
             <b-col lg="6">
-                <b-form-group label="Caregiver" label-for="caregiver">
-                    <b-form-input
-                        id="caregiver"
-                        name="caregiver"
-                        type="text"
-                        :value="caregiver.name"
-                        disabled
+                <b-form-group label="Caregiver" label-for="caregiver_id">
+                    <b-form-select
+                            id="caregiver_id"
+                            name="caregiver_id"
+                            v-model="form.caregiver_id"
                     >
-                    </b-form-input>
+                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="caregiver_id" text=""></input-help>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -223,10 +223,14 @@
             'out_distance': {},
             'activities': Array,
             'issues': Array,
+            'caregivers': Array,
+            'clients': Array,
         },
         data() {
             return {
                 form: new Form({
+                    client_id: this.shift.client_id,
+                    caregiver_id: this.shift.caregiver_id,
                     caregiver_comments: this.shift.caregiver_comments,
                     checked_in_time: this.shift.checked_in_time,
                     checked_out_time: this.shift.checked_out_time,

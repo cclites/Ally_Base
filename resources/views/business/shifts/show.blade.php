@@ -19,6 +19,8 @@
                 out_distance="{{ $checked_out_distance }}"
                 :activities="{{ $activities OR '[]' }}"
                 :issues="{{ $shift->issues OR '[]' }}"
+                :caregivers="{{ $caregivers OR '[]' }}"
+                :clients="{{ $clients OR '[]' }}"
             ></business-shift>
         </div>
     </div>

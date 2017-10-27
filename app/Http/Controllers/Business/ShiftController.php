@@ -47,8 +47,10 @@ class ShiftController extends BaseController
         }
 
         $activities = $shift->business->allActivities();
+        $caregivers = $shift->business->caregivers;
+        $clients = $shift->business->clients;
 
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities', 'clients', 'caregivers'));
     }
 
     public function update(Request $request, $shift_id) {
@@ -58,6 +60,8 @@ class ShiftController extends BaseController
         }
 
         $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'caregiver_id' => 'required|exists:caregivers,id',
             'caregiver_comments' => 'nullable',
             'mileage' => 'nullable|numeric',
             'other_expenses' => 'nullable|numeric',
@@ -71,8 +75,7 @@ class ShiftController extends BaseController
 
         if ($shift->update($data)) {
             $shift->activities()->sync($request->input('activities', []));
-            $term = ($data['verified']) ? 'verified' : 'modified';
-            return new SuccessResponse('You have successfully ' . $term . ' this shift.');
+            return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
