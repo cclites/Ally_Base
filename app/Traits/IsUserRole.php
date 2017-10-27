@@ -9,22 +9,69 @@ use App\User;
 
 trait IsUserRole
 {
+    /**
+     * IsUserRole constructor.
+     * @param array $attributes
+     */
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
+        // Automatically load user relationship
         if (empty($this->with)) $this->with = ['user'];
+        // Automatically append the following attributes to Role Model's data output
         $this->append(['firstname', 'lastname', 'email', 'name', 'nameLastFirst']);
     }
 
+    /**
+     * Forward the magic getter to the related User model if property is not found in the Role model
+     *
+     * @param $name
+     * @return null
+     */
+    public function __get($name) {
+        $parentValue = parent::__get($name);
+        if ($parentValue === null) {
+            if (isset($this->attributes[$this->primaryKey])) return $this->user->$name ?? null;
+        }
+        return $parentValue;
+    }
+
+    /**
+     * Get the name of this Role (e.g. App\Client returns Client)
+     *
+     * @return string
+     */
     public function getRoleType()
     {
         return snake_case(class_basename(get_called_class()));
     }
 
+    ///////////////////////////////////////////
+    /// Related User
+    ///////////////////////////////////////////
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id', 'id');
     }
+
+    ///////////////////////////////////////////
+    /// Name Concatenation Forwarders
+    ///////////////////////////////////////////
+
+    public function name()
+    {
+        return $this->user->name();
+    }
+
+    public function nameLastFirst()
+    {
+        return $this->user->nameLastFirst();
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
 
     public function getFirstNameAttribute()
     {
@@ -41,19 +88,9 @@ trait IsUserRole
         return $this->user->email;
     }
 
-    public function name()
-    {
-        return $this->user->name();
-    }
-
     public function getNameAttribute()
     {
         return $this->name();
-    }
-
-    public function nameLastFirst()
-    {
-        return $this->user->nameLastFirst();
     }
 
     public function getNameLastFirstAttribute()
@@ -61,14 +98,17 @@ trait IsUserRole
         return $this->nameLastFirst();
     }
 
-    public function __get($name) {
-        $parentValue = parent::__get($name);
-        if ($parentValue === null) {
-             if (isset($this->attributes[$this->primaryKey])) return $this->user->$name ?? null;
-        }
-        return $parentValue;
-    }
+    ///////////////////////////////////////////
+    /// Attribute Input Handling
+    ///////////////////////////////////////////
 
+    /**
+     * Simplifies the fill process to avoid checking against guarded attributes in the Role model
+     * This is needed because $fillable is used to define role attributes which the rest being forwarded to the related User model
+     *
+     * @param array $attributes
+     * @return $this
+     */
     public function fill(array $attributes = [])
     {
         foreach($attributes as $key => $value) {
@@ -77,6 +117,13 @@ trait IsUserRole
         return $this;
     }
 
+    /**
+     * Overridden Save Method to save $fillable attributes to the Role Model with the remaining attributes forwarded to the related User Model
+     *
+     * @param array $options
+     * @return mixed
+     * @throws \Exception
+     */
     public function save(array $options = [])
     {
         $this->setIncrementing(false);
@@ -107,9 +154,9 @@ trait IsUserRole
         return parent::save($options);
     }
 
-    /*
-     * Forward User Relationship Methods to User Model
-     */
+    ///////////////////////////////////////////
+    /// Forwarded Relationship Methods
+    ///////////////////////////////////////////
 
     public function addresses()
     {
