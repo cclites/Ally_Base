@@ -53,6 +53,7 @@ class CaregiverController extends BaseController
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
             'password' => 'required|confirmed',
+            'title' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
@@ -76,7 +77,7 @@ class CaregiverController extends BaseController
     {
         if (!$this->hasCaregiver($caregiver->id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+    }
 
 //        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
         $caregiver->load(['user.documents', 'bankAccount']);
@@ -114,6 +115,7 @@ class CaregiverController extends BaseController
             'lastname' => 'required',
             'email' => ['required', 'email', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
+            'title' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
