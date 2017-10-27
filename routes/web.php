@@ -109,3 +109,7 @@ Route::group([
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
 });
+
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
+   Route::resource('notes', 'NoteController');
+});
