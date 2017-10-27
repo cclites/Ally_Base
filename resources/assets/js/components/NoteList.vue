@@ -8,6 +8,7 @@
                         class="datepicker"
                         v-model="searchForm.start_date"
                         placeholder="Start Date"
+                        @change="filter"
                 >
                 </b-form-input>
             </b-col>
@@ -27,7 +28,7 @@
                 <b-form-select v-model="searchForm.caregiver" class="mb-3">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null" disabled>-- Caregiver --</option>
+                        <option :value="null">-- Caregiver --</option>
                     </template>
                     <option :value="caregiver.id" v-for="caregiver in business.caregivers">{{ caregiver.name }}</option>
                 </b-form-select>
@@ -37,7 +38,7 @@
                 <b-form-select v-model="searchForm.client" class="mb-3">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null" disabled>-- Client --</option>
+                        <option :value="null">-- Client --</option>
                     </template>
                     <option :value="client.id" v-for="client in business.clients">{{ client.name }}</option>
                 </b-form-select>
@@ -53,7 +54,7 @@
             </b-col>
 
             <b-col lg="2">
-                <b-button >
+                <b-button @click="filter" variant="primary">
                     Filter
                 </b-button>
             </b-col>
@@ -65,15 +66,17 @@
                      :fields="fields"
                      :current-page="currentPage"
                      :per-page="perPage"
-                     :filter="filter"
                      :sort-by.sync="sortBy"
                      @filtered="onFiltered"
             >
+                <template slot="created_at" scope="data">
+                    {{ createdAt(data) }}
+                </template>
                 <template slot="caregiver" scope="data">
-                    {{ data.item.caregiver.name }}
+                    <span v-if="data.item.caregiver">{{ data.item.caregiver.name }}</span>
                 </template>
                 <template slot="client" scope="data">
-                    {{ data.item.client.name }}
+                    <span v-if="data.item.client">{{ data.item.client.name }}</span>
                 </template>
             </b-table>
         </div>
@@ -90,6 +93,9 @@
 </template>
 
 <script>
+
+    import moment from 'moment';
+
     export default {
         props: {
             'business': Object,
@@ -107,7 +113,6 @@
                 perPage: 15,
                 currentPage: 1,
                 sortBy: null,
-                filter: null,
                 selectedItem: {},
                 fields: [
                     {
@@ -163,6 +168,7 @@
         },
 
         computed: {
+
         },
 
         methods: {
@@ -170,6 +176,17 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            },
+            createdAt(data) {
+                return moment(data.item.created_at).format('L');
+            },
+            filter() {
+                axios.post('/notes/search', this.searchForm)
+                    .then(response => {
+                        this.items = response.data;
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
             }
         }
     }

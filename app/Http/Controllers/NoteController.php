@@ -6,6 +6,7 @@ use App\Note;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class NoteController extends Controller
@@ -18,6 +19,10 @@ class NoteController extends Controller
     public function index()
     {
         $business = OfficeUser::find(auth()->id())->businesses()->with('caregivers', 'clients', 'notes.caregiver', 'notes.client')->first();
+        $business->notes = $business->notes->map(function ($note) {
+            $note->body = str_limit($note->body, 70);
+            return $note;
+        });
         return view('notes.index', compact('business'));
     }
 
@@ -104,5 +109,33 @@ class NoteController extends Controller
     public function destroy(Note $note)
     {
         //
+    }
+
+    public function search(Request $request)
+    {
+        $notes = Note::with('caregiver', 'client')
+            ->where('business_id', OfficeUser::find(auth()->id())->businesses[0]->id)
+            ->when($request->filled('start_date'), function ($query) use ($request) {
+                return $query->where('created_at', '>=', Carbon::parse($request->start_date)->subDay());
+            })
+            ->when($request->filled('end_date'), function ($query) use ($request) {
+                return $query->where('created_at', '<=', Carbon::parse($request->end_date)->addDay());
+            })
+            ->when($request->filled('caregiver'), function ($query) use ($request) {
+                return $query->where('caregiver_id', $request->caregiver);
+            })
+            ->when($request->filled('client'), function ($query) use ($request) {
+                return $query->where('client_id', $request->client);
+            })
+            ->when($request->filled('tags'), function ($query) use ($request) {
+                return $query->where('tags', 'like', '%'.$request->tags.'%');
+            })
+            ->get();
+
+        $notes = $notes->map(function ($note) {
+            $note->body = str_limit($note->body, 70);
+            return $note;
+        });
+        return response()->json($notes);
     }
 }
