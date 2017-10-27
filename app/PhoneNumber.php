@@ -24,6 +24,10 @@ class PhoneNumber extends Model
         parent::__construct($attributes);
     }
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -33,6 +37,24 @@ class PhoneNumber extends Model
     {
         return $this->belongsTo(Client::class, 'user_id');
     }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function setNumberAttribute($value)
+    {
+        $this->input($value);
+    }
+
+    public function getNumberAttribute()
+    {
+        return $this->number();
+    }
+
+    ////////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
 
     /**
      * Output the full phone number in a formatted or unformatted manner
@@ -137,16 +159,6 @@ class PhoneNumber extends Model
             return $this->phoneNumberUtil->isValidNumberForRegion($parsed, $region);
         }
         return $this->phoneNumberUtil->isValidNumber($parsed);
-    }
-
-    public function setNumberAttribute($value)
-    {
-        $this->input($value);
-    }
-
-    public function getNumberAttribute()
-    {
-        return $this->number();
     }
 
 }

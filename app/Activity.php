@@ -9,6 +9,10 @@ class Activity extends Model
     protected $table = 'activities';
     protected $guarded = ['id'];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function business()
     {
         return $this->belongsTo(Business::class);

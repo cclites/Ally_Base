@@ -8,6 +8,10 @@ class Document extends Model
 {
     protected $guarded = ['id', 'user_id'];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     /**
      * User who uploaded the document.
      */
@@ -15,4 +19,9 @@ class Document extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
 }

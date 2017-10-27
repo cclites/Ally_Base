@@ -33,6 +33,10 @@ class Schedule extends Model
         });
     }
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'schedule_activities');
@@ -62,6 +66,24 @@ class Schedule extends Model
     {
         return $this->hasMany(Shift::class);
     }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    /**
+     * Mutate to use the rrule() method
+     *
+     * @return mixed
+     */
+    public function getRruleAttribute()
+    {
+        return $this->rrule();
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
 
     public function isRecurring()
     {
@@ -117,16 +139,6 @@ class Schedule extends Model
         if (!$this->attributes['rrule']) return null;
         return ($this->end_date == self::FOREVER_ENDDATE) ? $this->attributes['rrule']
             : $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()); // add an hour to handle DST shifts
-    }
-
-    /**
-     * Mutate to use the rrule() method
-     *
-     * @return mixed
-     */
-    public function getRruleAttribute()
-    {
-        return $this->rrule();
     }
 
     /**
