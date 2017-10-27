@@ -1,6 +1,5 @@
 Hello.  If this is {{ $schedule->caregiver->user->firstname }} clocking-in for
-{{ $schedule->client->name() }}'s
-{{ date('F jS', strtotime($schedule->start_date)) }} care, please press 1.
+{{ $schedule->client->name() }}'s care, please press 1.
 
 If this information is not correct, please make sure the number you are calling
 from is a valid form of electronic visit verification on the client's file.
