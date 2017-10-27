@@ -155,9 +155,10 @@ class ReportsController extends BaseController
     public function payments()
     {
         $year_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
+        $month_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
 
         $month_sum = Payment::where('business_id', $this->business()->id)
-                            ->where('created_at', '>=', $year_start)
+                            ->where('created_at', '>=', $month_start)
                              ->sum('business_allotment');
         $month_sum = number_format($month_sum, 2);
         $year_sum = Payment::where('business_id', $this->business()->id)

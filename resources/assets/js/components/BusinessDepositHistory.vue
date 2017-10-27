@@ -11,9 +11,9 @@
                      :sort-desc.sync="sortDesc"
                      @filtered="onFiltered"
             >
-                <template slot="actions" scope="row">
+                <!--<template slot="actions" scope="row">-->
 
-                </template>
+                <!--</template>-->
             </b-table>
         </div>
 
@@ -60,7 +60,7 @@
                         label: 'Amount Deposited',
                         sortable: true,
                     },
-                    'actions'
+//                    'actions'
                 ]
             }
         },
