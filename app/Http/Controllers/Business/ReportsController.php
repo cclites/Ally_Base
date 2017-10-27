@@ -147,7 +147,7 @@ class ReportsController extends BaseController
     public function deposits()
     {
         $deposits = Deposit::where('business_id', $this->business()->id)
-            ->where('deposit_type', 'business');
+            ->where('deposit_type', 'business')
             ->orderBy('created_at', 'DESC')
             ->get();
         return view('business.reports.deposits', compact('deposits'));
