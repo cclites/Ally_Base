@@ -3,7 +3,7 @@
         <b-card>
             <b-row>
                 <b-col lg="12" class="text-center">
-                    <h4 v-if="!caregiver">Press Appointment to Clock In</h4>
+                    <h4 v-if="!caregiver">Press Appointment to Clock-In</h4>
                     <h4 v-else> </h4>
                 </b-col>
             </b-row>
