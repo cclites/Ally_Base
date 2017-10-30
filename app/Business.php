@@ -74,6 +74,11 @@ class Business extends Model
         return $this->hasMany(Shift::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
