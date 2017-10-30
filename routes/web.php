@@ -67,6 +67,8 @@ Route::group([
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
 
+    Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
+
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
     Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
