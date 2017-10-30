@@ -49,6 +49,11 @@ class Caregiver extends Model implements UserRole
         return $this->hasMany(Deposit::class);
     }
 
+    public function licenses()
+    {
+        return $this->hasMany(CaregiverLicense::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
