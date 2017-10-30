@@ -1,216 +1,221 @@
 <template>
-    <b-card
-        header="Shift Details"
-        header-text-variant="white"
-        header-bg-variant="info"
+    <div>
+        <div class="alert alert-warning" v-if="!form.checked_out_time">
+            <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save &amp; Verify".
+        </div>
+        <b-card
+                header="Shift Details"
+                header-text-variant="white"
+                header-bg-variant="info"
         >
-        <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)">
-        <b-row>
-            <b-col lg="6">
-                <b-form-group label="Client" label-for="client_id">
-                    <b-form-select
-                            id="client_id"
-                            name="client_id"
-                            v-model="form.client_id"
-                    >
-                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
-                    </b-form-select>
-                    <input-help :form="form" field="client_id" text=""></input-help>
-                </b-form-group>
-            </b-col>
-            <b-col lg="6">
-                <b-form-group label="Caregiver" label-for="caregiver_id">
-                    <b-form-select
-                            id="caregiver_id"
-                            name="caregiver_id"
-                            v-model="form.caregiver_id"
-                    >
-                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
-                    </b-form-select>
-                    <input-help :form="form" field="caregiver_id" text=""></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="6">
-                <b-form-group label="Clocked In Time" label-for="checked_in_time">
-                    <b-row>
-                        <b-col cols="7">
-                            <date-picker v-model="checked_in_date"></date-picker>
-                        </b-col>
-                        <b-col cols="5">
-                            <time-picker v-model="checked_in_time"></time-picker>
-                        </b-col>
-                    </b-row>
-                    <input-help :form="form" field="checked_in_time" text="Confirm the time the shift was clocked in to."></input-help>
-                </b-form-group>
-                <b-form-group label="Clocked Out Time" label-for="checked_out_time">
-                    <b-row>
-                        <b-col cols="7">
-                            <date-picker v-model="checked_out_date"></date-picker>
-                        </b-col>
-                        <b-col cols="5">
-                            <time-picker v-model="checked_out_time"></time-picker>
-                        </b-col>
-                    </b-row>
-                    <input-help :form="form" field="checked_out_time" text="Confirm the time the shift was clocked out from."></input-help>
-                </b-form-group>
-            </b-col>
-            <b-col lg="6">
-                <b-form-group label="Other Expenses" label-for="other_expenses">
-                    <b-form-input
-                        id="other_expenses"
-                        name="other_expenses"
-                        type="number"
-                        v-model="form.other_expenses"
-                        step="any"
-                    >
-                    </b-form-input>
-                    <input-help :form="form" field="other_expenses" text="Confirm the dollar amount of other expenses on this shift."></input-help>
-                </b-form-group>
-                <b-form-group label="Mileage" label-for="mileage">
-                    <b-form-input
-                        id="mileage"
-                        name="mileage"
-                        type="number"
-                        v-model="form.mileage"
-                        step="1"
-                        >
-                    </b-form-input>
-                    <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="12">
-                <b-form-group label="Caregiver Comments" label-for="caregiver_comments">
-                    <b-textarea
-                        id="caregiver_comments"
-                        name="caregiver_comments"
-                        :rows="3"
-                        v-model="form.caregiver_comments"
-                        >
-                    </b-textarea>
-                    <input-help :form="form" field="caregiver_comments" text=""></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="12">
-                <h5>Activities Performed</h5>
-                <div class="form-check">
-                    <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
-                    <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
-                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                    </label>
-                </div>
-            </b-col>
-        </b-row>
-        <b-row class="with-padding-top">
-            <b-col lg="12">
-                <h5>
-                    Shift Issues
-                    <b-btn size="sm" variant="info" @click="createIssue()">Add an Issue</b-btn>
-                </h5>
-                <div class="table-responsive" v-if="issues.length">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>Caregiver Injury</th>
-                            <th>Client Injury</th>
-                            <th>Comments</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="issue in issues">
-                            <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                            <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
-                            <td>{{ issue.comments }}</td>
-                            <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="with-padding-bottom" v-else>
-                    No recorded issues on this shift.
-                </div>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col sm="6">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th colspan="2">Clock In EVV</th>
-                    </tr>
-                    </thead>
-                    <tbody v-if="shift.checked_in_latitude || shift.checked_in_longitude">
-                    <tr>
-                        <th>Geocode</th>
-                        <td>{{ shift.checked_in_latitude.slice(0,8) }},<br />{{ shift.checked_in_longitude.slice(0,8) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Distance</th>
-                        <td>{{ in_distance }}m</td>
-                    </tr>
-                    </tbody>
-                    <tbody v-else-if="shift.checked_in_number">
-                    <tr>
-                        <th>Phone Number</th>
-                        <td>{{ shift.checked_in_number }}</td>
-                    </tr>
-                    </tbody>
-                    <tbody v-else>
-                    <tr>
-                        <td colspan="2">No EVV data</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </b-col>
-            <b-col sm="6">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th colspan="2">Clock Out EVV</th>
-                    </tr>
-                    </thead>
-                    <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
-                    <tr>
-                        <th>Geocode</th>
-                        <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Distance</th>
-                        <td>{{ out_distance }}m</td>
-                    </tr>
-                    </tbody>
-                    <tbody v-else-if="shift.checked_out_number">
-                    <tr>
-                        <th>Phone Number</th>
-                        <td>{{ shift.checked_out_number }}</td>
-                    </tr>
-                    </tbody>
-                    <tbody v-else>
-                    <tr>
-                        <td colspan="2">No EVV data</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="12">
-                <b-button variant="success" type="submit">Save Shift Modifications</b-button>
-                <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
-            </b-col>
-        </b-row>
-        </form>
+            <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)">
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Client" label-for="client_id">
+                            <b-form-select
+                                    id="client_id"
+                                    name="client_id"
+                                    v-model="form.client_id"
+                            >
+                                <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="client_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Caregiver" label-for="caregiver_id">
+                            <b-form-select
+                                    id="caregiver_id"
+                                    name="caregiver_id"
+                                    v-model="form.caregiver_id"
+                            >
+                                <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="caregiver_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Clocked In Time" label-for="checked_in_time">
+                            <b-row>
+                                <b-col cols="7">
+                                    <date-picker v-model="checked_in_date"></date-picker>
+                                </b-col>
+                                <b-col cols="5">
+                                    <time-picker v-model="checked_in_time"></time-picker>
+                                </b-col>
+                            </b-row>
+                            <input-help :form="form" field="checked_in_time" text="Confirm the time the shift was clocked in to."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Clocked Out Time" label-for="checked_out_time">
+                            <b-row>
+                                <b-col cols="7">
+                                    <date-picker v-model="checked_out_date"></date-picker>
+                                </b-col>
+                                <b-col cols="5">
+                                    <time-picker v-model="checked_out_time"></time-picker>
+                                </b-col>
+                            </b-row>
+                            <input-help :form="form" field="checked_out_time" text="Confirm the time the shift was clocked out from."></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Other Expenses" label-for="other_expenses">
+                            <b-form-input
+                                    id="other_expenses"
+                                    name="other_expenses"
+                                    type="number"
+                                    v-model="form.other_expenses"
+                                    step="any"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="other_expenses" text="Confirm the dollar amount of other expenses on this shift."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Mileage" label-for="mileage">
+                            <b-form-input
+                                    id="mileage"
+                                    name="mileage"
+                                    type="number"
+                                    v-model="form.mileage"
+                                    step="1"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Caregiver Comments" label-for="caregiver_comments">
+                            <b-textarea
+                                    id="caregiver_comments"
+                                    name="caregiver_comments"
+                                    :rows="3"
+                                    v-model="form.caregiver_comments"
+                            >
+                            </b-textarea>
+                            <input-help :form="form" field="caregiver_comments" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <h5>Activities Performed</h5>
+                        <div class="form-check">
+                            <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
+                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
+                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                            </label>
+                        </div>
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-top">
+                    <b-col lg="12">
+                        <h5>
+                            Shift Issues
+                            <b-btn size="sm" variant="info" @click="createIssue()">Add an Issue</b-btn>
+                        </h5>
+                        <div class="table-responsive" v-if="issues.length">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Caregiver Injury</th>
+                                    <th>Client Injury</th>
+                                    <th>Comments</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="issue in issues">
+                                    <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
+                                    <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
+                                    <td>{{ issue.comments }}</td>
+                                    <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="with-padding-bottom" v-else>
+                            No recorded issues on this shift.
+                        </div>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="6">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Clock In EVV</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="shift.checked_in_latitude || shift.checked_in_longitude">
+                            <tr>
+                                <th>Geocode</th>
+                                <td>{{ shift.checked_in_latitude.slice(0,8) }},<br />{{ shift.checked_in_longitude.slice(0,8) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ in_distance }}m</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else-if="shift.checked_in_number">
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ shift.checked_in_number }}</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </b-col>
+                    <b-col sm="6">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Clock Out EVV</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
+                            <tr>
+                                <th>Geocode</th>
+                                <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ out_distance }}m</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else-if="shift.checked_out_number">
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ shift.checked_out_number }}</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-button variant="success" type="submit">Save Shift Modifications</b-button>
+                        <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                    </b-col>
+                </b-row>
+            </form>
 
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="issues"></business-issue-modal>
-    </b-card>
+            <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="issues"></business-issue-modal>
+        </b-card>
+    </div>
 </template>
 
 <script>
@@ -249,11 +254,11 @@
         },
         mounted() {
             let checkin = moment.utc(this.shift.checked_in_time).local();
-            let checkout = moment.utc(this.shift.checked_out_time).local();
-            this.checked_in_time = checkin.format('h:mm A');
-            this.checked_out_time = checkout.format('h:mm A');
+            let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
             this.checked_in_date = checkin.format('MM/DD/YYYY');
-            this.checked_out_date = checkout.format('MM/DD/YYYY');
+            this.checked_in_time = checkin.format('h:mm A');
+            this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+            this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
             this.form.activities = this.getShiftActivityList();
         },
         methods: {
