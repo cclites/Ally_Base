@@ -6,9 +6,12 @@ use App\BankAccount;
 use App\CreditCard;
 use App\PhoneNumber;
 use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
 {
+    use SoftDeletes;
+
     /**
      * IsUserRole constructor.
      * @param array $attributes
@@ -16,10 +19,26 @@ trait IsUserRole
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        // Automatically load user relationship
+        $this->alwaysIncludeUserRelationship();
+        $this->appendAttributesToRoleModel();
+        $this->appendSoftDeletesToFillable();
+    }
+
+    protected function alwaysIncludeUserRelationship()
+    {
         if (empty($this->with)) $this->with = ['user'];
-        // Automatically append the following attributes to Role Model's data output
+    }
+
+    protected function appendAttributesToRoleModel()
+    {
         $this->append(['firstname', 'lastname', 'email', 'name', 'nameLastFirst']);
+    }
+
+    protected function appendSoftDeletesToFillable()
+    {
+        if (!in_array('deleted_at', $this->fillable)) {
+            $this->fillable[] = 'deleted_at';
+        }
     }
 
     /**

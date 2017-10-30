@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\UserRole;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\HiddenIdTrait;
@@ -78,6 +79,11 @@ class Client extends Model implements UserRole
         return $this->hasMany(Schedule::class);
     }
 
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
     public function defaultPayment()
     {
         return $this->morphTo('default_payment');
@@ -138,6 +144,19 @@ class Client extends Model implements UserRole
         }
 
         return $aggregator->events($start, $end);
+    }
+
+    public function hasActiveShift()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->exists();
+    }
+
+    public function clearFutureSchedules()
+    {
+        $yesterday = (new Carbon('yesterday'))->format('Y-m-d');
+        $this->schedules()
+            ->where('end_date', '>', $yesterday)
+            ->update(['end_date' => $yesterday]);
     }
 
 }

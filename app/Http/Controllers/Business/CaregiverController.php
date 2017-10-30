@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Traits\Request\PaymentMethodUpdate;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -134,7 +135,20 @@ class CaregiverController extends BaseController
      */
     public function destroy(Caregiver $caregiver)
     {
-        //
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $events = $caregiver->getEvents(Carbon::now(), new Carbon('2100-01-01'));
+        if (count($events)) {
+            $event = current($events);
+            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $event['title'] . '.');
+        }
+
+        if ($caregiver->delete()) {
+            return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
+        }
+        return new ErrorResponse(500, 'Error archiving this caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)

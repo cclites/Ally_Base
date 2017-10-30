@@ -176,10 +176,15 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        if ($client->delete()) {
-            return new SuccessResponse('The client has been deleted.');
+        if ($client->hasActiveShift()) {
+            return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
-        return new ErrorResponse('Could not delete the selected client.');
+
+        if ($client->delete()) {
+            $client->clearFutureSchedules();
+            return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
+        }
+        return new ErrorResponse('Could not archive the selected client.');
     }
 
     public function address(Request $request, $client_id, $type)

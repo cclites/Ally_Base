@@ -65,6 +65,7 @@
             <b-row>
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Delete Caregiver</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -101,6 +102,13 @@
         },
 
         methods: {
+
+            deleteCaregiver() {
+                let form = new Form();
+                if (confirm('Are you sure you wish to delete ' + this.caregiver.name + '?')) {
+                    form.submit('delete', '/business/caregivers/' + this.caregiver.id);
+                }
+            },
 
             saveProfile() {
                 this.form.patch('/business/caregivers/' + this.caregiver.id);
