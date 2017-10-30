@@ -4,7 +4,7 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn @click="createLicense()" variant="info">Add License</b-btn>
+        <b-btn @click="createLicense()" variant="info">Add Certification</b-btn>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -107,7 +107,7 @@
             deleteLicense(license) {
                 let component = this;
                 let form = new Form();
-                if (confirm('Are you sure you wish to delete this license?')) {
+                if (confirm('Are you sure you wish to delete this certification?')) {
                     form.submit('delete', '/business/caregivers/' + this.caregiverId + '/licenses/' + license.id)
                         .then(function(response) {
                             let index = component.licenseItems.findIndex(item => item.id === license.id);

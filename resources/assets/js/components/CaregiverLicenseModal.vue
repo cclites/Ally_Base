@@ -67,7 +67,7 @@
                 });
             },
             title() {
-                return (this.selectedItem) ? 'Edit ' : 'Create ';
+                return (this.selectedItem) ? 'Edit Certification' : 'Create Certification';
             }
         },
 

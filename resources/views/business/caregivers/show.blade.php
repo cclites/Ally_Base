@@ -30,7 +30,7 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Licenses</a>
+            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
