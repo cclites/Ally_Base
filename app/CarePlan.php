@@ -2,9 +2,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CarePlan extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'care_plans';
     protected $guarded = ['id'];
 

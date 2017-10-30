@@ -18,6 +18,7 @@ class CreateCarePlansTable extends Migration
             $table->string('name');
             $table->unsignedInteger('business_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
         });
