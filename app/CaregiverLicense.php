@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CaregiverLicense extends Model
 {
     protected $table = 'caregiver_licenses';
+    protected $guarded = ['id'];
 
     ///////////////////////////////////////////
     /// Relationship Methods
