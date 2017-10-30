@@ -8,7 +8,7 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'last_name' => $faker->lastName,
         'middle_initial' => $faker->randomLetter,
         'date_of_birth' => $faker->date(),
-        'ssn' => $faker->randomNumber(400000000, 700000000),
+        'ssn' => $faker->numberBetween(400000000, 700000000),
         'address' => $faker->streetAddress,
         'address_2' => $faker->randomNumber(),
         'city' => $faker->city,
@@ -25,6 +25,9 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'caregiver_position_id' => function () {
             return factory('App\CaregiverPosition')->create()->id;
         },
+        'caregiver_application_status_id' => function () {
+            return factory('App\CaregiverApplicationStatus')->create()->id;
+        },
         'preferred_start_date' => $faker->date(),
         'preferred_days' => 'mon,tues,wed,thurs,fri',
         'preferred_times' => 'mornings,afternoons,evenings,nights',
@@ -36,11 +39,18 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'moving_violation' => $faker->boolean,
         'moving_violation_count' => null,
         'accidents' => $faker->boolean,
-        'accident_count' => null
+        'accident_count' => null,
+        'acknowledged_terms' => false
     ];
 });
 
 $factory->define(\App\CaregiverPosition::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word
+    ];
+});
+
+$factory->define(\App\CaregiverApplicationStatus::class, function (Faker $faker) {
     return [
         'name' => $faker->word
     ];

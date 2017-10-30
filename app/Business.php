@@ -79,6 +79,11 @@ class Business extends Model
         return $this->hasMany(Note::class);
     }
 
+    public function caregiverApplications()
+    {
+        return $this->hasMany(CaregiverApplication::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

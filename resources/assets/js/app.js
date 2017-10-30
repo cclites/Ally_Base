@@ -102,6 +102,7 @@ Vue.component('note-list', require('./components/notes/NoteList'));
 Vue.component('note-edit', require('./components/notes/NoteEdit'));
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
+Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

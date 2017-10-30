@@ -16,6 +16,7 @@ class CreateCaregiverApplicationsTable extends Migration
         Schema::create('caregiver_applications', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_id');
+            $table->unsignedInteger('caregiver_application_status_id')->default(1);
             $table->string('last_name');
             $table->string('first_name');
             $table->string('middle_initial')->nullable();
@@ -26,9 +27,9 @@ class CreateCaregiverApplicationsTable extends Migration
             $table->string('city', 60)->nullable();
             $table->string('state', 2)->nullable();
             $table->string('zip', 10)->nullable();
-            $table->string('cell_phone');
+            $table->string('cell_phone', 20);
             $table->string('cell_phone_provider', 60)->nullable();
-            $table->string('home_phone', 10)->nullable();
+            $table->string('home_phone', 20)->nullable();
             $table->string('email', 100);
             $table->string('emergency_contact_name', 100)->nullable();
             $table->string('emergency_contact_phone', 100)->nullable();
@@ -84,7 +85,7 @@ class CreateCaregiverApplicationsTable extends Migration
 
             $table->string('heard_about')->nullable();
 
-            $table->boolean('acknowledged_terms');
+            $table->boolean('acknowledged_terms')->default(false);
 
             $table->timestamps();
 

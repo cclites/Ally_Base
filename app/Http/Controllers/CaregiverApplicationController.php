@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Business;
 use App\CaregiverApplication;
+use App\CaregiverApplicationStatus;
 use App\CaregiverPosition;
+use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use Carbon\Carbon;
@@ -19,7 +21,12 @@ class CaregiverApplicationController extends Controller
      */
     public function index()
     {
-        //
+        $user = OfficeUser::find(auth()->id());
+        $business = $user->businesses()->first();
+        $applications = CaregiverApplication::with('position', 'status')->where('business_id', $business->id)->get();
+        $statuses = CaregiverApplicationStatus::all();
+        $positions = CaregiverPosition::all();
+        return view('caregivers.applications.index', compact('business', 'applications', 'statuses', 'positions'));
     }
 
     /**
@@ -116,5 +123,28 @@ class CaregiverApplicationController extends Controller
     public function destroy(CaregiverApplication $caregiverApplication)
     {
         //
+    }
+
+
+    public function search(Request $request)
+    {
+        $user = OfficeUser::find(auth()->id());
+        $business = Business::find($user->businesses()->first()->id);
+        $applications = CaregiverApplication::with('position', 'status')
+            ->where('business_id', $business->id)
+            ->when($request->filled('from_date'), function ($query) use ($request) {
+                return $query->where('created_at', '>=', Carbon::parse($request->from_date));
+            })
+            ->when($request->filled('to_date'), function ($query) use ($request) {
+                return $query->where('created_at', '<=', Carbon::parse($request->to_date)->addDay());
+            })
+            ->when($request->filled('position'), function ($query) use ($request) {
+                return $query->where('caregiver_position_id', $request->position);
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                return $query->where('caregiver_application_status_id', $request->status);
+            })
+            ->get();
+        return response()->json($applications);
     }
 }
