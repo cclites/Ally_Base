@@ -6,6 +6,7 @@ use App\Note;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -80,12 +81,13 @@ class NoteController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Note  $note
+     * @param $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Note $note)
+    public function edit($id)
     {
-        //
+        $note = Note::with('caregiver', 'client', 'creator')->find($id);
+        return view('notes.edit', compact('note'));
     }
 
     /**
@@ -97,7 +99,17 @@ class NoteController extends Controller
      */
     public function update(Request $request, Note $note)
     {
-        //
+        $this->validate($request, ['body' => 'required|string']);
+
+        $result = $note->update([
+            'body' => $request->body,
+            'tags' => $request->tags
+        ]);
+
+        if ($result) {
+            return new SuccessResponse('Note updated.', [], '/notes');
+        }
+        return new ErrorResponse(500, 'The note could not be created.');
     }
 
     /**

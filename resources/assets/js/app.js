@@ -93,8 +93,9 @@ Vue.component('system-notifications', require('./components/SystemNotifications.
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 Vue.component('document-list', require('./components/DocumentList.vue'));
-Vue.component('note-create', require('./components/NoteCreate'));
-Vue.component('note-list', require('./components/NoteList'));
+Vue.component('note-create', require('./components/notes/NoteCreate'));
+Vue.component('note-list', require('./components/notes/NoteList'));
+Vue.component('note-edit', require('./components/notes/NoteEdit'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

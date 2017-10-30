@@ -78,6 +78,11 @@
                 <template slot="client" scope="data">
                     <span v-if="data.item.client">{{ data.item.client.name }}</span>
                 </template>
+                <template slot="action" scope="data">
+                    <a class="btn btn-primary" :href="'/notes/' + data.item.id + '/edit'">
+                        <i class="fa fa-wrench"></i>
+                    </a>
+                </template>
             </b-table>
         </div>
 
@@ -139,7 +144,8 @@
                         key: 'body',
                         label: 'Preview',
                         sortable: false
-                    }
+                    },
+                    'action'
                 ]
             }
         },

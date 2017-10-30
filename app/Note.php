@@ -22,4 +22,9 @@ class Note extends Model
     {
         return $this->belongsTo('App\Client');
     }
+
+    public function creator()
+    {
+        return $this->belongsTo('App\User');
+    }
 }
