@@ -5,6 +5,7 @@
                 :class="cssClass"
                 type="text"
                 v-model="value"
+                @change="updateInput()"
         />
     </div>
 </template>
@@ -60,11 +61,27 @@
 
         mounted() {
             let component = this;
-            let selector = jQuery(component.$refs.datepicker);
-            selector.datepicker(component.allOptions).on("changeDate", function() {
+            this.selector().datepicker(component.allOptions).on("changeDate", function() {
                 // Keep vue value in sync
-                component.$emit('input', selector.val());
+                component.updateInput();
             });
+        },
+
+        methods: {
+            updateInput() {
+                this.value = this.selector().val();
+                this.$emit('input', this.selector().val());
+            },
+            selector() {
+                return jQuery(this.$refs.datepicker);
+            }
+        },
+
+        watch: {
+            value(val) {
+                // Update the datepicker's highlighted date when external value changes occur
+                this.selector().datepicker('update', val);
+            }
         }
     }
 </script>
