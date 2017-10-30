@@ -1,6 +1,6 @@
 <template>
     <b-card
-        header="Licenses"
+        header="Certifications"
         header-text-variant="white"
         header-bg-variant="info"
         >
