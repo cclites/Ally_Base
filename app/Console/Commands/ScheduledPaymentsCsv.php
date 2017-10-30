@@ -21,6 +21,8 @@ class ScheduledPaymentsCsv extends Command
      */
     protected $description = 'Generate CSV output for the scheduled payments';
 
+    protected $csvSeparator = ';';  // Needs semi-colon because comma is used in names
+
     /**
      * Create a new command instance.
      *
@@ -56,9 +58,9 @@ class ScheduledPaymentsCsv extends Command
            return $row;
         });
 
-        $csv = implode(',', array_keys($rows[0])) . "\n";
+        $csv = implode($this->csvSeparator, array_keys($rows[0])) . "\n";
         foreach($rows as $row) {
-            $csv .= implode(',', $row) . "\n";
+            $csv .= implode($this->csvSeparator, $row) . "\n";
         }
 
         if ($this->option('output')) {
