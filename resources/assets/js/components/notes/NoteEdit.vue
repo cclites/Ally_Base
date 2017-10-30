@@ -16,7 +16,7 @@
                                 maxlength="32"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="tags" text="Tag the note with for searching."></input-help>
+                        <input-help :form="form" field="tags" text="Tag the note for searching."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
