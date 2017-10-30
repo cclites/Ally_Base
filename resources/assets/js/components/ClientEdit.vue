@@ -106,6 +106,7 @@
             <b-row>
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="danger" @click="deleteClient()"><i class="fa fa-times"></i> Delete Client</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -149,6 +150,13 @@
         },
 
         methods: {
+
+            deleteClient() {
+                let form = new Form();
+                if (confirm('Are you sure you wish to delete ' + this.client.name + '?')) {
+                    form.submit('delete', '/business/clients/' + this.client.id);
+                }
+            },
 
             saveProfile() {
                 let component = this;

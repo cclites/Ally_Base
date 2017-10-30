@@ -30,6 +30,9 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
         </li>
         <li class="nav-item">
@@ -83,6 +86,12 @@
                 :initial-documents="{{ $caregiver->user->documents->toJson() }}"
                 :user-id="{{ $caregiver->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="licenses" role="tabpanel">
+            <caregiver-license-list
+                    :licenses="{{ $caregiver->licenses }}"
+                    :caregiver-id="{{ $caregiver->id }}"
+            ></caregiver-license-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
             <!-- Availability Placeholder -->

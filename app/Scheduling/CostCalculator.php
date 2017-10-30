@@ -31,7 +31,7 @@ class CostCalculator
      * Supported client types
      * @var array
      */
-    protected $clientTypes = ['private_pay', 'medicaid'];
+    protected $clientTypes = ['private_pay', 'medicaid', 'LTCI', 'VA'];
 
     public function __construct($shift)
     {
@@ -64,7 +64,8 @@ class CostCalculator
                 }
                 // Default is bank account, so no more logic necessary
                 break;
-            case 'medicaid':
+            default:
+                // Medicaid fee is used for LTCI, VA, and Medicaid.  Expand the switch cases to add more.
                 $pct = config('ally.medicaid_fee');
                 break;
         }

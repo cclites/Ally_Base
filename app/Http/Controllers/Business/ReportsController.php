@@ -213,7 +213,7 @@ class ReportsController extends BaseController
     {
         $shifts = $this->business()
             ->shifts()
-            ->whereNotNull('checked_out_time')
+//            ->whereNotNull('checked_out_time')
             ->orderBy('checked_in_time', 'DESC')
             ->get();
         $shifts = $shifts->map(function($shift) {

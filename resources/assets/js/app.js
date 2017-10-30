@@ -51,8 +51,11 @@ Vue.component('business-schedule', require('./components/BusinessSchedule.vue'))
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
+Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
+
 
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 
