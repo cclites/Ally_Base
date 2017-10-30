@@ -46,10 +46,10 @@ class ScheduledPaymentsCsv extends Command
         $rows = $report->rows();
         $rows = $rows->map(function($row) {
            $row += [
-               'client_id' => $row['client_id'],
-               'client_name' => $row['client_name'],
-               'caregiver_id' => $row['caregiver_id'],
-               'caregiver_name' => $row['caregiver_name'],
+               'client_id' => $row['client']['id'],
+               'client_name' => $row['client']['name'],
+               'caregiver_id' => $row['caregiver']['id'],
+               'caregiver_name' => $row['caregiver']['name'],
            ];
            unset($row['client']);
            unset($row['caregiver']);
