@@ -237,8 +237,8 @@
                 ],
                 items: this.shifts.map(function(shift) {
                         let start = moment.utc(shift.checked_in_time);
-                        let end = moment.utc(shift.checked_out_time);
-                        let hours = (parseInt(end.diff(start, 'minutes')) / 60).toFixed(2);
+                        let end = (shift.checked_out_time) ? moment.utc(shift.checked_out_time) : null;
+                        let hours = (shift.checked_out_time) ? (parseInt(end.diff(start, 'minutes')) / 60).toFixed(2) : 'CLOCKED IN';
                         return {
                             id: shift.id,
                             date: start.local().format('L LTS'),
