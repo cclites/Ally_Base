@@ -42,9 +42,11 @@ class CaregiverLicenseController extends BaseController
             'expires_at' => 'required|date',
         ]);
 
+        $data['expires_at'] = filter_date($data['expires_at']) . ' 23:59:59';
+
         $license = new CaregiverLicense($data);
         if ($caregiver->licenses()->save($license)) {
-            return new SuccessResponse('The license has been added.');
+            return new SuccessResponse('The license has been added.', $license->toArray());
         }
         return new ErrorResponse(500, 'The license could not be saved.');
     }
@@ -68,8 +70,10 @@ class CaregiverLicenseController extends BaseController
             'expires_at' => 'required|date',
         ]);
 
+        $data['expires_at'] = filter_date($data['expires_at']) . ' 23:59:59';
+
         if ($license->update($data)) {
-            return new SuccessResponse('The license has been updated.');
+            return new SuccessResponse('The license has been updated.', $license->toArray());
         }
         return new ErrorResponse(500, 'The license could not be updated.');
     }
