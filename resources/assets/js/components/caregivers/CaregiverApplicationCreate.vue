@@ -9,9 +9,10 @@
         <b-card title="Caregiver Application">
             <b-row>
                 <b-col lg="4">
-                    <b-form-group label="First Name">
+                    <b-form-group label="First Name*">
                         <b-form-input
-                                v-model="form.first_name">
+                                v-model="form.first_name"
+                                tabindex="1">
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Date of Birth">
@@ -20,6 +21,7 @@
                                 id="date_of_birth"
                                 class="datepicker"
                                 v-model="form.date_of_birth"
+                                tabindex="4"
                         >
                         </b-form-input>
                     </b-form-group>
@@ -28,25 +30,29 @@
                 <b-col lg="4">
                     <b-form-group label="Middle Initial">
                         <b-form-input
-                                v-model="form.middle_initial">
+                                v-model="form.middle_initial"
+                                tabindex="2">
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Social Security Number">
                         <b-form-input
-                                v-model="form.ssn">
+                                v-model="form.ssn"
+                                tabindex="5">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Last Name">
+                    <b-form-group label="Last Name*">
                         <b-form-input
-                                v-model="form.last_name">
+                                v-model="form.last_name"
+                                tabindex="3">
                         </b-form-input>
                     </b-form-group>
-                    <b-form-group label="Email">
+                    <b-form-group label="Email*">
                         <b-form-input
-                                v-model="form.email">
+                                v-model="form.email"
+                                tabindex="6">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
@@ -56,7 +62,8 @@
                 <b-col lg="6">
                     <b-form-group label="Address">
                         <b-form-input
-                                v-model="form.address">
+                                v-model="form.address"
+                                tabindex="7">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
@@ -64,7 +71,8 @@
                 <b-col lg="6">
                     <b-form-group label="Address 2">
                         <b-form-input
-                                v-model="form.address_2">
+                                v-model="form.address_2"
+                                tabindex="8">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
@@ -74,12 +82,14 @@
                 <b-col lg="4">
                     <b-form-group label="City">
                         <b-form-input
-                                v-model="form.city">
+                                v-model="form.city"
+                                tabindex="9">
                         </b-form-input>
                     </b-form-group>
-                    <b-form-group label="Cell Phone">
+                    <b-form-group label="Cell Phone*">
                         <b-form-input
-                                v-model="form.cell_phone">
+                                v-model="form.cell_phone"
+                                tabindex="12">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
@@ -87,12 +97,14 @@
                 <b-col lg="4">
                     <b-form-group label="State">
                         <b-form-input
-                                v-model="form.state">
+                                v-model="form.state"
+                                tabindex="10">
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Cell Phone Provider">
                         <b-form-input
-                                v-model="form.cell_phone_provider">
+                                v-model="form.cell_phone_provider"
+                                tabindex="13">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
@@ -100,16 +112,17 @@
                 <b-col lg="4">
                     <b-form-group label="Zip">
                         <b-form-input
-                                v-model="form.zip">
+                                v-model="form.zip"
+                                tabindex="11">
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Home Phone">
                         <b-form-input
-                                v-model="form.home_phone">
+                                v-model="form.home_phone"
+                                tabindex="14">
                         </b-form-input>
                     </b-form-group>
                 </b-col>
-
             </b-row>
 
             <b-row>
