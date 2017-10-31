@@ -128,4 +128,17 @@ class ScheduledPaymentsReport implements Report
     {
         return $this->rows()->sum($column);
     }
+
+    /**
+     * Specify the sort order for the report
+     *
+     * @param $column
+     * @param string $direction ASC | DESC
+     * @return $this
+     */
+    public function orderBy($column, $direction = 'ASC')
+    {
+        $this->query()->orderBy($column, $direction);
+        return $this;
+    }
 }
