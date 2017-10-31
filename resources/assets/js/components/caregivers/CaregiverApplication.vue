@@ -1,6 +1,6 @@
 <template>
     <b-container>
-        <b-card :title="application.first_name + ' ' + application.last_name + ' applying for ' + application.position.name">
+        <b-card title="Submission">
             <table class="table">
                 <tr>
                     <td>First Name:</td>
