@@ -1,6 +1,11 @@
 <template>
     <b-card>
         <b-row class="mb-3">
+            <b-col>
+                Application URL: <a :href="'/'+business.id+'/caregiver-application/create'">{{ applicationUrl }}</a>
+            </b-col>
+        </b-row>
+        <b-row class="mb-3">
             <b-col lg="2">
                 <b-form-input
                         type="text"
@@ -30,7 +35,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Position --</option>
                     </template>
-                    <option :value="position.id" v-for="position in positions">{{ position.name }}</option>
+                    <option :value="position.id" v-for="position in positions" :key="position.id">{{ position.name }}</option>
                 </b-form-select>
             </b-col>
 
@@ -40,7 +45,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Status --</option>
                     </template>
-                    <option :value="status.id" v-for="status in statuses">{{ status.name }}</option>
+                    <option :value="status.id" v-for="status in statuses" :key="status.id">{{ status.name }}</option>
                 </b-form-select>
             </b-col>
 
@@ -171,7 +176,9 @@
         },
 
         computed: {
-
+            applicationUrl() {
+                return window.location.hostname+'/'+this.business.id+'/caregiver-application/create';
+            }
         },
 
         methods: {
