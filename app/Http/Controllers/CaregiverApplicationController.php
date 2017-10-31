@@ -75,7 +75,7 @@ class CaregiverApplicationController extends Controller
         $application = CaregiverApplication::create($data);
 
         if ($application) {
-            return new CreatedResponse('Application submitted successfully.', [], '/');
+            return new CreatedResponse('Application submitted successfully.', [], '/business/caregivers/applications');
         }
         return new ErrorResponse(500, 'The application could not be submitted.');
     }
