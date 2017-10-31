@@ -45,7 +45,7 @@
             </b-col>
 
             <b-col lg="2">
-                <b-button @click="filter" variant="primary">
+                <b-button @click="filter" variant="success">
                     Filter
                 </b-button>
             </b-col>
@@ -70,10 +70,10 @@
                     {{ data.item.city }} {{ data.item.zip }}
                 </template>
                 <template slot="position" scope="data">
-                    {{ data.item.position.name }}
+                    <span v-if="data.item.position">{{ data.item.position.name }}</span>
                 </template>
                 <template slot="status" scope="data">
-                    {{ data.item.status.name }}
+                    <span v-if="data.item.status">{{ data.item.status.name }}</span>
                 </template>
                 <template slot="action" scope="data">
                     <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-default"><i class="fa fa-edit"></i></a>
