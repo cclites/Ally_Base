@@ -76,7 +76,7 @@
                     {{ data.item.status.name }}
                 </template>
                 <template slot="action" scope="data">
-                    <a href="#" class="btn btn-default"><i class="fa fa-wrench"></i></a>
+                    <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-default"><i class="fa fa-edit"></i></a>
                 </template>
             </b-table>
         </div>

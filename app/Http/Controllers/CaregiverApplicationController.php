@@ -45,7 +45,7 @@ class CaregiverApplicationController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return CreatedResponse|ErrorResponse
      */
     public function store(Request $request)
     {
@@ -83,12 +83,13 @@ class CaregiverApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\CaregiverApplication  $caregiverApplication
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(CaregiverApplication $caregiverApplication)
+    public function show(int $id)
     {
-        //
+        $application = CaregiverApplication::with('position', 'status')->find($id);
+        return view('caregivers.applications.show', compact('application'));
     }
 
     /**
@@ -125,7 +126,12 @@ class CaregiverApplicationController extends Controller
         //
     }
 
-
+    /**
+     * Filter the list of Caregiver Applications
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function search(Request $request)
     {
         $user = OfficeUser::find(auth()->id());
