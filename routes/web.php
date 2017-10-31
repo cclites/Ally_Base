@@ -124,3 +124,12 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], fu
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
 });
+
+Route::group([
+    'as' => 'admin.',
+    'prefix' => 'admin',
+    'middleware' => ['auth', 'roles'],
+    'roles' => ['admin'],
+], function() {
+    Route::resource('businesses', 'Admin\BusinessController');
+});
