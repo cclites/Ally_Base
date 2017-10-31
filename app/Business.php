@@ -44,6 +44,11 @@ class Business extends Model
             ]);
     }
 
+    public function carePlans()
+    {
+        return $this->hasMany(CarePlan::class)->with('activities');
+    }
+
     public function deposits()
     {
         return $this->hasMany(Deposit::class);
