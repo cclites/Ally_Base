@@ -17,6 +17,9 @@ Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });
 
+Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
+Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
+
 Auth::routes();
 
 Route::group(['middleware' => 'guest'], function() {
@@ -61,6 +64,9 @@ Route::group([
 
     Route::resource('care_plans', 'Business\CarePlanController');
 
+    Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
+    Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
+    Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');

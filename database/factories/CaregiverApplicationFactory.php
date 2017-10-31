@@ -1,0 +1,105 @@
+<?php
+
+use Faker\Generator as Faker;
+
+$factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
+    return [
+        'first_name' => $faker->firstName,
+        'last_name' => $faker->lastName,
+        'middle_initial' => $faker->randomLetter,
+        'date_of_birth' => $faker->date(),
+        'ssn' => $faker->numberBetween(400000000, 700000000),
+        'address' => $faker->streetAddress,
+        'address_2' => $faker->randomNumber(),
+        'city' => $faker->city,
+        'state' => $faker->stateAbbr,
+        'zip' => $faker->postcode,
+        'cell_phone' => $faker->phoneNumber,
+        'cell_phone_provider' => $faker->word,
+        'home_phone' => $faker->phoneNumber,
+        'email' => $faker->safeEmail,
+        'emergency_contact_name' => $faker->name,
+        'emergency_contact_phone' => $faker->phoneNumber,
+        'worked_here_before' => $faker->boolean,
+        'worked_before_location' => '',
+        'caregiver_position_id' => function () {
+            return factory('App\CaregiverPosition')->create()->id;
+        },
+        'caregiver_application_status_id' => function () {
+            return factory('App\CaregiverApplicationStatus')->create()->id;
+        },
+        'preferred_start_date' => $faker->date(),
+        'preferred_days' => 'Mon,Tues,Wed,Thurs,Fri',
+        'preferred_times' => 'Mornings,Afternoons,Evenings,Nights',
+        'preferred_shift_length' => array_random([1, 4, 8, 12]),
+        'work_weekends' => $faker->boolean,
+        'travel_radius' => array_random([5, 10, 15, 20]),
+        'dui' => $faker->boolean,
+        'reckless_driving' => $faker->boolean,
+        'moving_violation' => $faker->boolean,
+        'moving_violation_count' => null,
+        'accidents' => $faker->boolean,
+        'accident_count' => null,
+        'driving_violations_desc' => $faker->paragraph,
+        'felony_conviction' => $faker->boolean,
+        'theft_conviction' => $faker->boolean,
+        'drug_conviction' => $faker->boolean,
+        'violence_conviction' => $faker->boolean,
+        'criminal_history_desc' => $faker->paragraph,
+        'currently_injured' => $faker->boolean,
+        'previously_injured' => $faker->boolean,
+        'lift_25_lbs' => $faker->boolean,
+        'workmans_comp' => $faker->boolean,
+        'workmans_comp_dates' => $faker->sentence,
+        'injury_status_desc' => $faker->paragraph,
+        'acknowledged_terms' => false,
+        'employer_1_name' => $faker->company,
+        'employer_1_city' => $faker->city,
+        'employer_1_state' => $faker->stateAbbr,
+        'employer_1_approx_start_date' => $faker->date(),
+        'employer_1_approx_end_date' => $faker->date(),
+        'employer_1_phone' => '',
+        'employer_1_job_title' => $faker->word,
+        'employer_1_supervisor_name' => $faker->name,
+        'employer_1_reason_for_leaving' => $faker->sentence,
+        'employer_2_name' => $faker->company,
+        'employer_2_city' => $faker->city,
+        'employer_2_state' => $faker->stateAbbr,
+        'employer_2_approx_start_date' => $faker->date(),
+        'employer_2_approx_end_date' => $faker->date(),
+        'employer_2_phone' => '',
+        'employer_2_job_title' => $faker->word,
+        'employer_2_supervisor_name' => $faker->name,
+        'employer_2_reason_for_leaving' => $faker->sentence,
+        'employer_3_name' => $faker->company,
+        'employer_3_city' => $faker->city,
+        'employer_3_state' => $faker->stateAbbr,
+        'employer_3_approx_start_date' => $faker->date(),
+        'employer_3_approx_end_date' => $faker->date(),
+        'employer_3_phone' => '',
+        'employer_3_job_title' => $faker->word,
+        'employer_3_supervisor_name' => $faker->name,
+        'employer_3_reason_for_leaving' => $faker->sentence,
+        'reference_1_name' => $faker->name,
+        'reference_1_phone' => '',
+        'reference_1_relationship' => $faker->word,
+        'reference_2_name' => $faker->name,
+        'reference_2_phone' => '',
+        'reference_2_relationship' => $faker->word,
+        'reference_3_name' => $faker->name,
+        'reference_3_phone' => '',
+        'reference_3_relationship' => $faker->word
+    ];
+});
+
+$factory->define(\App\CaregiverPosition::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word
+    ];
+});
+
+$factory->define(\App\CaregiverApplicationStatus::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word
+    ];
+});
