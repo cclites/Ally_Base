@@ -20,9 +20,9 @@ class ClientCaregiverController extends BaseController
 
         $data = $request->validate([
             'caregiver_hourly_rate' => 'required|numeric',
-            'caregiver_daily_rate' => 'required|numeric',
+            'caregiver_daily_rate' => 'nullable|numeric',
             'provider_hourly_fee' => 'required|numeric',
-            'provider_daily_fee' => 'required|numeric',
+            'provider_daily_fee' => 'nullable|numeric',
         ]);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
