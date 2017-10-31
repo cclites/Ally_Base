@@ -6,6 +6,7 @@ use App\Caregiver;
 use App\Deposit;
 use App\Payment;
 use App\PaymentQueue;
+use App\Reports\CertificationExpirationReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Schedule;
 use Carbon\Carbon;
@@ -222,5 +223,21 @@ class ReportsController extends BaseController
             return $shift;
         });
         return view('business.reports.shifts', compact('shifts'));
+    }
+
+    public function certificationExpirations(Request $request)
+    {
+        $defaultDate = new Carbon('now +30 days');
+
+        $caregivers = $this->business()->caregivers;
+        $caregiverIds = $caregivers->pluck('id');
+
+        $report = new CertificationExpirationReport();
+        $report->orderBy('expires_at');
+        $report->between(Carbon::now(), $defaultDate);
+        $report->query()->whereIn('caregiver_id', $caregiverIds->toArray());
+        $certifications = $report->rows();
+
+        return view('business.reports.certifications', compact('certifications'));
     }
 }
