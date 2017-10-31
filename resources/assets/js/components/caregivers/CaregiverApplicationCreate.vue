@@ -537,7 +537,7 @@
             <hr>
             <b-row>
                 <b-col>
-                    <div class="btn btn-primary" @click="saveApp">Submit</div>
+                    <div class="btn btn-success" @click="saveApp">Submit</div>
                 </b-col>
             </b-row>
         </b-card>
