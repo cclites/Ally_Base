@@ -58,10 +58,10 @@ class CaregiverApplicationController extends Controller
 
         $data = $request->all();
 
-        $data['preferred_days'] = implode(',', $data['preferred_days']);
-        $data['preferred_times'] = implode(',', $data['preferred_times']);
-        $data['preferred_shift_length'] = implode(',', $data['preferred_shift_length']);
-        $data['heard_about'] = implode(',', $data['heard_about']);
+        $data['preferred_days'] = $request->filled('preferred_days') ? implode(',', $data['preferred_days']) : '';
+        $data['preferred_times'] = $request->filled('preferred_times') ? implode(',', $data['preferred_times']) : '';
+        $data['preferred_shift_length'] = $request->filled('preferred_shift_length') ? implode(',', $data['preferred_shift_length']) : '';
+        $data['heard_about'] = $request->filled('preferred_shift_length') ? implode(',', $data['heard_about']) : '';
         $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);
 
         $data['preferred_start_date'] = Carbon::parse($data['preferred_start_date']);
