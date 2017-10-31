@@ -25,6 +25,9 @@ class ClientCaregiverController extends BaseController
             'provider_daily_fee' => 'nullable|numeric',
         ]);
 
+        // Force rates/fees to floats
+        $data = array_map('floatval', $data);
+
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
             $responseData = $client->caregivers->where('id', $caregiver_id)->first();
             return new CreatedResponse('The caregiver assignment has been saved.', $responseData);
