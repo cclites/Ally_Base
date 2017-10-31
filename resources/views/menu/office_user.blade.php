@@ -21,10 +21,10 @@
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-medkit"></i><span class="hide-menu">Care Plans</span></a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="javascript:void()">Care Plans</a></li>
+        <li><a href="{{ route('business.care_plans.index') }}">Care Plans</a></li>
         <li><a href="{{ route('business.activities.index') }}">Activities</a></li>
         <li class="divider"></li>
-        <li><a href="javascript:void()">Add a Care Plan</a></li>
+        <li><a href="{{ route('business.care_plans.create') }}">Add a Care Plan</a></li>
     </ul>
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
@@ -35,6 +35,7 @@
         <li><a href="{{ route('business.reports.deposits') }}">Registry Referral Deposits</a></li>
         <li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>
         <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
+        <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
     </ul>
 </li>
 

@@ -25,6 +25,15 @@ interface Report
     public function between($start=null, $end=null);
 
     /**
+     * Specify the sort order for the report
+     *
+     * @param $column
+     * @param string $direction  ASC | DESC
+     * @return $this
+     */
+    public function orderBy($column, $direction='ASC');
+
+    /**
      * Return the instance of the query builder for additional manipulation
      *
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder

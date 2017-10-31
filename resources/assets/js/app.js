@@ -37,6 +37,13 @@ Vue.component('time-picker', require('./components/TimePicker.vue'));
 
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
+// Admin
+Vue.component('business-create', require('./components/BusinessCreate.vue'));
+Vue.component('business-edit', require('./components/BusinessEdit.vue'));
+Vue.component('business-list', require('./components/BusinessList.vue'));
+
+// Office User
+Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-exception', require('./components/BusinessException.vue'));
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
@@ -49,13 +56,15 @@ Vue.component('business-shift-history', require('./components/BusinessShiftHisto
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 
+Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
+Vue.component('care-plan-list', require('./components/CarePlanList.vue'));
+
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
-
 
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 

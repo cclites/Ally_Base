@@ -11,6 +11,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $admin = factory(\App\Admin::class)->create([
+            'firstname' => 'Demo',
+            'lastname' => 'Admin',
+            'email' => 'admin@allyms.com',
+            'password' => bcrypt('demo'),
+        ]);
+
         $business = factory(\App\Business::class)->create([
             'name' => 'Ally Demo Business'
         ]);

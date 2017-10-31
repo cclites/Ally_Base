@@ -62,6 +62,8 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
+    Route::resource('care_plans', 'Business\CarePlanController');
+
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
     Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
@@ -92,6 +94,7 @@ Route::group([
     Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
 
+    Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
@@ -121,4 +124,13 @@ Route::group([
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
+});
+
+Route::group([
+    'as' => 'admin.',
+    'prefix' => 'admin',
+    'middleware' => ['auth', 'roles'],
+    'roles' => ['admin'],
+], function() {
+    Route::resource('businesses', 'Admin\BusinessController');
 });
