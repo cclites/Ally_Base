@@ -86,8 +86,9 @@ class NoteController extends Controller
      */
     public function edit($id)
     {
+        $business = OfficeUser::find(auth()->id())->businesses()->with('caregivers', 'clients')->first();
         $note = Note::with('caregiver', 'client', 'creator')->find($id);
-        return view('notes.edit', compact('note'));
+        return view('notes.edit', compact('note', 'business'));
     }
 
     /**
@@ -101,10 +102,7 @@ class NoteController extends Controller
     {
         $this->validate($request, ['body' => 'required|string']);
 
-        $result = $note->update([
-            'body' => $request->body,
-            'tags' => $request->tags
-        ]);
+        $result = $note->update($request->only(['body', 'tags', 'client_id', 'caregiver_id']));
 
         if ($result) {
             return new SuccessResponse('Note updated.', [], '/notes');

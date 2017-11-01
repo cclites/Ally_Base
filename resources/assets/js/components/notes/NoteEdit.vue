@@ -3,9 +3,27 @@
         <form @submit.prevent="saveNote()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Caregiver">
-                        <span v-if="note.caregiver">{{ note.caregiver.name }}</span>
-                        <span v-else>None</span>
+                    <b-form-group label="Caregiver" label-for="caregiver_id">
+                        <b-form-select
+                                id="caregiver_id"
+                                name="caregiver_id"
+                                v-model="form.caregiver_id"
+                        >
+                            <option value="">--Select--</option>
+                            <option :value="caregiver.id" v-for="caregiver in business.caregivers">{{ caregiver.name }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Client" label-for="client">
+                        <b-form-select
+                                id="client_id"
+                                name="client_id"
+                                v-model="form.client_id"
+                        >
+                            <option value="">--Select--</option>
+                            <option :value="client.id" v-for="client in business.clients">{{ client.name }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="client_id" text="Select a client."></input-help>
                     </b-form-group>
                     <b-form-group label="Tags" label-for="tags">
                         <b-form-input
@@ -20,16 +38,11 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Client">
-                        <span v-if="note.client">{{ note.client.name }}</span>
-                        <span v-else>None</span>
-                    </b-form-group>
-
                     <b-form-group label="Body" labe-for="body">
                         <b-form-textarea
                                 id="body"
                                 name="body"
-                                :rows="5"
+                                :rows="13"
                                 v-model="form.body"
                         >
                         </b-form-textarea>
@@ -47,7 +60,7 @@
 
 <script>
     export default {
-        props: ['note'],
+        props: ['note', 'business'],
 
         data() {
             return {
