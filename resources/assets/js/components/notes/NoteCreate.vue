@@ -42,7 +42,7 @@
                         <b-form-textarea
                                 id="body"
                                 name="body"
-                                :rows="5"
+                                :rows="13"
                                 v-model="form.body"
                         >
                         </b-form-textarea>

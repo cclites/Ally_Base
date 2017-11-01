@@ -54,7 +54,7 @@
             </b-col>
 
             <b-col lg="2">
-                <b-button @click="filter" variant="primary">
+                <b-button @click="filter" variant="info">
                     Filter
                 </b-button>
             </b-col>
@@ -79,8 +79,8 @@
                     <span v-if="data.item.client">{{ data.item.client.name }}</span>
                 </template>
                 <template slot="action" scope="data">
-                    <a class="btn btn-primary" :href="'/notes/' + data.item.id + '/edit'">
-                        <i class="fa fa-wrench"></i>
+                    <a class="btn btn-secondary" :href="'/notes/' + data.item.id + '/edit'">
+                        <i class="fa fa-edit"></i>
                     </a>
                 </template>
             </b-table>

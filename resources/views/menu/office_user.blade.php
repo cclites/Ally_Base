@@ -43,6 +43,6 @@
     <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="/notes">Notes</a></li>
-        <li><a href="/notes/create">Add Notes</a></li>
+        <li><a href="/notes/create">Add Note</a></li>
     </ul>
 </li>
