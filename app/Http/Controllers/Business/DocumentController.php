@@ -21,6 +21,8 @@ class DocumentController extends BaseController
     /**
      * Upload and save new document.
      * TODO: add validation and error checking
+     * @param Request $request
+     * @return SuccessResponse
      */
     public function store(Request $request)
     {
@@ -31,6 +33,7 @@ class DocumentController extends BaseController
             'filename' => $file->hashName(),
             'original_filename' => $file->getClientOriginalName(),
             'type' => $request->input('type'),
+            'description' => $request->description
         ]);
         return new SuccessResponse('Document uploaded.');
     }
