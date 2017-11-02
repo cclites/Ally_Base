@@ -72,7 +72,7 @@
                     <div class="card">
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
-                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :caregiver="{{ $caregiver }}" />
+                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submitUrl="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
                         </div>
                     </div>
                 </div>

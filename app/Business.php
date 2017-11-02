@@ -19,6 +19,11 @@ class Business extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
+    public function paymentAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'payment_account_id');
+    }
+
     public function activities()
     {
         return $this->hasMany(Activity::class)
