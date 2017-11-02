@@ -24,7 +24,7 @@ Route::get('/reconfirm/{encrypted_id}', 'ConfirmationController@reconfirm')->nam
 Route::post('/reconfirm/{encrypted_id}', 'ConfirmationController@store')->name('reconfirm.store');
 
 Auth::routes();
-Route::get('/logout', 'App\Http\Controllers\Auth\LoginController@logout');
+Route::get('/logout', 'Auth\LoginController@logout');
 
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/home', 'HomeController@index')->name('home');
