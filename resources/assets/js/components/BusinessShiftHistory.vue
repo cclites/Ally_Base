@@ -123,10 +123,10 @@
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
-                            <tr>
+                            <!-- <tr>
                                 <th>Geocode</th>
                                 <td>{{ selectedItem.checked_in_latitude.slice(0,8) }},<br />{{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
-                            </tr>
+                            </tr> -->
                             <tr>
                                 <th>Distance</th>
                                 <td>{{ selectedItem.checked_in_distance }}m</td>
