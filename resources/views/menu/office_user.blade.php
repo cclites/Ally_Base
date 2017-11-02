@@ -56,5 +56,6 @@
         <li><a href="/notes/create">Add Note</a></li>
     </ul>
 </li>
+<li>
     <a class="has-arrow" href="/business/settings" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>
 </li>
