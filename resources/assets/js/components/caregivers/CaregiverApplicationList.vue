@@ -81,7 +81,7 @@
                     <span v-if="data.item.status">{{ data.item.status.name }}</span>
                 </template>
                 <template slot="action" scope="data">
-                    <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-default"><i class="fa fa-edit"></i></a>
+                    <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
                 </template>
             </b-table>
         </div>

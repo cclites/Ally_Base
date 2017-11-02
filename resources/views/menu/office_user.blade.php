@@ -45,3 +45,10 @@
         <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
     </ul>
 </li>
+<li>
+    <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="/notes">Notes</a></li>
+        <li><a href="/notes/create">Add Note</a></li>
+    </ul>
+</li>
