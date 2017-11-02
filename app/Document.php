@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\File;
 
 /**
  * Class Document
@@ -15,7 +17,20 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Document extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = ['id', 'user_id'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // remove the document from the file system after it is deleted
+        static::deleted(function ($document) {
+            File::delete($document->path());
+        });
+
+    }
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -33,4 +48,8 @@ class Document extends Model
     /// Other Methods
     ///////////////////////////////////////////
 
+    public function path()
+    {
+        return storage_path('app/documents/'.$this->filename);
+    }
 }

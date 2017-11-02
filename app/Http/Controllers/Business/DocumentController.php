@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Responses\ErrorResponse;
 use App\User;
 use App\Document;
 use Illuminate\Http\Request;
@@ -36,6 +37,18 @@ class DocumentController extends BaseController
             'description' => $request->description
         ]);
         return new SuccessResponse('Document uploaded.');
+    }
+
+    public function destroy(Document $document)
+    {
+        try {
+            if ($document->delete()) {
+                return new SuccessResponse('Document deleted.');
+            }
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+        }
+        return new ErrorResponse(500, 'Document failed to delete.');
     }
 
     /**

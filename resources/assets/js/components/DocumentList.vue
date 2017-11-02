@@ -21,6 +21,7 @@
                 <tr>
                     <th>File</th>
                     <th>Description</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,6 +34,11 @@
                     <td>
                         {{ document.description }}
                     </td>
+                    <td>
+                       <b-button @click="destroy(document.id)" variant="danger">
+                           <i class="fa fa-times"></i>
+                       </b-button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -43,6 +49,7 @@
     import _ from 'lodash';
     export default {
         props: ['initialDocuments', 'userId'],
+
         data() {
             return {
                 documents: _.orderBy(this.initialDocuments, 'updated_at', 'desc'),
@@ -50,10 +57,13 @@
                 description: ''
             };
         },
+
         methods: {
+
             setFile(file) {
                 this.file = file;
             },
+
             upload() {
                 let formData = new FormData();
                 formData.append('file', this.file);
@@ -67,12 +77,26 @@
                 });
                 form.post('/business/documents').then(this.refreshList);
             },
+
             refreshList() {
                 axios.get('/business/users/' + this.userId + '/documents')
                     .then((response) => {
                         this.documents = _.orderBy(response.data, 'updated_at', 'desc');
                     });
             },
+
+            destroy(id) {
+
+                if (confirm('Are you sure you want to delete this document?')) {
+                    axios.delete('/business/documents/' + id)
+                        .then(response => {
+                            this.refreshList();
+                        })
+                        .catch(error => {
+                            console.error(error.response);
+                        });
+                }
+            }
         },
     }
 </script>
