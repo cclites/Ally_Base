@@ -221,7 +221,7 @@
             <!-- item--><!--  <a href="" class="link" data-toggle="tooltip" title="Email"><i class="mdi mdi-gmail"></i></a> -->
             <!-- item--><a href="{{ url('/logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="mdi mdi-power"></i>
+                Logout
             </a> </div>
         <!-- End Bottom points-->
     </aside>
