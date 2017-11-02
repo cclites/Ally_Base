@@ -37,6 +37,7 @@
         <li><a href="/notes/create">Add Notes</a></li>
     </ul>
 </li>
+<li>
     <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.reports.payments') }}">Payment History</a></li>

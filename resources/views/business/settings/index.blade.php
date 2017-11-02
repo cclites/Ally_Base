@@ -26,7 +26,8 @@
                             border-variant="primary"
                             header-bg-variant="info"
                             header-text-variant="white">
-                        <bank-account-form :account="{{ json_encode(new stdClass()) }}" />
+
+                        <bank-account-form :account="{{ $business->bankAccount ? json_encode($business->bankAccount) : json_encode(new stdClass()) }}" :submit-url="'/business/settings/bank-account/deposit'" />
                     </b-card>
                 </div>
                 <div class="col-lg-6">
@@ -34,7 +35,7 @@
                             border-variant="primary"
                             header-bg-variant="info"
                             header-text-variant="white">
-                        <bank-account-form :account="{{ json_encode(new stdClass()) }}" />
+                        <bank-account-form :account="{{ $business->paymentAccount ? json_encode($business->paymentAccount) : json_encode(new stdClass()) }}" :submit-url="'/business/settings/bank-account/payment'" />
                     </b-card>
                 </div>
             </div>

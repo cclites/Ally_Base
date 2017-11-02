@@ -151,6 +151,7 @@
 
         methods: {
             submit() {
+                console.log('Submit URL' + this.submitUrl);
                 let component = this;
                 this.form.post(this.submitUrl)
                     .then(function(response) {
