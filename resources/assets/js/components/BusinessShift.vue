@@ -182,10 +182,10 @@
                             </tr>
                             </thead>
                             <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
-                            <tr>
+                            <!-- <tr>
                                 <th>Geocode</th>
                                 <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
-                            </tr>
+                            </tr> -->
                             <tr>
                                 <th>Distance</th>
                                 <td>{{ out_distance }}m</td>

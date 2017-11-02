@@ -4,7 +4,7 @@ export default {
             caregivers: [],
             clients: [],
             client_id: (this.client) ? this.client.id : null,
-            interval: 15, // number of minutes in between each time period
+            interval: 30, // number of minutes in between each time period
             daysOfWeek: {
                 'Sunday': 'su',
                 'Monday': 'mo',

@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'AllyMS') }}</title>
+    <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'Ally Management System') }}</title>
     @include('layouts.partials.head')
     @stack('head')
 </head>
@@ -221,7 +221,7 @@
             <!-- item--><!--  <a href="" class="link" data-toggle="tooltip" title="Email"><i class="mdi mdi-gmail"></i></a> -->
             <!-- item--><a href="{{ url('/logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="mdi mdi-power"></i>
+                Logout
             </a> </div>
         <!-- End Bottom points-->
     </aside>

@@ -60,12 +60,12 @@
                         </b-col>
                         <b-col xlg="4" lg="6" sm="12">
                             <b-form-group v-if="client.onboard_status=='needs_agreement'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Send Confirmation Email</b-button>
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Send Client Agreement via Email</b-button>
                             </b-form-group>
                             <b-form-group v-if="client.onboard_status=='emailed_reconfirmation'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Resend Confirmation</b-button>
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Resend Client Agreement via Email</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -101,6 +101,10 @@
                         </b-form-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                     </b-form-group>
+                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
+                        <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
+                        <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -120,6 +124,7 @@
         props: {
             'client': {},
             'lastStatusDate' : {},
+            'confirmUrl': {},
         },
 
         data() {

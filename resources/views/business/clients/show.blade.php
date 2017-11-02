@@ -30,7 +30,7 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Scheduling</a>
+            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
@@ -42,7 +42,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-edit :client="{{ $client }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
+                    <client-edit :client="{{ $client }}" confirm-url="{{ route('reconfirm.encrypted_id', [$client->getEncryptedKey()]) }}" last-status-date="{{ $lastStatusDate }}"></client-edit>
                 </div>
             </div>
         </div>
