@@ -117,6 +117,7 @@ Route::group([
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
+    Route::delete('documents/{document}', 'Business\DocumentController@destroy');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
