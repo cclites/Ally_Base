@@ -2,6 +2,7 @@ export default {
     data() {
         return {
             allyPct: 0.05,
+            carePlans: [],
             caregivers: [],
             clients: [],
             client_id: (this.client) ? this.client.id : null,
@@ -23,6 +24,10 @@ export default {
         };
     },
 
+    mounted() {
+        this.loadCarePlans();
+    },
+
     methods: {
         dayOfMonth(date) {
             return moment(date).format('Do');
@@ -31,6 +36,11 @@ export default {
         loadAllyPctFromClient(client_id) {
             let component = this;
             axios.get('/business/clients/' + client_id + '/ally_pct').then(response => component.allyPct = response.data.percentage);
+        },
+
+        loadCarePlans() {
+            let component = this;
+            axios.get('/business/care_plans').then(response => component.carePlans = response.data);
         },
 
         loadCaregivers() {

@@ -84,6 +84,7 @@ class ClientScheduleController extends BaseController
             'duration' => 'required|integer',
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('start_date'))],
+            'care_plan_id' => 'nullable|exists:care_plans,id',
             'caregiver_id' => 'nullable|integer',
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
@@ -137,6 +138,7 @@ class ClientScheduleController extends BaseController
             'duration' => 'required|integer',
             'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
             'bydays' => 'required_if:interval_type,weekly,biweekly',
+            'care_plan_id' => 'nullable|exists:care_plans,id',
             'caregiver_id' => 'nullable|integer',
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
@@ -223,6 +225,7 @@ class ClientScheduleController extends BaseController
             'start_date' => 'required|date',
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
+            'care_plan_id' => 'nullable|exists:care_plans,id',
             'caregiver_id' => 'nullable|integer',
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
@@ -230,15 +233,11 @@ class ClientScheduleController extends BaseController
             'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
+        // Correct $data for use in model
         $data['start_date'] = filter_date($data['start_date']);
+        $data['business_id'] = $this->business()->id;
 
-        $schedule = new Schedule([
-            'business_id' => $this->business()->id,
-            'notes' => $data['notes'] ?? null,
-            'caregiver_id' => $data['caregiver_id'] ?? null,
-            'caregiver_rate' => $data['caregiver_rate'] ?? null,
-            'provider_fee' => $data['provider_fee'] ?? null,
-        ]);
+        $schedule = new Schedule($data);
         $schedule->setSingleEvent($data['start_date'], $data['time'], $data['duration']);
         if ($client->schedules()->save($schedule)) {
             return new CreatedResponse('The single event has been created successfully.');
@@ -269,6 +268,7 @@ class ClientScheduleController extends BaseController
             'selected_date' => 'required|date',
             'time' => 'required|date_format:H:i:s',
             'duration' => 'required|integer',
+            'care_plan_id' => 'nullable|exists:care_plans,id',
             'caregiver_id' => 'nullable|integer',
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
@@ -276,8 +276,10 @@ class ClientScheduleController extends BaseController
             'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
+        // Correct $data for use in model
         $selected_date = filter_date($data['selected_date']);
         unset($data['selected_date']);
+        $data['business_id'] = $this->business()->id;
 
         if ($schedule->isSingle()) {
             $schedule->fill($data);
@@ -290,18 +292,13 @@ class ClientScheduleController extends BaseController
         try {
             DB::beginTransaction();
 
-            if (!$schedule->createException($data['selected_date'])) {
+            if (!$schedule->createException($selected_date)) {
                 throw new \Exception('Schedule exception creation failed.');
             }
 
             $newSchedule = $schedule->replicate(['id', 'rrule']);
-            $newSchedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
-            $newSchedule->fill([
-                'caregiver_id' => $data['caregiver_id'] ?? null,
-                'caregiver_rate' => $data['caregiver_rate'] ?? null,
-                'provider_fee' => $data['provider_fee'] ?? null,
-                'notes' => $data['notes'] ?? null,
-            ]);
+            $newSchedule->fill($data);
+            $newSchedule->setSingleEvent($selected_date, $data['time'], $data['duration']);
             if (!$newSchedule->save()) {
                 throw new \Exception('Unable to create new single event after exception.');
             }
@@ -311,7 +308,7 @@ class ClientScheduleController extends BaseController
         }
         catch(\Exception $e) {
             DB::rollBack();
-            return new ErrorResponse(500, 'Unable to update selected date.');
+            return new ErrorResponse(500, 'Unable to update selected date.' . $e->getMessage());
         }
     }
 

@@ -75,6 +75,21 @@
                 </b-row>
                 <b-row>
                     <b-col sm="12">
+                        <b-form-group label="Care Plan" label-for="care_plan_id">
+                            <b-form-select
+                                id="care_plan_id"
+                                name="care_plan_id"
+                                v-model="form.care_plan_id"
+                                >
+                                <option value="">--No Care Plan--</option>
+                                <option v-for="plan in carePlans" :value="plan.id">{{ plan.name }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="care_plan_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="12">
                         <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                             <b-form-select
                                     id="caregiver_id"
@@ -251,6 +266,7 @@
                     start_date: this.selectedEvent.format(this.display.date_format),
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
+                    care_plan_id: null,
                     caregiver_id: null,
                     notes: null,
                     caregiver_rate: null,
@@ -267,6 +283,7 @@
                     duration: 60,
                     interval_type: null,
                     bydays: [],
+                    care_plan_id: null,
                     caregiver_id: null,
                     notes: null,
                     caregiver_rate: null,

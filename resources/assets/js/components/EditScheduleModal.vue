@@ -81,6 +81,21 @@
                     </b-row>
                     <b-row>
                         <b-col sm="12">
+                            <b-form-group label="Care Plan" label-for="care_plan_id">
+                                <b-form-select
+                                        id="care_plan_id"
+                                        name="care_plan_id"
+                                        v-model="form.care_plan_id"
+                                >
+                                    <option value="">--No Care Plan--</option>
+                                    <option v-for="plan in carePlans" :value="plan.id">{{ plan.name }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="care_plan_id" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col sm="12">
                             <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                                 <b-form-select
                                         id="caregiver_id"
@@ -279,6 +294,7 @@
                     selected_date: moment(this.selectedEvent.start).format(this.display.date_format),
                     time: moment(this.selectedEvent.start).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
+                    care_plan_id: this.selectedSchedule.care_plan_id,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
                     caregiver_rate: (this.selectedSchedule.caregiver_rate) ? this.selectedSchedule.caregiver_rate : this.selectedCaregiver.pivot.caregiver_hourly_rate,
@@ -295,6 +311,7 @@
                     duration: this.selectedSchedule.duration,
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
+                    care_plan_id: this.selectedSchedule.care_plan_id,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
                     caregiver_rate: (this.selectedSchedule.caregiver_rate) ? this.selectedSchedule.caregiver_rate : this.selectedCaregiver.pivot.caregiver_hourly_rate,

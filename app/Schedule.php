@@ -67,6 +67,11 @@ class Schedule extends Model
         return $this->hasMany(Shift::class);
     }
 
+    public function carePlan()
+    {
+        return $this->belongsTo(CarePlan::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
