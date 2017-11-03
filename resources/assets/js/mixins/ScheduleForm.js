@@ -136,7 +136,16 @@ export default {
     },
 
     watch: {
-        'form.caregiver_id': function() {
+        'form.caregiver_id': function(val, old_val) {
+            if (this.selectedSchedule) {
+                // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
+                if (this.selectedSchedule.caregiver_id == val) {
+                    this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
+                    this.form.provider_fee = this.selectedSchedule.provider_fee
+                    return;
+                }
+            }
+
             this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
             this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
         },
