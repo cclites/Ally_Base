@@ -83,8 +83,9 @@ class CaregiverController extends BaseController
 //        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
         $caregiver->load(['user.documents', 'bankAccount']);
         $schedules = $caregiver->schedules()->get();
+        $business = $caregiver->businesses()->first();
 
-        return view('business.caregivers.show', compact('caregiver', 'schedules'));
+        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
     /**

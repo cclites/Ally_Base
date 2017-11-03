@@ -29,9 +29,11 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
-        </li>
+        @if($business->scheduling)
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+            </li>
+        @endif
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>

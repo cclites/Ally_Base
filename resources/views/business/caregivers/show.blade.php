@@ -23,9 +23,11 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
-        </li>
+        @if ($business->scheduling)
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+            </li>
+        @endif
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
