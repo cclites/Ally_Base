@@ -269,7 +269,7 @@
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
                 });
-                deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
+                deleteForm.post('/business/clients/' + component.client_id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
                     .then(function(response) {
                         component.refreshEvents();
                     });
@@ -283,7 +283,7 @@
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
                 });
-                deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + this.selectedSchedule.id + '/delete')
+                deleteForm.post('/business/clients/' + component.client_id + '/schedule/' + this.selectedSchedule.id + '/delete')
                     .then(function(response) {
                         component.refreshEvents();
                     });
