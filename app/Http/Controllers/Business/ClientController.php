@@ -12,6 +12,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
+use App\Scheduling\AllyFeeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -234,5 +235,11 @@ class ClientController extends BaseController
         $client->onboardStatusHistory()->save($history);
 
         return new SuccessResponse('Email Sent to Client');
+    }
+
+    public function getAllyPercentage($client_id)
+    {
+        $client = Client::findOrFail($client_id);
+        return ['percentage' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)];
     }
 }

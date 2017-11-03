@@ -89,27 +89,15 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col sm="12">
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="rate_override" v-model="overrideRate" value="1">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Override Default Rates?</span>
-                            </label>
-                        </div>
-                    </b-col>
-                </b-row>
-                <b-row v-if="overrideRate">
                     <b-col sm="6">
                         <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
                             <b-form-input
-                                id="caregiver_rate"
-                                name="caregiver_rate"
-                                type="number"
-                                step="any"
-                                v-model="form.caregiver_rate"
-                                :placeholder="selectedCaregiver.pivot.caregiver_hourly_rate"
-                                >
+                                    id="caregiver_rate"
+                                    name="caregiver_rate"
+                                    type="number"
+                                    step="any"
+                                    v-model="form.caregiver_rate"
+                            >
                             </b-form-input>
                             <input-help :form="form" field="caregiver_rate" text=""></input-help>
                         </b-form-group>
@@ -122,10 +110,19 @@
                                     type="number"
                                     step="any"
                                     v-model="form.provider_fee"
-                                    :placeholder="selectedCaregiver.pivot.provider_hourly_fee"
                             >
                             </b-form-input>
                             <input-help :form="form" field="provider_fee" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col sm="6">
+                        <b-form-group label="Ally Fee" label-for="ally_fee">
+                            {{ allyFee }}
+                        </b-form-group>
+                    </b-col>
+                    <b-col sm="6">
+                        <b-form-group label="Total Rate" label-for="ally_fee">
+                            {{ totalRate }}
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -209,7 +206,6 @@
             return {
                 createModel: this.model,
                 createType: null,
-                form: new Form(),
             }
         },
 
@@ -294,6 +290,7 @@
                 else this.makeCreateRecurringForm()
             },
             client_id(val) {
+                this.loadAllyPctFromClient(val);
                 this.loadCaregivers();
             }
         },

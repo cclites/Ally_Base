@@ -1,6 +1,7 @@
 export default {
     data() {
         return {
+            allyPct: 0.05,
             caregivers: [],
             clients: [],
             client_id: (this.client) ? this.client.id : null,
@@ -18,13 +19,18 @@ export default {
                 date_format: 'MM/DD/YYYY',
                 time_format: 'h:mm A',
             },
-            overrideRate: false,
+            form: new Form({caregiver_id: null}),
         };
     },
 
     methods: {
         dayOfMonth(date) {
             return moment(date).format('Do');
+        },
+
+        loadAllyPctFromClient(client_id) {
+            let component = this;
+            axios.get('/business/clients/' + client_id + '/ally_pct').then(response => component.allyPct = response.data.percentage);
         },
 
         loadCaregivers() {
@@ -58,6 +64,22 @@ export default {
     },
 
     computed: {
+
+        allyFee() {
+            if (!parseFloat(this.form.caregiver_rate)) return null;
+            let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+            let providerHourlyFloat = parseFloat(this.form.provider_fee);
+            let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
+            return allyFee.toFixed(2);
+        },
+
+        totalRate() {
+            if (this.allyFee === null) return null;
+            let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+            let providerHourlyFloat = parseFloat(this.form.provider_fee);
+            let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
+            return totalRate.toFixed(2);
+        },
 
         startTimes() {
             let date = moment('01/01/2000 00:00:00');
@@ -99,16 +121,14 @@ export default {
             return {
                 pivot: {}
             };
-        }
+        },
 
     },
 
     watch: {
-        overrideRate(val) {
-            if (!val) {
-                this.form.caregiver_rate = null;
-                this.form.provider_fee = null;
-            }
+        'form.caregiver_id': function() {
+            this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
+            this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
         },
     }
 }
