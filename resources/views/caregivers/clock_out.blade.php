@@ -12,7 +12,7 @@
     </div>
     <div class="row">
         <div class="col-lg-6">
-            <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}"></clock-out>
+            <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}" :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"></clock-out>
         </div>
         <div class="col-lg-6">
             <div class="card">
