@@ -95,6 +95,7 @@ class ScheduleCreator
             'caregiver_id' => $this->data['caregiver_id'] ?? null,
             'caregiver_rate' => $this->data['caregiver_rate'] ?? null,
             'provider_fee' => $this->data['provider_fee'] ?? null,
+            'hours_type' => $this->data['hours_type'] ?? null,
         ];
     }
 

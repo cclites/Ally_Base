@@ -88,6 +88,7 @@ class ClientScheduleController extends BaseController
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ], [
             'bydays.required_if' => 'At least one day of the week is required.',
         ]);
@@ -140,6 +141,7 @@ class ClientScheduleController extends BaseController
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         list($data['selected_date'], $data['end_date']) = filter_dates($data['selected_date'], $data['end_date']);
@@ -225,6 +227,7 @@ class ClientScheduleController extends BaseController
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         $data['start_date'] = filter_date($data['start_date']);
@@ -270,18 +273,15 @@ class ClientScheduleController extends BaseController
             'caregiver_rate' => 'nullable|numeric',
             'provider_fee' => 'nullable|numeric',
             'notes' => 'nullable',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
-        $data['selected_date'] = filter_date($data['selected_date']);
+        $selected_date = filter_date($data['selected_date']);
+        unset($data['selected_date']);
 
         if ($schedule->isSingle()) {
-            $schedule->setSingleEvent($data['selected_date'], $data['time'], $data['duration']);
-            $schedule->fill([
-                'caregiver_id' => $data['caregiver_id'] ?? null,
-                'caregiver_rate' => $data['caregiver_rate'] ?? null,
-                'provider_fee' => $data['provider_fee'] ?? null,
-                'notes' => $data['notes'] ?? null,
-            ]);
+            $schedule->fill($data);
+            $schedule->setSingleEvent($selected_date, $data['time'], $data['duration']);
             $schedule->save();
             return new SuccessResponse('The selected date has been updated.', ['old_id' => $schedule->id, 'new_id' => $schedule->id]);
         }

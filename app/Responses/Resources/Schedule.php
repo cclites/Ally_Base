@@ -43,6 +43,7 @@ class Schedule implements Responsable
             'caregiver_rate' => $this->schedule->caregiver_rate,
             'provider_fee' => $this->schedule->provider_fee,
             'notes' => $this->schedule->notes,
+            'hours_type' => $this->schedule->hours_type,
         ];
     }
 

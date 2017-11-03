@@ -128,6 +128,22 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
+                        <b-form-group label="Special Designation" label-for="hours_type">
+                            <b-form-select
+                                    id="hours_type"
+                                    name="hours_type"
+                                    v-model="form.hours_type"
+                            >
+                                <option value="default">None - Regular</option>
+                                <option value="holiday">Holiday</option>
+                                <option value="overtime">Overtime</option>
+                            </b-form-select>
+                            <input-help :form="form" field="hours_type" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
                         <b-form-group label="Schedule Notes" label-for="notes">
                             <b-form-textarea
                                     id="notes"
@@ -239,6 +255,7 @@
                     notes: null,
                     caregiver_rate: null,
                     provider_fee: null,
+                    hours_type: 'default',
                 });
             },
 
@@ -254,6 +271,7 @@
                     notes: null,
                     caregiver_rate: null,
                     provider_fee: null,
+                    hours_type: 'default',
                 });
             },
 
