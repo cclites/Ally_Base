@@ -154,10 +154,12 @@ class ClientController extends BaseController
         }
 
         if ($client->update($data)) {
-            $history = new OnboardStatusHistory([
-                'status' => $data['onboard_status']
-            ]);
-            $client->onboardStatusHistory()->save($history);
+            if ($addOnboardRecord) {
+                $history = new OnboardStatusHistory([
+                    'status' => $data['onboard_status']
+                ]);
+                $client->onboardStatusHistory()->save($history);
+            }
 
             return new SuccessResponse('The client has been updated.');
         }
@@ -223,10 +225,14 @@ class ClientController extends BaseController
     public function sendConfirmationEmail($client_id)
     {
         $client = Client::findOrFail($client_id);
+        $status = 'emailed_reconfirmation';
 
         \Mail::to($client)->send(new ClientReconfirmation($client, $this->business()));
-        $history = new OnboardStatusHistory(['status' => 'emailed_reconfirmation']);
+
+        $client->update(['onboard_status' => $status]);
+        $history = new OnboardStatusHistory(compact('status'));
         $client->onboardStatusHistory()->save($history);
+
         return new SuccessResponse('Email Sent to Client');
     }
 }
