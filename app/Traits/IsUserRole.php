@@ -24,6 +24,17 @@ trait IsUserRole
         $this->appendSoftDeletesToFillable();
     }
 
+    public static function bootIsUserRole()
+    {
+        static::deleting(function(self $obj) {
+            $obj->addDeletedSuffixToEmail();
+        });
+
+        static::restoring(function(self $obj) {
+            return $obj->restoreOriginalEmail();
+        });
+    }
+
     protected function alwaysIncludeUserRelationship()
     {
         if (empty($this->with)) $this->with = ['user'];
@@ -34,11 +45,52 @@ trait IsUserRole
         $this->append(['firstname', 'lastname', 'email', 'name', 'nameLastFirst']);
     }
 
+    ///////////////////////////////////////////
+    /// Soft Delete Management
+    ///////////////////////////////////////////
+
+    /**
+     * Append deleted_at to the fillable property to make sure this attribute is updated on the Role Model
+     */
     protected function appendSoftDeletesToFillable()
     {
         if (!in_array('deleted_at', $this->fillable)) {
             $this->fillable[] = 'deleted_at';
         }
+    }
+
+    /**
+     * Change the user's email on deletion to allow user to be re-entered under another instance or client type (soft delete re-entry support)
+     */
+    public function addDeletedSuffixToEmail()
+    {
+        $newEmail = $this->user->email . '-deleted-' . time();
+        $this->user->update(['email' => $newEmail]);
+    }
+
+    /**
+     * Extend restore to check for a duplicate email and restore the email back to the original state
+     *
+     * @return bool
+     */
+    public function restoreOriginalEmail()
+    {
+        // Get original email
+        $deletedEmail = $this->user->email;
+        $deletedPosition = strpos($deletedEmail, '-deleted-');
+        if ($deletedPosition) {
+            $originalEmail = substr($deletedEmail, 0, $deletedPosition);
+        }
+
+        // Check for duplicate
+        if (User::where('email', $originalEmail)->exists()) {
+            return false;
+        }
+
+        if ($return = parent::restore()) {
+            $this->user->update(['email' => $originalEmail]);
+        }
+        return $return;
     }
 
     /**
