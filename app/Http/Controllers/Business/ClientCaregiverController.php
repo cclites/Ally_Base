@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
-use App\Responses\SuccessResponse;
+use App\Responses\Resources\ClientCaregiver;
 use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
@@ -29,8 +29,9 @@ class ClientCaregiverController extends BaseController
         $data = array_map('floatval', $data);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
-            $responseData = $client->caregivers->where('id', $caregiver_id)->first();
-            return new CreatedResponse('The caregiver assignment has been saved.', $responseData);
+            $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
+            $responseData = new ClientCaregiver($client, $caregiver);
+            return new CreatedResponse('The caregiver assignment has been saved.', $responseData->toResponse(null));
         }
 
         return new ErrorResponse(500, 'Unable to save caregiver assignment.');
@@ -42,9 +43,8 @@ class ClientCaregiverController extends BaseController
          */
         $client = $this->business()->clients()->where('id', $client_id)->firstOrFail();
 
-        $caregivers = $client->caregivers->map(function($caregiver) {
-            $caregiver->name = $caregiver->nameLastFirst();
-            return $caregiver;
+        $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
+            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
         });
         return $caregivers;
     }

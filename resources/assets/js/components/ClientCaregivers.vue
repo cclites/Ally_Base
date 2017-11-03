@@ -10,24 +10,31 @@
                 <thead>
                 <tr class="top-row">
                     <th rowspan="2">Assigned Caregiver</th>
-                    <th colspan="2" class="text-center hourly">Hourly</th>
-                    <!-- <th colspan="2" class="text-center daily">Daily</th> -->
+                    <th colspan="4" class="text-center hourly">Hourly</th>
+                    <!-- <th colspan="4" class="text-center daily">Daily</th> -->
                     <th rowspan="2"></th>
                 </tr>
                 <tr>
                     <th class="hourly">Caregiver Rate</th>
                     <th class="hourly">Provider Fee</th>
+                    <th class="hourly">Ally Fee</th>
+                    <th class="hourly">Total</th>
                     <!-- <th class="daily">Caregiver Rate</th> -->
                     <!-- <th class="daily">Provider Fee</th> -->
+                    <!-- <th class="daily">Ally Fee</th> -->
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-for="item in items">
-                    <td>{{ item.user.firstname }} {{ item.user.lastname }}</td>
+                    <td>{{ item.firstname }} {{ item.lastname }}</td>
                     <td class="hourly">{{ item.pivot.caregiver_hourly_rate }}</td>
                     <td class="hourly">{{ item.pivot.provider_hourly_fee }}</td>
+                    <td class="hourly">{{ item.pivot.ally_hourly_fee }}</td>
+                    <td class="hourly">{{ item.pivot.total_hourly_fee }}</td>
                     <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
                     <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
+                    <!--<td class="hourly">{{ item.pivot.ally_daily_fee }}</td>-->
+                    <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                     <td>
                         <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
                     </td>
@@ -191,7 +198,7 @@
     thead th {
         padding: .4rem .75rem !important;
     }
-    tr td:not(:first-child), tr th:not(:first-child) {
+    tr td.hourly, tr th.hourly {
         text-align: center;
     }
 </style>
