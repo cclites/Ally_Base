@@ -1,16 +1,22 @@
 <?php
-
 namespace App\Scheduling;
-
-
-use App\CreditCard;
 
 class CostCalculator
 {
     /**
      * Number of decimals to use in bcmath calculations
      */
-    const DEFAULT_SCALE = 2;
+    const DEFAULT_SCALE = 4;
+
+    /**
+     * Number of decimals to use in rounding
+     */
+    const DECIMAL_PLACES = 2;
+
+    /**
+     * Rounding methodology
+     */
+    const ROUNDING_METHOD = PHP_ROUND_HALF_UP;
 
     /**
      * @var \App\BankAccount|\App\CreditCard
@@ -51,7 +57,11 @@ class CostCalculator
         if ($this->shift->all_day) {
             return round($this->shift->provider_fee, self::DEFAULT_SCALE);
         }
-        return bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE);
+        return round(
+            bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
+        );
     }
 
     public function getCaregiverCost()
@@ -59,15 +69,23 @@ class CostCalculator
         if ($this->shift->all_day) {
             return round($this->shift->caregiver_rate, self::DEFAULT_SCALE);
         }
-        return bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        return round(
+            bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
+        );
     }
 
     public function getTotalCost()
     {
-        return bcadd(
-            bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
-            $this->getAllyFee(),
-            self::DEFAULT_SCALE
+        return round(
+            bcadd(
+                bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
+                $this->getAllyFee(),
+                self::DEFAULT_SCALE
+            ),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
         );
     }
 }

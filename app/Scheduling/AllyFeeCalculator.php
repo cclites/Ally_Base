@@ -45,11 +45,15 @@ class AllyFeeCalculator
                 break;
         }
 
-        return round(bcmul(
-            $paymentAmount,
-            $pct,
-            4
-        ), CostCalculator::DEFAULT_SCALE);
+        return round(
+            bcmul(
+                $paymentAmount,
+                $pct,
+                CostCalculator::DEFAULT_SCALE
+            ),
+            CostCalculator::DECIMAL_PLACES,
+            CostCalculator::ROUNDING_METHOD
+        );
     }
 
 }
