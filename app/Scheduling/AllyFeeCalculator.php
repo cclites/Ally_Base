@@ -27,6 +27,26 @@ class AllyFeeCalculator
             throw new \Exception('Client type ' . $client->client_type . ' is not supported at this time.');
         }
 
+        $pct = self::getPercentage($client, $paymentMethod);
+
+        return round(
+            bcmul(
+                $paymentAmount,
+                $pct,
+                CostCalculator::DEFAULT_SCALE
+            ),
+            CostCalculator::DECIMAL_PLACES,
+            CostCalculator::ROUNDING_METHOD
+        );
+    }
+
+    /**
+     * Return a float of the percentage used for the Ally Fee (5% is returned as 0.05)
+     *
+     * @return float
+     */
+    public static function getPercentage(Client $client, $paymentMethod)
+    {
         $pct = config('ally.bank_account_fee');
         switch($client->client_type) {
             case 'private_pay':
@@ -44,16 +64,7 @@ class AllyFeeCalculator
                 $pct = config('ally.medicaid_fee');
                 break;
         }
-
-        return round(
-            bcmul(
-                $paymentAmount,
-                $pct,
-                CostCalculator::DEFAULT_SCALE
-            ),
-            CostCalculator::DECIMAL_PLACES,
-            CostCalculator::ROUNDING_METHOD
-        );
+        return $pct;
     }
 
 }
