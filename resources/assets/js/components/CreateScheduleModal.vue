@@ -154,6 +154,9 @@
                                 <option value="overtime">Overtime</option>
                             </b-form-select>
                             <input-help :form="form" field="hours_type" text=""></input-help>
+                            <small class="form-text text-info" v-if="specialHoursChange">
+                                Be sure to update the caregiver's rates to reflect this special designation.
+                            </small>
                         </b-form-group>
                     </b-col>
                 </b-row>

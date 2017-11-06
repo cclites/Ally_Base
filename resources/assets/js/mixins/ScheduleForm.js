@@ -21,6 +21,7 @@ export default {
                 time_format: 'h:mm A',
             },
             form: new Form({caregiver_id: null}),
+            specialHoursChange: false,
         };
     },
 
@@ -149,5 +150,14 @@ export default {
             this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
             this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
         },
+        'form.hours_type': function(val, old_val) {
+            if (old_val === 'default') {
+                if (val === 'holiday' || val === 'overtime') {
+                    this.specialHoursChange = true;
+                    return;
+                }
+            }
+            this.specialHoursChange = false;
+        }
     }
 }
