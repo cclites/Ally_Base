@@ -113,7 +113,7 @@ class ClientController extends BaseController
 
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
-        $business = $client->business;
+        $business = $this->business();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
