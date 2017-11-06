@@ -50,7 +50,8 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required_unless:no_email,1|email|unique:users',
+            'email' => 'required_unless:no_email,1|email',
+            'username' => 'required|unique:users',
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
             'password' => 'required|confirmed',
@@ -118,7 +119,8 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => ['required_unless:no_email,1', 'email', Rule::unique('users')->ignore($caregiver->id)],
+            'email' => 'required_unless:no_email,1|email',
+            'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
         ]);
