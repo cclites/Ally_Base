@@ -44,41 +44,41 @@
         </b-row>
 
         <!-- Details modal -->
-        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal">
+        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
             <b-container fluid>
                 <h4>Shift</h4>
-                <b-row>
-                    <b-col sm="12">
-                        <b-form-group label="Client" label-for="">
-                            {{ selectedItem.client_name }}
-                        </b-form-group>
-                        <b-form-group label="Caregiver" label-for="">
-                            {{ selectedItem.caregiver_name }}
-                        </b-form-group>
-                        <b-form-group label="Clock In Time" label-for="checked_in_time">
-                            <b-form-input
-                                id="checked_in_time"
-                                name="checked_in_time"
-                                type="text"
-                                v-model="selectedItem.checked_in_time"
-                                disabled
-                                >
-                            </b-form-input>
-                            <!--<input-help :form="form" field="checked_in_time" text=""></input-help>-->
-                        </b-form-group>
-                        <b-form-group label="Clock Out Time" label-for="checked_out_time">
-                            <b-form-input
-                                    id="checked_out_time"
-                                    name="checked_out_time"
-                                    type="text"
-                                    v-model="selectedItem.checked_out_time"
-                                    disabled
-                            >
-                            </b-form-input>
-                            <!--<input-help :form="form" field="checked_out_time" text=""></input-help>-->
-                        </b-form-group>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Client</strong><br />
+                        {{ selectedItem.client_name }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Caregiver</strong><br />
+                        {{ selectedItem.caregiver_name }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Clocked In Time</strong><br />
+                        {{ selectedItem.checked_in_time }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Clocked Out Time</strong><br />
+                        {{ selectedItem.checked_out_time }}
                     </b-col>
                </b-row>
+                <b-row class="with-padding-bottom" v-if="selectedItem.schedule && selectedItem.schedule.notes">
+                    <b-col sm="12">
+                        <strong>Schedule Notes</strong><br />
+                        {{ selectedItem.schedule.notes }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="12">
+                        <strong>Caregiver Comments</strong><br />
+                        {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
+                    </b-col>
+                </b-row>
                 <h4>Issues on Shift</h4>
                 <b-row>
                     <b-col sm="12">

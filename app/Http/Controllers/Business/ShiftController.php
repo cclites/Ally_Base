@@ -14,7 +14,7 @@ class ShiftController extends BaseController
 {
     public function show(Request $request, $shift_id)
     {
-        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
+        $shift = Shift::with(['activities', 'issues', 'schedule'])->findOrFail($shift_id);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
