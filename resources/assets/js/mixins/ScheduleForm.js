@@ -151,7 +151,7 @@ export default {
             this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
         },
         'form.hours_type': function(val, old_val) {
-            if (old_val === 'default') {
+            if (old_val) {
                 if (val === 'holiday' || val === 'overtime') {
                     this.specialHoursChange = true;
                     return;
