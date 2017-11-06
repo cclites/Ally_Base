@@ -42,7 +42,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'name', 'nameLastFirst']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'name', 'nameLastFirst']);
     }
 
     ///////////////////////////////////////////
