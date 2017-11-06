@@ -42,6 +42,7 @@ class ImportPaychexCaregivers extends BaseImport
         for($row=2; $row<$lastRow; $row++) {
 
             $paychexId = $this->getValue($objPHPExcel, 'Paychex ID', $row);
+            $this->output->writeln("Row $row. Paychex ID: $paychexId.");
             if ($paychexId) {
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
                 $data['lastname'] = $this->getValue($objPHPExcel, 'Last Name', $row);
