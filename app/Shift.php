@@ -28,7 +28,7 @@ class Shift extends Model
 
     public function getRoundedShiftLengthAttribute()
     {
-        return number_format(floor(round($this->duration() * 4)) / 4, 2);
+        return $this->duration();
     }
 
     //////////////////////////////////////
@@ -94,14 +94,14 @@ class Shift extends Model
     public function duration()
     {
         $date1 = new Carbon($this->checked_in_time);
-
         if ($this->checked_out_time) {
             $date2 = new Carbon($this->checked_out_time);
         } else {
             $date2 = new Carbon();
         }
 
-        return round($date1->diffInMinutes($date2) / 60, 2);
+        $duration = round($date1->diffInMinutes($date2) / 60, 2);
+        return number_format(floor(round($duration * 4)) / 4, 2);
     }
 
     /**
