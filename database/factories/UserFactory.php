@@ -15,10 +15,12 @@ use Faker\Generator as Faker;
 
 if (!function_exists('userFactory')) {
     function userFactory(Faker $faker) {
+        $email = $faker->unique()->safeEmail;
         return [
             'firstname' => $faker->firstName,
             'lastname' => $faker->lastName,
-            'email' => $faker->unique()->safeEmail,
+            'email' => $email,
+            'username' => $email,
             'password' => $password = bcrypt('demo'),
             'remember_token' => str_random(10),
             'date_of_birth' => $faker->date('Y-m-d', '-20 years'),
@@ -82,6 +84,7 @@ $factory->define(\App\CreditCard::class, function(Faker $faker) {
 $factory->define(\App\BankAccount::class, function(Faker $faker) {
     return [
         'nickname' => $faker->streetName,
+        'name_on_account' => $faker->streetName,
         'routing_number' => $faker->bankAccountNumber,
         'account_number' => $faker->bankAccountNumber,
         'account_type' => 'Checking',
