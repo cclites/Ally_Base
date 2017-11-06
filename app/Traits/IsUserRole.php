@@ -159,6 +159,11 @@ trait IsUserRole
         return $this->user->email;
     }
 
+    public function getUsernameAttribute()
+    {
+        return $this->user->username;
+    }
+
     public function getNameAttribute()
     {
         return $this->name();
