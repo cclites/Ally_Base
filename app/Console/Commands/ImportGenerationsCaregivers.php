@@ -32,8 +32,8 @@ class ImportGenerationsCaregivers extends BaseImport
     public function handle()
     {
         $business = Business::findOrFail($this->argument('business_id'));
-        $this->output->writeln('Importing caregivers into ' . $business->name . ' in 2 seconds (Hit CTRL+C to cancel)..');
-        sleep(2);
+        $this->output->writeln('Importing caregivers into ' . $business->name . ' in 5 seconds (Hit CTRL+C to cancel)..');
+        sleep(5);
 
         $objPHPExcel = $this->loadSheet();
 
@@ -107,7 +107,7 @@ class ImportGenerationsCaregivers extends BaseImport
                     }
                 }
                 catch(\Exception $e) {
-                    dd($phone1, $phone2);
+
                 }
             }
 
