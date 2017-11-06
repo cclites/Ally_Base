@@ -143,13 +143,13 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
-                        <b-form-group label="Special Designation" label-for="hours_type">
+                        <b-form-group label="Special Shift Designation" label-for="hours_type">
                             <b-form-select
                                     id="hours_type"
                                     name="hours_type"
                                     v-model="form.hours_type"
                             >
-                                <option value="default">None - Regular</option>
+                                <option value="default">None - Regular Shift</option>
                                 <option value="holiday">Holiday</option>
                                 <option value="overtime">Overtime</option>
                             </b-form-select>
