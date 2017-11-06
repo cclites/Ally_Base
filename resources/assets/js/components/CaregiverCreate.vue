@@ -69,6 +69,7 @@
                                         type="email"
                                         v-model="form.email"
                                         :disabled="form.no_email"
+                                        @change="copyEmailToUsername()"
                                 >
                                 </b-form-input>
                             </b-col>
@@ -83,6 +84,16 @@
                             </b-col>
                         </b-row>
                         <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Username" label-for="username">
+                        <b-form-input
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Password" label-for="password">
                         <b-form-input
@@ -125,6 +136,7 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    username: null,
                     date_of_birth: null,
                     ssn: null,
                     password: null,
@@ -139,6 +151,12 @@
         },
 
         methods: {
+
+            copyEmailToUsername() {
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
+            },
 
             saveProfile() {
                 this.form.post('/business/caregivers');

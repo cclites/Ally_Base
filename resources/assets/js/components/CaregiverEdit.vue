@@ -64,6 +64,16 @@
                         </b-row>
                         <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
                     </b-form-group>
+                    <b-form-group label="Username" label-for="username">
+                        <b-form-input
+                            id="username"
+                            name="username"
+                            type="text"
+                            v-model="form.username"
+                            >
+                        </b-form-input>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                    </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <b-form-input
                                 id="date_of_birth"
@@ -98,6 +108,7 @@
                     firstname: this.caregiver.firstname,
                     lastname: this.caregiver.lastname,
                     email: this.caregiver.email,
+                    username: this.caregiver.username,
                     title: this.caregiver.title,
                     date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
                     no_email: false,
