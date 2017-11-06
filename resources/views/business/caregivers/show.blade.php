@@ -59,7 +59,7 @@
         <div class="tab-pane" id="phones" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Work Number" type="evv" action="{{ route('business.caregivers.phone', [$caregiver->id, 'work']) }}" :phone="{{ json_phone($caregiver->user, 'work') }}"></phone-number>
+                    <phone-number title="Cell Number" type="evv" action="{{ route('business.caregivers.phone', [$caregiver->id, 'work']) }}" :phone="{{ json_phone($caregiver->user, 'work') }}"></phone-number>
                 </div>
                 <div class="col-lg-6 col-sm-12">
                     <phone-number title="Home Number" type="billing" action="{{ route('business.caregivers.phone', [$caregiver->id, 'home']) }}" :phone="{{ json_phone($caregiver->user, 'home') }}"></phone-number>
