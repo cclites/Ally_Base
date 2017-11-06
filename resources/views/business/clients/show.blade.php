@@ -23,9 +23,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care-plan" role="tab">Care Plan</a>
-        </li>
+        </li> -->
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
