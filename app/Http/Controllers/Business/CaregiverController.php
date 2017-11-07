@@ -222,4 +222,19 @@ class CaregiverController extends BaseController
         }
         return new ErrorResponse(500, 'The bank account could not be saved.');
     }
+
+    public function changePassword(Request $request, Caregiver $caregiver) {
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $request->validate([
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        if ($caregiver->user->changePassword($request->input('password'))) {
+            return new SuccessResponse('The caregiver\'s password has been updated.');
+        }
+        return new ErrorResponse(500, 'Unable to update caregiver password.');
+    }
 }
