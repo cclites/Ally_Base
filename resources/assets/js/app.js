@@ -16,6 +16,8 @@ window.Countries = Countries;
 
 window.Vue = require('vue');
 
+// Vue Third Party Components
+
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
@@ -29,18 +31,39 @@ Vue.use(BootstrapVue);
  */
 
 // App Components
+Vue.component('date-picker', require('./components/DatePicker.vue'));
+Vue.component('time-picker', require('./components/TimePicker.vue'));
+
+
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
+// Admin
+Vue.component('business-create', require('./components/BusinessCreate.vue'));
+Vue.component('business-edit', require('./components/BusinessEdit.vue'));
+Vue.component('business-list', require('./components/BusinessList.vue'));
+
+// Office User
+Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
+Vue.component('business-exception', require('./components/BusinessException.vue'));
+Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
+Vue.component('business-issue-modal', require('./components/BusinessIssueModal.vue'));
 Vue.component('business-medicaid-report-caregivers', require('./components/BusinessMedicaidReportCaregivers.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
+Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
+Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
+
+Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
+Vue.component('care-plan-list', require('./components/CarePlanList.vue'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
+Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 
@@ -76,11 +99,23 @@ Vue.component('message', require('./components/Message.vue'));
 
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 
+Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
+
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
+
+Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 Vue.component('document-list', require('./components/DocumentList.vue'));
+// notes
+Vue.component('note-create', require('./components/notes/NoteCreate'));
+Vue.component('note-list', require('./components/notes/NoteList'));
+Vue.component('note-edit', require('./components/notes/NoteEdit'));
+// caregiver applications
+Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
+Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
+Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

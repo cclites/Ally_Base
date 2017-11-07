@@ -113,8 +113,7 @@
 <script>
     export default {
         props: {
-            'caregiver': {},
-            'client': {},
+            'submitUrl': '',
             'account': {},
             'source': {},
         },
@@ -125,6 +124,7 @@
                 'months': [],
                 'years': [],
                 'form': new Form({
+                    // todo update defaults for bank account info
                     nickname: this.account.nickname,
                     name_on_account: this.account.name_on_account,
                     routing_number: (this.account.last_four) ? '*********' : '',
@@ -151,15 +151,9 @@
 
         methods: {
             submit() {
+                console.log('Submit URL' + this.submitUrl);
                 let component = this;
-                let url;
-                if (component.client) {
-                    url = '/business/clients/' + component.client.id + '/payment/' + component.source;
-                }
-                if (component.caregiver) {
-                    url = '/business/caregivers/' + component.caregiver.id + '/bank_account';
-                }
-                this.form.post(url)
+                this.form.post(this.submitUrl)
                     .then(function(response) {
                         component.form.account_number = '*****' + component.form.account_number.slice(-4);
                         component.form.account_number_confirmation = '';

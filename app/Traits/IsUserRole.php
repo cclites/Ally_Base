@@ -6,33 +6,133 @@ use App\BankAccount;
 use App\CreditCard;
 use App\PhoneNumber;
 use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
 {
+    use SoftDeletes;
+
+    /**
+     * IsUserRole constructor.
+     * @param array $attributes
+     */
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
+        $this->alwaysIncludeUserRelationship();
+        $this->appendAttributesToRoleModel();
+        $this->appendSoftDeletesToFillable();
+    }
+
+    public static function bootIsUserRole()
+    {
+        static::deleting(function(self $obj) {
+            $obj->addDeletedSuffixToEmail();
+        });
+
+        static::restoring(function(self $obj) {
+            return $obj->restoreOriginalEmail();
+        });
+    }
+
+    protected function alwaysIncludeUserRelationship()
+    {
         if (empty($this->with)) $this->with = ['user'];
     }
 
+    protected function appendAttributesToRoleModel()
+    {
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst']);
+    }
+
+    ///////////////////////////////////////////
+    /// Soft Delete Management
+    ///////////////////////////////////////////
+
+    /**
+     * Append deleted_at to the fillable property to make sure this attribute is updated on the Role Model
+     */
+    protected function appendSoftDeletesToFillable()
+    {
+        if (!in_array('deleted_at', $this->fillable)) {
+            $this->fillable[] = 'deleted_at';
+        }
+    }
+
+    /**
+     * Change the user's email on deletion to allow user to be re-entered under another instance or client type (soft delete re-entry support)
+     */
+    public function addDeletedSuffixToEmail()
+    {
+        $newEmail = $this->user->email . '-deleted-' . time();
+        $this->user->update(['email' => $newEmail]);
+    }
+
+    /**
+     * Extend restore to check for a duplicate email and restore the email back to the original state
+     *
+     * @return bool
+     */
+    public function restoreOriginalEmail()
+    {
+        // Get original email
+        $deletedEmail = $this->user->email;
+        $deletedPosition = strpos($deletedEmail, '-deleted-');
+        if ($deletedPosition) {
+            $originalEmail = substr($deletedEmail, 0, $deletedPosition);
+        }
+
+        // Check for duplicate
+        if (User::where('email', $originalEmail)->exists()) {
+            return false;
+        }
+
+        if ($return = parent::restore()) {
+            $this->user->update(['email' => $originalEmail]);
+        }
+        return $return;
+    }
+
+    /**
+     * Forward the magic getter to the related User model if property is not found in the Role model
+     *
+     * @param $name
+     * @return null
+     */
+    public function __get($name) {
+        $parentValue = parent::__get($name);
+        if ($parentValue === null) {
+            if (isset($this->attributes[$this->primaryKey])) return $this->user->$name ?? null;
+        }
+        return $parentValue;
+    }
+
+    /**
+     * Get the name of this Role (e.g. App\Client returns Client)
+     *
+     * @return string
+     */
     public function getRoleType()
     {
         return snake_case(class_basename(get_called_class()));
     }
+
+    ///////////////////////////////////////////
+    /// Related User
+    ///////////////////////////////////////////
 
     public function user()
     {
         return $this->belongsTo(User::class, 'id', 'id');
     }
 
+    ///////////////////////////////////////////
+    /// Name Concatenation Forwarders
+    ///////////////////////////////////////////
+
     public function name()
     {
         return $this->user->name();
-    }
-
-    public function getNameAttribute()
-    {
-        return $this->name();
     }
 
     public function nameLastFirst()
@@ -40,14 +140,56 @@ trait IsUserRole
         return $this->user->nameLastFirst();
     }
 
-    public function __get($name) {
-        $parentValue = parent::__get($name);
-        if ($parentValue === null) {
-             if (isset($this->attributes[$this->primaryKey])) return $this->user->$name ?? null;
-        }
-        return $parentValue;
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function getFirstNameAttribute()
+    {
+        return $this->user->firstname;
     }
 
+    public function getLastNameAttribute()
+    {
+        return $this->user->lastname;
+    }
+
+    public function getEmailAttribute()
+    {
+        return $this->user->email;
+    }
+
+    public function getUsernameAttribute()
+    {
+        return $this->user->username;
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->name();
+    }
+
+    public function getNameLastFirstAttribute()
+    {
+        return $this->nameLastFirst();
+    }
+
+    public function getDateOfBirthAttribute()
+    {
+        return $this->user->date_of_birth;
+    }
+
+    ///////////////////////////////////////////
+    /// Attribute Input Handling
+    ///////////////////////////////////////////
+
+    /**
+     * Simplifies the fill process to avoid checking against guarded attributes in the Role model
+     * This is needed because $fillable is used to define role attributes which the rest being forwarded to the related User model
+     *
+     * @param array $attributes
+     * @return $this
+     */
     public function fill(array $attributes = [])
     {
         foreach($attributes as $key => $value) {
@@ -56,6 +198,13 @@ trait IsUserRole
         return $this;
     }
 
+    /**
+     * Overridden Save Method to save $fillable attributes to the Role Model with the remaining attributes forwarded to the related User Model
+     *
+     * @param array $options
+     * @return mixed
+     * @throws \Exception
+     */
     public function save(array $options = [])
     {
         $this->setIncrementing(false);
@@ -86,9 +235,9 @@ trait IsUserRole
         return parent::save($options);
     }
 
-    /*
-     * Forward User Relationship Methods to User Model
-     */
+    ///////////////////////////////////////////
+    /// Forwarded Relationship Methods
+    ///////////////////////////////////////////
 
     public function addresses()
     {

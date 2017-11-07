@@ -8,6 +8,10 @@ class PaymentQueue extends Model
 {
     protected $table = 'payment_queue';
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function client()
     {
         return $this->belongsTo(Client::class);
@@ -32,4 +36,9 @@ class PaymentQueue extends Model
     {
         return $this->morphTo();
     }
+
+    ////////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
 }

@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Traits\Request\PaymentMethodUpdate;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -22,9 +23,12 @@ class CaregiverController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $caregivers = $this->business()->caregivers()->with(['user', 'addresses', 'phoneNumbers'])->get();
+        if ($request->expectsJson()) {
+            return $caregivers;
+        }
         return view('business.caregivers.index', compact('caregivers'));
     }
 
@@ -49,7 +53,8 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email|unique:users',
+            'email' => 'required_unless:no_email,1|email',
+            'username' => 'required|unique:users',
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
             'password' => 'required|confirmed',
@@ -59,7 +64,11 @@ class CaregiverController extends BaseController
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt($data['password']);
 
+
         $caregiver = new Caregiver($data);
+        if ($request->input('no_email')) {
+            $caregiver->setAutoEmail();
+        }
         if ($this->business()->caregivers()->save($caregiver)) {
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id], route('business.caregivers.show', [$caregiver->id]));
         }
@@ -70,7 +79,7 @@ class CaregiverController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Caregiver  $caregiver
+     * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
      */
     public function show(Caregiver $caregiver)
@@ -82,8 +91,9 @@ class CaregiverController extends BaseController
 //        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
         $caregiver->load(['user.documents', 'bankAccount']);
         $schedules = $caregiver->schedules()->get();
+        $business = $this->business();
 
-        return view('business.caregivers.show', compact('caregiver', 'schedules'));
+        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
     /**
@@ -113,12 +123,17 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($caregiver->id)],
+            'email' => 'required_unless:no_email,1|email',
+            'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+
+        if ($request->input('no_email')) {
+            $data['email'] = $caregiver->getAutoEmail();
+        }
 
         if ($caregiver->update($data)) {
             return new SuccessResponse('The caregiver has been updated.');
@@ -134,7 +149,20 @@ class CaregiverController extends BaseController
      */
     public function destroy(Caregiver $caregiver)
     {
-        //
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $events = $caregiver->getEvents(Carbon::now(), new Carbon('2100-01-01'));
+        if (count($events)) {
+            $event = current($events);
+            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $event['title'] . '.');
+        }
+
+        if ($caregiver->delete()) {
+            return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
+        }
+        return new ErrorResponse(500, 'Error archiving this caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)
@@ -193,5 +221,20 @@ class CaregiverController extends BaseController
             return new SuccessResponse('The bank account has been saved.');
         }
         return new ErrorResponse(500, 'The bank account could not be saved.');
+    }
+
+    public function changePassword(Request $request, Caregiver $caregiver) {
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $request->validate([
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        if ($caregiver->user->changePassword($request->input('password'))) {
+            return new SuccessResponse('The caregiver\'s password has been updated.');
+        }
+        return new ErrorResponse(500, 'Unable to update caregiver password.');
     }
 }

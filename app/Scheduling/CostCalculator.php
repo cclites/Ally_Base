@@ -1,16 +1,22 @@
 <?php
-
 namespace App\Scheduling;
-
-
-use App\CreditCard;
 
 class CostCalculator
 {
     /**
      * Number of decimals to use in bcmath calculations
      */
-    const DEFAULT_SCALE = 2;
+    const DEFAULT_SCALE = 4;
+
+    /**
+     * Number of decimals to use in rounding
+     */
+    const DECIMAL_PLACES = 2;
+
+    /**
+     * Rounding methodology
+     */
+    const ROUNDING_METHOD = PHP_ROUND_HALF_UP;
 
     /**
      * @var \App\BankAccount|\App\CreditCard
@@ -27,12 +33,6 @@ class CostCalculator
      */
     protected $shift;
 
-    /**
-     * Supported client types
-     * @var array
-     */
-    protected $clientTypes = ['private_pay', 'medicaid', 'LTCI', 'VA'];
-
     public function __construct($shift)
     {
         $this->shift = $shift;
@@ -48,33 +48,8 @@ class CostCalculator
 
     public function getAllyFee()
     {
-        if (!in_array($this->client->client_type, $this->clientTypes)) {
-            throw new \Exception('Client type ' . $this->client->client_type . ' is not supported at this time.');
-        }
-
-        $pct = config('ally.bank_account_fee');
-        switch($this->client->client_type) {
-            case 'private_pay':
-                if (!$this->paymentType) {
-                    $this->paymentType = $this->client->defaultPayment;
-                    if (!$this->paymentType) $this->paymentType = new CreditCard();
-                }
-                if ($this->paymentType instanceof CreditCard) {
-                    $pct = config('ally.credit_card_fee');
-                }
-                // Default is bank account, so no more logic necessary
-                break;
-            default:
-                // Medicaid fee is used for LTCI, VA, and Medicaid.  Expand the switch cases to add more.
-                $pct = config('ally.medicaid_fee');
-                break;
-        }
-
-        return bcmul(
-            bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
-            $pct,
-            self::DEFAULT_SCALE
-        );
+        $amount = bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE);
+        return AllyFeeCalculator::getFee($this->client, $this->paymentType, $amount);
     }
 
     public function getProviderFee()
@@ -82,7 +57,11 @@ class CostCalculator
         if ($this->shift->all_day) {
             return round($this->shift->provider_fee, self::DEFAULT_SCALE);
         }
-        return bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE);
+        return round(
+            bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
+        );
     }
 
     public function getCaregiverCost()
@@ -90,15 +69,23 @@ class CostCalculator
         if ($this->shift->all_day) {
             return round($this->shift->caregiver_rate, self::DEFAULT_SCALE);
         }
-        return bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        return round(
+            bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
+        );
     }
 
     public function getTotalCost()
     {
-        return bcadd(
-            bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
-            $this->getAllyFee(),
-            self::DEFAULT_SCALE
+        return round(
+            bcadd(
+                bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
+                $this->getAllyFee(),
+                self::DEFAULT_SCALE
+            ),
+            self::DECIMAL_PLACES,
+            self::ROUNDING_METHOD
         );
     }
 }

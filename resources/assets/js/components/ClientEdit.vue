@@ -42,33 +42,6 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text=""></input-help>
                     </b-form-group>
-                    <b-row>
-                        <b-col xlg="8" lg="6" sm="12">
-                            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
-                                <b-form-select
-                                        id="onboard_status"
-                                        name="onboard_status"
-                                        v-model="form.onboard_status"
-                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
-                                >
-                                    <option value="">--Select--</option>
-                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
-                                    <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
-                            </b-form-group>
-                        </b-col>
-                        <b-col xlg="4" lg="6" sm="12">
-                            <b-form-group v-if="client.onboard_status=='needs_agreement'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Send Confirmation Email</b-button>
-                            </b-form-group>
-                            <b-form-group v-if="client.onboard_status=='emailed_reconfirmation'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Confirmation Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Resend Confirmation</b-button>
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -80,6 +53,16 @@
                             >
                         </b-form-input>
                         <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                    </b-form-group>
+                    <b-form-group label="Username" label-for="username">
+                        <b-form-input
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <b-form-input
@@ -105,10 +88,54 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
+                    <hr />
+                </b-col>
+                <b-col lg="6">
+                    <b-row>
+                        <b-col xlg="8" lg="6" sm="12">
+                            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
+                                <b-form-select
+                                        id="onboard_status"
+                                        name="onboard_status"
+                                        v-model="form.onboard_status"
+                                        :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
+                                    <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xlg="4" lg="6" sm="12">
+                            <b-form-group v-if="client.onboard_status=='needs_agreement'">
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Send Client Agreement via Email</b-button>
+                            </b-form-group>
+                            <b-form-group v-if="client.onboard_status=='emailed_reconfirmation'">
+                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button  variant="info" @click="sendConfirmation()">Resend Client Agreement via Email</b-button>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
+                        <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
+                        <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
+                    <b-button variant="danger" @click="deleteClient()"><i class="fa fa-times"></i> Delete Client</b-button>
                 </b-col>
             </b-row>
         </form>
+
+        <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
     </b-card>
 </template>
 
@@ -119,19 +146,22 @@
         props: {
             'client': {},
             'lastStatusDate' : {},
+            'confirmUrl': {},
         },
 
         data() {
             return {
                 form: new Form({
-                    firstname: this.client.user.firstname,
-                    lastname: this.client.user.lastname,
-                    email: this.client.user.email,
-                    date_of_birth: moment(this.client.user.date_of_birth).format('L'),
+                    firstname: this.client.firstname,
+                    lastname: this.client.lastname,
+                    email: this.client.email,
+                    username: this.client.username,
+                    date_of_birth: moment(this.client.date_of_birth).format('L'),
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
                     onboard_status: this.client.onboard_status,
                 }),
+                passwordModal: false,
             }
         },
 
@@ -141,6 +171,7 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    username: null,
                     date_of_birth: null,
                     ssn: null,
                     onboard_status: null,
@@ -149,6 +180,13 @@
         },
 
         methods: {
+
+            deleteClient() {
+                let form = new Form();
+                if (confirm('Are you sure you wish to delete ' + this.client.name + '?')) {
+                    form.submit('delete', '/business/clients/' + this.client.id);
+                }
+            },
 
             saveProfile() {
                 let component = this;

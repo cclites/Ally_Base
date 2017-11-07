@@ -2,6 +2,7 @@
 
 namespace App\Scheduling;
 
+use App\Events\UnverifiedShiftCreated;
 use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
@@ -44,6 +45,8 @@ class ClockOut extends ClockBase
             }
         }
 
+        $verified = ($shift->verified && !$this->manual) ? true : false;
+
         $update = $shift->update([
             'checked_out_time' => Carbon::now(),
             'checked_out_latitude' => $this->latitude,
@@ -52,8 +55,12 @@ class ClockOut extends ClockBase
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,
             'mileage' => $this->mileage,
-            'verified' => ($shift->verified && !$this->manual) ? true : false,
+            'verified' => $verified,
         ]);
+
+        if (!$verified) {
+            event(new UnverifiedShiftCreated($shift));
+        }
 
         return $update;
     }

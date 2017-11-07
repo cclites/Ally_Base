@@ -46,7 +46,7 @@
                                 v-model="form.ssn"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
+                        <input-help :form="form" field="ssn" text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -61,14 +61,39 @@
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
                     <b-form-group label="Email Address" label-for="email">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="form.email"
+                                        :disabled="form.no_email"
+                                        @change="copyEmailToUsername()"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_email" v-model="form.no_email" value="1">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">No Email</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Username" label-for="username">
                         <b-form-input
-                            id="email"
-                            name="email"
-                            type="email"
-                            v-model="form.email"
-                            >
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                        >
                         </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Password" label-for="password">
                         <b-form-input
@@ -111,11 +136,13 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    username: null,
                     date_of_birth: null,
                     ssn: null,
                     password: null,
                     password_confirmation: null,
                     title: null,
+                    no_email: false,
                 })
             }
         },
@@ -124,6 +151,12 @@
         },
 
         methods: {
+
+            copyEmailToUsername() {
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
+            },
 
             saveProfile() {
                 this.form.post('/business/caregivers');

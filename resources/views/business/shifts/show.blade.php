@@ -1,0 +1,27 @@
+@extends('layouts.app')
+
+@section('title', 'Shift Details')
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
+    <li class="breadcrumb-item active">Shift Details</li>
+@endsection
+
+@section('content')
+    <div class="row">
+        <div class="col-lg-12">
+            <business-shift
+                :shift="{{ $shift }}"
+                :caregiver="{{ $shift->caregiver }}"
+                :client="{{ $shift->client }}"
+                in_distance="{{ $checked_in_distance }}"
+                out_distance="{{ $checked_out_distance }}"
+                :activities="{{ $activities OR '[]' }}"
+                :issues="{{ $shift->issues OR '[]' }}"
+                :caregivers="{{ $caregivers OR '[]' }}"
+                :clients="{{ $clients OR '[]' }}"
+            ></business-shift>
+        </div>
+    </div>
+@endsection

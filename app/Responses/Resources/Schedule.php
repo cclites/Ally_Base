@@ -38,11 +38,13 @@ class Schedule implements Responsable
             'bydays' => ($rrule) ? array_map(function($value) { return substr($value, -2); }, (array) $rule->bydays) : [],
             'bymonthdays' => ($rrule) ? $rule->bymonthdays : [],
             'client_id' => $this->schedule->client_id,
+            'care_plan_id' => $this->schedule->care_plan_id,
             'caregiver_id' => $this->schedule->caregiver_id,
             'business_id' => $this->schedule->business_id,
             'caregiver_rate' => $this->schedule->caregiver_rate,
             'provider_fee' => $this->schedule->provider_fee,
             'notes' => $this->schedule->notes,
+            'hours_type' => $this->schedule->hours_type,
         ];
     }
 

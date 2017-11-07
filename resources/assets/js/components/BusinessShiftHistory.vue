@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-row>
+        <b-row class="mb-2">
             <b-col lg="6">
             </b-col>
             <b-col lg="6" class="text-right">
@@ -28,7 +28,8 @@
                     </span>
                 </template>
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click.stop="details(row.item)">Details</b-btn>
+                    <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit &amp; Details</b-btn>
+                    <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
                 </template>
             </b-table>
         </div>
@@ -43,41 +44,41 @@
         </b-row>
 
         <!-- Details modal -->
-        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal">
+        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
             <b-container fluid>
                 <h4>Shift</h4>
-                <b-row>
-                    <b-col sm="12">
-                        <b-form-group label="Client" label-for="">
-                            {{ selectedItem.client_name }}
-                        </b-form-group>
-                        <b-form-group label="Caregiver" label-for="">
-                            {{ selectedItem.caregiver_name }}
-                        </b-form-group>
-                        <b-form-group label="Clock In Time" label-for="checked_in_time">
-                            <b-form-input
-                                id="checked_in_time"
-                                name="checked_in_time"
-                                type="text"
-                                v-model="selectedItem.checked_in_time"
-                                disabled
-                                >
-                            </b-form-input>
-                            <!--<input-help :form="form" field="checked_in_time" text=""></input-help>-->
-                        </b-form-group>
-                        <b-form-group label="Clock Out Time" label-for="checked_out_time">
-                            <b-form-input
-                                    id="checked_out_time"
-                                    name="checked_out_time"
-                                    type="text"
-                                    v-model="selectedItem.checked_out_time"
-                                    disabled
-                            >
-                            </b-form-input>
-                            <!--<input-help :form="form" field="checked_out_time" text=""></input-help>-->
-                        </b-form-group>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Client</strong><br />
+                        {{ selectedItem.client_name }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Caregiver</strong><br />
+                        {{ selectedItem.caregiver_name }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Clocked In Time</strong><br />
+                        {{ selectedItem.checked_in_time }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Clocked Out Time</strong><br />
+                        {{ selectedItem.checked_out_time }}
                     </b-col>
                </b-row>
+                <b-row class="with-padding-bottom" v-if="selectedItem.schedule && selectedItem.schedule.notes">
+                    <b-col sm="12">
+                        <strong>Schedule Notes</strong><br />
+                        {{ selectedItem.schedule.notes }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="12">
+                        <strong>Caregiver Comments</strong><br />
+                        {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
+                    </b-col>
+                </b-row>
                 <h4>Issues on Shift</h4>
                 <b-row>
                     <b-col sm="12">
@@ -122,10 +123,10 @@
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
-                            <tr>
+                            <!-- <tr>
                                 <th>Geocode</th>
                                 <td>{{ selectedItem.checked_in_latitude.slice(0,8) }},<br />{{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
-                            </tr>
+                            </tr> -->
                             <tr>
                                 <th>Distance</th>
                                 <td>{{ selectedItem.checked_in_distance }}m</td>
@@ -152,10 +153,10 @@
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
-                            <tr>
+                           <!-- <tr>
                                 <th>Geocode</th>
                                 <td>{{ selectedItem.checked_out_latitude.slice(0,8) }},<br />{{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
-                            </tr>
+                            </tr> -->
                             <tr>
                                 <th>Distance</th>
                                 <td>{{ selectedItem.checked_out_distance }}m</td>
@@ -236,14 +237,12 @@
                 ],
                 items: this.shifts.map(function(shift) {
                         let start = moment.utc(shift.checked_in_time);
-                        let end = moment.utc(shift.checked_out_time);
-                        let hours = (parseInt(end.diff(start, 'minutes')) / 60).toFixed(2);
                         return {
                             id: shift.id,
                             date: start.local().format('L LTS'),
                             client_name: shift.client_name,
                             caregiver_name: shift.caregiver_name,
-                            hours: hours,
+                            hours: (shift.checked_out_time) ? shift.roundedShiftLength : 'CLOCKED IN',
                             verified: shift.verified
                         }
                     }),

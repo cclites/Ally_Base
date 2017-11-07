@@ -19,26 +19,22 @@ class BankAccount extends Model
         'savings'
     ];
 
-    public function bankAccount()
-    {
-        return BankAccount::where('id', $this->bank_account_id)
-            ->whereNull('user_id')
-            ->first();
-    }
-
-    public function getLastFourAttribute()
-    {
-        return substr($this->account_number, -4);
-    }
-
-    public static function getAccountTypes()
-    {
-        return self::$accountTypes;
-    }
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function getLastFourAttribute()
+    {
+        return substr($this->account_number, -4);
     }
 
     public function setRoutingNumberAttribute($value)
@@ -61,10 +57,13 @@ class BankAccount extends Model
         return empty($this->attributes['account_number']) ? null : Crypt::decrypt($this->attributes['account_number']);
     }
 
-    protected function ecsPaymentInstance()
-    {
-        $ecs = new ECSPayment();
-        $billingNameArray = explode(' ', $this->name_on_account);
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
 
+    public static function getAccountTypes()
+    {
+        return self::$accountTypes;
     }
+
 }

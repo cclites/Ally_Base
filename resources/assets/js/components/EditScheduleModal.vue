@@ -30,8 +30,8 @@
                                     name="editType"
                                     v-model="editType"
                             >
-                                <option value="single">Single Occurrence</option>
-                                <option value="all">All Future Events</option>
+                                <option value="single">Only This Shift</option>
+                                <option value="all">This and All Future Shifts</option>
                             </b-form-select>
                             <input-help :form="form" field="editType" text="Select which type of modification you wish to make."></input-help>
                         </b-form-group>
@@ -81,6 +81,21 @@
                     </b-row>
                     <b-row>
                         <b-col sm="12">
+                            <b-form-group label="Care Plan" label-for="care_plan_id">
+                                <b-form-select
+                                        id="care_plan_id"
+                                        name="care_plan_id"
+                                        v-model="form.care_plan_id"
+                                >
+                                    <option value="">--No Care Plan--</option>
+                                    <option v-for="plan in carePlans" :value="plan.id">{{ plan.name }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="care_plan_id" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col sm="12">
                             <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                                 <b-form-select
                                         id="caregiver_id"
@@ -95,17 +110,6 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col sm="12">
-                            <div class="form-check">
-                                <label class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="rate_override" v-model="overrideRate" value="1">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">Override Default Rates?</span>
-                                </label>
-                            </div>
-                        </b-col>
-                    </b-row>
-                    <b-row v-if="overrideRate">
                         <b-col sm="6">
                             <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
                                 <b-form-input
@@ -114,7 +118,6 @@
                                         type="number"
                                         step="any"
                                         v-model="form.caregiver_rate"
-                                        :placeholder="selectedCaregiver.pivot.caregiver_hourly_rate"
                                 >
                                 </b-form-input>
                                 <input-help :form="form" field="caregiver_rate" text=""></input-help>
@@ -128,10 +131,38 @@
                                         type="number"
                                         step="any"
                                         v-model="form.provider_fee"
-                                        :placeholder="selectedCaregiver.pivot.provider_hourly_fee"
                                 >
                                 </b-form-input>
                                 <input-help :form="form" field="provider_fee" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="6">
+                            <b-form-group label="Ally Fee" label-for="ally_fee">
+                                {{ allyFee }}
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="6">
+                            <b-form-group label="Total Rate" label-for="ally_fee">
+                                {{ totalRate }}
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <b-form-group label="Special Shift Designation" label-for="hours_type">
+                                <b-form-select 
+                                    id="hours_type"
+                                    name="hours_type"
+                                    v-model="form.hours_type"
+                                    >
+                                    <option value="default">None - Regular Shift</option>
+                                    <option value="holiday">Holiday</option>
+                                    <option value="overtime">Overtime</option>
+                                </b-form-select>
+                                <input-help :form="form" field="hours_type" text=""></input-help>
+                                <small class="form-text text-info" v-if="specialHoursChange">
+                                    Be sure to update the caregiver's rates to reflect this special designation.
+                                </small>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -217,7 +248,6 @@
             return {
                 editModel: this.model,
                 editType: null,
-                form: new Form(),
             }
         },
 
@@ -242,7 +272,7 @@
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
                 });
-                deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
+                deleteForm.post('/business/clients/' + component.client_id + '/schedule/' + + this.selectedSchedule.id + '/single/delete')
                     .then(function(response) {
                         component.refreshEvents();
                     });
@@ -256,7 +286,7 @@
                 let deleteForm = new Form({
                     selected_date: this.form.selected_date,
                 });
-                deleteForm.post('/business/clients/' + this.client.id + '/schedule/' + this.selectedSchedule.id + '/delete')
+                deleteForm.post('/business/clients/' + component.client_id + '/schedule/' + this.selectedSchedule.id + '/delete')
                     .then(function(response) {
                         component.refreshEvents();
                     });
@@ -267,15 +297,13 @@
                     selected_date: moment(this.selectedEvent.start).format(this.display.date_format),
                     time: moment(this.selectedEvent.start).format('HH:mm:ss'),
                     duration: this.selectedSchedule.duration,
+                    care_plan_id: this.selectedSchedule.care_plan_id,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
-                    caregiver_rate: this.selectedSchedule.caregiver_rate,
-                    provider_fee: this.selectedSchedule.provider_fee,
+                    caregiver_rate: (this.selectedSchedule.caregiver_rate) ? this.selectedSchedule.caregiver_rate : this.selectedCaregiver.pivot.caregiver_hourly_rate,
+                    provider_fee: (this.selectedSchedule.provider_fee) ? this.selectedSchedule.provider_fee : this.selectedCaregiver.pivot.provider_hourly_fee,
+                    hours_type: this.selectedSchedule.hours_type,
                 });
-
-                if (this.form.caregiver_rate || this.form.provider_fee) {
-                    this.overrideRate = true;
-                }
             },
 
             makeEditAllForm() {
@@ -286,18 +314,16 @@
                     duration: this.selectedSchedule.duration,
                     interval_type: this.selectedSchedule.interval_type,
                     bydays: this.selectedSchedule.bydays,
+                    care_plan_id: this.selectedSchedule.care_plan_id,
                     caregiver_id: this.selectedSchedule.caregiver_id,
                     notes: this.selectedSchedule.notes,
-                    caregiver_rate: this.selectedSchedule.caregiver_rate,
-                    provider_fee: this.selectedSchedule.provider_fee,
+                    caregiver_rate: (this.selectedSchedule.caregiver_rate) ? this.selectedSchedule.caregiver_rate : this.selectedCaregiver.pivot.caregiver_hourly_rate,
+                    provider_fee: (this.selectedSchedule.provider_fee) ? this.selectedSchedule.provider_fee : this.selectedCaregiver.pivot.provider_hourly_fee,
+                    hours_type: this.selectedSchedule.hours_type,
                 });
 
                 if (this.form.end_date == '12/31/2100') {
                     this.form.end_date = null;
-                }
-
-                if (this.form.caregiver_rate || this.form.provider_fee) {
-                    this.overrideRate = true;
                 }
             },
 
@@ -340,6 +366,7 @@
 
             'selectedSchedule.client_id': function(val) {
                 this.client_id = val;
+                this.loadAllyPctFromClient(val);
             }
         },
 

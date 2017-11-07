@@ -11,12 +11,25 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <b-row v-if="carePlanActivities().length > 0">
+                <b-col lg="12" class="with-padding-bottom">
+                    <h5>Recommended Care Plan Activities</h5>
+                    <div class="form-check">
+                        <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
+                        <label class="custom-control custom-checkbox" v-for="activity in carePlanActivities()" style="clear: left; float: left;">
+                            <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                        </label>
+                    </div>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
-                    <h5>Activities Performed</h5>
+                    <h5>Additional Activities Performed</h5>
                         <div class="form-check">
-                            <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
+                            <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
+                            <label class="custom-control custom-checkbox" v-for="activity in additionalActivities()" style="clear: left; float: left;">
                                 <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
@@ -105,7 +118,8 @@
     export default {
         props: {
             'shift': {},
-            'activities': {},
+            'activities': Array,
+            'carePlanActivityIds': Array,
         },
 
         data() {
@@ -167,6 +181,22 @@
                 this.form.manual = 1;
                 this.submitForm();
             },
+
+            carePlanActivities() {
+                let component = this;
+                let activities = this.activities.slice(0);
+                return activities.filter(function(activity) {
+                   return (component.carePlanActivityIds.findIndex(item => item === activity.id) !== -1);
+                });
+            },
+
+            additionalActivities() {
+                let component = this;
+                let activities = this.activities.slice(0);
+                return activities.filter(function(activity) {
+                    return (component.carePlanActivityIds.findIndex(item => item === activity.id) === -1);
+                });
+            }
         },
 
         computed: {

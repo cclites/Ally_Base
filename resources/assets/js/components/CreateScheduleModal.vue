@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="createScheduleModal" title="Create Schedule" v-model="createModel">
+    <b-modal id="createScheduleModal" title="Schedule Shift" v-model="createModel">
         <b-container fluid>
             <b-row v-if="!this.client">
                 <b-col lg="12">
@@ -75,6 +75,21 @@
                 </b-row>
                 <b-row>
                     <b-col sm="12">
+                        <b-form-group label="Care Plan" label-for="care_plan_id">
+                            <b-form-select
+                                id="care_plan_id"
+                                name="care_plan_id"
+                                v-model="form.care_plan_id"
+                                >
+                                <option value="">--No Care Plan--</option>
+                                <option v-for="plan in carePlans" :value="plan.id">{{ plan.name }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="care_plan_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="12">
                         <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
                             <b-form-select
                                     id="caregiver_id"
@@ -89,27 +104,15 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col sm="12">
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="rate_override" v-model="overrideRate" value="1">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Override Default Rates?</span>
-                            </label>
-                        </div>
-                    </b-col>
-                </b-row>
-                <b-row v-if="overrideRate">
                     <b-col sm="6">
                         <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
                             <b-form-input
-                                id="caregiver_rate"
-                                name="caregiver_rate"
-                                type="number"
-                                step="any"
-                                v-model="form.caregiver_rate"
-                                :placeholder="selectedCaregiver.pivot.caregiver_hourly_rate"
-                                >
+                                    id="caregiver_rate"
+                                    name="caregiver_rate"
+                                    type="number"
+                                    step="any"
+                                    v-model="form.caregiver_rate"
+                            >
                             </b-form-input>
                             <input-help :form="form" field="caregiver_rate" text=""></input-help>
                         </b-form-group>
@@ -122,10 +125,38 @@
                                     type="number"
                                     step="any"
                                     v-model="form.provider_fee"
-                                    :placeholder="selectedCaregiver.pivot.provider_hourly_fee"
                             >
                             </b-form-input>
                             <input-help :form="form" field="provider_fee" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col sm="6">
+                        <b-form-group label="Ally Fee" label-for="ally_fee">
+                            {{ allyFee }}
+                        </b-form-group>
+                    </b-col>
+                    <b-col sm="6">
+                        <b-form-group label="Total Rate" label-for="ally_fee">
+                            {{ totalRate }}
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Special Shift Designation" label-for="hours_type">
+                            <b-form-select
+                                    id="hours_type"
+                                    name="hours_type"
+                                    v-model="form.hours_type"
+                            >
+                                <option value="default">None - Regular Shift</option>
+                                <option value="holiday">Holiday</option>
+                                <option value="overtime">Overtime</option>
+                            </b-form-select>
+                            <input-help :form="form" field="hours_type" text=""></input-help>
+                            <small class="form-text text-info" v-if="specialHoursChange">
+                                Be sure to update the caregiver's rates to reflect this special designation.
+                            </small>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -209,7 +240,6 @@
             return {
                 createModel: this.model,
                 createType: null,
-                form: new Form(),
             }
         },
 
@@ -239,10 +269,12 @@
                     start_date: this.selectedEvent.format(this.display.date_format),
                     time: (this.selectedEvent._ambigTime) ? '09:00:00' : this.selectedEvent.format('HH:mm:ss'),
                     duration: 60,
+                    care_plan_id: null,
                     caregiver_id: null,
                     notes: null,
                     caregiver_rate: null,
                     provider_fee: null,
+                    hours_type: 'default',
                 });
             },
 
@@ -254,10 +286,12 @@
                     duration: 60,
                     interval_type: null,
                     bydays: [],
+                    care_plan_id: null,
                     caregiver_id: null,
                     notes: null,
                     caregiver_rate: null,
                     provider_fee: null,
+                    hours_type: 'default',
                 });
             },
 
@@ -294,6 +328,7 @@
                 else this.makeCreateRecurringForm()
             },
             client_id(val) {
+                this.loadAllyPctFromClient(val);
                 this.loadCaregivers();
             }
         },

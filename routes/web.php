@@ -17,13 +17,14 @@ Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });
 
-Auth::routes();
+Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
+Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
+Route::get('/reconfirm/saved', 'ConfirmationController@saved')->name('reconfirm.saved');
+Route::get('/reconfirm/{encrypted_id}', 'ConfirmationController@reconfirm')->name('reconfirm.encrypted_id');
+Route::post('/reconfirm/{encrypted_id}', 'ConfirmationController@store')->name('reconfirm.store');
 
-Route::group(['middleware' => 'guest'], function() {
-    Route::get('/reconfirm/saved', 'ConfirmationController@saved')->name('reconfirm.saved');
-    Route::get('/reconfirm/{encrypted_id}', 'ConfirmationController@reconfirm')->name('reconfirm.encrypted_id');
-    Route::post('/reconfirm/{encrypted_id}', 'ConfirmationController@store')->name('reconfirm.store');
-});
+Auth::routes();
+Route::get('/logout', 'Auth\LoginController@logout');
 
 Route::group(['middleware' => 'auth'], function() {
     Route::get('/home', 'HomeController@index')->name('home');
@@ -59,6 +60,16 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
+    Route::resource('care_plans', 'Business\CarePlanController');
+
+    Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
+    Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
+    Route::get('settings', 'Business\SettingController@index')->name('settings.index');
+    Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+
+    Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
+    Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
+    Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');
@@ -66,6 +77,9 @@ Route::group([
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
+    Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
+
+    Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
@@ -83,7 +97,10 @@ Route::group([
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
     Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
+    Route::get('clients/{id}/ally_pct', 'Business\ClientController@getAllyPercentage')->name('clients.ally_pct');
+    Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
+    Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
@@ -97,8 +114,30 @@ Route::group([
 
     Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
     Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+    Route::post('shifts/{id}', 'Business\ShiftController@update')->name('shifts.update');
+    Route::post('shifts/{id}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
+    Route::patch('shifts/{id}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+
+    Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
+    Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
+    Route::post('exceptions/{id}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
+    Route::delete('documents/{document}', 'Business\DocumentController@destroy');
+});
+
+Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
+    Route::post('/notes/search', 'NoteController@search');
+    Route::resource('notes', 'NoteController');
+});
+
+Route::group([
+    'as' => 'admin.',
+    'prefix' => 'admin',
+    'middleware' => ['auth', 'roles'],
+    'roles' => ['admin'],
+], function() {
+    Route::resource('businesses', 'Admin\BusinessController');
 });

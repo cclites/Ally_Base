@@ -10,8 +10,17 @@ class ShiftIssue extends Model
     public $timestamps = false;
     protected $guarded = ['id'];
 
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
     public function shift()
     {
         return $this->belongsTo(Shift::class);
     }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
 }

@@ -23,11 +23,16 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
-        </li>
+        @if ($business->scheduling)
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+            </li>
+        @endif
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
@@ -56,10 +61,10 @@
         <div class="tab-pane" id="phones" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Work Number" type="evv" action="{{ route('business.caregivers.phone', [$caregiver->id, 'work']) }}" :phone="{{ json_phone($caregiver->user, 'work') }}"></phone-number>
+                    <phone-number title="Cell Number" type="work" action="{{ route('business.caregivers.phone', [$caregiver->id, 'work']) }}" :phone="{{ json_phone($caregiver->user, 'work') }}"></phone-number>
                 </div>
                 <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Home Number" type="billing" action="{{ route('business.caregivers.phone', [$caregiver->id, 'home']) }}" :phone="{{ json_phone($caregiver->user, 'home') }}"></phone-number>
+                    <phone-number title="Home Number" type="home" action="{{ route('business.caregivers.phone', [$caregiver->id, 'home']) }}" :phone="{{ json_phone($caregiver->user, 'home') }}"></phone-number>
                 </div>
             </div>
         </div>
@@ -69,20 +74,26 @@
                     <div class="card">
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
-                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :caregiver="{{ $caregiver }}" />
+                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submitUrl="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="tab-pane" id="schedule" role="tabpanel">
-            <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
+            <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
                 :initial-documents="{{ $caregiver->user->documents->toJson() }}"
                 :user-id="{{ $caregiver->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="licenses" role="tabpanel">
+            <caregiver-license-list
+                    :licenses="{{ $caregiver->licenses }}"
+                    :caregiver-id="{{ $caregiver->id }}"
+            ></caregiver-license-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
             <!-- Availability Placeholder -->

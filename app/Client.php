@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\UserRole;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 use App\Traits\HiddenIdTrait;
@@ -28,6 +29,10 @@ class Client extends Model implements UserRole
         'ssn',
         'onboard_status'
     ];
+
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
 
     public function payments()
     {
@@ -74,6 +79,11 @@ class Client extends Model implements UserRole
         return $this->hasMany(Schedule::class);
     }
 
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
     public function defaultPayment()
     {
         return $this->morphTo('default_payment');
@@ -88,6 +98,34 @@ class Client extends Model implements UserRole
     {
         return $this->hasMany(OnboardStatusHistory::class);
     }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    /**
+     * Encrypt ssn on entry
+     *
+     * @param $value
+     */
+    public function setSsnAttribute($value)
+    {
+        $this->attributes['ssn'] = Crypt::encrypt($value);
+    }
+
+    /**
+     * Decrypt ssn on retrieval
+     *
+     * @return null|string
+     */
+    public function getSsnAttribute()
+    {
+        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
 
     /**
      * Aggregate schedules for this client and return an array of events
@@ -108,24 +146,17 @@ class Client extends Model implements UserRole
         return $aggregator->events($start, $end);
     }
 
-    /**
-     * Encrypt ssn on entry
-     *
-     * @param $value
-     */
-    public function setSsnAttribute($value)
+    public function hasActiveShift()
     {
-        $this->attributes['ssn'] = Crypt::encrypt($value);
+        return $this->shifts()->whereNull('checked_out_time')->exists();
     }
 
-    /**
-     * Decrypt ssn on retrieval
-     *
-     * @return null|string
-     */
-    public function getSsnAttribute()
+    public function clearFutureSchedules()
     {
-        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+        $yesterday = (new Carbon('yesterday'))->format('Y-m-d');
+        $this->schedules()
+            ->where('end_date', '>', $yesterday)
+            ->update(['end_date' => $yesterday]);
     }
 
 }

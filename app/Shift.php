@@ -11,6 +11,8 @@ class Shift extends Model
     public $timestamps = false;
     protected $guarded = ['id'];
 
+    protected $appends = ['roundedShiftLength'];
+
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////
@@ -23,6 +25,11 @@ class Shift extends Model
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
+
+    public function getRoundedShiftLengthAttribute()
+    {
+        return $this->duration();
+    }
 
     //////////////////////////////////////
     /// Relationship Methods
@@ -70,8 +77,13 @@ class Shift extends Model
         return $this->hasMany(ShiftIssue::class);
     }
 
+    public function exceptions()
+    {
+        return $this->morphMany(SystemException::class, 'reference');
+    }
+
     //////////////////////////////////////
-    /// Model Methods
+    /// Other Methods
     //////////////////////////////////////
 
     /**
@@ -82,15 +94,14 @@ class Shift extends Model
     public function duration()
     {
         $date1 = new Carbon($this->checked_in_time);
-
         if ($this->checked_out_time) {
             $date2 = new Carbon($this->checked_out_time);
-        }
-        else {
+        } else {
             $date2 = new Carbon();
         }
 
-        return round($date1->diffInMinutes($date2) / 60, 2);
+        $duration = round($date1->diffInMinutes($date2) / 60, 2);
+        return number_format(floor(round($duration * 4)) / 4, 2);
     }
 
     /**

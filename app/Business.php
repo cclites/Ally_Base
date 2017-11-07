@@ -10,30 +10,18 @@ class Business extends Model
     protected $table = 'businesses';
     protected $guarded = ['id'];
 
-    public function setBankAccount(BankAccount $account)
-    {
-        if ($account->id) {
-            throw new ExistingBankAccountException('setBankAccount only accepts new bank accounts.');
-        }
-
-        $account->user_id = null;
-        if (!$account->save()) {
-            throw new \Exception('Could not save the bank account to the database.');
-        }
-
-        $existingAccount = $this->bankAccount;
-        $update = $this->update(['bank_account_id' => $account->id]);
-        $this->load('bankAccount'); // reload bankAccount related model
-        if ($update && $existingAccount) {
-            $existingAccount->delete();
-        }
-
-        return $update;
-    }
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
 
     public function bankAccount()
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    public function paymentAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'payment_account_id');
     }
 
     public function activities()
@@ -45,17 +33,6 @@ class Business extends Model
     public function allActivities()
     {
         return $this->activities->merge(Activity::whereNull('business_id')->get())->sortBy('code')->values();
-    }
-
-    public function findActivity($code)
-    {
-        $activity = Activity::where(function ($q) {
-            $q->where('business_id', $this->business_id)
-                ->orWhereNull('business_id');
-        })
-            ->where('code', $code)
-            ->first();
-        return $activity;
     }
 
     public function clients()
@@ -70,6 +47,11 @@ class Business extends Model
                 'type',
                 'default_rate'
             ]);
+    }
+
+    public function carePlans()
+    {
+        return $this->hasMany(CarePlan::class)->with('activities');
     }
 
     public function deposits()
@@ -100,5 +82,65 @@ class Business extends Model
     public function shifts()
     {
         return $this->hasMany(Shift::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    public function caregiverApplications()
+    {
+        return $this->hasMany(CaregiverApplication::class);
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Set the Business' primary deposit account
+     *
+     * @param \App\BankAccount $account
+     * @return bool
+     * @throws \App\Exceptions\ExistingBankAccountException
+     * @throws \Exception
+     */
+    public function setBankAccount(BankAccount $account)
+    {
+        if ($account->id) {
+            throw new ExistingBankAccountException('setBankAccount only accepts new bank accounts.');
+        }
+
+        $account->user_id = null;
+        if (!$account->save()) {
+            throw new \Exception('Could not save the bank account to the database.');
+        }
+
+        $existingAccount = $this->bankAccount;
+        $update = $this->update(['bank_account_id' => $account->id]);
+        $this->load('bankAccount'); // reload bankAccount related model
+        if ($update && $existingAccount) {
+            $existingAccount->delete();
+        }
+
+        return $update;
+    }
+
+    /**
+     * Find an activity by the activity code
+     *
+     * @param $code
+     * @return \App\Activity|null
+     */
+    public function findActivity($code)
+    {
+        $activity = Activity::where(function ($q) {
+            $q->where('business_id', $this->business_id)
+                ->orWhereNull('business_id');
+        })
+            ->where('code', $code)
+            ->first();
+        return $activity;
     }
 }

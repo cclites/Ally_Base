@@ -11,6 +11,11 @@
             'form': {},
             'field': '',
             'text': '',
+        },
+        watch: {
+            'form.errorMods': function() {
+                this.$forceUpdate();
+            }
         }
     }
 </script>

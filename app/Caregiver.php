@@ -18,20 +18,9 @@ class Caregiver extends Model implements UserRole
     public $hidden = ['ssn'];
     public $fillable = ['ssn', 'bank_account_id', 'title'];
 
-    public function setBankAccount(BankAccount $account)
-    {
-        if ($account->id && $account->user_id != $this->id) {
-            throw new ExistingBankAccountException('Bank account is owned by another user.');
-        }
-
-        if (!$account->id) {
-            if (!$this->bankAccounts()->save($account)) {
-                throw new \Exception('Unable to save bank account to database.');
-            }
-        }
-
-        return $this->update(['bank_account_id' => $account->id]);
-    }
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
 
     public function bankAccount()
     {
@@ -60,6 +49,11 @@ class Caregiver extends Model implements UserRole
         return $this->hasMany(Deposit::class);
     }
 
+    public function licenses()
+    {
+        return $this->hasMany(CaregiverLicense::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -80,6 +74,10 @@ class Caregiver extends Model implements UserRole
         return $this->hasMany(Shift::class);
     }
 
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
     /**
      * Encrypt ssn on entry
      *
@@ -98,6 +96,55 @@ class Caregiver extends Model implements UserRole
     public function getSsnAttribute()
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
+    }
+
+    ///////////////////////////////////////////
+    /// Other Methods
+    ///////////////////////////////////////////
+
+    /**
+     * Retrieve the fake email address for a caregiver that does not have an email address.
+     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
+     *
+     * @return string
+     */
+    public function getAutoEmail()
+    {
+        return $this->id . '@noemail.allyms.com';
+    }
+
+    /**
+     * Set the generated fake email address for a caregiver that does not have an email address.
+     *
+     * @return $this
+     */
+    public function setAutoEmail()
+    {
+        $this->email = $this->getAutoEmail();
+        return $this;
+    }
+
+    /**
+     * Set the caregiver's primary deposit account
+     *
+     * @param \App\BankAccount $account
+     * @return bool
+     * @throws \App\Exceptions\ExistingBankAccountException
+     * @throws \Exception
+     */
+    public function setBankAccount(BankAccount $account)
+    {
+        if ($account->id && $account->user_id != $this->id) {
+            throw new ExistingBankAccountException('Bank account is owned by another user.');
+        }
+
+        if (!$account->id) {
+            if (!$this->bankAccounts()->save($account)) {
+                throw new \Exception('Unable to save bank account to database.');
+            }
+        }
+
+        return $this->update(['bank_account_id' => $account->id]);
     }
 
     /**
