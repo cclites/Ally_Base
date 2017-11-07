@@ -89,10 +89,13 @@
             <b-row>
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Delete Caregiver</b-button>
                 </b-col>
             </b-row>
         </form>
+
+        <reset-password-modal v-model="passwordModal" :url="'/business/caregivers/' + this.caregiver.id + '/password'"></reset-password-modal>
     </b-card>
 </template>
 
@@ -112,7 +115,8 @@
                     title: this.caregiver.title,
                     date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
                     no_email: false,
-                })
+                }),
+                passwordModal: false,
             }
         },
 

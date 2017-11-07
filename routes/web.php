@@ -77,6 +77,7 @@ Route::group([
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
+    Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
 
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
@@ -97,6 +98,7 @@ Route::group([
     Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{id}/ally_pct', 'Business\ClientController@getAllyPercentage')->name('clients.ally_pct');
+    Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');

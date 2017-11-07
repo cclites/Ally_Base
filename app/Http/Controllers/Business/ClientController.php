@@ -248,4 +248,19 @@ class ClientController extends BaseController
         $client = Client::findOrFail($client_id);
         return ['percentage' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)];
     }
+
+    public function changePassword(Request $request, Client $client) {
+        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $request->validate([
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        if ($client->user->changePassword($request->input('password'))) {
+            return new SuccessResponse('The client\'s password has been updated.');
+        }
+        return new ErrorResponse(500, 'Unable to update client password.');
+    }
 }
