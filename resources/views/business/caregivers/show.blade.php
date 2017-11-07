@@ -74,7 +74,7 @@
                     <div class="card">
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
-                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submitUrl="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
+                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submit-url="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
                         </div>
                     </div>
                 </div>
