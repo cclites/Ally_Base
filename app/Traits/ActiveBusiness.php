@@ -14,9 +14,11 @@ trait ActiveBusiness
      */
     protected function business()
     {
-        if (!$this->business) {
-            if ( ! $this->business = auth()->user()->role->businesses->first()) {
-                throw new \Exception('No default business found.');
+        if (auth()->user()->role_type === 'office_user') {
+            if (!$this->business) {
+                if ( ! $this->business = auth()->user()->role->businesses->first()) {
+                    throw new \Exception('No default business found.');
+                }
             }
         }
         return $this->business;
