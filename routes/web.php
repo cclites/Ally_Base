@@ -62,8 +62,10 @@ Route::group([
 
     Route::resource('care_plans', 'Business\CarePlanController');
 
-    Route::get('settings', 'Business\SettingController@index');
-    Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount');
+    Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
+    Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
+    Route::get('settings', 'Business\SettingController@index')->name('settings.index');
+    Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');

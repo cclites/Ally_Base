@@ -71,7 +71,7 @@ class CaregiverController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Caregiver  $caregiver
+     * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
      */
     public function show(Caregiver $caregiver)
@@ -83,8 +83,9 @@ class CaregiverController extends BaseController
 //        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
         $caregiver->load(['user.documents', 'bankAccount']);
         $schedules = $caregiver->schedules()->get();
+        $business = $this->business();
 
-        return view('business.caregivers.show', compact('caregiver', 'schedules'));
+        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
     /**
