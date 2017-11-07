@@ -19,8 +19,23 @@ class ScheduleController extends BaseController
 
     public function events(Request $request)
     {
+        $schedules = $this->business()->schedules;
+
+        // Filter by client or caregiver
+        if ($request->input('caregiver_id') || $request->input('client_id')) {
+            $schedules = $schedules->filter(function(Schedule $schedule) use ($request) {
+                if ($client_id = $request->input('client_id')) {
+                    if ($schedule->client_id != $client_id) return false;
+                }
+                if ($caregiver_id = $request->input('caregiver_id')) {
+                    if ($schedule->caregiver_id != $caregiver_id) return false;
+                }
+                return true;
+            });
+        }
+
         $aggregator = new ScheduleAggregator();
-        foreach($this->business()->schedules as $schedule) {
+        foreach($schedules as $schedule) {
             $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
             $title = $clientName . ' (' . $caregiverName . ')';

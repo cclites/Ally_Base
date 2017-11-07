@@ -81,7 +81,7 @@
             </div>
         </div>
         <div class="tab-pane" id="schedule" role="tabpanel">
-            <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
+            <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list

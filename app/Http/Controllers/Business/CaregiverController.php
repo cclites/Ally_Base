@@ -23,9 +23,12 @@ class CaregiverController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $caregivers = $this->business()->caregivers()->with(['user', 'addresses', 'phoneNumbers'])->get();
+        if ($request->expectsJson()) {
+            return $caregivers;
+        }
         return view('business.caregivers.index', compact('caregivers'));
     }
 

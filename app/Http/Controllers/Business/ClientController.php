@@ -23,9 +23,12 @@ class ClientController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
+        if ($request->expectsJson()) {
+            return $clients;
+        }
         return view('business.clients.index', compact('clients'));
     }
 
