@@ -222,6 +222,7 @@ class ReportsController extends BaseController
             $shift->caregiver_name = ($shift->caregiver) ? $shift->caregiver->name() : '';
             return $shift;
         });
+
         return view('business.reports.shifts', compact('shifts'));
     }
 

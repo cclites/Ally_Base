@@ -87,13 +87,11 @@
             items() {
                 return this.shifts.map(function(shift) {
                     let start = moment.utc(shift.checked_in_time);
-                    let end = moment.utc(shift.checked_out_time);
-                    let hours = (parseInt(end.diff(start, 'minutes')) / 60).toFixed(2);
                     return {
                         id: shift.id,
                         date: start.local().format('L LTS'),
                         client_name: shift.client_name,
-                        hours: hours,
+                        hours: shift.roundedShiftLength,
                         verified: (shift.verified) ? 'Verified' : 'Unverified'
                     }
                 })
