@@ -38,6 +38,15 @@ Route::group(['middleware' => 'auth'], function() {
 
 Route::group([
     'middleware' => ['auth', 'roles'],
+    'roles' => ['client'],
+    'namespace' => 'Clients',
+], function () {
+    Route::post('shift-history/approve', 'ShiftController@approveWeek');
+    Route::get('shift-history/{week?}', 'ShiftController@index');
+});
+
+Route::group([
+    'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver'],
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');

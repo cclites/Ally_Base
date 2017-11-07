@@ -37,6 +37,9 @@ Vue.component('time-picker', require('./components/TimePicker.vue'));
 
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
+// Client
+Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
+
 // Admin
 Vue.component('business-create', require('./components/BusinessCreate.vue'));
 Vue.component('business-edit', require('./components/BusinessEdit.vue'));
