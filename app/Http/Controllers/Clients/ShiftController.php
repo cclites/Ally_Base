@@ -25,6 +25,11 @@ class ShiftController extends Controller
             ->orderBy('checked_in_time')
             ->get();
 
+        $shifts = $shifts->map(function($shift) {
+            $shift->total = $shift->roundedShiftLength * $shift->caregiver_rate + $shift->provider_fee + $shift->other_expenses;
+            return $shift;
+        });
+
         if (request()->expectsJson()) {
             $week_start_date = $week_start_date->format('Y-m-d H:i:s');
             $week_end_date = $week_end_date->format('Y-m-d H:i:s');
