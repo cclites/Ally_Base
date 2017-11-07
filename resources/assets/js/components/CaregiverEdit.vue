@@ -41,14 +41,38 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="form.email"
+                                        :disabled="form.no_email"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_email" v-model="form.no_email" value="1">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">No Email</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Username" label-for="username">
                         <b-form-input
-                            id="email"
-                            name="email"
-                            type="email"
-                            v-model="form.email"
+                            id="username"
+                            name="username"
+                            type="text"
+                            v-model="form.username"
                             >
                         </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <b-form-input
@@ -84,24 +108,29 @@
                     firstname: this.caregiver.firstname,
                     lastname: this.caregiver.lastname,
                     email: this.caregiver.email,
+                    username: this.caregiver.username,
                     title: this.caregiver.title,
-                    date_of_birth: moment(this.caregiver.user.date_of_birth).format('L')
+                    date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
+                    no_email: false,
                 })
             }
         },
 
         mounted() {
-            if (!this.caregiver) {
-                form: new Form({
-                    firstname: null,
-                    lastname: null,
-                    email: null,
-                    date_of_birth: null,
-                })
-            }
+            this.checkForNoEmailDomain();
         },
 
         methods: {
+
+            checkForNoEmailDomain() {
+                let domain = 'noemail.allyms.com';
+                if (this.form.email) {
+                    if (this.form.email.substr(domain.length * -1) === domain) {
+                        this.form.no_email = true;
+                        this.form.email = null;
+                    }
+                }
+            },
 
             deleteCaregiver() {
                 let form = new Form();

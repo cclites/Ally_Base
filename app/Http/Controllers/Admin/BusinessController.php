@@ -60,6 +60,7 @@ class BusinessController extends Controller
 
         $userData = $request->validate([
             'email' => 'required|email',
+            'username' => 'required|unique:users',
             'firstname' => 'required',
             'lastname' => 'required',
             'password' => 'required|confirmed',

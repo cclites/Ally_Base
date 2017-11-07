@@ -63,7 +63,8 @@ class ClientController extends BaseController
             [
                 'firstname' => 'required',
                 'lastname' => 'required',
-                'email' => 'required|email|unique:users',
+                'email' => 'required|email|',
+                'username' => 'required|unique:users',
                 'date_of_birth' => 'nullable',
                 'business_fee' => 'nullable|numeric',
                 'client_type' => 'required',
@@ -139,7 +140,8 @@ class ClientController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
+            'email' => 'required|email',
+            'username' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',

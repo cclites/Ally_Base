@@ -50,7 +50,8 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email|unique:users',
+            'email' => 'required_unless:no_email,1|email',
+            'username' => 'required|unique:users',
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
             'password' => 'required|confirmed',
@@ -60,7 +61,11 @@ class CaregiverController extends BaseController
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt($data['password']);
 
+
         $caregiver = new Caregiver($data);
+        if ($request->input('no_email')) {
+            $caregiver->setAutoEmail();
+        }
         if ($this->business()->caregivers()->save($caregiver)) {
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id], route('business.caregivers.show', [$caregiver->id]));
         }
@@ -115,12 +120,17 @@ class CaregiverController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($caregiver->id)],
+            'email' => 'required_unless:no_email,1|email',
+            'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+
+        if ($request->input('no_email')) {
+            $data['email'] = $caregiver->getAutoEmail();
+        }
 
         if ($caregiver->update($data)) {
             return new SuccessResponse('The caregiver has been updated.');
