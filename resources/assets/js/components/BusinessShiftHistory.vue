@@ -46,15 +46,22 @@
         <!-- Details modal -->
         <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
             <b-container fluid>
-                <h4>Shift</h4>
                 <b-row class="with-padding-bottom">
                     <b-col sm="6">
-                        <strong>Client</strong><br />
+                        <strong>Client</strong>
+                        <br />
                         {{ selectedItem.client_name }}
                     </b-col>
                     <b-col sm="6">
                         <strong>Caregiver</strong><br />
                         {{ selectedItem.caregiver_name }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col>
+                        <strong>Client Signature</strong>
+                        <br />
+                        <span class="signature">{{ selectedItem.client_name }}</span>
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-bottom">
