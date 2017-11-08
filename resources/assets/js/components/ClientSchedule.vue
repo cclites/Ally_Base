@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Create a Schedule</b-btn>
+        <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
         <full-calendar ref="calendar" :events="events" @day-click="createSchedule" @event-selected="editSchedule" />
 
         <create-schedule-modal :model.sync="createModal"

@@ -113,7 +113,7 @@
                     email: this.caregiver.email,
                     username: this.caregiver.username,
                     title: this.caregiver.title,
-                    date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
+                    date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
                 }),
                 passwordModal: false,

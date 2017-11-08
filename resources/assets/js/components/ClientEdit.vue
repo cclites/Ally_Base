@@ -156,7 +156,7 @@
                     lastname: this.client.lastname,
                     email: this.client.email,
                     username: this.client.username,
-                    date_of_birth: moment(this.client.date_of_birth).format('L'),
+                    date_of_birth: (this.client.date_of_birth) ? moment(this.client.date_of_birth).format('L') : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
                     onboard_status: this.client.onboard_status,
