@@ -56,6 +56,9 @@ class AllyFeeCalculator
                 }
                 if ($paymentMethod instanceof CreditCard) {
                     $pct = config('ally.credit_card_fee');
+                    if (strtolower($paymentMethod->type) == 'amex') {
+                        $pct = bcadd($pct, '0.01', 2);
+                    }
                 }
                 // Default is bank account, so no more logic necessary
                 break;
