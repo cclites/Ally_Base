@@ -76,13 +76,7 @@
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
-                        <b-form-input
-                                id="ssn"
-                                name="ssn"
-                                type="text"
-                                v-model="form.ssn"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                     </b-form-group>
                 </b-col>
