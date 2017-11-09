@@ -8,7 +8,8 @@
                 <b-row v-if="isFilterable()">
                     <b-col cols="6">
                         <b-form-select v-model="filterCaregiverId">
-                            <option value="">--Filter by Caregiver--</option>
+                            <option value="">All Caregivers</option>
+                            <option value="0">Unassigned Shifts</option>
                             <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
@@ -69,7 +70,7 @@
         computed: {
             filteredEventsUrl() {
                 let url = this.events;
-                if (this.filterCaregiverId) {
+                if (this.filterCaregiverId.length > 0) {
                     url = url + '?caregiver_id=' + this.filterCaregiverId;
                     if (this.filterClientId) {
                         url = url + '&client_id=' + this.filterClientId;
