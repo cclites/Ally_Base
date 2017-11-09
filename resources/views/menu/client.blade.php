@@ -12,6 +12,6 @@
 @endif
 <li>
     <a href="/payment-history" aria-expanded="false">
-        <i class="mdi mdi-gauge"></i><span class="hide-menu">Payment History</span>
+        <i class="mdi mdi-credit-card"></i><span class="hide-menu">Payment History</span>
     </a>
 </li>

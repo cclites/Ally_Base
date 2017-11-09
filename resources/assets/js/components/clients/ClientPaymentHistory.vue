@@ -1,0 +1,56 @@
+<template>
+    <b-card title="Payment History">
+        <b-table hover
+                :items="items"
+                :fields="fields">
+            <template slot="created_at" scope="data">
+                {{ formatDate(data.item.created_at) }}
+            </template>
+            <template slot="actions" scope="data">
+                <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
+                    View Details
+                </a>
+            </template>
+        </b-table>
+    </b-card>
+</template>
+
+<style lang="scss">
+</style>
+
+<script>
+    export default {
+        props: ['client'],
+
+        data() {
+            return{
+                items: this.client.payments,
+                fields: [
+                    { key: 'created_at', label: 'Date Paid' },
+                    { key: 'week', label: 'Week' },
+                    { key: 'amount', label: 'Amount' },
+                    { key: 'method', label: 'Type' },
+                    'actions'
+                ]
+            }
+        },
+
+        created() {
+
+        },
+
+        mounted() {
+
+        },
+
+        methods: {
+            formatDate(date) {
+                return moment(date).format('L');
+            },
+        },
+
+        computed: {
+
+        }
+    }
+</script>

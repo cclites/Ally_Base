@@ -1,5 +1,11 @@
 <?php
 
+use App\Activity;
+use App\Business;
+use App\Caregiver;
+use App\Client;
+use App\Payment;
+use App\ShiftActivity;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,17 +21,21 @@ class DatabaseSeeder extends Seeder
             'firstname' => 'Demo',
             'lastname' => 'Admin',
             'email' => 'admin@allyms.com',
+            'username' => 'admin@allyms.com',
             'password' => bcrypt('demo'),
         ]);
 
-        $business = factory(\App\Business::class)->create([
+        $business = factory(Business::class)->create([
             'name' => 'Ally Demo Business'
         ]);
 
-        $client = factory(\App\Client::class)->create([
+        $this->generateActivities($business);
+
+        $client = factory(Client::class)->create([
             'firstname' => 'Demo',
             'lastname' => 'Client',
             'email' => 'client@allyms.com',
+            'username' => 'client@allyms.com',
             'password' => bcrypt('demo'),
             'business_id' => $business->id
         ]);
@@ -34,66 +44,27 @@ class DatabaseSeeder extends Seeder
             'firstname' => 'Demo',
             'lastname' => 'User',
             'email' => 'officeuser@allyms.com',
+            'username' => 'officeuser@allyms.com',
             'password' => bcrypt('demo')
         ]);
         $business->users()->attach($officeUser);
 
-        $caregiver = factory(\App\Caregiver::class)->create([
+        $caregiver = factory(Caregiver::class)->create([
             'firstname' => 'Demo',
             'lastname' => 'Caregiver',
             'email' => 'caregiver@allyms.com',
+            'username' => 'caregiver@allyms.com',
             'password' => bcrypt('demo')
         ]);
         $business->caregivers()->attach($caregiver, ['default_rate' => 20.00]);
 
-        // Create Others
-        factory(\App\Business::class, 3)->create();
-        factory(\App\Client::class, 20)->create();
-        factory(\App\Caregiver::class, 10)->create();
-        factory(\App\OfficeUser::class, 6)->create();
+        $this->generateShifts($caregiver, $client, $business);
 
-        // Create shift and payment entries
-        factory(\App\Shift::class, 50)->create([
-            'caregiver_id' => $caregiver->id,
-            'client_id' => $client->id,
-            'business_id' => $business->id
-        ])->each(function($shift) {
-            $secondsSince = time() - strtotime($shift->checked_out_time);
-            if ($secondsSince < 0) return;
-            $duration = round((strtotime($shift->checked_out_time) - strtotime($shift->checked_in_time)) / 3600);
-            $amount = $duration * 20.00;
-            $business_fee = $duration * 4.00;
-            $system_fee = $amount * 0.05;
-            if ($secondsSince < (86400*3)) {
-                $queue = \App\PaymentQueue::create([
-                    'client_id' => $shift->client_id,
-                    'business_id' => $shift->business_id,
-                    'reference_type' => \App\Shift::class,
-                    'reference_id' => $shift->id,
-                    'amount' => $amount,
-                    'business_allotment' => $business_fee,
-                    'system_allotment' => $system_fee,
-                    'caregiver_allotment' => $amount - ($business_fee + $system_fee),
-                    'created_at' => $shift->checked_out_time,
-                    'updated_at' => $shift->checked_out_time,
-                ]);
-            }
-            else {
-                $payment = \App\Payment::create([
-                    'client_id' => $shift->client_id,
-                    'business_id' => $shift->business_id,
-                    'reference_type' => \App\Shift::class,
-                    'reference_id' => $shift->id,
-                    'amount' => $amount,
-                    'business_allotment' => $business_fee,
-                    'system_allotment' => $system_fee,
-                    'caregiver_allotment' => $amount - ($business_fee + $system_fee),
-                    'success' => 1,
-                    'created_at' => $shift->checked_out_time,
-                    'updated_at' => $shift->checked_out_time,
-                ]);
-            }
-        });
+        // Create Others
+        factory(Business::class, 3)->create();
+        factory(Client::class, 20)->create();
+        factory(Caregiver::class, 10)->create();
+        factory(\App\OfficeUser::class, 6)->create();
 
         // Batch deposits
         $date = new DateTime('monday 3 months ago');
@@ -116,8 +87,8 @@ class DatabaseSeeder extends Seeder
                 'created_at' => $end,
             ]);
 
-            $payments = \App\Payment::where('deposited', 0)
-                ->whereBetween('created_at', [$start, $end])->each(function (\App\Payment $payment) use ($businessDeposit, $caregiverDeposit) {
+            $payments = Payment::where('deposited', 0)
+                ->whereBetween('created_at', [$start, $end])->each(function (Payment $payment) use ($businessDeposit, $caregiverDeposit) {
                     $businessDeposit->amount += $payment->business_allotment;
                     $caregiverDeposit->amount += $payment->caregiver_allotment;
                     $businessDeposit->payments()->attach($payment);
@@ -132,7 +103,49 @@ class DatabaseSeeder extends Seeder
 
             \DB::commit();
         }
+    }
 
+    private function generateShifts(Caregiver $caregiver, Client $client, Business $business)
+    {
+        // Create shift and payment entries
+        $shifts = factory(\App\Shift::class, 50)->create([
+            'caregiver_id' => $caregiver->id,
+            'client_id' => $client->id,
+            'business_id' => $business->id
+        ]);
+
+        $shifts->chunk(5)->each(function($chunk) use ($business) {
+            $chunk = collect($chunk);
+            $duration = $chunk->reduce(function ($carry, $shift) {
+                $secondsSince = time() - strtotime($shift->checked_out_time);
+                if ($secondsSince < 0) return;
+                return $carry + round((strtotime($shift->checked_out_time) - strtotime($shift->checked_in_time)) / 3600);
+            });
+
+            $amount = $duration * 20.00;
+            $business_fee = $duration * 4.00;
+            $system_fee = $amount * 0.05;
+
+            $payment = Payment::create([
+                'client_id' => $chunk->first()->client_id,
+                'business_id' => $chunk->first()->business_id,
+                'amount' => $amount,
+                'business_allotment' => $business_fee,
+                'system_allotment' => $system_fee,
+                'caregiver_allotment' => $amount - ($business_fee + $system_fee),
+                'success' => 1
+            ]);
+
+            foreach ($chunk as $shift) {
+                ShiftActivity::create(['shift_id' => $shift->id, 'activity_id' => rand(1, 7)]);
+                $shift->payment_id = $payment->id;
+                $shift->save();
+            }
+        });
+    }
+
+    private function generateActivities(Business $business)
+    {
         // Demo activities
         $activities = [
             'Bathing - Shower',
@@ -145,7 +158,7 @@ class DatabaseSeeder extends Seeder
             'Feeding',
         ];
         for ($i = 0; $i < count($activities)-1; $i++) {
-            \App\Activity::create([
+            Activity::create([
                 'code' => str_pad($i+1, 3, 0,STR_PAD_LEFT),
                 'name' => $activities[$i],
                 'business_id' => $business->id,

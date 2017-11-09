@@ -37,6 +37,11 @@ class Shift extends Model
     /// Relationship Methods
     //////////////////////////////////////
 
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);

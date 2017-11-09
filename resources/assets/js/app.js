@@ -34,11 +34,13 @@ Vue.use(BootstrapVue);
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
 
-
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
+Vue.component('client-payment-history', require('./components/clients/ClientPaymentHistory'));
+Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
+Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 
 // Admin
 Vue.component('business-create', require('./components/BusinessCreate.vue'));

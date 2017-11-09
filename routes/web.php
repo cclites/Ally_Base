@@ -43,6 +43,8 @@ Route::group([
 ], function () {
     Route::post('shift-history/approve', 'ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'ShiftController@index');
+    Route::get('payment-history/{id}/print', 'PaymentHistoryController@printDetails');
+    Route::resource('payment-history', 'PaymentHistoryController');
 });
 
 Route::group([
