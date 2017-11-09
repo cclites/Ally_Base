@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div class="alert alert-warning" v-if="!form.checked_out_time">
+        <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
             <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save &amp; Verify".
         </div>
         <b-card
-                header="Shift Details"
+                :header="title"
                 header-text-variant="white"
                 header-bg-variant="info"
         >
@@ -143,7 +143,7 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="shift.id">
                     <b-col sm="6">
                         <table class="table">
                             <thead>
@@ -207,7 +207,7 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
-                        <b-button variant="success" type="submit">Save Shift Modifications</b-button>
+                        <b-button variant="success" type="submit">Save Shift</b-button>
                         <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
                     </b-col>
                 </b-row>
@@ -221,28 +221,37 @@
 <script>
     export default {
         props: {
-            'shift': {},
+            'shift': {
+                default() {
+                    return {};
+                }
+            },
             'caregiver': {},
             'client': {},
             'in_distance': {},
             'out_distance': {},
             'activities': Array,
-            'issues': Array,
+            'issues': {
+                default() {
+                    return [];
+                }
+            },
             'caregivers': Array,
             'clients': Array,
         },
         data() {
             return {
                 form: new Form({
-                    client_id: this.shift.client_id,
-                    caregiver_id: this.shift.caregiver_id,
-                    caregiver_comments: this.shift.caregiver_comments,
-                    checked_in_time: this.shift.checked_in_time,
-                    checked_out_time: this.shift.checked_out_time,
-                    mileage: this.shift.mileage,
-                    other_expenses: this.shift.other_expenses,
+                    client_id: (this.shift.id) ? this.shift.client_id : null,
+                    caregiver_id: (this.shift.id) ? this.shift.caregiver_id : null,
+                    caregiver_comments: (this.shift.id) ? this.shift.caregiver_comments : null,
+                    checked_in_time: (this.shift.id) ? this.shift.checked_in_time : null,
+                    checked_out_time: (this.shift.id) ? this.shift.checked_out_time : null,
+                    mileage: (this.shift.id) ? this.shift.mileage : 0,
+                    other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
                     activities: [],
-                    verified: this.shift.verified,
+                    verified: (this.shift.id) ? this.shift.verified : true,
+                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
                 checked_in_time: '',
                 checked_in_date: '',
@@ -253,13 +262,20 @@
             }
         },
         mounted() {
-            let checkin = moment.utc(this.shift.checked_in_time).local();
-            let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
-            this.checked_in_date = checkin.format('MM/DD/YYYY');
-            this.checked_in_time = checkin.format('h:mm A');
-            this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-            this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
-            this.form.activities = this.getShiftActivityList();
+            if (this.shift.id) {
+                let checkin = moment.utc(this.shift.checked_in_time).local();
+                let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
+                this.checked_in_date = checkin.format('MM/DD/YYYY');
+                this.checked_in_time = checkin.format('h:mm A');
+                this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+                this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
+                this.form.activities = this.getShiftActivityList();
+            }
+        },
+        computed: {
+            title() {
+                return (this.shift.id) ? 'Shift Details' : 'Create a Manual Shift';
+            },
         },
         methods: {
             createIssue() {
@@ -286,7 +302,14 @@
             saveShift() {
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
-                this.form.post('/business/shifts/' + this.shift.id);
+                if (this.shift.id) {
+                    this.form.patch('/business/shifts/' + this.shift.id);
+                }
+                else {
+                    // Create a shift
+                    this.form.issues = this.issues;
+                    this.form.post('/business/shifts');
+                }
             },
             saveAndVerify() {
                 this.form.verified = true;

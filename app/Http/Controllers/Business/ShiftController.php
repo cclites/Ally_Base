@@ -27,7 +27,35 @@ class ShiftController extends BaseController
 
     public function store(Request $request)
     {
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'caregiver_id' => 'required|exists:caregivers,id',
+            'caregiver_comments' => 'nullable',
+            'mileage' => 'nullable|numeric',
+            'other_expenses' => 'nullable|numeric',
+            'checked_in_time' => 'required|date',
+            'checked_out_time' => 'required|date',
+            'verified' => 'boolean',
+        ]);
 
+        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
+        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+        $data['business_id'] = $this->business()->id;
+
+        if ($shift = Shift::create($data)) {
+            $shift->activities()->sync($request->input('activities', []));
+            foreach($request->input('issues', []) as $issue) {
+                $issue = new ShiftIssue([
+                    'caregiver_injury' => $issue['caregiver_injury'] ?? 0,
+                    'client_injury' => $issue['client_injury'] ?? 0,
+                    'comments' => $issue['comments'] ?? ''
+                ]);
+                $shift->issues()->save($issue);
+            }
+            return new SuccessResponse('You have successfully created this shift.', ['id' => $shift->id], route('business.shifts.show', [$shift->id]));
+        }
+
+        return new ErrorResponse(500, 'Error creating the shift.');
     }
 
     public function show(Request $request, Shift $shift)
