@@ -136,13 +136,13 @@
                             <b-row>
                                 <b-col cols="6">
                                     <b-form-select v-model="filterCaregiverId">
-                                        <option value="">--Filter by Caregiver--</option>
+                                        <option value="">All Caregivers</option>
                                         <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
                                     </b-form-select>
                                 </b-col>
                                 <b-col cols="6">
                                     <b-form-select v-model="filterClientId">
-                                        <option value="">--Filter by Client--</option>
+                                        <option value="">All Clients</option>
                                         <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                                     </b-form-select>
                                 </b-col>
