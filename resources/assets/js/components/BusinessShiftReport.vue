@@ -49,6 +49,15 @@
                             <td>{{ item.ally_total }}</td>
                         </tr>
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <td><strong>Total</strong></td>
+                                <td>{{ clientTotals.total }}</td>
+                                <td>{{ clientTotals.caregiver_total }}</td>
+                                <td>{{ clientTotals.provider_total }}</td>
+                                <td>{{ clientTotals.ally_total }}</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </b-card>
             </b-col>
@@ -73,6 +82,13 @@
                             <td>{{ item.amount }}</td>
                         </tr>
                         </tbody>
+                        <tfoot>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td>{{ caregiverTotals.hours }}</td>
+                            <td>{{ caregiverTotals.amount }}</td>
+                        </tr>
+                        </tfoot>
                     </table>
                 </b-card>
             </b-col>
@@ -195,6 +211,28 @@
                         'Designation': item.hours_type,
                     }
                 });
+            },
+            clientTotals() {
+                let component = this;
+                return this.items.clientCharges.reduce(function(totals, item) {
+                    console.log(totals, item);
+                    return {
+                        total: (component.parseFloat(totals.total) + component.parseFloat(item.total)).toFixed(2),
+                        caregiver_total: (component.parseFloat(totals.caregiver_total) + component.parseFloat(item.caregiver_total)).toFixed(2),
+                        provider_total: (component.parseFloat(totals.provider_total) + component.parseFloat(item.provider_total)).toFixed(2),
+                        ally_total: (component.parseFloat(totals.ally_total) + component.parseFloat(item.ally_total)).toFixed(2),
+                    }
+                })
+            },
+            caregiverTotals() {
+                let component = this;
+                return this.items.caregiverPayments.reduce(function(totals, item) {
+                    console.log(totals, item);
+                    return {
+                        amount: (component.parseFloat(totals.amount) + component.parseFloat(item.amount)).toFixed(2),
+                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
+                    }
+                })
             }
         },
 
@@ -224,6 +262,14 @@
             dayFormat(date) {
                 return moment(date).format('ddd MMM D');
             },
+
+            parseFloat(float) {
+                if (typeof(float) === 'string') {
+                    float = float.replace(',', '');
+                }
+                return parseFloat(float);
+            },
+
 
         },
     }
