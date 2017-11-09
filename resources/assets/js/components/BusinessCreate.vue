@@ -190,6 +190,7 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    username: null,
                     password: null,
                     password_confirmation: null,
                 })
