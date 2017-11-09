@@ -25,7 +25,15 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
-        $caregivers = $this->business()->caregivers()->with(['user', 'addresses', 'phoneNumbers'])->get();
+        $caregivers = $this->business()->caregivers()
+            ->with(['user', 'addresses', 'phoneNumbers'])
+            ->get();
+
+        $caregivers = $caregivers->sort(function(Caregiver $caregiverA, Caregiver $caregiverB) {
+            $strcmp = strcmp($caregiverA->lastname, $caregiverB->lastname);
+            return ($strcmp !== 0) ? $strcmp : strcmp($caregiverA->firstname, $caregiverB->firstname);
+        })->values();
+
         if ($request->expectsJson()) {
             return $caregivers;
         }
