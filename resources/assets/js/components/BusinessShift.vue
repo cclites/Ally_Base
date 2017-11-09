@@ -37,27 +37,27 @@
                 </b-row>
                 <b-row>
                     <b-col lg="6">
-                        <b-form-group label="Clocked In Time" label-for="checked_in_time">
+                        <b-form-group label="Clocked In Date &amp; Time" label-for="checked_in_time">
                             <b-row>
                                 <b-col cols="7">
-                                    <date-picker v-model="checked_in_date"></date-picker>
+                                    <date-picker v-model="checked_in_date" placeholder="Date (MM/DD/YYYY)"></date-picker>
                                 </b-col>
                                 <b-col cols="5">
-                                    <time-picker v-model="checked_in_time"></time-picker>
+                                    <time-picker v-model="checked_in_time" placeholder="Time (Ex. 12:00 PM)"></time-picker>
                                 </b-col>
                             </b-row>
-                            <input-help :form="form" field="checked_in_time" text="Confirm the time the shift was clocked in to."></input-help>
+                            <input-help :form="form" field="checked_in_time" text="Confirm the date &amp; time the shift was clocked in to."></input-help>
                         </b-form-group>
-                        <b-form-group label="Clocked Out Time" label-for="checked_out_time">
+                        <b-form-group label="Clocked Out Date &amp; Time" label-for="checked_out_time">
                             <b-row>
                                 <b-col cols="7">
-                                    <date-picker v-model="checked_out_date"></date-picker>
+                                    <date-picker v-model="checked_out_date" placeholder="Date (MM/DD/YYYY)"></date-picker>
                                 </b-col>
                                 <b-col cols="5">
-                                    <time-picker v-model="checked_out_time"></time-picker>
+                                    <time-picker v-model="checked_out_time" placeholder="Time (Ex. 12:00 PM)"></time-picker>
                                 </b-col>
                             </b-row>
-                            <input-help :form="form" field="checked_out_time" text="Confirm the time the shift was clocked out from."></input-help>
+                            <input-help :form="form" field="checked_out_time" text="Confirm the date &amp; time the shift was clocked out from."></input-help>
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
@@ -116,14 +116,26 @@
                 <b-row>
                     <b-col lg="12">
                         <h5>Activities Performed</h5>
-                        <div class="form-check">
-                            <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                            </label>
-                        </div>
+                        <b-row>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in leftHalfActivities" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in rightHalfActivities" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-top">
@@ -286,10 +298,21 @@
                 this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
                 this.form.activities = this.getShiftActivityList();
             }
+            else {
+                this.checked_in_date = moment().format('MM/DD/YYYY');
+                this.checked_out_date = moment().format('MM/DD/YYYY');
+                this.checked_in_time = '09:00 AM';
+            }
         },
         computed: {
             title() {
                 return (this.shift.id) ? 'Shift Details' : 'Create a Manual Shift';
+            },
+            leftHalfActivities() {
+                return this.getHalfOfActivities(true);
+            },
+            rightHalfActivities() {
+                return this.getHalfOfActivities(false);
             },
         },
         methods: {
@@ -306,6 +329,13 @@
             },
             getClockedOutMoment() {
                 return moment(this.checked_out_date + ' ' + this.checked_out_time, 'MM/DD/YYYY h:mm A');
+            },
+            getHalfOfActivities(leftHalf = true)
+            {
+                let half_length = Math.ceil(this.activities.length / 2);
+                let clone = this.activities.slice(0);
+                let left = clone.splice(0,half_length);
+                return (leftHalf) ? left : clone;
             },
             getShiftActivityList() {
                 let list = [];
