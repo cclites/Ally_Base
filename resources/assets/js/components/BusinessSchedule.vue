@@ -8,14 +8,14 @@
                 <b-row v-if="isFilterable()">
                     <b-col cols="6">
                         <b-form-select v-model="filterCaregiverId">
-                            <option value="">All Caregivers</option>
-                            <option value="0">Unassigned Shifts</option>
+                            <option :value="-1">All Caregivers</option>
+                            <option :value="0">Unassigned Shifts</option>
                             <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                     <b-col cols="6">
                         <b-form-select v-model="filterClientId">
-                            <option value="">--Filter by Client--</option>
+                            <option :value="-1">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
@@ -48,8 +48,8 @@
 
         data() {
             return {
-                filterCaregiverId: (this.caregiver) ? this.caregiver.id : "",
-                filterClientId: (this.client) ? this.client.id : "",
+                filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
+                filterClientId: (this.client) ? this.client.id : -1,
                 header: {
                     left:   'prev,next today',
                     center: 'title',
@@ -70,13 +70,13 @@
         computed: {
             filteredEventsUrl() {
                 let url = this.events;
-                if (this.filterCaregiverId.length > 0) {
+                if (this.filterCaregiverId > -1) {
                     url = url + '?caregiver_id=' + this.filterCaregiverId;
-                    if (this.filterClientId) {
+                    if (this.filterClientId > -1) {
                         url = url + '&client_id=' + this.filterClientId;
                     }
                 }
-                else if (this.filterClientId) {
+                else if (this.filterClientId > -1) {
                     url = url + '?client_id=' + this.filterClientId;
                 }
                 return url;
