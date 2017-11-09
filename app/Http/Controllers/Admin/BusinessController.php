@@ -65,7 +65,7 @@ class BusinessController extends Controller
             'lastname' => 'required',
             'password' => 'required|confirmed',
         ]);
-        if (!$userData['username']) $userData['username'] = $userData['email'];
+        $userData['username'] = $userData['username'] ?? $userData['email'];
         $userData['password'] = bcrypt($userData['password']);
 
         $business = Business::create($businessData);
