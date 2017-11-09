@@ -34,28 +34,34 @@
                         <thead>
                         <tr>
                             <th>Client</th>
+                            <th>Hours</th>
                             <th>Total</th>
-                            <th>Caregiver</th>
-                            <th>Registry</th>
-                            <th>Ally</th>
+                            <!--<th>Caregiver</th>-->
+                            <!--<th>Registry</th>-->
+                            <!--<th>Ally</th>-->
+                            <th>Type</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr v-for="item in items.clientCharges">
                             <td>{{ item.name }}</td>
+                            <td>{{ item.hours }}</td>
                             <td>{{ item.total }}</td>
-                            <td>{{ item.caregiver_total }}</td>
-                            <td>{{ item.provider_total }}</td>
-                            <td>{{ item.ally_total }}</td>
+                            <!--<td>{{ item.caregiver_total }}</td>-->
+                            <!--<td>{{ item.provider_total }}</td>-->
+                            <!--<td>{{ item.ally_total }}</td>-->
+                            <td>{{ item.payment_type }}</td>
                         </tr>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td><strong>Total</strong></td>
+                                <td>{{ clientTotals.hours }}</td>
                                 <td>{{ clientTotals.total }}</td>
-                                <td>{{ clientTotals.caregiver_total }}</td>
-                                <td>{{ clientTotals.provider_total }}</td>
-                                <td>{{ clientTotals.ally_total }}</td>
+                                <td></td>
+                                <!--<td>{{ clientTotals.caregiver_total }}</td>-->
+                                <!--<td>{{ clientTotals.provider_total }}</td>-->
+                                <!--<td>{{ clientTotals.ally_total }}</td>-->
                             </tr>
                         </tfoot>
                     </table>
@@ -89,6 +95,28 @@
                             <td>{{ caregiverTotals.amount }}</td>
                         </tr>
                         </tfoot>
+                    </table>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="6">
+                <b-card>
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Provider Payment For Date Range:</strong></td>
+                            <td>{{ clientTotals.provider_total }}</td>
+                        </tr>
+                    </table>
+                </b-card>
+            </b-col>
+            <b-col lg="6">
+                <b-card>
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><strong>Processing Fee For Date Range:</strong></td>
+                            <td>{{ clientTotals.ally_total }}</td>
+                        </tr>
                     </table>
                 </b-card>
             </b-col>
@@ -207,7 +235,6 @@
                         'Ally Fee': item.ally_fee,
                         'Total Hourly': item.hourly_total,
                         'Shift Total': item.shift_total,
-                        'Type': item.payment_method,
                         'Designation': item.hours_type,
                     }
                 });
@@ -217,6 +244,7 @@
                 return this.items.clientCharges.reduce(function(totals, item) {
                     console.log(totals, item);
                     return {
+                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
                         total: (component.parseFloat(totals.total) + component.parseFloat(item.total)).toFixed(2),
                         caregiver_total: (component.parseFloat(totals.caregiver_total) + component.parseFloat(item.caregiver_total)).toFixed(2),
                         provider_total: (component.parseFloat(totals.provider_total) + component.parseFloat(item.provider_total)).toFixed(2),
