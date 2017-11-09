@@ -18,7 +18,7 @@ class AllyFeeCalculator
      * @param \App\Client $client
      * @param $paymentMethod
      * @param $paymentAmount
-     * @return string
+     * @return float
      * @throws \Exception
      */
     public static function getFee(Client $client, $paymentMethod, $paymentAmount)
