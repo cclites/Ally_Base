@@ -105,18 +105,21 @@ Route::group([
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
-    Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
+    Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
+
+    Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
+    Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
-    Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
-    Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
-    Route::post('shifts/{id}', 'Business\ShiftController@update')->name('shifts.update');
-    Route::post('shifts/{id}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
-    Route::patch('shifts/{id}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::resource('shifts', 'Business\ShiftController');
+    Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+    Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
+    Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
     Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
