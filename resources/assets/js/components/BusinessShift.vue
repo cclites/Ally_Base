@@ -86,8 +86,22 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="12">
-                        <b-form-group label="Caregiver Comments" label-for="caregiver_comments">
+                    <b-col lg="4">
+                        <b-form-group label="Shift Designation" label-for="hours_type">
+                            <b-form-select
+                                    id="hours_type"
+                                    name="hours_type"
+                                    v-model="form.hours_type"
+                            >
+                                <option value="default">None - Regular Shift</option>
+                                <option value="holiday">Holiday</option>
+                                <option value="overtime">Overtime</option>
+                            </b-form-select>
+                            <input-help :form="form" field="" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="8">
+                        <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
                                     name="caregiver_comments"
@@ -249,6 +263,7 @@
                     checked_out_time: (this.shift.id) ? this.shift.checked_out_time : null,
                     mileage: (this.shift.id) ? this.shift.mileage : 0,
                     other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
+                    hours_type: (this.shift.hours_type) ? this.shift.hours_type : 'default',
                     activities: [],
                     verified: (this.shift.id) ? this.shift.verified : true,
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal

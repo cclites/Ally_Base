@@ -36,6 +36,7 @@ class ShiftController extends BaseController
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
             'verified' => 'boolean',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
@@ -113,6 +114,7 @@ class ShiftController extends BaseController
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
             'verified' => 'boolean',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
