@@ -3,21 +3,25 @@
 namespace App\Http\Controllers\Business;
 
 use App\BankAccount;
+use App\Business;
 use App\OfficeUser;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 
 class SettingController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
-        $business = OfficeUser::find(auth()->id())->businesses()->with('bankAccount', 'paymentAccount')->first();
+        $business = OfficeUser::find(auth()->id())->businesses()->first();
+
         return view('business.settings.index', compact('business'));
+    }
+
+    public function bankAccounts()
+    {
+        $business = OfficeUser::find(auth()->id())->businesses()->with('bankAccount', 'paymentAccount')->first();
+        return view('business.settings.bank_accounts', compact('business'));
     }
 
     /**
@@ -104,7 +108,12 @@ class SettingController extends BaseController
      */
     public function update(Request $request, $id)
     {
-        //
+        $business = Business::find($id);
+
+        $business->update([
+            'scheduling' => $request->scheduling
+        ]);
+        return new SuccessResponse('Business settings updated.');
     }
 
     /**

@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-row>
+        <b-row class="mb-2">
             <b-col lg="6">
             </b-col>
             <b-col lg="6" class="text-right">
@@ -237,14 +237,12 @@
                 ],
                 items: this.shifts.map(function(shift) {
                         let start = moment.utc(shift.checked_in_time);
-                        let end = (shift.checked_out_time) ? moment.utc(shift.checked_out_time) : null;
-                        let hours = (shift.checked_out_time) ? (parseInt(end.diff(start, 'minutes')) / 60).toFixed(2) : 'CLOCKED IN';
                         return {
                             id: shift.id,
                             date: start.local().format('L LTS'),
                             client_name: shift.client_name,
                             caregiver_name: shift.caregiver_name,
-                            hours: hours,
+                            hours: (shift.checked_out_time) ? shift.roundedShiftLength : 'CLOCKED IN',
                             verified: shift.verified
                         }
                     }),

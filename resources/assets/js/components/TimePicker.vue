@@ -4,6 +4,7 @@
                 ref="timepicker"
                 :class="cssClass"
                 type="text"
+                :placeholder="placeholder"
                 v-model="value"
                 @change="onChange($event.target.value, $event)"
         />
@@ -22,6 +23,11 @@
             'format': {
                 default() {
                     return 'h:mm A';
+                }
+            },
+            'placeholder': {
+                default() {
+                    return '';
                 }
             }
         },

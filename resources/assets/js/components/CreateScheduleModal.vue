@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="createScheduleModal" title="Create Schedule" v-model="createModel">
+    <b-modal id="createScheduleModal" title="Schedule Shift" v-model="createModel">
         <b-container fluid>
             <b-row v-if="!this.client">
                 <b-col lg="12">

@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div class="alert alert-warning" v-if="!form.checked_out_time">
+        <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
             <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save &amp; Verify".
         </div>
         <b-card
-                header="Shift Details"
+                :header="title"
                 header-text-variant="white"
                 header-bg-variant="info"
         >
@@ -37,27 +37,27 @@
                 </b-row>
                 <b-row>
                     <b-col lg="6">
-                        <b-form-group label="Clocked In Time" label-for="checked_in_time">
+                        <b-form-group label="Clocked In Date &amp; Time" label-for="checked_in_time">
                             <b-row>
                                 <b-col cols="7">
-                                    <date-picker v-model="checked_in_date"></date-picker>
+                                    <date-picker v-model="checked_in_date" placeholder="Date (MM/DD/YYYY)"></date-picker>
                                 </b-col>
                                 <b-col cols="5">
-                                    <time-picker v-model="checked_in_time"></time-picker>
+                                    <time-picker v-model="checked_in_time" placeholder="Time (Ex. 12:00 PM)"></time-picker>
                                 </b-col>
                             </b-row>
-                            <input-help :form="form" field="checked_in_time" text="Confirm the time the shift was clocked in to."></input-help>
+                            <input-help :form="form" field="checked_in_time" text="Confirm the date &amp; time the shift was clocked in to."></input-help>
                         </b-form-group>
-                        <b-form-group label="Clocked Out Time" label-for="checked_out_time">
+                        <b-form-group label="Clocked Out Date &amp; Time" label-for="checked_out_time">
                             <b-row>
                                 <b-col cols="7">
-                                    <date-picker v-model="checked_out_date"></date-picker>
+                                    <date-picker v-model="checked_out_date" placeholder="Date (MM/DD/YYYY)"></date-picker>
                                 </b-col>
                                 <b-col cols="5">
-                                    <time-picker v-model="checked_out_time"></time-picker>
+                                    <time-picker v-model="checked_out_time" placeholder="Time (Ex. 12:00 PM)"></time-picker>
                                 </b-col>
                             </b-row>
-                            <input-help :form="form" field="checked_out_time" text="Confirm the time the shift was clocked out from."></input-help>
+                            <input-help :form="form" field="checked_out_time" text="Confirm the date &amp; time the shift was clocked out from."></input-help>
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
@@ -86,8 +86,22 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="12">
-                        <b-form-group label="Caregiver Comments" label-for="caregiver_comments">
+                    <b-col lg="4">
+                        <b-form-group label="Shift Designation" label-for="hours_type">
+                            <b-form-select
+                                    id="hours_type"
+                                    name="hours_type"
+                                    v-model="form.hours_type"
+                            >
+                                <option value="default">None - Regular Shift</option>
+                                <option value="holiday">Holiday</option>
+                                <option value="overtime">Overtime</option>
+                            </b-form-select>
+                            <input-help :form="form" field="" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="8">
+                        <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
                                     name="caregiver_comments"
@@ -102,14 +116,26 @@
                 <b-row>
                     <b-col lg="12">
                         <h5>Activities Performed</h5>
-                        <div class="form-check">
-                            <input-help :form="form" field="activities" text="Check off the activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in activities" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                            </label>
-                        </div>
+                        <b-row>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in leftHalfActivities" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in rightHalfActivities" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-top">
@@ -143,7 +169,7 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="shift.id">
                     <b-col sm="6">
                         <table class="table">
                             <thead>
@@ -207,7 +233,7 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
-                        <b-button variant="success" type="submit">Save Shift Modifications</b-button>
+                        <b-button variant="success" type="submit">Save Shift</b-button>
                         <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
                     </b-col>
                 </b-row>
@@ -221,28 +247,38 @@
 <script>
     export default {
         props: {
-            'shift': {},
+            'shift': {
+                default() {
+                    return {};
+                }
+            },
             'caregiver': {},
             'client': {},
             'in_distance': {},
             'out_distance': {},
             'activities': Array,
-            'issues': Array,
+            'issues': {
+                default() {
+                    return [];
+                }
+            },
             'caregivers': Array,
             'clients': Array,
         },
         data() {
             return {
                 form: new Form({
-                    client_id: this.shift.client_id,
-                    caregiver_id: this.shift.caregiver_id,
-                    caregiver_comments: this.shift.caregiver_comments,
-                    checked_in_time: this.shift.checked_in_time,
-                    checked_out_time: this.shift.checked_out_time,
-                    mileage: this.shift.mileage,
-                    other_expenses: this.shift.other_expenses,
+                    client_id: (this.shift.id) ? this.shift.client_id : null,
+                    caregiver_id: (this.shift.id) ? this.shift.caregiver_id : null,
+                    caregiver_comments: (this.shift.id) ? this.shift.caregiver_comments : null,
+                    checked_in_time: (this.shift.id) ? this.shift.checked_in_time : null,
+                    checked_out_time: (this.shift.id) ? this.shift.checked_out_time : null,
+                    mileage: (this.shift.id) ? this.shift.mileage : 0,
+                    other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
+                    hours_type: (this.shift.hours_type) ? this.shift.hours_type : 'default',
                     activities: [],
-                    verified: this.shift.verified,
+                    verified: (this.shift.id) ? this.shift.verified : true,
+                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
                 checked_in_time: '',
                 checked_in_date: '',
@@ -253,13 +289,31 @@
             }
         },
         mounted() {
-            let checkin = moment.utc(this.shift.checked_in_time).local();
-            let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
-            this.checked_in_date = checkin.format('MM/DD/YYYY');
-            this.checked_in_time = checkin.format('h:mm A');
-            this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-            this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
-            this.form.activities = this.getShiftActivityList();
+            if (this.shift.id) {
+                let checkin = moment.utc(this.shift.checked_in_time).local();
+                let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
+                this.checked_in_date = checkin.format('MM/DD/YYYY');
+                this.checked_in_time = checkin.format('h:mm A');
+                this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+                this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
+                this.form.activities = this.getShiftActivityList();
+            }
+            else {
+                this.checked_in_date = moment().format('MM/DD/YYYY');
+                this.checked_out_date = moment().format('MM/DD/YYYY');
+                this.checked_in_time = '09:00 AM';
+            }
+        },
+        computed: {
+            title() {
+                return (this.shift.id) ? 'Shift Details' : 'Create a Manual Shift';
+            },
+            leftHalfActivities() {
+                return this.getHalfOfActivities(true);
+            },
+            rightHalfActivities() {
+                return this.getHalfOfActivities(false);
+            },
         },
         methods: {
             createIssue() {
@@ -276,6 +330,13 @@
             getClockedOutMoment() {
                 return moment(this.checked_out_date + ' ' + this.checked_out_time, 'MM/DD/YYYY h:mm A');
             },
+            getHalfOfActivities(leftHalf = true)
+            {
+                let half_length = Math.ceil(this.activities.length / 2);
+                let clone = this.activities.slice(0);
+                let left = clone.splice(0,half_length);
+                return (leftHalf) ? left : clone;
+            },
             getShiftActivityList() {
                 let list = [];
                 for (let activity of this.shift.activities) {
@@ -286,7 +347,14 @@
             saveShift() {
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
-                this.form.post('/business/shifts/' + this.shift.id);
+                if (this.shift.id) {
+                    this.form.patch('/business/shifts/' + this.shift.id);
+                }
+                else {
+                    // Create a shift
+                    this.form.issues = this.issues;
+                    this.form.post('/business/shifts');
+                }
             },
             saveAndVerify() {
                 this.form.verified = true;

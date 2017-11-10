@@ -56,7 +56,7 @@
             },
             referenceUrlTitle() {
                 if (this.exception.reference_type === 'App\\Shift') {
-                    return 'Link to Shift';
+                    return 'View Shift';
                 }
                 return 'Reference Link';
             }

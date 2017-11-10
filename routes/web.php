@@ -62,8 +62,10 @@ Route::group([
 
     Route::resource('care_plans', 'Business\CarePlanController');
 
-    Route::get('settings', 'Business\SettingController@index');
-    Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount');
+    Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
+    Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
+    Route::get('settings', 'Business\SettingController@index')->name('settings.index');
+    Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
@@ -75,6 +77,7 @@ Route::group([
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
+    Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
 
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
@@ -95,24 +98,28 @@ Route::group([
     Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{id}/ally_pct', 'Business\ClientController@getAllyPercentage')->name('clients.ally_pct');
+    Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
-    Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
+    Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
+
+    Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
+    Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
-    Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
-    Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
-    Route::post('shifts/{id}', 'Business\ShiftController@update')->name('shifts.update');
-    Route::post('shifts/{id}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
-    Route::patch('shifts/{id}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::resource('shifts', 'Business\ShiftController');
+    Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+    Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
+    Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
     Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');

@@ -23,9 +23,19 @@ class ClientController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
+
+        $clients = $clients->sort(function(Client $clientA, Client $clientB) {
+            $strcmp = strcmp($clientA->lastname, $clientB->lastname);
+            return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
+        })->values();
+
+        if ($request->expectsJson()) {
+            return $clients;
+        }
+
         return view('business.clients.index', compact('clients'));
     }
 
@@ -63,7 +73,8 @@ class ClientController extends BaseController
             [
                 'firstname' => 'required',
                 'lastname' => 'required',
-                'email' => 'required|email|unique:users',
+                'email' => 'required|email|',
+                'username' => 'required|unique:users',
                 'date_of_birth' => 'nullable',
                 'business_fee' => 'nullable|numeric',
                 'client_type' => 'required',
@@ -113,8 +124,9 @@ class ClientController extends BaseController
 
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate'));
+        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
 
     public function edit(Client $client)
@@ -138,7 +150,8 @@ class ClientController extends BaseController
         $data = $request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
+            'email' => 'required|email',
+            'username' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -241,5 +254,20 @@ class ClientController extends BaseController
     {
         $client = Client::findOrFail($client_id);
         return ['percentage' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)];
+    }
+
+    public function changePassword(Request $request, Client $client) {
+        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $request->validate([
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        if ($client->user->changePassword($request->input('password'))) {
+            return new SuccessResponse('The client\'s password has been updated.');
+        }
+        return new ErrorResponse(500, 'Unable to update client password.');
     }
 }

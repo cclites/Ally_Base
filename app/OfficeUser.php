@@ -22,5 +22,4 @@ class OfficeUser extends Model implements UserRole
     {
         return $this->belongsToMany(Business::class, 'business_office_users');
     }
-
 }

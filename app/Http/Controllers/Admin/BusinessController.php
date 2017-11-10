@@ -60,10 +60,12 @@ class BusinessController extends Controller
 
         $userData = $request->validate([
             'email' => 'required|email',
+            'username' => 'nullable|unique:users',
             'firstname' => 'required',
             'lastname' => 'required',
             'password' => 'required|confirmed',
         ]);
+        $userData['username'] = $userData['username'] ?? $userData['email'];
         $userData['password'] = bcrypt($userData['password']);
 
         $business = Business::create($businessData);

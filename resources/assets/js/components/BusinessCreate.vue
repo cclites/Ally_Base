@@ -124,9 +124,20 @@
                                 name="email"
                                 type="email"
                                 v-model="form.email"
+                                @change="copyEmailToUsername()"
                         >
                         </b-form-input>
                         <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                    </b-form-group>
+                    <b-form-group label="Username" label-for="username">
+                        <b-form-input
+                                id="username"
+                                name="username"
+                                type="text"
+                                v-model="form.username"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -179,6 +190,7 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    username: null,
                     password: null,
                     password_confirmation: null,
                 })
@@ -189,6 +201,12 @@
         },
 
         methods: {
+
+            copyEmailToUsername() {
+                if (this.form.email && !this.form.username) {
+                    this.form.username = this.form.email;
+                }
+            },
 
             submitForm() {
                 this.form.post('/admin/businesses');

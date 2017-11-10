@@ -2,6 +2,9 @@
 
 namespace App\Console;
 
+use App\Console\Commands\ImportGenerationsCaregivers;
+use App\Console\Commands\ImportPaychexCaregivers;
+use App\Console\Commands\ScheduledPaymentsCsv;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +16,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        ScheduledPaymentsCsv::class,
+        ImportGenerationsCaregivers::class,
+        ImportPaychexCaregivers::class,
     ];
 
     /**

@@ -23,9 +23,11 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
-        </li>
+        @if ($business->scheduling)
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+            </li>
+        @endif
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
@@ -72,14 +74,14 @@
                     <div class="card">
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
-                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submitUrl="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
+                            <bank-account-form :account="{{ $caregiver->bankAccount OR '{}' }}" :submit-url="'{{ '/business/caregivers/' . $caregiver->id . '/bank_account' }}'" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="tab-pane" id="schedule" role="tabpanel">
-            <caregiver-schedule :caregiver="{{ $caregiver }}" :schedules="{{ $schedules }}"></caregiver-schedule>
+            <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list

@@ -6,8 +6,11 @@ use App\Caregiver;
 use App\Deposit;
 use App\Payment;
 use App\PaymentQueue;
+use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
+use App\Reports\ClientChargesReport;
 use App\Reports\ScheduledPaymentsReport;
+use App\Reports\ShiftsReport;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -210,19 +213,9 @@ class ReportsController extends BaseController
         return view('business.reports.scheduled', compact('payments', 'month_sum', 'year_sum', 'scheduled_sum'));
     }
 
-    public function shifts()
+    public function shiftsReport()
     {
-        $shifts = $this->business()
-            ->shifts()
-//            ->whereNotNull('checked_out_time')
-            ->orderBy('checked_in_time', 'DESC')
-            ->get();
-        $shifts = $shifts->map(function($shift) {
-            $shift->client_name = ($shift->client) ? $shift->client->name() : '';
-            $shift->caregiver_name = ($shift->caregiver) ? $shift->caregiver->name() : '';
-            return $shift;
-        });
-        return view('business.reports.shifts', compact('shifts'));
+        return view('business.reports.shifts');
     }
 
     public function certificationExpirations(Request $request)
@@ -239,5 +232,34 @@ class ReportsController extends BaseController
         $certifications = $report->rows();
 
         return view('business.reports.certifications', compact('certifications'));
+    }
+
+    public function shifts(Request $request) {
+        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
+        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+
+        $report = new ShiftsReport();
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        return $report->rows();
+    }
+
+    public function caregiverPayments(Request $request)
+    {
+        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
+        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+
+        $report = new CaregiverPaymentsReport();
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        return $report->rows();
+    }
+
+    public function clientCharges(Request $request)
+    {
+        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
+        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+
+        $report = new ClientChargesReport();
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        return $report->rows();
     }
 }

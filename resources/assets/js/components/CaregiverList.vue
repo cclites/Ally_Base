@@ -51,7 +51,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: null,
+                sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
                 filter: null,

@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Traits\ActiveBusiness;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
+    use ActiveBusiness;
+
     /**
      * Bootstrap any application services.
      *
@@ -19,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment() == 'local') {
             Schema::defaultStringLength(191);
         }
+
+        \View::composer('*', function ($view) {
+            $view->with('active_business', $this->business());
+        });
     }
 
     /**
