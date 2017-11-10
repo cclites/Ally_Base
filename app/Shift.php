@@ -26,10 +26,6 @@ class Shift extends Model
     const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
-    public function getRoundedShiftLengthAttribute()
-    {
-        return $this->duration();
-    }
 
     //////////////////////////////////////
     /// Relationship Methods
@@ -80,6 +76,15 @@ class Shift extends Model
     public function exceptions()
     {
         return $this->morphMany(SystemException::class, 'reference');
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function getRoundedShiftLengthAttribute()
+    {
+        return $this->duration();
     }
 
     //////////////////////////////////////
