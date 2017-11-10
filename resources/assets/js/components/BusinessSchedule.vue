@@ -22,7 +22,7 @@
                 </b-row>
             </b-col>
         </b-row>
-        <full-calendar ref="calendar" :events="filteredEventsUrl" default-view="agendaWeek" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
+        <full-calendar ref="calendar" :events="filteredEventsUrl" default-view="month" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
 
         <create-schedule-modal :model.sync="createModal"
                                :selected-event="selectedEvent"
