@@ -29,17 +29,24 @@ class ReportsController extends Controller
 
     public function paymentHistory()
     {
+        // todo fix this workaround method for getting caregiver payments when a better relationship is created
         $caregiver = Caregiver::with('shifts.payment')->find(auth()->id());
         $payments = $caregiver->shifts->map(function ($shift) {
-            $payment = $shift->payment;
-            if ($payment) {
+            $payment = null;
+            if (isset($shift->payment)) {
+                $payment = $shift->payment;
                 $payment->week = [
                     'start' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear)->toDateString(),
                     'end' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear, 7)->toDateString()
                 ];
             }
             return $payment;
-        })->unique();
+        })
+            ->filter();
+
+        if ($payments->count()) {
+            $payments = $payments->unique();
+        }
         return view('caregivers.reports.payment_history', compact('caregiver', 'payments'));
     }
 
