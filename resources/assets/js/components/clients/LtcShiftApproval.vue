@@ -17,7 +17,8 @@
             </b-row>
             <b-row v-if="items.length">
                 <b-col>
-                    <b-button v-b-modal.modal1>Sign and Approve These Shifts</b-button>
+                    <b-button v-b-modal.modal1 v-if="!shiftsVerified">Sign and Approve These Shifts</b-button>
+                    <div v-else class="ml-2"><em>Shifts for this week have been approved.</em></div>
                 </b-col>
             </b-row>
             <b-table show-empty :items="items"
@@ -31,7 +32,8 @@
             </b-table>
             <b-row v-if="items.length">
                 <b-col>
-                    <b-button v-b-modal.modal1>Sign and Approve These Shifts</b-button>
+                    <b-button v-b-modal.modal1 v-if="!shiftsVerified">Sign and Approve These Shifts</b-button>
+                    <div v-else class="ml-2"><em>Shifts for this week have been approved.</em></div>
                 </b-col>
             </b-row>
         </b-card>
@@ -148,15 +150,13 @@
     </div>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
     export default {
-        props: ['shifts', 'weekStartDate', 'weekEndDate'],
+        props: ['shifts', 'weekStartDate', 'weekEndDate', 'verified'],
 
         data() {
             return{
+                shiftsVerified: this.verified,
                 currentItem: {
                     caregiver: {}
                 },
@@ -212,6 +212,7 @@
                 this.startDate = response.data.week_start_date;
                 this.endDate = response.data.week_end_date;
                 this.weekOfYear = moment(this.startDate).week();
+                this.shiftsVerified = response.data.shifts_verified;
             },
 
             signShifts() {
@@ -220,6 +221,7 @@
                 });
 
                 form.post('/shift-history/approve').then(response => {
+                    this.getWeek(this.weekOfYear);
                     this.approved = false;
                 });
             },

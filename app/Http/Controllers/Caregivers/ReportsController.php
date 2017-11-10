@@ -32,10 +32,12 @@ class ReportsController extends Controller
         $caregiver = Caregiver::with('shifts.payment')->find(auth()->id());
         $payments = $caregiver->shifts->map(function ($shift) {
             $payment = $shift->payment;
-            $payment->week = [
-                'start' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear)->toDateString(),
-                'end' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear, 7)->toDateString()
-            ];
+            if ($payment) {
+                $payment->week = [
+                    'start' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear)->toDateString(),
+                    'end' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear, 7)->toDateString()
+                ];
+            }
             return $payment;
         })->unique();
         return view('caregivers.reports.payment_history', compact('caregiver', 'payments'));
