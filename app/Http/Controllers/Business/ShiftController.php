@@ -105,6 +105,10 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
+        if ($shift->isReadOnly()) {
+            return new ErrorResponse(400, 'This shift is locked for modification.');
+        }
+
         $data = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'required|exists:caregivers,id',
