@@ -36,6 +36,8 @@ class ShiftController extends BaseController
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
             'verified' => 'boolean',
+            'caregiver_rate' => 'required|numeric',
+            'provider_fee' => 'required|numeric',
             'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
@@ -118,6 +120,8 @@ class ShiftController extends BaseController
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
             'verified' => 'boolean',
+            'caregiver_rate' => 'required|numeric',
+            'provider_fee' => 'required|numeric',
             'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 

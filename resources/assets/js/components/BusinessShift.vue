@@ -86,7 +86,29 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="4">
+                    <b-col md="4" sm="6">
+                        <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_rate">
+                            <b-form-input 
+                                id="caregiver_rate"
+                                name="caregiver_rate"
+                                type="number"
+                                step="any"
+                                v-model="form.caregiver_rate"
+                                >
+                            </b-form-input>
+                            <input-help :form="form" field="caregiver_rate" text=""></input-help>
+                        </b-form-group>
+                        <b-form-group label="Provider Hourly Fee" label-for="provider_fee">
+                            <b-form-input
+                                    id="provider_fee"
+                                    name="provider_fee"
+                                    type="number"
+                                    step="any"
+                                    v-model="form.provider_fee"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="provider_fee" text=""></input-help>
+                        </b-form-group>
                         <b-form-group label="Shift Designation" label-for="hours_type">
                             <b-form-select
                                     id="hours_type"
@@ -100,12 +122,12 @@
                             <input-help :form="form" field="" text=""></input-help>
                         </b-form-group>
                     </b-col>
-                    <b-col lg="8">
+                    <b-col md="8" sm="6">
                         <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
                                     name="caregiver_comments"
-                                    :rows="3"
+                                    :rows="6"
                                     v-model="form.caregiver_comments"
                             >
                             </b-textarea>
@@ -236,7 +258,7 @@
                         <b-button variant="success" type="submit">Save Shift</b-button>
                         <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
                     </b-col>
-                    <b-col lg="12">
+                    <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
                     </b-col>
                 </b-row>
@@ -279,8 +301,10 @@
                     mileage: (this.shift.id) ? this.shift.mileage : 0,
                     other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
                     hours_type: (this.shift.hours_type) ? this.shift.hours_type : 'default',
-                    activities: [],
                     verified: (this.shift.id) ? this.shift.verified : true,
+                    caregiver_rate: (this.shift.id) ? this.shift.caregiver_rate : '',
+                    provider_fee: (this.shift.id) ? this.shift.provider_fee : '',
+                    activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
                 checked_in_time: '',
