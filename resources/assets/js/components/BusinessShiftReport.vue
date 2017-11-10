@@ -159,6 +159,14 @@
                         <template slot="Day" scope="data">
                             {{ dayFormat(data.value) }}
                         </template>
+                        <template slot="Verified" scope="data">
+                            <span v-if="data.value" style="color: green">
+                                <i class="fa fa-check-square-o"></i>
+                            </span>
+                                    <span v-else style="color: darkred">
+                                <i class="fa fa-times-rectangle-o"></i>
+                            </span>
+                        </template>
                         <template slot="actions" scope="row">
                             <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit</b-btn>
                             <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
@@ -382,12 +390,13 @@
                         'Hours': item.roundedShiftLength,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
+                        'Verified': item.verified,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
                         'Total Hourly': item.hourly_total,
                         'Shift Total': item.shift_total,
-                        'Designation': item.hours_type,
+                        'Type': item.hours_type,
                     }
                 });
             },

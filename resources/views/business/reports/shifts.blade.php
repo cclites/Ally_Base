@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Shift Report')
+@section('title', 'Shift History')
 
 @section('content')
     <business-shift-report></business-shift-report>
