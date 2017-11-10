@@ -7,13 +7,7 @@
             <b-row>
                 <b-col lg="6" sm="5" xs="12">
                     <b-form-group label="Phone Number" label-for="number">
-                        <b-form-input
-                                id="number"
-                                name="number"
-                                type="text"
-                                v-model="form.number"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.number" name="number" id="number"></mask-input>
                         <input-help :form="form" field="number" text="Enter full phone number."></input-help>
                     </b-form-group>
                 </b-col>
@@ -76,10 +70,8 @@
             handleKeyDown(target) {
                 this.form.clearError(target);
                 this.buttonVisible = true;
-            }
+            },
 
-        }
-
-
+        },
     }
 </script>

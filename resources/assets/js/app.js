@@ -119,6 +119,8 @@ Vue.component('caregiver-application-create', require('./components/caregivers/C
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
+Vue.component('mask-input', require('./components/MaskInput'));
+
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
 });
@@ -141,6 +143,6 @@ Vue.filter('nl2br', value => {
 
 
 const app = new Vue({
-    el: '#main-wrapper'
+    el: '#main-wrapper',
 });
 require('./alerts');

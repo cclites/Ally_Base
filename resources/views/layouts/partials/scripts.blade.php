@@ -6,14 +6,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.js"></script>
 <script src="/vendor/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-
+<script src="/vendor/jquery-mask/jquery.mask.min.js"></script>
 {{--<!-- slimscrollbar scrollbar JavaScript -->--}}
 <script src="/demo/js/jquery.slimscroll.js"></script>
 
 {{--<!--stickey kit -->--}}
 <script src="/demo/assets/plugins/sticky-kit-master/dist/sticky-kit.min.js"></script>
 <script src="/demo/assets/plugins/sparkline/jquery.sparkline.min.js"></script>
-
 <!-- App JavaScript -->
 <script src="{{ asset(mix('js/app.js')) }}"></script>
 
