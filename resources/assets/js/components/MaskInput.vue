@@ -1,5 +1,11 @@
 <template>
-    <input type="text" class="form-control" autocomplete="off" maxlength="14" :id="id" :name="name" :value="localValue" :type="localType" />
+    <b-input
+           :autocomplete="autocomplete"
+           :id="id"
+           :name="name"
+           v-model="localValue"
+           @change="updateInput()"
+    ></b-input>
 </template>
 
 <script>
@@ -38,16 +44,23 @@
                     $(this.$el).mask('+0 (000) 000-0000');
                     break;
                 case 'ssn':
-                    $(this.$el).mask('000-00-0000');
+                    $(this.$el).mask('***-**-****', {'translation': {
+                        '*': {pattern: /[\*0-9]/},
+                    }});
                     break;
             }
         },
 
         computed: {
-            localType() {
-                // We only allow certain types
-                return this.type;
-            },
+            autocomplete() {
+                switch(this.type)
+                {
+                    case 'ssn':
+                        return 'off';
+                    default:
+                        return 'on';
+                }
+            }
         },
 
         watch:{
@@ -56,16 +69,11 @@
                     this.localValue = newVal;
                 }
             },
-            localValue(newVal, oldVal) {
-                if (newVal !== oldVal){
-                    this.$emit('input', newVal);
-                }
-            }
         },
 
         methods: {
-            onInput(value, e) {
-                this.localValue = value;
+            updateInput() {
+                this.$emit('input', $(this.$el).val());
             },
         }
     }
