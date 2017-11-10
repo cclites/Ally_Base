@@ -182,18 +182,21 @@ class Client extends Model implements UserRole
      * @return mixed|null|string
      */
     public function getPaymentType($method = null) {
-        if ($this->client_type == 'private_pay') {
-            if (!$method) $method = $this->defaultPayment;
-            if ($method instanceof BankAccount) {
-                return 'ACH';
-            }
-            if ($method instanceof CreditCard) {
-                if ($method->type == 'amex') return 'AMEX';
-                return 'CC';
-            }
-            return 'NONE';
+        switch($this->client_type) {
+            case 'private_pay':
+            case 'LTCI':
+                if (!$method) $method = $this->defaultPayment;
+                if ($method instanceof BankAccount) {
+                    return 'ACH';
+                }
+                if ($method instanceof CreditCard) {
+                    if ($method->type == 'amex') return 'AMEX';
+                    return 'CC';
+                }
+                return 'NONE';
+            default:
+                return $this->client_type;
         }
-        return $this->client_type;
     }
 
     /**
