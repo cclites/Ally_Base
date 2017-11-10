@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\Caregiver;
 use App\Http\Controllers\Controller;
+use App\Payment;
 
 class ReportsController extends Controller
 {
@@ -23,5 +25,25 @@ class ReportsController extends Controller
             return $shift;
         });
         return view('caregivers.reports.shifts', compact('shifts'));
+    }
+
+    public function paymentHistory()
+    {
+        $caregiver = Caregiver::with('shifts.payment')->find(auth()->id());
+        $payments = $caregiver->shifts->map(function ($shift) {
+            $payment = $shift->payment;
+            $payment->week = [
+                'start' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear)->toDateString(),
+                'end' => $shift->checked_in_time->setIsoDate($shift->checked_in_time->year, $shift->checked_in_time->weekOfYear, 7)->toDateString()
+            ];
+            return $payment;
+        })->unique();
+        return view('caregivers.reports.payment_history', compact('caregiver', 'payments'));
+    }
+
+    public function paymentDetails($id)
+    {
+        $payment = Payment::with('shifts.client')->find($id);
+        return view('caregivers.reports.payment_details', compact('payment'));
     }
 }

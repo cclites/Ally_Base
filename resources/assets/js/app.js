@@ -72,6 +72,8 @@ Vue.component('caregiver-license-list', require('./components/CaregiverLicenseLi
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
+Vue.component('caregiver-payment-history', require('./components/caregivers/CaregiverPaymentHistory'));
+Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
 
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 
