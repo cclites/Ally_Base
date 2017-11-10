@@ -68,8 +68,9 @@ export default {
                     });
             }
             else {
-                // Load caregivers immediately
+                // Load caregivers and ally pct immediately
                 this.loadCaregivers();
+                this.loadAllyPctFromClient(this.client.id);
             }
         },
 
