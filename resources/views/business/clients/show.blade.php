@@ -126,6 +126,7 @@
         // Change hash for page-reload
         $('.nav-item a').on('shown.bs.tab', function (e) {
             window.location.hash = e.target.hash;
+            window.scrollTo(0,0);
         })
     </script>
 @endpush

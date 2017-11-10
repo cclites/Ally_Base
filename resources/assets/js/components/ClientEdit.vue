@@ -40,7 +40,7 @@
                             <option value="VA">VA</option>
                             <option value="LTCI">LTC Insurance</option>
                         </b-form-select>
-                        <input-help :form="form" field="client_type" text=""></input-help>
+                        <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
