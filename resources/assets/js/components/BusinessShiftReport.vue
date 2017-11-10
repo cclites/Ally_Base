@@ -161,11 +161,159 @@
                         </template>
                         <template slot="actions" scope="row">
                             <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit</b-btn>
+                            <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
                         </template>
                     </b-table>
                 </b-card>
             </b-col>
         </b-row>
+
+        <!-- Details modal -->
+        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
+            <b-container fluid>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Client</strong>
+                        <br />
+                        {{ selectedItem.client_name }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Caregiver</strong><br />
+                        {{ selectedItem.caregiver_name }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
+                    <b-col>
+                        <strong>Client Signature</strong>
+                        <br />
+                        <span class="signature">{{ selectedItem.client_name }}</span>
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Clocked In Time</strong><br />
+                        {{ selectedItem.checked_in_time }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Clocked Out Time</strong><br />
+                        {{ selectedItem.checked_out_time }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom" v-if="selectedItem.schedule && selectedItem.schedule.notes">
+                    <b-col sm="12">
+                        <strong>Schedule Notes</strong><br />
+                        {{ selectedItem.schedule.notes }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="12">
+                        <strong>Caregiver Comments</strong><br />
+                        {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
+                    </b-col>
+                </b-row>
+                <h4>Issues on Shift</h4>
+                <b-row>
+                    <b-col sm="12">
+                        <p v-if="!selectedItem.issues || !selectedItem.issues.length">
+                            No issues reported
+                        </p>
+                        <p else v-for="issue in selectedItem.issues">
+                            <strong v-if="issue.caregiver_injury">The caregiver reported an injury to themselves.<br /></strong>
+                            {{ issue.comments }}
+                        </p>
+                    </b-col>
+                </b-row>
+                <h4>Activities Performed</h4>
+                <b-row>
+                    <b-col sm="12">
+                        <p v-if="!selectedItem.activities || !selectedItem.activities.length">
+                            No activities recorded
+                        </p>
+                        <table class="table" v-else>
+                            <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="activity in selectedItem.activities">
+                                <td>{{ activity.code }}</td>
+                                <td>{{ activity.name }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </b-col>
+                </b-row>
+                <h4>EVV</h4>
+                <b-row>
+                    <b-col sm="6">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Clock In</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
+                            <!-- <tr>
+                                <th>Geocode</th>
+                                <td>{{ selectedItem.checked_in_latitude.slice(0,8) }},<br />{{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
+                            </tr> -->
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ selectedItem.checked_in_distance }}m</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else-if="selectedItem.checked_in_number">
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ selectedItem.checked_in_number }}</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </b-col>
+                    <b-col sm="6">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th colspan="2">Clock Out</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
+                            <!-- <tr>
+                                 <th>Geocode</th>
+                                 <td>{{ selectedItem.checked_out_latitude.slice(0,8) }},<br />{{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
+                             </tr> -->
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ selectedItem.checked_out_distance }}m</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else-if="selectedItem.checked_out_number">
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ selectedItem.checked_out_number }}</td>
+                            </tr>
+                            </tbody>
+                            <tbody v-else>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
+                <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -188,6 +336,10 @@
                 filterClientId: "",
                 sortBy: null,
                 sortDesc: null,
+                detailsModal: false,
+                selectedItem: {
+                    client: {}
+                },
             }
         },
 
@@ -289,6 +441,22 @@
 
             dayFormat(date) {
                 return moment(date).format('ddd MMM D');
+            },
+
+            details(item) {
+                let component = this;
+                axios.get('/business/shifts/' + item.id)
+                    .then(function(response) {
+                        let shift = response.data;
+                        shift.checked_in_time = moment.utc(shift.checked_in_time).local().format('L LT');
+                        shift.checked_out_time = moment.utc(shift.checked_out_time).local().format('L LT');
+                        component.selectedItem = shift;
+                        component.detailsModal = true;
+                        console.log(component.selectedItem);
+                    })
+                    .catch(function(error) {
+                        alert('Error loading shift details');
+                    });
             },
 
             parseFloat(float) {
