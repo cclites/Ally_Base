@@ -136,6 +136,9 @@
                                 <input-help :form="form" field="provider_fee" text=""></input-help>
                             </b-form-group>
                         </b-col>
+                        <b-col sm="12">
+                            Payment Type: {{ paymentType }} ({{ displayAllyPct }}% Processing Fee)
+                        </b-col>
                         <b-col sm="6">
                             <b-form-group label="Ally Fee" label-for="ally_fee">
                                 {{ allyFee }}

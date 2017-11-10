@@ -251,10 +251,12 @@ class ClientController extends BaseController
         return new SuccessResponse('Email Sent to Client');
     }
 
-    public function getAllyPercentage($client_id)
+    public function getPaymentType(Client $client)
     {
-        $client = Client::findOrFail($client_id);
-        return ['percentage' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)];
+        return [
+            'payment_type' => $client->getPaymentType(),
+            'percentage_fee' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)
+        ];
     }
 
     public function changePassword(Request $request, Client $client) {
