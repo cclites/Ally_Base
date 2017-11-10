@@ -1,0 +1,69 @@
+<?php
+namespace App\Reports;
+
+use App\BankAccount;
+use App\Client;
+use App\CreditCard;
+
+/**
+ * Class ClientChargesReport
+ * Show all pending or completed client charges for a date period
+ *
+ * @package App\Reports
+ */
+class ClientChargesReport extends ScheduledPaymentsReport
+{
+
+    /**
+     * Return the collection of rows matching report criteria
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function rows()
+    {
+        if (!$this->generated) {
+            $shifts = $this->query->get();
+
+            foreach($shifts->groupBy('client_id') as $client_id => $client_shifts) {
+                $client = Client::find($client_id);
+                $row = [
+                    'id' => $client_id,
+                    'name' => $client->name(),
+                    'nameLastFirst' => $client->nameLastFirst(),
+                    'payment_type' => $this->getPaymentType($client),
+                    'hours' => 0,
+                    'caregiver_total' => 0,
+                    'provider_total' => 0,
+                    'ally_total' => 0,
+                    'total' => 0,
+                ];
+                foreach($client_shifts as $shift) {
+                    /** @var \App\Shift $shift */
+                    $row['hours'] += $shift->duration();
+                    $row['caregiver_total'] += $shift->costs()->getCaregiverCost();
+                    $row['provider_total'] += $shift->costs()->getProviderFee();
+                    $row['ally_total'] += $shift->costs()->getAllyFee();
+                    $row['total'] += $shift->costs()->getTotalCost();
+                }
+                $this->rows[] = array_map(function($value) {
+                    return is_float($value) ? number_format($value, 2) : $value;
+                }, $row);
+            }
+        }
+        return $this->rows;
+    }
+
+    protected function getPaymentType(Client $client) {
+        if ($client->client_type == 'private_pay') {
+            if ($client->defaultPayment instanceof BankAccount) {
+                return 'ACH';
+            }
+            if ($client->defaultPayment instanceof CreditCard) {
+                if ($client->defaultPayment->type == 'amex') return 'AMEX';
+                return 'CC';
+            }
+            return 'NONE';
+        }
+        return $client->client_type;
+    }
+}

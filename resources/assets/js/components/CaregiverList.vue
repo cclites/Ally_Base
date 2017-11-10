@@ -73,6 +73,21 @@
                         label: 'Email Address',
                         sortable: true,
                     },
+                    {
+                        key: 'primaryphone',
+                        label: 'Primary Phone',
+                        sortable: true,
+                    },
+                    {
+                        key: 'city',
+                        label: 'City',
+                        sortable: true,
+                    },
+                    {
+                        key: 'zipcode',
+                        label: 'Zip Code',
+                        sortable: true,
+                    },
                     'actions'
                 ]
             }
@@ -84,18 +99,37 @@
 
         computed: {
             items() {
+                let that = this;
                 return this.caregivers.map(function(caregiver) {
                     return {
                         id: caregiver.id,
                         firstname: caregiver.user.firstname,
                         lastname: caregiver.user.lastname,
-                        email: caregiver.user.email
+                        email: caregiver.user.email,
+                        primaryphone: that.getPrimaryPhone(caregiver),
+                        zipcode: caregiver.addresses[0].zip,
+                        city: caregiver.addresses[0].city,
                     }
                 })
             },
         },
 
         methods: {
+            getPrimaryPhone(caregiver)
+            {
+                let phone_number = "";
+                if (caregiver.phone_numbers[0].country_code != null)
+                {
+                    phone_number = "+" + caregiver.phone_numbers[0].country_code;
+                }
+                phone_number = phone_number + " " + caregiver.phone_numbers[0].national_number;
+                if (caregiver.phone_numbers[0].extension != null)
+                {
+                    phone_number += " ext " + caregiver.phone_numbers[0].extension;
+                }
+                return phone_number;
+            },
+
             details(item, index, button) {
                 this.selectedItem = item;
                 this.modalDetails.data = JSON.stringify(item, null, 2);

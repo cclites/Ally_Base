@@ -58,6 +58,7 @@ Vue.component('business-payment-history', require('./components/BusinessPaymentH
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
+Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
@@ -107,6 +108,7 @@ Vue.component('payment-method', require('./components/PaymentMethod.vue'));
 Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
 
 Vue.component('shift-history', require('./components/ShiftHistory.vue'));
+Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('system-notifications', require('./components/SystemNotifications.vue'));
 
@@ -121,6 +123,8 @@ Vue.component('note-edit', require('./components/notes/NoteEdit'));
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
+
+Vue.component('mask-input', require('./components/MaskInput'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
@@ -142,7 +146,8 @@ Vue.filter('nl2br', value => {
     return value.toString().replace(/(?:\r\n|\r|\n)/g, '<br />');
 });
 
+
 const app = new Vue({
-    el: '#main-wrapper'
+    el: '#main-wrapper',
 });
 require('./alerts');

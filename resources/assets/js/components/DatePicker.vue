@@ -5,6 +5,7 @@
                 :class="cssClass"
                 type="text"
                 v-model="value"
+                :placeholder="placeholder"
                 @change="updateInput()"
         />
     </div>
@@ -26,6 +27,11 @@
             'format': {
                 default() {
                     return 'MM/DD/YYYY';
+                }
+            },
+            'placeholder': {
+                default() {
+                    return '';
                 }
             }
         },

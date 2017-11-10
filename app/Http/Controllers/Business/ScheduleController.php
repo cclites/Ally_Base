@@ -22,13 +22,17 @@ class ScheduleController extends BaseController
         $schedules = $this->business()->schedules;
 
         // Filter by client or caregiver
-        if ($request->input('caregiver_id') || $request->input('client_id')) {
+        if ($request->has('caregiver_id') || $request->has('client_id')) {
             $schedules = $schedules->filter(function(Schedule $schedule) use ($request) {
                 if ($client_id = $request->input('client_id')) {
                     if ($schedule->client_id != $client_id) return false;
                 }
                 if ($caregiver_id = $request->input('caregiver_id')) {
                     if ($schedule->caregiver_id != $caregiver_id) return false;
+                }
+                else if ($request->input('caregiver_id') === "0") {
+                    // Unassigned shifts only
+                    if ($schedule->caregiver_id) return false;
                 }
                 return true;
             });

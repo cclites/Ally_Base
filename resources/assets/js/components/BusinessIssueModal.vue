@@ -83,6 +83,10 @@
 
         methods: {
             save() {
+                if (!this.shiftId) {
+                    return this.updateItems();
+                }
+
                 let component = this;
                 let method = 'post';
                 let url = '/business/shifts/' + this.shiftId + '/issues';
@@ -92,20 +96,39 @@
                 }
                 component.form.submit(method, url)
                     .then(function(response) {
-                        // Push the newly created item without mutating the prop, requires the sync modifier
-                        let newItems = component.items;
-                        if (component.selectedItem) {
-                            let index = newItems.findIndex(item => item.id === component.selectedItem.id);
-                            newItems[index] = response.data.data;
-                        }
-                        else {
-                            newItems.push(response.data.data);
-                        }
-                        component.$emit('update:items', newItems);
-
-                        component.showModal = false;
+                        component.updateItems(response);
                     });
+            },
+
+            updateItems(response) {
+                let item;
+                if (response) {
+                    item = response.data.data;
+                }
+                else {
+                    item = Object.assign(
+                        {},
+                        {
+                            id: (this.selectedItem) ? this.selectedItem.id : Math.round((new Date()).getTime() / 1000),
+                        },
+                        this.form.data()
+                    );
+                }
+
+                // Push the newly created item without mutating the prop, requires the sync modifier
+                let newItems = this.items.slice(0);
+                if (this.selectedItem) {
+                    let index = newItems.findIndex(item => item.id === this.selectedItem.id);
+                    newItems[index] = item;
+                }
+                else {
+                    newItems.push(item);
+                }
+                this.$emit('update:items', newItems);
+
+                this.showModal = false;
             }
+
         },
     }
 </script>

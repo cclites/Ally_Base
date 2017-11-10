@@ -172,7 +172,7 @@
             events: {
                 deep: true,
                 handler(val) {
-                    $(this.$el).fullCalendar('removeEvents')
+                    $(this.$el).fullCalendar('removeEventSources')
                     $(this.$el).fullCalendar('addEventSource', this.events)
                 },
             },

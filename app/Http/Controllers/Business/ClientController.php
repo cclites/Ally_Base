@@ -26,9 +26,16 @@ class ClientController extends BaseController
     public function index(Request $request)
     {
         $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
+
+        $clients = $clients->sort(function(Client $clientA, Client $clientB) {
+            $strcmp = strcmp($clientA->lastname, $clientB->lastname);
+            return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
+        })->values();
+
         if ($request->expectsJson()) {
             return $clients;
         }
+
         return view('business.clients.index', compact('clients'));
     }
 
