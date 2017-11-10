@@ -10,8 +10,7 @@ class Shift extends Model
 {
     public $timestamps = false;
     protected $guarded = ['id'];
-
-    protected $appends = ['roundedShiftLength'];
+    protected $appends = ['roundedShiftLength', 'readOnly'];
 
     ///////////////////////////////////////
     /// Shift Statuses
@@ -22,7 +21,7 @@ class Shift extends Model
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Verified shift that needs to be authorized for payment
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
-    // Read-only statuses from here down
+    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
@@ -85,6 +84,11 @@ class Shift extends Model
     public function getRoundedShiftLengthAttribute()
     {
         return $this->duration();
+    }
+
+    public function getReadOnlyAttribute()
+    {
+        return $this->isReadOnly();
     }
 
     //////////////////////////////////////
