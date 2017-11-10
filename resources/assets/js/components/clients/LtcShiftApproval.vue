@@ -221,10 +221,7 @@
                 });
 
                 form.post('/shift-history/approve').then(response => {
-                    if (response.data.success) {
-                        this.getWeek(this.weekOfYear);
-                        alerts.addMessage('success', 'Shifts approved.');
-                    }
+                    this.getWeek(this.weekOfYear);
                     this.approved = false;
                 });
             },

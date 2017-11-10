@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Clients;
 
 use App\Http\Controllers\Controller;
+use App\Responses\SuccessResponse;
 use App\Shift;
 use Carbon\Carbon;
 
@@ -58,6 +59,6 @@ class ShiftController extends Controller
         Shift::where('client_id', auth()->id())
             ->whereBetween('checked_in_time', [$week_start_date, $week_end_date])
             ->update(['signature' => Carbon::now()]);
-        return response()->json(['success' => true]);
+        return new SuccessResponse('Shifts approved.');
     }
 }
