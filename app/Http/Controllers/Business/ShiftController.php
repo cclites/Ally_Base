@@ -61,7 +61,7 @@ class ShiftController extends BaseController
 
     public function show(Request $request, Shift $shift)
     {
-        $shift->load(['activities', 'issues', 'schedule']);
+        $shift->load(['activities', 'issues', 'schedule', 'client']);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
