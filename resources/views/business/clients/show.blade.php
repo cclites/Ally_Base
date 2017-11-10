@@ -73,7 +73,10 @@
         </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
             <!-- Care Plan Placeholder -->
-            <client-caregivers :list="{{ $caregivers }}" :client_id="{{ $client->id }}"></client-caregivers>
+            <client-caregivers :list="{{ $caregivers }}"
+                               :client_id="{{ $client->id }}"
+                               payment-type-message="Client's Pay Type: {{ $client->getPaymentType() }} ({{ round($client->getAllyPercentage() * 100, 2) }}% Processing Fee)"
+            ></client-caregivers>
         </div>
         <div class="tab-pane" id="care-plan" role="tabpanel">
             <!-- Care Plan Placeholder -->
