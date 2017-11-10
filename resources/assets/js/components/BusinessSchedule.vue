@@ -1,7 +1,5 @@
 <template>
     <b-card>
-        <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Create a Schedule</b-btn>
-        <b-btn size="lg" variant="info" class="pull-right"><i class="fa fa-clock-o"></i> Clock In</b-btn>
         <b-row>
             <b-col md="7">
                 <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
@@ -25,6 +23,7 @@
             </b-col>
         </b-row>
         <full-calendar ref="calendar" :events="filteredEventsUrl" default-view="agendaWeek" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
+
         <create-schedule-modal :model.sync="createModal"
                                :selected-event="selectedEvent"
                                @refresh-events="refreshEvents()"
