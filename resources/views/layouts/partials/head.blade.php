@@ -1,15 +1,18 @@
-
 <meta name="csrf-token" content="{{ csrf_token() }}">
-
 
 <!-- Favicon icon -->
 <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
-<!-- Bootstrap & FontAwesome CSS -->
+<!-- Bootstrap  -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.css" />
 <link rel="stylesheet" href="/vendor/bootstrap-datepicker/bootstrap-datepicker.min.css" />
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css?family=Homemade+Apple" rel="stylesheet">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<!-- Full Calendar -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.css" />
 
 <!-- chartist CSS -->
 {{--<link href="../assets/plugins/chartist-js/dist/chartist.min.css" rel="stylesheet">--}}
