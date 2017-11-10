@@ -72,10 +72,6 @@
                 this.buttonVisible = true;
             },
 
-            installMaskInput: function() {
-                $('.mask-phone').mask('+0 (000) 000-0000');
-            }
-
         },
 
         ready: function()
