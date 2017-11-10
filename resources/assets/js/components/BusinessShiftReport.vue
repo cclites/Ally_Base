@@ -402,6 +402,7 @@
             },
             clientTotals() {
                 let component = this;
+                if (this.items.clientCharges.length === 0) return [];
                 return this.items.clientCharges.reduce(function(totals, item) {
                     console.log(totals, item);
                     return {
@@ -415,6 +416,7 @@
             },
             caregiverTotals() {
                 let component = this;
+                if (this.items.caregiverPayments.length === 0) return [];
                 return this.items.caregiverPayments.reduce(function(totals, item) {
                     console.log(totals, item);
                     return {
@@ -431,15 +433,30 @@
                 let prefix = '/business/reports/data/';
                 axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(function(response) {
-                        component.items.caregiverPayments = response.data;
+                        if (Array.isArray(response.data)) {
+                            component.items.caregiverPayments = response.data;
+                        }
+                        else {
+                            component.items.caregiverPayments = [];
+                        }
                     });
                 axios.get(prefix + 'client_charges?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(function(response) {
-                        component.items.clientCharges = response.data;
+                        if (Array.isArray(response.data)) {
+                            component.items.clientCharges = response.data;
+                        }
+                        else {
+                            component.items.clientCharges = [];
+                        }
                     });
                 axios.get(prefix + 'shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(function(response) {
-                        component.items.shifts = response.data;
+                        if (Array.isArray(response.data)) {
+                            component.items.shifts = response.data;
+                        }
+                        else {
+                            component.items.shifts = [];
+                        }
                     });
             },
 
