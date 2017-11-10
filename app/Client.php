@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Contracts\UserRole;
+use App\Scheduling\AllyFeeCalculator;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ class Client extends Model implements UserRole
     protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
+    public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -123,6 +125,22 @@ class Client extends Model implements UserRole
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
+    /**
+     * @return string
+     */
+    public function getPaymentTypeAttribute()
+    {
+        return $this->getPaymentType();
+    }
+
+    /**
+     * @return string
+     */
+    public function getAllyPercentageAttribute()
+    {
+        return $this->getAllyPercentage();
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -157,6 +175,33 @@ class Client extends Model implements UserRole
         $this->schedules()
             ->where('end_date', '>', $yesterday)
             ->update(['end_date' => $yesterday]);
+    }
+
+    /**
+     * @param $method
+     * @return mixed|null|string
+     */
+    public function getPaymentType($method = null) {
+        if ($this->client_type == 'private_pay') {
+            if (!$method) $method = $this->defaultPayment;
+            if ($method instanceof BankAccount) {
+                return 'ACH';
+            }
+            if ($method instanceof CreditCard) {
+                if ($method->type == 'amex') return 'AMEX';
+                return 'CC';
+            }
+            return 'NONE';
+        }
+        return $this->client_type;
+    }
+
+    /**
+     * @param $method
+     * @return float
+     */
+    public function getAllyPercentage($method = null) {
+        return AllyFeeCalculator::getPercentage($this, $method);
     }
 
 }

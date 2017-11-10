@@ -30,7 +30,7 @@ class ClientChargesReport extends ScheduledPaymentsReport
                     'id' => $client_id,
                     'name' => $client->name(),
                     'nameLastFirst' => $client->nameLastFirst(),
-                    'payment_type' => $this->getPaymentType($client),
+                    'payment_type' => $client->getPaymentType(),
                     'hours' => 0,
                     'caregiver_total' => 0,
                     'provider_total' => 0,
@@ -51,19 +51,5 @@ class ClientChargesReport extends ScheduledPaymentsReport
             }
         }
         return $this->rows;
-    }
-
-    protected function getPaymentType(Client $client) {
-        if ($client->client_type == 'private_pay') {
-            if ($client->defaultPayment instanceof BankAccount) {
-                return 'ACH';
-            }
-            if ($client->defaultPayment instanceof CreditCard) {
-                if ($client->defaultPayment->type == 'amex') return 'AMEX';
-                return 'CC';
-            }
-            return 'NONE';
-        }
-        return $client->client_type;
     }
 }
