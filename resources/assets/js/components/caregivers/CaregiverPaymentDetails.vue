@@ -13,23 +13,14 @@
                 {{ data.item.client.name }}
             </template>
             <template slot="amount" scope="data">
-                {{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.roundedShiftLength) }}
-            </template>
-            <template slot="actions" scope="data">
-                <a :href="'/payment-history/' + data.item.id + '/print'" target="_blank">
-                    Print
-                </a>
+                &dollar;{{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.roundedShiftLength) }}
             </template>
         </b-table>
     </b-card>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
-    import FormatsDates from '../../mixins/FormatsDates';
-
+    import FormatsDates from '../../mixins/FormatsDates'
     export default {
         props: ['payment'],
 
@@ -43,8 +34,7 @@
                     { key: 'care_time', label: 'Care Time' },
                     { key: 'roundedShiftLength', label: 'Hours of Care Received' },
                     { key: 'client_name', label: 'Client Name' },
-                    { key: 'amount', label: 'Amount' },
-                    'actions'
+                    { key: 'amount', label: 'Amount' }
                 ]
             }
         }

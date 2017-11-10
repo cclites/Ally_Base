@@ -84,12 +84,12 @@
     </b-container>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
+    import FormatsDates from '../../mixins/FormatsDates';
     export default {
         props: ['payment'],
+
+        mixins: [FormatsDates],
 
         data() {
             return {
@@ -102,24 +102,6 @@
                     { key: 'caregiver', label: 'Caregiver' },
                     { key: 'amount', label: 'Amount' }
                 ]
-            }
-        },
-
-        created() {
-
-        },
-
-        mounted() {
-
-        },
-
-        methods: {
-            formatDate(date) {
-                return moment(date).format('L');
-            },
-
-            formatTime(dateTime) {
-                return moment(dateTime).format('h:mm:ss a');
             }
         },
 

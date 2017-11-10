@@ -18,12 +18,12 @@
     </b-card>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
+    import FormatsDates from '../../mixins/FormatsDates';
     export default {
         props: ['client'],
+
+        mixins: [FormatsDates],
 
         data() {
             return{
@@ -36,24 +36,6 @@
                     'actions'
                 ]
             }
-        },
-
-        created() {
-
-        },
-
-        mounted() {
-
-        },
-
-        methods: {
-            formatDate(date) {
-                return moment(date).format('L');
-            },
-        },
-
-        computed: {
-
         }
     }
 </script>
