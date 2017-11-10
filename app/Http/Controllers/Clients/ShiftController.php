@@ -30,13 +30,19 @@ class ShiftController extends Controller
             return $shift;
         });
 
+        $shifts_verified = false;
+
+        if ($shifts->count()) {
+            $shifts_verified = !is_null($shifts->first()->signature) && !is_null($shifts->last()->signature);
+        }
+
         if (request()->expectsJson()) {
             $week_start_date = $week_start_date->format('Y-m-d H:i:s');
             $week_end_date = $week_end_date->format('Y-m-d H:i:s');
-            return response()->json(compact('shifts', 'week_start_date', 'week_end_date'));
+            return response()->json(compact('shifts', 'week_start_date', 'week_end_date', 'shifts_verified'));
         }
 
-        return view('clients.shift_history', compact('shifts', 'week_start_date', 'week_end_date'));
+        return view('clients.shift_history', compact('shifts', 'week_start_date', 'week_end_date', 'shifts_verified'));
     }
 
     public function approveWeek()
@@ -52,6 +58,6 @@ class ShiftController extends Controller
         Shift::where('client_id', auth()->id())
             ->whereBetween('checked_in_time', [$week_start_date, $week_end_date])
             ->update(['signature' => Carbon::now()]);
-        return response()->json([]);
+        return response()->json(['success' => true]);
     }
 }

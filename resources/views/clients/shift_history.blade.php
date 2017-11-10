@@ -8,5 +8,8 @@
 @endsection
 
 @section('content')
-    <ltc-shift-approval :shifts="{{ $shifts }}" :week-start-date="'{{ $week_start_date }}'" :week-end-date="'{{ $week_end_date }}'"></ltc-shift-approval>
+    <ltc-shift-approval :shifts="{{ $shifts }}"
+                        :week-start-date="'{{ $week_start_date }}'"
+                        :week-end-date="'{{ $week_end_date }}'"
+                        :verified="{{ json_encode($shifts_verified) }}"></ltc-shift-approval>
 @endsection
