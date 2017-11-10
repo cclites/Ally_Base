@@ -9,9 +9,11 @@ use libphonenumber\PhoneNumberUtil;
 class PhoneNumber extends Model
 {
     const DEFAULT_REGION = 'US';
+    const DEFAULT_FORMAT = PhoneNumberFormat::NATIONAL;
 
     protected $table = 'phone_numbers';
     protected $guarded = ['id'];
+    protected $appends = ['number'];
 
     /**
      * @var \libphonenumber\PhoneNumberUtil
@@ -63,7 +65,7 @@ class PhoneNumber extends Model
      *
      * @return string
      */
-    public function number($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL, $includeExtension = true)
+    public function number($formatted = true, $format = self::DEFAULT_FORMAT, $includeExtension = true)
     {
         if ($formatted) {
             return $this->format($this->number(false, 0, $includeExtension), null, $format);
@@ -83,7 +85,7 @@ class PhoneNumber extends Model
      *
      * @return string
      */
-    public function numberOnly($formatted = true, $format = PhoneNumberFormat::INTERNATIONAL)
+    public function numberOnly($formatted = true, $format = self::DEFAULT_FORMAT)
     {
         return $this->number($formatted, $format, false);
     }
@@ -128,7 +130,7 @@ class PhoneNumber extends Model
      *
      * @return string
      */
-    public function format($number, $extension=null, $format = PhoneNumberFormat::INTERNATIONAL)
+    public function format($number, $extension=null, $format = self::DEFAULT_FORMAT)
     {
         $parsed = $this->parse($number, $extension);
         return $this->phoneNumberUtil->format($parsed, $format);

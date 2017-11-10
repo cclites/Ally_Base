@@ -106,7 +106,7 @@
                         firstname: caregiver.user.firstname,
                         lastname: caregiver.user.lastname,
                         email: caregiver.user.email,
-                        primaryphone: component.getPhone(caregiver).national_number,
+                        primaryphone: component.getPhone(caregiver).number,
                         zipcode: component.getAddress(caregiver).zip,
                         city: component.getAddress(caregiver).city,
                     }

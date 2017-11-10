@@ -41,7 +41,7 @@
             switch(this.type)
             {
                 case 'phone':
-                    $(this.$el).mask('+0 (000) 000-0000');
+                    $(this.$el).mask('(000) 000-0000');
                     break;
                 case 'ssn':
                     $(this.$el).mask('***-**-****', {'translation': {
