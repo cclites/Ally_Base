@@ -73,12 +73,5 @@
             },
 
         },
-
-        ready: function()
-        {
-            Vue.nextTick(function () {
-                this.installMaskInput();
-            }.bind(this));
-        }
     }
 </script>
