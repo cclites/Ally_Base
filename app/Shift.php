@@ -11,6 +11,7 @@ class Shift extends Model
     public $timestamps = false;
     protected $guarded = ['id'];
     protected $appends = ['roundedShiftLength', 'readOnly'];
+    protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
 
     ///////////////////////////////////////
     /// Shift Statuses
@@ -29,6 +30,11 @@ class Shift extends Model
     //////////////////////////////////////
     /// Relationship Methods
     //////////////////////////////////////
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
 
     public function client()
     {

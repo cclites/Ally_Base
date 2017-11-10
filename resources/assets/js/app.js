@@ -34,8 +34,13 @@ Vue.use(BootstrapVue);
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
 
-
 Vue.component('activity-list', require('./components/ActivityList.vue'));
+
+// Client
+Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
+Vue.component('client-payment-history', require('./components/clients/ClientPaymentHistory'));
+Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
+Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 
 // Admin
 Vue.component('business-create', require('./components/BusinessCreate.vue'));
@@ -67,6 +72,8 @@ Vue.component('caregiver-license-list', require('./components/CaregiverLicenseLi
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
+Vue.component('caregiver-payment-history', require('./components/caregivers/CaregiverPaymentHistory'));
+Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
 
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 
@@ -119,6 +126,8 @@ Vue.component('caregiver-application-create', require('./components/caregivers/C
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
+Vue.component('mask-input', require('./components/MaskInput'));
+
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
 });
@@ -141,6 +150,6 @@ Vue.filter('nl2br', value => {
 
 
 const app = new Vue({
-    el: '#main-wrapper'
+    el: '#main-wrapper',
 });
 require('./alerts');

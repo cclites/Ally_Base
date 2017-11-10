@@ -13,6 +13,6 @@
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('caregivers.reports.shifts') }}">Shift History</a></li>
-        <li><a href="{{ route('caregivers.reports.deposits') }}">Deposit History</a></li>
+        <li><a href="{{ route('caregivers.reports.payment_history') }}">Payment History</a></li>
     </ul>
 </li>

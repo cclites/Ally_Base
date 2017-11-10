@@ -39,3 +39,15 @@ $factory->define(App\ShiftIssue::class, function(Faker $faker) {
         'comments' => (mt_rand(0,1) == 0) ? $faker->paragraph : null,
     ];
 });
+
+$factory->define(App\ShiftActivity::class, function(Faker $faker) {
+    return [
+        'shift_id' => function () {
+            return factory('App\Shift')->create()->id;
+        },
+        'activity_id' => function () {
+            return factory('App\Activity')->create()->id;
+        },
+        'completed' => $faker->boolean
+    ];
+});

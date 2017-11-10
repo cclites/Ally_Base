@@ -226,7 +226,5 @@ $(function () {
             barColor: '#7460ee'
         });
     var sparkResize;
- 
-        
-    
+
 });
