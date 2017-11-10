@@ -99,35 +99,45 @@
 
         computed: {
             items() {
-                let that = this;
+                let component = this;
                 return this.caregivers.map(function(caregiver) {
                     return {
                         id: caregiver.id,
                         firstname: caregiver.user.firstname,
                         lastname: caregiver.user.lastname,
                         email: caregiver.user.email,
-                        primaryphone: that.getPrimaryPhone(caregiver),
-                        zipcode: caregiver.addresses[0].zip,
-                        city: caregiver.addresses[0].city,
+                        primaryphone: component.getPhone(caregiver).national_number,
+                        zipcode: component.getAddress(caregiver).zip,
+                        city: component.getAddress(caregiver).city,
                     }
                 })
             },
         },
 
         methods: {
-            getPrimaryPhone(caregiver)
+            getAddress(caregiver)
             {
-                let phone_number = "";
-                if (caregiver.phone_numbers[0].country_code != null)
-                {
-                    phone_number = "+" + caregiver.phone_numbers[0].country_code;
+                if (caregiver.addresses && caregiver.addresses.length > 0) {
+                    let index = caregiver.addresses.findIndex(function(address) {
+                        return address.type === 'home';
+                    });
+                    if (index !== -1) {
+                        return caregiver.addresses[index];
+                    }
                 }
-                phone_number = phone_number + " " + caregiver.phone_numbers[0].national_number;
-                if (caregiver.phone_numbers[0].extension != null)
-                {
-                    phone_number += " ext " + caregiver.phone_numbers[0].extension;
+                return {};
+            },
+            getPhone(caregiver)
+            {
+                if (caregiver.phone_numbers && caregiver.phone_numbers.length > 0) {
+                    let index = caregiver.phone_numbers.findIndex(function(phone) {
+                        return phone.type === 'work';
+                    });
+                    if (index !== -1) {
+                        return caregiver.phone_numbers[index];
+                    }
                 }
-                return phone_number;
+                return {};
             },
 
             details(item, index, button) {
