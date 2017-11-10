@@ -23,11 +23,11 @@
             },
             id: {
                 type: String,
-                default: null,
+                default: '',
             },
             name: {
                 type: String,
-                default: null,
+                default: '',
             },
         },
 
