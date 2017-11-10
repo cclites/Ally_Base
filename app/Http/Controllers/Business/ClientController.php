@@ -233,7 +233,8 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method');
+        $redirect = route('business.clients.edit', [$client->id]) . '#payment';
+        return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method', $redirect);
     }
 
     public function sendConfirmationEmail($client_id)
