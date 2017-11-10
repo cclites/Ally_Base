@@ -10,8 +10,8 @@ class Shift extends Model
 {
     public $timestamps = false;
     protected $guarded = ['id'];
-
-    protected $appends = ['roundedShiftLength'];
+    protected $appends = ['roundedShiftLength', 'readOnly'];
+    protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
 
     ///////////////////////////////////////
     /// Shift Statuses
@@ -22,18 +22,19 @@ class Shift extends Model
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Verified shift that needs to be authorized for payment
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
+    // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
-    public function getRoundedShiftLengthAttribute()
-    {
-        return $this->duration();
-    }
-
     //////////////////////////////////////
     /// Relationship Methods
     //////////////////////////////////////
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
 
     public function client()
     {
@@ -80,6 +81,20 @@ class Shift extends Model
     public function exceptions()
     {
         return $this->morphMany(SystemException::class, 'reference');
+    }
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function getRoundedShiftLengthAttribute()
+    {
+        return $this->duration();
+    }
+
+    public function getReadOnlyAttribute()
+    {
+        return $this->isReadOnly();
     }
 
     //////////////////////////////////////
@@ -151,5 +166,22 @@ class Shift extends Model
     public function isVerified()
     {
         return (bool) $this->verified;
+    }
+
+    /**
+     * Returns true if a shift should no longer be modified
+     *
+     * @return bool
+     */
+    public function isReadOnly()
+    {
+        return in_array(
+            $this->status,
+            [
+                self::WAITING_FOR_PAYOUT,
+                self::PAID_NOT_CHARGED,
+                self::PAID,
+            ]
+        );
     }
 }

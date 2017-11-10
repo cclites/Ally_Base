@@ -2,6 +2,7 @@ export default {
     data() {
         return {
             allyPct: 0.05,
+            paymentType: 'NONE',
             carePlans: [],
             caregivers: [],
             clients: [],
@@ -36,7 +37,10 @@ export default {
 
         loadAllyPctFromClient(client_id) {
             let component = this;
-            axios.get('/business/clients/' + client_id + '/ally_pct').then(response => component.allyPct = response.data.percentage);
+            axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
+                component.allyPct = response.data.percentage_fee;
+                component.paymentType = response.data.payment_type;
+            });
         },
 
         loadCarePlans() {
@@ -64,8 +68,9 @@ export default {
                     });
             }
             else {
-                // Load caregivers immediately
+                // Load caregivers and ally pct immediately
                 this.loadCaregivers();
+                this.loadAllyPctFromClient(this.client.id);
             }
         },
 
@@ -82,6 +87,10 @@ export default {
             let providerHourlyFloat = parseFloat(this.form.provider_fee);
             let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
             return allyFee.toFixed(2);
+        },
+
+        displayAllyPct() {
+            return (parseFloat(this.allyPct) * 100).toFixed(2);
         },
 
         totalRate() {

@@ -14,7 +14,7 @@ class PaymentMethodController
 {
     use PaymentMethodUpdate;
 
-    public function update(Request $request, Client $client, $type, $reference = 'The payment method')
+    public function update(Request $request, Client $client, $type, $reference = 'The payment method', $redirect = null)
     {
         if ($type == 'primary') {
             $existing = $client->defaultPayment;
@@ -49,7 +49,7 @@ class PaymentMethodController
             else {
                 $client->backupPayment()->associate($method)->save();
             }
-            return new SuccessResponse($reference . ' has been updated.');
+            return new SuccessResponse($reference . ' has been updated.', [], $redirect);
         }
 
         return new ErrorResponse(500, $reference . ' could not be saved.');

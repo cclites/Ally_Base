@@ -12,6 +12,11 @@ class Payment extends Model
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);

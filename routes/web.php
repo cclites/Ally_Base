@@ -38,6 +38,17 @@ Route::group(['middleware' => 'auth'], function() {
 
 Route::group([
     'middleware' => ['auth', 'roles'],
+    'roles' => ['client'],
+    'namespace' => 'Clients',
+], function () {
+    Route::post('shift-history/approve', 'ShiftController@approveWeek');
+    Route::get('shift-history/{week?}', 'ShiftController@index');
+    Route::get('payment-history/{id}/print', 'PaymentHistoryController@printDetails');
+    Route::resource('payment-history', 'PaymentHistoryController');
+});
+
+Route::group([
+    'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver'],
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');
@@ -47,9 +58,11 @@ Route::group([
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
 
-    Route::get('reports/deposits', 'Caregivers\ReportsController@deposits')->name('caregivers.reports.deposits');
+    Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
+    Route::get('reports/payment-history/{id}', 'Caregivers\ReportsController@paymentDetails')->name('caregivers.reports.payment_details');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
+
 });
 
 Route::group([
@@ -97,7 +110,7 @@ Route::group([
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
     Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
-    Route::get('clients/{id}/ally_pct', 'Business\ClientController@getAllyPercentage')->name('clients.ally_pct');
+    Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
@@ -105,18 +118,21 @@ Route::group([
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
-    Route::get('reports/shifts', 'Business\ReportsController@shifts')->name('reports.shifts');
+    Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
+
+    Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
+    Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
+    Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
-    Route::get('shifts/{id}', 'Business\ShiftController@show')->name('shifts.show');
-    Route::post('shifts/{id}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
-    Route::post('shifts/{id}', 'Business\ShiftController@update')->name('shifts.update');
-    Route::post('shifts/{id}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
-    Route::patch('shifts/{id}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::resource('shifts', 'Business\ShiftController');
+    Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
+    Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
+    Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
     Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');

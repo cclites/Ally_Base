@@ -9,6 +9,11 @@
 @endsection
 
 @section('content')
+    <?php
+        $defaultPaymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($client->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+        $backupPaymentTypeMessage = "Active Payment Type: " . $client->getPaymentType($client->backupPayment) . " (" . round($client->getAllyPercentage($client->backupPayment) * 100, 2) . "% Processing Fee)";
+    ?>
+
     <!-- Nav tabs -->
     <ul class="nav nav-pills with-padding-bottom" role="tablist">
         <li class="nav-item">
@@ -73,7 +78,10 @@
         </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
             <!-- Care Plan Placeholder -->
-            <client-caregivers :list="{{ $caregivers }}" :client_id="{{ $client->id }}"></client-caregivers>
+            <client-caregivers :list="{{ $caregivers }}"
+                               :client_id="{{ $client->id }}"
+                               payment-type-message="{{ $defaultPaymentTypeMessage }}"
+            ></client-caregivers>
         </div>
         <div class="tab-pane" id="care-plan" role="tabpanel">
             <!-- Care Plan Placeholder -->
@@ -83,10 +91,10 @@
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" />
+                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $defaultPaymentTypeMessage }}" />
                 </div>
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" />
+                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" />
                 </div>
             </div>
         </div>
@@ -104,8 +112,21 @@
 
 @push('scripts')
     <script>
+        // Render Calendar inside Tab
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             $('#calendar').fullCalendar('render');
+        });
+
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-item a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+            window.scrollTo(0,0);
         })
     </script>
 @endpush

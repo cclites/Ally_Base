@@ -18,7 +18,7 @@ class AllyFeeCalculator
      * @param \App\Client $client
      * @param $paymentMethod
      * @param $paymentAmount
-     * @return string
+     * @return float
      * @throws \Exception
      */
     public static function getFee(Client $client, $paymentMethod, $paymentAmount)
@@ -50,6 +50,7 @@ class AllyFeeCalculator
         $pct = config('ally.bank_account_fee');
         switch($client->client_type) {
             case 'private_pay':
+            case 'LTCI':
                 if (!$paymentMethod) {
                     $paymentMethod = $client->defaultPayment;
                     if (!$paymentMethod) $paymentMethod = new CreditCard();

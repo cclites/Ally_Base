@@ -73,6 +73,21 @@
                         label: 'Email Address',
                         sortable: true,
                     },
+                    {
+                        key: 'primaryphone',
+                        label: 'Primary Phone',
+                        sortable: true,
+                    },
+                    {
+                        key: 'city',
+                        label: 'City',
+                        sortable: true,
+                    },
+                    {
+                        key: 'zipcode',
+                        label: 'Zip Code',
+                        sortable: true,
+                    },
                     'actions'
                 ]
             }
@@ -84,18 +99,47 @@
 
         computed: {
             items() {
+                let component = this;
                 return this.caregivers.map(function(caregiver) {
                     return {
                         id: caregiver.id,
                         firstname: caregiver.user.firstname,
                         lastname: caregiver.user.lastname,
-                        email: caregiver.user.email
+                        email: caregiver.user.email,
+                        primaryphone: component.getPhone(caregiver).number,
+                        zipcode: component.getAddress(caregiver).zip,
+                        city: component.getAddress(caregiver).city,
                     }
                 })
             },
         },
 
         methods: {
+            getAddress(caregiver)
+            {
+                if (caregiver.addresses && caregiver.addresses.length > 0) {
+                    let index = caregiver.addresses.findIndex(function(address) {
+                        return address.type === 'home';
+                    });
+                    if (index !== -1) {
+                        return caregiver.addresses[index];
+                    }
+                }
+                return {};
+            },
+            getPhone(caregiver)
+            {
+                if (caregiver.phone_numbers && caregiver.phone_numbers.length > 0) {
+                    let index = caregiver.phone_numbers.findIndex(function(phone) {
+                        return phone.type === 'work';
+                    });
+                    if (index !== -1) {
+                        return caregiver.phone_numbers[index];
+                    }
+                }
+                return {};
+            },
+
             details(item, index, button) {
                 this.selectedItem = item;
                 this.modalDetails.data = JSON.stringify(item, null, 2);

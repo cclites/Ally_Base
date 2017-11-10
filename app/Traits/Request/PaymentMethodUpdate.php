@@ -66,11 +66,18 @@ trait PaymentMethodUpdate
         }
 
         $data = $request->validate($rules);
+
         // Extract CVV
-        $cvv = $data['cvv'];
-        unset($data['cvv']);
-        if ($cvv) {
-            // TODO: Validate card with CVV
+        if (array_key_exists('cvv', $data)) {
+            $cvv = $data['cvv'];
+            unset($data['cvv']);
+            // TODO: Validate card with $cvv
+        }
+
+        // Add Card Type
+        if (isset($data['number'])) {
+            $cardValidator = \Inacho\CreditCard::validCreditCard($data['number']);
+            $data['type'] = $cardValidator['type'];
         }
 
         // Add Card Type

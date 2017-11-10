@@ -12,9 +12,58 @@ use Illuminate\Http\Request;
 
 class ShiftController extends BaseController
 {
-    public function show(Request $request, $shift_id)
+    public function index()
     {
-        $shift = Shift::with(['activities', 'issues', 'schedule'])->findOrFail($shift_id);
+        // TODO: redirect to Shift Report
+    }
+
+    public function create()
+    {
+        $activities = $this->business()->allActivities();
+        $caregivers = $this->business()->caregivers;
+        $clients = $this->business()->clients;
+        return view('business.shifts.create', compact('activities', 'caregivers', 'clients'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'caregiver_id' => 'required|exists:caregivers,id',
+            'caregiver_comments' => 'nullable',
+            'mileage' => 'nullable|numeric',
+            'other_expenses' => 'nullable|numeric',
+            'checked_in_time' => 'required|date',
+            'checked_out_time' => 'required|date',
+            'verified' => 'boolean',
+            'caregiver_rate' => 'required|numeric',
+            'provider_fee' => 'required|numeric',
+            'hours_type' => 'required|in:default,overtime,holiday',
+        ]);
+
+        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
+        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+        $data['business_id'] = $this->business()->id;
+
+        if ($shift = Shift::create($data)) {
+            $shift->activities()->sync($request->input('activities', []));
+            foreach($request->input('issues', []) as $issue) {
+                $issue = new ShiftIssue([
+                    'caregiver_injury' => $issue['caregiver_injury'] ?? 0,
+                    'client_injury' => $issue['client_injury'] ?? 0,
+                    'comments' => $issue['comments'] ?? ''
+                ]);
+                $shift->issues()->save($issue);
+            }
+            return new SuccessResponse('You have successfully created this shift.', ['id' => $shift->id], route('business.shifts.show', [$shift->id]));
+        }
+
+        return new ErrorResponse(500, 'Error creating the shift.');
+    }
+
+    public function show(Request $request, Shift $shift)
+    {
+        $shift->load(['activities', 'issues', 'schedule', 'client']);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
@@ -53,10 +102,13 @@ class ShiftController extends BaseController
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities', 'clients', 'caregivers'));
     }
 
-    public function update(Request $request, $shift_id) {
-        $shift = Shift::findOrFail($shift_id);
+    public function update(Request $request, Shift $shift) {
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        if ($shift->isReadOnly()) {
+            return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
         $data = $request->validate([
@@ -68,6 +120,9 @@ class ShiftController extends BaseController
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
             'verified' => 'boolean',
+            'caregiver_rate' => 'required|numeric',
+            'provider_fee' => 'required|numeric',
+            'hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
@@ -80,9 +135,9 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
 
-    public function verify($shift_id)
+    public function verify(Shift $shift)
     {
-        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
+        $shift->load(['activities', 'issues']);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
@@ -95,9 +150,9 @@ class ShiftController extends BaseController
         return new ErrorResponse('The shift could not be verified');
     }
 
-    public function storeIssue(Request $request, $shift_id)
+    public function storeIssue(Request $request, Shift $shift)
     {
-        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
+        $shift->load(['activities', 'issues']);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
@@ -115,9 +170,8 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'Unable to create issue.');
     }
 
-    public function updateIssue(Request $request, $shift_id, $issue_id)
+    public function updateIssue(Request $request, Shift $shift, $issue_id)
     {
-        $shift = Shift::with(['activities', 'issues'])->findOrFail($shift_id);
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }

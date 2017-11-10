@@ -40,7 +40,7 @@
                             <option value="VA">VA</option>
                             <option value="LTCI">LTC Insurance</option>
                         </b-form-select>
-                        <input-help :form="form" field="client_type" text=""></input-help>
+                        <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -75,13 +75,7 @@
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
-                        <b-form-input
-                                id="ssn"
-                                name="ssn"
-                                type="text"
-                                v-model="form.ssn"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
                     </b-form-group>
                 </b-col>
@@ -156,7 +150,7 @@
                     lastname: this.client.lastname,
                     email: this.client.email,
                     username: this.client.username,
-                    date_of_birth: moment(this.client.date_of_birth).format('L'),
+                    date_of_birth: (this.client.date_of_birth) ? moment(this.client.date_of_birth).format('L') : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
                     onboard_status: this.client.onboard_status,

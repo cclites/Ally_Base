@@ -26,9 +26,16 @@ class ClientController extends BaseController
     public function index(Request $request)
     {
         $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
+
+        $clients = $clients->sort(function(Client $clientA, Client $clientB) {
+            $strcmp = strcmp($clientA->lastname, $clientB->lastname);
+            return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
+        })->values();
+
         if ($request->expectsJson()) {
             return $clients;
         }
+
         return view('business.clients.index', compact('clients'));
     }
 
@@ -226,7 +233,8 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method');
+        $redirect = route('business.clients.edit', [$client->id]) . '#payment';
+        return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method', $redirect);
     }
 
     public function sendConfirmationEmail($client_id)
@@ -243,10 +251,12 @@ class ClientController extends BaseController
         return new SuccessResponse('Email Sent to Client');
     }
 
-    public function getAllyPercentage($client_id)
+    public function getPaymentType(Client $client)
     {
-        $client = Client::findOrFail($client_id);
-        return ['percentage' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)];
+        return [
+            'payment_type' => $client->getPaymentType(),
+            'percentage_fee' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)
+        ];
     }
 
     public function changePassword(Request $request, Client $client) {

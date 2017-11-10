@@ -4,7 +4,14 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
+        <b-row>
+            <b-col sm="6">
+                <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
+            </b-col>
+            <b-col sm="6" class="text-right">
+                {{ paymentTypeMessage }}
+            </b-col>
+        </b-row>
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
@@ -118,6 +125,11 @@
         props: {
             'list': {},
             'client_id': {},
+            'paymentTypeMessage': {
+                default() {
+                    return '';
+                }
+            }
         },
 
         data() {
