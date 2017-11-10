@@ -60,7 +60,11 @@ class AxiosResponseHandler {
 
     handleRedirect() {
         let data = this.getResponseData();
-        window.location = data.redirect;
+        if (window.location.href === data.redirect) {
+            window.location.reload();
+            return;
+        }
+        window.location.href = data.redirect;
     }
 
     hasError() {
