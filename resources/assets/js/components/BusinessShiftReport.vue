@@ -485,6 +485,21 @@
                     });
             },
 
+            verifySelected() {
+                let component = this;
+                let form = new Form();
+                form.post('/business/shifts/' + component.selectedItem.id + '/verify')
+                    .then(function(response) {
+                        component.detailsModal = false;
+                        component.items.shifts.map(function(shift) {
+                            if (shift.id === component.selectedItem.id) {
+                                shift.verified = 1;
+                            }
+                            return shift;
+                        });
+                    });
+            },
+
             parseFloat(float) {
                 if (typeof(float) === 'string') {
                     float = float.replace(',', '');
