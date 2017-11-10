@@ -6,6 +6,9 @@
             <template slot="created_at" scope="data">
                 {{ formatDate(data.item.created_at) }}
             </template>
+            <template slot="week" scope="data">
+                {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
+            </template>
             <template slot="actions" scope="data">
                 <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
                     View Details

@@ -63,7 +63,7 @@
                             {{ item.roundedShiftLength }}
                         </td>
                         <td>
-                            {{ item.roundedShiftLength * item.caregiver_rate }}
+                            {{ parseFloat(item.roundedShiftLength) * parseFloat(item.caregiver_rate) }}
                         </td>
                     </tr>
                     </tbody>
@@ -126,7 +126,7 @@
         computed: {
             total() {
                return _.reduce(this.items, function(sum, item) {
-                    return sum + item.caregiver_rate * item.roundedShiftLength;
+                    return sum + parseFloat(item.caregiver_rate) * parseFloat(item.roundedShiftLength);
                 }, 0);
             }
         }

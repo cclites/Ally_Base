@@ -6,6 +6,7 @@ use App\Caregiver;
 use App\Client;
 use App\Payment;
 use App\ShiftActivity;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -107,18 +108,21 @@ class DatabaseSeeder extends Seeder
 
     private function generateShifts(Caregiver $caregiver, Client $client, Business $business)
     {
-        // Create shift and payment entries
-        $shifts = factory(\App\Shift::class, 50)->create([
-            'caregiver_id' => $caregiver->id,
-            'client_id' => $client->id,
-            'business_id' => $business->id
-        ]);
+        for ($i = 1; $i < 6; $i++) {
+            $start = Carbon::now()->subWeeks($i + 1);
+            $end = $start->copy()->addHours(2);
+            // Create shift and payment entries
+            $data = [
+                'caregiver_id' => $caregiver->id,
+                'client_id' => $client->id,
+                'business_id' => $business->id,
+                'checked_in_time' => $start,
+                'checked_out_time' => $end
+            ];
 
-        $shifts->chunk(5)->each(function($chunk) use ($business) {
-            $chunk = collect($chunk);
-            $duration = $chunk->reduce(function ($carry, $shift) {
-                $secondsSince = time() - strtotime($shift->checked_out_time);
-                if ($secondsSince < 0) return;
+            $shifts = factory(\App\Shift::class, 10)->create($data);
+
+            $duration = $shifts->reduce(function ($carry, $shift) {
                 return $carry + round((strtotime($shift->checked_out_time) - strtotime($shift->checked_in_time)) / 3600);
             });
 
@@ -127,8 +131,8 @@ class DatabaseSeeder extends Seeder
             $system_fee = $amount * 0.05;
 
             $payment = Payment::create([
-                'client_id' => $chunk->first()->client_id,
-                'business_id' => $chunk->first()->business_id,
+                'client_id' => $shifts->first()->client_id,
+                'business_id' => $shifts->first()->business_id,
                 'amount' => $amount,
                 'business_allotment' => $business_fee,
                 'system_allotment' => $system_fee,
@@ -136,12 +140,12 @@ class DatabaseSeeder extends Seeder
                 'success' => 1
             ]);
 
-            foreach ($chunk as $shift) {
+            $shifts->each(function($shift) use ($payment) {
                 ShiftActivity::create(['shift_id' => $shift->id, 'activity_id' => rand(1, 7)]);
                 $shift->payment_id = $payment->id;
                 $shift->save();
-            }
-        });
+            });
+        }
     }
 
     private function generateActivities(Business $business)

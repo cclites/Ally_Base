@@ -13,10 +13,10 @@
                 {{ data.item.client.name }}
             </template>
             <template slot="amount" scope="data">
-                {{ data.item.caregiver_rate * data.item.roundedShiftLength }}
+                {{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.roundedShiftLength) }}
             </template>
             <template slot="actions" scope="data">
-                <a :href="'/payment-history/' + data.item.id + '/print'">
+                <a :href="'/payment-history/' + data.item.id + '/print'" target="_blank">
                     Print
                 </a>
             </template>
