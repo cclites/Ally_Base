@@ -10,13 +10,16 @@ class ImpersonateController extends Controller
     public function impersonate(User $user)
     {
         $user->impersonate();
-        redirect('/');
+        return redirect('/');
     }
 
     public function stopImpersonating()
     {
-        auth()->user()->stopImpersonating();
-        redirect()->route('admin.users.index');
+        if (auth()->user()->impersonator()) {
+            auth()->user()->stopImpersonating();
+            return redirect()->route('admin.users.index');
+        }
+        abort(403);
     }
 
 }
