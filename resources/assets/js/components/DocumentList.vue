@@ -7,13 +7,15 @@
             <div class="form-group">
                 <input type="file" name="document" @change="setFile($event.target.files[0])">
             </div>
-            <input type="submit" value="Upload" class="btn btn-success">
+
             <b-form-group class="ml-2">
                 <b-form-input
                     v-model="description"
                     placeholder="File Description...">
                 </b-form-input>
             </b-form-group>
+
+            <input type="submit" value="Upload" class="btn btn-success">
         </form>
         <hr>
         <table class="table">
