@@ -98,13 +98,27 @@ class ScheduledVsActualReport extends BaseReport
             $shifts = $this->query->get();
             // Filter out events that were clocked in to (comparing against $shifts)
             $events = array_filter($this->events, function($event) use (&$shifts) {
-                 $matchingShifts = $shifts->where('schedule_id', $event['schedule_id']);
-                 foreach ($matchingShifts as $shift) {
+                 $matchingShiftsBySchedule = $shifts->where('schedule_id', $event['schedule_id']);
+                 foreach ($matchingShiftsBySchedule as $shift) {
                      /** @var Shift $shift */
                      $eventTime = Carbon::instance($event['start']);
                      $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
-                     if ($eventTime->diffInMinutes($shiftTime) <= 120) return false;
+                     // clocked in to within 2.5 hours of start time, filter from array
+                     if ($eventTime->diffInMinutes($shiftTime) <= 150) return false;
                  }
+
+                 if ($event['caregiver_id']) {
+                     $matchingShiftsByClient = $shifts->where('client_id', $event['client_id']);
+                     $matchingShiftsByClientCaregiver = $matchingShiftsByClient->where('caregiver_id', $event['caregiver_id']);
+                     foreach ($matchingShiftsByClientCaregiver as $shift) {
+                         /** @var Shift $shift */
+                         $eventTime = Carbon::instance($event['start']);
+                         $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
+                         // clocked in to within 2.5 hours of start time, filter from array
+                         if ($eventTime->diffInMinutes($shiftTime) <= 150) return false;
+                     }
+                 }
+
                  return true;
             });
             // Map the report fields
