@@ -1,9 +1,15 @@
 <li>
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li>
-<li> <a class="has-arrow" href="{{ route('business.clients.index') }}" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Businesses</span></a>
+<li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bank"></i><span class="hide-menu">Businesses</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.businesses.index') }}">Business List</a></li>
         <li><a href="{{ route('admin.businesses.create') }}">Add Business</a></li>
     </ul>
 </li>
+<li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Users</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.users.index') }}">User List</a></li>
+    </ul>
+</li>
+

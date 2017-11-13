@@ -5,6 +5,7 @@ namespace App\Http;
 use App\Http\Middleware\CheckActive;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\TwilioRequestValidator;
+use Bizhub\Impersonate\Middleware\CheckIfImpersonating;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -38,6 +39,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            CheckIfImpersonating::class, // ADMIN IMPERSONATION
         ],
 
         'api' => [

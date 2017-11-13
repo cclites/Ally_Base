@@ -4,9 +4,51 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1e32211a2d1b8fba5acf8fd5abd4595c",
-    "content-hash": "0a2ac44b4510f0e460c107e1fe597ba1",
+    "hash": "14b9c75667858b1eb8af0b1f36b5cc36",
+    "content-hash": "e2e126531e2f8c1aed67b861aeed878f",
     "packages": [
+        {
+            "name": "bizhub/impersonate",
+            "version": "0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bizhub/impersonate.git",
+                "reference": "8d1db55429e79b45acf49dfd68f78ba978da9355"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bizhub/impersonate/zipball/8d1db55429e79b45acf49dfd68f78ba978da9355",
+                "reference": "8d1db55429e79b45acf49dfd68f78ba978da9355",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bizhub\\Impersonate\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lex van der Woude",
+                    "email": "lex@bizhub.co.nz"
+                }
+            ],
+            "description": "Impersonate a Laravel user",
+            "homepage": "http://bizhub.co.nz",
+            "keywords": [
+                "bizhub",
+                "impersonate",
+                "laravel"
+            ],
+            "time": "2017-03-21 23:00:02"
+        },
         {
             "name": "dnoegel/php-xdg-base-dir",
             "version": "0.1",
