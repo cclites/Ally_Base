@@ -386,7 +386,7 @@
                     return {
                         'id': item.id,
                         'Day': item.checked_in_time, // filtered in template
-                        'Time': moment(item.checked_in_time).format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment(item.checked_out_time).format('h:mm A') : ''),
+                        'Time': moment(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment(item.checked_out_time).local().format('h:mm A') : ''),
                         'Hours': item.roundedShiftLength,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
@@ -466,7 +466,7 @@
             },
 
             dayFormat(date) {
-                return moment(date).format('ddd MMM D');
+                return moment(date).local().format('ddd MMM D');
             },
 
             details(item) {
