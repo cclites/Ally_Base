@@ -35,7 +35,14 @@ class ConfirmationController extends Controller
         $client->load(['user', 'evvAddress']);
         $phoneNumber = ($client->evvPhone) ? $client->evvPhone->national_number : null;
 
-        return view('confirmation.reconfirm', compact('encrypted_id', 'client', 'phoneNumber'));
+        // Allow custom terms per business (terms-inc-$id.html)
+        $businessId = $client->business_id;
+        $termsUrl = url('terms-inc.html');
+        if (file_exists(public_path('terms-inc-' . $businessId . '.html'))) {
+            $termsUrl = url('terms-inc-' . $businessId . '.html');
+        }
+
+        return view('confirmation.reconfirm', compact('encrypted_id', 'client', 'phoneNumber', 'termsUrl'));
     }
 
     public function store(Request $request, $encrypted_id)
