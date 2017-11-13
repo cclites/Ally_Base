@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Traits\PreventsDelete;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -11,6 +11,7 @@ class User extends Authenticatable
 {
     use Notifiable;
     use PreventsDelete;
+    use CanImpersonate;
 
     /**
      * The attributes that are mass assignable.

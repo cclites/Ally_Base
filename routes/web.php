@@ -156,4 +156,8 @@ Route::group([
     'roles' => ['admin'],
 ], function() {
     Route::resource('businesses', 'Admin\BusinessController');
+    Route::resource('users', 'Admin\UserController');
+
+    Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
+    Route::get('impersonate/{user_id}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });

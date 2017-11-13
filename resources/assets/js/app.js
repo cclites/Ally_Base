@@ -36,6 +36,7 @@ Vue.component('time-picker', require('./components/TimePicker.vue'));
 
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 
+
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
 Vue.component('client-payment-history', require('./components/clients/ClientPaymentHistory'));
@@ -43,6 +44,7 @@ Vue.component('client-payment-details', require('./components/clients/ClientPaym
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 
 // Admin
+Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
 Vue.component('business-create', require('./components/BusinessCreate.vue'));
 Vue.component('business-edit', require('./components/BusinessEdit.vue'));
 Vue.component('business-list', require('./components/BusinessList.vue'));
