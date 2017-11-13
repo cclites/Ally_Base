@@ -127,7 +127,7 @@
                 header-text-variant="white"
         >
             <div class="embed-responsive" style="height:200px;">
-                <iframe class="embed-responsive-item" src="/terms-inc.html"></iframe>
+                <iframe class="embed-responsive-item" :src="termsUrl"></iframe>
             </div>
         </b-card>
         <b-row>
@@ -154,6 +154,7 @@
             'user': {},
             'phoneNumber': {},
             'address': {},
+            'termsUrl': String,
         },
 
         data() {
