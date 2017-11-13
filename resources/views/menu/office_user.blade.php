@@ -44,6 +44,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.reports.payments') }}">Payment History</a></li>
         <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
+        <li><a href="{{ route('business.reports.scheduled_vs_actual') }}">Scheduled vs. Actual</a></li>
         <li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>
         <li><a href="{{ route('business.reports.deposits') }}">Registry Referral Deposits</a></li>
         <li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>

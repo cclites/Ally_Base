@@ -10,6 +10,7 @@ use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ScheduledPaymentsReport;
+use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
 use Carbon\Carbon;
@@ -261,5 +262,18 @@ class ReportsController extends BaseController
         $report = new ClientChargesReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
         return $report->rows();
+    }
+
+    public function scheduledVsActual(Request $request)
+    {
+        if ($request->expectsJson()) {
+            $startDate = new Carbon($request->input('start_date'), $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date'), $this->business()->timezone);
+
+            $report = new ScheduledVsActualReport($this->business());
+            $report->between($startDate, $endDate);
+            return $report->rows();
+        }
+        return view('business.reports.scheduled_vs_actual');
     }
 }
