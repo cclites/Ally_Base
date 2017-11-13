@@ -94,7 +94,7 @@
                     number: (this.card.last_four) ? '************ ' + this.card.last_four : '',
                     expiration_month: _.padStart(this.card.expiration_month, 2, '0'),
                     expiration_year: this.card.expiration_year,
-                    cvv: null,
+                    cvv: (this.card.last_four) ? '***' : '',
                 }),
             }
         },
@@ -117,7 +117,7 @@
                 this.form.post('/business/clients/' + this.client.id + '/payment/' + this.source)
                     .then(function(response) {
                         component.form.number = '************ ' + component.form.number.slice(-4);
-                        component.form.cvv = null;
+                        component.form.cvv = '***';
                     });
             }
         }
