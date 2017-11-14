@@ -267,8 +267,8 @@ class ReportsController extends BaseController
     public function scheduledVsActual(Request $request)
     {
         if ($request->expectsJson()) {
-            $startDate = new Carbon($request->input('start_date'), $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date'), $this->business()->timezone);
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
             $report = new ScheduledVsActualReport($this->business());
             $report->between($startDate, $endDate);
