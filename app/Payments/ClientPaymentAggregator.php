@@ -85,7 +85,10 @@ class ClientPaymentAggregator
             // Save the payment to the client
             $this->client->payments()->save($payment);
             // Update shifts' payment id
-            Shift::whereIn('id', $data['shifts'])->update(['payment_id' => $payment->id]);
+            Shift::whereIn('id', $data['shifts'])->update([
+                'payment_id' => $payment->id,
+                'status' => Shift::WAITING_FOR_PAYOUT,
+            ]);
         }
 
         return $transaction;
