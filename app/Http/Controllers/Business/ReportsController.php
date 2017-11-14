@@ -236,31 +236,31 @@ class ReportsController extends BaseController
     }
 
     public function shifts(Request $request) {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate  . ' 23:59:59');
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
         return $report->rows();
     }
 
     public function caregiverPayments(Request $request)
     {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new CaregiverPaymentsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate . ' 23:59:59');
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
         return $report->rows();
     }
 
     public function clientCharges(Request $request)
     {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new ClientChargesReport();
-        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate . ' 23:59:59');
+        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
         return $report->rows();
     }
 
