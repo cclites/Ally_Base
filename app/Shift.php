@@ -36,6 +36,11 @@ class Shift extends Model
         return $this->belongsTo(Payment::class);
     }
 
+    public function deposits()
+    {
+        return $this->belongsToMany(Deposit::class,'deposit_shifts');
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);
