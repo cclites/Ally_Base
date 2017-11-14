@@ -2,8 +2,8 @@
 
 namespace App\Scheduling;
 
+use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftCreated;
-use App\Reports\ShiftsReport;
 use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
@@ -61,11 +61,8 @@ class ClockOut extends ClockBase
 
         if (!$verified) {
             event(new UnverifiedShiftCreated($shift));
-            $shift->update(['status' => Shift::WAITING_FOR_APPROVAL]);
         }
-        else {
-            $shift->update(['status' => Shift::WAITING_FOR_AUTHORIZATION]);
-        }
+        event(new ShiftModified($shift));
 
         return $update;
     }

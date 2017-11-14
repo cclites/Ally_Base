@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftApproved;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -129,8 +130,13 @@ class ShiftController extends BaseController
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
 
+        if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
+             event(new UnverifiedShiftApproved($shift));
+        }
+
         if ($shift->update($data)) {
             $shift->activities()->sync($request->input('activities', []));
+            event(new ShiftModified($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -144,10 +150,8 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update(['verified' => true])) {
-            if ($shift->status === Shift::WAITING_FOR_APPROVAL) {
-                $shift->update(['status' => Shift::WAITING_FOR_AUTHORIZATION]);
-            }
             event(new UnverifiedShiftApproved($shift));
+            event(new ShiftModified($shift));
             return new SuccessResponse('The shift has been verified');
         }
 

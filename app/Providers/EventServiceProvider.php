@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftApproved;
 use App\Events\UnverifiedShiftCreated;
+use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
 use App\Listeners\UnverifiedShiftException;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -21,6 +23,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         UnverifiedShiftApproved::class => [
             UnverifiedShiftAcknowledgement::class,
+        ],
+        ShiftModified::class => [
+            ShiftStatusUpdate::class,
         ]
     ];
 
