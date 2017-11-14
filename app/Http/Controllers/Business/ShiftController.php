@@ -144,6 +144,9 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update(['verified' => true])) {
+            if ($shift->status === Shift::WAITING_FOR_APPROVAL) {
+                $shift->update(['status' => Shift::WAITING_FOR_AUTHORIZATION]);
+            }
             event(new UnverifiedShiftApproved($shift));
             return new SuccessResponse('The shift has been verified');
         }
