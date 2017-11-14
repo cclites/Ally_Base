@@ -58,7 +58,7 @@ class ChargesController extends Controller
     public function chargeClient(Request $request, Client $client)
     {
         $startDate = new Carbon($request->input('start_date'), 'America/New_York');
-        $endDate = new Carbon($request->input('end_date'), 'America/New_York');
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
         $payment = new ClientPaymentAggregator($client, $startDate, $endDate);
         if ($transaction = $payment->charge()) {
             return new CreatedResponse('The client has been charged ' . $transaction->amount, $transaction);
