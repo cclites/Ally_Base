@@ -29,8 +29,19 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
             >
-                <template slot="charge" scope="row">
-                    <charge-payment-button :item.sync="row.item" :start-date="start_date" :end-date="end_date"></charge-payment-button>
+                <template slot="shift_time" scope="data">
+                    {{ dayFormat(data.value) }}
+                </template>
+                <template slot="verified" scope="data">
+                    <span v-if="data.value" style="color: green">
+                        <i class="fa fa-check-square-o"></i>
+                    </span>
+                    <span v-else style="color: darkred">
+                        <i class="fa fa-times-rectangle-o"></i>
+                    </span>
+                </template>
+                <template slot="authorized" scope="row">
+                    <authorized-payment-checkbox :item.sync="row.item"></authorized-payment-checkbox>
                 </template>
             </b-table>
         </div>
@@ -51,13 +62,23 @@
                 items: [],
                 fields: [
                     {
-                        key: 'client_id',
-                        label: 'Client ID',
+                        key: 'shift_time',
+                        label: 'Date',
                         sortable: true,
                     },
                     {
                         key: 'client_name',
-                        label: 'Client Name',
+                        label: 'Client',
+                        sortable: true,
+                    },
+                    {
+                        key: 'caregiver_name',
+                        label: 'Caregiver',
+                        sortable: true,
+                    },
+                    {
+                        key: 'shift_hours',
+                        label: 'Hours',
                         sortable: true,
                     },
                     {
@@ -81,21 +102,21 @@
                         sortable: true,
                     },
                     {
+                        key: 'ally_pct',
+                        label: 'Ally %',
+                        sortable: true,
+                    },
+                    {
                         key: 'payment_type',
                         label: 'Type',
                         sortable: true,
                     },
                     {
-                        key: 'total_shifts',
-                        label: 'Total Shifts',
+                        key: 'verified',
+                        label: 'Verified',
                         sortable: true,
                     },
-                    {
-                        key: 'unauthorized_shifts',
-                        label: 'Unauthorized',
-                        sortable: true,
-                    },
-                    'charge'
+                    'authorized'
                 ]
             }
         },
@@ -110,10 +131,20 @@
 
         methods: {
             loadItems() {
-                axios.get('/admin/charges/pending_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get('/admin/charges/pending_shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
-                        this.items = response.data;
+                        this.items = response.data.map(function (item) {
+                            item.client_name = (item.client) ? item.client.name : '';
+                            item.caregiver_name = (item.caregiver) ? item.caregiver.name : '';
+                            item.verified = (item.status !== 'WAITING_FOR_APPROVAL');
+                            item.authorized = (item.status === 'WAITING_FOR_CHARGE');
+                            return item;
+                        });
                     });
+            },
+
+            dayFormat(date) {
+                return moment(date).local().format('ddd MMM D');
             },
         }
     }

@@ -26,6 +26,7 @@ class ScheduledPaymentsReport extends ShiftsReport
                     'shift_time' => (new Carbon($shift->checked_in_time))->format(DATE_ISO8601),
                     'shift_hours' => $shift->duration(),
                     'status' => $shift->status,
+                    'client_id' => $shift->client_id,
                     'client' => [
                         'id' => $shift->client->id,
                         'name' => $shift->client->nameLastFirst(),

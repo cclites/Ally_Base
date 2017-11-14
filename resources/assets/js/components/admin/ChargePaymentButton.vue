@@ -1,10 +1,6 @@
 <template>
-    <div class="form-check">
-        <label class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" name="authorized" v-model="form.authorized" @change="updateStatus()">
-            <span class="custom-control-indicator"></span>
-        </label>
-
+    <div>
+        [CHARGE BUTTON]
     </div>
 </template>
 
@@ -12,6 +8,8 @@
     export default {
         props: {
             'item': Object,
+            'startDate': String,
+            'endDate': String,
         },
 
         data() {
