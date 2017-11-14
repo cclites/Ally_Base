@@ -63,6 +63,13 @@ class ScheduledVsActualReport extends BaseReport
      */
     public function between($start = null, $end = null)
     {
+        if ($start) {
+            $start = (new Carbon($start))->setTimezone('UTC');
+        }
+        if ($end) {
+            $end = (new Carbon($end))->setTimezone('UTC');
+        }
+
         if ($start && $end) {
             $this->query->whereBetween('checked_in_time', [$start, $end]);
         }
