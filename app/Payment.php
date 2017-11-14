@@ -32,14 +32,14 @@ class Payment extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function reference()
+    public function method()
     {
         return $this->morphTo();
     }
 
-    public function method()
+    public function transaction()
     {
-        return $this->morphTo();
+        return $this->belongsTo(GatewayTransaction::class, 'transaction_id');
     }
 
     ////////////////////////////////////////////
