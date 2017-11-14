@@ -342,8 +342,8 @@
                 caregivers: [],
                 filterCaregiverId: "",
                 filterClientId: "",
-                sortBy: null,
-                sortDesc: null,
+                sortBy: 'Day',
+                sortDesc: false,
                 detailsModal: false,
                 selectedItem: {
                     client: {}
