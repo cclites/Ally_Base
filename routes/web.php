@@ -158,6 +158,8 @@ Route::group([
 ], function() {
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
+    Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
+    Route::post('charges/pending/{shift}', 'Admin\ChargesController@updateStatus')->name('charges.updateStatus');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 
