@@ -240,7 +240,7 @@ class ReportsController extends BaseController
         $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
 
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate  . ' 23:59:59');
         return $report->rows();
     }
 
@@ -250,7 +250,7 @@ class ReportsController extends BaseController
         $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
 
         $report = new CaregiverPaymentsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate . ' 23:59:59');
         return $report->rows();
     }
 
@@ -260,7 +260,7 @@ class ReportsController extends BaseController
         $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
 
         $report = new ClientChargesReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id)->between($startDate . ' 00:00:00', $endDate . ' 23:59:59');
         return $report->rows();
     }
 
