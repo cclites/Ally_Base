@@ -41,5 +41,11 @@
             }
 
         },
+
+        watch: {
+            'item.authorized': function(val) {
+                this.form.authorized = val;
+            }
+        }
     }
 </script>
