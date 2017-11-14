@@ -45,11 +45,11 @@ abstract class BaseReport implements Report
      */
     public function between($start = null, $end = null)
     {
-        if ($start) {
-            $start = (new Carbon($start))->setTimezone('UTC');
+        if ($start instanceof \DateTime) {
+            $start = Carbon::instance($start)->setTimezone('UTC');
         }
-        if ($end) {
-            $end = (new Carbon($end))->setTimezone('UTC');
+        if ($end instanceof \DateTime) {
+            $end = Carbon::instance($end)->setTimezone('UTC');
         }
 
         if ($start && $end) {
@@ -61,6 +61,7 @@ abstract class BaseReport implements Report
         else {
             $this->query->where('checked_in_time', '<=', $end);
         }
+
         return $this;
     }
 
