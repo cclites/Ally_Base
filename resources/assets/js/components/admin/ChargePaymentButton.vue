@@ -1,6 +1,6 @@
 <template>
     <div>
-        [CHARGE BUTTON]
+        <b-button :variant="variant" :disabled="disabled" @click="chargeClient()">{{ text }}</b-button>
     </div>
 </template>
 
@@ -14,7 +14,13 @@
 
         data() {
             return {
-                'form': new Form({ authorized: this.item.authorized }),
+                'form': new Form({
+                    start_date: this.startDate,
+                    end_date: this.endDate,
+                }),
+                'variant': 'info',
+                'disabled': false,
+                'text': 'Charge!',
             }
         },
 
@@ -24,17 +30,16 @@
 
         methods: {
 
-            updateStatus() {
-                let authorized = this.form.authorized;
-                this.form.post('/admin/charges/pending_shifts/' + this.item.shift_id)
+            chargeClient() {
+                this.disabled = true;
+                this.form.post('/admin/charges/client/' + this.item.client_id)
                     .then(response => {
-                        this.item.authorized = authorized;
-                        if (authorized) {
-                            this.item.verified = true;
-                        }
+                        this.variant = 'success';
+                        this.text = 'Charged';
                     })
-                    .catch(response => {
-                        this.form.authorized = !authorized;
+                    .catch(error => {
+                        this.variant = 'danger';
+                        this.text = 'Failed';
                     });
             }
 
