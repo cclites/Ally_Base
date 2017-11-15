@@ -111,9 +111,19 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $client->load(['user', 'addresses', 'phoneNumbers', 'bankAccounts', 'creditCards', 'user.documents', 'notes.creator', 'notes' => function ($query) {
-            return $query->orderBy('created_at', 'desc');
-        }]);
+        $client->load([
+            'user',
+            'addresses',
+            'phoneNumbers',
+            'bankAccounts',
+            'creditCards',
+            'payments',
+            'user.documents',
+            'notes.creator',
+            'notes' => function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            }
+        ]);
         $schedules = $client->schedules()->get();
         $caregivers = $this->business()->caregivers()
               ->with('user')
