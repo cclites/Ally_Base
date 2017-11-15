@@ -32,7 +32,7 @@ abstract class BaseReport implements Report
      */
     public function where($field, $delimiter, $value = null)
     {
-        $this->query->where($field, $delimiter, $value);
+        $this->query()->where($field, $delimiter, $value);
         return $this;
     }
 
@@ -53,13 +53,13 @@ abstract class BaseReport implements Report
         }
 
         if ($start && $end) {
-            $this->query->whereBetween('checked_in_time', [$start, $end]);
+            $this->query()->whereBetween('checked_in_time', [$start, $end]);
         }
         elseif ($start) {
-            $this->query->where('checked_in_time', '>=', $start);
+            $this->query()->where('checked_in_time', '>=', $start);
         }
         else {
-            $this->query->where('checked_in_time', '<=', $end);
+            $this->query()->where('checked_in_time', '<=', $end);
         }
 
         return $this;
