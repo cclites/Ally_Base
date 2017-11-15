@@ -14,7 +14,7 @@ class ProfileController extends Controller
     public function index()
     {
         $type = auth()->user()->role_type;
-        $user = auth()->user();
+        $user = auth()->user()->load('phoneNumbers');
         return view('profile.' . $type, compact('user'));
     }
 
