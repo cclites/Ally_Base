@@ -8,10 +8,12 @@ use App\Payment;
 use App\PaymentQueue;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
+use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
+use App\Responses\Resources\ClientCaregiver;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -236,8 +238,8 @@ class ReportsController extends BaseController
     }
 
     public function shifts(Request $request) {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new ShiftsReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
@@ -246,8 +248,8 @@ class ReportsController extends BaseController
 
     public function caregiverPayments(Request $request)
     {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new CaregiverPaymentsReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
@@ -256,8 +258,8 @@ class ReportsController extends BaseController
 
     public function clientCharges(Request $request)
     {
-        $startDate = filter_date($request->input('start_date', date('Y-m-d', strtotime('last monday'))));
-        $endDate = filter_date($request->input('end_date', date('Y-m-d', strtotime('this sunday'))));
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
         $report = new ClientChargesReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
@@ -266,14 +268,25 @@ class ReportsController extends BaseController
 
     public function scheduledVsActual(Request $request)
     {
-        if ($request->expectsJson()) {
-            $startDate = new Carbon($request->input('start_date'), $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date'), $this->business()->timezone);
+        if ($request->expectsJson() && $request->input('json')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
             $report = new ScheduledVsActualReport($this->business());
             $report->between($startDate, $endDate);
             return $report->rows();
         }
         return view('business.reports.scheduled_vs_actual');
+    }
+
+    public function clientCaregivers(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new ClientCaregiversReport();
+            $report->where('business_id', $this->business()->id);
+            return $report->rows();
+        }
+
+        return view('business.reports.client_caregivers');
     }
 }

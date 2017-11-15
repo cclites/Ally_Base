@@ -114,6 +114,7 @@ Route::group([
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
+    Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
@@ -158,6 +159,10 @@ Route::group([
 ], function() {
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
+    Route::get('charges/pending_payments', 'Admin\ChargesController@pendingPayments')->name('charges.pending_payments');
+    Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
+    Route::post('charges/pending_shifts/{shift}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
+    Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 

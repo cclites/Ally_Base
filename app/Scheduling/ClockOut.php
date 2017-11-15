@@ -2,6 +2,7 @@
 
 namespace App\Scheduling;
 
+use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftCreated;
 use App\Shift;
 use App\ShiftIssue;
@@ -61,6 +62,7 @@ class ClockOut extends ClockBase
         if (!$verified) {
             event(new UnverifiedShiftCreated($shift));
         }
+        event(new ShiftModified($shift));
 
         return $update;
     }

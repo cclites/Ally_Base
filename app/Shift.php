@@ -18,7 +18,7 @@ class Shift extends Model
     ///////////////////////////////////////
 
     const CLOCKED_IN = 'CLOCKED_IN';
-    const CLOCKED_OUT = 'CLOCKED_OUT';
+    const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Verified shift that needs to be authorized for payment
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
@@ -34,6 +34,11 @@ class Shift extends Model
     public function payment()
     {
         return $this->belongsTo(Payment::class);
+    }
+
+    public function deposits()
+    {
+        return $this->belongsToMany(Deposit::class,'deposit_shifts');
     }
 
     public function client()

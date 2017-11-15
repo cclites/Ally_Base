@@ -27,6 +27,7 @@ class ClockIn extends ClockBase
             'checked_in_longitude' => $this->longitude,
             'checked_in_number' => $this->number,
             'all_day' => $schedule->all_day,
+            'status' => Shift::CLOCKED_IN,
         ]);
 
         if ($shift->verified) {

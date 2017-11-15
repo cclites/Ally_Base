@@ -7,7 +7,7 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadData()">
+                    <b-form inline @submit.prevent="reloadData()">
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -18,7 +18,8 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;
+                        <b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -342,8 +343,8 @@
                 caregivers: [],
                 filterCaregiverId: "",
                 filterClientId: "",
-                sortBy: null,
-                sortDesc: null,
+                sortBy: 'Day',
+                sortDesc: false,
                 detailsModal: false,
                 selectedItem: {
                     client: {}
@@ -428,34 +429,55 @@
         },
 
         methods: {
+            reloadData() {
+                this.setLocalStorage('sortBy', 'Day');
+                this.setLocalStorage('sortDesc', 'false');
+                return this.loadData();
+            },
             loadData() {
-                let component = this;
                 let prefix = '/business/reports/data/';
+
+                // Attempt to load local storage information first
+                if (typeof(Storage) !== "undefined") {
+                    let startDate = this.getLocalStorage('startDate');
+                    if (startDate) this.start_date = startDate;
+                    let endDate = this.getLocalStorage('endDate');
+                    if (endDate) this.end_date = endDate;
+                    let filterCaregiverId = this.getLocalStorage('filterCaregiverId');
+                    if (filterCaregiverId) this.filterCaregiverId = filterCaregiverId;
+                    let filterClientId = this.getLocalStorage('filterClientId');
+                    if (filterClientId) this.filterClientId = filterClientId;
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) this.sortBy = sortBy;
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                }
+
                 axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.caregiverPayments = response.data;
+                            this.items.caregiverPayments = response.data;
                         }
                         else {
-                            component.items.caregiverPayments = [];
+                            this.items.caregiverPayments = [];
                         }
                     });
                 axios.get(prefix + 'client_charges?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.clientCharges = response.data;
+                            this.items.clientCharges = response.data;
                         }
                         else {
-                            component.items.clientCharges = [];
+                            this.items.clientCharges = [];
                         }
                     });
                 axios.get(prefix + 'shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.shifts = response.data;
+                            this.items.shifts = response.data;
                         }
                         else {
-                            component.items.shifts = [];
+                            this.items.shifts = [];
                         }
                     });
             },
@@ -507,8 +529,44 @@
                 return parseFloat(float);
             },
 
+            getLocalStorage(item) {
+                let val = localStorage.getItem('shift_report_' + item);
+                if (typeof(val) === 'string') {
+                    if (val.toLowerCase() === 'null' || val.toLowerCase() === '') return null;
+                    if (val.toLowerCase() === 'false') return false;
+                    if (val.toLowerCase() === 'true') return true;
+                }
+                return val;
+            },
+
+            setLocalStorage(item, value) {
+                if (typeof(Storage) !== "undefined") {
+                    localStorage.setItem('shift_report_' + item, value);
+                }
+            }
 
         },
+
+        watch: {
+            filterCaregiverId(val) {
+                this.setLocalStorage('filterCaregiverId', val);
+            },
+            filterClientId(val) {
+                this.setLocalStorage('filterClientId', val);
+            },
+            start_date(val) {
+                this.setLocalStorage('startDate', val);
+            },
+            end_date(val) {
+                this.setLocalStorage('endDate', val);
+            },
+            sortBy(val) {
+                this.setLocalStorage('sortBy', val);
+            },
+            sortDesc(val) {
+                this.setLocalStorage('sortDesc', val);
+            },
+        }
     }
 </script>
 

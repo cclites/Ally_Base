@@ -53,6 +53,13 @@ class CertificationExpirationReport implements Report
      */
     public function between($start = null, $end = null)
     {
+        if ($start) {
+            $start = (new Carbon($start))->setTimezone('UTC');
+        }
+        if ($end) {
+            $end = (new Carbon($end))->setTimezone('UTC');
+        }
+
         if ($start && $end) {
             $this->query->whereBetween('expires_at', [$start, $end]);
         }

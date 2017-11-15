@@ -190,6 +190,11 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
         );
     }
 
+    /**
+     * @return \App\GatewayTransaction
+     * @throws \App\Exceptions\PaymentMethodDeclined
+     * @throws \App\Exceptions\PaymentMethodError
+     */
     public function post()
     {
         if (!$this->params['type']) {
@@ -235,7 +240,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      *
      * @param \App\BankAccount $account
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function validateAccount(BankAccount $account)
@@ -253,7 +258,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param string $currency
      * @param string $secCode
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function depositFunds(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
@@ -275,7 +280,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param string $currency
      * @param string $secCode
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function authorizeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
@@ -297,7 +302,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param string $currency
      * @param string $secCode
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function chargeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
@@ -317,7 +322,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param \App\CreditCard $card
      * @param mixed $cvv
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function validateCard(CreditCard $card, $cvv = null)
@@ -335,7 +340,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param string $currency
      * @param mixed $cvv
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function authorizeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null)
@@ -357,7 +362,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @param string $currency
      * @param mixed $cvv
      *
-     * @return bool
+     * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function chargeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null)

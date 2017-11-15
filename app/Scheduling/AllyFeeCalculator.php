@@ -47,6 +47,10 @@ class AllyFeeCalculator
      */
     public static function getPercentage(Client $client, $paymentMethod)
     {
+        if ($client->fee_override !== null) {
+            return $client->fee_override;
+        }
+
         $pct = config('ally.bank_account_fee');
         switch($client->client_type) {
             case 'private_pay':

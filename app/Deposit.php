@@ -28,8 +28,13 @@ class Deposit extends Model
         return $this->morphTo();
     }
 
-    public function payments()
+    public function transaction()
     {
-        return $this->belongsToMany(Payment::class, 'deposit_payments');
+        return $this->belongsTo(GatewayTransaction::class, 'transaction_id');
+    }
+
+    public function shifts()
+    {
+        return $this->belongsToMany(Shift::class, 'deposit_shifts');
     }
 }

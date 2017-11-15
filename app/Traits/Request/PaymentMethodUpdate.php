@@ -80,6 +80,12 @@ trait PaymentMethodUpdate
             $data['type'] = $cardValidator['type'];
         }
 
+        // Add Card Type
+        if (isset($data['number'])) {
+            $cardValidator = \Inacho\CreditCard::validCreditCard($data['number']);
+            $data['type'] = $cardValidator['type'];
+        }
+
         if (!$existing) {
             $existing = new CreditCard($data);
         }

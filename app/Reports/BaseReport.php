@@ -32,7 +32,7 @@ abstract class BaseReport implements Report
      */
     public function where($field, $delimiter, $value = null)
     {
-        $this->query->where($field, $delimiter, $value);
+        $this->query()->where($field, $delimiter, $value);
         return $this;
     }
 
@@ -45,15 +45,23 @@ abstract class BaseReport implements Report
      */
     public function between($start = null, $end = null)
     {
+        if ($start instanceof \DateTime) {
+            $start = Carbon::instance($start)->setTimezone('UTC');
+        }
+        if ($end instanceof \DateTime) {
+            $end = Carbon::instance($end)->setTimezone('UTC');
+        }
+
         if ($start && $end) {
-            $this->query->whereBetween('checked_in_time', [$start, $end]);
+            $this->query()->whereBetween('checked_in_time', [$start, $end]);
         }
         elseif ($start) {
-            $this->query->where('checked_in_time', '>=', $start);
+            $this->query()->where('checked_in_time', '>=', $start);
         }
         else {
-            $this->query->where('checked_in_time', '<=', $end);
+            $this->query()->where('checked_in_time', '<=', $end);
         }
+
         return $this;
     }
 
