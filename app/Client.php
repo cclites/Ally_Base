@@ -29,7 +29,8 @@ class Client extends Model implements UserRole
         'backup_payment_type',
         'backup_payment_id',
         'ssn',
-        'onboard_status'
+        'onboard_status',
+        'fee_override',
     ];
 
     ///////////////////////////////////////////
