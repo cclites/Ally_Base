@@ -50,7 +50,7 @@
         <li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>
         <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
         <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
-        <li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregivers</a></li>
+        <li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver Rates</a></li>
     </ul>
 </li>
 <li>

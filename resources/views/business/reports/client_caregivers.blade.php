@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Client Caregivers Report')
+@section('title', 'Client Caregiver Rates Report')
 
 @section('content')
     <business-client-caregivers-report></business-client-caregivers-report>
