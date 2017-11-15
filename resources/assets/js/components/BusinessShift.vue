@@ -257,9 +257,11 @@
                     <b-col lg="12" v-if="!shift.readOnly">
                         <b-button variant="success" type="submit">Save Shift</b-button>
                         <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                        <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                        <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                 </b-row>
             </form>
