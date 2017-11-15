@@ -89,7 +89,7 @@
         methods: {
             loadData() {
                 let component = this;
-                axios.get('/business/reports/scheduled_vs_actual?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get('/business/reports/scheduled_vs_actual?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(function(response) {
                         if (Array.isArray(response.data)) {
                             component.items = response.data.map(function(item) {

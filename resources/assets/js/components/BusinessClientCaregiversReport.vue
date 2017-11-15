@@ -100,7 +100,7 @@
         methods: {
             loadData() {
                 let component = this;
-                axios.get('/business/reports/client_caregivers')
+                axios.get('/business/reports/client_caregivers?json=1')
                     .then(function(response) {
                         if (Array.isArray(response.data)) {
                             component.items = response.data;

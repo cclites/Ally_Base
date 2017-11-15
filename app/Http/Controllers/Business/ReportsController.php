@@ -268,7 +268,7 @@ class ReportsController extends BaseController
 
     public function scheduledVsActual(Request $request)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() && $request->input('json')) {
             $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
             $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
 
@@ -281,7 +281,7 @@ class ReportsController extends BaseController
 
     public function clientCaregivers(Request $request)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() && $request->input('json')) {
             $report = new ClientCaregiversReport();
             $report->where('business_id', $this->business()->id);
             return $report->rows();
