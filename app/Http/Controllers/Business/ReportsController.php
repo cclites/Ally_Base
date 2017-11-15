@@ -289,4 +289,13 @@ class ReportsController extends BaseController
 
         return view('business.reports.client_caregivers');
     }
+
+    /**
+     * Get a list of all clients that are missing an email address
+     */
+    public function clientEmailMissing()
+    {
+        $clients = Client::where('')
+        return view('business.reports.client_email_missing', compact('clients'));
+    }
 }
