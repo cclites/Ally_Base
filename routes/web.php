@@ -159,8 +159,8 @@ Route::group([
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges/pending_payments', 'Admin\ChargesController@pendingPayments')->name('charges.pending_payments');
-    Route::get('charges/pending_shifts', 'Admin\ChargesController@pendingShifts')->name('charges.pending_shifts');
-    Route::post('charges/pending_shifts/{shift}', 'Admin\ChargesController@updateShiftStatus')->name('charges.update_shift_status');
+    Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
+    Route::post('charges/pending_shifts/{shift}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
     Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
