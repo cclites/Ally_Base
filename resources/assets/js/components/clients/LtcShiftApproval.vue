@@ -155,13 +155,13 @@
                         key: 'checked_in_time',
                         label: 'Start',
                         sortable: true,
-                        formatter: (value) => { return this.formatDate(value) + ' ' + this.formatTime(value) }
+                        formatter: (value) => { return this.formatDateTime(value) }
                     },
                     {
                         key: 'checked_out_time',
                         label: 'End',
                         sortable: true,
-                        formatter: (value) => { return this.formatDate(value) + ' ' + this.formatTime(value) }
+                        formatter: (value) => { return this.formatDateTime(value) }
                     },
                     {
                         key: 'caregiver',
@@ -174,7 +174,7 @@
                     {
                         key: 'total',
                         label: 'Total Amount',
-                        formatter: (value) => { return numeral(value).format('$0,0.00'); }
+                        formatter: (value) => { return this.formatMoney(value); }
 
                     },
                     'actions'
