@@ -31,6 +31,8 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    protected $appends = ['name'];
+
     ///////////////////////////////////////////
     /// Name Concatenation Methods
     ///////////////////////////////////////////
