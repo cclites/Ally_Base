@@ -47,9 +47,8 @@ class AllyFeeCalculator
      */
     public static function getPercentage(Client $client, $paymentMethod)
     {
-        // Temporary: Lock Nancy Miller to 5%
-        if ($client->id == 94) {
-            return '0.05';
+        if ($client->fee_override !== null) {
+            return $client->fee_override;
         }
 
         $pct = config('ally.bank_account_fee');
