@@ -30,20 +30,25 @@ class ClientCaregiversReport extends BaseReport
     public function rows()
     {
         $clients = $this->query()->get();
-        $rows = $clients->map(function($client) {
+        $rows = [];
+        foreach($clients as $client) {
             $allyPct = AllyFeeCalculator::getPercentage($client, null);
-            return [
-                'client_id' => $client->id,
-                'client_name' => $client->nameLastFirst(),
-                'caregiver_id' => $client->caregiver->id,
-                'caregiver_name' => $client->caregiver->nameLastFirst(),
-                'caregiver_rate' => $client->caregiver->pivot->caregiver_rate,
-                'provider_fee' => $client->caregiver->pivot->provider_fee,
-                'ally_fee' => round(($client->caregiver->pivot->caregiver_rate + $client->caregiver->pivot->provider_fee) * $allyPct),
-                'ally_percentage' => $allyPct,
-                'payment_type' => $client->getPaymentType(),
-            ];
-        });
-        return $rows;
+            foreach($client->caregivers as $caregiver) {
+                $allyFee = round(($caregiver->pivot->caregiver_hourly_rate + $caregiver->pivot->provider_hourly_fee) * $allyPct, 2);
+                $rows[] = [
+                    'client_id' => $client->id,
+                    'client_name' => $client->nameLastFirst(),
+                    'caregiver_id' => $caregiver->id,
+                    'caregiver_name' => $caregiver->nameLastFirst(),
+                    'caregiver_rate' => $caregiver->pivot->caregiver_hourly_rate,
+                    'provider_fee' => $caregiver->pivot->provider_hourly_fee,
+                    'ally_fee' => $allyFee,
+                    'total_hourly' => $caregiver->pivot->caregiver_hourly_rate + $caregiver->pivot->provider_hourly_fee + $allyFee,
+                    'ally_percentage' => $allyPct,
+                    'payment_type' => $client->getPaymentType(),
+                ];
+            }
+        }
+        return collect($rows);
     }
 }

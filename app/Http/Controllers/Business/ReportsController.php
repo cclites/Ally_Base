@@ -8,10 +8,12 @@ use App\Payment;
 use App\PaymentQueue;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
+use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
+use App\Responses\Resources\ClientCaregiver;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -275,5 +277,16 @@ class ReportsController extends BaseController
             return $report->rows();
         }
         return view('business.reports.scheduled_vs_actual');
+    }
+
+    public function clientCaregivers(Request $request)
+    {
+        if ($request->expectsJson()) {
+            $report = new ClientCaregiversReport();
+            $report->where('business_id', $this->business()->id);
+            return $report->rows();
+        }
+
+        return view('business.reports.client_caregivers');
     }
 }

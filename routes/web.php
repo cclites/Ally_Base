@@ -114,6 +114,7 @@ Route::group([
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
+    Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
