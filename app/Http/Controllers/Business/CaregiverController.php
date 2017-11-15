@@ -29,7 +29,7 @@ class CaregiverController extends BaseController
             ->with(['user', 'addresses', 'phoneNumbers'])
             ->get();
 
-        $caregivers = $caregivers->sort(function(Caregiver $caregiverA, Caregiver $caregiverB) {
+        $caregivers = $caregivers->sort(function (Caregiver $caregiverA, Caregiver $caregiverB) {
             $strcmp = strcmp($caregiverA->lastname, $caregiverB->lastname);
             return ($strcmp !== 0) ? $strcmp : strcmp($caregiverA->firstname, $caregiverB->firstname);
         })->values();
@@ -53,7 +53,7 @@ class CaregiverController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -94,10 +94,12 @@ class CaregiverController extends BaseController
     {
         if (!$this->hasCaregiver($caregiver->id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
-    }
+        }
 
 //        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
-        $caregiver->load(['user.documents', 'bankAccount']);
+        $caregiver->load(['user.documents', 'bankAccount', 'notes.creator', 'notes' => function ($query) {
+            return $query->orderBy('created_at', 'desc');
+        }]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -107,7 +109,7 @@ class CaregiverController extends BaseController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Caregiver  $caregiver
+     * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
      */
     public function edit(Caregiver $caregiver)
@@ -118,8 +120,8 @@ class CaregiverController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Caregiver  $caregiver
+     * @param  \Illuminate\Http\Request $request
+     * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Caregiver $caregiver)
@@ -152,7 +154,7 @@ class CaregiverController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Caregiver  $caregiver
+     * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
      */
     public function destroy(Caregiver $caregiver)
@@ -231,7 +233,8 @@ class CaregiverController extends BaseController
         return new ErrorResponse(500, 'The bank account could not be saved.');
     }
 
-    public function changePassword(Request $request, Caregiver $caregiver) {
+    public function changePassword(Request $request, Caregiver $caregiver)
+    {
         if (!$this->hasCaregiver($caregiver->id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }

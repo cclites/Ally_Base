@@ -74,6 +74,11 @@ class Caregiver extends Model implements UserRole
         return $this->hasMany(Shift::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

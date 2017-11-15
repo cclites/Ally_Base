@@ -29,6 +29,9 @@
             </li>
         @endif
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
@@ -82,6 +85,9 @@
         </div>
         <div class="tab-pane" id="schedule" role="tabpanel">
             <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
+        </div>
+        <div class="tab-pane" id="caregiver_notes" role="tabpanel">
+            <notes-tab :notes="{{ $caregiver->notes }}"></notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
