@@ -35,8 +35,7 @@
             <template slot="total_hourly" scope="data">{{ numberFormat(data.value) }}</template>
             <template slot="ally_percentage" scope="data">{{ percentageFormat(data.value) }}</template>
             <template slot="actions" scope="row">
-                <b-btn :href="'/business/clients/' + row.item.client_id">View Client</b-btn>
-                <b-btn :href="'/business/caregivers/' + row.item.caregiver_id">View Caregiver</b-btn>
+                <b-btn :href="'/business/clients/' + row.item.client_id + '#caregivers'">View Client Tab</b-btn>
             </template>
         </b-table>
     </b-card>
