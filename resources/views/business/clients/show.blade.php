@@ -40,6 +40,9 @@
             </li>
         @endif
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
     </ul>
@@ -100,6 +103,9 @@
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
+        </div>
+        <div class="tab-pane" id="client_notes" role="tabpanel">
+            <notes-tab :notes="{{ $client->notes }}"></notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
