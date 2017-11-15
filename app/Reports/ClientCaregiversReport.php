@@ -44,7 +44,7 @@ class ClientCaregiversReport extends BaseReport
                     'provider_fee' => $caregiver->pivot->provider_hourly_fee,
                     'ally_fee' => $allyFee,
                     'total_hourly' => $caregiver->pivot->caregiver_hourly_rate + $caregiver->pivot->provider_hourly_fee + $allyFee,
-                    'ally_percentage' => $allyPct,
+                    'payment_fee' => $allyPct,
                     'payment_type' => $client->getPaymentType(),
                 ];
             }
