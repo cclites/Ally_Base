@@ -429,33 +429,45 @@
 
         methods: {
             loadData() {
-                let component = this;
                 let prefix = '/business/reports/data/';
+
+                // Attempt to load local storage information first
+                if (typeof(Storage) !== "undefined") {
+                    let startDate = this.getLocalStorage('startDate');
+                    if (startDate) this.start_date = startDate;
+                    let endDate = this.getLocalStorage('endDate');
+                    if (endDate) this.end_date = endDate;
+                    let filterCaregiverId = this.getLocalStorage('filterCaregiverId');
+                    if (filterCaregiverId) this.filterCaregiverId = filterCaregiverId;
+                    let filterClientId = this.getLocalStorage('filterClientId');
+                    if (filterClientId) this.filterClientId = filterClientId;
+                }
+
                 axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.caregiverPayments = response.data;
+                            this.items.caregiverPayments = response.data;
                         }
                         else {
-                            component.items.caregiverPayments = [];
+                            this.items.caregiverPayments = [];
                         }
                     });
                 axios.get(prefix + 'client_charges?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.clientCharges = response.data;
+                            this.items.clientCharges = response.data;
                         }
                         else {
-                            component.items.clientCharges = [];
+                            this.items.clientCharges = [];
                         }
                     });
                 axios.get(prefix + 'shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
-                    .then(function(response) {
+                    .then(response => {
                         if (Array.isArray(response.data)) {
-                            component.items.shifts = response.data;
+                            this.items.shifts = response.data;
                         }
                         else {
-                            component.items.shifts = [];
+                            this.items.shifts = [];
                         }
                     });
             },
@@ -507,8 +519,32 @@
                 return parseFloat(float);
             },
 
+            getLocalStorage(item) {
+                return localStorage.getItem('shift_report_' + item);
+            },
+
+            setLocalStorage(item, value) {
+                if (typeof(Storage) !== "undefined") {
+                    localStorage.setItem('shift_report_' + item, value);
+                }
+            }
 
         },
+
+        watch: {
+            filterCaregiverId(val) {
+                this.setLocalStorage('filterCaregiverId', val);
+            },
+            filterClientId(val) {
+                this.setLocalStorage('filterClientId', val);
+            },
+            start_date(val) {
+                this.setLocalStorage('startDate', val);
+            },
+            end_date(val) {
+                this.setLocalStorage('endDate', val);
+            },
+        }
     }
 </script>
 
