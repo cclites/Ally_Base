@@ -55,107 +55,92 @@
 
         <b-modal id="modal_details"
                  ref="modalDetails"
-                 :title="'Shift ' + formatDate(startDate)">
-            <b-row>
-                <b-col>
-                    <strong>Caregiver:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.caregiver.name }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Check In Time:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.checked_in_time }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Check Out Time:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.checked_out_time }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Shift Length:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.roundedShiftLength }}hrs
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Hours Type:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.hours_type }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Mileage:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.mileage }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Other Expenses:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.other_expenses }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Caregiver Rate:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.caregiver_rate }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Provider Fee:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.provider_fee }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Status:</strong>
-                </b-col>
-                <b-col>
-                    {{ currentItem.status }}
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <strong>Caregiver Comments:</strong>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    {{ currentItem.caregiver_comments }}
-                </b-col>
-            </b-row>
+                 :title="'Shift ' + formatDate(startDate)"
+                 size="lg">
+            <b-container fluid>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Caregiver:</strong>
+                        <br>
+                        {{ currentItem.caregiver.name }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Check In Time:</strong>
+                        <br>
+                        {{ formatDateTime(currentItem.checked_in_time) }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Check Out Time:</strong>
+                        <br>
+                        {{ formatDateTime(currentItem.checked_out_time) }}
+                    </b-col>
+
+                    <b-col sm="6">
+                        <strong>Shift Length:</strong>
+                        <br>
+                        {{ currentItem.roundedShiftLength }}hrs
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Hours Type:</strong>
+                        <br>
+                        {{ currentItem.hours_type }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Mileage:</strong>
+                        <br>
+                        {{ currentItem.mileage }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Other Expenses:</strong>
+                        <br>
+                        {{ formatMoney(currentItem.other_expenses) }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Caregiver Rate:</strong>
+                        <br>
+                        {{ formatMoney(currentItem.caregiver_rate) }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        <strong>Provider Fee:</strong>
+                        <br>
+                        {{ formatMoney(currentItem.provider_fee) }}
+                    </b-col>
+                    <b-col sm="6">
+                        <strong>Status:</strong>
+                        <br>
+                        {{ currentItem.status }}
+                    </b-col>
+                </b-row>
+                <b-row class="with-padding-bottom">
+                    <b-col>
+                        <strong>Caregiver Comments:</strong>
+                        <br>
+                        {{ currentItem.caregiver_comments }}
+                    </b-col>
+                </b-row>
+            </b-container>
         </b-modal>
     </div>
 </template>
 
 <script>
+    import FormatsDates from '../../mixins/FormatsDates';
+
     export default {
         props: ['shifts', 'weekStartDate', 'weekEndDate', 'verified'],
 
+        mixins: [FormatsDates],
+
         data() {
-            return{
+            return {
                 shiftsVerified: this.verified,
                 currentItem: {
                     caregiver: {}
@@ -169,12 +154,14 @@
                     {
                         key: 'checked_in_time',
                         label: 'Start',
-                        sortable: true
+                        sortable: true,
+                        formatter: (value) => { return this.formatDateTime(value) }
                     },
                     {
                         key: 'checked_out_time',
                         label: 'End',
-                        sortable: true
+                        sortable: true,
+                        formatter: (value) => { return this.formatDateTime(value) }
                     },
                     {
                         key: 'caregiver',
@@ -186,7 +173,9 @@
                     },
                     {
                         key: 'total',
-                        label: 'Total Amount'
+                        label: 'Total Amount',
+                        formatter: (value) => { return this.formatMoney(value); }
+
                     },
                     'actions'
                 ]
@@ -194,8 +183,9 @@
         },
 
         methods: {
-            formatDate(date) {
-                return moment(date).format('L');
+
+            formatMoney(value) {
+                return numeral(value).format('$0,0.00');
             },
 
             getWeek(week) {
@@ -203,8 +193,8 @@
                     .then(response => {
                         this.refreshData(response);
                     }).catch(error => {
-                        console.error(error.response);
-                    });
+                    console.error(error.response);
+                });
             },
 
             refreshData(response) {
@@ -217,7 +207,7 @@
 
             signShifts() {
                 let form = new Form({
-                   week: this.weekOfYear
+                    week: this.weekOfYear
                 });
 
                 form.post('/shift-history/approve').then(response => {
@@ -233,7 +223,6 @@
         },
 
         computed: {
-
             currentWeek() {
                 return moment().week() === moment(this.startDate).week();
             }
