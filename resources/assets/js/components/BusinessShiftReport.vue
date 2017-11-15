@@ -7,7 +7,7 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadData()">
+                    <b-form inline @submit.prevent="reloadData()">
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -18,7 +18,8 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;
+                        <b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -428,6 +429,11 @@
         },
 
         methods: {
+            reloadData() {
+                this.setLocalStorage('sortBy', 'Day');
+                this.setLocalStorage('sortDesc', 'false');
+                return this.loadData();
+            },
             loadData() {
                 let prefix = '/business/reports/data/';
 
@@ -441,6 +447,10 @@
                     if (filterCaregiverId) this.filterCaregiverId = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.filterClientId = filterClientId;
+                    let sortBy = this.getLocalStorage('sortBy');
+                    if (sortBy) this.sortBy = sortBy;
+                    let sortDesc = this.getLocalStorage('sortDesc');
+                    if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
                 }
 
                 axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
@@ -520,7 +530,13 @@
             },
 
             getLocalStorage(item) {
-                return localStorage.getItem('shift_report_' + item);
+                let val = localStorage.getItem('shift_report_' + item);
+                if (typeof(val) === 'string') {
+                    if (val.toLowerCase() === 'null' || val.toLowerCase() === '') return null;
+                    if (val.toLowerCase() === 'false') return false;
+                    if (val.toLowerCase() === 'true') return true;
+                }
+                return val;
             },
 
             setLocalStorage(item, value) {
@@ -543,6 +559,12 @@
             },
             end_date(val) {
                 this.setLocalStorage('endDate', val);
+            },
+            sortBy(val) {
+                this.setLocalStorage('sortBy', val);
+            },
+            sortDesc(val) {
+                this.setLocalStorage('sortDesc', val);
             },
         }
     }
