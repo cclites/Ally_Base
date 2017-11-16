@@ -8,6 +8,7 @@ class Payment extends Model
 {
     protected $table = 'payments';
     protected $guarded = ['id'];
+    protected $appends = ['week'];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -47,4 +48,15 @@ class Payment extends Model
     /// Other Methods
     ///////////////////////////////////////////
 
+    public function getWeekAttribute()
+    {
+        if ($this->shifts()->exists()) {
+            $checked_in_time = $this->shifts->first()->checked_in_time;
+            return (object) [
+                'start' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear)->toDateString(),
+                'end' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear, 7)->toDateString()
+            ];
+        }
+        return null;
+    }
 }
