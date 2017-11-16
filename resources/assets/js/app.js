@@ -68,6 +68,7 @@ Vue.component('business-shift-history', require('./components/BusinessShiftHisto
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
+Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
