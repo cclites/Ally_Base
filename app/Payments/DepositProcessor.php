@@ -56,9 +56,6 @@ class DepositProcessor
     {
         $aggregator = new CaregiverDepositAggregator($caregiver, $this->startDate, $this->endDate);
         $deposit = $aggregator->getDeposit();
-        // TEST
-        echo "Deposit to caregiver " . $caregiver->name() . " : " . $deposit->amount . "\n";
-        return;
         if ($deposit->amount > 0) {
             $transaction = false;
             $this->shifts = array_merge($this->shifts, $aggregator->getShiftIds());
@@ -77,9 +74,6 @@ class DepositProcessor
     {
         $aggregator = new BusinessDepositAggregator($this->business, $this->startDate, $this->endDate);
         $deposit = $aggregator->getDeposit();
-        // TEST
-        echo "Business " . $this->business->name . " Deposit: " . $deposit->amount . "\n";
-        return;
         if ($deposit->amount > 0) {
             $transaction = false;
             try {
