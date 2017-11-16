@@ -14,8 +14,8 @@ class AlterPaymentsDropReferences extends Migration
     public function up()
     {
         Schema::table('payments', function (Blueprint $table) {
-            $table->dropColumn('reference_type');
-            $table->dropColumn('reference_id');
+//            $table->dropColumn('reference_type');
+//            $table->dropColumn('reference_id');
         });
     }
 }
