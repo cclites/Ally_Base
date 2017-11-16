@@ -57,7 +57,7 @@ class DepositProcessor
         $aggregator = new CaregiverDepositAggregator($caregiver, $this->startDate, $this->endDate);
         $deposit = $aggregator->getDeposit();
         // TEST
-        echo "Business Deposit: " . $deposit->amount . "\n";
+        echo "Deposit to caregiver " . $caregiver->name() . " : " . $deposit->amount . "\n";
         return;
         if ($deposit->amount > 0) {
             $transaction = false;
