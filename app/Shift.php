@@ -132,10 +132,12 @@ class Shift extends Model
     public function scheduledEndTime()
     {
         $shiftStart = new Carbon($this->checked_in_time);
-        $scheduleStart = new Carbon($this->schedule->time);
+        $scheduleStart = Carbon::now()->setTimeFromTimeString($this->schedule->time);
+
         if ($scheduleStart->diffInMinutes($shiftStart) > 60 && $scheduleStart > $shiftStart) {
             $scheduleStart->subDay();
         }
+
         $end = $scheduleStart->copy()->addMinutes($this->schedule->duration);
         return $end;
     }
