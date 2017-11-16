@@ -354,7 +354,7 @@ class ScheduleTest extends TestCase
 
     public function testMissingBusinessTimezoneShouldThrowException()
     {
-        $business = factory(Business::class)->create(['timezone' => null]);
+        $business = factory(Business::class)->create(['timezone' => '']);
         $this->expectException(MissingTimezoneException::class);
         $schedule = $this->prepASchedule($business->id);
         $schedule->getOccurrences();

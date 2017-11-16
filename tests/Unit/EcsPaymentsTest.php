@@ -60,13 +60,6 @@ class EcsPaymentsTest extends TestCase
         $this->assertEquals(100.50, $transaction->amount);
     }
 
-    public function testAchValidation()
-    {
-        $ecs = new ECSPayment();
-        $transaction = $ecs->validateAccount($this->account);
-        $this->assertTrue($transaction->success);
-    }
-
     public function testAchPayment()
     {
         $ecs = new ECSPayment();
