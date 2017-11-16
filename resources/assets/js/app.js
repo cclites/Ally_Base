@@ -71,6 +71,7 @@ Vue.component('business-scheduled-vs-actual', require('./components/BusinessSche
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
+Vue.component('client-payments-tab', require('./components/business/clients/ClientPaymentsTab'));
 
 Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
 Vue.component('care-plan-list', require('./components/CarePlanList.vue'));

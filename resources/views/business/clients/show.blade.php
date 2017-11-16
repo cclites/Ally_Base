@@ -45,6 +45,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -112,6 +115,9 @@
                 :initial-documents="{{ $client->user->documents->toJson() }}"
                 :user-id="{{ $client->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="client_payment_history" role="tabpanel">
+            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
         </div>
     </div>
 @endsection
