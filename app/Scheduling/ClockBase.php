@@ -9,7 +9,7 @@ use App\Schedule;
 
 abstract class ClockBase
 {
-    const MAXIMUM_DISTANCE_METERS = 150;
+    const MAXIMUM_DISTANCE_METERS = 804; // 0.5mi
     protected $caregiver;
     protected $latitude;
     protected $longitude;
