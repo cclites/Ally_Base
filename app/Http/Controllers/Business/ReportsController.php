@@ -175,7 +175,8 @@ class ReportsController extends BaseController
         $year_sum = number_format($year_sum, 2);
 
         $report = new ScheduledPaymentsReport();
-        $report->between($year_start, null);
+        $report->where('business_id', $this->business()->id)
+            ->between($year_start, null);
         $scheduled_sum = $report->sum('business_allotment');
         $scheduled_sum = number_format($scheduled_sum, 2);
 
@@ -209,6 +210,7 @@ class ReportsController extends BaseController
         $year_sum = number_format($year_sum, 2);
 
         $report = new ScheduledPaymentsReport();
+        $report->where('business_id', $this->business()->id);
         $scheduled_sum = $report->sum('business_allotment');
         $scheduled_sum = number_format($scheduled_sum, 2);
 
