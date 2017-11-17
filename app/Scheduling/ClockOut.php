@@ -12,6 +12,7 @@ class ClockOut extends ClockBase
 {
     protected $comments;
     protected $otherExpenses = 0;
+    protected $otherExpensesDesc;
     protected $mileage = 0;
 
     public function setComments($comments)
@@ -20,9 +21,11 @@ class ClockOut extends ClockBase
         return $this;
     }
 
-    public function setOtherExpenses($amount)
+    public function setOtherExpenses($amount, $desc = null)
     {
         $this->otherExpenses = $amount;
+        if (!is_null($desc))
+            $this->otherExpensesDesc = $desc;
     }
 
     public function setMileage($miles)
@@ -55,6 +58,7 @@ class ClockOut extends ClockBase
             'checked_out_number' => $this->number,
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,
+            'other_expenses_desc' => $this->otherExpensesDesc,
             'mileage' => $this->mileage,
             'verified' => $verified,
         ]);
