@@ -220,7 +220,7 @@ class ImportShiftReconciliation extends Command
             $data['deposit_type'] = strtolower($this->getValue('deposit_type', $row));
             $data['business_id'] = $this->getValue('business_id', $row);
             $data['caregiver_id'] = $this->getValue('cg_id', $row);
-            $data['amount'] = (float) $this->getValue('Amount', $row);
+            $data['amount'] = (float) $this->getValue('amount', $row);
             $data['created_at'] = $this->getValue('created_at', $row);
             $data['success'] = $this->getValue('success', $row) ?? 1;
 
