@@ -103,7 +103,7 @@ class ImportShiftReconciliation extends Command
                 ->where('caregiver_id', $data['caregiver_id'])
                 ->whereBetween('checked_in_time', [
                     $clockIn->copy()->subMinutes(30),
-                    $clockIn->copy()->add(30)
+                    $clockIn->copy()->addMinutes(30)
                 ]);
 
             if ($oldShift->exists()) {
