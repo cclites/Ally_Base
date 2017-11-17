@@ -81,6 +81,8 @@ class ImportShiftReconciliation extends Command
 
         for ($row = 2; $row < $lastRow; $row++) {
 
+            if ($this->isRowEmpty($row)) continue;
+
             $data['business_id'] = $this->getValue('Business ID', $row);
             $data['client_id'] = $this->getValue('Client ID', $row);
             $data['caregiver_id'] = $this->getValue('CG ID', $row);
@@ -142,6 +144,9 @@ class ImportShiftReconciliation extends Command
         }
 
         for ($row = 2; $row < $lastRow; $row++) {
+
+            if ($this->isRowEmpty($row)) continue;
+
             $data['business_id'] = $this->getValue('Business ID', $row);
             $data['client_id'] = $this->getValue('Client ID', $row);
             $data['payment_type'] = $this->getValue('Pay Type', $row);
@@ -207,6 +212,9 @@ class ImportShiftReconciliation extends Command
         }
 
         for ($row = 2; $row < $lastRow; $row++) {
+
+            if ($this->isRowEmpty($row)) continue;
+
             $data['deposit_type'] = strtolower($this->getValue('deposit_type', $row));
             $data['business_id'] = $this->getValue('business_id', $row);
             $data['caregiver_id'] = $this->getValue('cg_id', $row);
@@ -279,7 +287,6 @@ class ImportShiftReconciliation extends Command
         return $this->sheet;
     }
 
-
     public function getRowCount()
     {
         $lastRow = (int) $this->sheet->getHighestRow();
@@ -288,6 +295,19 @@ class ImportShiftReconciliation extends Command
             exit;
         }
         return $lastRow;
+    }
+
+    public function isRowEmpty($rowNo)
+    {
+        // Only checks columns A-Z
+        $a_z = range('A', 'Z');
+        foreach($a_z as $column) {
+            $value = $this->sheet->getCell($column . $rowNo)->getValue();
+            if ($value !== null && (is_string($value) && trim($value) !== '')) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function getValue($header, $rowNo)
