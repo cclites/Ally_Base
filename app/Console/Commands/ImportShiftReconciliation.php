@@ -58,6 +58,8 @@ class ImportShiftReconciliation extends Command
         $objPHPExcel = $this->loadFile();
 
         $this->importShifts();
+        $this->importCharges();
+        $this->importDeposits();
 
     }
 
