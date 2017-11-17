@@ -2,9 +2,15 @@
     <b-modal title="Convert Scheduled Shift" v-model="showModal">
         <b-container fluid>
             <b-row>
-                Convert this scheduled shift to an actual shift?
-                <br />
-                Date: {{ formatDate(selectedItem.Day) }}
+                <b-col sm="12">
+                    Convert this scheduled shift to an actual shift?
+
+                    <b>Date:</b> {{ formatDate(selectedItem.Day) }}<br />
+                    <b>Time:</b> {{ formatTime(selectedItem.Day) }}<br />
+                    <b>Hours:</b> {{ selectedItem.Hours }}<br />
+                    <b>Client:</b> {{ selectedItem.Client }}<br />
+                    <b>Caregiver:</b> {{ selectedItem.Caregiver }}<br />
+                </b-col>
             </b-row>
         </b-container>
         <div slot="modal-footer">
