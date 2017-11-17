@@ -87,7 +87,7 @@ class ImportShiftReconciliation extends Command
             try {
                 $business = Business::findOrFail($data['business_id']);
                 $caregiver = Caregiver::findOrFail($data['caregiver_id']);
-                $client = Client::findOrFail($data['caregiver_id']);
+                $client = Client::findOrFail($data['client_id']);
             }
             catch(\Exception $e) {
                 $this->output->error('Shifts Row ' . $row . ': could not find a relationship... '  . $e->getMessage());
