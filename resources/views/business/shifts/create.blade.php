@@ -13,8 +13,6 @@
         <div class="col-lg-12">
             <business-shift
                 :activities="{{ $activities OR '[]' }}"
-                :caregivers="{{ $caregivers OR '[]' }}"
-                :clients="{{ $clients OR '[]' }}"
             ></business-shift>
         </div>
     </div>
