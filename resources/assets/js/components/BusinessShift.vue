@@ -86,29 +86,55 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col md="4" sm="6">
-                        <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_rate">
-                            <b-form-input 
-                                id="caregiver_rate"
-                                name="caregiver_rate"
-                                type="number"
-                                step="any"
-                                v-model="form.caregiver_rate"
-                                >
-                            </b-form-input>
-                            <input-help :form="form" field="caregiver_rate" text=""></input-help>
-                        </b-form-group>
-                        <b-form-group label="Provider Hourly Fee" label-for="provider_fee">
-                            <b-form-input
-                                    id="provider_fee"
-                                    name="provider_fee"
-                                    type="number"
-                                    step="any"
-                                    v-model="form.provider_fee"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="provider_fee" text=""></input-help>
-                        </b-form-group>
+                    <b-col md="5" sm="6">
+                        <b-row>
+                            <b-col sm="6">
+                                <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_rate">
+                                    <b-form-input
+                                            id="caregiver_rate"
+                                            name="caregiver_rate"
+                                            type="number"
+                                            step="any"
+                                            v-model="form.caregiver_rate"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="caregiver_rate" text=""></input-help>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6">
+                                <b-form-group label="Provider Hourly Fee" label-for="provider_fee">
+                                    <b-form-input
+                                            id="provider_fee"
+                                            name="provider_fee"
+                                            type="number"
+                                            step="any"
+                                            v-model="form.provider_fee"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="provider_fee" text=""></input-help>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col sm="6">
+                                <b-form-group :label="'Processing Fee (' + percentageFormat(allyPct) + ')'">
+                                    <b-form-input
+                                            v-model="allyFee"
+                                            readonly
+                                    >
+                                    </b-form-input>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6">
+                                <b-form-group label="Total Hourly Rate">
+                                    <b-form-input
+                                            v-model="totalRate"
+                                            readonly
+                                    >
+                                    </b-form-input>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                         <b-form-group label="Shift Designation" label-for="hours_type">
                             <b-form-select
                                     id="hours_type"
@@ -122,7 +148,7 @@
                             <input-help :form="form" field="" text=""></input-help>
                         </b-form-group>
                     </b-col>
-                    <b-col md="8" sm="6">
+                    <b-col md="7" sm="6">
                         <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
@@ -275,7 +301,11 @@
 </template>
 
 <script>
+    import FormatsNumbers from '../mixins/FormatsNumbers'
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             'shift': {
                 default() {
@@ -319,10 +349,13 @@
                 deleted: false,
                 clients: [],
                 caregivers: [],
+                allyPct: 0.05,
+                paymentType: 'NONE',
             }
         },
         mounted() {
             this.loadClientCaregiverData();
+            this.loadAllyPctFromClient();
             if (this.shift.id) {
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
@@ -351,6 +384,20 @@
             formClass() {
                 if (this.deleted) return 'deletedForm';
                 return '';
+            },
+            totalRate() {
+                if (this.allyFee === null) return null;
+                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+                let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
+                return totalRate.toFixed(2);
+            },
+            allyFee() {
+                if (!parseFloat(this.form.caregiver_rate)) return null;
+                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+                let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
+                return allyFee.toFixed(2);
             }
         },
         methods: {
@@ -438,7 +485,14 @@
                         this.form.provider_fee = response.data.pivot.provider_hourly_fee;
                     }
                 });
-            }
+            },
+            loadAllyPctFromClient() {
+                if (!this.form.client_id) return;
+                axios.get('/business/clients/' + this.form.client_id + '/payment_type').then(response => {
+                    this.allyPct = response.data.percentage_fee;
+                    this.paymentType = response.data.payment_type;
+                });
+            },
         },
         watch: {
             checked_in_date(val, old) {
@@ -457,6 +511,7 @@
                 if (!this.shift.id) {
                     this.loadCaregiverRates();
                 }
+                this.loadAllyPctFromClient();
             },
             'form.caregiver_id': function() {
                 if (!this.shift.id) {
