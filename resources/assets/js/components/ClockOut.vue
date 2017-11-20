@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Clock Out"
+    <b-card header=""
         header-bg-variant="info"
         header-text-variant="white"
         >
@@ -107,7 +107,7 @@
             <b-row>
                 <b-col lg="12">
                     <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock Out</b-button>
-                    <b-button id="complete-clock-out" variant="success" type="submit">I am finished with my shift.</b-button>
+                    <b-button id="complete-clock-out" variant="success" type="submit">Press Here To Clock Out</b-button>
                 </b-col>
             </b-row>
         </form>

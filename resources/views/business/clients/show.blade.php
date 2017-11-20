@@ -40,7 +40,13 @@
             </li>
         @endif
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
         </li>
     </ul>
 
@@ -101,11 +107,17 @@
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
         </div>
+        <div class="tab-pane" id="client_notes" role="tabpanel">
+            <notes-tab :notes="{{ $client->notes }}"></notes-tab>
+        </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
                 :initial-documents="{{ $client->user->documents->toJson() }}"
                 :user-id="{{ $client->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="client_payment_history" role="tabpanel">
+            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
         </div>
     </div>
 @endsection

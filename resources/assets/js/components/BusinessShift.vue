@@ -8,7 +8,7 @@
                 header-text-variant="white"
                 header-bg-variant="info"
         >
-            <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)">
+            <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)" :class="formClass">
                 <b-row>
                     <b-col lg="6">
                         <b-form-group label="Client" label-for="client_id">
@@ -164,7 +164,7 @@
                     <b-col lg="12">
                         <h5>
                             Shift Issues
-                            <b-btn size="sm" variant="info" @click="createIssue()">Add an Issue</b-btn>
+                            <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                         </h5>
                         <div class="table-responsive" v-if="issues.length">
                             <table class="table table-bordered">
@@ -255,8 +255,11 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12" v-if="!shift.readOnly">
-                        <b-button variant="success" type="submit">Save Shift</b-button>
-                        <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                        <span v-if="!deleted">
+                            <b-button variant="success" type="submit">Save Shift</b-button>
+                            <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                            <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
+                        </span>
                         <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
@@ -289,8 +292,6 @@
                     return [];
                 }
             },
-            'caregivers': Array,
-            'clients': Array,
         },
         data() {
             return {
@@ -315,9 +316,13 @@
                 checked_out_date: '',
                 issueModal: false,
                 selectedIssue: null,
+                deleted: false,
+                clients: [],
+                caregivers: [],
             }
         },
         mounted() {
+            this.loadClientCaregiverData();
             if (this.shift.id) {
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
@@ -343,6 +348,10 @@
             rightHalfActivities() {
                 return this.getHalfOfActivities(false);
             },
+            formClass() {
+                if (this.deleted) return 'deletedForm';
+                return '';
+            }
         },
         methods: {
             createIssue() {
@@ -372,6 +381,13 @@
                     list.push(activity.id);
                 }
                 return list;
+            },
+            deleteShift() {
+                if (confirm('Are you sure you wish to delete this shift?')) {
+                    let form = new Form();
+                    form.submit('delete', '/business/shifts/' + this.shift.id)
+                        .then(response => this.deleted = true);
+                }
             },
             saveShift() {
                 this.form.checked_in_time = this.getClockedInMoment().format();
@@ -408,6 +424,20 @@
                 else {
                     console.log('Invalid time?');
                 }
+            },
+            loadClientCaregiverData() {
+                axios.get('/business/clients').then(response => this.clients = response.data);
+                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+            },
+            loadCaregiverRates() {
+                if (!this.form.caregiver_id || !this.form.client_id) return;
+                axios.get('/business/clients/' + this.form.client_id + '/caregivers/' + this.form.caregiver_id).then(response => {
+                    console.log(response.data.pivot);
+                    if (response.data.pivot) {
+                        this.form.caregiver_rate = response.data.pivot.caregiver_hourly_rate;
+                        this.form.provider_fee = response.data.pivot.provider_hourly_fee;
+                    }
+                });
             }
         },
         watch: {
@@ -423,6 +453,22 @@
             checked_out_time(val, old) {
                 if (old) this.validateTimeDifference('checked_out_time')
             },
+            'form.client_id': function() {
+                if (!this.shift.id) {
+                    this.loadCaregiverRates();
+                }
+            },
+            'form.caregiver_id': function() {
+                if (!this.shift.id) {
+                    this.loadCaregiverRates();
+                }
+            }
         },
     }
 </script>
+
+<style>
+    .deletedForm {
+        opacity: 0.3;
+    }
+</style>

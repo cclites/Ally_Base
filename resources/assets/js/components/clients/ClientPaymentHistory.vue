@@ -31,7 +31,11 @@
                 fields: [
                     { key: 'created_at', label: 'Date Paid' },
                     { key: 'week', label: 'Week' },
-                    { key: 'amount', label: 'Amount' },
+                    {
+                        key: 'amount',
+                        label: 'Amount',
+                        formatter: (value) => { return numeral(value).format('$0,0.00') }
+                    },
                     { key: 'method', label: 'Type' },
                     'actions'
                 ]

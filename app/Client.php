@@ -102,6 +102,11 @@ class Client extends Model implements UserRole
         return $this->hasMany(OnboardStatusHistory::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
