@@ -131,6 +131,7 @@ Route::group([
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
+    Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');

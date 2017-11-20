@@ -41,12 +41,18 @@
                             {{ dayFormat(data.value) }}
                         </template>
                         <template slot="actions" scope="row">
-
+                            <b-btn @click="convertToShift(row.item)" v-if="!row.item.converted">Convert</b-btn>
+                            <b-btn disabled v-else>Converted</b-btn>
                         </template>
                     </b-table>
                 </b-card>
             </b-col>
         </b-row>
+        <business-convert-schedule-modal
+                v-model="convertModal"
+                :selectedItem="selectedItem"
+                @convert="markConverted"
+        ></business-convert-schedule-modal>
     </div>
 </template>
 
@@ -61,6 +67,8 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 sortBy: null,
                 sortDesc: null,
+                selectedItem: {},
+                convertModal: false,
             }
         },
 
@@ -74,7 +82,9 @@
                 let item;
                 if (item = this.items[0]) {
                     for (let key of Object.keys(item)) {
-                        if (key === 'id') continue;
+                        if (key === 'key') continue;
+                        if (key === 'schedule_id') continue;
+                        if (key === 'converted') continue;
                         fields.push({
                             'key': key,
                             'sortable': true,
@@ -92,8 +102,13 @@
                 axios.get('/business/reports/scheduled_vs_actual?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(function(response) {
                         if (Array.isArray(response.data)) {
+                            let counter = 1;
                             component.items = response.data.map(function(item) {
                                 return {
+                                    'key': counter++,
+                                    'schedule_id': item.schedule_id,
+                                    'converted': false,
+                                    //
                                     'Day': item.start,
                                     'Time': moment(item.start).format('h:mm A') + ' - ' + moment(item.end).format('h:mm A'),
                                     'Hours': item.hours,
@@ -117,6 +132,18 @@
             dayFormat(date) {
                 return moment.utc(date).local().format('ddd MMM D');
             },
+
+            convertToShift(item) {
+                this.selectedItem = item;
+                this.convertModal = true;
+            },
+
+            markConverted(key) {
+                this.items.map(item => {
+                    if (item.key === key) item.converted = true;
+                    return item;
+                })
+            }
 
         },
     }

@@ -4,8 +4,10 @@ export default {
             return moment(date).format('L');
         },
 
-        formatTime(dateTime) {
-            return moment(dateTime).format('h:mm:ss a');
+        formatTime(dateTime, seconds = false) {
+            let format = 'h:mm a';
+            if (seconds) format = 'h:mm:ss a';
+            return moment(dateTime).format(format);
         },
 
         formatDateTime(dateTime) {
