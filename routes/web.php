@@ -100,6 +100,7 @@ Route::group([
     Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
     Route::post('clients/{id}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{id}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
+    Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');
     Route::get('clients/{id}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
     Route::post('clients/{id}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
     Route::post('clients/{id}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');

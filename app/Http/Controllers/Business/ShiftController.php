@@ -144,6 +144,22 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
 
+
+    public function destroy(Shift $shift)
+    {
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+        if ($shift->isReadOnly()) {
+            return new ErrorResponse(400, 'This shift is locked for modification.');
+        }
+        if ($shift->delete()) {
+            return new SuccessResponse("This shift has been deleted.");
+        }
+        return new ErrorResponse(500, "This shift could not be deleted.");
+    }
+
+
     public function verify(Shift $shift)
     {
         $shift->load(['activities', 'issues']);
