@@ -23,9 +23,7 @@ class ShiftController extends BaseController
     public function create()
     {
         $activities = $this->business()->allActivities();
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
-        return view('business.shifts.create', compact('activities', 'caregivers', 'clients'));
+        return view('business.shifts.create', compact('activities'));
     }
 
     public function store(Request $request)
