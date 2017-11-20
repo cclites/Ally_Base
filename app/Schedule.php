@@ -169,6 +169,8 @@ class Schedule extends Model
     }
 
     /**
+     * Get schedule occurrences that overlap at any time between $start_date and $end_date (takes duration into account)
+     *
      * @param $start_date
      * @param $end_date
      * @param string $timezone
@@ -181,8 +183,32 @@ class Schedule extends Model
         if (is_string($start_date)) $start_date = new Carbon($start_date . ' 00:00:00', $this->getTimezone());
         if (is_string($end_date)) $end_date = new Carbon($end_date . ' 23:59:59', $this->getTimezone());
 
+        // Force creation of a new Carbon instance to avoid mutations
+        $start_date = Carbon::instance($start_date);
+
         // Subtract the duration of the event to allow for events that may have already started but not finished
-        $start_date = Carbon::instance($start_date)->subMinute($this->duration);
+        $start_date->subMinute($this->duration);
+
+        return $this->getOccurrencesStartingBetween($start_date, $end_date, $limit);
+    }
+
+    /**
+     * Get schedule occurrences that start between $start_date and $end_date (does not take duration into account)
+     *
+     * @param $start_date
+     * @param $end_date
+     * @param string $timezone
+     * @param int $limit
+     *
+     * @return \DateTime[]
+     */
+    public function getOccurrencesStartingBetween($start_date, $end_date, $limit = 100)
+    {
+        if (is_string($start_date)) $start_date = new Carbon($start_date . ' 00:00:00', $this->getTimezone());
+        if (is_string($end_date)) $end_date = new Carbon($end_date . ' 23:59:59', $this->getTimezone());
+
+        // Force creation of a new Carbon instance to avoid mutations
+        $start_date = Carbon::instance($start_date);
 
         if ($start_date > $this->getEndDateTime()) {
             return [];
