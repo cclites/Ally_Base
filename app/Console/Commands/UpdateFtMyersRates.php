@@ -73,7 +73,7 @@ class UpdateFtMyersRates extends Command
         }
 
         $providerDiff = $model->provider_fee - $caregiver->pivot->provider_hourly_fee;
-        $pctDiff = $providerDiff / $model->provider_fee;
+        $pctDiff = $providerDiff / $caregiver->pivot->provider_hourly_fee;
         if ($pctDiff <= 0.05) {
             $this->output->writeln("Updating fee from " . $model->provider_fee . " to " . $caregiver->pivot->provider_hourly_fee);
             $model->provider_fee = $caregiver->pivot->provider_hourly_fee;
