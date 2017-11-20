@@ -63,7 +63,7 @@ class ClientPaymentAggregator
 
     public function getShiftIds()
     {
-        return $this->getShifts()->pluck('id')->toArray();
+        return $this->getShifts()->pluck('shift_id')->toArray();
     }
 
     public function addMileageExpense($data) {
