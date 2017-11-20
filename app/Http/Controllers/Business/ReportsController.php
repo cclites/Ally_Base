@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Client;
 use App\Caregiver;
 use App\Deposit;
 use App\Payment;
-use App\PaymentQueue;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientCaregiversReport;
@@ -13,7 +13,6 @@ use App\Reports\ClientChargesReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
-use App\Responses\Resources\ClientCaregiver;
 use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -288,5 +287,17 @@ class ReportsController extends BaseController
         }
 
         return view('business.reports.client_caregivers');
+    }
+
+    /**
+     * Get a list of all clients that are missing an email address
+     */
+    public function clientEmailMissing()
+    {
+        $clients = Client::whereHas('user', function ($query) {
+            $query->whereNull('email');
+        })->get();
+
+        return view('business.reports.client_email_missing', compact('clients'));
     }
 }
