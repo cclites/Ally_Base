@@ -8,7 +8,7 @@
                 header-text-variant="white"
                 header-bg-variant="info"
         >
-            <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)">
+            <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)" :class="formClass">
                 <b-row>
                     <b-col lg="6">
                         <b-form-group label="Client" label-for="client_id">
@@ -164,7 +164,7 @@
                     <b-col lg="12">
                         <h5>
                             Shift Issues
-                            <b-btn size="sm" variant="info" @click="createIssue()">Add an Issue</b-btn>
+                            <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                         </h5>
                         <div class="table-responsive" v-if="issues.length">
                             <table class="table table-bordered">
@@ -255,8 +255,11 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12" v-if="!shift.readOnly">
-                        <b-button variant="success" type="submit">Save Shift</b-button>
-                        <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                        <span v-if="!deleted">
+                            <b-button variant="success" type="submit">Save Shift</b-button>
+                            <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                            <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
+                        </span>
                         <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
@@ -315,6 +318,7 @@
                 checked_out_date: '',
                 issueModal: false,
                 selectedIssue: null,
+                deleted: false,
             }
         },
         mounted() {
@@ -343,6 +347,10 @@
             rightHalfActivities() {
                 return this.getHalfOfActivities(false);
             },
+            formClass() {
+                if (this.deleted) return 'deletedForm';
+                return '';
+            }
         },
         methods: {
             createIssue() {
@@ -372,6 +380,13 @@
                     list.push(activity.id);
                 }
                 return list;
+            },
+            deleteShift() {
+                if (confirm('Are you sure you wish to delete this shift?')) {
+                    let form = new Form();
+                    form.submit('delete', '/business/shifts/' + this.shift.id)
+                        .then(response => this.deleted = true);
+                }
             },
             saveShift() {
                 this.form.checked_in_time = this.getClockedInMoment().format();
@@ -426,3 +441,9 @@
         },
     }
 </script>
+
+<style>
+    .deletedForm {
+        opacity: 0.3;
+    }
+</style>
