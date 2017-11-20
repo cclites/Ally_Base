@@ -227,7 +227,7 @@ class ShiftController extends BaseController
 
         $searchStart = (new Carbon($date, $this->business()->timezone))->setTime(0, 0, 0);
         $searchEnd = $searchStart->copy()->addDay();
-        $occurrences = $schedule->getOccurrencesBetween($searchStart, $searchEnd);
+        $occurrences = $schedule->getOccurrencesStartingBetween($searchStart, $searchEnd);
 
         // Make sure 1 occurrence was found
         if (count($occurrences) !== 1) return new ErrorResponse(400,'Unable to match the schedule for conversion.');
