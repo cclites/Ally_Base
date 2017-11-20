@@ -57,7 +57,7 @@
                 this.form.date = moment(this.selectedItem['Day']).format('YYYY-MM-DD');
                 this.form.submit(method, url)
                     .then(response => {
-                        this.$emit('convert', this.selectedItem.key);
+                        this.$emit('convert', this.selectedItem.key, response.data.data.id);
                         this.showModal = false;
                     });
             }
