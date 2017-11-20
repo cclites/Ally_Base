@@ -292,8 +292,6 @@
                     return [];
                 }
             },
-            'caregivers': Array,
-            'clients': Array,
         },
         data() {
             return {
@@ -319,9 +317,12 @@
                 issueModal: false,
                 selectedIssue: null,
                 deleted: false,
+                clients: [],
+                caregivers: [],
             }
         },
         mounted() {
+            this.loadClientCaregiverData();
             if (this.shift.id) {
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
@@ -423,6 +424,20 @@
                 else {
                     console.log('Invalid time?');
                 }
+            },
+            loadClientCaregiverData() {
+                axios.get('/business/clients').then(response => this.clients = response.data);
+                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+            },
+            loadCaregiverRates() {
+                if (!this.form.caregiver_id || !this.form.client_id) return;
+                axios.get('/business/clients/' + this.form.client_id + '/caregivers/' + this.form.caregiver_id).then(response => {
+                    console.log(response.data.pivot);
+                    if (response.data.pivot) {
+                        this.form.caregiver_rate = response.data.pivot.caregiver_hourly_rate;
+                        this.form.provider_fee = response.data.pivot.provider_hourly_fee;
+                    }
+                });
             }
         },
         watch: {
@@ -438,6 +453,16 @@
             checked_out_time(val, old) {
                 if (old) this.validateTimeDifference('checked_out_time')
             },
+            'form.client_id': function() {
+                if (!this.shift.id) {
+                    this.loadCaregiverRates();
+                }
+            },
+            'form.caregiver_id': function() {
+                if (!this.shift.id) {
+                    this.loadCaregiverRates();
+                }
+            }
         },
     }
 </script>
