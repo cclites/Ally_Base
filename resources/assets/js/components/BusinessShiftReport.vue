@@ -396,6 +396,7 @@
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
                         'Total Hourly': item.hourly_total,
+                        'Mileage': item.mileage_costs,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
                     }
