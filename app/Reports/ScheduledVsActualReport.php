@@ -57,17 +57,17 @@ class ScheduledVsActualReport extends BaseReport
     /**
      * Limit rows between two dates
      *
-     * @param string|\DateTime|null $start If null, leave starting period unlimited
-     * @param string|\DateTime|null $end If null, leave ending period unlimited
+     * @param \DateTime|null $start If null, leave starting period unlimited
+     * @param \DateTime|null $end If null, leave ending period unlimited
      * @return $this
      */
     public function between($start = null, $end = null)
     {
-        if ($start) {
-            $start = (new Carbon($start))->setTimezone('UTC');
+        if ($start instanceof \DateTime) {
+            $start = Carbon::instance($start)->setTimezone('UTC');
         }
-        if ($end) {
-            $end = (new Carbon($end))->setTimezone('UTC');
+        if ($end instanceof \DateTime) {
+            $end = Carbon::instance($end)->setTimezone('UTC');
         }
 
         if ($start && $end) {
