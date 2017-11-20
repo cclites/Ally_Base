@@ -232,6 +232,6 @@ class ShiftController extends BaseController
             'provider_fee' => $schedule->getProviderFee(),
             'status' => Shift::WAITING_FOR_AUTHORIZATION,
         ]);
-        return new CreatedResponse('The scheduled shift has been converted to an actual shift.', [$shift->toArray()]);
+        return new CreatedResponse('The scheduled shift has been converted to an actual shift.', $shift->toArray());
     }
 }

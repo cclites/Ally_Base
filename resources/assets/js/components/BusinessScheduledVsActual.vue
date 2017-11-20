@@ -41,8 +41,13 @@
                             {{ dayFormat(data.value) }}
                         </template>
                         <template slot="actions" scope="row">
-                            <b-btn @click="convertToShift(row.item)" v-if="!row.item.converted">Convert</b-btn>
-                            <b-btn disabled v-else>Converted</b-btn>
+                            <div v-if="!row.item.converted">
+                                <b-btn @click="convertToShift(row.item)" >Convert</b-btn>
+                            </div>
+                            <div v-else>
+                                <b-btn disabled>Converted</b-btn>
+                                <b-btn :href="'/business/shifts/' + row.item.shift_id">Edit</b-btn>
+                            </div>
                         </template>
                     </b-table>
                 </b-card>
@@ -84,6 +89,7 @@
                     for (let key of Object.keys(item)) {
                         if (key === 'key') continue;
                         if (key === 'schedule_id') continue;
+                        if (key === 'shift_id') continue;
                         if (key === 'converted') continue;
                         fields.push({
                             'key': key,
@@ -138,9 +144,12 @@
                 this.convertModal = true;
             },
 
-            markConverted(key) {
+            markConverted(key, newId) {
                 this.items.map(item => {
-                    if (item.key === key) item.converted = true;
+                    if (item.key === key) {
+                        item.converted = true;
+                        item.shift_id = newId;
+                    }
                     return item;
                 })
             }
