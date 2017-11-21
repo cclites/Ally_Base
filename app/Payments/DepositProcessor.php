@@ -83,7 +83,8 @@ class DepositProcessor
         $caregivers = $this->business->caregivers->sortBy('nameLastFirst');
         $data = [$this->getBusinessDeposit($this->business)];
         foreach($caregivers as $caregiver) {
-            $data[] = $this->getCaregiverDeposit($caregiver);
+            $deposit = $this->getCaregiverDeposit($caregiver);
+            if ($deposit->amount > 0) $data[] = $deposit;
         }
         return $data;
     }
