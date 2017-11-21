@@ -16,7 +16,7 @@ class CarePlanController extends BaseController
      */
     public function index(Request $request)
     {
-        $plans = $this->business()->carePlans;
+        $plans = $this->business()->carePlans()->orderBy('name')->get();
 
         if ($request->expectsJson()) {
             return $plans;

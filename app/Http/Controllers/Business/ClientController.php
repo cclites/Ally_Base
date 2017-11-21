@@ -41,14 +41,18 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()->clients()->with(['user'])->get()->map(function($client) {
-            return [
-                'id' => $client->id,
-                'firstname' => $client->user->firstname,
-                'lastname' => $client->user->lastname,
-                'name' => $client->nameLastFirst(),
-            ];
-        });
+        return $this->business()->clients()
+            ->with(['user'])->get()->map(function($client) {
+                return [
+                    'id' => $client->id,
+                    'firstname' => $client->user->firstname,
+                    'lastname' => $client->user->lastname,
+                    'name' => $client->nameLastFirst(),
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
     }
 
     /**

@@ -48,7 +48,7 @@ class ClientCaregiverController extends BaseController
         $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
             return (new ClientCaregiver($client, $caregiver))->toResponse(null);
         });
-        return $caregivers;
+        return $caregivers->sortBy('name')->values()->all();
     }
 
     public function show($client_id, $caregiver_id) {

@@ -30,7 +30,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Caregiver --</option>
                     </template>
-                    <option :value="caregiver.id" v-for="caregiver in business.caregivers">{{ caregiver.name }}</option>
+                    <option :value="caregiver.id" v-for="caregiver in caregivers">{{ caregiver.name }}</option>
                 </b-form-select>
             </b-col>
 
@@ -40,7 +40,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Client --</option>
                     </template>
-                    <option :value="client.id" v-for="client in business.clients">{{ client.name }}</option>
+                    <option :value="client.id" v-for="client in clients">{{ client.name }}</option>
                 </b-form-select>
             </b-col>
 
@@ -174,7 +174,12 @@
         },
 
         computed: {
-
+            caregivers() {
+                return _.sortBy(this.business.caregivers, ['name']);
+            },
+            clients() {
+                return _.sortBy(this.business.clients, ['name']);
+            }
         },
 
         methods: {
