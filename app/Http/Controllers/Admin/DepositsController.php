@@ -31,7 +31,10 @@ class DepositsController extends Controller
         $endDate->setTimezone('UTC');
 
         $deposits = Deposit::with(['transaction', 'caregiver', 'business'])
-            ->where('business_id', $business->id)
+            ->where(function($q) use ($business) {
+                $q->where('business_id', $business->id)
+                    ->orWhereIn('caregiver_id', $business->caregivers->pluck('id')->toArray());
+            })
             ->whereBetween('created_at', [$startDate, $endDate])
             ->orderBy('created_at', 'DESC')
             ->get();

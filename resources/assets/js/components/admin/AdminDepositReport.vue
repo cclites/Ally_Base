@@ -52,8 +52,8 @@
             return {
                 sortBy: null,
                 sortDesc: false,
-                start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
-                end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
+                end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
                 items: [],
@@ -75,7 +75,7 @@
                     },
                     {
                         key: 'created_at',
-                        label: 'Date',
+                        label: 'Trans. Response',
                         sortable: true,
                     },
                     {
