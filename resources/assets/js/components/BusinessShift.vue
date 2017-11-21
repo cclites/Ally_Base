@@ -78,7 +78,7 @@
                                     name="mileage"
                                     type="number"
                                     v-model="form.mileage"
-                                    step="1"
+                                    step="any"
                             >
                             </b-form-input>
                             <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>

@@ -37,13 +37,11 @@ class ClientPaymentAggregator
             'business_allotment' => 0,
             'ally_allotment' => 0,
         ];
-        $shiftIds = [];
 
         foreach($authorizedShifts as $shift) {
             foreach($data as $index=>$value) {
                 $data[$index] = round(bcadd($data[$index], $shift[$index], 4), 2);
             }
-            $shiftIds[] = $shift['shift_id'];
         }
 
         $data = $this->addMileageExpense($data);
@@ -53,9 +51,19 @@ class ClientPaymentAggregator
         $data['payment_type'] = $this->client->getPaymentType();
         $data['total_shifts'] = $this->shifts->count();
         $data['unauthorized_shifts'] = $this->shifts->count() - $authorizedShifts->count();
-        $data['shifts'] = $shiftIds;
+        $data['shifts'] = $this->getShiftIds();
 
         return $data;
+    }
+
+    public function getShifts()
+    {
+        return $this->shifts;
+    }
+
+    public function getShiftIds()
+    {
+        return $this->getShifts()->pluck('shift_id')->toArray();
     }
 
     public function addMileageExpense($data) {
