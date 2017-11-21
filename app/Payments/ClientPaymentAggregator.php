@@ -17,7 +17,7 @@ class ClientPaymentAggregator
     public function __construct(Client $client, $startDate, $endDate)
     {
         $this->client = $client;
-        $this->method = $client->defaultPayment;
+        $this->method = $client->getPaymentMethod();
 
         $report = new \App\Reports\ScheduledPaymentsReport();
         $report->between($startDate, $endDate);
