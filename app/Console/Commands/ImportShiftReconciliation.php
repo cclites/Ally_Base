@@ -21,7 +21,7 @@ class ImportShiftReconciliation extends Command
      *
      * @var string
      */
-    protected $signature = 'import:shift_reconcil {file}';
+    protected $signature = 'import:shift_reconcile {file}';
 
     /**
      * The console command description.
@@ -54,7 +54,6 @@ class ImportShiftReconciliation extends Command
      */
     public function handle()
     {
-
         $objPHPExcel = $this->loadFile();
 
         $this->importShifts();
@@ -98,8 +97,7 @@ class ImportShiftReconciliation extends Command
                 $business = Business::findOrFail($data['business_id']);
                 $caregiver = Caregiver::findOrFail($data['caregiver_id']);
                 $client = Client::findOrFail($data['client_id']);
-            }
-            catch(\Exception $e) {
+            } catch(\Exception $e) {
                 $this->output->error('Shifts Row ' . $row . ': could not find a relationship... '  . $e->getMessage());
                 continue;
             }
@@ -124,6 +122,8 @@ class ImportShiftReconciliation extends Command
 
             print_r($data);
             sleep(2);
+
+            Shift::create($data);
         }
     }
 
@@ -165,34 +165,38 @@ class ImportShiftReconciliation extends Command
                 ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
             if ($oldPayment->exists()) {
                 $this->output->warning('Charges Row ' . $row . ': Found existing payment ' . $oldPayment->first()->id . ' conflicting with ' . $date);
-                continue;
-            }
+                $payment = $oldPayment->first();
+            } else {
+                // Check for a matching transaction
+                $searchForType = 'sale';
+                $searchAmount = $data['amount'];
+                if ($data['amount'] < 0) {
+                    $searchAmount *= -1;
+                    $searchForType = 'credit';
+                }
+                $transaction = GatewayTransaction::where('amount', $searchAmount)
+                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
+                    ->where('transaction_type', $searchForType)
+                    ->first();
+                if (!$transaction) {
+                    $this->output->warning('Charges Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
+                }
+                $data['transaction_id'] = $transaction->id ?? null;
 
-            // Check for a matching transaction
-            $searchForType = 'sale';
-            $searchAmount = $data['amount'];
-            if ($data['amount'] < 0) {
-                $searchAmount *= -1;
-                $searchForType = 'credit';
+                // SAVE PAYMENT
+                $payment = Payment::create($data);
             }
-            $transaction = GatewayTransaction::where('amount', $searchAmount)
-                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
-                ->where('transaction_type', $searchForType)
-                ->first();
-            if (!$transaction) {
-                $this->output->warning('Charges Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
-            }
-            $data['transaction_id'] = $transaction->id ?? null;
-
-            print_r($data);
-
-            // SAVE PAYMENT
 
             // UPDATE ALL SHIFTS DURING THIS WEEK's payment_id FOR client_id
+            $shifts = Shift::where('client_id', $payment->client_id)
+                ->whereNull('payment_id')
+                ->whereBetween('checked_in_time', [$this->getStartOfWeek($payment->created_at), $this->getEndOfWeek($payment->created_at)])
+                ->get();
 
+            foreach ($shifts as $shift) {
+                $shift->update(['payment_id' => $payment->id]);
+            }
         }
-
-
     }
 
     public function importDeposits()
@@ -238,33 +242,68 @@ class ImportShiftReconciliation extends Command
 
             if ($oldDeposit && $oldDeposit->exists()) {
                 $this->output->warning('Deposits Row ' . $row . ': Found existing payment ' . $oldDeposit->first()->id . ' conflicting with ' . $date);
-                continue;
+                $deposit = $oldDeposit->first();
+            } else {
+                // Check for a matching transaction
+                $searchForType = 'credit';
+                $searchAmount = $data['amount'];
+                if ($data['amount'] < 0) {
+                    $searchAmount *= -1;
+                    $searchForType = 'sale';
+                }
+                $transaction = GatewayTransaction::where('amount', $searchAmount)
+                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
+                    ->where('transaction_type', $searchForType)
+                    ->first();
+                if (!$transaction) {
+                    $this->output->warning('Deposits Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
+                }
+                $data['transaction_id'] = $transaction->id ?? null;
+
+                print_r($data);
+
+                // SAVE DEPOSIT
+                $deposit = Deposit::create($data);
             }
 
-            // Check for a matching transaction
-            $searchForType = 'credit';
-            $searchAmount = $data['amount'];
-            if ($data['amount'] < 0) {
-                $searchAmount *= -1;
-                $searchForType = 'sale';
+            $shifts = [];
+            switch($deposit->deposit_type) {
+                case 'caregiver':
+                    $shifts = Shift::where('caregiver_id', $deposit->caregiver_id)
+                        ->whereBetween('checked_in_time', [$this->getStartOfWeek($deposit->created_at), $this->getEndOfWeek($deposit->created_at)])
+                        ->get();
+                    break;
+                case 'business':
+                    $shifts = Shift::where('caregiver_id', $deposit->business_id)
+                        ->whereBetween('checked_in_time', [$this->getStartOfWeek($deposit->created_at), $this->getEndOfWeek($deposit->created_at)])
+                        ->get();
+                    break;
             }
-            $transaction = GatewayTransaction::where('amount', $searchAmount)
-                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
-                ->where('transaction_type', $searchForType)
-                ->first();
-            if (!$transaction) {
-                $this->output->warning('Deposits Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
+
+            foreach ($shifts as $shift) {
+                $shift->deposits()->attach($deposit);
             }
-            $data['transaction_id'] = $transaction->id ?? null;
-
-            print_r($data);
-
-            // SAVE DEPOSIT
-
-            // If deposit_type = caregiver, ADD RECORDS TO deposit_shifts FOR ALL DURING THIS WEEK FOR caregiver_id
-            // If deposit_type = business, ADD RECORDS TO deposit_shifts FOR ALL DURING THIS WEEK FOR business_id
-
         }
+    }
+
+    public function getStartOfWeek($utc_date)
+    {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+        return (new Carbon($utc_date, 'UTC'))
+            ->setTimezone('America/New_York')
+            ->startOfWeek()
+            ->setTimezone('UTC')
+            ->format('Y-m-d H:i:s');
+    }
+
+    public function getEndOfWeek($utc_date)
+    {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+        return (new Carbon($utc_date, 'UTC'))
+            ->setTimezone('America/New_York')
+            ->endOfWeek()
+            ->setTimezone('UTC')
+            ->format('Y-m-d H:i:s');
     }
 
     /**
@@ -322,6 +361,7 @@ class ImportShiftReconciliation extends Command
         $value = $cell->getValue();
 
         if(\PHPExcel_Shared_Date::isDateTime($cell)) {
+            dump($cell->getValue());
             return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
         }
 
