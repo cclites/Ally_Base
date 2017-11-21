@@ -89,7 +89,7 @@ class ImportShiftReconciliation extends Command
             $data['caregiver_id'] = $this->getValue('CG ID', $row);
             $data['caregiver_rate'] = floatval($this->getValue('CG Rate', $row));
             $data['provider_fee'] = floatval($this->getValue('Provider Fee', $row));
-            $data['hours_type'] = $this->getValue('Provider Fee', $row) ?? 'default';
+            $data['hours_type'] = $this->getValue('Hours Type', $row) ?? 'default';
             $clockIn = $this->getValue('Clocked-In', $row);  // This is in business timezone!!
             $hours  = $this->getValue('Duration', $row);
             $data['status'] = 'PAID';
@@ -163,7 +163,7 @@ class ImportShiftReconciliation extends Command
             // Check for an existing payment
             $date = explode(' ', $data['created_at'])[0];
             $oldPayment = Payment::where('client_id', $data['client_id'])
-                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+                ->whereBetween('created_at', [$this->getStartOfWeek($date), $this->getEndOfWeek($date)]);
             if ($oldPayment->exists()) {
                 $this->output->warning('Charges Row ' . $row . ': Found existing payment ' . $oldPayment->first()->id . ' conflicting with ' . $date);
                 $payment = $oldPayment->first();
@@ -188,10 +188,10 @@ class ImportShiftReconciliation extends Command
                 $payment = Payment::create($data);
             }
 
-            // UPDATE ALL SHIFTS DURING THIS WEEK's payment_id FOR client_id
+            
             $shifts = Shift::where('client_id', $payment->client_id)
                 ->whereNull('payment_id')
-                ->whereBetween('checked_in_time', [$this->getStartOfWeek($payment->created_at), $this->getEndOfWeek($payment->created_at)])
+                ->whereBetween('checked_in_time', [$this->getStartOfWeek($payment->created_at->subWeek()), $this->getEndOfWeek($payment->created_at->subWeek())])
                 ->get();
 
             foreach ($shifts as $shift) {
@@ -234,11 +234,10 @@ class ImportShiftReconciliation extends Command
             $oldDeposit = null;
             if ($data['deposit_type'] === 'caregiver') {
                 $oldDeposit = Deposit::where('caregiver_id', $data['caregiver_id'])
-                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
-            }
-            elseif ($data['deposit_type'] === 'business') {
+                    ->whereBetween('created_at', [$this->getStartOfWeek($date), $this->getEndOfWeek($date)]);
+            } elseif ($data['deposit_type'] === 'business') {
                 $oldDeposit = Deposit::where('business_id', $data['business_id'])
-                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+                    ->whereBetween('created_at', [$this->getStartOfWeek($date), $this->getEndOfWeek($date)]);
             }
 
             if ($oldDeposit && $oldDeposit->exists()) {
