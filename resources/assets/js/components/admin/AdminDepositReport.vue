@@ -75,7 +75,7 @@
                     },
                     {
                         key: 'created_at',
-                        label: 'Trans. Response',
+                        label: 'Date',
                         sortable: true,
                     },
                     {
