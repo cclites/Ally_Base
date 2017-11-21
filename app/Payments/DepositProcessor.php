@@ -80,8 +80,9 @@ class DepositProcessor
      */
     public function getDepositData()
     {
+        $caregivers = $this->business->caregivers->sortBy('nameLastFirst');
         $data = [$this->getBusinessDeposit($this->business)];
-        foreach($this->business->caregivers as $caregiver) {
+        foreach($caregivers as $caregiver) {
             $data[] = $this->getCaregiverDeposit($caregiver);
         }
         return $data;
