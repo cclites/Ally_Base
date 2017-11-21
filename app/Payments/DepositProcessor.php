@@ -58,6 +58,11 @@ class DepositProcessor
         $this->endDate = $endDate;
     }
 
+    /**
+     * Process all the deposits relating to the business (returns an integer of successful transactions)
+     *
+     * @return int
+     */
     public function process()
     {
         foreach($this->business->caregivers as $caregiver) {
@@ -65,8 +70,14 @@ class DepositProcessor
         }
         $this->processBusiness();
         $this->updateShiftStatuses();
+        return $this->countSuccess();
     }
 
+    /**
+     * Return all the deposit models that would be created (does not persist anything)
+     *
+     * @return \App\Deposit[]
+     */
     public function getDepositData()
     {
         $data = [$this->getBusinessDeposit($this->business)];
@@ -151,5 +162,11 @@ class DepositProcessor
         Shift::whereIn('id', $failedCaregiverOnly)->update(['status' => Shift::PAID_BUSINESS_ONLY]);
         Shift::whereIn('id', $failedBusinessOnly)->update(['status' => Shift::PAID_CAREGIVER_ONLY]);
         Shift::whereIn('id', $failedBoth)->update(['status' => Shift::WAITING_FOR_PAYOUT]);
+    }
+
+    public function countSuccess()
+    {
+        $failed = array_unique(array_merge($this->failedBusinessShifts, $this->failedCaregiverShifts));
+        return count($this->shifts) - count($failed);
     }
 }
