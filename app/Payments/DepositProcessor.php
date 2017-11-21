@@ -5,6 +5,7 @@ use App\Business;
 use App\Caregiver;
 use App\Shift;
 use Carbon\Carbon;
+use Psr\Log\LoggerInterface;
 
 class DepositProcessor
 {
@@ -28,16 +29,30 @@ class DepositProcessor
     protected $failedCaregiverShifts = [];
 
     /**
+     * Shift ids belonging to failed business deposits
+     *
+     * @var array
+     */
+    protected $failedBusinessShifts = [];
+
+    /**
      * @var \Carbon\Carbon
      */
     private $startDate;
+
     /**
      * @var \Carbon\Carbon
      */
     private $endDate;
 
-    public function __construct(Business $business, Carbon $startDate, Carbon $endDate)
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    public function __construct(Business $business, Carbon $startDate, Carbon $endDate, LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $this->business = $business;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -52,44 +67,89 @@ class DepositProcessor
         $this->updateShiftStatuses();
     }
 
-    public function processCaregiver(Caregiver $caregiver)
+    public function getDepositData()
+    {
+        $data = [$this->getBusinessDeposit($this->business)];
+        foreach($this->business->caregivers as $caregiver) {
+            $data[] = $this->getCaregiverDeposit($caregiver);
+        }
+        return $data;
+    }
+
+    public function getCaregiverDeposit(Caregiver $caregiver, $aggregator = null)
+    {
+        if (!$aggregator) $aggregator = $this->getCaregiverAggregator($caregiver);
+        $deposit = $aggregator->getDeposit();
+        return $deposit;
+    }
+
+    public function getCaregiverAggregator(Caregiver $caregiver)
     {
         $aggregator = new CaregiverDepositAggregator($caregiver, $this->startDate, $this->endDate);
-        $deposit = $aggregator->getDeposit();
+        return $aggregator;
+    }
+
+    public function processCaregiver(Caregiver $caregiver)
+    {
+        $aggregator = $this->getCaregiverAggregator($caregiver);
+        $deposit = $this->getCaregiverDeposit($caregiver, $aggregator);
         if ($deposit->amount > 0) {
             $transaction = false;
             $this->shifts = array_merge($this->shifts, $aggregator->getShiftIds());
             try {
                 $transaction = $aggregator->deposit();
-                echo "Deposited " . $deposit->amount . " to caregiver " . $caregiver->name() . "\n";
+                $this->logger->info("Deposited " . $deposit->amount . " to caregiver " . $caregiver->name());
             }
-            catch (\Exception $e) {}
+            catch (\Exception $e) {
+                $this->logger->error('processCaregiver Error: ' . $e->getMessage());
+            }
             if (!$transaction) {
-                $this->failedCaregiverShifts = array_merge($this->shifts, $aggregator->getShiftIds());
+                $this->failedCaregiverShifts = array_merge($this->failedCaregiverShifts, $aggregator->getShiftIds());
             }
         }
     }
 
+    public function getBusinessDeposit(Business $business, $aggregator = null)
+    {
+        if (!$aggregator) $aggregator = $this->getBusinessAggregator($business);
+        $deposit = $aggregator->getDeposit();
+        return $deposit;
+    }
+
+    public function getBusinessAggregator(Business $business)
+    {
+        $aggregator = new BusinessDepositAggregator($business, $this->startDate, $this->endDate);
+        return $aggregator;
+    }
+
     public function processBusiness()
     {
-        $aggregator = new BusinessDepositAggregator($this->business, $this->startDate, $this->endDate);
-        $deposit = $aggregator->getDeposit();
+        $aggregator = $this->getBusinessAggregator($this->business);
+        $deposit = $this->getBusinessDeposit($this->business, $aggregator);
         if ($deposit->amount > 0) {
             $transaction = false;
             try {
                 $transaction = $aggregator->deposit();
-                echo "Deposited " . $deposit->amount . " to business " . $this->business->name . "\n";
+                $this->logger->info("Deposited " . $deposit->amount . " to business " . $this->business->name);
             }
-            catch (\Exception $e) {}
+            catch (\Exception $e) {
+                $this->logger->error('processBusiness Error: ' . $e->getMessage());
+            }
             if (!$transaction) {
-                // DO SOMETHING WITH FAILED BUSINESS TRANSACTION
+                $this->failedBusinessShifts = array_merge($this->failedBusinessShifts, $aggregator->getShiftIds());
             }
         }
     }
 
     public function updateShiftStatuses()
     {
+        $failedCaregiverOnly = array_diff($this->failedCaregiverShifts, $this->failedBusinessShifts);
+        $failedBusinessOnly = array_diff($this->failedBusinessShifts, $this->failedCaregiverShifts);
+        $failedBoth = array_intersect($this->failedBusinessShifts, $this->failedCaregiverShifts);
+
         Shift::whereIn('id', $this->shifts)->update(['status' => Shift::PAID]);
-        Shift::whereIn('id', $this->failedCaregiverShifts)->update(['status' => Shift::PAID_BUSINESS_ONLY]);
+        Shift::whereIn('id', $failedCaregiverOnly)->update(['status' => Shift::PAID_BUSINESS_ONLY]);
+        Shift::whereIn('id', $failedBusinessOnly)->update(['status' => Shift::PAID_CAREGIVER_ONLY]);
+        Shift::whereIn('id', $failedBoth)->update(['status' => Shift::WAITING_FOR_PAYOUT]);
     }
 }
