@@ -92,6 +92,7 @@ class ImportShiftReconciliation extends Command
             $data['hours_type'] = $this->getValue('Provider Fee', $row) ?? 'default';
             $clockIn = $this->getValue('Clocked-In', $row);  // This is in business timezone!!
             $hours  = $this->getValue('Duration', $row);
+            $data['status'] = 'PAID';
 
             try {
                 $business = Business::findOrFail($data['business_id']);
@@ -292,8 +293,8 @@ class ImportShiftReconciliation extends Command
         return (new Carbon($utc_date, 'UTC'))
             ->setTimezone('America/New_York')
             ->startOfWeek()
-            ->setTimezone('UTC')
-            ->format('Y-m-d H:i:s');
+            ->setTimezone('UTC');
+     //       ->format('Y-m-d H:i:s');
     }
 
     public function getEndOfWeek($utc_date)
@@ -302,8 +303,8 @@ class ImportShiftReconciliation extends Command
         return (new Carbon($utc_date, 'UTC'))
             ->setTimezone('America/New_York')
             ->endOfWeek()
-            ->setTimezone('UTC')
-            ->format('Y-m-d H:i:s');
+            ->setTimezone('UTC');
+            //->format('Y-m-d H:i:s');
     }
 
     /**
@@ -361,8 +362,8 @@ class ImportShiftReconciliation extends Command
         $value = $cell->getValue();
 
         if(\PHPExcel_Shared_Date::isDateTime($cell)) {
-            dump($cell->getValue());
-            return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+            //return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+            return date('Y-m-d H:i:s', strtotime($value));
         }
 
         if (!$this->allowEmptyStrings && is_string($value) && trim($value) === '') {
