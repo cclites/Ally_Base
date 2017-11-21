@@ -46,6 +46,11 @@ class DepositProcessor
     private $endDate;
 
     /**
+     * @var int
+     */
+    private $success = 0;
+
+    /**
      * @var \Psr\Log\LoggerInterface
      */
     public $logger;
@@ -119,6 +124,9 @@ class DepositProcessor
             if (!$transaction) {
                 $this->failedCaregiverShifts = array_merge($this->failedCaregiverShifts, $aggregator->getShiftIds());
             }
+            else {
+                $this->success++;
+            }
         }
     }
 
@@ -151,6 +159,9 @@ class DepositProcessor
             if (!$transaction) {
                 $this->failedBusinessShifts = array_merge($this->failedBusinessShifts, $aggregator->getShiftIds());
             }
+            else {
+                $this->success++;
+            }
         }
     }
 
@@ -168,7 +179,6 @@ class DepositProcessor
 
     public function countSuccess()
     {
-        $failed = array_unique(array_merge($this->failedBusinessShifts, $this->failedCaregiverShifts));
-        return count($this->shifts) - count($failed);
+        return $this->success;
     }
 }
