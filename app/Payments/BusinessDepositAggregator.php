@@ -2,12 +2,13 @@
 namespace App\Payments;
 
 use App\Business;
+use App\Contracts\DepositAggregatorInterface;
 use App\Deposit;
 use App\Gateway\ECSPayment;
 use App\Shift;
 use Carbon\Carbon;
 
-class BusinessDepositAggregator
+class BusinessDepositAggregator implements DepositAggregatorInterface
 {
     protected $business;
 
@@ -49,6 +50,11 @@ class BusinessDepositAggregator
         return $this->shifts;
     }
 
+    public function getShiftIds()
+    {
+        return $this->getShifts()->pluck('id')->toArray();
+    }
+
     public function deposit()
     {
         $deposit = $this->getDeposit();
@@ -63,7 +69,7 @@ class BusinessDepositAggregator
             $deposit->save();
 
             // Update shift status
-            $shiftIds = $this->getShifts()->pluck('id')->toArray();
+            $shiftIds = $this->getShiftIds();
 
             // Associate payment method
             $deposit->method()->associate($account);

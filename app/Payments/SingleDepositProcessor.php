@@ -6,6 +6,13 @@ use App\Deposit;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ECSPayment;
 
+/**
+ * Class SingleDepositProcessor
+ *
+ * Use for manual deposits only!  (use DepositProcessor for automated transactions utilizing shift data)
+ *
+ * @package App\Payments
+ */
 class SingleDepositProcessor
 {
     /**
