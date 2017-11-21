@@ -122,6 +122,7 @@ class DepositProcessor
                 $this->logger->error('processCaregiver Error: ' . $e->getMessage());
             }
             if (!$transaction) {
+                $this->logger->warning('processCaregiver Warning: Transaction not found for ' . $caregiver->name());
                 $this->failedCaregiverShifts = array_merge($this->failedCaregiverShifts, $aggregator->getShiftIds());
             }
             else {
@@ -158,6 +159,7 @@ class DepositProcessor
             }
             if (!$transaction) {
                 $this->failedBusinessShifts = array_merge($this->failedBusinessShifts, $aggregator->getShiftIds());
+                $this->logger->warning('processBusiness Warning: Transaction not found for ' . $this->business->name);
             }
             else {
                 $this->success++;
