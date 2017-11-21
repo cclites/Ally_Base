@@ -274,7 +274,7 @@ class ImportShiftReconciliation extends Command
                         ->get();
                     break;
                 case 'business':
-                    $shifts = Shift::where('caregiver_id', $deposit->business_id)
+                    $shifts = Shift::where('business_id', $deposit->business_id)
                         ->whereBetween('checked_in_time', [$this->getStartOfWeek($deposit->created_at), $this->getEndOfWeek($deposit->created_at)])
                         ->get();
                     break;
