@@ -118,6 +118,7 @@ Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
 
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
+Vue.component('payment-method-provider', require('./components/PaymentMethodProvider.vue'));
 
 Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
 

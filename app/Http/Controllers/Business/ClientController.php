@@ -246,6 +246,15 @@ class ClientController extends BaseController
         }
 
         $redirect = route('business.clients.edit', [$client->id]) . '#payment';
+
+        if ($request->input('use_business')) {
+            if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
+            if ($type == 'primary') $client->defaultPayment()->associate($this->business())->save();
+            elseif ($type == 'backup') $client->backupPayment()->associate($this->business())->save();
+            else return new ErrorResponse(400, 'Invalid type');
+            return new SuccessResponse('You have set this client\'s payment method to the provider bank account.');
+        }
+
         return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method', $redirect);
     }
 
