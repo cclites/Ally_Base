@@ -30,7 +30,7 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="charge" scope="row">
-                    <charge-payment-button :item.sync="row.item" :start-date="start_date" :end-date="end_date"></charge-payment-button>
+                    <charge-payment-button :item.sync="row.item" :start-date="start_date" :end-date="end_date" :key="row.item.client_id"></charge-payment-button>
                 </template>
             </b-table>
         </div>
