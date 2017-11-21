@@ -90,6 +90,9 @@ class ImportShiftReconciliation extends Command
             $data['caregiver_rate'] = floatval($this->getValue('CG Rate', $row));
             $data['provider_fee'] = floatval($this->getValue('Provider Fee', $row));
             $data['hours_type'] = $this->getValue('Hours Type', $row) ?? 'default';
+            if ($data['hours_type'] == 'OT') {
+                $data['hours_type'] = 'overtime';
+            }
             $clockIn = $this->getValue('Clocked-In', $row);  // This is in business timezone!!
             $hours  = $this->getValue('Duration', $row);
             $data['status'] = 'PAID';
@@ -188,7 +191,7 @@ class ImportShiftReconciliation extends Command
                 $payment = Payment::create($data);
             }
 
-            
+
             $shifts = Shift::where('client_id', $payment->client_id)
                 ->whereNull('payment_id')
                 ->whereBetween('checked_in_time', [$this->getStartOfWeek($payment->created_at->subWeek()), $this->getEndOfWeek($payment->created_at->subWeek())])
