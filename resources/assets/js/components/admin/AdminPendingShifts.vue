@@ -82,6 +82,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'mileage_costs',
+                        label: 'Mileage Cost',
+                        sortable: true,
+                    },
+                    {
                         key: 'total_payment',
                         label: 'Amount',
                         sortable: true,

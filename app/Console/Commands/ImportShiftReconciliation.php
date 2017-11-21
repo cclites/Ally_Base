@@ -1,0 +1,354 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Business;
+use App\Caregiver;
+use App\Client;
+use App\Deposit;
+use App\GatewayTransaction;
+use App\Payment;
+use App\Shift;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use PHPExcel_IOFactory;
+
+
+class ImportShiftReconciliation extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'import:shift_reconcil {file}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Import an internal shift reconciliation spreadsheet into the system.';
+
+    /**
+     * Convert empty strings to null values in getValue()
+     *
+     * @var bool
+     */
+    protected $allowEmptyStrings = false;
+
+    /**
+     * @var \PHPExcel
+     */
+    protected $file;
+
+    /**
+     * @var \PHPExcel_Worksheet
+     */
+    protected $sheet;
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+
+        $objPHPExcel = $this->loadFile();
+
+        $this->importShifts();
+        $this->importCharges();
+        $this->importDeposits();
+
+    }
+
+    public function importShifts()
+    {
+        $this->output->writeln('Processing SHIFTS..');
+
+        $sheet = $this->loadSheet('SHIFTS');
+
+        if (!$sheet) {
+            $this->output->error('Error loading "SHIFTS" sheet.');
+            exit();
+        }
+
+        $lastRow = $this->getRowCount();
+        if (!$lastRow) {
+            $this->output->error('Error getting row count for "SHIFTS".  Is this spreadsheet empty?');
+            sleep(2);
+            return;
+        }
+
+        for ($row = 2; $row < $lastRow; $row++) {
+
+            if ($this->isRowEmpty($row)) continue;
+
+            $data['business_id'] = $this->getValue('Business ID', $row);
+            $data['client_id'] = $this->getValue('Client ID', $row);
+            $data['caregiver_id'] = $this->getValue('CG ID', $row);
+            $data['caregiver_rate'] = floatval($this->getValue('CG Rate', $row));
+            $data['provider_fee'] = floatval($this->getValue('Provider Fee', $row));
+            $data['hours_type'] = $this->getValue('Provider Fee', $row) ?? 'default';
+            $clockIn = $this->getValue('Clocked-In', $row);  // This is in business timezone!!
+            $hours  = $this->getValue('Duration', $row);
+
+            try {
+                $business = Business::findOrFail($data['business_id']);
+                $caregiver = Caregiver::findOrFail($data['caregiver_id']);
+                $client = Client::findOrFail($data['client_id']);
+            }
+            catch(\Exception $e) {
+                $this->output->error('Shifts Row ' . $row . ': could not find a relationship... '  . $e->getMessage());
+                continue;
+            }
+
+            $clockIn = Carbon::createFromFormat('Y-m-d H:i:s', $clockIn, $business->timezone)->setTimezone('UTC');
+            $data['checked_in_time'] = $clockIn->format('Y-m-d H:i:s');
+            $data['checked_out_time'] = $clockIn->copy()->addMinutes(round($hours * 60))->format('Y-m-d H:i:s');
+
+            // Check for existing shift
+            $oldShift = Shift::where('business_id', $data['business_id'])
+                ->where('client_id', $data['client_id'])
+                ->where('caregiver_id', $data['caregiver_id'])
+                ->whereBetween('checked_in_time', [
+                    $clockIn->copy()->subMinutes(30),
+                    $clockIn->copy()->addMinutes(30)
+                ]);
+
+            if ($oldShift->exists()) {
+                $this->output->warning('Shifts Row ' . $row . ': Found existing shift ' . $oldShift->first()->id . ' conflicting with ' . $data['checked_in_time']);
+                continue;
+            }
+
+            print_r($data);
+            sleep(2);
+        }
+    }
+
+    public function importCharges()
+    {
+        $this->output->writeln('Processing CHARGES..');
+        $sheet = $this->loadSheet('CHARGES');
+
+        if (!$sheet) {
+            $this->output->error('Error loading "CHARGES" sheet.');
+            sleep(2);
+            return;
+        }
+
+        $lastRow = $this->getRowCount();
+        if (!$lastRow) {
+            $this->output->error('Error getting row count for "CHARGES".  Is this spreadsheet empty?');
+            sleep(2);
+            return;
+        }
+
+        for ($row = 2; $row < $lastRow; $row++) {
+
+            if ($this->isRowEmpty($row)) continue;
+
+            $data['business_id'] = $this->getValue('Business ID', $row);
+            $data['client_id'] = $this->getValue('Client ID', $row);
+            $data['payment_type'] = $this->getValue('Pay Type', $row);
+            $data['amount'] = (float) $this->getValue('Amount', $row);
+            $data['created_at'] = $this->getValue('created_at', $row);
+            $data['deposited'] = $this->getValue('deposited', $row) ?? 1;
+            $data['business_allotment'] = (float) $this->getValue('business_amt', $row);
+            $data['caregiver_allotment'] = (float) $this->getValue('caregiver_amt', $row);
+            $data['system_allotment'] = (float) $this->getValue('system_amt', $row);
+
+            // Check for an existing payment
+            $date = explode(' ', $data['created_at'])[0];
+            $oldPayment = Payment::where('client_id', $data['client_id'])
+                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+            if ($oldPayment->exists()) {
+                $this->output->warning('Charges Row ' . $row . ': Found existing payment ' . $oldPayment->first()->id . ' conflicting with ' . $date);
+                continue;
+            }
+
+            // Check for a matching transaction
+            $searchForType = 'sale';
+            $searchAmount = $data['amount'];
+            if ($data['amount'] < 0) {
+                $searchAmount *= -1;
+                $searchForType = 'credit';
+            }
+            $transaction = GatewayTransaction::where('amount', $searchAmount)
+                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
+                ->where('transaction_type', $searchForType)
+                ->first();
+            if (!$transaction) {
+                $this->output->warning('Charges Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
+            }
+            $data['transaction_id'] = $transaction->id ?? null;
+
+            print_r($data);
+
+            // SAVE PAYMENT
+
+            // UPDATE ALL SHIFTS DURING THIS WEEK's payment_id FOR client_id
+
+        }
+
+
+    }
+
+    public function importDeposits()
+    {
+        $this->output->writeln('Processing DEPOSITS..');
+        $sheet = $this->loadSheet('DEPOSITS');
+
+        if (!$sheet) {
+            $this->output->error('Error loading "DEPOSITS" sheet.');
+            sleep(2);
+            return;
+        }
+
+        $lastRow = $this->getRowCount();
+        if (!$lastRow) {
+            $this->output->error('Error getting row count for "DEPOSITS".  Is this spreadsheet empty?');
+            sleep(2);
+            return;
+        }
+
+        for ($row = 2; $row < $lastRow; $row++) {
+
+            if ($this->isRowEmpty($row)) continue;
+
+            $data['deposit_type'] = strtolower($this->getValue('deposit_type', $row));
+            $data['business_id'] = $this->getValue('business_id', $row);
+            $data['caregiver_id'] = $this->getValue('cg_id', $row);
+            $data['amount'] = (float) $this->getValue('amount', $row);
+            $data['created_at'] = $this->getValue('created_at', $row);
+            $data['success'] = $this->getValue('success', $row) ?? 1;
+
+            // Check for an existing deposit
+            $date = explode(' ', $data['created_at'])[0];
+            $oldDeposit = null;
+            if ($data['deposit_type'] === 'caregiver') {
+                $oldDeposit = Deposit::where('caregiver_id', $data['caregiver_id'])
+                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+            }
+            elseif ($data['deposit_type'] === 'business') {
+                $oldDeposit = Deposit::where('business_id', $data['business_id'])
+                    ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59']);
+            }
+
+            if ($oldDeposit && $oldDeposit->exists()) {
+                $this->output->warning('Deposits Row ' . $row . ': Found existing payment ' . $oldDeposit->first()->id . ' conflicting with ' . $date);
+                continue;
+            }
+
+            // Check for a matching transaction
+            $searchForType = 'credit';
+            $searchAmount = $data['amount'];
+            if ($data['amount'] < 0) {
+                $searchAmount *= -1;
+                $searchForType = 'sale';
+            }
+            $transaction = GatewayTransaction::where('amount', $searchAmount)
+                ->whereBetween('created_at', [$date . ' 00:00:00', $date . ' 23:59:59'])
+                ->where('transaction_type', $searchForType)
+                ->first();
+            if (!$transaction) {
+                $this->output->warning('Deposits Row ' . $row . ': Transaction not found for  ' . $searchAmount. '(' . $searchForType . ') on ' . $date);
+            }
+            $data['transaction_id'] = $transaction->id ?? null;
+
+            print_r($data);
+
+            // SAVE DEPOSIT
+
+            // If deposit_type = caregiver, ADD RECORDS TO deposit_shifts FOR ALL DURING THIS WEEK FOR caregiver_id
+            // If deposit_type = business, ADD RECORDS TO deposit_shifts FOR ALL DURING THIS WEEK FOR business_id
+
+        }
+    }
+
+    /**
+     * @return \PHPExcel
+     */
+    public function loadFile()
+    {
+        if (!$objPHPExcel = PHPExcel_IOFactory::load($this->argument('file'))) {
+            $this->output->error('Could not load file: ' . $this->argument('file'));
+            exit;
+        }
+        $this->file = $objPHPExcel;
+        return $this->file;
+    }
+
+    /**
+     * @return \PHPExcel_Worksheet
+     */
+    public function loadSheet($name)
+    {
+        $this->sheet = $this->file->getSheetByName($name);
+        return $this->sheet;
+    }
+
+    public function getRowCount()
+    {
+        $lastRow = (int) $this->sheet->getHighestRow();
+        if (!$lastRow) {
+            $this->output->error('Error getting row count.  Is this spreadsheet empty?');
+            exit;
+        }
+        return $lastRow;
+    }
+
+    public function isRowEmpty($rowNo)
+    {
+        // Only checks columns A-Z
+        $a_z = range('A', 'Z');
+        foreach($a_z as $column) {
+            $value = $this->sheet->getCell($column . $rowNo)->getValue();
+            if ($value !== null && (is_string($value) && trim($value) !== '')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function getValue($header, $rowNo)
+    {
+        $column = $this->findColumn($header);
+        if ($column === false) {
+            return null;
+        }
+        $cell = $this->sheet->getCell($column . $rowNo);
+        $value = $cell->getValue();
+
+        if(\PHPExcel_Shared_Date::isDateTime($cell)) {
+            return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+        }
+
+        if (!$this->allowEmptyStrings && is_string($value) && trim($value) === '') {
+            return null;
+        }
+
+        return $value;
+    }
+
+    public function findColumn($header)
+    {
+        // Get range from A to BZ
+        $a_z = range('A', 'Z');
+        $range = array_merge(
+            $a_z,
+            array_map(function($val) { return 'A' . $val; }, $a_z),
+            array_map(function($val) { return 'B' . $val; }, $a_z)
+        );
+
+        foreach($range as $column) {
+            $value = $this->sheet->getCell($column . '1')->getValue();
+            if ($value == $header) {
+                return $column;
+            }
+        }
+
+        return false;
+    }
+}
