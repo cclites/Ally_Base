@@ -17,6 +17,7 @@
                 </b-form-group>
                 <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" />
                 <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="'/business/clients/' + client.id + '/payment/' + source" />
+                <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="'/business/clients/' + client.id + '/payment/' + source" />
                 <small class="form-text text-muted">
                     {{ paymentTypeMessage }}
                 </small>
@@ -36,7 +37,8 @@
                 default() {
                     return '';
                 }
-            }
+            },
+            'business': null,
         },
 
         data() {
@@ -59,6 +61,12 @@
         },
 
         mounted() {
+            if (this.business) {
+                this.types.push({
+                    'value': 'provider',
+                    'text': 'Provider Payment Account',
+                })
+            }
             if (this.method) {
                 if (this.method.account_type) {
                     this.type = 'bank_account';
@@ -67,6 +75,9 @@
                 else if (this.method.expiration_year) {
                     this.type = 'credit_card';
                     this.existing_card = this.method;
+                }
+                else if (this.method.payment_account_id) {
+                    this.type = 'provider';
                 }
             }
         },
