@@ -20,7 +20,7 @@ class BusinessController extends Controller
      */
     public function index(Request $request)
     {
-        $businesses = Business::get();
+        $businesses = Business::orderBy('name')->get();
 
         if ($request->expectsJson()) {
             return $businesses;

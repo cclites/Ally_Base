@@ -167,7 +167,7 @@ Route::group([
     Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
     Route::get('deposits/pending', 'Admin\DepositsController@index')->name('deposits.pending');
     Route::get('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.pending.business');
-    Route::post('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.submit.business');
+    Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 
