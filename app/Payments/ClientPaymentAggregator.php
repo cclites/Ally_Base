@@ -32,6 +32,7 @@ class ClientPaymentAggregator
 
         $data = [
             'mileage' => 0,
+            'mileage_costs' => 0,
             'total_payment' => 0,
             'caregiver_allotment' => 0,
             'business_allotment' => 0,
@@ -43,8 +44,6 @@ class ClientPaymentAggregator
                 $data[$index] = round(bcadd($data[$index], $shift[$index], 4), 2);
             }
         }
-
-        $data = $this->addMileageExpense($data);
 
         $data['client_id'] = $this->client->id;
         $data['client_name'] = $this->client->nameLastFirst();
@@ -64,17 +63,6 @@ class ClientPaymentAggregator
     public function getShiftIds()
     {
         return $this->getShifts()->pluck('shift_id')->toArray();
-    }
-
-    public function addMileageExpense($data) {
-        $business = $this->client->business;
-        $calc = new MileageExpenseCalculator($this->client, $business, $this->method, $data['mileage']);
-
-        $data['total_payment'] = bcadd($data['total_payment'], $calc->getTotalCost(), 2);
-        $data['ally_allotment'] = bcadd($data['ally_allotment'], $calc->getAllyFee(), 2);
-        $data['caregiver_allotment'] = bcadd($data['caregiver_allotment'], $calc->getCaregiverReimbursement(), 2);
-
-        return $data;
     }
 
     /**

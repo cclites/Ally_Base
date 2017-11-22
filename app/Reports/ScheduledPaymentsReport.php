@@ -1,8 +1,6 @@
 <?php
 namespace App\Reports;
 
-use App\Contracts\Report;
-use App\Payments\MileageExpenseCalculator;
 use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
@@ -22,7 +20,6 @@ class ScheduledPaymentsReport extends ShiftsReport
                 ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE, Shift::WAITING_FOR_APPROVAL])
                 ->get();
             $this->rows = $shifts->map(function(Shift $shift) {
-                $mileageCalc = new MileageExpenseCalculator($shift->client, $shift->business, null, $shift->mileage);
                 return [
                     'shift_id' => $shift->id,
                     'shift_time' => (new Carbon($shift->checked_in_time))->format(DATE_ISO8601),
@@ -44,7 +41,7 @@ class ScheduledPaymentsReport extends ShiftsReport
                     'ally_allotment' => number_format($shift->costs()->getAllyFee(), 2),
                     'caregiver_allotment' => number_format($shift->costs()->getCaregiverCost(), 2),
                     'mileage' => $shift->mileage,
-                    'mileage_costs' => number_format($mileageCalc->getTotalCost(), 2),
+                    'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
                 ];
             });
         }
