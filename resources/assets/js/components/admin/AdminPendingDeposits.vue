@@ -32,6 +32,11 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col sm="12">
+                <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+            </b-col>
+        </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -45,7 +50,10 @@
 </template>
 
 <script>
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
+        mixins: [FormatsNumbers],
 
         props: {},
 
@@ -57,8 +65,9 @@
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
+                deposits: [],
+                missingAccounts: [],
                 processing: false,
-                items: [],
                 fields: [
                     {
                         key: 'deposit_type',
@@ -75,6 +84,11 @@
                         label: 'Amount',
                         sortable: true,
                     },
+                    {
+                        key: 'flag',
+                        label: 'Flag',
+                        sortable: true,
+                    },
                 ]
             }
         },
@@ -84,7 +98,23 @@
         },
 
         computed: {
-
+            items() {
+                return this.deposits.map(item => {
+                     item.flag = '';
+                     if (this.missingAccounts.find(caregiver => { return item.caregiver_id == caregiver.id })) {
+                         item.flag = 'Missing Bank Account';
+                     }
+                     return item;
+                });
+            },
+            totalItems() {
+                return this.deposits.length;
+            },
+            totalAmount() {
+                return this.deposits.reduce((previous, current) => {
+                    return previous + parseFloat(current.amount);
+                }, 0);
+            }
         },
 
         methods: {
@@ -94,10 +124,14 @@
             loadItems() {
                 axios.get('/admin/deposits/pending/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
-                        this.items = response.data.map(function(item) {
+                        this.deposits = response.data.map(function(item) {
                             item.name = (item.deposit_type == 'business') ? item.business.name : item.caregiver.nameLastFirst;
                             return item;
                         });
+                    });
+                axios.get('/admin/deposits/missing_accounts/' + this.business_id)
+                    .then(response => {
+                        this.missingAccounts = response.data;
                     });
             },
             processDeposits()

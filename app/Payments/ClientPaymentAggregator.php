@@ -3,6 +3,7 @@ namespace App\Payments;
 
 use App\BankAccount;
 use App\Client;
+use App\Contracts\ChargeableInterface;
 use App\CreditCard;
 use App\Gateway\ECSPayment;
 use App\Payment;
@@ -71,17 +72,11 @@ class ClientPaymentAggregator
     public function charge()
     {
         $data = $this->getData();
-        $gateway = new ECSPayment();
 
-        if ($this->method instanceof CreditCard) {
-            $transaction = $gateway->chargeCard($this->method, $data['total_payment']);
-        }
-        elseif ($this->method instanceof BankAccount) {
-            $transaction = $gateway->chargeAccount($this->method, $data['total_payment']);
-        }
-        else {
+        if (!$this->method instanceof ChargeableInterface) {
             return false;
         }
+        $transaction = $this->method->charge($data['total_payment']);
 
         if ($transaction) {
             $payment = new Payment([
