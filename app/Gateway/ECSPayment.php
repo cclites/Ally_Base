@@ -1,11 +1,13 @@
 <?php
 namespace App\Gateway;
 
+use App\Address;
 use App\BankAccount;
 use App\CreditCard;
 use App\Exceptions\PaymentMethodDeclined;
 use App\Exceptions\PaymentMethodError;
 use App\GatewayTransaction;
+use App\PhoneNumber;
 
 class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCardPaymentInterface {
 
@@ -89,28 +91,6 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
         $this->billing['website']   = $website;
     }
 
-    function setShipping($firstname,
-        $lastname,
-        $company,
-        $address1,
-        $address2,
-        $city,
-        $state,
-        $zip,
-        $country,
-        $email) {
-        $this->shipping['firstname'] = $firstname;
-        $this->shipping['lastname']  = $lastname;
-        $this->shipping['company']   = $company;
-        $this->shipping['address1']  = $address1;
-        $this->shipping['address2']  = $address2;
-        $this->shipping['city']      = $city;
-        $this->shipping['state']     = $state;
-        $this->shipping['zip']       = $zip;
-        $this->shipping['country']   = $country;
-        $this->shipping['email']     = $email;
-    }
-
     // TRANSACTION FUNCTIONS
 
     function doCapture($transactionid, $amount =0) {
@@ -185,7 +165,6 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             $this->login
             + $this->params
             + $this->billing
-            + $this->shipping
             + $this->order
         );
     }
@@ -402,5 +381,34 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'cvv' => $cvv ?? '',
             'payment' => 'creditcard'
         ]);
+
+        $this->billing['firstname'] = $firstname;
+        $this->billing['lastname'] = $firstname;
+    }
+
+
+    /**
+     * @param \App\Address $address
+     * @return $this
+     */
+    public function setBillingAddress(Address $address)
+    {
+        $this->billing['address1'] = $address->address1;
+        $this->billing['address2'] = $address->address2;
+        $this->billing['city'] = $address->city;
+        $this->billing['state'] = $address->state;
+        $this->billing['zip'] = $address->zip;
+        $this->billing['country'] = $address->country;
+        return $this;
+    }
+
+    /**
+     * @param \App\PhoneNumber $phone
+     * @return $this
+     */
+    public function setBillingPhone(PhoneNumber $phone)
+    {
+        $this->billing['phone'] = $phone->national_number;
+        return $this;
     }
 }
