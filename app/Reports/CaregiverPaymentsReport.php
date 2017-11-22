@@ -21,6 +21,7 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
     {
         if (!$this->generated) {
             $shifts = $this->query->get();
+            $this->rows = [];
 
             foreach($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
                 $caregiver = Caregiver::find($caregiver_id);
@@ -40,8 +41,13 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
                     return is_float($value) ? number_format($value, 2) : $value;
                 }, $row);
             }
+
+            // Sort by name
+            usort($this->rows, function($a, $b) {
+                return strcmp($a['nameLastFirst'], $b['nameLastFirst']);
+            });
         }
-        return $this->rows;
+        return collect($this->rows);
     }
 
 }
