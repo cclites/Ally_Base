@@ -45,7 +45,7 @@ class AllyFeeCalculator
      *
      * @return float
      */
-    public static function getPercentage(Client $client, $paymentMethod)
+    public static function getPercentage(Client $client, $paymentMethod=null)
     {
         if ($client->fee_override !== null) {
             return $client->fee_override;
@@ -56,7 +56,7 @@ class AllyFeeCalculator
             case 'private_pay':
             case 'LTCI':
                 if (!$paymentMethod) {
-                    $paymentMethod = $client->defaultPayment;
+                    $paymentMethod = $client->getPaymentMethod();
                     if (!$paymentMethod) $paymentMethod = new CreditCard();
                 }
                 if ($paymentMethod instanceof CreditCard) {
