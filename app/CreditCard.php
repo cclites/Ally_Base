@@ -55,12 +55,21 @@ class CreditCard extends Model implements ChargeableInterface
     public function charge($amount, $currency = 'USD')
     {
         $gateway = app()->make(CreditCardPaymentInterface::class);
+
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
             $gateway->setBillingAddress($address);
         }
+        elseif ($this->user && $address = $this->user->addresses->where('type', 'evv')->first()) {
+            $gateway->setBillingAddress($address);
+        }
+
         if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
             $gateway->setBillingPhone($phone);
         }
+        elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'evv')->first()) {
+            $gateway->setBillingPhone($phone);
+        }
+
         return $gateway->chargeCard($this, $amount, $currency);
     }
 }
