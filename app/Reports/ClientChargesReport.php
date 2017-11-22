@@ -23,6 +23,7 @@ class ClientChargesReport extends ScheduledPaymentsReport
     {
         if (!$this->generated) {
             $shifts = $this->query->get();
+            $this->rows = [];
 
             foreach($shifts->groupBy('client_id') as $client_id => $client_shifts) {
                 $client = Client::find($client_id);
@@ -49,6 +50,11 @@ class ClientChargesReport extends ScheduledPaymentsReport
                     return is_float($value) ? number_format($value, 2) : $value;
                 }, $row);
             }
+
+            // Sort by name
+            usort($this->rows, function($a, $b) {
+                return strcmp($a['nameLastFirst'], $b['nameLastFirst']);
+            });
         }
         return $this->rows;
     }
