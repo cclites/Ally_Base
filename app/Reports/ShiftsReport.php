@@ -1,11 +1,8 @@
 <?php
 namespace App\Reports;
 
-use App\Contracts\Report;
-use App\Payments\MileageExpenseCalculator;
 use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
-use Carbon\Carbon;
 
 class ShiftsReport extends BaseReport
 {
@@ -53,12 +50,11 @@ class ShiftsReport extends BaseReport
             $shifts = $this->query->with(['caregiver', 'client'])->get();
             $this->rows = $shifts->map(function(Shift $shift) {
                 $allyFee = AllyFeeCalculator::getFee($shift->client, null, $shift->caregiver_rate + $shift->provider_fee);
-                $mileageCalc = new MileageExpenseCalculator($shift->client, $shift->business, null, $shift->mileage);
                 $row = array_merge($shift->toArray(), [
                     'ally_fee' => number_format($allyFee, 2),
-                    'shift_total' => number_format(bcadd($shift->costs()->getTotalCost(), $mileageCalc->getTotalCost(), 2), 2),
+                    'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                     'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
-                    'mileage_costs' => number_format($mileageCalc->getTotalCost(), 2),
+                    'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
                     'payment_method' => 'TBD',
                 ]);
                 return $row;
