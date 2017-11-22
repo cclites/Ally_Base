@@ -17,7 +17,17 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        <b-form-select
+                            id="business_id"
+                            name="business_id"
+                            v-model="business_id"
+                            required
+                            >
+                            <option value="">--Select a Business--</option>
+                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                        </b-form-select>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info">List Pending Deposits</b-button>
+                        &nbsp;&nbsp;<b-button @click="processDeposits()" variant="danger" :disabled="processing">Process Deposits</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -29,9 +39,6 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
             >
-                <template slot="charge" scope="row">
-                    <charge-payment-button :item.sync="row.item" :start-date="start_date" :end-date="end_date" :key="row.item.client_id"></charge-payment-button>
-                </template>
             </b-table>
         </div>
     </b-card>
@@ -48,60 +55,32 @@
                 sortDesc: false,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                business_id: "",
+                businesses: [],
+                processing: false,
                 items: [],
                 fields: [
                     {
-                        key: 'client_id',
-                        label: 'Client ID',
+                        key: 'deposit_type',
+                        label: 'Deposit Type',
                         sortable: true,
                     },
                     {
-                        key: 'client_name',
-                        label: 'Client Name',
+                        key: 'name',
+                        label: 'Name',
                         sortable: true,
                     },
                     {
-                        key: 'total_payment',
+                        key: 'amount',
                         label: 'Amount',
                         sortable: true,
                     },
-                    {
-                        key: 'caregiver_allotment',
-                        label: 'Caregiver Allotment',
-                        sortable: true,
-                    },
-                    {
-                        key: 'business_allotment',
-                        label: 'Business Allotment',
-                        sortable: true,
-                    },
-                    {
-                        key: 'ally_allotment',
-                        label: 'Ally Allotment',
-                        sortable: true,
-                    },
-                    {
-                        key: 'payment_type',
-                        label: 'Type',
-                        sortable: true,
-                    },
-                    {
-                        key: 'total_shifts',
-                        label: 'Total Shifts',
-                        sortable: true,
-                    },
-                    {
-                        key: 'unauthorized_shifts',
-                        label: 'Unauthorized',
-                        sortable: true,
-                    },
-                    'charge'
                 ]
             }
         },
 
         mounted() {
-            this.loadItems();
+            this.loadBusinesses();
         },
 
         computed: {
@@ -109,12 +88,29 @@
         },
 
         methods: {
+            loadBusinesses() {
+                axios.get('/admin/businesses').then(response => this.businesses = response.data);
+            },
             loadItems() {
-                axios.get('/admin/charges/pending_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get('/admin/deposits/pending/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
-                        this.items = response.data;
+                        this.items = response.data.map(function(item) {
+                            item.name = (item.deposit_type == 'business') ? item.business.name : item.caregiver.nameLastFirst;
+                            return item;
+                        });
                     });
             },
+            processDeposits()
+            {
+                if (this.business_id && confirm('Are you sure you wish to process the deposits for this business?')) {
+                    this.processing = true;
+                    let form = new Form({
+                        start_date: this.start_date,
+                        end_date: this.end_date,
+                    });
+                    form.post('/admin/deposits/pending/' + this.business_id).catch(error => { this.processing = false; })
+                }
+            }
         }
     }
 </script>

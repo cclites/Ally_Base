@@ -41,7 +41,7 @@
                     </span>
                 </template>
                 <template slot="authorized" scope="row">
-                    <authorized-payment-checkbox :item.sync="row.item"></authorized-payment-checkbox>
+                    <authorized-payment-checkbox :item.sync="row.item" :key="row.item.shift_id"></authorized-payment-checkbox>
                 </template>
             </b-table>
         </div>

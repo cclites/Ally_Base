@@ -18,6 +18,12 @@
         <li><a href="{{ route('admin.charges.pending_payments') }}">Pending Charges</a></li>
     </ul>
 </li>
+<li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-money"></i><span class="hide-menu">Deposits</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.deposits.pending') }}">Pending Deposits</a></li>
+        <li><a href="{{ route('admin.deposits') }}">Deposit Report</a></li>
+    </ul>
+</li>
 
 
 

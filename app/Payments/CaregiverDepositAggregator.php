@@ -2,12 +2,13 @@
 namespace App\Payments;
 
 use App\Caregiver;
+use App\Contracts\DepositAggregatorInterface;
 use App\Deposit;
 use App\Gateway\ECSPayment;
 use App\Shift;
 use Carbon\Carbon;
 
-class CaregiverDepositAggregator
+class CaregiverDepositAggregator implements DepositAggregatorInterface
 {
     protected $caregiver;
 
