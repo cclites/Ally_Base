@@ -50,6 +50,11 @@ class DepositsController extends Controller
         return $processor->getDepositData();
     }
 
+    public function missingBankAccount(Request $request, Business $business)
+    {
+        return $business->caregivers()->doesntHave('bankAccount')->get();
+    }
+
     public function deposit(Request $request, Business $business)
     {
         $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
