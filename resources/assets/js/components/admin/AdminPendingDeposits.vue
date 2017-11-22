@@ -32,6 +32,11 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col sm="12">
+                <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+            </b-col>
+        </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -45,7 +50,10 @@
 </template>
 
 <script>
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
+        mixins: [FormatsNumbers],
 
         props: {},
 
@@ -98,6 +106,14 @@
                      }
                      return item;
                 });
+            },
+            totalItems() {
+                return this.deposits.length;
+            },
+            totalAmount() {
+                return this.deposits.reduce((previous, current) => {
+                    return previous + parseFloat(current.amount);
+                }, 0);
             }
         },
 
