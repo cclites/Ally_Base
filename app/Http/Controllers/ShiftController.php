@@ -186,8 +186,8 @@ class ShiftController extends Controller
 
     protected function getRecentEvents()
     {
-        $start = new \DateTime('-1 hours');
-        $end = new \DateTime('+1 hours');
+        $start = new \DateTime('-12 hours');
+        $end = new \DateTime('+12 hours');
 
         $events = new ScheduleEventsResponse($this->caregiver()->getEvents($start, $end));
         return $events;
