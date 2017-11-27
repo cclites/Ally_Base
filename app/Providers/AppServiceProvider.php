@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
         $this->app->bind(ChatServiceInterface::class, function() {
             $slack = new Slack(env('SLACK_ENDPOINT'));
-            return $slack->setChannel('#allyms')
+            return $slack->setChannel(env('SLACK_CHANNEL'))
                 ->setUsername('Ally Bot')
                 ->setIconUrl('https://s3.amazonaws.com/teambox-assets/avatars-v2/a052eac951312dc8d2c72c23ac675f8d47540438/thumb.png?1454879401');
         });
