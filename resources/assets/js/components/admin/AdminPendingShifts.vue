@@ -17,6 +17,15 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
+                        <b-form-select
+                                id="business_id"
+                                name="business_id"
+                                v-model="business_id"
+                        >
+                            <option value="">--Select a Business--</option>
+                            <option value="">All Businesses</option>
+                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
@@ -59,6 +68,8 @@
                 sortDesc: false,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                business_id: "",
+                businesses: [],
                 items: [],
                 fields: [
                     {
@@ -127,6 +138,7 @@
         },
 
         mounted() {
+            this.loadBusinesses();
             this.loadItems();
         },
 
@@ -135,8 +147,14 @@
         },
 
         methods: {
+            loadBusinesses() {
+                axios.get('/admin/businesses').then(response => this.businesses = response.data);
+            },
+
             loadItems() {
-                axios.get('/admin/charges/pending_shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                let url = '/admin/charges/pending_shifts?start_date=' + this.start_date + '&end_date=' + this.end_date;
+                if (this.business_id) url = url + '&business_id=' + this.business_id;
+                axios.get(url)
                     .then(response => {
                         this.items = response.data.map(function (item) {
                             item.client_name = (item.client) ? item.client.name : '';
