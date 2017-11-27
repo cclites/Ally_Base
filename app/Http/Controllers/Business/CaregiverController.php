@@ -194,7 +194,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        return (new PhoneController())->update($request, $caregiver->user, $type, 'The caregiver\'s phone number');
+        return (new PhoneController())->upsert($request, $caregiver->user, $type, 'The caregiver\'s phone number');
     }
 
     public function schedule(Request $request, $caregiver_id)

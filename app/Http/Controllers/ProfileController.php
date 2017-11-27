@@ -57,6 +57,6 @@ class ProfileController extends Controller
     public function phone(Request $request, $type)
     {
         $user = auth()->user();
-        return (new PhoneController())->update($request, $user, $type, 'Your phone number');
+        return (new PhoneController())->upsert($request, $user, $type, 'Your phone number');
     }
 }

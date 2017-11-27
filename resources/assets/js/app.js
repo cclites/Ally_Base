@@ -42,6 +42,7 @@ Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApprov
 Vue.component('client-payment-history', require('./components/clients/ClientPaymentHistory'));
 Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
+Vue.component('client-phone-numbers-tab', require('./components/clients/profile/ClientPhoneNumbersTab'));
 
 // Admin
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));

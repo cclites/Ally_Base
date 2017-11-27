@@ -238,7 +238,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        return (new PhoneController())->update($request, $client->user, $type, 'The client\'s phone number');
+        return (new PhoneController())->upsert($request, $client->user, $type, 'The client\'s phone number');
     }
 
     public function paymentMethod(Request $request, $client_id, $type)
