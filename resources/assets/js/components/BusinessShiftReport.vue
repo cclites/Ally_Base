@@ -132,6 +132,7 @@
                     <b-row>
                         <b-col sm="6">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
+                            <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                         <b-col sm="6">
                             <b-row>
@@ -182,6 +183,26 @@
                 </b-card>
             </b-col>
         </b-row>
+
+        <!-- Filter columns modal -->
+        <b-modal id="filterColumnsModal" title="Show or Hide Columns" v-model="columnsModal">
+            <b-container fluid>
+                <b-row>
+                    <div class="form-check row">
+                        <div class="col-sm-auto" v-for="field in availableFields">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" v-model="filteredFields" :value="field">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ field }}</span>
+                            </label>
+                        </div>
+                    </div>
+               </b-row>
+            </b-container>
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="columnsModal=false">Close</b-btn>
+            </div>
+        </b-modal>
 
         <!-- Details modal -->
         <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
@@ -356,10 +377,33 @@
                 selectedItem: {
                     client: {}
                 },
+                columnsModal: false,
+                availableFields: [
+                    'Day',
+                    'Time',
+                    'Hours',
+                    'Client',
+                    'Caregiver',
+                    'Verified',
+                    'CG Rate',
+                    'Reg Rate',
+                    'Ally Fee',
+                    'Total Hourly',
+                    'Mileage',
+                    'CG Total',
+                    'Reg Total',
+                    'Ally Total',
+                    'Mileage Costs',
+                    'Other Expenses',
+                    'Shift Total',
+                    'Type',
+                ],
+                filteredFields: [],
             }
         },
 
         mounted() {
+            this.setInitialFields();
             this.loadData();
             this.loadFiltersData();
         },
@@ -367,16 +411,9 @@
         computed: {
             fields() {
                 let fields = [];
-                let item;
-                if (item = this.shiftHistoryItems[0]) {
-                    for (let key of Object.keys(item)) {
-                        if (key === 'id') continue;
-                        if (key === 'client_id') continue;
-                        if (key === 'caregiver_id') continue;
-                        fields.push({
-                            'key': key,
-                            'sortable': true,
-                        });
+                for (let field of this.availableFields) {
+                    if (this.filteredFields.indexOf(field) !== -1) {
+                        fields.push(field);
                     }
                 }
                 fields.push('actions');
@@ -407,7 +444,12 @@
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
                         'Total Hourly': item.hourly_total,
+                        'Mileage': item.mileage,
+                        'CG Total': item.caregiver_total,
+                        'Reg Total': item.provider_total,
+                        'Ally Total': item.ally_total,
                         'Mileage Costs': item.mileage_costs,
+                        'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
                     }
@@ -555,6 +597,15 @@
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem('shift_report_' + item, value);
                 }
+            },
+
+            setInitialFields() {
+                if (this.getLocalStorage('fields')) {
+                    this.filteredFields = JSON.parse(this.getLocalStorage('fields'))
+                }
+                else {
+                    this.filteredFields = this.availableFields.slice();
+                }
             }
 
         },
@@ -578,6 +629,9 @@
             sortDesc(val) {
                 this.setLocalStorage('sortDesc', val);
             },
+            fields(val) {
+                this.setLocalStorage('fields', JSON.stringify(val));
+            }
         }
     }
 </script>
