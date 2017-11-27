@@ -45,7 +45,7 @@
                         </thead>
                         <tbody>
                         <tr v-for="item in items.clientCharges">
-                            <td>{{ item.name }}</td>
+                            <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
                             <td>{{ item.total }}</td>
                             <!--<td>{{ item.caregiver_total }}</td>-->
@@ -84,7 +84,7 @@
                         </thead>
                         <tbody>
                         <tr v-for="item in items.caregiverPayments">
-                            <td>{{ item.name }}</td>
+                            <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
                             <td>{{ item.amount }}</td>
                         </tr>
