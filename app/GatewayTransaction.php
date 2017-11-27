@@ -13,7 +13,16 @@ class GatewayTransaction extends Model
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function history()
+    {
+        return $this->hasMany(GatewayTransactionHistory::class, 'internal_transaction_id');
+    }
 
+    public function lastHistory()
+    {
+        return $this->hasOne(GatewayTransactionHistory::class, 'internal_transaction_id')
+            ->orderBy('created_at', 'DESC');
+    }
 
     ////////////////////////////////////////////
     /// Other Methods
