@@ -26,7 +26,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Scheduled Shifts with No Clock-in"
+                        header="Scheduled Shifts with No Clock-in (These will not be charged nor paid)"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
