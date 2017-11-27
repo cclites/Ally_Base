@@ -134,6 +134,7 @@ Route::group([
 
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
+    Route::get('shifts/{shift}/duplicate', 'Business\ShiftController@duplicate')->name('shifts.duplicate');
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
     Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');

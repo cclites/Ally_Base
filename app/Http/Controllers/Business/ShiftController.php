@@ -98,10 +98,7 @@ class ShiftController extends BaseController
         }
 
         $activities = $shift->business->allActivities();
-        $caregivers = $shift->business->caregivers;
-        $clients = $shift->business->clients;
-
-        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities', 'clients', 'caregivers'));
+        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
     }
 
     public function update(Request $request, Shift $shift) {
@@ -247,5 +244,21 @@ class ShiftController extends BaseController
             'status' => Shift::WAITING_FOR_AUTHORIZATION,
         ]);
         return new CreatedResponse('The scheduled shift has been converted to an actual shift.', $shift->toArray());
+    }
+
+    public function duplicate(Shift $shift)
+    {
+        // Duplicate an existing shift and advance one day
+        $shift = $shift->replicate();
+        $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
+        $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
+        $shift->status = null;
+
+        $checked_in_distance = null;
+        $checked_out_distance = null;
+        $activities = $shift->business->allActivities();
+
+        return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
+
     }
 }

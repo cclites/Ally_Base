@@ -326,17 +326,17 @@
         data() {
             return {
                 form: new Form({
-                    client_id: (this.shift.id) ? this.shift.client_id : null,
-                    caregiver_id: (this.shift.id) ? this.shift.caregiver_id : null,
-                    caregiver_comments: (this.shift.id) ? this.shift.caregiver_comments : null,
-                    checked_in_time: (this.shift.id) ? this.shift.checked_in_time : null,
-                    checked_out_time: (this.shift.id) ? this.shift.checked_out_time : null,
-                    mileage: (this.shift.id) ? this.shift.mileage : 0,
-                    other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
-                    hours_type: (this.shift.hours_type) ? this.shift.hours_type : 'default',
-                    verified: (this.shift.id) ? this.shift.verified : true,
-                    caregiver_rate: (this.shift.id) ? this.shift.caregiver_rate : '',
-                    provider_fee: (this.shift.id) ? this.shift.provider_fee : '',
+                    client_id: (this.shift) ? this.shift.client_id : null,
+                    caregiver_id: (this.shift) ? this.shift.caregiver_id : null,
+                    caregiver_comments: (this.shift) ? this.shift.caregiver_comments : null,
+                    checked_in_time: (this.shift) ? this.shift.checked_in_time : null,
+                    checked_out_time: (this.shift) ? this.shift.checked_out_time : null,
+                    mileage: (this.shift) ? this.shift.mileage : 0,
+                    other_expenses: (this.shift) ? this.shift.other_expenses : 0,
+                    hours_type: (this.shift) ? this.shift.hours_type : 'default',
+                    verified: (this.shift) ? this.shift.verified : true,
+                    caregiver_rate: (this.shift) ? this.shift.caregiver_rate : '',
+                    provider_fee: (this.shift) ? this.shift.provider_fee : '',
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
@@ -356,7 +356,8 @@
         mounted() {
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
-            if (this.shift.id) {
+            // Do not check against id below to allow for shift duplication
+            if (this.shift.checked_in_time) {
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
                 this.checked_in_date = checkin.format('MM/DD/YYYY');
