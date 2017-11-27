@@ -502,13 +502,15 @@
         },
         watch: {
             checked_in_date(val, old) {
-                if (old) this.validateTimeDifference('checked_in_time');
-                if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
-                    this.checked_out_date = val;
-                }
-                else {
-                    if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
+                if (old) {
+                    this.validateTimeDifference('checked_in_time');
+                    if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
                         this.checked_out_date = val;
+                    }
+                    else {
+                        if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
+                            this.checked_out_date = val;
+                        }
                     }
                 }
             },
