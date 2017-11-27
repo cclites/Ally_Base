@@ -176,8 +176,8 @@
                             </span>
                         </template>
                         <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit</b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
+                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                         </template>
                     </b-table>
                 </b-card>
