@@ -413,7 +413,10 @@
                 let fields = [];
                 for (let field of this.availableFields) {
                     if (this.filteredFields.indexOf(field) !== -1) {
-                        fields.push(field);
+                        fields.push({
+                            'key': field,
+                            'sortable': true,
+                        });
                     }
                 }
                 fields.push('actions');
