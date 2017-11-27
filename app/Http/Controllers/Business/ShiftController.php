@@ -7,8 +7,10 @@ use App\Events\UnverifiedShiftApproved;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Schedule;
 use App\Shift;
 use App\ShiftIssue;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ShiftController extends BaseController
@@ -21,9 +23,7 @@ class ShiftController extends BaseController
     public function create()
     {
         $activities = $this->business()->allActivities();
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
-        return view('business.shifts.create', compact('activities', 'caregivers', 'clients'));
+        return view('business.shifts.create', compact('activities'));
     }
 
     public function store(Request $request)
@@ -142,6 +142,22 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
 
+
+    public function destroy(Shift $shift)
+    {
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+        if ($shift->isReadOnly()) {
+            return new ErrorResponse(400, 'This shift is locked for modification.');
+        }
+        if ($shift->delete()) {
+            return new SuccessResponse("This shift has been deleted.");
+        }
+        return new ErrorResponse(500, "This shift could not be deleted.");
+    }
+
+
     public function verify(Shift $shift)
     {
         $shift->load(['activities', 'issues']);
@@ -195,5 +211,41 @@ class ShiftController extends BaseController
             return new SuccessResponse('The issue has been updated successfully.', $issue->toArray());
         }
         return new ErrorResponse(500, 'Unable to update issue.');
+    }
+
+    public function convertSchedule(Request $request, Schedule $schedule)
+    {
+        $request->validate([
+            'date' => 'required|date_format:Y-m-d',
+        ]);
+
+        $date = $request->input('date');
+
+        // Make sure schedule has proper assignments
+        if (!$schedule->caregiver_id) return new ErrorResponse(400,'There is no caregiver assigned to this scheduled shift, cannot convert.');
+        if (!$schedule->client_id) return new ErrorResponse(400,'There is no client assigned to this scheduled shift, cannot convert.');
+
+        $searchStart = (new Carbon($date, $this->business()->timezone))->setTime(0, 0, 0);
+        $searchEnd = $searchStart->copy()->addDay();
+        $occurrences = $schedule->getOccurrencesStartingBetween($searchStart, $searchEnd);
+
+        // Make sure 1 occurrence was found
+        if (count($occurrences) !== 1) return new ErrorResponse(400,'Unable to match the schedule for conversion.');
+
+        // Create Shift
+        $start = Carbon::instance(current($occurrences))->setTimezone('UTC');
+        $shift = Shift::create([
+            'business_id' => $this->business()->id,
+            'caregiver_id' => $schedule->caregiver_id,
+            'client_id' => $schedule->client_id,
+            'checked_in_time' => $start,
+            'checked_out_time' => $start->copy()->addMinutes($schedule->duration),
+            'schedule_id' => $schedule->id,
+            'hours_type' => $schedule->hours_type,
+            'caregiver_rate' => $schedule->getCaregiverRate(),
+            'provider_fee' => $schedule->getProviderFee(),
+            'status' => Shift::WAITING_FOR_AUTHORIZATION,
+        ]);
+        return new CreatedResponse('The scheduled shift has been converted to an actual shift.', $shift->toArray());
     }
 }

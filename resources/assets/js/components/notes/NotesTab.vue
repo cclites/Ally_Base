@@ -9,6 +9,9 @@
                             Created By: {{ note.creator.name }}
                         </b-col>
                         <b-col>
+                            <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>
+                        </b-col>
+                        <b-col>
                             <div class="pull-right">{{ formatDate(note.created_at) + ' ' + formatTime(note.created_at) }}</div>
                         </b-col>
                     </b-row>

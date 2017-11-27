@@ -100,6 +100,7 @@ Route::group([
     Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
     Route::post('clients/{id}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{id}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
+    Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');
     Route::get('clients/{id}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
     Route::post('clients/{id}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
     Route::post('clients/{id}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');
@@ -122,6 +123,7 @@ Route::group([
     Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
+    Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
@@ -131,6 +133,7 @@ Route::group([
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 
+    Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
@@ -163,6 +166,12 @@ Route::group([
     Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
     Route::post('charges/pending_shifts/{shift}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
     Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
+    Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
+    Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
+    Route::get('deposits/{business}', 'Admin\DepositsController@report')->name('deposits.report');
+    Route::get('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.pending.business');
+    Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
+    Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 

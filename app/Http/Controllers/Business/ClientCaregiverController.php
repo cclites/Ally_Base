@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Caregiver;
+use App\Client;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientCaregiver;
@@ -46,6 +48,16 @@ class ClientCaregiverController extends BaseController
         $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
             return (new ClientCaregiver($client, $caregiver))->toResponse(null);
         });
-        return $caregivers;
+        return $caregivers->sortBy('name')->values()->all();
+    }
+
+    public function show($client_id, $caregiver_id) {
+        /**
+         * @var \App\Client $client
+         */
+        $client = $this->business()->clients()->where('id', $client_id)->firstOrFail();
+
+        $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
+        return new ClientCaregiver($client, $caregiver);
     }
 }

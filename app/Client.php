@@ -29,7 +29,8 @@ class Client extends Model implements UserRole
         'backup_payment_type',
         'backup_payment_id',
         'ssn',
-        'onboard_status'
+        'onboard_status',
+        'fee_override',
     ];
 
     ///////////////////////////////////////////
@@ -182,6 +183,15 @@ class Client extends Model implements UserRole
             ->update(['end_date' => $yesterday]);
     }
 
+    public function getPaymentMethod($backup = false)
+    {
+        $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
+        if ($method instanceof Business) {
+            return $method->paymentAccount;
+        }
+        return $method;
+    }
+
     /**
      * @param $method
      * @return mixed|null|string
@@ -190,7 +200,7 @@ class Client extends Model implements UserRole
         switch($this->client_type) {
             case 'private_pay':
             case 'LTCI':
-                if (!$method) $method = $this->defaultPayment;
+                if (!$method) $method = $this->getPaymentMethod();
                 if ($method instanceof BankAccount) {
                     return 'ACH';
                 }

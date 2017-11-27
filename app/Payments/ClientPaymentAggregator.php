@@ -3,13 +3,16 @@ namespace App\Payments;
 
 use App\BankAccount;
 use App\Client;
+use App\Contracts\ChargeableInterface;
 use App\CreditCard;
 use App\Gateway\ECSPayment;
 use App\Payment;
+use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
 
 class ClientPaymentAggregator
 {
+
     protected $client;
     protected $method;
     protected $shifts;
@@ -17,7 +20,7 @@ class ClientPaymentAggregator
     public function __construct(Client $client, $startDate, $endDate)
     {
         $this->client = $client;
-        $this->method = $client->defaultPayment;
+        $this->method = $client->getPaymentMethod();
 
         $report = new \App\Reports\ScheduledPaymentsReport();
         $report->between($startDate, $endDate);
@@ -29,18 +32,18 @@ class ClientPaymentAggregator
         $authorizedShifts = $this->shifts->where('status', Shift::WAITING_FOR_CHARGE);
 
         $data = [
+            'mileage' => 0,
+            'mileage_costs' => 0,
             'total_payment' => 0,
             'caregiver_allotment' => 0,
             'business_allotment' => 0,
             'ally_allotment' => 0,
         ];
-        $shiftIds = [];
 
         foreach($authorizedShifts as $shift) {
             foreach($data as $index=>$value) {
                 $data[$index] = round(bcadd($data[$index], $shift[$index], 4), 2);
             }
-            $shiftIds[] = $shift['shift_id'];
         }
 
         $data['client_id'] = $this->client->id;
@@ -48,9 +51,19 @@ class ClientPaymentAggregator
         $data['payment_type'] = $this->client->getPaymentType();
         $data['total_shifts'] = $this->shifts->count();
         $data['unauthorized_shifts'] = $this->shifts->count() - $authorizedShifts->count();
-        $data['shifts'] = $shiftIds;
+        $data['shifts'] = $this->getShiftIds();
 
         return $data;
+    }
+
+    public function getShifts()
+    {
+        return $this->shifts;
+    }
+
+    public function getShiftIds()
+    {
+        return $this->getShifts()->pluck('shift_id')->toArray();
     }
 
     /**
@@ -59,17 +72,11 @@ class ClientPaymentAggregator
     public function charge()
     {
         $data = $this->getData();
-        $gateway = new ECSPayment();
 
-        if ($this->method instanceof CreditCard) {
-            $transaction = $gateway->chargeCard($this->method, $data['total_payment']);
-        }
-        elseif ($this->method instanceof BankAccount) {
-            $transaction = $gateway->chargeAccount($this->method, $data['total_payment']);
-        }
-        else {
+        if (!$this->method instanceof ChargeableInterface) {
             return false;
         }
+        $transaction = $this->method->charge($data['total_payment']);
 
         if ($transaction) {
             $payment = new Payment([

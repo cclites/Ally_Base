@@ -1,6 +1,8 @@
 <?php
 namespace App\Scheduling;
 
+use App\Payments\MileageExpenseCalculator;
+
 class CostCalculator
 {
     /**
@@ -69,11 +71,23 @@ class CostCalculator
         if ($this->shift->all_day) {
             return round($this->shift->caregiver_rate, self::DEFAULT_SCALE);
         }
+        $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        $mileage = $this->mileageCalculator()->getCaregiverReimbursement();
         return round(
-            bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE),
+            bcadd($shift, $mileage, self::DEFAULT_SCALE),
             self::DECIMAL_PLACES,
             self::ROUNDING_METHOD
         );
+    }
+
+    public function mileageCalculator()
+    {
+        return new MileageExpenseCalculator($this->client, $this->shift->business, $this->paymentType, $this->shift->mileage);
+    }
+
+    public function getMileageCost()
+    {
+        return $this->mileageCalculator()->getTotalCost();
     }
 
     public function getTotalCost()

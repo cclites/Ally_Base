@@ -126,7 +126,7 @@ class ShiftTest extends TestCase
         ]);
 
         // Mock the time as 1:00PM
-        Carbon::setTestNow(new Carbon('2017-10-11 13:00:00'));
+        Carbon::setTestNow($now = new Carbon('2017-10-11 13:00:00'));
         $this->assertEquals(4, $shift->remaining());
     }
 

@@ -41,14 +41,18 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()->clients()->with(['user'])->get()->map(function($client) {
-            return [
-                'id' => $client->id,
-                'firstname' => $client->user->firstname,
-                'lastname' => $client->user->lastname,
-                'name' => $client->nameLastFirst(),
-            ];
-        });
+        return $this->business()->clients()
+            ->with(['user'])->get()->map(function($client) {
+                return [
+                    'id' => $client->id,
+                    'firstname' => $client->user->firstname,
+                    'lastname' => $client->user->lastname,
+                    'name' => $client->nameLastFirst(),
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
     }
 
     /**
@@ -111,9 +115,19 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $client->load(['user', 'addresses', 'phoneNumbers', 'bankAccounts', 'creditCards', 'user.documents', 'notes.creator', 'notes' => function ($query) {
-            return $query->orderBy('created_at', 'desc');
-        }]);
+        $client->load([
+            'user',
+            'addresses',
+            'phoneNumbers',
+            'bankAccounts',
+            'creditCards',
+            'payments',
+            'user.documents',
+            'notes.creator',
+            'notes' => function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            }
+        ]);
         $schedules = $client->schedules()->get();
         $caregivers = $this->business()->caregivers()
               ->with('user')
@@ -236,6 +250,15 @@ class ClientController extends BaseController
         }
 
         $redirect = route('business.clients.edit', [$client->id]) . '#payment';
+
+        if ($request->input('use_business')) {
+            if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
+            if ($type == 'primary') $client->defaultPayment()->associate($this->business())->save();
+            elseif ($type == 'backup') $client->backupPayment()->associate($this->business())->save();
+            else return new ErrorResponse(400, 'Invalid type');
+            return new SuccessResponse('You have set this client\'s payment method to the provider bank account.');
+        }
+
         return (new PaymentMethodController())->update($request, $client, $type, 'The client\'s payment method', $redirect);
     }
 
@@ -257,7 +280,7 @@ class ClientController extends BaseController
     {
         return [
             'payment_type' => $client->getPaymentType(),
-            'percentage_fee' => AllyFeeCalculator::getPercentage($client, $client->defaultPayment)
+            'percentage_fee' => AllyFeeCalculator::getPercentage($client)
         ];
     }
 

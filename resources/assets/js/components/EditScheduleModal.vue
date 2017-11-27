@@ -18,6 +18,7 @@
                                 >
                                 <option v-for="item in clients" :value="item.id">{{ item.name }}</option>
                             </b-form-select>
+                            <small>Type: {{ clientType }}</small>
                             <input-help :form="form" field="client_id" text=""></input-help>
                         </b-form-group>
                     </b-col>
@@ -347,6 +348,14 @@
                 }
             },
 
+        },
+
+        computed: {
+            clientType() {
+                let type =  _.find(this.$parent.clients, { id: this.client_id }).client_type;
+
+                return _.startCase(type);
+            }
         },
 
         watch: {

@@ -44,8 +44,10 @@ Vue.component('client-payment-details', require('./components/clients/ClientPaym
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 
 // Admin
+Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
 Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
+Vue.component('admin-pending-deposits', require('./components/admin/AdminPendingDeposits.vue'));
 Vue.component('admin-pending-shifts', require('./components/admin/AdminPendingShifts.vue'));
 Vue.component('authorized-payment-checkbox', require('./components/admin/AuthorizePaymentCheckbox.vue'));
 Vue.component('charge-payment-button', require('./components/admin/ChargePaymentButton.vue'));
@@ -68,9 +70,12 @@ Vue.component('business-shift-history', require('./components/BusinessShiftHisto
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
 Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
+Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
+Vue.component('client-payments-tab', require('./components/business/clients/ClientPaymentsTab'));
+Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 
 Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
 Vue.component('care-plan-list', require('./components/CarePlanList.vue'));
@@ -115,6 +120,7 @@ Vue.component('input-help', require('./components/InputHelp.vue'));
 Vue.component('message', require('./components/Message.vue'));
 
 Vue.component('payment-method', require('./components/PaymentMethod.vue'));
+Vue.component('payment-method-provider', require('./components/PaymentMethodProvider.vue'));
 
 Vue.component('reset-password-modal', require('./components/ResetPasswordModal.vue'));
 

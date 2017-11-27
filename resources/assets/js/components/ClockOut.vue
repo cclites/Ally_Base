@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Clock Out"
+    <b-card header=""
         header-bg-variant="info"
         header-text-variant="white"
         >
@@ -52,6 +52,11 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
+
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg-6>
                     <b-form-group label="Other Expenses" label-for="other_expenses">
                         <b-form-input
                                 id="other_expenses"
@@ -62,6 +67,13 @@
                         >
                         </b-form-input>
                         <input-help :form="form" field="other_expenses" text="Enter the amount of expenses incurred during your shift."></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Other Expenses Description">
+                        <b-form-textarea v-model="form.other_expenses_desc"
+                                         :rows="2">
+                        </b-form-textarea>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -107,7 +119,7 @@
             <b-row>
                 <b-col lg="12">
                     <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock Out</b-button>
-                    <b-button id="complete-clock-out" variant="success" type="submit">I am finished with my shift.</b-button>
+                    <b-button id="complete-clock-out" variant="success" type="submit">Press Here To Clock Out</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -134,13 +146,10 @@
                     activities: [],
                     caregiver_injury: 0,
                     issue_text: null,
+                    other_expenses_desc: null
                 }),
-                showManual: false,
+                showManual: false
             }
-        },
-
-        mounted() {
-
         },
 
         methods: {
@@ -204,7 +213,5 @@
                 return moment().local().format('LT');
             }
         }
-
-
     }
 </script>

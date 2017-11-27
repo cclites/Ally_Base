@@ -45,6 +45,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -94,10 +97,10 @@
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $defaultPaymentTypeMessage }}" />
+                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $defaultPaymentTypeMessage }}" :business="true" />
                 </div>
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" />
+                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" :business="true" />
                 </div>
             </div>
         </div>
@@ -112,6 +115,9 @@
                 :initial-documents="{{ $client->user->documents->toJson() }}"
                 :user-id="{{ $client->user->id }}"
             ></document-list>
+        </div>
+        <div class="tab-pane" id="client_payment_history" role="tabpanel">
+            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
         </div>
     </div>
 @endsection

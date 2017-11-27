@@ -1,7 +1,6 @@
 <?php
 namespace App\Reports;
 
-use App\Contracts\Report;
 use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
@@ -41,6 +40,8 @@ class ScheduledPaymentsReport extends ShiftsReport
                     'business_allotment' => number_format($shift->costs()->getProviderFee(), 2),
                     'ally_allotment' => number_format($shift->costs()->getAllyFee(), 2),
                     'caregiver_allotment' => number_format($shift->costs()->getCaregiverCost(), 2),
+                    'mileage' => $shift->mileage,
+                    'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
                 ];
             });
         }

@@ -18,8 +18,8 @@ class CreatePaymentsTable extends Migration {
 			$table->integer('client_id')->unsigned()->index('fk_payments_client_id_idx');
 			$table->integer('caregiver_id')->unsigned()->index('fk_payments_caregiver_id_idx');
 			$table->integer('business_id')->unsigned()->index('fk_payments_business_id_idx');
-			$table->string('reference_type', 45)->nullable();
-			$table->string('reference_id', 45)->nullable();
+//			$table->string('reference_type', 45)->nullable();
+//			$table->string('reference_id', 45)->nullable();
 			$table->string('method_type', 45)->nullable();
 			$table->string('method_id', 45)->nullable();
 			$table->decimal('amount', 9)->nullable();

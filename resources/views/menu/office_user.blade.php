@@ -51,6 +51,7 @@
         <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
         <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
         <li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver Rates</a></li>
+        <li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>
     </ul>
 </li>
 <li>
