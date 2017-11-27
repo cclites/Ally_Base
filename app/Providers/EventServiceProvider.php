@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\FailedTransaction;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftApproved;
 use App\Events\UnverifiedShiftCreated;
+use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
 use App\Listeners\UnverifiedShiftException;
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ShiftModified::class => [
             ShiftStatusUpdate::class,
+        ],
+        FailedTransaction::class => [
+            PostToSlackOnFailedTransaction::class,
         ]
     ];
 
