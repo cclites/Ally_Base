@@ -369,6 +369,7 @@
                 this.checked_in_date = moment().format('MM/DD/YYYY');
                 this.checked_out_date = moment().format('MM/DD/YYYY');
                 this.checked_in_time = '09:00 AM';
+                this.checked_out_time = '10:00 AM';
             }
         },
         computed: {
@@ -453,24 +454,26 @@
                 this.saveShift();
             },
             validateTimeDifference(field) {
-                let clockin = this.getClockedInMoment();
-                let clockout = this.getClockedOutMoment();
-                if (clockin.isValid() && clockout.isValid()) {
-                    let diffInMinutes = clockout.diff(clockin, 'minutes');
-                    console.log(diffInMinutes);
-                    if (diffInMinutes < 0) {
-                        this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
-                    }
-                    else if (diffInMinutes > 600) {
-                        this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                this.$nextTick(function() {
+                    let clockin = this.getClockedInMoment();
+                    let clockout = this.getClockedOutMoment();
+                    if (clockin.isValid() && clockout.isValid()) {
+                        let diffInMinutes = clockout.diff(clockin, 'minutes');
+                        console.log(diffInMinutes);
+                        if (diffInMinutes < 0) {
+                            this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
+                        }
+                        else if (diffInMinutes > 600) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                        }
+                        else {
+                            this.form.clearError(field);
+                        }
                     }
                     else {
-                        this.form.clearError(field);
+                        console.log('Invalid time?');
                     }
-                }
-                else {
-                    console.log('Invalid time?');
-                }
+                });
             },
             loadClientCaregiverData() {
                 axios.get('/business/clients').then(response => this.clients = response.data);
@@ -496,7 +499,15 @@
         },
         watch: {
             checked_in_date(val, old) {
-                if (old) this.validateTimeDifference('checked_in_time')
+                if (old) this.validateTimeDifference('checked_in_time');
+                if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
+                    this.checked_out_date = val;
+                }
+                else {
+                    if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
+                        this.checked_out_date = val;
+                    }
+                }
             },
             checked_in_time(val, old) {
                 if (old) this.validateTimeDifference('checked_in_time')
