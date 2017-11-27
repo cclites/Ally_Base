@@ -93,6 +93,7 @@ class ShiftController extends Controller
             'longitude' => 'numeric|nullable|required_unless:manual,1',
             'manual' => 'nullable',
         ], [
+            'schedule_id.exists' => 'You must select a valid shift from the drop down.',
             'latitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
         ]);

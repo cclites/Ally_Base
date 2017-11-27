@@ -6,7 +6,7 @@
                     <b-btn href="/clock-in" size="lg" variant="info" class="btn-block">Press Here To Clock In</b-btn>
                 </b-col>
             </b-row>
-            <full-calendar ref="calendar" :events="events" defaultView="listWeek" @event-selected="viewDetails" :header="header" />
+            <full-calendar ref="calendar" :events="events" defaultView="listDay" @event-selected="viewDetails" :header="header" />
         </b-card>
         <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal">
             <b-container fluid>
@@ -63,7 +63,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'listWeek,agendaWeek'
+                    right:  'listDay,agendaWeek'
                 }
             }
         },
