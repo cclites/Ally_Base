@@ -604,11 +604,14 @@
 
             setInitialFields() {
                 if (this.getLocalStorage('fields')) {
-                    this.filteredFields = JSON.parse(this.getLocalStorage('fields'))
+                    // Temporary fix for invalid objects stored
+                    let fields = JSON.parse(this.getLocalStorage('fields'));
+                    if (fields[0] && typeof(fields[0]) !== 'object') {
+                        this.filteredFields = fields;
+                        return;
+                    }
                 }
-                else {
-                    this.filteredFields = this.availableFields.slice();
-                }
+                this.filteredFields = this.availableFields.slice();
             }
 
         },
@@ -632,7 +635,7 @@
             sortDesc(val) {
                 this.setLocalStorage('sortDesc', val);
             },
-            fields(val) {
+            filteredFields(val) {
                 this.setLocalStorage('fields', JSON.stringify(val));
             }
         }
