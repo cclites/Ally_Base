@@ -73,8 +73,10 @@ class CostCalculator
         }
         $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
         $mileage = $this->mileageCalculator()->getCaregiverReimbursement();
+        // $expenses is "other expenses" + mileage cost
+        $expenses = bcadd($this->shift->other_expenses, $mileage, self::DEFAULT_SCALE);
         return round(
-            bcadd($shift, $mileage, self::DEFAULT_SCALE),
+            bcadd($shift, $expenses, self::DEFAULT_SCALE),
             self::DECIMAL_PLACES,
             self::ROUNDING_METHOD
         );
