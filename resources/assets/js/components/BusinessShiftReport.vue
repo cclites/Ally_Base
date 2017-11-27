@@ -160,6 +160,12 @@
                         <template slot="Day" scope="data">
                             {{ dayFormat(data.value) }}
                         </template>
+                        <template slot="Client" scope="row">
+                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
+                        </template>
+                        <template slot="Caregiver" scope="row">
+                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
+                        </template>
                         <template slot="Verified" scope="data">
                             <span v-if="data.value" style="color: green">
                                 <i class="fa fa-check-square-o"></i>
@@ -365,6 +371,8 @@
                 if (item = this.shiftHistoryItems[0]) {
                     for (let key of Object.keys(item)) {
                         if (key === 'id') continue;
+                        if (key === 'client_id') continue;
+                        if (key === 'caregiver_id') continue;
                         fields.push({
                             'key': key,
                             'sortable': true,
@@ -387,6 +395,8 @@
                 return items.map(function(item) {
                     return {
                         'id': item.id,
+                        'client_id': item.client_id,
+                        'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
                         'Hours': item.roundedShiftLength,
