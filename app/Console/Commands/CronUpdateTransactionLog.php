@@ -22,7 +22,7 @@ class CronUpdateTransactionLog extends Command
      *
      * @var string
      */
-    protected $signature = 'cron:transaction_log {--start_date?} {{--end_date?}}';
+    protected $signature = 'cron:transaction_log {--start_date=} {--end_date=}';
 
     /**
      * The console command description.
@@ -48,8 +48,8 @@ class CronUpdateTransactionLog extends Command
      */
     public function handle()
     {
-        $endDate = new Carbon($this->option('end_date')) ?? Carbon::now('UTC');
-        $startDate = new Carbon($this->option('start_date')) ?? $endDate->copy()->subDays(2);
+        $endDate = $this->option('end_date') ? new Carbon($this->option('end_date')) : Carbon::now('UTC');
+        $startDate = $this->option('start_date') ? new Carbon($this->option('start_date')) : $endDate->copy()->subDays(2);
         $dateFormat = 'YmdHis';
 
         $query = new ECSQuery();
