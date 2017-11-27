@@ -321,6 +321,7 @@
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+                <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate &amp; Advance 1 Day</b-btn>
             </div>
         </b-modal>
     </div>
