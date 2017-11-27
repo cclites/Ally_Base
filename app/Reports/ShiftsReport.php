@@ -52,6 +52,9 @@ class ShiftsReport extends BaseReport
                 $allyFee = AllyFeeCalculator::getFee($shift->client, null, $shift->caregiver_rate + $shift->provider_fee);
                 $row = array_merge($shift->toArray(), [
                     'ally_fee' => number_format($allyFee, 2),
+                    'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                    'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
+                    'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
                     'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                     'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
                     'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
