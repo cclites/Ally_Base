@@ -34,9 +34,11 @@ class TelefonyGreetingController extends BaseTelefonyController
     {
         switch ($this->request->input('Digits')) {
             case 1:
+                \Log::info('redirect: telefony.check-in.response');
                 $this->telefony->redirect(route('telefony.check-in.response'));
                 return $this->telefony->response();
             case 2:
+                \Log::info('redirect: telefony.check-out.response');
                 $this->telefony->redirect(route('telefony.check-out.response'));
                 return $this->telefony->response();
         }

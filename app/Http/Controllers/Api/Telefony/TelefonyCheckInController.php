@@ -14,6 +14,7 @@ class TelefonyCheckInController extends BaseTelefonyController
     {
         $schedule = $this->telefony->scheduledShiftForClient($this->client);
         if ($schedule) {
+            \Log::info('Schedule found.');
             $gather = $this->telefony->gather([
                 'numDigits' => 1,
                 'action' => route('telefony.check-in', [$schedule->caregiver])
@@ -24,12 +25,11 @@ class TelefonyCheckInController extends BaseTelefonyController
             To return to the main menu, press 0.', $schedule->caregiver->firstname, $schedule->caregiver->firstname),
                 $gather
             );
+            return $this->telefony->response();
         }
-        else {
-            return $this->enterPhoneNumberDigits();
-        }
+        \Log::info('Schedule not found.');
 
-        return $this->telefony->response();
+        return $this->enterPhoneNumberDigits();
     }
 
     /**
