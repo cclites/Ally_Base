@@ -142,6 +142,16 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
+        // include a placeholder for the primary number if one doesn't already exist
+        if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {
+            $client->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
+        }
+
+        // include a placeholder for the billing number if one doesn't already exist
+        if ($client->phoneNumbers->where('type', 'billing')->count() == 0) {
+            $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
+        }
+
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
 

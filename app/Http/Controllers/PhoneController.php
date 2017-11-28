@@ -25,8 +25,7 @@ class PhoneController extends Controller
             'type' => 'required'
         ]);
 
-
-        $user = request()->has('user_id') ? User::find(request('user_id')) : auth()->user();
+        $user = request()->filled('user_id') ? User::find(request('user_id')) : auth()->user();
 
         $phone = new PhoneNumber();
         $phone->type = $data['type'];
