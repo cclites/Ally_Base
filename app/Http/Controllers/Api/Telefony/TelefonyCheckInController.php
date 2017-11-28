@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Telefony;
 
 use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;

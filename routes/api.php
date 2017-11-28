@@ -20,24 +20,24 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // caregiver shift routes
 
 // Backwards Compatibility with Telefony v1
-Route::get('/caregiver/greeting', 'Api\TelefonyGreetingController@greeting');
+Route::get('/caregiver/greeting', 'Api\Telefony\TelefonyGreetingController@greeting');
 
 Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::get('/', 'Api\TelefonyGreetingController@greeting')->name('greeting');
 
-    Route::post('check-in/response', 'Api\TelefonyCheckInController@checkInResponse')->name('check-in.response');
-    Route::post('check-in/enter-digits', 'Api\TelefonyCheckInController@enterPhoneNumberDigits')->name('check-in.enter-digits');
-    Route::post('check-in/accept-digits', 'Api\TelefonyCheckInController@acceptPhoneNumberDigits')->name('check-in.accept-digits');
-    Route::post('check-in/{caregiver}', 'Api\TelefonyCheckInController@checkIn')->name('check-in');
+    Route::post('check-in/response', 'Api\Telefony\TelefonyCheckInController@checkInResponse')->name('check-in.response');
+    Route::post('check-in/enter-digits', 'Api\Telefony\TelefonyCheckInController@enterPhoneNumberDigits')->name('check-in.enter-digits');
+    Route::post('check-in/accept-digits', 'Api\Telefony\TelefonyCheckInController@acceptPhoneNumberDigits')->name('check-in.accept-digits');
+    Route::post('check-in/{caregiver}', 'Api\Telefony\TelefonyCheckInController@checkIn')->name('check-in');
 
-    Route::post('check-out/response', 'Api\TelefonyCheckOutController@checkOutResponse')->name('check-out.response');
-    Route::post('check-out/enter-digits', 'Api\TelefonyCheckOutController@enterPhoneNumberDigits')->name('check-out.enter-digits');
-    Route::post('check-out/accept-digits', 'Api\TelefonyCheckOutController@acceptPhoneNumberDigits')->name('check-out.accept-digits');
-    Route::post('check-out/check-for-injury', 'Api\TelefonyCheckOutController@checkForInjuryAction')->name('check-out.check-for-injury');
-    Route::post('check-out/check-for-activities', 'Api\TelefonyCheckOutController@checkForActivitiesResponse')->name('check-out.check-for-activities');
-    Route::post('check-out/confirm-activity', 'Api\TelefonyCheckOutController@confirmActivity')->name('check-out.confirm-activity');
-    Route::post('check-out/record-activity', 'Api\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');
-    Route::post('check-out/finalize', 'Api\TelefonyCheckOutController@finalizeCheckOut')->name('check-out.finalize');
-    Route::post('check-out', 'Api\TelefonyCheckOutController@checkOut')->name('check-out');
+    Route::post('check-out/response', 'Api\Telefony\TelefonyCheckOutController@checkOutResponse')->name('check-out.response');
+    Route::post('check-out/enter-digits', 'Api\Telefony\TelefonyCheckOutController@enterPhoneNumberDigits')->name('check-out.enter-digits');
+    Route::post('check-out/accept-digits', 'Api\Telefony\TelefonyCheckOutController@acceptPhoneNumberDigits')->name('check-out.accept-digits');
+    Route::post('check-out/check-for-injury', 'Api\Telefony\TelefonyCheckOutController@checkForInjuryAction')->name('check-out.check-for-injury');
+    Route::post('check-out/check-for-activities', 'Api\Telefony\TelefonyCheckOutController@checkForActivitiesResponse')->name('check-out.check-for-activities');
+    Route::post('check-out/confirm-activity', 'Api\Telefony\TelefonyCheckOutController@confirmActivity')->name('check-out.confirm-activity');
+    Route::post('check-out/record-activity', 'Api\Telefony\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');
+    Route::post('check-out/finalize', 'Api\Telefony\TelefonyCheckOutController@finalizeCheckOut')->name('check-out.finalize');
+    Route::post('check-out', 'Api\Telefony\TelefonyCheckOutController@checkOut')->name('check-out');
 });
 

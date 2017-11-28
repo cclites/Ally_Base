@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Telefony;
 
 use App\Activity;
 use App\Exceptions\TelefonyMessageException;
