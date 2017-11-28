@@ -3,15 +3,20 @@ namespace App\Scheduling;
 
 use App\Caregiver;
 use App\Client;
-use App\Exceptions\TelefonyMessageException;
 use App\PhoneNumber;
 use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Twilio\Twiml;
 
 class TelefonyManager
 {
+    /**
+     * @var \Twilio\Twiml
+     */
+    protected $twilioResponse;
+
     public function findClientByNumber(PhoneNumber $number)
     {
         $national_number = $number->national_number;

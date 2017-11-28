@@ -24,11 +24,6 @@ abstract class BaseTelefonyController extends Controller
     protected $request;
 
     /**
-     * @var \Twilio\Twiml
-     */
-    protected $twilioResponse;
-
-    /**
      * @var TelefonyManager
      */
     protected $telefony;
