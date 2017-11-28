@@ -4,7 +4,7 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-row>
+        <b-row class="mb-2">
             <b-col sm="6">
                 <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
             </b-col>
@@ -134,7 +134,7 @@
 
         data() {
             return {
-                items: {},
+                items: [],
                 clientCaregiverModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
@@ -145,9 +145,8 @@
             axios.get('/business/clients/' + this.client_id + '/caregivers')
                 .then(response => {
                     if (Array.isArray(response.data)) {
-                        this.items = response.data;
-                    }
-                    else {
+                        this.items = _.sortBy(response.data, ['lastname', 'firstname']);
+                    } else {
                         this.items = [];
                     }
                 });

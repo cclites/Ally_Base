@@ -84,10 +84,10 @@
         </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
             <!-- Care Plan Placeholder -->
-            <client-caregivers :list="{{ $caregivers }}"
+            <business-client-caregivers :list="{{ $caregivers }}"
                                :client_id="{{ $client->id }}"
                                payment-type-message="{{ $defaultPaymentTypeMessage }}"
-            ></client-caregivers>
+            ></business-client-caregivers>
         </div>
         <div class="tab-pane" id="care-plan" role="tabpanel">
             <!-- Care Plan Placeholder -->
