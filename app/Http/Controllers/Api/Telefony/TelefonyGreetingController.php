@@ -12,7 +12,6 @@ namespace App\Http\Controllers\Api\Telefony;
 class TelefonyGreetingController extends BaseTelefonyController
 {
 
-
     /**
      * Return caregiver call in greeting in TwiML.
      */
@@ -21,9 +20,12 @@ class TelefonyGreetingController extends BaseTelefonyController
         $gather = $this->telefony->gather([
             'timeout' => 15,
             'numDigits' => 1,
-            'action' => route('telefony.check-in-or-out', [], false),
+            'action' => route('telefony.check-in-or-out'),
         ]);
-        $this->telefony->say("Press 1 to clock in,,,,,,Press 2 to clock out", $gather);
+        $this->telefony->say(
+            "Press 1 to clock in,,,,,,Press 2 to clock out",
+            $gather
+        );
         return $this->telefony->response();
     }
 
