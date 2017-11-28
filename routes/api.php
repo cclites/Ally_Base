@@ -24,7 +24,7 @@ Route::get('/caregiver/greeting', 'Api\Telefony\TelefonyGreetingController@greet
 
 Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::get('/', 'Api\TelefonyGreetingController@greeting')->name('greeting');
-    Route::get('/check-in-or-out', 'Api\Telefony\TelefonyGreetingController@checkInOrOut')->name('check-in-or-out');
+    Route::post('/check-in-or-out', 'Api\Telefony\TelefonyGreetingController@checkInOrOut')->name('check-in-or-out');
 
     Route::post('check-in/response', 'Api\Telefony\TelefonyCheckInController@checkInResponse')->name('check-in.response');
     Route::post('check-in/enter-digits', 'Api\Telefony\TelefonyCheckInController@enterPhoneNumberDigits')->name('check-in.enter-digits');
