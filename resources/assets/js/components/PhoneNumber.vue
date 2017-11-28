@@ -10,7 +10,7 @@
                     <div class="mb-2 mt-1">{{ title }}</div>
                 </b-col>
                 <b-col>
-                    <b-form-group horizontal label="Type" v-if="type != 'primary'" class="mb-0">
+                    <b-form-group horizontal label="Type" v-if="!isFixedType(type)" class="mb-0">
                         <b-form-select v-model="form.type" :options="types" size="sm" @input="typeChange" style="background-color: white;"></b-form-select>
                     </b-form-group>
                 </b-col>
@@ -42,7 +42,7 @@
                     <b-form-group>
                         <b-button id="save-profile" variant="success" type="submit" v-if="buttonVisible">Save Number</b-button>
                     </b-form-group>
-                    <b-form-group v-if="type != 'primary'">
+                    <b-form-group v-if="!isFixedType(type)">
                         <b-button variant="danger"
                                   v-if="this.phone.id"
                                   @click="destroy"
@@ -93,11 +93,17 @@
 
         computed: {
             headerVariant() {
-                return this.type == 'primary' ? 'info' : 'secondary';
+                return this.isFixedType(this.type) ? 'info' : 'secondary';
             }
         },
 
         methods: {
+            isFixedType(type) {
+                let fixedTypes = ['primary', 'billing'];
+
+                return fixedTypes.indexOf(type) === -1 ? false : true;
+            },
+
             typeChange(value) {
                 this.selectedType = value;
                 this.buttonVisible = true;

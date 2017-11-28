@@ -29,8 +29,6 @@
     export default {
         props: ['phoneNumbers'],
 
-        mixins: [],
-
         components: {
             PhoneNumber
         },
@@ -39,14 +37,6 @@
             return {
                 numbers: this.phoneNumbers
             }
-        },
-
-        created() {
-
-        },
-
-        mounted() {
-
         },
 
         methods: {
@@ -58,7 +48,7 @@
                 this.numbers.push({ type: 'home', number: '', extension: '' });
             },
 
-            removePhoneNumber(event) {
+            removePhoneNumber() {
                 this.refreshPhoneNumbers();
             },
 
@@ -73,10 +63,6 @@
                         console.error(error.response);
                     });
             }
-        },
-
-        computed: {
-
         }
     }
 </script>

@@ -15,6 +15,17 @@ class ProfileController extends Controller
     {
         $type = auth()->user()->role_type;
         $user = auth()->user()->load('phoneNumbers');
+
+        // include a placeholder for the primary number if one doesn't already exist
+        if ($user->phoneNumbers->where('type', 'primary')->count() == 0) {
+            $user->phoneNumbers->push(['type' => 'primary', 'extension' => '', 'number' => '']);
+        }
+
+        // include a placeholder for the billing number if one doesn't already exist
+        if ($user->phoneNumbers->where('type', 'billing')->count() == 0) {
+            $user->phoneNumbers->push(['type' => 'billing', 'extension' => '', 'number' => '']);
+        }
+
         return view('profile.' . $type, compact('user'));
     }
 
