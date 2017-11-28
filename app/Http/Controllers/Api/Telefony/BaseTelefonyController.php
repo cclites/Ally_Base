@@ -45,7 +45,7 @@ abstract class BaseTelefonyController extends Controller
     public function mainMenuResponse()
     {
         $this->telefony->say('Returning to the main menu');
-        $this->telefony->redirect('/api/caregiver/greeting', ['method' => 'GET']);
+        $this->telefony->redirect(route('telefony.greeting'), ['method' => 'GET']);
         return $this->telefony->response();
     }
 
