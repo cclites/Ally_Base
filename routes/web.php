@@ -74,6 +74,8 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['office_user'],
 ], function() {
+    Route::get('phone-numbers/{user}', 'UserController@phoneNumbers');
+
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
     Route::resource('care_plans', 'Business\CarePlanController');

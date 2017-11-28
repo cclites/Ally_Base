@@ -43,20 +43,21 @@
             </div>
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
-            @foreach ($user->phoneNumbers as $phone_number)
-                @if ($loop->first)
-                    <b-row>
-                @endif
-                <div class="col-lg-6 col-sm-12">
-                    <phone-number title="{{ ucfirst($phone_number->type) }} Number"
-                                  type="{{ $phone_number->type }}"
-                                  :phone="{{ json_phone($user, $phone_number->type) }}">
-                    </phone-number>
-                </div>
-                @if ($loop->last)
-                    </b-row>
-                @endif
-            @endforeach
+            <caregiver-phone-numbers-tab :phone-numbers="{{ $user->phoneNumbers }}"></caregiver-phone-numbers-tab>
+            {{--@foreach ($user->phoneNumbers as $phone_number)--}}
+                {{--@if ($loop->first)--}}
+                    {{--<b-row>--}}
+                {{--@endif--}}
+                {{--<div class="col-lg-6 col-sm-12">--}}
+                    {{--<phone-number title="{{ ucfirst($phone_number->type) }} Number"--}}
+                                  {{--type="{{ $phone_number->type }}"--}}
+                                  {{--:phone="{{ json_phone($user, $phone_number->type) }}">--}}
+                    {{--</phone-number>--}}
+                {{--</div>--}}
+                {{--@if ($loop->last)--}}
+                    {{--</b-row>--}}
+                {{--@endif--}}
+            {{--@endforeach--}}
         </div>
     </div>
 @endsection

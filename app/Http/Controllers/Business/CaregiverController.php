@@ -96,12 +96,22 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-//        $caregiver->load(['user', 'addresses', 'phoneNumbers', 'user.documents', 'bankAccount']);
-        $caregiver->load(['user.documents', 'bankAccount', 'notes.creator', 'notes' => function ($query) {
-            return $query->orderBy('created_at', 'desc');
-        }]);
+        $caregiver->load([
+            'phoneNumbers',
+            'user.documents',
+            'bankAccount',
+            'notes.creator',
+            'notes' => function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            }
+        ]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
+
+        // include a placeholder for the primary number if one doesn't already exist
+        if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
+            $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
+        }
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
@@ -248,4 +258,5 @@ class CaregiverController extends BaseController
         }
         return new ErrorResponse(500, 'Unable to update caregiver password.');
     }
+
 }

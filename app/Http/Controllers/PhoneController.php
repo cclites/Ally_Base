@@ -9,7 +9,7 @@ use App\Rules\PhonePossible;
 use App\User;
 use Illuminate\Http\Request;
 
-class PhoneController
+class PhoneController extends Controller
 {
     public function index()
     {
@@ -25,10 +25,12 @@ class PhoneController
             'type' => 'required'
         ]);
 
+
         $user = request()->has('user_id') ? User::find(request('user_id')) : auth()->user();
 
         $phone = new PhoneNumber();
         $phone->type = $data['type'];
+        $phone->user_id = $user->id;
         $phone->input($data['number'], $data['extension']);
         if ($phone = $user->phoneNumbers()->save($phone)) {
             return response()->json($phone);
@@ -73,11 +75,11 @@ class PhoneController
         if (!isset($data['extension'])) $data['extension'] = null;
 
         $phone = PhoneNumber::find($id);
-        if ($phone->user_id == auth()->id() || auth()->user()->role_type == 'office_user') {
-            $phone->type = request('type');
-            if ($phone->input($data['number'], $data['extension'])->save()) {
-                return new SuccessResponse('The phone number has been saved.');
-            }
+        $this->authorize('update', $phone);
+
+        $phone->type = request('type');
+        if ($phone->input($data['number'], $data['extension'])->save()) {
+            return new SuccessResponse('The phone number has been saved.');
         }
 
         return new ErrorResponse(500, 'The phone number could not be saved.');
@@ -86,10 +88,9 @@ class PhoneController
     public function destroy($id)
     {
         $number = PhoneNumber::find($id);
-        if (auth()->id() == $number->user_id && $number->type != 'primary') {
-            PhoneNumber::destroy($id);
-            return new SuccessResponse('Phone number deleted.');
-        }
-        return new ErrorResponse(403,'Not authorized.');
+        $this->authorize('delete', $number);
+
+        PhoneNumber::destroy($id);
+        return new SuccessResponse('Phone number deleted.');
     }
 }

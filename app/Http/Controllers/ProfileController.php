@@ -22,7 +22,7 @@ class ProfileController extends Controller
         }
 
         // include a placeholder for the billing number if one doesn't already exist
-        if ($user->phoneNumbers->where('type', 'billing')->count() == 0) {
+        if ($type == 'client' && $user->phoneNumbers->where('type', 'billing')->count() == 0) {
             $user->phoneNumbers->push(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
