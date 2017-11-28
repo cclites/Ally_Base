@@ -134,7 +134,7 @@ class ScheduledVsActualReport extends BaseReport
                 $hours = round($schedule->duration / 60, 2);
                 $caregiverRate = $schedule->getCaregiverRate();
                 $providerFee = $schedule->getProviderFee();
-                $allyFee = AllyFeeCalculator::getFee($schedule->client, null, $caregiverRate + $providerFee);
+                $allyFee = AllyFeeCalculator::getHourlyRate($schedule->client, null, $caregiverRate, $providerFee);
                 $hourlyTotal = $caregiverRate + $providerFee + $allyFee;
                 return array_merge($event, [
                     'start' => Carbon::instance($event['start'])->toIso8601String(),

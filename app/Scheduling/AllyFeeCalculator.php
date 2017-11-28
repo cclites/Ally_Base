@@ -15,6 +15,27 @@ class AllyFeeCalculator
     protected static $clientTypes = ['private_pay', 'medicaid', 'LTCI', 'VA'];
 
     /**
+     * Calculate a one-hour (rounded) rate of the Ally processing fee
+     *
+     * @param \App\Client $client
+     * @param mixed $paymentMethod
+     * @param float $caregiverRate
+     * @param float $providerFee
+     */
+    public static function getHourlyRate(Client $client, $paymentMethod, $caregiverRate, $providerFee)
+    {
+        $paymentAmount = bcadd($caregiverRate, $providerFee, CostCalculator::DEFAULT_SCALE);
+        return round(
+            self::getFee($client, $paymentMethod, $paymentAmount),
+            CostCalculator::DECIMAL_PLACES,
+            CostCalculator::ROUNDING_METHOD
+        );
+    }
+
+
+    /**
+     * Calculate the fee based on a dollar amount (should only be used directly for misc expenses)
+     *
      * @param \App\Client $client
      * @param $paymentMethod
      * @param $paymentAmount
