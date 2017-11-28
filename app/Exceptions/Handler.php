@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Scheduling\TelefonyManager;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
@@ -48,6 +49,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof TelefonyMessageException) {
+            $telefony = new TelefonyManager();
+            $telefony->say($exception->getMessage());
+            $telefony->redirect(route('telefony.greeting'));
+            return $telefony->response();
+        }
+
         return parent::render($request, $exception);
     }
 }
