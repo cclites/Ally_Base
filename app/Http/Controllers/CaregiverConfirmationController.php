@@ -8,10 +8,12 @@ use App\Confirmations\Confirmation;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Traits\Request\PaymentMethodUpdate;
 use Illuminate\Http\Request;
 
 class CaregiverConfirmationController extends Controller
 {
+    use PaymentMethodUpdate;
 
     public function show($token)
     {
@@ -38,7 +40,7 @@ class CaregiverConfirmationController extends Controller
 
         $caregiver = Caregiver::find($confirmation->user->id);
 
-//        $request->validate(['accepted_terms' => 'accepted'], ['accepted_terms.accepted' => 'You must accept the terms of service by checking the box.']);
+        $request->validate(['accepted_terms' => 'accepted'], ['accepted_terms.accepted' => 'You must accept the terms of service by checking the box.']);
 
         // Profile Data
         $profile_data = $request->validate([
@@ -58,6 +60,10 @@ class CaregiverConfirmationController extends Controller
         $phone_data = $request->validate([
             'phone_number' => 'required|min:10'
         ]);
+
+        // Save Bank Account
+        $account = $this->updateBankAccount($request, $caregiver);
+        $caregiver->update(['bank_account_id' => $account->id]);
 
         // Save Address
         $response = (new AddressController())->update($request, $caregiver->user, 'home', 'Your address');
