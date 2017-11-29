@@ -8,11 +8,20 @@
                             <b-form-radio-group v-model="scheduling"
                                                 :options="options"
                                                 size="sm"
-                                                name="radiosSm"
-                                                @change="update">
+                                                name="radiosSm">
                             </b-form-radio-group>
                         </b-form-group>
 
+                    </b-list-group-item>
+                    <b-list-group-item>
+                        <b-form-group horizontal label="Mileage Rate">
+                            <b-form-input type="text" v-model="mileageRate"></b-form-input>
+                        </b-form-group>
+                    </b-list-group-item>
+                    <b-list-group-item>
+                        <b-form-group>
+                            <b-button @click="update" variant="info">Save</b-button>
+                        </b-form-group>
                     </b-list-group-item>
                 </b-list-group>
             </b-col>
@@ -30,6 +39,7 @@
         data() {
             return{
                 scheduling: this.business.scheduling,
+                mileageRate: this.business.mileage_rate,
                 options: [
                     { text: 'Enabled', value: 1 },
                     { text: 'Disabled', value: 0 }
@@ -38,16 +48,12 @@
         },
 
         methods: {
-            update(value) {
+            update() {
                 let form = new Form({
-                    scheduling: value
+                    scheduling: this.scheduling,
+                    mileage_rate: this.mileageRate
                 });
-                form.put('/business/settings/' + this.business.id)
-                    .then(response => {
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000)
-                    });
+                form.put('/business/settings/' + this.business.id);
             }
         }
     }
