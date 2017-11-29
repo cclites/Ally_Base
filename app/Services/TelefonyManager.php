@@ -75,16 +75,17 @@ class TelefonyManager
     }
 
     public function say($message, $object=null) {
+        $sayOptions = ['voice' => 'alice'];
         if (!$object) $object = $this->getTwilioResponse();
         if (strpos($message, '<PAUSE>') === false) {
-            $object->say($message, ['voice' => 'alice']);
+            $object->say($message, $sayOptions);
         }
         else {
             $parts = explode('<PAUSE>', $message);
-            if (strlen($parts[0])) $object->say($parts[0]);
+            if (strlen($parts[0])) $object->say($parts[0], $sayOptions);
             for($i=1; $i<count($parts); $i++) {
                 $object->pause();
-                if (strlen($parts[$i])) $object->say($parts[$i]);
+                if (strlen($parts[$i])) $object->say($parts[$i], $sayOptions);
             }
         }
     }
