@@ -184,7 +184,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         foreach($shift->business->allActivities() as $activity) {
             $codeReadout = implode(',,', str_split($activity->code));
             $this->telefony->say(
-                ',,' . $codeReadout . ', ' . $activity->name . ',,',
+                ' .. ' . $codeReadout . ', ' . $activity->name . '.',
                 $gather
             );
         }
