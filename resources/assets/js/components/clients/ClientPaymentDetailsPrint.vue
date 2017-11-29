@@ -51,7 +51,7 @@
                             {{ item.caregiver.name }}
                         </td>
                         <td>
-                            &dollar;{{ item.caregiver_rate }}
+                            {{ moneyFormat(item.hourly_total) }}
                         </td>
                         <td>
                             {{ item.hours_type }}
@@ -63,7 +63,7 @@
                             {{ item.roundedShiftLength }}
                         </td>
                         <td>
-                            &dollar;{{ parseFloat(item.roundedShiftLength) * parseFloat(item.caregiver_rate) }}
+                            {{ moneyFormat(item.shift_total) }}
                         </td>
                     </tr>
                     </tbody>
@@ -74,7 +74,7 @@
                             Total:
                         </td>
                         <td>
-                            &dollar;{{ total }}
+                            {{ total }}
                         </td>
                     </tr>
                     </tfoot>
@@ -86,30 +86,24 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
         props: ['payment'],
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
 
         data() {
             return {
-                items: this.payment.shifts,
-                fields: [
-                    { key: 'checked_in_time', label: 'Date' },
-                    { key: 'care_time', label: 'Time' },
-                    { key: 'activities', label: 'Activities Performed' },
-                    { key: 'roundedShiftLength', label: 'Hours of Care Received' },
-                    { key: 'caregiver', label: 'Caregiver' },
-                    { key: 'amount', label: 'Amount' }
-                ]
+                items: this.payment.shifts
             }
         },
 
         computed: {
             total() {
-               return _.reduce(this.items, function(sum, item) {
-                    return sum + parseFloat(item.caregiver_rate) * parseFloat(item.roundedShiftLength);
-                }, 0);
+               return this.moneyFormat(_.reduce(this.items, function(sum, item) {
+                    return sum + parseFloat(item.shift_total);
+                }, 0));
             }
         }
     }

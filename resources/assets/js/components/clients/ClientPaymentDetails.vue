@@ -21,33 +21,50 @@
             <template slot="client_name" scope="data">
                 {{ data.item.client.name }}
             </template>
-            <template slot="amount" scope="data">
-                &dollar;{{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.roundedShiftLength) }}
+            <template slot="caregiver_name" scope="data">
+                {{ data.item.caregiver.name }}
             </template>
         </b-table>
     </b-card>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
         props: ['payment'],
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
 
         data() {
-            return{
+            return {
                 items: this.payment.shifts,
                 fields: [
-                    { key: 'checked_in_time', label: 'Care Date' },
-                    { key: 'care_time', label: 'Care Time' },
-                    { key: 'roundedShiftLength', label: 'Hours of Care Received' },
-                    { key: 'client_name', label: 'Client Name' },
-                    { key: 'amount', label: 'Amount' }
+                    {
+                        key: 'checked_in_time',
+                        label: 'Care Date'
+                    },
+                    {
+                        key: 'care_time',
+                        label: 'Care Time'
+                    },
+                    {
+                        key: 'roundedShiftLength',
+                        label: 'Hours of Care Received'
+                    },
+                    {
+                        key: 'caregiver_name'
+                    },
+                    {
+                        key: 'client_name',
+                        label: 'Client Name'
+                    },
+                    {
+                        key: 'shift_total',
+                        label: 'Amount',
+                        formatter: (value) => { return this.moneyFormat(value) }
+                    }
                 ]
             }
         }
