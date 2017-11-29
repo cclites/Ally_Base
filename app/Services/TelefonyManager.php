@@ -75,29 +75,32 @@ class TelefonyManager
     }
 
     public function say($message, $object=null, $loop=1) {
-        $sayOptions = ['voice' => 'alice', 'loop' => $loop];
+        $sayOptions = ['voice' => 'alice'];
         if (!$object) $object = $this->getTwilioResponse();
         if (strpos($message, '<PAUSE>') === false) {
+            $sayOptions['loop'] = $loop;
             $object->say($message, $sayOptions);
         }
         else {
             $parts = explode('<PAUSE>', $message);
-            if (strlen($parts[0])) $object->say($parts[0], $sayOptions);
-            for($i=1; $i<count($parts); $i++) {
-                $object->pause();
-                if (strlen($parts[$i])) $object->say($parts[$i], $sayOptions);
+            for ($i=0; $i<$loop; $i++) {
+                if (strlen($parts[0])) $object->say($parts[0], $sayOptions);
+                for($i=1; $i<count($parts); $i++) {
+                    $object->pause();
+                    if (strlen($parts[$i])) $object->say($parts[$i], $sayOptions);
+                }
             }
         }
     }
 
     /**
-     * Same as say, but will repeat the message indefinitely
+     * Same as say, but will repeat the message a second time
      *
      * @param $message
      * @param null $object
      */
     public function repeat($message, $object=null) {
-        $this->say($message, $object, 0);
+        $this->say($message, $object, 2);
     }
 
     public function pause($seconds=1, $object=null) {
