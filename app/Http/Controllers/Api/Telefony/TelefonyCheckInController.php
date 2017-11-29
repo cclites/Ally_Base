@@ -20,8 +20,8 @@ class TelefonyCheckInController extends BaseTelefonyController
                 'action' => route('telefony.check-in', [$schedule->caregiver])
             ]);
             $this->telefony->say(
-                sprintf('If this is %s clocking in, press 1,,,,,,
-            Press 3 if this is not %s,,,,,,,
+                sprintf('If this is %s clocking in, press 1<PAUSE>
+            Press 3 if this is not %s<PAUSE>
             To return to the main menu, press 0.', $schedule->caregiver->firstname, $schedule->caregiver->firstname),
                 $gather
             );
@@ -78,13 +78,13 @@ class TelefonyCheckInController extends BaseTelefonyController
                 'action' => route('telefony.check-in', [$caregiver])
             ]);
             $this->telefony->say(
-                sprintf('If this is %s, press 1 to finish clocking in,,,,,,press 3 to re-enter.', $caregiver->firstname),
+                sprintf('If this is %s, press 1 to finish clocking in<PAUSE>press 3 to re-enter.', $caregiver->firstname),
                 $gather
             );
         }
         else {
             $this->telefony->say(
-                sprintf('There were no matches for %s,,,,', implode(',,', str_split($digits)))
+                sprintf('There were no matches for %s<PAUSE>', implode(',,', str_split($digits)))
             );
             $this->telefony->redirect('/api/caregiver/check-in/enter-digits');
         }
@@ -128,6 +128,6 @@ class TelefonyCheckInController extends BaseTelefonyController
             }
         }
 
-        throw new TelefonyMessageException('There was an error clocking in,,,,,  Please try again.');
+        throw new TelefonyMessageException('There was an error clocking in<PAUSE>Please try again.');
     }
 }

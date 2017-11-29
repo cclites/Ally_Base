@@ -21,8 +21,8 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 'action' => route('telefony.check-out.injury-response', [$shift]),
             ]);
             $this->telefony->say(
-                sprintf('If this is %s clocking out, press 2,,,,,,' .
-                    'Press 3 if this is not %s,,,,,,' .
+                sprintf('If this is %s clocking out, press 2<PAUSE>' .
+                    'Press 3 if this is not %s<PAUSE>' .
                     'To return to the main menu, press 0.', $shift->caregiver->firstname, $shift->caregiver->firstname),
                 $gather
             );
@@ -78,20 +78,20 @@ class TelefonyCheckOutController extends BaseTelefonyController
             ]);
             if ($caregiver->isClockedIn()) {
                 $this->telefony->say(
-                    sprintf('If this is %s, press 2 to clock out,,,,,,press 3 to re-enter.', $caregiver->firstname),
+                    sprintf('If this is %s, press 2 to clock out<PAUSE>press 3 to re-enter.', $caregiver->firstname),
                     $gather
                 );
             }
             else {
                 $this->telefony->say(
-                    sprintf('%s is not clocked in,,,,,,press 3 to re-enter,,,,,,press 0 to return to the main menu.', $caregiver->firstname),
+                    sprintf('%s is not clocked in<PAUSE>press 3 to re-enter<PAUSE>press 0 to return to the main menu.', $caregiver->firstname),
                     $gather
                 );
             }
         }
         else {
             $this->telefony->say(
-                sprintf('There were no matches for %s,,,,', implode(',,', str_split($digits)))
+                sprintf('There were no matches for %s<PAUSE>', implode(',,', str_split($digits)))
             );
             $this->telefony->redirect('/api/caregiver/check-out/enter-digits');
         }
@@ -217,7 +217,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 'action' => route('telefony.check-out.record-activity', [$shift, $activity]),
             ]);
             $this->telefony->say(
-                sprintf('You have entered %s.  If this is correct, Press 1. If this is incorrect, Press 2.', $activity->name),
+                sprintf('You have entered %s.  If this is correct, Press 1<PAUSE>If this is incorrect, Press 2.', $activity->name),
                 $gather
             );
 
@@ -270,7 +270,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
             }
 
             if ($clockOut->clockOut($shift)) {
-                $this->telefony->say('You have successfully clocked out.  Thank you. Good bye.');
+                $this->telefony->say('You have successfully clocked out.<PAUSE>Thank you. Good bye.');
                 return $this->telefony->response();
             }
         }
