@@ -247,7 +247,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         if ($this->request->input('Digits') == 1) {
             $shift->activities()->attach($activity->id);
             $this->telefony->say('The activity has been recorded.');
-            $this->telefony->redirect(route('telefony.check-out.check-for-activities'));
+            $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
             return $this->telefony->response();
         }
 
