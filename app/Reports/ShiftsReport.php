@@ -49,7 +49,7 @@ class ShiftsReport extends BaseReport
         if (!$this->generated) {
             $shifts = $this->query->with(['caregiver', 'client'])->get();
             $this->rows = $shifts->map(function(Shift $shift) {
-                $allyFee = AllyFeeCalculator::getFee($shift->client, null, $shift->caregiver_rate + $shift->provider_fee);
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
                 $row = array_merge($shift->toArray(), [
                     'ally_fee' => number_format($allyFee, 2),
                     'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),

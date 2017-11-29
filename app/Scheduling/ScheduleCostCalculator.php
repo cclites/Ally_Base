@@ -48,10 +48,11 @@ class ScheduleCostCalculator
 
     public function getAllyFee()
     {
-        return AllyFeeCalculator::getFee(
+        return AllyFeeCalculator::getHourlyRate(
             $this->client,
             $this->paymentType,
-            bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE)
+            $this->getProviderFee(),
+            $this->getCaregiverCost()
         );
     }
 
