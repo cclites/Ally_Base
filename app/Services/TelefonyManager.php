@@ -41,7 +41,7 @@ class TelefonyManager
     public function findCaregiverByLastDigits($digits, $iteration=0)
     {
         $caregivers = Caregiver::whereHas('phoneNumbers', function($q) use ($digits) {
-            $q->where('national_number', $digits);
+            $q->where('national_number', 'LIKE', '%' . $digits);
         })
             ->orderBy('id')
             ->get();
