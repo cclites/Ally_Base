@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Activity;
+use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
 use App\Scheduling\ClockOut;
 use App\Shift;
@@ -40,7 +41,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
             case 0:
                 return $this->mainMenuResponse();
             case 2:
-                return $this->checkForInjuryResponse($shift);
+                if ($shift->id) return $this->checkForInjuryResponse($shift);
             case 3:
                 return $this->enterPhoneNumberDigits();
         }
@@ -79,17 +80,22 @@ class TelefonyCheckOutController extends BaseTelefonyController
         }
 
         if ($caregiver = $this->telefony->findCaregiverByLastDigits($digits, $iteration)) {
-            $gather = $this->telefony->gather([
-                'numDigits' => 1,
-                'action' => route('telefony.check-out', [$caregiver])
-            ]);
             if ($caregiver->isClockedIn()) {
+                $shift = $caregiver->getActiveShift();
+                $gather = $this->telefony->gather([
+                    'numDigits' => 1,
+                    'action' => route('telefony.check-out', [$shift])
+                ]);
                 $this->telefony->repeat(
                     sprintf('If this is %s, press 2 to clock out<PAUSE>press 3 to re-enter.<PAUSE>press 0 to return to the main menu<PAUSE>', $caregiver->firstname),
                     $gather
                 );
             }
             else {
+                $gather = $this->telefony->gather([
+                    'numDigits' => 1,
+                    'action' => route('telefony.check-out', [new Shift()])
+                ]);
                 $this->telefony->repeat(
                     sprintf('%s is not clocked in<PAUSE>press 3 to re-enter<PAUSE>press 0 to return to the main menu.<PAUSE>', $caregiver->firstname),
                     $gather
