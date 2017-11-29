@@ -52,7 +52,7 @@ class Handler extends ExceptionHandler
         if ($exception instanceof TelefonyMessageException) {
             $telefony = new TelefonyManager();
             $telefony->say($exception->getMessage());
-            $telefony->redirect(route('telefony.greeting'));
+            $telefony->redirect(route('telefony.greeting'), ['method' => 'GET']);
             return $telefony->response();
         }
 
