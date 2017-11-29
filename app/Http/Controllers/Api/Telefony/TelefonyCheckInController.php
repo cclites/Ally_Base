@@ -72,6 +72,13 @@ class TelefonyCheckInController extends BaseTelefonyController
         $iteration = $this->request->input('iteration', 0);
         $digits = $this->request->input('Digits');
 
+        if (strlen($digits) !== 4) {
+            if ($digits == 0) {
+                return $this->mainMenuResponse();
+            }
+            return $this->enterPhoneNumberDigits();
+        }
+
         if ($caregiver = $this->telefony->findCaregiverByLastDigits($digits, $iteration)) {
             $gather = $this->telefony->gather([
                 'numDigits' => 1,
