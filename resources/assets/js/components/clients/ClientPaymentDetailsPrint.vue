@@ -45,7 +45,7 @@
                             {{ formatTime(item.checked_in_time) }} - {{ formatTime(item.checked_out_time) }}
                         </td>
                         <td>
-                            <span v-for="activity in item.activities" :key="activity.id">{{ activity.name }}</span>
+                            <div v-for="activity in activities(item.activities)" :key="activity">{{ activity }}</div>
                         </td>
                         <td>
                             {{ item.caregiver.name }}
@@ -104,6 +104,12 @@
                return this.moneyFormat(_.reduce(this.items, function(sum, item) {
                     return sum + parseFloat(item.shift_total);
                 }, 0));
+            }
+        },
+
+        methods: {
+            activities(activities) {
+                return _.uniq(_.map(_.sortBy(activities, 'name'), 'name'));
             }
         }
     }

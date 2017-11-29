@@ -29,7 +29,9 @@ class PaymentHistoryController extends Controller
     public function show($id)
     {
         $report = new ShiftsReport();
-        $report->where('payment_id', $id)
+        $report->query()
+            ->with('activities')
+            ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 
         $payment = json_encode([
@@ -44,8 +46,9 @@ class PaymentHistoryController extends Controller
         $payment = Payment::with('business', 'client')->find($id)->toArray();
 
         $report = new ShiftsReport();
-        $report->query()->with('caregiver', 'activities');
-        $report->where('payment_id', $id)
+        $report->query()
+            ->with('activities')
+            ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 
         $payment['shifts'] = $report->rows()->values();

@@ -18,8 +18,8 @@
             <template slot="care_time" scope="data">
                 {{ formatTime(data.item.checked_in_time) }} - {{ formatTime(data.item.checked_out_time) }}
             </template>
-            <template slot="client_name" scope="data">
-                {{ data.item.client.name }}
+            <template slot="activities" scope="data">
+                <div v-for="activity in activities(data.item.activities)" :key="activity">{{ activity }}</div>
             </template>
             <template slot="caregiver_name" scope="data">
                 {{ data.item.caregiver.name }}
@@ -57,8 +57,7 @@
                         key: 'caregiver_name'
                     },
                     {
-                        key: 'client_name',
-                        label: 'Client Name'
+                        key: 'activities'
                     },
                     {
                         key: 'shift_total',
@@ -66,6 +65,12 @@
                         formatter: (value) => { return this.moneyFormat(value) }
                     }
                 ]
+            }
+        },
+
+        methods: {
+            activities(activities) {
+                return _.uniq(_.map(_.sortBy(activities, 'name'), 'name'));
             }
         }
     }
