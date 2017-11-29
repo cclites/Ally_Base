@@ -80,6 +80,7 @@
                     events: this.events,
                     eventSources: this.eventSources,
                     allDaySlot: false,
+                    weekNumberCalculation: 'iso',
 
                     eventRender(...args) {
                         if (this.sync) {
