@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 trait IsUserRole
 {
     use SoftDeletes;
+    use HiddenIdTrait;
 
     /**
      * IsUserRole constructor.

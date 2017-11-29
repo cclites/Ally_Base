@@ -92,7 +92,7 @@
                     <b-form-group label="Password" label-for="password">
                         <b-form-input
                                 id="password"
-                                name="ssn"
+                                name="password"
                                 type="password"
                                 v-model="form.password"
                         >
@@ -102,7 +102,7 @@
                     <b-form-group label="Confirm Password" label-for="password_confirmation">
                         <b-form-input
                                 id="password_confirmation"
-                                name="ssn"
+                                name="password_confirmation"
                                 type="password"
                                 v-model="form.password_confirmation"
                         >

@@ -6,7 +6,7 @@ use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PhoneController;
-use App\Mail\ClientReconfirmation;
+use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -265,14 +265,7 @@ class ClientController extends BaseController
     public function sendConfirmationEmail($client_id)
     {
         $client = Client::findOrFail($client_id);
-        $status = 'emailed_reconfirmation';
-
-        \Mail::to($client)->send(new ClientReconfirmation($client, $this->business()));
-
-        $client->update(['onboard_status' => $status]);
-        $history = new OnboardStatusHistory(compact('status'));
-        $client->onboardStatusHistory()->save($history);
-
+        $client->sendConfirmationEmail();
         return new SuccessResponse('Email Sent to Client');
     }
 

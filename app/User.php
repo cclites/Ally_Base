@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
 use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Notifications\Notifiable;
@@ -12,6 +13,7 @@ class User extends Authenticatable
     use Notifiable;
     use PreventsDelete;
     use CanImpersonate;
+    use HiddenIdTrait;
 
     /**
      * The attributes that are mass assignable.

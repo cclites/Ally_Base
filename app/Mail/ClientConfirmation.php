@@ -2,18 +2,19 @@
 
 namespace App\Mail;
 
+use App\Confirmations\Confirmation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ClientReconfirmation extends Mailable
+class ClientConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $client;
     public $business;
     public $url;
+    public $token;
 
     /**
      * Create a new message instance.
@@ -24,7 +25,9 @@ class ClientReconfirmation extends Mailable
     {
         $this->client = $client;
         $this->business = $business;
-        $this->url = route('reconfirm.encrypted_id', [$client->getEncryptedKey()]);
+        $confirmation = new Confirmation($client);
+        $this->token = $confirmation->getToken();
+        $this->url = route('confirm.client', [$this->token]);
     }
 
     /**
@@ -35,6 +38,6 @@ class ClientReconfirmation extends Mailable
     public function build()
     {
         $this->subject('Please confirm your information for ' . $this->business->name);
-        return $this->view('emails.reconfirm');
+        return $this->view('emails.client-confirmation');
     }
 }

@@ -2,14 +2,17 @@
 
 namespace App;
 
+use App\Confirmations\Confirmation;
+use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
+use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
-class Caregiver extends Model implements UserRole
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
 {
     use IsUserRole;
 
@@ -191,4 +194,10 @@ class Caregiver extends Model implements UserRole
         return $aggregator->events($start, $end);
     }
 
+    public function sendConfirmationEmail()
+    {
+        $confirmation = new Confirmation($this);
+        $confirmation->touchTimestamp();
+        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $this->businesses()->first()));
+    }
 }

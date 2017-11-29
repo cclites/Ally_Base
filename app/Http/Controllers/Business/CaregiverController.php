@@ -213,7 +213,13 @@ class CaregiverController extends BaseController
 
         $events = new ScheduleEventsResponse($caregiver->getEvents($start, $end));
         return $events;
+    }
 
+    public function sendConfirmationEmail($caregiver_id)
+    {
+        $caregiver = Caregiver::findOrFail($caregiver_id);
+        $caregiver->sendConfirmationEmail();
+        return new SuccessResponse('Email Sent to Caregiver');
     }
 
     public function bankAccount(Request $request, $caregiver_id)
