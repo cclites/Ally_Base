@@ -91,7 +91,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         }
         else {
             $this->telefony->say(
-                sprintf('There were no matches for %s<PAUSE>', implode(',,', str_split($digits)))
+                sprintf('There were no matches for, %s<PAUSE>', implode(',,', str_split($digits)))
             );
             $this->telefony->redirect(route('telefony.check-out.enter-digits'));
         }
@@ -184,7 +184,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         foreach($shift->business->allActivities() as $activity) {
             $codeReadout = implode(',,', str_split($activity->code));
             $this->telefony->say(
-                $codeReadout . ', ' . $activity->name,
+                ',,' . $codeReadout . ', ' . $activity->name . ',,',
                 $gather
             );
         }
@@ -217,7 +217,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 'action' => route('telefony.check-out.record-activity', [$shift, $activity]),
             ]);
             $this->telefony->say(
-                sprintf('You have entered %s.  If this is correct, Press 1<PAUSE>If this is incorrect, Press 2.', $activity->name),
+                sprintf('You have entered, %s.  If this is correct, Press 1<PAUSE>If this is incorrect, Press 2.', $activity->name),
                 $gather
             );
 
