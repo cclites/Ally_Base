@@ -22,8 +22,8 @@ class TelefonyGreetingController extends BaseTelefonyController
             'numDigits' => 1,
             'action' => route('telefony.check-in-or-out'),
         ]);
-        $this->telefony->say(
-            "Press 1 to clock in .. Press 2 to clock out.",
+        $this->telefony->repeat(
+            "Press 1 to clock in .. Press 2 to clock out.<PAUSE>",
             $gather
         );
         return $this->telefony->response();
