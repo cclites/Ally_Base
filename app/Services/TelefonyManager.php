@@ -74,8 +74,8 @@ class TelefonyManager
         return $this->getTwilioResponse()->gather($options);
     }
 
-    public function say($message, $object=null) {
-        $sayOptions = ['voice' => 'alice'];
+    public function say($message, $object=null, $loop=1) {
+        $sayOptions = ['voice' => 'alice', 'loop' => $loop];
         if (!$object) $object = $this->getTwilioResponse();
         if (strpos($message, '<PAUSE>') === false) {
             $object->say($message, $sayOptions);
@@ -88,6 +88,16 @@ class TelefonyManager
                 if (strlen($parts[$i])) $object->say($parts[$i], $sayOptions);
             }
         }
+    }
+
+    /**
+     * Same as say, but will repeat the message indefinitely
+     *
+     * @param $message
+     * @param null $object
+     */
+    public function repeat($message, $object=null) {
+        $this->say($message, $object, 0);
     }
 
     public function pause($seconds=1, $object=null) {

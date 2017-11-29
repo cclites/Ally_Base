@@ -20,10 +20,10 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 'numDigits' => 1,
                 'action' => route('telefony.check-out', [$shift]),
             ]);
-            $this->telefony->say(
+            $this->telefony->repeat(
                 sprintf('If this is %s clocking out, press 2<PAUSE>' .
                     'Press 3 if this is not %s<PAUSE>' .
-                    'To return to the main menu, press 0.', $shift->caregiver->firstname, $shift->caregiver->firstname),
+                    'To return to the main menu, press 0.<PAUSE>', $shift->caregiver->firstname, $shift->caregiver->firstname),
                 $gather
             );
             return $this->telefony->response();
@@ -77,14 +77,14 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 'action' => route('telefony.check-out', [$caregiver])
             ]);
             if ($caregiver->isClockedIn()) {
-                $this->telefony->say(
-                    sprintf('If this is %s, press 2 to clock out<PAUSE>press 3 to re-enter.', $caregiver->firstname),
+                $this->telefony->repeat(
+                    sprintf('If this is %s, press 2 to clock out<PAUSE>press 3 to re-enter.<PAUSE>press 0 to return to the main menu<PAUSE>', $caregiver->firstname),
                     $gather
                 );
             }
             else {
-                $this->telefony->say(
-                    sprintf('%s is not clocked in<PAUSE>press 3 to re-enter<PAUSE>press 0 to return to the main menu.', $caregiver->firstname),
+                $this->telefony->repeat(
+                    sprintf('%s is not clocked in<PAUSE>press 3 to re-enter<PAUSE>press 0 to return to the main menu.<PAUSE>', $caregiver->firstname),
                     $gather
                 );
             }
