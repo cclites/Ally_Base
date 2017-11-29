@@ -18,6 +18,7 @@ class PendingShiftsController extends Controller
             $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
             $report = new ScheduledPaymentsReport();
+            if ($request->has('business_id')) $report->where('business_id', $request->input('business_id'));
             $report->between($startDate, $endDate);
             return $report->rows();
         }
