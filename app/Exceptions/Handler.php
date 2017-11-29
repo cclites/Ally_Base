@@ -2,7 +2,7 @@
 
 namespace App\Exceptions;
 
-use App\Scheduling\TelefonyManager;
+use App\Services\TelefonyManager;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 

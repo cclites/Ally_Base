@@ -1,5 +1,5 @@
 <?php
-namespace App\Scheduling;
+namespace App\Services;
 
 use App\Caregiver;
 use App\Client;
@@ -77,6 +77,11 @@ class TelefonyManager
     public function say($message, $object=null) {
         if (!$object) $object = $this->getTwilioResponse();
         return $object->say($message, ['voice' => 'alice']);
+    }
+
+    public function pause($seconds=1, $object=null) {
+        if (!$object) $object = $this->getTwilioResponse();
+        return $object->pause($seconds);
     }
 
     public function redirect($url, $options=[], $object=null) {

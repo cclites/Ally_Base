@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Api\Telefony;
 
 use App\Http\Controllers\Controller;
 use App\PhoneNumber;
-use App\Scheduling\TelefonyManager;
+use App\Services\TelefonyManager;
 use Illuminate\Http\Request;
 
 abstract class BaseTelefonyController extends Controller
