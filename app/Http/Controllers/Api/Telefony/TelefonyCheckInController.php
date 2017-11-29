@@ -86,7 +86,7 @@ class TelefonyCheckInController extends BaseTelefonyController
             $this->telefony->say(
                 sprintf('There were no matches for %s<PAUSE>', implode(',,', str_split($digits)))
             );
-            $this->telefony->redirect('/api/caregiver/check-in/enter-digits');
+            $this->telefony->redirect(route('telefony.check-in.enter-digits'));
         }
 
         return $this->telefony->response();
