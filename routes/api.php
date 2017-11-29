@@ -34,11 +34,11 @@ Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::post('check-out/response', 'Api\Telefony\TelefonyCheckOutController@checkOutResponse')->name('check-out.response');
     Route::post('check-out/enter-digits', 'Api\Telefony\TelefonyCheckOutController@enterPhoneNumberDigits')->name('check-out.enter-digits');
     Route::post('check-out/accept-digits', 'Api\Telefony\TelefonyCheckOutController@acceptPhoneNumberDigits')->name('check-out.accept-digits');
-    Route::post('check-out/check-for-injury', 'Api\Telefony\TelefonyCheckOutController@checkForInjuryAction')->name('check-out.check-for-injury');
-    Route::post('check-out/check-for-activities', 'Api\Telefony\TelefonyCheckOutController@checkForActivitiesResponse')->name('check-out.check-for-activities');
-    Route::post('check-out/confirm-activity', 'Api\Telefony\TelefonyCheckOutController@confirmActivity')->name('check-out.confirm-activity');
-    Route::post('check-out/record-activity', 'Api\Telefony\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');
-    Route::post('check-out/finalize', 'Api\Telefony\TelefonyCheckOutController@finalizeCheckOut')->name('check-out.finalize');
-    Route::post('check-out', 'Api\Telefony\TelefonyCheckOutController@checkOut')->name('check-out');
+    Route::post('check-out/check-for-injury/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkForInjuryAction')->name('check-out.check-for-injury');
+    Route::post('check-out/check-for-activities/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkForActivitiesResponse')->name('check-out.check-for-activities');
+    Route::post('check-out/confirm-activity/{shift}', 'Api\Telefony\TelefonyCheckOutController@confirmActivity')->name('check-out.confirm-activity');
+    Route::post('check-out/record-activity/{shift}/{activity}', 'Api\Telefony\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');
+    Route::post('check-out/finalize/{shift}', 'Api\Telefony\TelefonyCheckOutController@finalizeCheckOut')->name('check-out.finalize');
+    Route::post('check-out/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkOut')->name('check-out');
 });
 
