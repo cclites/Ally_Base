@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Business;
 use App\Client;
+use App\Payment;
 use App\Payments\ClientPaymentAggregator;
 use App\Payments\PendingPayments;
 use App\Responses\CreatedResponse;
@@ -13,6 +15,27 @@ use App\Http\Controllers\Controller;
 
 class ChargesController extends Controller
 {
+    public function index()
+    {
+        return view('admin.charges.index');
+    }
+
+    public function report(Request $request, Business $business)
+    {
+        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+
+        // Make UTC to match DB
+        $startDate->setTimezone('UTC');
+        $endDate->setTimezone('UTC');
+
+        $deposits = Payment::with(['transaction', 'client', 'business'])
+            ->where('business_id', $business->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'DESC')
+            ->get();
+        return $deposits;
+    }
 
     public function pendingPayments(Request $request)
     {
