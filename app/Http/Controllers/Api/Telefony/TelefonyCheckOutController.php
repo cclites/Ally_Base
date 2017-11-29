@@ -18,7 +18,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         if ($shift) {
             $gather = $this->telefony->gather([
                 'numDigits' => 1,
-                'action' => route('telefony.check-out.injury-response', [$shift]),
+                'action' => route('telefony.check-out', [$shift]),
             ]);
             $this->telefony->say(
                 sprintf('If this is %s clocking out, press 2<PAUSE>' .
