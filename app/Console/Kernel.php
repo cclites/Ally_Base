@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\CronUpdateTransactionLog;
 use App\Console\Commands\ImportGenerationsCaregivers;
 use App\Console\Commands\ImportPaychexCaregivers;
 use App\Console\Commands\ScheduledPaymentsCsv;
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
         ScheduledPaymentsCsv::class,
         ImportGenerationsCaregivers::class,
         ImportPaychexCaregivers::class,
+        CronUpdateTransactionLog::class,
     ];
 
     /**
@@ -29,8 +31,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('cron:transaction_log')
+            ->dailyAt('18:00'); // 1PM EST / 2PM EDT
     }
 
     /**

@@ -110,8 +110,8 @@ class ScheduledVsActualReport extends BaseReport
                      /** @var Shift $shift */
                      $eventTime = Carbon::instance($event['start']);
                      $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
-                     // clocked in to within 2.5 hours of start time, filter from array
-                     if ($eventTime->diffInMinutes($shiftTime) <= 150) return false;
+                     // clocked in to within 10 hours of start time, filter from array
+                     if ($eventTime->diffInMinutes($shiftTime) <= 600) return false;
                  }
 
                  if ($event['caregiver_id']) {
@@ -121,8 +121,8 @@ class ScheduledVsActualReport extends BaseReport
                          /** @var Shift $shift */
                          $eventTime = Carbon::instance($event['start']);
                          $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
-                         // clocked in to within 2.5 hours of start time, filter from array
-                         if ($eventTime->diffInMinutes($shiftTime) <= 150) return false;
+                         // clocked in to within 3 hours of start time, filter from array
+                         if ($eventTime->diffInMinutes($shiftTime) <= 180) return false;
                      }
                  }
 

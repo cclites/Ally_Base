@@ -284,13 +284,15 @@
                         <span v-if="!deleted">
                             <b-button variant="success" type="submit">Save Shift</b-button>
                             <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                            <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
-                        <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
+                        <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                        <b-button variant="primary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
+                        <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
+                        <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                 </b-row>
             </form>
@@ -326,17 +328,17 @@
         data() {
             return {
                 form: new Form({
-                    client_id: (this.shift.id) ? this.shift.client_id : null,
-                    caregiver_id: (this.shift.id) ? this.shift.caregiver_id : null,
-                    caregiver_comments: (this.shift.id) ? this.shift.caregiver_comments : null,
-                    checked_in_time: (this.shift.id) ? this.shift.checked_in_time : null,
-                    checked_out_time: (this.shift.id) ? this.shift.checked_out_time : null,
-                    mileage: (this.shift.id) ? this.shift.mileage : 0,
-                    other_expenses: (this.shift.id) ? this.shift.other_expenses : 0,
-                    hours_type: (this.shift.hours_type) ? this.shift.hours_type : 'default',
-                    verified: (this.shift.id) ? this.shift.verified : true,
-                    caregiver_rate: (this.shift.id) ? this.shift.caregiver_rate : '',
-                    provider_fee: (this.shift.id) ? this.shift.provider_fee : '',
+                    client_id: (this.shift) ? this.shift.client_id : null,
+                    caregiver_id: (this.shift) ? this.shift.caregiver_id : null,
+                    caregiver_comments: (this.shift) ? this.shift.caregiver_comments : null,
+                    checked_in_time: (this.shift) ? this.shift.checked_in_time : null,
+                    checked_out_time: (this.shift) ? this.shift.checked_out_time : null,
+                    mileage: (this.shift) ? this.shift.mileage : 0,
+                    other_expenses: (this.shift) ? this.shift.other_expenses : 0,
+                    hours_type: (this.shift) ? this.shift.hours_type : 'default',
+                    verified: (this.shift) ? this.shift.verified : true,
+                    caregiver_rate: (this.shift) ? this.shift.caregiver_rate : '',
+                    provider_fee: (this.shift) ? this.shift.provider_fee : '',
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
@@ -356,7 +358,8 @@
         mounted() {
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
-            if (this.shift.id) {
+            // Do not check against id below to allow for shift duplication
+            if (this.shift.checked_in_time) {
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
                 this.checked_in_date = checkin.format('MM/DD/YYYY');
@@ -369,6 +372,7 @@
                 this.checked_in_date = moment().format('MM/DD/YYYY');
                 this.checked_out_date = moment().format('MM/DD/YYYY');
                 this.checked_in_time = '09:00 AM';
+                this.checked_out_time = '10:00 AM';
             }
         },
         computed: {
@@ -453,24 +457,26 @@
                 this.saveShift();
             },
             validateTimeDifference(field) {
-                let clockin = this.getClockedInMoment();
-                let clockout = this.getClockedOutMoment();
-                if (clockin.isValid() && clockout.isValid()) {
-                    let diffInMinutes = clockout.diff(clockin, 'minutes');
-                    console.log(diffInMinutes);
-                    if (diffInMinutes < 0) {
-                        this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
-                    }
-                    else if (diffInMinutes > 600) {
-                        this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                this.$nextTick(function() {
+                    let clockin = this.getClockedInMoment();
+                    let clockout = this.getClockedOutMoment();
+                    if (clockin.isValid() && clockout.isValid()) {
+                        let diffInMinutes = clockout.diff(clockin, 'minutes');
+                        console.log(diffInMinutes);
+                        if (diffInMinutes < 0) {
+                            this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
+                        }
+                        else if (diffInMinutes > 600) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                        }
+                        else {
+                            this.form.clearError(field);
+                        }
                     }
                     else {
-                        this.form.clearError(field);
+                        console.log('Invalid time?');
                     }
-                }
-                else {
-                    console.log('Invalid time?');
-                }
+                });
             },
             loadClientCaregiverData() {
                 axios.get('/business/clients').then(response => this.clients = response.data);
@@ -496,7 +502,17 @@
         },
         watch: {
             checked_in_date(val, old) {
-                if (old) this.validateTimeDifference('checked_in_time')
+                if (old) {
+                    this.validateTimeDifference('checked_in_time');
+                    if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
+                        this.checked_out_date = val;
+                    }
+                    else {
+                        if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
+                            this.checked_out_date = val;
+                        }
+                    }
+                }
             },
             checked_in_time(val, old) {
                 if (old) this.validateTimeDifference('checked_in_time')

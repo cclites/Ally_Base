@@ -86,6 +86,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'transaction_id',
+                        label: 'Transaction ID',
+                        sortable: true,
+                    },
+                    {
                         key: 'transaction_response',
                         label: 'Trans. Response',
                         sortable: true,
@@ -108,6 +113,7 @@
                         this.items = response.data.map(function(item) {
                             item.name = item.client.nameLastFirst;
                             item.transaction_response = (item.transaction) ? item.transaction.response_text : '';
+                            item.transaction_id = (item.transaction) ? item.transaction.transaction_id : '';
                             return item;
                         });
                     });

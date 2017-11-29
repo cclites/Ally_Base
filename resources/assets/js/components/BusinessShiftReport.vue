@@ -45,7 +45,7 @@
                         </thead>
                         <tbody>
                         <tr v-for="item in items.clientCharges">
-                            <td>{{ item.name }}</td>
+                            <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
                             <td>{{ item.total }}</td>
                             <!--<td>{{ item.caregiver_total }}</td>-->
@@ -84,7 +84,7 @@
                         </thead>
                         <tbody>
                         <tr v-for="item in items.caregiverPayments">
-                            <td>{{ item.name }}</td>
+                            <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
                             <td>{{ item.amount }}</td>
                         </tr>
@@ -132,6 +132,7 @@
                     <b-row>
                         <b-col sm="6">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
+                            <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                         <b-col sm="6">
                             <b-row>
@@ -160,6 +161,12 @@
                         <template slot="Day" scope="data">
                             {{ dayFormat(data.value) }}
                         </template>
+                        <template slot="Client" scope="row">
+                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
+                        </template>
+                        <template slot="Caregiver" scope="row">
+                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
+                        </template>
                         <template slot="Verified" scope="data">
                             <span v-if="data.value" style="color: green">
                                 <i class="fa fa-check-square-o"></i>
@@ -169,13 +176,33 @@
                             </span>
                         </template>
                         <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id">Edit</b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)">View</b-btn>
+                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                         </template>
                     </b-table>
                 </b-card>
             </b-col>
         </b-row>
+
+        <!-- Filter columns modal -->
+        <b-modal id="filterColumnsModal" title="Show or Hide Columns" v-model="columnsModal">
+            <b-container fluid>
+                <b-row>
+                    <div class="form-check row">
+                        <div class="col-sm-auto" v-for="field in availableFields">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" v-model="filteredFields" :value="field">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">{{ field }}</span>
+                            </label>
+                        </div>
+                    </div>
+               </b-row>
+            </b-container>
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="columnsModal=false">Close</b-btn>
+            </div>
+        </b-modal>
 
         <!-- Details modal -->
         <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
@@ -321,6 +348,7 @@
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+                <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
     </div>
@@ -349,10 +377,33 @@
                 selectedItem: {
                     client: {}
                 },
+                columnsModal: false,
+                availableFields: [
+                    'Day',
+                    'Time',
+                    'Hours',
+                    'Client',
+                    'Caregiver',
+                    'Verified',
+                    'CG Rate',
+                    'Reg Rate',
+                    'Ally Fee',
+                    'Total Hourly',
+                    'Mileage',
+                    'CG Total',
+                    'Reg Total',
+                    'Ally Total',
+                    'Mileage Costs',
+                    'Other Expenses',
+                    'Shift Total',
+                    'Type',
+                ],
+                filteredFields: [],
             }
         },
 
         mounted() {
+            this.setInitialFields();
             this.loadData();
             this.loadFiltersData();
         },
@@ -360,12 +411,10 @@
         computed: {
             fields() {
                 let fields = [];
-                let item;
-                if (item = this.shiftHistoryItems[0]) {
-                    for (let key of Object.keys(item)) {
-                        if (key === 'id') continue;
+                for (let field of this.availableFields) {
+                    if (this.filteredFields.indexOf(field) !== -1) {
                         fields.push({
-                            'key': key,
+                            'key': field,
                             'sortable': true,
                         });
                     }
@@ -386,6 +435,8 @@
                 return items.map(function(item) {
                     return {
                         'id': item.id,
+                        'client_id': item.client_id,
+                        'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
                         'Hours': item.roundedShiftLength,
@@ -396,7 +447,12 @@
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
                         'Total Hourly': item.hourly_total,
+                        'Mileage': item.mileage,
+                        'CG Total': item.caregiver_total,
+                        'Reg Total': item.provider_total,
+                        'Ally Total': item.ally_total,
                         'Mileage Costs': item.mileage_costs,
+                        'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
                     }
@@ -544,6 +600,18 @@
                 if (typeof(Storage) !== "undefined") {
                     localStorage.setItem('shift_report_' + item, value);
                 }
+            },
+
+            setInitialFields() {
+                if (this.getLocalStorage('fields')) {
+                    // Temporary fix for invalid objects stored
+                    let fields = JSON.parse(this.getLocalStorage('fields'));
+                    if (fields[0] && typeof(fields[0]) !== 'object') {
+                        this.filteredFields = fields;
+                        return;
+                    }
+                }
+                this.filteredFields = this.availableFields.slice();
             }
 
         },
@@ -567,6 +635,9 @@
             sortDesc(val) {
                 this.setLocalStorage('sortDesc', val);
             },
+            filteredFields(val) {
+                this.setLocalStorage('fields', JSON.stringify(val));
+            }
         }
     }
 </script>
