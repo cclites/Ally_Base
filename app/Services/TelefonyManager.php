@@ -85,9 +85,9 @@ class TelefonyManager
             $parts = explode('<PAUSE>', $message);
             for ($i=0; $i<$loop; $i++) {
                 if (strlen($parts[0])) $object->say($parts[0], $sayOptions);
-                for($i=1; $i<count($parts); $i++) {
+                for($p=1; $p<count($parts); $p++) {
                     $object->pause();
-                    if (strlen($parts[$i])) $object->say($parts[$i], $sayOptions);
+                    if (strlen($parts[$p])) $object->say($parts[$p], $sayOptions);
                 }
             }
         }

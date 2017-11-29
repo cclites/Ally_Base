@@ -23,7 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('/caregiver/greeting', 'Api\Telefony\TelefonyGreetingController@greeting');
 
 Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
-    Route::get('/', 'Api\TelefonyGreetingController@greeting')->name('greeting');
+    Route::get('/', 'Api\Telefony\TelefonyGreetingController@greeting')->name('greeting');
     Route::post('/check-in-or-out', 'Api\Telefony\TelefonyGreetingController@checkInOrOut')->name('check-in-or-out');
 
     Route::post('check-in/response', 'Api\Telefony\TelefonyCheckInController@checkInResponse')->name('check-in.response');
