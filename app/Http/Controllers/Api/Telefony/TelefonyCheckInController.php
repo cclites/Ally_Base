@@ -128,6 +128,6 @@ class TelefonyCheckInController extends BaseTelefonyController
             }
         }
 
-        throw new TelefonyMessageException('There was an error clocking in<PAUSE>Please try again.');
+        throw new TelefonyMessageException('There was an error clocking in .. Please try again.');
     }
 }

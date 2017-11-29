@@ -50,7 +50,7 @@ class ClockIn extends ClockBase
     public function clockInWithoutSchedule(Business $business, Client $client)
     {
         // Find rates through relationship, if no rates, set to 0
-        $relationship = $client->caregivers()->where('id', $this->caregiver->id)->first();
+        $relationship = $client->caregivers()->where('caregiver_id', $this->caregiver->id)->first();
         if ($relationship && isset($relationship->pivot)) {
             $rates = $relationship->pivot;
         }
