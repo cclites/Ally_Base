@@ -41,7 +41,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
             case 0:
                 return $this->mainMenuResponse();
             case 2:
-                if ($shift->id) return $this->checkForInjuryResponse($shift);
+                return $this->checkForInjuryResponse($shift);
             case 3:
                 return $this->enterPhoneNumberDigits();
         }
@@ -92,14 +92,10 @@ class TelefonyCheckOutController extends BaseTelefonyController
                 );
             }
             else {
-                $gather = $this->telefony->gather([
-                    'numDigits' => 1,
-                    'action' => route('telefony.check-out', [new Shift()])
-                ]);
-                $this->telefony->repeat(
-                    sprintf('%s is not clocked in<PAUSE>press 3 to re-enter<PAUSE>press 0 to return to the main menu.<PAUSE>', $caregiver->firstname),
-                    $gather
+                $this->telefony->say(
+                    sprintf('You entered, %s, but %s is not clocked in<PAUSE>', implode(',,', str_split($digits)), $caregiver->firstname)
                 );
+                $this->telefony->redirect(route('telefony.greeting'), ['method' => 'GET']);
             }
         }
         else {
