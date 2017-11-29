@@ -19,9 +19,14 @@ Route::get('/', function () {
 
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
-Route::get('/reconfirm/saved', 'ConfirmationController@saved')->name('reconfirm.saved');
-Route::get('/reconfirm/{encrypted_id}', 'ConfirmationController@reconfirm')->name('reconfirm.encrypted_id');
-Route::post('/reconfirm/{encrypted_id}', 'ConfirmationController@store')->name('reconfirm.store');
+Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
+Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
+Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
+Route::get('/confirm/client/{token}', 'ClientConfirmationController@show')->name('confirm.client');
+Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->name('confirm.client.store');
+Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
+Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
+Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
@@ -90,7 +95,9 @@ Route::group([
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
+    Route::post('caregivers/{id}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
     Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
+
 
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 

@@ -90,12 +90,15 @@
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
+                    <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
                     <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Delete Caregiver</b-button>
                 </b-col>
             </b-row>
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/caregivers/' + this.caregiver.id + '/password'"></reset-password-modal>
+        <send-welcome-email-modal v-model="welcomeEmailModal" :user='caregiver' :url="'/business/caregivers/' + this.caregiver.id + '/send_confirmation_email'"></send-welcome-email-modal>
+
     </b-card>
 </template>
 
@@ -117,6 +120,7 @@
                     no_email: false,
                 }),
                 passwordModal: false,
+                welcomeEmailModal: false,
             }
         },
 

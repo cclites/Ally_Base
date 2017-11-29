@@ -35,6 +35,7 @@
                                 name="email"
                                 type="email"
                                 v-model="form.email"
+                                required
                         >
                         </b-form-input>
                         <input-help :form="form" field="email" text="Confirm your email address.  Ex: user@domain.com"></input-help>
@@ -44,7 +45,7 @@
                                 id="email"
                                 name="email"
                                 type="text"
-                                :value="client.username"
+                                :value="caregiver.username"
                                 disabled
                         >
                         </b-form-input>
@@ -155,24 +156,24 @@
                 </b-col>
             </b-row>
         </b-card>
-        <b-card header="Terms of Service"
-                header-bg-variant="info"
-                header-text-variant="white"
-        >
-            <div class="embed-responsive" style="height:200px;">
-                <iframe class="embed-responsive-item" :src="termsUrl"></iframe>
-            </div>
-        </b-card>
+        <!--<b-card header="Terms of Service"-->
+                <!--header-bg-variant="info"-->
+                <!--header-text-variant="white"-->
+        <!--&gt;-->
+            <!--<div class="embed-responsive" style="height:200px;">-->
+                <!--<iframe class="embed-responsive-item" :src="termsUrl"></iframe>-->
+            <!--</div>-->
+        <!--</b-card>-->
         <b-row>
             <b-col lg="12" class="text-right">
-                <div class="form-check">
-                    <label class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" name="accepted_terms" v-model="form.accepted_terms" value="1">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description"><b>I accept the terms and conditions above</b></span>
-                    </label>
-                    <input-help :form="form" field="accepted_terms" text=""></input-help>
-                </div>
+                <!--<div class="form-check">-->
+                    <!--<label class="custom-control custom-checkbox">-->
+                        <!--<input type="checkbox" class="custom-control-input" name="accepted_terms" v-model="form.accepted_terms" value="1">-->
+                        <!--<span class="custom-control-indicator"></span>-->
+                        <!--<span class="custom-control-description"><b>I accept the terms and conditions above</b></span>-->
+                    <!--</label>-->
+                    <!--<input-help :form="form" field="accepted_terms" text=""></input-help>-->
+                <!--</div>-->
                 <b-button variant="success" size="lg" type="submit">Accept and Verify</b-button>
             </b-col>
         </b-row>
@@ -183,7 +184,7 @@
     export default {
         props: {
             'token': {},
-            'client': {},
+            'caregiver': {},
             'phoneNumber': {},
             'address': {},
             'termsUrl': String,
@@ -192,10 +193,10 @@
         data() {
             return {
                 form: new Form({
-                    firstname: this.client.firstname,
-                    lastname: this.client.lastname,
-                    email: this.client.email,
-                    date_of_birth: moment(this.client.user.date_of_birth).format('L'),
+                    firstname: this.caregiver.firstname,
+                    lastname: this.caregiver.lastname,
+                    email: this.caregiver.email,
+                    date_of_birth: moment(this.caregiver.user.date_of_birth).format('L'),
                     phone_number: this.phoneNumber,
                     address1: this.address.address1,
                     address2: this.address.address2,
@@ -217,8 +218,8 @@
         methods: {
 
             submitForm() {
-                this.form.post('/confirm/client/' + this.token)
-                    .then(function(response) {
+                this.form.post('/confirm/caregiver/' + this.token)
+                    .then(response => {
                         window.location = '/confirm/saved';
                     });
             }

@@ -8,5 +8,9 @@
         <p>Thank you for verifying your information.  You're all set!<br><br></p>
         <p>Contact us at any time with questions:</p>
         <p>(800) 930-0587</p>
+        <p></p>
+        <p>
+            <a href="{{ route('login') }}" role="button" class="btn btn-info">Click Here to Login</a>
+        </p>
     </center>
 @endsection

@@ -5,12 +5,11 @@
 @section('breadcrumbs', 'Then, click the "Accept and Verify" button at the bottom of the page.')
 
 @section('content')
-    <client-confirmation id="{{ $encrypted_id }}"
-                         :client="{{ $client }}"
-                         :user="{{ $client->user }}"
+    <caregiver-confirmation token="{{ $token }}"
+                         :caregiver="{{ $caregiver }}"
                          phone-number="{{ $phoneNumber }}"
-                         :address="{{ $client->evvAddress OR '{}' }}"
+                         :address="{{ $address OR '{}' }}"
                          terms-url="{{ $termsUrl }}"
     >
-    </client-confirmation>
+    </caregiver-confirmation>
 @endsection
