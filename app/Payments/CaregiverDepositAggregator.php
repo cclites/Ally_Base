@@ -23,7 +23,7 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
         $this->endDate = $endDate->setTimezone('UTC');
         $this->caregiver = $caregiver;
 
-        $this->shifts = Shift::where('status', Shift::WAITING_FOR_PAYOUT)
+        $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_PAYOUT, Shift::PAID_BUSINESS_ONLY])
                 ->whereBetween('checked_in_time', [$startDate, $endDate])
                 ->where('caregiver_id', $this->caregiver->id)
                 ->get();
