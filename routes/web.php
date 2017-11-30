@@ -103,6 +103,7 @@ Route::group([
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
+    Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrder')->name('clients.service_orders');
     Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
     Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
     Route::post('clients/{id}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
