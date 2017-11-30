@@ -11,11 +11,19 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-12 hidden-sm-up">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Schedule Notes</h4>
+                    {!! nl2br(htmlentities($notes)) !!}
+                </div>
+            </div>
+        </div>
         <div class="col-lg-6">
             <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}" :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"></clock-out>
         </div>
         <div class="col-lg-6">
-            <div class="card">
+            <div class="card hidden-xs-down">
                 <div class="card-body">
                     <h4 class="card-title">Schedule Notes</h4>
                     {!! nl2br(htmlentities($notes)) !!}
