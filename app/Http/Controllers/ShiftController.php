@@ -126,8 +126,8 @@ class ShiftController extends Controller
 
         $data = $request->validate([
             'caregiver_comments' => 'nullable',
-            'mileage' => 'nullable|numeric',
-            'other_expenses' => 'nullable|numeric',
+            'mileage' => 'nullable|numeric|max:1000|min:0',
+            'other_expenses' => 'nullable|numeric|max:1000|min:0',
             'other_expenses_desc' => 'nullable',
             'latitude' => 'numeric|nullable|required_unless:manual,1',
             'longitude' => 'numeric|nullable|required_unless:manual,1',
