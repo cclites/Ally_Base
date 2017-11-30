@@ -32,6 +32,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         'ssn',
         'onboard_status',
         'fee_override',
+        'max_weekly_hours',
     ];
 
     ///////////////////////////////////////////

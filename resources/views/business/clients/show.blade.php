@@ -127,7 +127,7 @@
             </div>
         </div>
         <div class="tab-pane" id="service_orders" role="tabpanel">
-            <h4>Service orders coming soon</h4>
+            <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
