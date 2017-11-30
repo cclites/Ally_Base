@@ -56,6 +56,7 @@ class ShiftsReport extends BaseReport
                     'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
                     'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
                     'payment_method' => 'TBD',
+                    'duration' => $shift->duration()
                 ]);
                 return $row;
             });

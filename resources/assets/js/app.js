@@ -62,7 +62,7 @@ Vue.component('business-deposit-history', require('./components/BusinessDepositH
 Vue.component('business-exception', require('./components/BusinessException.vue'));
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
 Vue.component('business-issue-modal', require('./components/BusinessIssueModal.vue'));
-Vue.component('business-medicaid-report-caregivers', require('./components/BusinessMedicaidReportCaregivers.vue'));
+Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-shift', require('./components/BusinessShift.vue'));
