@@ -65,12 +65,12 @@ class CaregiverController extends BaseController
             'username' => 'required|unique:users',
             'date_of_birth' => 'nullable',
             'ssn' => 'nullable',
-            'password' => 'required|confirmed',
+            'password' => 'nullable|confirmed',
             'title' => 'required',
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
-        $data['password'] = bcrypt($data['password']);
+        $data['password'] = bcrypt($data['password'] ?? str_random());
 
 
         $caregiver = new Caregiver($data);
