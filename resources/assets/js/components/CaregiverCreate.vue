@@ -29,13 +29,7 @@
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
-                        <b-form-input
-                                id="date_of_birth"
-                                name="date_of_birth"
-                                type="text"
-                                v-model="form.date_of_birth"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
