@@ -14,7 +14,7 @@ class AlterClientsAddMaxWeeklyHours extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->decimal('max_weekly_hours', 5,2);
+            $table->decimal('max_weekly_hours', 5,2)->default(999);
         });
     }
 

@@ -233,7 +233,7 @@ class ClientController extends BaseController
         }
 
         $data = $request->validate([
-            'max_weekly_hours' => 'nullable|numeric|min:0|max:168',
+            'max_weekly_hours' => 'required|numeric|min:0|max:999',
         ]);
 
         if ($client->update($data)) {
