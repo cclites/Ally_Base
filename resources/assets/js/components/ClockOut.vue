@@ -1,8 +1,5 @@
 <template>
-    <b-card header=""
-        header-bg-variant="info"
-        header-text-variant="white"
-        >
+    <b-card title="Confirm Clock Out Details">
         <form @submit.prevent="clockOut()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">

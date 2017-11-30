@@ -16,10 +16,8 @@
         </div>
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-header bg-info text-white">
-                    Schedule Notes
-                </div>
                 <div class="card-body">
+                    <h4 class="card-title">Schedule Notes</h4>
                     {!! nl2br(htmlentities($notes)) !!}
                 </div>
             </div>
