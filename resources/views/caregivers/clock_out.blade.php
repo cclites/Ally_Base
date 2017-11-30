@@ -15,7 +15,11 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Schedule Notes</h4>
-                    {!! nl2br(htmlentities($notes)) !!}
+                    @if ($notes)
+                        {!! nl2br(htmlentities($notes)) !!}
+                    @else
+                        No notes for this shift.
+                    @endif
                 </div>
             </div>
         </div>
