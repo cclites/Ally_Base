@@ -34,6 +34,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
+        </li>
         @if($business->scheduling)
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
@@ -46,7 +49,7 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
         </li>
     </ul>
 
@@ -60,9 +63,11 @@
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+                <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
-                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+                <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
             </div>
         </li>
     </ul>
@@ -120,6 +125,9 @@
                     <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" :business="true" />
                 </div>
             </div>
+        </div>
+        <div class="tab-pane" id="service_orders" role="tabpanel">
+            <h4>Service orders coming soon</h4>
         </div>
         <div class="tab-pane" id="schedule" role="schedule">
             <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
