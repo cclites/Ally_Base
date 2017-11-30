@@ -9,7 +9,7 @@
 
 @section('content')
     <!-- Nav tabs -->
-    <ul class="nav nav-pills with-padding-bottom" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-sm-down" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Profile</a>
         </li>
@@ -18,6 +18,18 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+        </li>
+    </ul>
+
+    <!-- Mobile nav tabs (drop down) -->
+    <ul class="nav nav-pills with-padding-bottom hidden-md-up" role="tablist">
+        <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Change Tab: <span class="tab-name">Profile</span></a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" data-toggle="tab" href="#profile" role="tab">Profile</a>
+                <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
+                <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+            </div>
         </li>
     </ul>
 
@@ -54,3 +66,12 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $('.nav-item a.dropdown-item').click(function() {
+            var text = $(this).text();
+            $(this).closest('.nav-item').find('.tab-name').text(text);
+        });
+    </script>
+@endpush
