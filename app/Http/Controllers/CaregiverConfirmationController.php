@@ -8,6 +8,7 @@ use App\Confirmations\Confirmation;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\ValidSSN;
 use App\Traits\Request\PaymentMethodUpdate;
 use Illuminate\Http\Request;
 
@@ -48,6 +49,7 @@ class CaregiverConfirmationController extends Controller
             'lastname' => 'required',
             'email' => 'required|email',
             'date_of_birth' => 'nullable|date',
+            'ssn' => ['required', new ValidSSN()],
         ]);
         if ($profile_data['date_of_birth']) $profile_data['date_of_birth'] = filter_date($profile_data['date_of_birth']);
 

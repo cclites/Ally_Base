@@ -76,23 +76,15 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
-                        <b-form-input
-                                id="date_of_birth"
-                                name="date_of_birth"
-                                type="text"
-                                v-model="form.date_of_birth"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
+                    <b-form-group label="Social Security Number" label-for="ssn">
+                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
+                        <input-help :form="form" field="ssn" text="Confirm your social security number."></input-help>
+                    </b-form-group>
                     <b-form-group label="Phone Number" label-for="phone_number">
-                        <b-form-input
-                                id="phone_number"
-                                name="phone_number"
-                                type="text"
-                                v-model="form.phone_number"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.phone_number" id="phone_number" type="phone"></mask-input>
                         <input-help :form="form" field="phone_number" text="Confirm your full phone number."></input-help>
                     </b-form-group>
                     <b-form-group label="Address">
@@ -163,8 +155,6 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <p class="card-text">I hereby authorize Ally, LLC (Ally) to debit entries, and if necessary credit entries to correct erroneous debits from the account at the Financial Institution named above.  If a debit is scheduled to take place on a non-banking date, the transaction will take place on the next banking day. I (we) acknowledge the origination of ACH transactions to our account must comply with the provisions of U.S. law.  This authority is to remain in full force and effect until Ally has received written notification from me of termination in such time and manner as to afford Ally and Financial Institution a reasonable opportunity to act on it.
-                    </p>
                     <b-form-group label="Nickname" label-for="nickname">
                         <b-form-input
                                 id="nickname"
@@ -281,6 +271,13 @@
                     img-bottom
                     >
                 </b-card>
+                <b-card
+                    header="Direct Deposit Terms"
+                    header-text-variant="white"
+                    header-bg-variant="info"
+                    >
+                    <p class="card-text">I hereby authorize Ally, LLC (Ally) to debit entries, and if necessary credit entries to correct erroneous debits from the account at the Financial Institution named above.  If a debit is scheduled to take place on a non-banking date, the transaction will take place on the next banking day. I (we) acknowledge the origination of ACH transactions to our account must comply with the provisions of U.S. law.  This authority is to remain in full force and effect until Ally has received written notification from me of termination in such time and manner as to afford Ally and Financial Institution a reasonable opportunity to act on it.</p>
+                </b-card>
             </b-col>
         </b-row>
         
@@ -332,6 +329,7 @@
                     accepted_terms: 0,
                     password: null,
                     password_confirmation: null,
+                    ssn: '',
                     // Bank Account
                     nickname: this.account.nickname,
                     name_on_account: this.account.name_on_account,

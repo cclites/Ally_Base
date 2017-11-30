@@ -10,7 +10,7 @@
 
 <script>
     const TYPES = [
-        'phone','ssn'
+        'phone','ssn','date'
     ];
     export default {
         data() {
@@ -47,6 +47,9 @@
                     $(this.$el).mask('***-**-****', {'translation': {
                         '*': {pattern: /[\*0-9]/},
                     }});
+                    break;
+                case 'date':
+                    $(this.$el).mask('00/00/0000');
                     break;
             }
         },

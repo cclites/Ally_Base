@@ -75,23 +75,11 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
-                        <b-form-input
-                                id="date_of_birth"
-                                name="date_of_birth"
-                                type="text"
-                                v-model="form.date_of_birth"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Confirm your date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Phone Number" label-for="phone_number">
-                        <b-form-input
-                                id="phone_number"
-                                name="phone_number"
-                                type="text"
-                                v-model="form.phone_number"
-                        >
-                        </b-form-input>
+                        <mask-input v-model="form.phone_number" id="phone_number" type="phone"></mask-input>
                         <input-help :form="form" field="phone_number" text="Confirm your full phone number."></input-help>
                     </b-form-group>
                     <b-form-group label="Address">
