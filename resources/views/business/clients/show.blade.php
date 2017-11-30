@@ -15,7 +15,7 @@
     ?>
 
     <!-- Nav tabs -->
-    <ul class="nav nav-pills with-padding-bottom" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Profile</a>
         </li>
@@ -47,6 +47,23 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+        </li>
+    </ul>
+
+    <!-- Smaller device tabs -->
+    <ul class="nav nav-pills with-padding-bottom hidden-xl-up" role="tablist">
+        <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Change Tab: <span class="tab-name">Profile</span></a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" data-toggle="tab" href="#profile" role="tab">Profile</a>
+                <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
+                <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+                <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History Statement</a>
+            </div>
         </li>
     </ul>
 
