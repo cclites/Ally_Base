@@ -1,8 +1,5 @@
 <template>
-    <b-card header=""
-        header-bg-variant="info"
-        header-text-variant="white"
-        >
+    <b-card title="Confirm Clock Out Details">
         <form @submit.prevent="clockOut()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">
@@ -179,7 +176,7 @@
                 var component = this;
                 this.form.post('/clock-out')
                     .then(function(response) {
-                        window.location = '/clock-in?clocked_out=1'
+                        window.location = '/schedule?clocked_out=1'
                     })
                     .catch(function(error) {
                         component.showManual = true;
