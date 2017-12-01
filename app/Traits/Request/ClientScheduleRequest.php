@@ -75,7 +75,7 @@ trait ClientScheduleRequest
         return $this->validateData($request, $rules);
     }
 
-    protected function calculateClientWeeklyHours(Schedule $schedule)
+    public function calculateClientWeeklyHours(Schedule $schedule)
     {
         $client = $schedule->client;
 
@@ -84,10 +84,11 @@ trait ClientScheduleRequest
         if ($date < Carbon::now()) {
             $date = Carbon::now();
         }
-        $start = $date->startOfWeek()->setTimezone('UTC');
-        $end = $date->endOfWeek()->setTimezone('UTC');
+        $start = $date->copy()->startOfWeek()->setTimezone('UTC');
+        $end = $date->copy()->endOfWeek()->setTimezone('UTC');
 
         $events = $client->getEvents($start, $end, true);
+
         $minutes = 0;
         foreach($events as $event) {
             $minutes += $event['duration'];

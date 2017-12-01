@@ -23,6 +23,7 @@ export default {
             },
             form: new Form({caregiver_id: null}),
             specialHoursChange: false,
+            maxHoursWarning: false,
         };
     },
 
@@ -76,6 +77,28 @@ export default {
 
         refreshEvents() {
             this.$emit('refresh-events');
+        },
+
+        showMaxHoursWarning(response) {
+            this.maxHoursWarning = true;
+            // Recreate the form with max override
+            let data = this.form.data();
+            data.override_max_hours = 1;
+            this.form = new Form(data);
+        },
+
+        hideMaxHoursWarning() {
+            this.maxHoursWarning = false;
+        },
+
+        handleErrors(error) {
+            if (error.response) {
+                switch(error.response.status) {
+                    case 449:
+                        this.showMaxHoursWarning(error.response);
+                        break;
+                }
+            }
         }
     },
 
@@ -167,6 +190,11 @@ export default {
                 }
             }
             this.specialHoursChange = false;
-        }
+        },
+        model(val) {
+            if (!val) {
+                this.hideMaxHoursWarning();
+            }
+        },
     }
 }
