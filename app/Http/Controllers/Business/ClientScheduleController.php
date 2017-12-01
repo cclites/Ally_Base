@@ -128,6 +128,8 @@ class ClientScheduleController extends BaseController
             $data['end_date'] = Schedule::FOREVER_ENDDATE;
         }
 
+        $durationChanged = ($data['duration'] != $schedule->duration);
+
         $creator = new ScheduleCreator($data);
         if (!$creator->hasChangesFrom($schedule)) {
             return new SuccessResponse('But no changes were made.');
@@ -144,7 +146,7 @@ class ClientScheduleController extends BaseController
                 throw new \Exception('Unable to create new schedule after closing old schedule.');
             }
 
-            if ($this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
+            if ($durationChanged && $this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
                 return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
             }
@@ -245,6 +247,8 @@ class ClientScheduleController extends BaseController
         unset($data['selected_date']);
         $data['business_id'] = $this->business()->id;
 
+        $durationChanged = ($data['duration'] != $schedule->duration);
+
         DB::beginTransaction();
 
         if ($schedule->isSingle()) {
@@ -252,7 +256,7 @@ class ClientScheduleController extends BaseController
             $schedule->setSingleEvent($selected_date, $data['time'], $data['duration']);
             $schedule->save();
 
-            if ($this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
+            if ($durationChanged && $this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
                 return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
             }
