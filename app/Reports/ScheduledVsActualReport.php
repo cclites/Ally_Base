@@ -2,6 +2,7 @@
 namespace App\Reports;
 
 use App\Business;
+use App\Caregiver;
 use App\Schedule;
 use App\Scheduling\AllyFeeCalculator;
 use App\Scheduling\ScheduleAggregator;
@@ -70,15 +71,15 @@ class ScheduledVsActualReport extends BaseReport
             $end = Carbon::instance($end)->setTimezone('UTC');
         }
 
-        if ($start && $end) {
-            $this->query->whereBetween('checked_in_time', [$start, $end]);
+        if (!$start) {
+            $start = new Carbon('2017-01-01');
         }
-        elseif ($start) {
-            $this->query->where('checked_in_time', '>=', $start);
+        if (!$end) {
+            $end = new Carbon('2100-01-01');
         }
-        else {
-            $this->query->where('checked_in_time', '<=', $end);
-        }
+
+        // Get all shifts from -1 day from start to +1 day from end to allow for late / early clock ins
+        $this->query->whereBetween('checked_in_time', [$start->copy()->subDay(), $end->copy()->addDay()]);
 
         $aggregator = new ScheduleAggregator();
         foreach($this->business->schedules as $schedule) {
@@ -88,7 +89,7 @@ class ScheduledVsActualReport extends BaseReport
             $aggregator->add($title, $schedule);
         }
 
-        $this->events = $aggregator->events($start, $end);
+        $this->events = $aggregator->onlyStartTime()->events($start, $end);
 
         return $this;
     }

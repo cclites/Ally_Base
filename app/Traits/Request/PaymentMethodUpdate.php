@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 
 trait PaymentMethodUpdate
 {
+    use BankAccountRequest;
+
     /**
      * @param \Illuminate\Http\Request $request
      * @param \App\BankAccount|null $existing
@@ -20,21 +22,7 @@ trait PaymentMethodUpdate
      */
     public function updateBankAccount(Request $request, UserRole $user, $existing = null)
     {
-        $rules = [
-            'nickname' => 'nullable',
-            'account_type' => 'required|in:checking,savings',
-            'account_holder_type' => 'required|in:business,personal',
-            'name_on_account' => 'required',
-        ];
-
-        if (!$existing || strpos($request->input('account_number'), '****') !== 0) {
-            $rules += [
-                'account_number' => 'required|confirmed|numeric',
-                'routing_number' => 'required|confirmed|numeric|digits:9',
-            ];
-        }
-
-        $data = $request->validate($rules);
+        $data = $this->validateBankAccount($request, $existing);
 
         if (!$existing) {
             $existing = new BankAccount($data);

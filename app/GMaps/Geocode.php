@@ -17,16 +17,10 @@ class Geocode {
 	public static function getResult($address) {
 
 		$arguments = [ 'address' => $address ];
-		try {
-			$array = API::get('geocode', $arguments);
-			if (empty($array['results'])) {
-				throw new NoGeocodeFoundException('No geocode information could be found.');
-			}
-		}
-		catch (NoGeocodeFoundException $e) {
-			echo $e->getMessage();
-			return false;
-		}
+        $array = API::get('geocode', $arguments);
+        if (empty($array['results'])) {
+            throw new NoGeocodeFoundException('No geocode information could be found.');
+        }
 		return $array['results'][0];
 	}
 
@@ -52,16 +46,10 @@ class Geocode {
 			'latlng' => "$latitude,$longitude",
 			'language' => $language,
 		];
-		try {
-			$array = API::get('geocode', $arguments);
-			if (empty($array['results'])) {
-				throw new NoGeocodeFoundException('ReverseGeocode: No geocode information could be found.');
-			}
-		}
-		catch (NoGeocodeFoundException $e) {
-			echo $e->getMessage();
-			return false;
-		}
+        $array = API::get('geocode', $arguments);
+        if (empty($array['results'])) {
+            throw new NoGeocodeFoundException('ReverseGeocode: No geocode information could be found.');
+        }
 		return $array['results'];
 	}
 
