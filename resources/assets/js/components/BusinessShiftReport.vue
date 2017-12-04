@@ -232,7 +232,13 @@
                     </b-col>
                     <b-col sm="6">
                         <strong>Clocked Out Time</strong><br />
-                        {{ selectedItem.checked_out_time }}
+                        {{ selectedItem.checked_out_time }}<br />
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="6" class="with-padding-bottom">
+                        <strong>Special Designation</strong><br>
+                        {{ hoursType(selectedItem)}}
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-bottom" v-if="selectedItem.schedule && selectedItem.schedule.notes">
@@ -612,8 +618,18 @@
                     }
                 }
                 this.filteredFields = this.availableFields.slice();
-            }
+            },
 
+            hoursType(item) {
+                switch (item.hours_type) {
+                    case 'default':
+                        return 'None';
+                    case 'overtime':
+                        return 'OT';
+                    case 'holiday':
+                        return 'HOL';
+                }
+            }
         },
 
         watch: {
