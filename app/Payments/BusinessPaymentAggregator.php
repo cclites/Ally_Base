@@ -1,23 +1,18 @@
 <?php
 namespace App\Payments;
 
-use App\BankAccount;
-use App\Client;
+use App\Business;
 use App\Contracts\ChargeableInterface;
-use App\CreditCard;
-use App\Gateway\ECSPayment;
 use App\Payment;
-use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
 
-class ClientPaymentAggregator
+class BusinessPaymentAggregator
 {
-
     /**
-     * @var \App\Client
+     * @var \App\Business
      */
-    protected $client;
+    protected $business;
 
     /**
      * @var \App\Contracts\ChargeableInterface
@@ -39,27 +34,31 @@ class ClientPaymentAggregator
      */
     private $endDate;
 
-    public function __construct(Client $client, Carbon $startDate, Carbon $endDate)
+    public function __construct(Business $business, Carbon $startDate, Carbon $endDate)
     {
-        $this->client = $client;
-        $this->method = $client->getPaymentMethod();
+        $this->business = $business;
+        $this->method = $business->paymentAccount;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
 
         $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE])
             ->whereNull('payment_id')
             ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
-            ->where('client_id', $this->client->id)
+            ->whereIn('client_id', $this->getClientsUsingProviderPayment())
             ->get();
+    }
 
+    public function getClientsUsingProviderPayment()
+    {
+        return $this->business->clientsUsingProviderPayment;
     }
 
     public function getPayment()
     {
         $payment = new Payment([
-            'client_id' => $this->client->id,
-            'business_id' => $this->client->business_id,
-            'payment_type' => $this->client->getPaymentType(),
+            'client_id' => null,
+            'business_id' => $this->business->id,
+            'payment_type' => 'ACH',
             'amount' => 0,
             'business_allotment' => 0,
             'caregiver_allotment' => 0,
@@ -73,7 +72,7 @@ class ClientPaymentAggregator
             $payment->system_allotment += $shift->costs()->getAllyFee();
         }
 
-        $payment->load('client');
+        $payment->load('business');
 
         return $payment;
     }
@@ -109,8 +108,8 @@ class ClientPaymentAggregator
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
             ]);
-            // Save the payment to the business
-            $this->client->payments()->save($payment);
+            // Save the payment to the client
+            $this->business->payments()->save($payment);
             // Update shifts' payment id
             Shift::whereIn('id', $this->getShiftIds())->update([
                 'payment_id' => $payment->id,
