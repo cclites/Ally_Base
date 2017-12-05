@@ -133,7 +133,6 @@ class ClientController extends BaseController
               ->with('user')
               ->where('business_id', $this->business()->id)
               ->get()
-              ->sortBy('user.lastname')
               ->map(function($caregiver) {
                   return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
               });

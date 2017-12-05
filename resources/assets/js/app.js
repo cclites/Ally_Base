@@ -101,7 +101,7 @@ Vue.component('clock-out', require('./components/ClockOut.vue'));
 Vue.component('caregiver-confirmation', require('./components/CaregiverConfirmation.vue'));
 Vue.component('client-confirmation', require('./components/ClientConfirmation.vue'));
 
-Vue.component('client-caregivers', require('./components/ClientCaregivers.vue'));
+Vue.component('business-client-caregivers', require('./components/business/clients/ClientCaregivers.vue'));
 Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-list', require('./components/ClientList.vue'));
