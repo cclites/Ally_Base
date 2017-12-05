@@ -60,7 +60,7 @@
                                 name="caregiver_id"
                                 v-model="form.caregiver_id"
                                 >
-                                <option v-for="item in list" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
@@ -134,6 +134,7 @@
 
         data() {
             return {
+                caregiverList: _.sortBy(this.list, 'name'),
                 items: [],
                 clientCaregiverModal: false,
                 selectedCaregiver: {},
