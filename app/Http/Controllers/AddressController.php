@@ -49,7 +49,7 @@ class AddressController
         }
 
         \DB::rollBack();
-        if (isset($geocode)) return new ErrorResponse(400, 'Unable to obtain geocoordinates for address.  Please verify and try again.');
+        if (isset($geocode)) return new ErrorResponse(400, 'This address was found to be invalid.  Please verify and try again.');
         return new ErrorResponse(500, $reference . ' could not be saved.');
     }
 }

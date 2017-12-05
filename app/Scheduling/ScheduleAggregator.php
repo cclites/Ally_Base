@@ -8,6 +8,7 @@ class ScheduleAggregator
 {
     protected $data = [];
     protected $activeSchedules = [];
+    protected $onlyStartTime = true;
 
     public function add($title, $schedule)
     {
@@ -21,6 +22,18 @@ class ScheduleAggregator
     {
         $active = (array) $active;
         $this->activeSchedules = array_merge($this->activeSchedules, $active);
+    }
+
+    /**
+     * Only include the schedule if the date range matches the start time, not accounting for the end time
+     *
+     * @param bool $bool
+     * @return $this
+     */
+    public function onlyStartTime(bool $bool=true)
+    {
+        $this->onlyStartTime = $bool;
+        return $this;
     }
 
     /**
@@ -38,7 +51,12 @@ class ScheduleAggregator
             $title       = $event['title'];
             /** @var \App\Schedule $schedule */
             $schedule    = $event['schedule'];
-            $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $limitPerEvent);
+            if ($this->onlyStartTime) {
+                $occurrences = $schedule->getOccurrencesStartingBetween($start_date, $end_date, $limitPerEvent);
+            }
+            else {
+                $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $limitPerEvent);
+            }
             $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
                 $end = clone $date;
                 $end->add(new \DateInterval('PT' . $schedule->duration . 'M'));

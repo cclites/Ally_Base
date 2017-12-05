@@ -40,6 +40,11 @@ class Business extends Model
         return $this->hasMany(Client::class);
     }
 
+    public function clientsUsingProviderPayment()
+    {
+        return $this->morphMany(Client::class, 'default_payment');
+    }
+
     public function caregivers()
     {
         return $this->belongsToMany(Caregiver::class, 'business_caregivers')

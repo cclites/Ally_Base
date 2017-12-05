@@ -197,7 +197,7 @@ namespace App{
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
  * @property-read \App\Address $evvAddress
  * @property-read \App\PhoneNumber $evvPhone
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
  * @property-read \App\User $user

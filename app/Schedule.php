@@ -239,7 +239,7 @@ class Schedule extends Model
     /**
      * Get the starting time of the first event
      *
-     * @return \DateTime
+     * @return \Carbon\Carbon
      */
     public function getStartDateTime()
     {
@@ -249,7 +249,7 @@ class Schedule extends Model
     /**
      * Get the starting time of the last event
      *
-     * @return \DateTime
+     * @return \Carbon\Carbon
      */
     public function getEndDateTime()
     {

@@ -133,7 +133,6 @@ class ClientController extends BaseController
               ->with('user')
               ->where('business_id', $this->business()->id)
               ->get()
-              ->sortBy('user.lastname')
               ->map(function($caregiver) {
                   return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
               });
@@ -217,6 +216,29 @@ class ClientController extends BaseController
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
         return new ErrorResponse('Could not archive the selected client.');
+    }
+
+    /**
+     * Updates relating to the service orders tab
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Client $client
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
+    public function serviceOrders(Request $request, Client $client)
+    {
+        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->validate([
+            'max_weekly_hours' => 'required|numeric|min:0|max:999',
+        ]);
+
+        if ($client->update($data)) {
+            return new SuccessResponse('The service orders have been updated');
+        }
+        return new ErrorResponse(500, 'Unable to update service orders.');
     }
 
     public function address(Request $request, $client_id, $type)

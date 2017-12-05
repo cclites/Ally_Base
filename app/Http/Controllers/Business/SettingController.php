@@ -6,10 +6,12 @@ use App\BankAccount;
 use App\Business;
 use App\OfficeUser;
 use App\Responses\SuccessResponse;
+use App\Traits\Request\BankAccountRequest;
 use Illuminate\Http\Request;
 
 class SettingController extends BaseController
 {
+    use BankAccountRequest;
 
     public function index()
     {
@@ -28,39 +30,31 @@ class SettingController extends BaseController
      * Show the form for creating a new resource.
      *
      * @param string $type
-     * @return void
      */
-    public function storeBankAccount(string $type)
+    public function storeBankAccount(Request $request, string $type)
     {
-        $this->validate(request(), [
-            'routing_number' => 'required',
-            'account_number' => 'required'
-        ]);
-
-        $account_data = request()->except('account_number_confirmation', 'routing_number_confirmation');
-        $account_data['user_id'] = auth()->id();
-
-        $business = OfficeUser::find(auth()->id())->businesses()->first();
+        $business = $this->business();
         switch($type) {
             case 'deposit':
-                if ($business->bank_account_id) {
-                    $account = BankAccount::find($business->bank_account_id);
+                $account = $business->bankAccount;
+                $account_data = $this->validateBankAccount($request, $account);
+                if ($account) {
                     $account->update($account_data);
                 } else {
-                    $account = BankAccount::create($account_data);
+                    $account = new BankAccount($account_data);
+                    $business->setBankAccount($account);
                 }
-                $business->bank_account_id = $account->id;
-                $business->save();
                 break;
             case 'payment':
-                if ($business->payment_account_id) {
-                    $account = BankAccount::find($business->payment_account_id);
+                $account = $business->paymentAccount;
+                $account_data = $this->validateBankAccount($request, $account);
+                if ($account) {
                     $account->update($account_data);
                 } else {
                     $account = BankAccount::create($account_data);
+                    $business->payment_account_id = $account->id;
+                    $business->save();
                 }
-                $business->payment_account_id = $account->id;
-                $business->save();
                 break;
         }
         return new SuccessResponse( ucfirst($type) . ' Account updated.');
@@ -109,10 +103,11 @@ class SettingController extends BaseController
     public function update(Request $request, $id)
     {
         $business = Business::find($id);
-
-        $business->update([
-            'scheduling' => $request->scheduling
+        $data = $request->validate([
+            'scheduling' => 'required|bool',
+            'mileage_rate' => 'required|numeric'
         ]);
+        $business->update($data);
         return new SuccessResponse('Business settings updated.');
     }
 

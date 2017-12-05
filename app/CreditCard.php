@@ -14,7 +14,7 @@ class CreditCard extends Model implements ChargeableInterface
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
     protected $hidden = ['number'];
-    protected $appends = ['last_four'];
+    protected $appends = ['last_four', 'expiration_date'];
 
     ///////////////////////////////////////////
     /// Relationship Methods

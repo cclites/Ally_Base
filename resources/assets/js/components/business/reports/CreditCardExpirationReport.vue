@@ -8,14 +8,16 @@
                             <b-col lg="6">
                                 <b-button-toolbar class="mb-1">
                                     <b-input-group size="sm" class="w-30 mx-1" left="Days from now">
-                                        <b-form-input v-model="daysFromNow" type="number"></b-form-input>
+                                        <b-form-input v-model="form.daysFromNow" type="number"></b-form-input>
                                     </b-input-group>
-                                    <b-btn>Search</b-btn>
+                                    <b-btn @click="fetchReportData">Search</b-btn>
                                 </b-button-toolbar>
                             </b-col>
                         </b-row>
                         <b-table :items="cards"
-                                 :fields="fields"></b-table>
+                                 :fields="fields">
+                        </b-table>
+                        <div class="ml-2" v-if="cards.length == 0">No results.</div>
                     </b-col>
                 </b-row>
             </b-card>
@@ -30,8 +32,9 @@
 
         data() {
             return{
+                cards: [],
                 form: new Form({
-                    daysFromNow: this.days,
+                    daysFromNow: this.days
                 }),
                 fields: [
                     {
@@ -55,7 +58,7 @@
             fetchReportData() {
                 this.form.post('/business/reports/credit-cards')
                     .then((response) => {
-                        this.cards = response.data;
+                        this.cards = _.sortBy(response.data, 'user.name');
                     })
             }
         },
