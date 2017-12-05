@@ -1,6 +1,7 @@
 <?php
 namespace App\Reports;
 
+use App\GatewayTransaction;
 use App\Scheduling\AllyFeeCalculator;
 use App\Shift;
 
@@ -64,6 +65,19 @@ class ShiftsReport extends BaseReport
             });
         }
         return $this->rows;
+    }
+
+    public function forTransaction(GatewayTransaction $transaction) {
+        if ($transaction->payment) {
+            $this->query()->whereHas('payment', function($q) use ($transaction) {
+                $q->where('payments.id', $transaction->payment->id);
+            });
+        }
+        elseif ($transaction->deposit) {
+            $this->query()->whereHas('deposits', function($q) use ($transaction) {
+                $q->where('deposits.id', $transaction->deposit->id);
+            });
+        }
     }
 
 }

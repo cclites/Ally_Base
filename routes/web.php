@@ -131,6 +131,7 @@ Route::group([
     Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
     Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');
+    Route::get('reports/reconciliation', 'Business\ReportsController@reconciliation')->name('reports.reconciliation');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
@@ -146,6 +147,8 @@ Route::group([
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
     Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+
+    Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
     Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');

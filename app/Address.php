@@ -34,13 +34,16 @@ class Address extends Model
     {
         if ($forceUpdate || (!$this->latitude && !$this->longitude)) {
             $fullAddress = $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
-            if (!$geocode = Geocode::getCoordinates($fullAddress)) {
+            try {
+                $geocode = Geocode::getCoordinates($fullAddress);
+                $this->update([
+                    'latitude' => $geocode->latitude,
+                    'longitude' => $geocode->longitude,
+                ]);
+            }
+            catch (\Exception $e) {
                 return false;
             }
-            $this->update([
-                'latitude' => $geocode->latitude,
-                'longitude' => $geocode->longitude,
-            ]);
         }
         else {
             $geocode = new GeocodeCoordinates($this->latitude, $this->longitude);
