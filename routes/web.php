@@ -123,6 +123,7 @@ Route::group([
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
+    Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
     Route::get('reports/client_caregivers', 'Business\ReportsController@clientCaregivers')->name('reports.client_caregivers');
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');

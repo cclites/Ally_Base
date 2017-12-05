@@ -306,8 +306,12 @@ class ReportsController extends BaseController
 
     public function creditCardExpiration()
     {
-        $expires_in = 100;
-        $report_date = Carbon::now()->addDays($expires_in);
+        return view('business.reports.cc_expiration', compact('cards'));
+    }
+
+    public function creditCards()
+    {
+        $report_date = Carbon::now()->addDays(request('daysFromNow'));
 
         $cards = CreditCard::with('user')
             ->where('expiration_year', '<=', $report_date->year)
@@ -317,7 +321,6 @@ class ReportsController extends BaseController
                 $card->expires_in = Carbon::now()->diffForHumans($card->expirationDate);
                 return $card;
             });
-
-        return view('business.reports.cc_expiration', compact('cards'));
+        return response()->json($cards);
     }
 }
