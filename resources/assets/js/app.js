@@ -78,6 +78,7 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 Vue.component('client-payments-tab', require('./components/business/clients/ClientPaymentsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 
 Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
 Vue.component('care-plan-list', require('./components/CarePlanList.vue'));

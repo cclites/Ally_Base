@@ -5,6 +5,7 @@ namespace App;
 
 use App\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
+use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,6 +42,15 @@ class CreditCard extends Model implements ChargeableInterface
     public function getLastFourAttribute()
     {
         return substr($this->number, -4);
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getExpirationDateAttribute()
+    {
+        $date = Carbon::parse("$this->expiration_year-$this->expiration_month-01");
+        return $date;
     }
 
     ///////////////////////////////////////////

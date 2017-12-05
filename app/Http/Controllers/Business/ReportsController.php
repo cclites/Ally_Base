@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Caregiver;
+use App\CreditCard;
 use App\Deposit;
 use App\Payment;
 use App\Reports\CaregiverPaymentsReport;
@@ -301,5 +302,22 @@ class ReportsController extends BaseController
         })->get();
 
         return view('business.reports.client_email_missing', compact('clients'));
+    }
+
+    public function creditCardExpiration()
+    {
+        $expires_in = 100;
+        $report_date = Carbon::now()->addDays($expires_in);
+
+        $cards = CreditCard::with('user')
+            ->where('expiration_year', '<=', $report_date->year)
+            ->where('expiration_month', '<=', $report_date->month)
+            ->get()
+            ->map(function ($card) {
+                $card->expires_in = Carbon::now()->diffForHumans($card->expirationDate);
+                return $card;
+            });
+
+        return view('business.reports.cc_expiration', compact('cards'));
     }
 }
