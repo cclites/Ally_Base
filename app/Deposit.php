@@ -8,6 +8,7 @@ class Deposit extends Model
 {
     protected $table = 'deposits';
     protected $guarded = ['id'];
+    protected $appends = ['week'];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -36,5 +37,16 @@ class Deposit extends Model
     public function shifts()
     {
         return $this->belongsToMany(Shift::class, 'deposit_shifts');
+    }
+
+    // Mutators
+
+    public function getWeekAttribute()
+    {
+        $date = $this->created_at->copy()->subWeek();
+        return [
+            'start' => $date->setIsoDate($date->year, $date->weekOfYear)->toDateString(),
+            'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
+        ];
     }
 }
