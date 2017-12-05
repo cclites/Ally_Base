@@ -13,11 +13,14 @@ use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Scheduling\ScheduleCreator;
+use App\Traits\Request\ClientScheduleRequest;
 use DB;
 use Illuminate\Http\Request;
 
 class ClientScheduleController extends BaseController
 {
+    use ClientScheduleRequest;
+
     /**
      * Retrieve aggregated list of events generated from all client schedules
      *
@@ -77,32 +80,21 @@ class ClientScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $data = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date',
-            'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer',
-            'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
-            'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('start_date'))],
-            'care_plan_id' => 'nullable|exists:care_plans,id',
-            'caregiver_id' => 'nullable|integer',
-            'caregiver_rate' => 'nullable|numeric',
-            'provider_fee' => 'nullable|numeric',
-            'notes' => 'nullable',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ], [
-            'bydays.required_if' => 'At least one day of the week is required.',
-        ]);
-
-        list($data['start_date'], $data['end_date']) = filter_dates($data['start_date'], $data['end_date']);
+        $data = $this->validateScheduleStore($request);
         if (!$data['end_date']) {
             $data['end_date'] = Schedule::FOREVER_ENDDATE;
         }
 
         $creator = new ScheduleCreator($data);
         try {
+            DB::beginTransaction();
             $schedule = $creator->make(['business_id' => $this->business()->id]);
             if ($client->schedules()->save($schedule)) {
+                if ($this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
+                    DB::rollBack();
+                    return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                }
+                DB::commit();
                 return new CreatedResponse('The new schedule has been successfully created.');
             }
         }
@@ -131,25 +123,12 @@ class ClientScheduleController extends BaseController
 
         $schedule = Schedule::findOrFail($schedule_id);
 
-        $data = $request->validate([
-            'selected_date' => 'required|date',
-            'end_date' => 'nullable|date',
-            'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer',
-            'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
-            'bydays' => 'required_if:interval_type,weekly,biweekly',
-            'care_plan_id' => 'nullable|exists:care_plans,id',
-            'caregiver_id' => 'nullable|integer',
-            'caregiver_rate' => 'nullable|numeric',
-            'provider_fee' => 'nullable|numeric',
-            'notes' => 'nullable',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ]);
-
-        list($data['selected_date'], $data['end_date']) = filter_dates($data['selected_date'], $data['end_date']);
+        $data = $this->validateScheduleUpdate($request, $schedule);
         if (!$data['end_date']) {
             $data['end_date'] = Schedule::FOREVER_ENDDATE;
         }
+
+        $durationChanged = ($data['duration'] != $schedule->duration);
 
         $creator = new ScheduleCreator($data);
         if (!$creator->hasChangesFrom($schedule)) {
@@ -165,6 +144,11 @@ class ClientScheduleController extends BaseController
 
             if (!$newSchedule = $creator->recreate($schedule)) {
                 throw new \Exception('Unable to create new schedule after closing old schedule.');
+            }
+
+            if ($durationChanged && $this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
+                DB::rollBack();
+                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
             }
 
             DB::commit();
@@ -221,25 +205,18 @@ class ClientScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $data = $request->validate([
-            'start_date' => 'required|date',
-            'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer',
-            'care_plan_id' => 'nullable|exists:care_plans,id',
-            'caregiver_id' => 'nullable|integer',
-            'caregiver_rate' => 'nullable|numeric',
-            'provider_fee' => 'nullable|numeric',
-            'notes' => 'nullable',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ]);
-
-        // Correct $data for use in model
-        $data['start_date'] = filter_date($data['start_date']);
+        $data = $this->validateScheduleStoreSingle($request);
         $data['business_id'] = $this->business()->id;
 
+        DB::beginTransaction();
         $schedule = new Schedule($data);
         $schedule->setSingleEvent($data['start_date'], $data['time'], $data['duration']);
         if ($client->schedules()->save($schedule)) {
+            if ($this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
+                DB::rollBack();
+                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+            }
+            DB::commit();
             return new CreatedResponse('The single event has been created successfully.');
         }
         return new ErrorResponse(500, 'Unable to create event.');
@@ -264,34 +241,32 @@ class ClientScheduleController extends BaseController
 
         $schedule = Schedule::findOrFail($schedule_id);
 
-        $data = $request->validate([
-            'selected_date' => 'required|date',
-            'time' => 'required|date_format:H:i:s',
-            'duration' => 'required|integer',
-            'care_plan_id' => 'nullable|exists:care_plans,id',
-            'caregiver_id' => 'nullable|integer',
-            'caregiver_rate' => 'nullable|numeric',
-            'provider_fee' => 'nullable|numeric',
-            'notes' => 'nullable',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ]);
-
+        $data = $this->validateScheduleUpdateSingle($request, $schedule);
         // Correct $data for use in model
         $selected_date = filter_date($data['selected_date']);
         unset($data['selected_date']);
         $data['business_id'] = $this->business()->id;
 
+        $durationChanged = ($data['duration'] != $schedule->duration);
+
+        DB::beginTransaction();
+
         if ($schedule->isSingle()) {
             $schedule->fill($data);
             $schedule->setSingleEvent($selected_date, $data['time'], $data['duration']);
             $schedule->save();
+
+            if ($durationChanged && $this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
+                DB::rollBack();
+                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+            }
+
+            DB::commit();
             return new SuccessResponse('The selected date has been updated.', ['old_id' => $schedule->id, 'new_id' => $schedule->id]);
         }
 
         // Recurring: Create a schedule exception then a new single event with the new data
         try {
-            DB::beginTransaction();
-
             if (!$schedule->createException($selected_date)) {
                 throw new \Exception('Schedule exception creation failed.');
             }
@@ -301,6 +276,11 @@ class ClientScheduleController extends BaseController
             $newSchedule->setSingleEvent($selected_date, $data['time'], $data['duration']);
             if (!$newSchedule->save()) {
                 throw new \Exception('Unable to create new single event after exception.');
+            }
+
+            if ($this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
+                DB::rollBack();
+                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
             }
 
             DB::commit();

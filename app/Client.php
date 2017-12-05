@@ -32,6 +32,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         'ssn',
         'onboard_status',
         'fee_override',
+        'max_weekly_hours',
     ];
 
     ///////////////////////////////////////////
@@ -157,10 +158,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
      *
      * @param string|\DateTime $start
      * @param string|\DateTime $end
+     * @param bool $onlyStartTime  Only include events matching the start time within the date range, otherwise include events that match start or end time
      *
      * @return array
      */
-    public function getEvents($start, $end)
+    public function getEvents($start, $end, $onlyStartTime = false)
     {
         $aggregator = new ScheduleAggregator();
         foreach($this->schedules as $schedule) {
@@ -168,7 +170,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
             $aggregator->add($title, $schedule);
         }
 
-        return $aggregator->events($start, $end);
+        return $aggregator->onlyStartTime($onlyStartTime)->events($start, $end);
     }
 
     public function hasActiveShift()

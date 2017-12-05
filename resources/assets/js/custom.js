@@ -12,6 +12,15 @@ $(function () {
     jQuery(document).on('click', '.mega-dropdown', function (e) {
         e.stopPropagation()
     });
+
+    // ==============================================================
+    // Ally Specific Custom JQuery
+    // ==============================================================
+    $('.nav-pills > .nav-item a.dropdown-item').click(function() {
+        var text = $(this).text();
+        $(this).closest('.nav-item').find('.tab-name').text(text);
+    });
+
     // ============================================================== 
     // This is for the top header part and sidebar part
     // ==============================================================  

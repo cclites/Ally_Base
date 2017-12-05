@@ -66,12 +66,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        $('.nav-item a.dropdown-item').click(function() {
-            var text = $(this).text();
-            $(this).closest('.nav-item').find('.tab-name').text(text);
-        });
-    </script>
-@endpush
