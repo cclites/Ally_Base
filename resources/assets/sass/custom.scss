@@ -47,9 +47,10 @@
   padding-bottom: 15px;
 }
 
-/* Datepicker padding */
+/* Datepicker */
 .datepicker {
   padding: .5rem .75rem;
+  z-index: 1000 !important;
 }
 
 /* Signature */
@@ -62,3 +63,4 @@
 td .fc-event-container {
   padding: 0 2px;
 }
+
