@@ -111,7 +111,7 @@
                 axios.get('/admin/charges/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.items = response.data.map(function(item) {
-                            item.name = item.client.nameLastFirst;
+                            item.name = (item.client) ? item.client.nameLastFirst : item.business.name;
                             item.transaction_response = (item.transaction) ? item.transaction.response_text : '';
                             item.transaction_id = (item.transaction) ? item.transaction.transaction_id : '';
                             return item;
