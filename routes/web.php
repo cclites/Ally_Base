@@ -190,8 +190,10 @@ Route::group([
     Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
+    Route::get('shifts/data', 'Admin\ShiftsController@data')->name('shifts.data');
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
+    Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
 
 });
 
