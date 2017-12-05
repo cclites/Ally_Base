@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\Deposit;
+use App\GatewayTransaction;
 use App\Payment;
 use App\PaymentQueue;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
+use App\Reports\ProviderReconciliationReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
@@ -151,6 +153,16 @@ class ReportsController extends BaseController
         return view('business.reports.overtime', compact('caregivers'));
     }
 
+    public function reconciliation(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new ProviderReconciliationReport($this->business());
+            return $report->rows();
+        }
+
+        return view('business.reports.reconciliation');
+    }
+
     public function deposits()
     {
         $deposits = Deposit::where('business_id', $this->business()->id)
@@ -240,11 +252,18 @@ class ReportsController extends BaseController
     }
 
     public function shifts(Request $request) {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id);
+
+        if ($request->has('start_date') || $request->has('end_date')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
+            $report->between($startDate, $endDate);
+        }
+        if ($request->has('transaction_id')) {
+            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
+
         return $report->rows();
     }
 

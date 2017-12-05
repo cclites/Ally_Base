@@ -13,6 +13,16 @@ class GatewayTransaction extends Model
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'transaction_id');
+    }
+
+    public function deposit()
+    {
+        return $this->hasOne(Deposit::class, 'transaction_id');
+    }
+
     public function history()
     {
         return $this->hasMany(GatewayTransactionHistory::class, 'internal_transaction_id');
