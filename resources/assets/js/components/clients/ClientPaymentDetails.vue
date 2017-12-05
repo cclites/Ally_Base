@@ -18,37 +18,59 @@
             <template slot="care_time" scope="data">
                 {{ formatTime(data.item.checked_in_time) }} - {{ formatTime(data.item.checked_out_time) }}
             </template>
-            <template slot="client_name" scope="data">
-                {{ data.item.client.name }}
+            <template slot="activities" scope="data">
+                <div v-for="activity in activities(data.item.activities)" :key="activity">{{ activity }}</div>
             </template>
-            <template slot="amount" scope="data">
-                &dollar;{{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.roundedShiftLength) }}
+            <template slot="caregiver_name" scope="data">
+                {{ data.item.caregiver.name }}
             </template>
         </b-table>
     </b-card>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
         props: ['payment'],
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
 
         data() {
-            return{
+            return {
                 items: this.payment.shifts,
                 fields: [
-                    { key: 'checked_in_time', label: 'Care Date' },
-                    { key: 'care_time', label: 'Care Time' },
-                    { key: 'roundedShiftLength', label: 'Hours of Care Received' },
-                    { key: 'client_name', label: 'Client Name' },
-                    { key: 'amount', label: 'Amount' }
+                    {
+                        key: 'checked_in_time',
+                        label: 'Care Date'
+                    },
+                    {
+                        key: 'care_time',
+                        label: 'Care Time'
+                    },
+                    {
+                        key: 'roundedShiftLength',
+                        label: 'Hours of Care Received'
+                    },
+                    {
+                        key: 'caregiver_name'
+                    },
+                    {
+                        key: 'activities'
+                    },
+                    {
+                        key: 'shift_total',
+                        label: 'Amount',
+                        formatter: (value) => { return this.moneyFormat(value) }
+                    }
                 ]
+            }
+        },
+
+        methods: {
+            activities(activities) {
+                return _.uniq(_.map(_.sortBy(activities, 'name'), 'name'));
             }
         }
     }

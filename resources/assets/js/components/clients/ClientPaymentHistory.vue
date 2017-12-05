@@ -20,10 +20,12 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
         props: ['client'],
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
 
         data() {
             return{
@@ -34,7 +36,7 @@
                     {
                         key: 'amount',
                         label: 'Amount',
-                        formatter: (value) => { return numeral(value).format('$0,0.00') }
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     { key: 'method', label: 'Type' },
                     'actions'
