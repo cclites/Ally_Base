@@ -43,7 +43,7 @@ class Deposit extends Model
 
     public function getWeekAttribute()
     {
-        $date = $this->created_at->subWeek();
+        $date = $this->created_at->copy()->subWeek();
         return [
             'start' => $date->setIsoDate($date->year, $date->weekOfYear)->toDateString(),
             'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
