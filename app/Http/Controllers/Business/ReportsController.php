@@ -22,7 +22,17 @@ class ReportsController extends BaseController
 {
     use ActiveBusiness;
 
+    public function medicaidReport(Request $request)
+    {
+        return view('business.reports.medicaid', $this->medicaidData($request));
+    }
+
     public function medicaid(Request $request)
+    {
+        return response()->json($this->medicaidData($request));
+    }
+
+    private function medicaidData(Request $request)
     {
         if (!$offset = $request->input('offset')) {
             $offset = "America/New_York";
@@ -68,11 +78,7 @@ class ReportsController extends BaseController
                 })
         ];
 
-        if ($request->expectsJson()) {
-            return response()->json(compact('totals', 'shifts'));
-        }
-
-        return view('business.reports.medicaid', compact('totals', 'shifts', 'dates'));
+        return compact('totals', 'shifts', 'dates');
     }
 
     public function overtime(Request $request)

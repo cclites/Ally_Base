@@ -174,7 +174,7 @@
         methods: {
             reloadData() {
                 this.fetchingData = true;
-                axios.get('/business/reports/medicaid?start_date='+this.form.start_date+'&end_date='+this.form.end_date)
+                axios.post('/business/reports/medicaid', { start_date: this.form.start_date, end_date: this.form.end_date })
                     .then(response => {
                         this.reportTotals = response.data.totals;
                         this.items = response.data.shifts;
