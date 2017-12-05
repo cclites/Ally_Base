@@ -203,6 +203,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         switch($this->client_type) {
             case 'private_pay':
             case 'LTCI':
+            case 'medicaid':
+            case 'VA':
                 if (!$method) $method = $this->getPaymentMethod();
                 if ($method instanceof BankAccount) {
                     return 'ACH';
