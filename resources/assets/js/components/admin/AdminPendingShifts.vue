@@ -64,7 +64,7 @@
 
         data() {
             return {
-                sortBy: null,
+                sortBy: 'shift_time',
                 sortDesc: false,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),

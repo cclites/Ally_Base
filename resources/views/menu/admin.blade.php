@@ -15,7 +15,7 @@
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-money"></i><span class="hide-menu">Charges</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.charges.pending_shifts') }}">Pending Shifts</a></li>
-        <li><a href="{{ route('admin.charges.pending_payments') }}">Pending Charges</a></li>
+        <li><a href="{{ route('admin.charges.pending') }}">Pending Charges</a></li>
         <li><a href="{{ route('admin.charges') }}">Charges Report</a></li>
         <li><a href="{{ route('admin.transactions') }}">Transactions Report</a></li>
     </ul>
