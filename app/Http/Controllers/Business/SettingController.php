@@ -109,10 +109,11 @@ class SettingController extends BaseController
     public function update(Request $request, $id)
     {
         $business = Business::find($id);
-
-        $business->update([
-            'scheduling' => $request->scheduling
+        $data = $request->validate([
+            'scheduling' => 'required|bool',
+            'mileage_rate' => 'required|numeric'
         ]);
+        $business->update($data);
         return new SuccessResponse('Business settings updated.');
     }
 
