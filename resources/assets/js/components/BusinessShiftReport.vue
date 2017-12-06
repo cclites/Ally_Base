@@ -149,6 +149,7 @@
                              :sort-by.sync="sortBy"
                              :sort-desc.sync="sortDesc"
                              class="shift-table"
+                             :foot-clone="shiftHistoryItems.length > 1"
                     >
                         <template slot="Day" scope="data">
                             {{ dayFormat(data.value) }}
