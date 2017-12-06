@@ -50,6 +50,7 @@ class CreditCard extends Model implements ChargeableInterface
     public function getExpirationDateAttribute()
     {
         $date = Carbon::parse("$this->expiration_year-$this->expiration_month-01");
+        $date->endOfMonth();
         return $date;
     }
 
