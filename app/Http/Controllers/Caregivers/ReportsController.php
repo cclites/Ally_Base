@@ -32,15 +32,25 @@ class ReportsController extends Controller
     {
         $caregiver = Caregiver::find(auth()->id());
 
-        $deposits = Deposit::where('caregiver_id', $caregiver->id)
-            ->get();
+        $deposits = Deposit::with(['shifts.client', 'shifts' => function ($query) {
+            $query->orderBy('checked_in_time');
+        }])
+            ->where('caregiver_id', $caregiver->id)
+            ->get()
+            ->map(function ($deposit) {
+                $deposit->start = $deposit->shifts->first()->checked_in_time->toDateString();
+                $deposit->end = $deposit->shifts->last()->checked_in_time->toDateString();
+                return $deposit;
+            });
 
         return view('caregivers.reports.payment_history', compact('caregiver', 'deposits'));
     }
 
     public function paymentDetails($id)
     {
-        $payment = Payment::with('shifts.client')->find($id);
-        return view('caregivers.reports.payment_details', compact('payment'));
+        $deposit = Deposit::with(['shifts.client', 'shifts' => function ($query) {
+            $query->orderBy('checked_in_time');
+        }])->find($id);
+        return view('caregivers.reports.payment_details', compact('deposit'));
     }
 }

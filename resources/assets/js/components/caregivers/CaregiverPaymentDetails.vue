@@ -22,13 +22,13 @@
 <script>
     import FormatsDates from '../../mixins/FormatsDates'
     export default {
-        props: ['payment'],
+        props: ['deposit'],
 
         mixins: [FormatsDates],
 
         data() {
             return{
-                items: this.payment.shifts,
+                items: this.deposit.shifts,
                 fields: [
                     { key: 'checked_in_time', label: 'Care Date' },
                     { key: 'care_time', label: 'Care Time' },
