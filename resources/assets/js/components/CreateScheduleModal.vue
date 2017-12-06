@@ -38,13 +38,6 @@
                         <b-col lg="12">
                             <b-form-group label="Start Date" label-for="date">
                                 <date-picker v-model="form.start_date"></date-picker>
-                                <b-form-input
-                                        type="text"
-                                        id="create-start-date"
-                                        class="datepicker"
-                                        v-model="form.start_date"
-                                >
-                                </b-form-input>
                                 <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
                             </b-form-group>
                         </b-col>
