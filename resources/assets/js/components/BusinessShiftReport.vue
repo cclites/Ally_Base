@@ -26,13 +26,14 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
-                        &nbsp;&nbsp;
-                        <b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
@@ -108,7 +109,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -149,9 +150,10 @@
                              :sort-by.sync="sortBy"
                              :sort-desc.sync="sortDesc"
                              class="shift-table"
+                             :foot-clone="shiftHistoryItems.length > 1"
                     >
                         <template slot="Day" scope="data">
-                            {{ dayFormat(data.value) }}
+                            {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
                         </template>
                         <template slot="Client" scope="row">
                             <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
@@ -163,13 +165,16 @@
                             <span v-if="data.value" style="color: green">
                                 <i class="fa fa-check-square-o"></i>
                             </span>
-                                    <span v-else style="color: darkred">
+                            <span v-else-if="data.value === undefined"></span>
+                            <span v-else style="color: darkred">
                                 <i class="fa fa-times-rectangle-o"></i>
                             </span>
                         </template>
                         <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                            <span v-if="row.item.id">
+                                <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                            </span>
                         </template>
                     </b-table>
                 </b-card>
@@ -369,6 +374,7 @@
                 client_id: "",
                 clients: [],
                 caregivers: [],
+                showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
                 detailsModal: false,
@@ -422,7 +428,7 @@
             },
             shiftHistoryItems() {
                 let items = this.items.shifts;
-                return items.map(function(item) {
+                items = items.map(function(item) {
                     return {
                         'id': item.id,
                         'client_id': item.client_id,
@@ -447,31 +453,58 @@
                         'Type': item.hours_type,
                     }
                 });
+                items.push({
+                    '_rowVariant': 'info',
+                    'Day': 'Total',
+                    'Hours': this.shiftTotals.hours,
+                    'Mileage': this.shiftTotals.mileage,
+                    'CG Total': this.shiftTotals.caregiver_total,
+                    'Reg Total': this.shiftTotals.provider_total,
+                    'Ally Total': this.shiftTotals.ally_total,
+                    'Mileage Costs': this.shiftTotals.mileage_costs,
+                    'Other Expenses': this.shiftTotals.other_expenses,
+                    'Shift Total': this.shiftTotals.shift_total,
+                })
+                return items;
             },
             clientTotals() {
-                let component = this;
-                if (this.items.clientCharges.length === 0) return [];
-                return this.items.clientCharges.reduce(function(totals, item) {
-                    console.log(totals, item);
+                if (this.items.clientCharges.length === 0) return {};
+                return this.items.clientCharges.reduce((totals, item) => {
                     return {
-                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
-                        total: (component.parseFloat(totals.total) + component.parseFloat(item.total)).toFixed(2),
-                        caregiver_total: (component.parseFloat(totals.caregiver_total) + component.parseFloat(item.caregiver_total)).toFixed(2),
-                        provider_total: (component.parseFloat(totals.provider_total) + component.parseFloat(item.provider_total)).toFixed(2),
-                        ally_total: (component.parseFloat(totals.ally_total) + component.parseFloat(item.ally_total)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
+                        total: (this.parseFloat(totals.total) + this.parseFloat(item.total)).toFixed(2),
+                        caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
+                        provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
+                        ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
                     }
                 })
             },
             caregiverTotals() {
-                let component = this;
-                if (this.items.caregiverPayments.length === 0) return [];
-                return this.items.caregiverPayments.reduce(function(totals, item) {
-                    console.log(totals, item);
+                if (this.items.caregiverPayments.length === 0) return {};
+                return this.items.caregiverPayments.reduce((totals, item) => {
                     return {
-                        amount: (component.parseFloat(totals.amount) + component.parseFloat(item.amount)).toFixed(2),
-                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
+                        amount: (this.parseFloat(totals.amount) + this.parseFloat(item.amount)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
                     }
                 })
+            },
+            shiftTotals() {
+                if (this.items.shifts.length === 0) return {};
+                return this.items.shifts.reduce((totals, item) => {
+                    return {
+                        hours: (this.parseFloat(totals.roundedShiftLength) + this.parseFloat(item.roundedShiftLength)).toFixed(2),
+                        caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
+                        provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
+                        ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
+                        shift_total: (this.parseFloat(totals.shift_total) + this.parseFloat(item.shift_total)).toFixed(2),
+                        mileage: (this.parseFloat(totals.mileage) + this.parseFloat(item.mileage)).toFixed(2),
+                        mileage_costs: (this.parseFloat(totals.mileage_costs) + this.parseFloat(item.mileage_costs)).toFixed(2),
+                        other_expenses: (this.parseFloat(totals.other_expenses) + this.parseFloat(item.other_expenses)).toFixed(2),
+                    }
+                })
+            },
+            summaryButtonText() {
+                return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             }
         },
 
@@ -496,6 +529,8 @@
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                    let showSummary = this.getLocalStorage('showSummary');
+                    if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
                 // Global query information
@@ -615,6 +650,10 @@
                     case 'holiday':
                         return 'HOL';
                 }
+            },
+
+            showHideSummary() {
+                this.showSummary = !this.showSummary;
             }
         },
 
@@ -639,7 +678,10 @@
             },
             filteredFields(val) {
                 this.setLocalStorage('fields', JSON.stringify(val));
-            }
+            },
+            showSummary(val) {
+                this.setLocalStorage('showSummary', JSON.stringify(val));
+            },
         }
     }
 </script>
@@ -647,5 +689,10 @@
 <style>
     table {
         font-size: 14px;
+    }
+    .table-info, .table-info>td, .table-info>th {
+        font-weight: bold;
+        font-size: 13px;
+        background-color: #ecf7f9;
     }
 </style>
