@@ -92,17 +92,18 @@
             </div>
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
-            <div class="row">
-                <div class="col-12 col-lg-6 col-xlg-4">
-                    <phone-number title="Service Number" type="evv" action="{{ route('business.clients.phone', [$client->id, 'evv']) }}" :phone="{{ json_phone($client->user, 'evv') }}"></phone-number>
-                </div>
-                <div class="col-12 col-lg-6 col-xlg-4">
-                    <phone-number title="Billing Number" type="billing" action="{{ route('business.clients.phone', [$client->id, 'billing']) }}" :phone="{{ json_phone($client->user, 'billing') }}"></phone-number>
-                </div>
-                <div class="col-12 col-lg-6 col-xlg-4">
-                    <phone-number title="Home Number" type="home" action="{{ route('business.clients.phone', [$client->id, 'home']) }}" :phone="{{ json_phone($client->user, 'home') }}"></phone-number>
-                </div>
-            </div>
+            <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
+            {{--<div class="row">--}}
+                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
+                    {{--<phone-number title="Service Number" type="evv" action="{{ route('business.clients.phone', [$client->id, 'evv']) }}" :phone="{{ json_phone($client->user, 'evv') }}"></phone-number>--}}
+                {{--</div>--}}
+                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
+                    {{--<phone-number title="Billing Number" type="billing" action="{{ route('business.clients.phone', [$client->id, 'billing']) }}" :phone="{{ json_phone($client->user, 'billing') }}"></phone-number>--}}
+                {{--</div>--}}
+                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
+                    {{--<phone-number title="Home Number" type="home" action="{{ route('business.clients.phone', [$client->id, 'home']) }}" :phone="{{ json_phone($client->user, 'home') }}"></phone-number>--}}
+                {{--</div>--}}
+            {{--</div>--}}
         </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
             <business-client-caregivers :client_id="{{ $client->id }}"
