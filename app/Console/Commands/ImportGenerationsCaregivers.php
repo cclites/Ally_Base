@@ -47,10 +47,12 @@ class ImportGenerationsCaregivers extends BaseImport
 
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
                 $data['lastname'] = $this->getValue($objPHPExcel, 'Last Name', $row);
-                $data['ssn'] = $this->getValue($objPHPExcel, 'SSN', $row);
+                $data['ssn'] = str_pad($this->getValue($objPHPExcel, 'SSN', $row), 9, '0', STR_PAD_LEFT);
                 $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
-                $data['date_of_birth'] = $this->getValue($objPHPExcel, 'Date of Birth', $row);
+                $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
                 $data['password'] = bcrypt(str_random(12));
+                $data['hire_date'] = filter_date($this->getValue($objPHPExcel, 'Hire Date', $row));
+                $data['gender'] = $this->getValue($objPHPExcel, 'Gender', $row);
                 $addressData['address1'] = $this->getValue($objPHPExcel, 'Address1', $row);
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);

@@ -22,7 +22,7 @@
                 </b-row>
             </b-col>
         </b-row>
-        <full-calendar ref="calendar" :events="filteredEventsUrl" default-view="month" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
+        <full-calendar ref="calendar" :events="filteredEventsUrl" :default-view="defaultView" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
 
         <create-schedule-modal :model.sync="createModal"
                                :selected-event="selectedEvent"
@@ -42,8 +42,13 @@
 
     export default {
         props: {
-            'caregiver': {},
-            'client': {},
+            'caregiver': Object,
+            'client': Object,
+            'defaultView': {
+                default() {
+                    return 'month';
+                }
+            }
         },
 
         data() {
@@ -85,6 +90,11 @@
 
         methods: {
             loadFiltersData() {
+                axios.get('/business/settings?json=1').then(response => {
+                    if (response.data.calendar_caregiver_filter === 'unassigned') {
+                        this.filterCaregiverId = 0;
+                    }
+                });
                 axios.get('/business/clients').then(response => this.clients = response.data);
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
             },

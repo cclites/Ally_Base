@@ -9,9 +9,35 @@ use App\Rules\PhonePossible;
 use App\User;
 use Illuminate\Http\Request;
 
-class PhoneController
+class PhoneController extends Controller
 {
-    public function update(Request $request, User $user, $type, $reference = 'The phone number')
+    public function index()
+    {
+        $numbers = PhoneNumber::where('user_id', auth()->id())->get();
+        return response()->json($numbers);
+    }
+
+    public function store()
+    {
+        $data = request()->validate([
+            'number' => ['required', new PhonePossible()],
+            'extension' => 'nullable|numeric',
+            'type' => 'required'
+        ]);
+
+        $user = request()->filled('user_id') ? User::find(request('user_id')) : auth()->user();
+
+        $phone = new PhoneNumber();
+        $phone->type = $data['type'];
+        $phone->user_id = $user->id;
+        $phone->input($data['number'], $data['extension']);
+        if ($phone = $user->phoneNumbers()->save($phone)) {
+            return response()->json($phone);
+        }
+        return new ErrorResponse(500, 'The phone number could not be saved.');
+    }
+
+    public function upsert(Request $request, User $user, $type, $reference = 'The phone number')
     {
         $data = $request->validate([
             'number' => ['required', new PhonePossible()],
@@ -25,8 +51,7 @@ class PhoneController
             if ($phone->input($data['number'], $data['extension'])->save()) {
                 return new SuccessResponse($reference . ' has been saved.');
             }
-        }
-        else {
+        } else {
             $phone = new PhoneNumber();
             $phone->type = $type;
             $phone->input($data['number'], $data['extension']);
@@ -36,5 +61,35 @@ class PhoneController
         }
 
         return new ErrorResponse(500, $reference . ' could not be saved.');
+    }
+
+    public function update($id)
+    {
+        $data = request()->validate([
+            'number' => ['required', new PhonePossible()],
+            'extension' => 'nullable|numeric',
+            'type' => 'required'
+        ]);
+
+        if (!isset($data['extension'])) $data['extension'] = null;
+
+        $phone = PhoneNumber::find($id);
+        $this->authorize('update', $phone);
+
+        $phone->type = request('type');
+        if ($phone->input($data['number'], $data['extension'])->save()) {
+            return new SuccessResponse('The phone number has been saved.');
+        }
+
+        return new ErrorResponse(500, 'The phone number could not be saved.');
+    }
+
+    public function destroy($id)
+    {
+        $number = PhoneNumber::find($id);
+        $this->authorize('delete', $number);
+
+        PhoneNumber::destroy($id);
+        return new SuccessResponse('Phone number deleted.');
     }
 }

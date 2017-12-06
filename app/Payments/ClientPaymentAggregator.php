@@ -43,8 +43,8 @@ class ClientPaymentAggregator
     {
         $this->client = $client;
         $this->method = $client->getPaymentMethod();
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        $this->startDate = $startDate->copy()->setTimezone('UTC');
+        $this->endDate = $endDate->copy()->setTimezone('UTC');
 
         $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE])
             ->whereNull('payment_id')
@@ -76,6 +76,15 @@ class ClientPaymentAggregator
         $payment->load('client');
 
         return $payment;
+    }
+
+    public function getAllPendingShifts()
+    {
+        return Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE, Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_APPROVAL])
+            ->whereNull('payment_id')
+            ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
+            ->where('client_id', $this->client->id)
+            ->get();
     }
 
     public function getShifts()

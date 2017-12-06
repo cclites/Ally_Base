@@ -37,13 +37,7 @@
                     <b-row>
                         <b-col lg="12">
                             <b-form-group label="Start Date" label-for="date">
-                                <b-form-input
-                                        type="text"
-                                        id="create-start-date"
-                                        class="datepicker"
-                                        v-model="form.start_date"
-                                >
-                                </b-form-input>
+                                <date-picker v-model="form.start_date"></date-picker>
                                 <input-help :form="form" field="date" text="Confirm the starting date."></input-help>
                             </b-form-group>
                         </b-col>
@@ -208,13 +202,7 @@
                                 </p>
                             </div>
                             <b-form-group label="End date" label-for="end_date">
-                                <b-form-input
-                                        id="create-end-date"
-                                        class="datepicker"
-                                        type="text"
-                                        v-model="form.end_date"
-                                >
-                                </b-form-input>
+                                <date-picker v-model="form.end_date"></date-picker>
                                 <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
                             </b-form-group>
                         </b-col>
@@ -241,9 +229,10 @@
 
 <script>
     import ScheduleForm from '../mixins/ScheduleForm';
+    import DatePicker from "./DatePicker";
 
     export default {
-     
+        components: {DatePicker},
         props: {
             client: {},
             model: {},
@@ -258,23 +247,7 @@
         },
 
         mounted() {
-            let startDate = jQuery('#create-start-date');
-            let endDate = jQuery('#create-end-date');
-            let component = this;
-            startDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function() {
-                component.form.start_date = startDate.val();
-            });
-            endDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function() {
-                component.form.end_date = endDate.val();
-            });
+
         },
 
         methods: {

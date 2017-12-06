@@ -1,29 +1,57 @@
 <template>
-    <b-card title="Business Settings">
+    <b-card
+            header="Business Settings"
+            header-text-variant="white"
+            header-bg-variant="info"
+    >
         <b-row>
             <b-col lg="6">
-                <b-list-group>
-                    <b-list-group-item>
-                        <b-form-group label="Schedules" horizontal="true" class="mb-0">
-                            <b-form-radio-group v-model="scheduling"
-                                                :options="options"
-                                                size="sm"
-                                                name="radiosSm">
-                            </b-form-radio-group>
-                        </b-form-group>
+                <b-form-group label="Scheduling" label-for="scheduling">
+                    <b-form-select id="scheduling" 
+                                   v-model="form.scheduling"
+                    >
+                        <option value="1">Enabled</option>
+                        <option value="0">Disabled</option>
+                    </b-form-select>
+                    <input-help :form="form" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
+                </b-form-group>
 
-                    </b-list-group-item>
-                    <b-list-group-item>
-                        <b-form-group horizontal label="Mileage Rate">
-                            <b-form-input type="text" v-model="mileageRate"></b-form-input>
-                        </b-form-group>
-                    </b-list-group-item>
-                    <b-list-group-item>
-                        <b-form-group>
-                            <b-button @click="update" variant="info">Save</b-button>
-                        </b-form-group>
-                    </b-list-group-item>
-                </b-list-group>
+                <b-form-group label="Mileage Rate" label-for="mileageRate">
+                    <b-form-input type="number"
+                                  step="any"
+                                  id="mileageRate"
+                                  v-model="form.mileage_rate"
+                    >
+                    </b-form-input>
+                    <input-help :form="form" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
+                </b-form-group>
+            </b-col>
+            <b-col lg="6">
+                <b-form-group label="Calendar Default View" label-for="calendar_default_view">
+                    <b-form-select id="calendar_default_view"
+                                   v-model="form.calendar_default_view"
+                    >
+                        <option value="month">Month</option>
+                        <option value="agendaWeek">Week</option>
+                    </b-form-select>
+                    <input-help :form="form" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
+                </b-form-group>
+                <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
+                    <b-form-select id="calendar_caregiver_filter"
+                                   v-model="form.calendar_caregiver_filter"
+                    >
+                        <option value="all">All Caregivers</option>
+                        <option value="unassigned">Unassigned Shifts</option>
+                    </b-form-select>
+                    <input-help :form="form" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="12">
+                <b-form-group>
+                    <b-button @click="update" variant="info">Save</b-button>
+                </b-form-group>
             </b-col>
         </b-row>
     </b-card>
@@ -34,26 +62,24 @@
 
 <script>
     export default {
-        props: ['business'],
+        props: {
+            'business': Object,
+        },
 
         data() {
-            return{
-                scheduling: this.business.scheduling,
-                mileageRate: this.business.mileage_rate,
-                options: [
-                    { text: 'Enabled', value: 1 },
-                    { text: 'Disabled', value: 0 }
-                ]
+            return {
+                form: new Form({
+                    scheduling: this.business.scheduling,
+                    mileage_rate: this.business.mileage_rate,
+                    calendar_default_view: this.business.calendar_default_view,
+                    calendar_caregiver_filter: this.business.calendar_caregiver_filter,
+                }),
             }
         },
 
         methods: {
             update() {
-                let form = new Form({
-                    scheduling: this.scheduling,
-                    mileage_rate: this.mileageRate
-                });
-                form.put('/business/settings/' + this.business.id);
+                this.form.put('/business/settings/' + this.business.id);
             }
         }
     }

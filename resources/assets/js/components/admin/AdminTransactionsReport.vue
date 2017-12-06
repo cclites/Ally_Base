@@ -29,6 +29,9 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
             >
+                <template slot="actions" scope="row">
+                    <b-btn size="sm" :href="'/admin/transactions/' + row.item.id">View Transaction Details</b-btn>
+                </template>
             </b-table>
         </div>
     </b-card>
@@ -76,6 +79,7 @@
                         key: 'response_text',
                         sortable: true,
                     },
+                    'actions'
                 ]
             }
         },

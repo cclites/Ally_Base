@@ -76,6 +76,8 @@ class AllyFeeCalculator
         switch($client->client_type) {
             case 'private_pay':
             case 'LTCI':
+            case 'medicaid':
+            case 'VA':
                 if (!$paymentMethod) {
                     $paymentMethod = $client->getPaymentMethod();
                     if (!$paymentMethod) $paymentMethod = new CreditCard();
