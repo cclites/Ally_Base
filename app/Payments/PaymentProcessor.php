@@ -108,17 +108,24 @@ class PaymentProcessor
         $businessPayment = new BusinessPaymentAggregator($this->business, $this->startDate, $this->endDate);
 
         // Separate Provider Clients
-        $clientsUsingProviderPayment = $businessPayment->getClientsUsingProviderPayment();
-        $clientsUsingProviderPaymentIds = $clientsUsingProviderPayment->pluck('id')->toArray();
         $clientsNotUsingProviderPayment = $this->business->clients()
-            ->whereNotIn('id', $clientsUsingProviderPaymentIds)
+            ->whereNotIn('id', $businessPayment->getClientIdsUsingProviderPayment())
             ->get();
 
+        $payments = [];
+
+        $payment = $businessPayment->getPayment();
+        if ($payment->amount) {
+            $payments[] = $payment;
+        }
+
         // Process Payments for Clients Not Using Provider Payment Method
-        $payments = [$businessPayment->getPayment()];
         foreach($clientsNotUsingProviderPayment as $client) {
             $clientPayment = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
-            $payments[] = $clientPayment->getPayment();
+            $payment = $clientPayment->getPayment();
+            if ($payment->amount) {
+                $payments[] = $payment;
+            }
         }
 
         return $payments;
@@ -135,10 +142,12 @@ class PaymentProcessor
         foreach($this->business->clients as $client) {
             $clientPayment = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
             $payment = $clientPayment->getPayment();
-
-            // Add shift details and payment method
-
-            $payments[] = $payment;
+            if ($payment->amount) {
+                // Add shift details and payment method
+                $payment->total_shifts = $clientPayment->getAllPendingShifts()->count();
+                $payment->unauthorized_shifts = $payment->total_shifts - $clientPayment->getShifts()->count();
+                $payments[] = $payment;
+            }
         }
 
         return $payments;

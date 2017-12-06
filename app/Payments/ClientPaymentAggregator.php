@@ -78,6 +78,15 @@ class ClientPaymentAggregator
         return $payment;
     }
 
+    public function getAllPendingShifts()
+    {
+        return Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE, Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_APPROVAL])
+            ->whereNull('payment_id')
+            ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
+            ->where('client_id', $this->client->id)
+            ->get();
+    }
+
     public function getShifts()
     {
         return $this->shifts;
