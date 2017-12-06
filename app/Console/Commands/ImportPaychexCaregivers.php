@@ -47,10 +47,12 @@ class ImportPaychexCaregivers extends BaseImport
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
                 $data['lastname'] = $this->getValue($objPHPExcel, 'Last Name', $row);
                 $this->output->writeln('Found caregiver: ' . $data['firstname'] . ' ' . $data['lastname']);
-                $data['ssn'] = $this->getValue($objPHPExcel, 'SSN', $row);
-//                $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
-//                $data['date_of_birth'] = $this->getValue($objPHPExcel, 'Date of Birth', $row);
+                $data['ssn'] = str_pad($this->getValue($objPHPExcel, 'SSN', $row), 9, '0', STR_PAD_LEFT);
+                $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
+                $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
                 $data['password'] = bcrypt(str_random(12));
+                $data['hire_date'] = filter_date($this->getValue($objPHPExcel, 'Hire Date', $row));
+                $data['gender'] = $this->getValue($objPHPExcel, 'Gender', $row);
                 $addressData['address1'] = $this->getValue($objPHPExcel, 'Address 1', $row);
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address 2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);
