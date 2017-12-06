@@ -3,5 +3,5 @@
 @section('title', 'Schedule')
 
 @section('content')
-    <business-schedule></business-schedule>
+    <business-schedule default-view="{{ $business->calendar_default_view }}"></business-schedule>
 @endsection
