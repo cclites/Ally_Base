@@ -32,5 +32,34 @@ class TransactionsController extends Controller
         return $transactions;
     }
 
+    public function show(GatewayTransaction $transaction)
+    {
+        $transaction->load(['payment', 'deposit', 'history']);
+
+        $user = null;
+        $userType = null;
+        if ($payment = $transaction->payment) {
+            if ($payment->client) {
+                $userType = 'client';
+                $user = $payment->client;
+            }
+            elseif ($payment->business) {
+                $userType = 'business';
+                $user = $payment->business;
+            }
+        }
+        if ($deposit = $transaction->deposit) {
+            if ($deposit->caregiver) {
+                $userType = 'caregiver';
+                $user = $deposit->caregiver;
+            }
+            elseif ($deposit->business) {
+                $userType = 'business';
+                $user = $deposit->business;
+            }
+        }
+
+        return view('admin.transactions.show', compact('transaction', 'user', 'userType'));
+    }
 
 }

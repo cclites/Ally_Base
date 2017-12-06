@@ -176,7 +176,10 @@ Route::group([
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
-    Route::get('charges/pending_payments', 'Admin\ChargesController@pendingPayments')->name('charges.pending_payments');
+    Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
+    Route::get('charges/pending/{business}', 'Admin\ChargesController@pendingData')->name('charges.pending.data');
+    Route::get('charges/pending/{business}/per-client', 'Admin\ChargesController@pendingDataPerClient')->name('charges.pending.data_per_client');
+    Route::post('charges/pending/{business}', 'Admin\ChargesController@processCharges')->name('charges.process_charges');
     Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
     Route::post('charges/pending_shifts/{shift}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
     Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
@@ -188,8 +191,10 @@ Route::group([
     Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
+    Route::get('shifts/data', 'Admin\ShiftsController@data')->name('shifts.data');
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
+    Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
 
 });
 
