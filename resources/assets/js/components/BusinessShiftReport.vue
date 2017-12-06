@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Select Date Range"
+                        header="Select Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -18,6 +18,14 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
+                        <b-form-select v-model="caregiver_id">
+                            <option value="">All Caregivers</option>
+                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                        </b-form-select>
+                        <b-form-select v-model="client_id">
+                            <option value="">All Clients</option>
+                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                        </b-form-select>
                         &nbsp;&nbsp;
                         <b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
@@ -27,7 +35,7 @@
         <b-row>
             <b-col lg="6">
                 <b-card
-                        header="Client Charges for Date Range"
+                        header="Client Charges for Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -70,7 +78,7 @@
             </b-col>
             <b-col lg="6">
                 <b-card
-                        header="Caregiver Payments for Date Range"
+                        header="Caregiver Payments for Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -105,7 +113,7 @@
                 <b-card>
                     <table class="table table-bordered">
                         <tr>
-                            <td><strong>Provider Payment For Date Range:</strong></td>
+                            <td><strong>Provider Payment For Date Range &amp; Filters:</strong></td>
                             <td>{{ clientTotals.provider_total }}</td>
                         </tr>
                     </table>
@@ -115,7 +123,7 @@
                 <b-card>
                     <table class="table table-bordered">
                         <tr>
-                            <td><strong>Processing Fee For Date Range:</strong></td>
+                            <td><strong>Processing Fee For Date Range &amp; Filters:</strong></td>
                             <td>{{ clientTotals.ally_total }}</td>
                         </tr>
                     </table>
@@ -130,25 +138,9 @@
                         header-bg-variant="info"
                 >
                     <b-row>
-                        <b-col sm="6">
+                        <b-col sm="12">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
-                        </b-col>
-                        <b-col sm="6">
-                            <b-row>
-                                <b-col cols="6">
-                                    <b-form-select v-model="filterCaregiverId">
-                                        <option value="">All Caregivers</option>
-                                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
-                                    </b-form-select>
-                                </b-col>
-                                <b-col cols="6">
-                                    <b-form-select v-model="filterClientId">
-                                        <option value="">All Clients</option>
-                                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
-                                    </b-form-select>
-                                </b-col>
-                            </b-row>
                         </b-col>
                     </b-row>
                     <b-table bordered striped hover show-empty
@@ -373,10 +365,10 @@
                 },
                 start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                caregiver_id: "",
+                client_id: "",
                 clients: [],
                 caregivers: [],
-                filterCaregiverId: "",
-                filterClientId: "",
                 sortBy: 'Day',
                 sortDesc: false,
                 detailsModal: false,
@@ -410,8 +402,8 @@
 
         mounted() {
             this.setInitialFields();
-            this.loadData();
             this.loadFiltersData();
+            this.loadData();
         },
 
         computed: {
@@ -429,15 +421,7 @@
                 return fields;
             },
             shiftHistoryItems() {
-                let component = this;
                 let items = this.items.shifts;
-                if (component.filterCaregiverId || component.filterClientId) {
-                    items = items.filter(function(item) {
-                        if (component.filterCaregiverId && component.filterCaregiverId != item.caregiver_id) return false;
-                        if (component.filterClientId && component.filterClientId != item.client_id) return false;
-                        return true;
-                    });
-                }
                 return items.map(function(item) {
                     return {
                         'id': item.id,
@@ -498,8 +482,6 @@
                 return this.loadData();
             },
             loadData() {
-                let prefix = '/business/reports/data/';
-
                 // Attempt to load local storage information first
                 if (typeof(Storage) !== "undefined") {
                     let startDate = this.getLocalStorage('startDate');
@@ -507,16 +489,20 @@
                     let endDate = this.getLocalStorage('endDate');
                     if (endDate) this.end_date = endDate;
                     let filterCaregiverId = this.getLocalStorage('filterCaregiverId');
-                    if (filterCaregiverId) this.filterCaregiverId = filterCaregiverId;
+                    if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
-                    if (filterClientId) this.filterClientId = filterClientId;
+                    if (filterClientId) this.client_id = filterClientId;
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
                 }
 
-                axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                // Global query information
+                let prefix = '/business/reports/data/';
+                let queryString = '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
+
+                axios.get(prefix + 'caregiver_payments' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -525,7 +511,7 @@
                             this.items.caregiverPayments = [];
                         }
                     });
-                axios.get(prefix + 'client_charges?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get(prefix + 'client_charges' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -534,7 +520,7 @@
                             this.items.clientCharges = [];
                         }
                     });
-                axios.get(prefix + 'shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get(prefix + 'shifts' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.shifts = response.data;
@@ -633,10 +619,10 @@
         },
 
         watch: {
-            filterCaregiverId(val) {
+            caregiver_id(val) {
                 this.setLocalStorage('filterCaregiverId', val);
             },
-            filterClientId(val) {
+            client_id(val) {
                 this.setLocalStorage('filterClientId', val);
             },
             start_date(val) {

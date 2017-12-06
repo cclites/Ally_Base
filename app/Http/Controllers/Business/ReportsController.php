@@ -262,6 +262,12 @@ class ReportsController extends BaseController
         if ($request->has('transaction_id')) {
             $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
         }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
 
         return $report->rows();
     }
@@ -273,6 +279,15 @@ class ReportsController extends BaseController
 
         $report = new CaregiverPaymentsReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
+
+
         return $report->rows();
     }
 
@@ -283,6 +298,14 @@ class ReportsController extends BaseController
 
         $report = new ClientChargesReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
+
         return $report->rows();
     }
 
