@@ -40,7 +40,7 @@ trait ClientScheduleRequest
                 'selected_date' => 'required|date',
                 'end_date' => 'nullable|date',
                 'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
-                'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('start_date'))],
+                'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('selected_date'))],
             ];
         return $this->validateData($request, $rules);
     }
@@ -52,7 +52,7 @@ trait ClientScheduleRequest
                 'start_date' => 'required|date',
                 'end_date' => 'nullable|date',
                 'interval_type' => 'required|in:weekly,biweekly,monthly,bimonthly',
-                'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('selected_date'))],
+                'bydays' => ['required_if:interval_type,weekly,biweekly', new ValidStartDate($request->input('start_date'))],
             ];
         return $this->validateData($request, $rules);
     }
