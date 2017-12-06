@@ -26,13 +26,14 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
-                        &nbsp;&nbsp;
-                        <b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
@@ -108,7 +109,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -373,6 +374,7 @@
                 client_id: "",
                 clients: [],
                 caregivers: [],
+                showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
                 detailsModal: false,
@@ -500,6 +502,9 @@
                         other_expenses: (this.parseFloat(totals.other_expenses) + this.parseFloat(item.other_expenses)).toFixed(2),
                     }
                 })
+            },
+            summaryButtonText() {
+                return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             }
         },
 
@@ -524,6 +529,8 @@
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                    let showSummary = this.getLocalStorage('showSummary');
+                    if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
                 // Global query information
@@ -643,6 +650,10 @@
                     case 'holiday':
                         return 'HOL';
                 }
+            },
+
+            showHideSummary() {
+                this.showSummary = !this.showSummary;
             }
         },
 
@@ -667,7 +678,10 @@
             },
             filteredFields(val) {
                 this.setLocalStorage('fields', JSON.stringify(val));
-            }
+            },
+            showSummary(val) {
+                this.setLocalStorage('showSummary', JSON.stringify(val));
+            },
         }
     }
 </script>
