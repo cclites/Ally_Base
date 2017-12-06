@@ -38,8 +38,8 @@ class BusinessPaymentAggregator
     {
         $this->business = $business;
         $this->method = $business->paymentAccount;
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        $this->startDate = $startDate->copy()->setTimezone('UTC');
+        $this->endDate = $endDate->copy()->setTimezone('UTC');
 
         $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE])
             ->whereNull('payment_id')

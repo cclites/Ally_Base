@@ -2,6 +2,7 @@
 namespace App\Payments;
 
 use App\Business;
+use App\Exceptions\PaymentMethodError;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
 
@@ -78,20 +79,24 @@ class PaymentProcessor
         $count = 0;
         foreach($clientsNotUsingProviderPayment as $client) {
             $clientPayment = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
-            if ($transaction = $clientPayment->charge()) {
+            try {
+                $transaction = $clientPayment->charge();
+                if (!$transaction) throw new PaymentMethodError("Unknown");
                 $count++;
             }
-            else {
+            catch (\Exception $e) {
                 $payment = $clientPayment->getPayment();
                 $this->logger->warning('Failed charging ' . $payment->amount . ' to client ' . $client->name() . '(' . $client->id . ')');
             }
         }
 
         // Process Business Payment
-        if ($transaction = $businessPayment->charge()) {
+        try {
+            $transaction = $businessPayment->charge();
+            if (!$transaction) throw new PaymentMethodError("Unknown");
             $count++;
         }
-        else {
+        catch (\Exception $e) {
             $payment = $businessPayment->getPayment();
             $this->logger->warning('Failed charging ' . $payment->amount . ' to business payment method for ' . $this->business->name . '(' . $this->business->id . ')');
         }

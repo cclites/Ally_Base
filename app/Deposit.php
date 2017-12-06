@@ -39,10 +39,16 @@ class Deposit extends Model
         return $this->belongsToMany(Shift::class, 'deposit_shifts');
     }
 
-    // Mutators
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
 
     public function getWeekAttribute()
     {
+        if (!$this->created_at) {
+            return null;
+        }
+
         $date = $this->created_at->copy()->subWeek();
         return [
             'start' => $date->setIsoDate($date->year, $date->weekOfYear)->toDateString(),
