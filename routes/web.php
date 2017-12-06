@@ -129,7 +129,8 @@ Route::group([
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
     Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
-    Route::get('reports/medicaid', 'Business\ReportsController@medicaid')->name('reports.medicaid');
+    Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
+    Route::post('reports/medicaid', 'Business\ReportsController@medicaid');
     Route::get('reports/scheduled_vs_actual', 'Business\ReportsController@scheduledVsActual')->name('reports.scheduled_vs_actual');
     Route::get('reports/client-email-missing', 'Business\ReportsController@clientEmailMissing')->name('reports.client_email_missing');
     Route::get('reports/reconciliation', 'Business\ReportsController@reconciliation')->name('reports.reconciliation');
