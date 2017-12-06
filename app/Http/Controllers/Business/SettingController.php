@@ -13,16 +13,22 @@ class SettingController extends BaseController
 {
     use BankAccountRequest;
 
-    public function index()
+    public function index(Request $request)
     {
-        $business = OfficeUser::find(auth()->id())->businesses()->first();
+        $business = $this->business();
+
+        if ($request->expectsJson() && $request->input('json')) {
+            return $business;
+        }
 
         return view('business.settings.index', compact('business'));
     }
 
     public function bankAccounts()
     {
-        $business = OfficeUser::find(auth()->id())->businesses()->with('bankAccount', 'paymentAccount')->first();
+        $business = $this->business();
+        $business->load(['bankAccount', 'paymentAccount']);
+
         return view('business.settings.bank_accounts', compact('business'));
     }
 
@@ -61,39 +67,6 @@ class SettingController extends BaseController
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -105,20 +78,12 @@ class SettingController extends BaseController
         $business = Business::find($id);
         $data = $request->validate([
             'scheduling' => 'required|bool',
-            'mileage_rate' => 'required|numeric'
+            'mileage_rate' => 'required|numeric',
+            'calendar_default_view' => 'required',
+            'calendar_caregiver_filter' => 'required|in:all,unassigned'
         ]);
         $business->update($data);
         return new SuccessResponse('Business settings updated.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }
