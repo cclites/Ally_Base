@@ -129,13 +129,6 @@ class ClientController extends BaseController
             }
         ]);
         $schedules = $client->schedules()->get();
-        $caregivers = $this->business()->caregivers()
-              ->with('user')
-              ->where('business_id', $this->business()->id)
-              ->get()
-              ->map(function($caregiver) {
-                  return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
-              });
 
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
