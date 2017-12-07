@@ -147,8 +147,6 @@ namespace App{
  * @property int|null $payment_account_id
  * @property int $scheduling
  * @property float $mileage_rate
- * @property string $calendar_default_view
- * @property string $calendar_caregiver_filter
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \App\BankAccount|null $bankAccount
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
@@ -168,8 +166,6 @@ namespace App{
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereBankAccountId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarCaregiverFilter($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarDefaultView($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCreatedAt($value)
@@ -1011,10 +1007,13 @@ namespace App{
  * @property \Carbon\Carbon|null $signature
  * @property int|null $payment_id
  * @property string|null $other_expenses_desc
+ * @property string|null $created_at
+ * @property string|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \App\Business|null $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
+ * @property-read \App\ShiftCostHistory $costHistory
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read mixed $read_only
@@ -1023,12 +1022,10 @@ namespace App{
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
  * @property-read \App\Payment|null $payment
  * @property-read \App\Schedule|null $schedule
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift isAwaitingBusinessDeposit()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift isAwaitingCaregiverDeposit()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift isAwaitingCharge()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift isPending()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift isReadOnly()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAllDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCharge()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverId($value)
@@ -1042,16 +1039,20 @@ namespace App{
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMileage($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpenses($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpensesDesc($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePending()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereReadOnly()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereScheduleId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereSignature($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  */
 	class Shift extends \Eloquent {}
@@ -1073,6 +1074,37 @@ namespace App{
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereShiftId($value)
  */
 	class ShiftActivity extends \Eloquent {}
+}
+
+namespace App{
+/**
+ * App\ShiftCostHistory
+ *
+ * @property int $id
+ * @property float $caregiver_shift
+ * @property float $caregiver_expenses
+ * @property float $caregiver_mileage
+ * @property float $caregiver_total
+ * @property float $provider_fee
+ * @property float $ally_fee
+ * @property float $total_cost
+ * @property float $ally_pct
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Shift $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyPct($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverExpenses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverShift($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverTotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereTotalCost($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereUpdatedAt($value)
+ */
+	class ShiftCostHistory extends \Eloquent {}
 }
 
 namespace App{

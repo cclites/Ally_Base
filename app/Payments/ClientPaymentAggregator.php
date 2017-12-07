@@ -47,7 +47,7 @@ class ClientPaymentAggregator
         $this->startDate = $startDate->copy()->setTimezone('UTC');
         $this->endDate = $endDate->copy()->setTimezone('UTC');
 
-        $this->shifts = Shift::isAwaitingCharge()
+        $this->shifts = Shift::whereAwaitingCharge()
             ->whereNull('payment_id')
             ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
             ->where('client_id', $this->client->id)
