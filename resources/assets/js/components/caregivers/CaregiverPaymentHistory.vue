@@ -17,11 +17,11 @@
                     {{ formatDate(data.item.created_at) }}
                 </template>
                 <template slot="week" scope="data">
-                    {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
+                    {{ formatDate(data.item.start) }} - {{ formatDate(data.item.end) }}
                 </template>
-                <!--<template slot="actions" scope="data">-->
-                    <!--<a v-if="data.item.payment" :href="'/reports/payment-history/' + data.item.payment.id" class="btn btn-secondary">View Details</a>-->
-                <!--</template>-->
+                <template slot="actions" scope="data">
+                    <b-btn :href="'/reports/payment-history/' + data.item.id" class="btn btn-secondary">View Details</b-btn>
+                </template>
             </b-table>
         </b-card>
     </div>
@@ -47,12 +47,12 @@
             return {
                 fields: [
                     { key: 'created_at', label: 'Paid' },
-                    { key: 'week', label: 'For Care Week'},
+                    { key: 'week', label: 'Shifts'},
                     {
                         key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value); }
                     },
-                //    'actions'
+                    'actions'
                 ]
             }
         },
