@@ -435,7 +435,7 @@
                         'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
-                        'Hours': item.roundedShiftLength,
+                        'Hours': item.duration,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
                         'Verified': item.verified,
@@ -456,7 +456,7 @@
                 items.push({
                     '_rowVariant': 'info',
                     'Day': 'Total',
-                    'Hours': this.shiftTotals.hours,
+                    'Hours': this.shiftTotals.duration,
                     'Mileage': this.shiftTotals.mileage,
                     'CG Total': this.shiftTotals.caregiver_total,
                     'Reg Total': this.shiftTotals.provider_total,
@@ -492,7 +492,7 @@
                 if (this.items.shifts.length === 0) return {};
                 return this.items.shifts.reduce((totals, item) => {
                     return {
-                        hours: (this.parseFloat(totals.roundedShiftLength) + this.parseFloat(item.roundedShiftLength)).toFixed(2),
+                        duration: (this.parseFloat(totals.duration) + this.parseFloat(item.duration)).toFixed(2),
                         caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
                         provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
                         ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),

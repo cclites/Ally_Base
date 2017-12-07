@@ -80,7 +80,7 @@
                     <b-col sm="6">
                         <strong>Shift Length:</strong>
                         <br>
-                        {{ currentItem.roundedShiftLength }}hrs
+                        {{ currentItem.duration }}hrs
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-bottom">
@@ -168,7 +168,7 @@
                         label: 'Caregiver'
                     },
                     {
-                        key: 'roundedShiftLength',
+                        key: 'duration',
                         label: 'Shift Length'
                     },
                     {

@@ -10,7 +10,7 @@ class Shift extends Model
 {
     public $timestamps = false;
     protected $guarded = ['id'];
-    protected $appends = ['roundedShiftLength', 'readOnly'];
+    protected $appends = ['duration', 'readOnly'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
 
     ///////////////////////////////////////
@@ -94,7 +94,7 @@ class Shift extends Model
     /// Mutators
     ///////////////////////////////////////////
 
-    public function getRoundedShiftLengthAttribute()
+    public function getDurationAttribute()
     {
         return $this->duration();
     }

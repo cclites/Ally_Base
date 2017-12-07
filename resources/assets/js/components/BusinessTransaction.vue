@@ -81,7 +81,7 @@
                         sortable: true,
                     },
                     {
-                        key: 'roundedShiftLength',
+                        key: 'duration',
                         label: 'Hours',
                         sortable: true,
                     },

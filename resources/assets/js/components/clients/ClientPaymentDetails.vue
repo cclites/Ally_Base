@@ -50,7 +50,7 @@
                         label: 'Care Time'
                     },
                     {
-                        key: 'roundedShiftLength',
+                        key: 'duration',
                         label: 'Hours of Care Received'
                     },
                     {

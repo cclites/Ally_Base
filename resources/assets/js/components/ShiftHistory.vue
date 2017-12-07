@@ -91,7 +91,7 @@
                         id: shift.id,
                         date: start.local().format('L LTS'),
                         client_name: shift.client_name,
-                        hours: shift.roundedShiftLength,
+                        hours: shift.duration,
                         verified: (shift.verified) ? 'Verified' : 'Unverified'
                     }
                 })
