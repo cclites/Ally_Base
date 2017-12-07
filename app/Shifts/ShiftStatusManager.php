@@ -115,7 +115,6 @@ class ShiftStatusManager
 
     /**
      * Returns true if a shift should no longer be modified
-     *
      * @return bool
      */
     public function isReadOnly()
@@ -126,6 +125,10 @@ class ShiftStatusManager
         );
     }
 
+    /**
+     * Returns true if a shift is pending (has not been charged)
+     * @return bool
+     */
     public function isPending()
     {
         return in_array(
@@ -134,7 +137,10 @@ class ShiftStatusManager
         );
     }
 
-
+    /**
+     * Returns true if a shift is ready to be charged
+     * @return bool
+     */
     public function isAwaitingCharge()
     {
         return in_array(
@@ -143,6 +149,10 @@ class ShiftStatusManager
         );
     }
 
+    /**
+     * Returns true if a shift is ready for a business deposit
+     * @return bool
+     */
     public function isAwaitingBusinessDeposit()
     {
         return in_array(
@@ -151,6 +161,10 @@ class ShiftStatusManager
         );
     }
 
+    /**
+     * Returns true if a shift is ready for a caregiver deposit
+     * @return bool
+     */
     public function isAwaitingCaregiverDeposit()
     {
         return in_array(
@@ -165,7 +179,7 @@ class ShiftStatusManager
     ///////////////////////////////////////////
 
     /**
-     * Acknowledge a clock out
+     * Acknowledge a clock in
      * @return bool
      */
     public function ackClockIn()
@@ -281,7 +295,7 @@ class ShiftStatusManager
     }
 
     /**
-     * Acknowledge a returned (failed) caregiver deposit\
+     * Acknowledge a returned (failed) caregiver deposit
      * @return bool
      */
     public function ackFailedCaregiverDeposit()
