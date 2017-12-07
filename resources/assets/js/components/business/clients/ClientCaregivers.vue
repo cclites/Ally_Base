@@ -49,6 +49,11 @@
                 </tr>
                 </tbody>
             </table>
+            <hr>
+            <div class="h6">Excluded Caregivers</div>
+            <b-form-field v-for="exGiver in excludedCaregivers">
+                <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
+            </b-form-field>
         </div>
 
         <b-modal id="clientExcludeCargiver"
@@ -149,7 +154,6 @@
 <script>
     export default {
         props: {
-            'list': {},
             'client_id': {},
             'paymentTypeMessage': {
                 default() {
@@ -160,13 +164,13 @@
 
         data() {
             return {
-                caregiverList: _.sortBy(this.list, 'name'),
+                caregiverList: [],
                 items: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
-                excludeForm: new Form(),
+                excludeForm: {},
                 excludedCaregivers: []
             }
         },
@@ -180,6 +184,11 @@
                         this.items = [];
                     }
                 });
+        },
+
+        created() {
+            this.fetchCaregivers();
+            this.fetchExcludedCaregivers();
         },
 
         methods: {
@@ -210,7 +219,8 @@
             saveCaregiver() {
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
-                    .then(function(response) {
+                    .then((response) => {
+                        this.fetchCaregivers()
                         component.items = component.items.filter(caregiver => {
                             return caregiver.id != response.data.data.id;
                         });
@@ -219,9 +229,41 @@
                     })
             },
 
+            fetchCaregivers() {
+                axios.get('/business/clients/' + this.client_id + '/potential-caregivers')
+                    .then(response => {
+                        this.caregiverList = response.data;
+                    });
+            },
+
+            fetchExcludedCaregivers() {
+                axios.get('/business/clients/'+this.client_id+'/excluded-caregivers')
+                    .then(response => {
+                        this.excludedCaregivers = response.data;
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
+            },
+
             excludeCaregiver() {
                 console.log('Excluding ' + this.excludeForm.caregiver_id);
-                //this.excludeForm.post();
+                axios.post('/business/clients/'+this.client_id+'/exclude-caregiver', this.excludeForm)
+                    .then(response => {
+                        this.fetchExcludedCaregivers();
+                        this.fetchCaregivers();
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
+            },
+
+            removeExcludedCaregiver(id) {
+                axios.delete('/business/clients/excluded-caregiver/'+id)
+                    .then(response => {
+                        this.fetchExcludedCaregivers();
+                        this.fetchCaregivers();
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
             }
         },
 

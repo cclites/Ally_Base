@@ -1,20 +1,23 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
+use App\Client;
 use App\ClientExcludedCaregiver;
+use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 
-class ClientExcludedCaregiverController extends Controller
+class ClientExcludedCaregiverController extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Client $client)
     {
-        //
+        return response()->json($client->excludedCaregivers);
     }
 
     /**
@@ -31,11 +34,22 @@ class ClientExcludedCaregiverController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|\Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $client)
     {
-        //
+        $data = $request->validate(['caregiver_id' => 'required|int']);
+
+        $caregiver = ClientExcludedCaregiver::create([
+            'client_id' => $client,
+            'caregiver_id' => $data['caregiver_id']
+        ]);
+
+        if ($caregiver) {
+            return response()->json($caregiver);
+        }
+
+        return new ErrorResponse(500, 'Error excluding caregiver.');
     }
 
     /**
@@ -75,11 +89,12 @@ class ClientExcludedCaregiverController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\ClientExcludedCaregiver  $clientExcludedCaregiver
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ClientExcludedCaregiver $clientExcludedCaregiver)
+    public function destroy($id)
     {
-        //
+        ClientExcludedCaregiver::destroy($id);
+        return response()->json([]);
     }
 }

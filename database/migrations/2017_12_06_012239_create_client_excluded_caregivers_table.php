@@ -19,8 +19,9 @@ class CreateClientExcludedCaregiversTable extends Migration
             $table->unsignedInteger('caregiver_id');
             $table->timestamps();
 
+            $table->unique(['client_id', 'caregiver_id']);
             $table->foreign('client_id')->references('id')->on('clients');
-            $table->foreign('caregiver_id')->references('id')->on('caregiver');
+            $table->foreign('caregiver_id')->references('id')->on('caregivers');
         });
     }
 

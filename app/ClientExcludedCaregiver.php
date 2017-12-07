@@ -8,6 +8,8 @@ class ClientExcludedCaregiver extends Model
 {
     protected $guarded = ['id'];
 
+    protected $with = ['caregiver'];
+
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class);
