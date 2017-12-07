@@ -91,7 +91,6 @@ class DepositProcessor
         $deposit = $this->getCaregiverDeposit($caregiver, $aggregator);
         if ($deposit->amount > 0) {
             $transaction = false;
-            $this->shifts = array_merge($this->shifts, $aggregator->getShiftIds());
             try {
                 $transaction = $aggregator->deposit();
                 $this->logger->info("Deposited " . $deposit->amount . " to caregiver " . $caregiver->name());
