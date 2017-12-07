@@ -55,9 +55,11 @@ class ShiftStatusManager
      * @param string $newStatus
      * @return bool
      */
-    public function update($newStatus)
+    public function update($newStatus, $otherAttributes = [])
     {
-        return $this->shift->update(['status' => $newStatus]);
+        $data = $otherAttributes;
+        $data['status'] = $newStatus;
+        return $this->shift->update($data);
     }
 
     ///////////////////////////////////////////
@@ -216,18 +218,19 @@ class ShiftStatusManager
      * Acknowledge a successful payment
      * @return bool
      */
-    public function ackPayment()
+    public function ackPayment($payment_id)
     {
         switch($this->status()) {
             case Shift::PAID_NOT_CHARGED:
-                return $this->update(Shift::PAID);
+                return $this->update(Shift::PAID, ['payment_id' => $payment_id]);
             case Shift::PAID_BUSINESS_ONLY_NOT_CHARGED:
-                return $this->update(Shift::PAID_BUSINESS_ONLY);
+                return $this->update(Shift::PAID_BUSINESS_ONLY, ['payment_id' => $payment_id]);
             case Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED:
-                return $this->update(Shift::PAID_CAREGIVER_ONLY);
-            default:
-                return $this->update(Shift::WAITING_FOR_PAYOUT);
+                return $this->update(Shift::PAID_CAREGIVER_ONLY, ['payment_id' => $payment_id]);
+            case Shift::WAITING_FOR_CHARGE:
+                return $this->update(Shift::WAITING_FOR_PAYOUT, ['payment_id' => $payment_id]);
         }
+        return false;
     }
 
     /**
