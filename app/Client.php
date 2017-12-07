@@ -186,6 +186,10 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
             ->update(['end_date' => $yesterday]);
     }
 
+    /**
+     * @param bool $backup
+     * @return \App\Contracts\ChargeableInterface
+     */
     public function getPaymentMethod($backup = false)
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
