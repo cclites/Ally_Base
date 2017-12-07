@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Business;
 use App\Reports\ScheduledPaymentsReport;
 use App\Schedule;
-use App\Scheduling\CostCalculator;
+use App\Shifts\CostCalculator;
 use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCostCalculator;
 use App\Shift;

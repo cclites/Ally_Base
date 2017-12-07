@@ -6,7 +6,7 @@ use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\UserRole;
 use App\Mail\ClientConfirmation;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;

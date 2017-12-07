@@ -1,9 +1,5 @@
 <?php
-
 namespace App\Scheduling;
-
-
-use App\CreditCard;
 
 class ScheduleCostCalculator
 {

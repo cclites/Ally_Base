@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Scheduling\CostCalculator;
+use App\Shifts\CostCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -162,7 +162,7 @@ class Shift extends Model
     /**
      * Return an instance of the CostCalculator for this shift
      *
-     * @return \App\Scheduling\CostCalculator
+     * @return \App\Shifts\CostCalculator
      */
     public function costs()
     {
