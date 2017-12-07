@@ -129,17 +129,20 @@ class ClientController extends BaseController
             }
         ]);
         $schedules = $client->schedules()->get();
-        $caregivers = $this->business()->caregivers()
-              ->with('user')
-              ->where('business_id', $this->business()->id)
-              ->get()
-              ->map(function($caregiver) {
-                  return ['id' => $caregiver->id, 'name' => $caregiver->nameLastFirst(), 'default_rate' => $caregiver->default_rate];
-              });
 
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
+
+        // include a placeholder for the primary number if one doesn't already exist
+        if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {
+            $client->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
+        }
+
+        // include a placeholder for the billing number if one doesn't already exist
+        if ($client->phoneNumbers->where('type', 'billing')->count() == 0) {
+            $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
+        }
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
@@ -260,7 +263,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        return (new PhoneController())->update($request, $client->user, $type, 'The client\'s phone number');
+        return (new PhoneController())->upsert($request, $client->user, $type, 'The client\'s phone number');
     }
 
     public function paymentMethod(Request $request, $client_id, $type)
