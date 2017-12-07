@@ -1,5 +1,5 @@
 <?php
-namespace App\Scheduling;
+namespace App\Shifts;
 
 use App\Business;
 use App\Client;

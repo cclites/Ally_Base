@@ -1,7 +1,5 @@
 <?php
-
-
-namespace App\Scheduling;
+namespace App\Shifts;
 
 use App\Client;
 use App\CreditCard;

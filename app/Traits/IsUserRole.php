@@ -6,6 +6,7 @@ use App\BankAccount;
 use App\CreditCard;
 use App\PhoneNumber;
 use App\User;
+use App\Document;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole

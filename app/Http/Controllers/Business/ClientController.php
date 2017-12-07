@@ -12,7 +12,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

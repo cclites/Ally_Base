@@ -7,6 +7,7 @@ use App\Deposit;
 use App\Gateway\ECSPayment;
 use App\Shift;
 use Carbon\Carbon;
+use DB;
 
 class BusinessDepositAggregator implements DepositAggregatorInterface
 {
@@ -23,7 +24,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
         $this->endDate = $endDate->setTimezone('UTC');
         $this->business = $business;
 
-        $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_PAYOUT, Shift::PAID_CAREGIVER_ONLY])
+        $this->shifts = Shift::isAwaitingBusinessDeposit()
                 ->whereBetween('checked_in_time', [$startDate, $endDate])
                 ->where('business_id', $this->business->id)
                 ->get();
@@ -58,26 +59,52 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
     public function deposit()
     {
         $deposit = $this->getDeposit();
+        if ($deposit->amount <= 0) {
+            return false;
+        }
+
         $account = $this->business->bankAccount;
         if (!$account) return false;
 
-        $gateway = new ECSPayment();
-        $transaction = $gateway->depositFunds($account, $deposit->amount);
-        if ($transaction) {
+        try {
+            // Process Deposit and Update Status in a Transaction
+            DB::beginTransaction();
+
+            // Attempt to update status of all shifts
+            foreach($this->getShifts() as $shift) {
+                if (!$shift->status()->ackBusinessDeposit()) {
+                    DB::rollBack();
+                    return false;
+                }
+            }
+
+            // Attempt to save shifts to the deposit
+            $deposit->save();
+            $deposit->shifts()->attach($this->getShiftIds());
+
+            // Process Deposit
+            $gateway = new ECSPayment();
+            if (!$transaction = $gateway->depositFunds($account, $deposit->amount)) {
+                DB::rollBack();
+                return false;
+            }
+
+            // Commit database transaction now that deposit has completed
+            DB::commit();
+
+            // Save transaction details to the deposit
             $deposit->transaction_id = $transaction->id;
             $deposit->success = $transaction->success;
             $deposit->save();
 
-            // Update shift status
-            $shiftIds = $this->getShiftIds();
-
             // Associate payment method
             $deposit->method()->associate($account);
 
-            // Attach shifts to deposit
-            $deposit->shifts()->attach($shiftIds);
+            return $transaction;
         }
-
-        return $transaction;
+        catch(\Exception $e) {
+            DB::rollBack();
+            return false;
+        }
     }
 }

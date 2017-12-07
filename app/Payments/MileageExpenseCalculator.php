@@ -6,7 +6,7 @@ namespace App\Payments;
 
 use App\Business;
 use App\Client;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 
 class MileageExpenseCalculator
 {

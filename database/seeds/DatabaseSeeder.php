@@ -88,17 +88,6 @@ class DatabaseSeeder extends Seeder
                 'created_at' => $end,
             ]);
 
-            $payments = Payment::where('deposited', 0)
-                ->whereBetween('created_at', [$start, $end])->each(function (Payment $payment) use ($businessDeposit, $caregiverDeposit) {
-                    $businessDeposit->amount += $payment->business_allotment;
-                    $caregiverDeposit->amount += $payment->caregiver_allotment;
-                    $businessDeposit->payments()->attach($payment);
-                    $caregiverDeposit->payments()->attach($payment);
-                    $businessDeposit->save();
-                    $caregiverDeposit->save();
-                    $payment->update(['deposited' => true]);
-                });
-
             if ($businessDeposit->amount == 0) $businessDeposit->delete();
             if ($caregiverDeposit->amount == 0) $caregiverDeposit->delete();
 
