@@ -121,6 +121,8 @@ class BusinessPaymentAggregator
                     DB::rollBack();
                     return false;
                 }
+                // Persist shift costs
+                $shift->costs()->setPaymentType($this->method)->persist();
             }
 
             // Process Payments

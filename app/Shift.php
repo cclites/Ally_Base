@@ -93,6 +93,11 @@ class Shift extends Model
         return $this->morphMany(SystemException::class, 'reference');
     }
 
+    public function costHistory()
+    {
+        return $this->hasOne(ShiftCostHistory::class, 'id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
