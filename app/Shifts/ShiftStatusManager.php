@@ -207,6 +207,10 @@ class ShiftStatusManager
         switch($this->status()) {
             case Shift::PAID_NOT_CHARGED:
                 return $this->update(Shift::PAID);
+            case Shift::PAID_BUSINESS_ONLY_NOT_CHARGED:
+                return $this->update(Shift::PAID_BUSINESS_ONLY);
+            case Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED:
+                return $this->update(Shift::PAID_CAREGIVER_ONLY);
             default:
                 return $this->update(Shift::WAITING_FOR_PAYOUT);
         }
