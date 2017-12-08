@@ -93,6 +93,11 @@ class Shift extends Model
         return $this->morphMany(SystemException::class, 'reference');
     }
 
+    public function costHistory()
+    {
+        return $this->hasOne(ShiftCostHistory::class, 'id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -204,27 +209,27 @@ class Shift extends Model
     /// Query Scopes
     ///////////////////////////////////////////
 
-    public function scopeIsReadOnly($query)
+    public function scopeWhereReadOnly($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getReadOnlyStatuses());
     }
 
-    public function scopeIsPending($query)
+    public function scopeWherePending($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getPendingStatuses());
     }
 
-    public function scopeIsAwaitingCharge($query)
+    public function scopeWhereAwaitingCharge($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingChargeStatuses());
     }
 
-    public function scopeIsAwaitingBusinessDeposit($query)
+    public function scopeWhereAwaitingBusinessDeposit($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingBusinessDepositStatuses());
     }
 
-    public function scopeIsAwaitingCaregiverDeposit($query)
+    public function scopeWhereAwaitingCaregiverDeposit($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingCaregiverDepositStatuses());
     }

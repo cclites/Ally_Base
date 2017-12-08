@@ -30,7 +30,7 @@ $factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
     }
     $companies[] = $company;
     return [
-        'name' => $faker->company,
+        'name' => $faker->unique()->company,
         'type' => 'Registry',
         'address1' => $faker->streetAddress,
         'address2' => null,
