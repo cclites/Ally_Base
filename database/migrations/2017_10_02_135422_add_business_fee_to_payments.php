@@ -14,7 +14,7 @@ class AddBusinessFeeToPayments extends Migration
     public function up()
     {
         Schema::table('payments', function (Blueprint $table) {
-            $table->boolean('deposited')->default(0);
+//            $table->boolean('deposited')->default(0);
             $table->decimal('business_allotment', 9, 2)->default(0);
             $table->decimal('caregiver_allotment', 9, 2)->default(0);
             $table->decimal('system_allotment', 9, 2)->default(0);
