@@ -18,6 +18,7 @@ class Shift extends Model
     /// Shift Statuses
     ///////////////////////////////////////
 
+    const UNCONFIRMED = 'UNCONFIRMED'; // unconfirmed shift (automatically added from schedule but not clocked in)
     const CLOCKED_IN = 'CLOCKED_IN';
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
@@ -232,5 +233,15 @@ class Shift extends Model
     public function scopeWhereAwaitingCaregiverDeposit($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingCaregiverDepositStatuses());
+    }
+
+    public function scopeWhereConfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getConfirmedStatuses());
+    }
+
+    public function scopeWhereUnconfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 }

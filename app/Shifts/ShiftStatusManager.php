@@ -14,6 +14,7 @@ class ShiftStatusManager
      * @var array
      */
     protected static $statuses = [
+        Shift::UNCONFIRMED,
         Shift::CLOCKED_IN,
         Shift::CLOCKED_OUT,
         Shift::WAITING_FOR_APPROVAL,
@@ -110,6 +111,18 @@ class ShiftStatusManager
         ];
     }
 
+    public static function getUnconfirmedStatuses()
+    {
+        return [
+            Shift::UNCONFIRMED,
+        ];
+    }
+
+    public static function getConfirmedStatuses()
+    {
+        return array_diff(self::$statuses, self::getUnconfirmedStatuses());
+    }
+
 
     ///////////////////////////////////////////
     /// Check Methods
@@ -172,6 +185,18 @@ class ShiftStatusManager
         return in_array(
             $this->status(),
             self::getAwaitingCaregiverDepositStatuses()
+        );
+    }
+
+    /**
+     * Returns true if a shift is confirmed (was clocked in or has been recognized by the registry)
+     * @return bool
+     */
+    public function isConfirmed()
+    {
+        return !in_array(
+            $this->status(),
+            self::getUnconfirmedStatuses()
         );
     }
 
