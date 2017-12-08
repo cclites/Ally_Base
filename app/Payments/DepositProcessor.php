@@ -15,27 +15,6 @@ class DepositProcessor
     protected $business;
 
     /**
-     * All processed shift IDs
-     *
-     * @var array
-     */
-    protected $shifts = [];
-
-    /**
-     * Shift ids belonging to failed caregiver deposits
-     *
-     * @var array
-     */
-    protected $failedCaregiverShifts = [];
-
-    /**
-     * Shift ids belonging to failed business deposits
-     *
-     * @var array
-     */
-    protected $failedBusinessShifts = [];
-
-    /**
      * @var \Carbon\Carbon
      */
     private $startDate;
@@ -74,7 +53,6 @@ class DepositProcessor
             $this->processCaregiver($caregiver);
         }
         $this->processBusiness();
-        $this->updateShiftStatuses();
         return $this->countSuccess();
     }
 
@@ -113,7 +91,6 @@ class DepositProcessor
         $deposit = $this->getCaregiverDeposit($caregiver, $aggregator);
         if ($deposit->amount > 0) {
             $transaction = false;
-            $this->shifts = array_merge($this->shifts, $aggregator->getShiftIds());
             try {
                 $transaction = $aggregator->deposit();
                 $this->logger->info("Deposited " . $deposit->amount . " to caregiver " . $caregiver->name());
@@ -123,7 +100,6 @@ class DepositProcessor
             }
             if (!$transaction) {
                 $this->logger->warning('processCaregiver Warning: Transaction not found for ' . $caregiver->name());
-                $this->failedCaregiverShifts = array_merge($this->failedCaregiverShifts, $aggregator->getShiftIds());
             }
             else {
                 $this->success++;
@@ -158,25 +134,12 @@ class DepositProcessor
                 $this->logger->error('processBusiness Error: ' . $e->getMessage());
             }
             if (!$transaction) {
-                $this->failedBusinessShifts = array_merge($this->failedBusinessShifts, $aggregator->getShiftIds());
                 $this->logger->warning('processBusiness Warning: Transaction not found for ' . $this->business->name);
             }
             else {
                 $this->success++;
             }
         }
-    }
-
-    public function updateShiftStatuses()
-    {
-        $failedCaregiverOnly = array_diff($this->failedCaregiverShifts, $this->failedBusinessShifts);
-        $failedBusinessOnly = array_diff($this->failedBusinessShifts, $this->failedCaregiverShifts);
-        $failedBoth = array_intersect($this->failedBusinessShifts, $this->failedCaregiverShifts);
-
-        Shift::whereIn('id', $this->shifts)->update(['status' => Shift::PAID]);
-        Shift::whereIn('id', $failedCaregiverOnly)->update(['status' => Shift::PAID_BUSINESS_ONLY]);
-        Shift::whereIn('id', $failedBusinessOnly)->update(['status' => Shift::PAID_CAREGIVER_ONLY]);
-        Shift::whereIn('id', $failedBoth)->update(['status' => Shift::WAITING_FOR_PAYOUT]);
     }
 
     public function countSuccess()

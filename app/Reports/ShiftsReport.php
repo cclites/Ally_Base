@@ -2,7 +2,7 @@
 namespace App\Reports;
 
 use App\GatewayTransaction;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 
 class ShiftsReport extends BaseReport

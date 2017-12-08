@@ -4,7 +4,7 @@ namespace App\Reports;
 use App\Business;
 use App\Caregiver;
 use App\Schedule;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;

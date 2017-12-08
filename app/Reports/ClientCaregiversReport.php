@@ -2,7 +2,7 @@
 namespace App\Reports;
 
 use App\Client;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 
 class ClientCaregiversReport extends BaseReport
 {

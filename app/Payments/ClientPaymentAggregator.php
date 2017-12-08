@@ -7,7 +7,7 @@ use App\Contracts\ChargeableInterface;
 use App\CreditCard;
 use App\Gateway\ECSPayment;
 use App\Payment;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
 

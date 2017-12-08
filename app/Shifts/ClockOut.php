@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Scheduling;
+namespace App\Shifts;
 
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftCreated;
