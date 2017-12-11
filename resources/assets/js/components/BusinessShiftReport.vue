@@ -164,13 +164,22 @@
                                 <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
                             </template>
                             <template slot="EVV" scope="data">
-                            <span v-if="data.value" style="color: green">
-                                <i class="fa fa-check-square-o"></i>
-                            </span>
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                    <span v-else-if="data.value === undefined"></span>
+                                    <span v-else style="color: darkred">
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
+                            <template slot="Confirmed" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
                                 <span v-else-if="data.value === undefined"></span>
                                 <span v-else style="color: darkred">
-                                <i class="fa fa-times-rectangle-o"></i>
-                            </span>
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
                             </template>
                             <template slot="actions" scope="row">
                             <span v-if="row.item.id">
@@ -404,6 +413,7 @@
                     'Other Expenses',
                     'Shift Total',
                     'Type',
+                    'Confirmed',
                 ],
                 filteredFields: [],
             }
@@ -454,6 +464,7 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
+                        'Confirmed': (item.status !== 'UNCONFIRMED')
                     }
                 });
                 items.push({
