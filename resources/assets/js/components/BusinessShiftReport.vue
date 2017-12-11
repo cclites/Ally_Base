@@ -134,9 +134,10 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Actual Shifts"
+                        header="Shifts"
                         header-text-variant="white"
                         header-bg-variant="info"
+                        title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
                     <b-row>
                         <b-col sm="12">
@@ -144,39 +145,41 @@
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                     </b-row>
-                    <b-table bordered striped hover show-empty
-                             :fields="fields"
-                             :items="shiftHistoryItems"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                             class="shift-table"
-                             :foot-clone="shiftHistoryItems.length > 1"
-                    >
-                        <template slot="Day" scope="data">
-                            {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
-                        </template>
-                        <template slot="Client" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
-                        </template>
-                        <template slot="Caregiver" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
-                        </template>
-                        <template slot="Verified" scope="data">
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="fields"
+                                 :items="shiftHistoryItems"
+                                 :sort-by.sync="sortBy"
+                                 :sort-desc.sync="sortDesc"
+                                 class="shift-table"
+                                 :foot-clone="shiftHistoryItems.length > 1"
+                        >
+                            <template slot="Day" scope="data">
+                                {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
+                            </template>
+                            <template slot="Client" scope="row">
+                                <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
+                            </template>
+                            <template slot="Caregiver" scope="row">
+                                <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
+                            </template>
+                            <template slot="Verified" scope="data">
                             <span v-if="data.value" style="color: green">
                                 <i class="fa fa-check-square-o"></i>
                             </span>
-                            <span v-else-if="data.value === undefined"></span>
-                            <span v-else style="color: darkred">
+                                <span v-else-if="data.value === undefined"></span>
+                                <span v-else style="color: darkred">
                                 <i class="fa fa-times-rectangle-o"></i>
                             </span>
-                        </template>
-                        <template slot="actions" scope="row">
+                            </template>
+                            <template slot="actions" scope="row">
                             <span v-if="row.item.id">
                                 <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                             </span>
-                        </template>
-                    </b-table>
+                            </template>
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
