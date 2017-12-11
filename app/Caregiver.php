@@ -24,8 +24,11 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         'bank_account_id',
         'title',
         'hire_date',
-        'gender'
+        'gender',
+        'onboarded'
     ];
+
+    public $dates = ['onboarded', 'hire_date', 'deleted_at'];
 
     ///////////////////////////////////////////
     /// Relationship Methods

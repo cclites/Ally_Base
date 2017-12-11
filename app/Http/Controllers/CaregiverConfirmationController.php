@@ -65,7 +65,10 @@ class CaregiverConfirmationController extends Controller
 
         // Save Bank Account
         $account = $this->updateBankAccount($request, $caregiver);
-        $caregiver->update(['bank_account_id' => $account->id]);
+        $caregiver->update([
+            'bank_account_id' => $account->id,
+            'onboarded' => Carbon::now()
+        ]);
 
         // Save Address
         $response = (new AddressController())->update($request, $caregiver->user, 'home', 'Your address');
@@ -85,8 +88,7 @@ class CaregiverConfirmationController extends Controller
                     'type' => 'work',
                 ]);
                 $caregiver->phoneNumbers()->save($phone);
-            }
-            else {
+            } else {
                 $phone->update(['national_number' => $phone_data['phone_number']]);
             }
 

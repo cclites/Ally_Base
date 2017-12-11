@@ -87,6 +87,7 @@ Vue.component('business-convert-schedule-modal', require('./components/BusinessC
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
+Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
