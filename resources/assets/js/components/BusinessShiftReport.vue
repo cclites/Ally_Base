@@ -464,21 +464,10 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
-                        'Confirmed': (item.status !== 'UNCONFIRMED')
+                        'Confirmed': (item.status !== 'UNCONFIRMED'),
+                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning',
                     }
                 });
-                items.push({
-                    '_rowVariant': 'info',
-                    'Day': 'Total',
-                    'Hours': this.shiftTotals.duration,
-                    'Mileage': this.shiftTotals.mileage,
-                    'CG Total': this.shiftTotals.caregiver_total,
-                    'Reg Total': this.shiftTotals.provider_total,
-                    'Ally Total': this.shiftTotals.ally_total,
-                    'Mileage Costs': this.shiftTotals.mileage_costs,
-                    'Other Expenses': this.shiftTotals.other_expenses,
-                    'Shift Total': this.shiftTotals.shift_total,
-                })
                 return items;
             },
             clientTotals() {
