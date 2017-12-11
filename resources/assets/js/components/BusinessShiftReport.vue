@@ -163,7 +163,7 @@
                             <template slot="Caregiver" scope="row">
                                 <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
                             </template>
-                            <template slot="Verified" scope="data">
+                            <template slot="EVV" scope="data">
                             <span v-if="data.value" style="color: green">
                                 <i class="fa fa-check-square-o"></i>
                             </span>
@@ -391,7 +391,7 @@
                     'Hours',
                     'Client',
                     'Caregiver',
-                    'Verified',
+                    'EVV',
                     'CG Rate',
                     'Reg Rate',
                     'Ally Fee',
@@ -441,7 +441,7 @@
                         'Hours': item.duration,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
-                        'Verified': item.verified,
+                        'EVV': item.verified,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
