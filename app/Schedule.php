@@ -27,6 +27,11 @@ class Schedule extends Model
     {
         parent::boot();
 
+        // Exclude schedules for deleted clients
+        static::addGlobalScope('hasClient', function ($builder) {
+            $builder->has('client');
+        });
+
         // For closed schedules before they start
         static::addGlobalScope('age', function ($builder) {
             $builder->whereColumn('start_date', '<=', 'end_date');
