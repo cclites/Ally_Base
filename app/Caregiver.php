@@ -164,11 +164,17 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
     /**
      * Check if the caregiver is currently clocked in to a shift
      *
+     * @param null $client_id
      * @return bool
      */
-    public function isClockedIn()
+    public function isClockedIn($client_id = null)
     {
-        return $this->shifts()->whereNull('checked_out_time')->exists();
+        return $this->shifts()
+            ->whereNull('checked_out_time')
+            ->when($client_id, function ($query) use ($client_id) {
+                return $query->where('client_id', $client_id);
+            })
+            ->exists();
     }
 
     /**

@@ -109,6 +109,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->hasMany(Note::class);
     }
 
+    public function excludedCaregivers()
+    {
+        return $this->hasMany(ClientExcludedCaregiver::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
