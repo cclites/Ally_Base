@@ -19,7 +19,13 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
     protected $table = 'caregivers';
     public $timestamps = false;
     public $hidden = ['ssn'];
-    public $fillable = ['ssn', 'bank_account_id', 'title'];
+    public $fillable = [
+        'ssn',
+        'bank_account_id',
+        'title',
+        'hire_date',
+        'gender'
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods

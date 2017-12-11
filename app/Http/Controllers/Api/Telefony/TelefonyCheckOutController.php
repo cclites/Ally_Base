@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Telefony;
 use App\Activity;
 use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
-use App\Scheduling\ClockOut;
+use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 
