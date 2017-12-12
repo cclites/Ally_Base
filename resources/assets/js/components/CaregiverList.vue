@@ -1,8 +1,15 @@
 <template>
     <b-card>
-        <b-row>
-            <b-col lg="6">
+        <b-row class="mb-2">
+            <b-col lg="3">
                 <a href="/business/caregivers/create" class="btn btn-info">Add Caregiver</a>
+            </b-col>
+            <b-col lg="3">
+                <b-form-select v-model="active">
+                    <option value="all">All Caregivers</option>
+                    <option value="active">Active Caregivers</option>
+                    <option value="inactive">Inactive Caregivers</option>
+                </b-form-select>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -48,6 +55,7 @@
 
         data() {
             return {
+                active: 'active',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -100,7 +108,7 @@
         computed: {
             items() {
                 let component = this;
-                return this.caregivers.map(function(caregiver) {
+                let caregivers = this.caregivers.map(function(caregiver) {
                     return {
                         id: caregiver.id,
                         firstname: caregiver.user.firstname,
@@ -109,6 +117,18 @@
                         primaryphone: component.getPhone(caregiver).number,
                         zipcode: component.getAddress(caregiver).zip,
                         city: component.getAddress(caregiver).city,
+                        active: caregiver.user.active
+                    }
+                })
+
+                return _.filter(caregivers, function (caregiver) {
+                    switch (component.active) {
+                        case 'all':
+                            return true;
+                        case 'active':
+                            return caregiver.active;
+                        case 'inactive':
+                            return !caregiver.active;
                     }
                 })
             },

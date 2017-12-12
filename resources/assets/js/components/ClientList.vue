@@ -1,8 +1,15 @@
 <template>
     <b-card>
-        <b-row>
-            <b-col lg="6">
+        <b-row class="mb-2">
+            <b-col lg="3">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
+            </b-col>
+            <b-col lg="3">
+                <b-form-select v-model="active">
+                    <option value="all">All Clients</option>
+                    <option value="active">Active Clients</option>
+                    <option value="inactive">Inactive Clients</option>
+                </b-form-select>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -48,6 +55,7 @@
 
         data() {
             return {
+                active: 'active',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -89,13 +97,25 @@
 
         computed: {
             items() {
-                return this.clients.map(function(client) {
+                let clients = this.clients.map(function(client) {
                     return {
                         id: client.id,
                         firstname: client.user.firstname,
                         lastname: client.user.lastname,
                         email: client.user.email,
                         client_type: _.upperFirst(_.replace(client.client_type, '_', ' ')),
+                        active: client.user.active
+                    }
+                });
+
+                return _.filter(clients, (client) => {
+                    switch (this.active) {
+                        case 'all':
+                            return true;
+                        case 'active':
+                            return client.active;
+                        case 'inactive':
+                            return !client.active;
                     }
                 })
             },
