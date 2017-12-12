@@ -118,7 +118,7 @@ Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-list', require('./components/ClientList.vue'));
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
-Vue.component('client-payments-tab', require('./components/business/clients/ClientPaymentsTab'));
+Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 
 Vue.component('create-schedule-modal', require('./components/CreateScheduleModal.vue'));

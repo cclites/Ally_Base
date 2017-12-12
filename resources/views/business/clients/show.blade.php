@@ -49,7 +49,7 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
         </li>
     </ul>
 
@@ -67,7 +67,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
-                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
             </div>
         </li>
     </ul>
@@ -141,7 +141,7 @@
             ></document-list>
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
-            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
+            <client-statements-tab :payments="{{ $client->payments }}"></client-statements-tab>
         </div>
     </div>
 @endsection
