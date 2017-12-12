@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Api\Telefony;
 
 use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
-use App\Scheduling\ClockIn;
+use App\Shifts\ClockIn;
 
 class TelefonyCheckInController extends BaseTelefonyController
 {

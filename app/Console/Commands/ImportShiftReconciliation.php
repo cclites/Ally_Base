@@ -158,7 +158,6 @@ class ImportShiftReconciliation extends Command
             $data['payment_type'] = $this->getValue('Pay Type', $row);
             $data['amount'] = (float) $this->getValue('Amount', $row);
             $data['created_at'] = $this->getValue('created_at', $row);
-            $data['deposited'] = $this->getValue('deposited', $row) ?? 1;
             $data['business_allotment'] = (float) $this->getValue('business_amt', $row);
             $data['caregiver_allotment'] = (float) $this->getValue('caregiver_amt', $row);
             $data['system_allotment'] = (float) $this->getValue('system_amt', $row);

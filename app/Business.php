@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\ExistingBankAccountException;
+use App\Scheduling\ScheduleAggregator;
 use Illuminate\Database\Eloquent\Model;
 
 class Business extends Model
@@ -147,5 +148,26 @@ class Business extends Model
             ->where('code', $code)
             ->first();
         return $activity;
+    }
+
+    /**
+     * Return all scheduled events for a business between $start and $end
+     *
+     * @param $start
+     * @param $end
+     * @param bool $onlyStartTime
+     * @return array
+     */
+    public function getEvents($start, $end, $onlyStartTime = false)
+    {
+        $aggregator = new ScheduleAggregator();
+        foreach($this->schedules as $schedule) {
+            $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
+            $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
+            $title = $clientName . ' (' . $caregiverName . ')';
+            $aggregator->add($title, $schedule);
+        }
+
+        return $aggregator->onlyStartTime($onlyStartTime)->events($start, $end);
     }
 }

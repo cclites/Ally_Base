@@ -4,7 +4,7 @@
 namespace App\Responses\Resources;
 
 
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use Illuminate\Contracts\Support\Responsable;
 
 class ClientCaregiver implements Responsable

@@ -2,7 +2,8 @@
 
 namespace App;
 
-use App\Scheduling\CostCalculator;
+use App\Shifts\CostCalculator;
+use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +18,7 @@ class Shift extends Model
     /// Shift Statuses
     ///////////////////////////////////////
 
+    const UNCONFIRMED = 'UNCONFIRMED'; // unconfirmed shift (automatically added from schedule but not clocked in)
     const CLOCKED_IN = 'CLOCKED_IN';
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
@@ -24,9 +26,11 @@ class Shift extends Model
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
     // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
-    const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out but still requires payment from the client
     const PAID_BUSINESS_ONLY = 'PAID_BUSINESS_ONLY'; // Shift that failed payment to the caregiver, but paid successfully to the business
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
+    const PAID_BUSINESS_ONLY_NOT_CHARGED = 'PAID_BUSINESS_ONLY_NOT_CHARGED'; // Shift that failed payment to the caregiver, paid successfully to the business, but still requires payment from the client
+    const PAID_CAREGIVER_ONLY_NOT_CHARGED = 'PAID_CAREGIVER_ONLY_NOT_CHARGED'; // Shift that failed payment to the business, paid successfully to the caregiver, but still requires payment from the client
+    const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
     //////////////////////////////////////
@@ -88,6 +92,11 @@ class Shift extends Model
     public function exceptions()
     {
         return $this->morphMany(SystemException::class, 'reference');
+    }
+
+    public function costHistory()
+    {
+        return $this->hasOne(ShiftCostHistory::class, 'id');
     }
 
     ///////////////////////////////////////////
@@ -162,11 +171,21 @@ class Shift extends Model
     /**
      * Return an instance of the CostCalculator for this shift
      *
-     * @return \App\Scheduling\CostCalculator
+     * @return \App\Shifts\CostCalculator
      */
     public function costs()
     {
         return new CostCalculator($this);
+    }
+
+    /**
+     * Return an instance of the ShiftStatusManager for this shift
+     *
+     * @return \App\Shifts\ShiftStatusManager
+     */
+    public function status()
+    {
+        return new ShiftStatusManager($this);
     }
 
     /**
@@ -184,13 +203,45 @@ class Shift extends Model
      */
     public function isReadOnly()
     {
-        return in_array(
-            $this->status,
-            [
-                self::WAITING_FOR_PAYOUT,
-                self::PAID_NOT_CHARGED,
-                self::PAID,
-            ]
-        );
+        return $this->status()->isReadOnly();
+    }
+
+    ///////////////////////////////////////////
+    /// Query Scopes
+    ///////////////////////////////////////////
+
+    public function scopeWhereReadOnly($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getReadOnlyStatuses());
+    }
+
+    public function scopeWherePending($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getPendingStatuses());
+    }
+
+    public function scopeWhereAwaitingCharge($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getAwaitingChargeStatuses());
+    }
+
+    public function scopeWhereAwaitingBusinessDeposit($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getAwaitingBusinessDepositStatuses());
+    }
+
+    public function scopeWhereAwaitingCaregiverDeposit($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getAwaitingCaregiverDepositStatuses());
+    }
+
+    public function scopeWhereConfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getConfirmedStatuses());
+    }
+
+    public function scopeWhereUnconfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 }

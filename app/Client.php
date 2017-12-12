@@ -6,7 +6,7 @@ use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\UserRole;
 use App\Mail\ClientConfirmation;
-use App\Scheduling\AllyFeeCalculator;
+use App\Shifts\AllyFeeCalculator;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
@@ -186,6 +186,10 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
             ->update(['end_date' => $yesterday]);
     }
 
+    /**
+     * @param bool $backup
+     * @return \App\Contracts\ChargeableInterface
+     */
     public function getPaymentMethod($backup = false)
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;

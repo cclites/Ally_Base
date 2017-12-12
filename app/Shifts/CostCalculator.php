@@ -1,7 +1,8 @@
 <?php
-namespace App\Scheduling;
+namespace App\Shifts;
 
 use App\Payments\MileageExpenseCalculator;
+use App\ShiftCostHistory;
 
 class CostCalculator
 {
@@ -35,6 +36,11 @@ class CostCalculator
      */
     protected $shift;
 
+    /**
+     * @var bool|null
+     */
+    protected $hasCostsPersisted = null;
+
     public function __construct($shift)
     {
         $this->shift = $shift;
@@ -61,6 +67,10 @@ class CostCalculator
      */
     public function getAllyFee()
     {
+        if ($this->hasPersistedCosts()) {
+            return $this->getPersistedCosts()->ally_fee;
+        }
+
         $hours = $this->shift->duration();
         $hourlyRate = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
         $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
@@ -82,6 +92,10 @@ class CostCalculator
      */
     public function getProviderFee()
     {
+        if ($this->hasPersistedCosts()) {
+            return $this->getPersistedCosts()->provider_fee;
+        }
+
         return round(
             bcmul($this->shift->duration(), $this->shift->provider_fee, self::DEFAULT_SCALE),
             self::DECIMAL_PLACES,
@@ -94,10 +108,20 @@ class CostCalculator
      *
      * @return float
      */
-    public function getCaregiverCost()
+    public function getCaregiverCost($expensesIncluded = true)
     {
+        if ($this->hasPersistedCosts()) {
+            if ($expensesIncluded) {
+                return $this->getPersistedCosts()->caregiver_total;
+            }
+            return $this->getPersistedCosts()->caregiver_shift;
+        }
+
         $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
-        $expenses = $this->getCaregiverExpenses();
+        $expenses = 0;
+        if ($expensesIncluded) {
+            $expenses = $this->getCaregiverExpenses();
+        }
 
         return round(
             bcadd($shift, $expenses, self::DEFAULT_SCALE),
@@ -111,6 +135,10 @@ class CostCalculator
      */
     public function getCaregiverExpenses()
     {
+        if ($this->hasPersistedCosts()) {
+            return bcadd($this->getPersistedCosts()->caregiver_expenses, $this->getPersistedCosts()->caregiver_mileage, self::DECIMAL_PLACES);
+        }
+
         $mileage = $this->mileageCalculator()->getCaregiverReimbursement();
         $expenses = bcadd($this->shift->other_expenses, $mileage, self::DEFAULT_SCALE);
         return round(
@@ -123,10 +151,18 @@ class CostCalculator
     /**
      * Return the other expenses with the ally fee included
      */
-    public function getOtherExpenses()
+    public function getOtherExpenses($allyFeeIncluded = true)
     {
+        if ($this->hasPersistedCosts() && !$allyFeeIncluded) {
+            return $this->getPersistedCosts()->caregiver_expenses;
+        }
+
         $expenses = $this->shift->other_expenses;
-        $fee = AllyFeeCalculator::getFee($this->client, $this->paymentType, $this->shift->other_expenses);
+        $fee = 0;
+        if ($allyFeeIncluded) {
+            $fee = AllyFeeCalculator::getFee($this->client, $this->paymentType, $this->shift->other_expenses);
+        }
+
         return round(
             bcadd($expenses, $fee, self::DEFAULT_SCALE),
             self::DECIMAL_PLACES,
@@ -139,9 +175,23 @@ class CostCalculator
      *
      * @return string
      */
-    public function getMileageCost()
+    public function getMileageCost($allyFeeIncluded = true)
     {
-        return $this->mileageCalculator()->getTotalCost();
+        if ($this->hasPersistedCosts()) {
+            if ($allyFeeIncluded) {
+                return bcadd(
+                    $this->getPersistedCosts()->caregiver_mileage,
+                    bcmul($this->getPersistedCosts()->caregiver_mileage, $this->getPersistedCosts()->ally_pct, self::DECIMAL_PLACES),
+                    self::DECIMAL_PLACES
+                );
+            }
+            return $this->getPersistedCosts()->caregiver_mileage;
+        }
+
+        if ($allyFeeIncluded) {
+            return $this->mileageCalculator()->getTotalCost();
+        }
+        return $this->mileageCalculator()->getCaregiverReimbursement();
     }
 
     /**
@@ -161,6 +211,7 @@ class CostCalculator
      */
     public function getTotalCost()
     {
+
         return round(
             bcadd(
                 bcadd($this->getProviderFee(), $this->getCaregiverCost(), self::DEFAULT_SCALE),
@@ -170,5 +221,49 @@ class CostCalculator
             self::DECIMAL_PLACES,
             self::ROUNDING_METHOD
         );
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPersistedCosts()
+    {
+        return ($this->hasCostsPersisted !== null)
+            ? $this->hasCostsPersisted
+            : $this->hasCostsPersisted = !!$this->shift->costHistory;
+    }
+
+    /**
+     * @return ShiftCostHistory|null
+     */
+    public function getPersistedCosts()
+    {
+        return $this->shift->costHistory;
+    }
+
+    /**
+     * @return bool
+     */
+    public function persist()
+    {
+        // Ensure values are calculated, not pulled from existing shift_costs record
+        $this->hasCostsPersisted = false;
+
+        $costs = ShiftCostHistory::findOrNew($this->shift->id);
+        $costs->fill([
+            'caregiver_shift' => $this->getCaregiverCost(false),
+            'caregiver_mileage' => $this->getMileageCost(false),
+            'caregiver_expenses' => $this->getOtherExpenses(false),
+            'caregiver_total' => $this->getCaregiverCost(true),
+            'provider_fee' => $this->getProviderFee(),
+            'ally_fee' => $this->getAllyFee(),
+            'total_cost' => $this->getTotalCost(),
+            'ally_pct' => AllyFeeCalculator::getPercentage($this->client, $this->paymentType),
+        ]);
+        if ($this->shift->costHistory()->save($costs)) {
+            $this->shift->load('costHistory');
+            return true;
+        }
+        return false;
     }
 }

@@ -134,9 +134,10 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Actual Shifts"
+                        header="Shifts"
                         header-text-variant="white"
                         header-bg-variant="info"
+                        title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
                     <b-row>
                         <b-col sm="12">
@@ -144,39 +145,50 @@
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                     </b-row>
-                    <b-table bordered striped hover show-empty
-                             :fields="fields"
-                             :items="shiftHistoryItems"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                             class="shift-table"
-                             :foot-clone="shiftHistoryItems.length > 1"
-                    >
-                        <template slot="Day" scope="data">
-                            {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
-                        </template>
-                        <template slot="Client" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
-                        </template>
-                        <template slot="Caregiver" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
-                        </template>
-                        <template slot="Verified" scope="data">
-                            <span v-if="data.value" style="color: green">
-                                <i class="fa fa-check-square-o"></i>
-                            </span>
-                            <span v-else-if="data.value === undefined"></span>
-                            <span v-else style="color: darkred">
-                                <i class="fa fa-times-rectangle-o"></i>
-                            </span>
-                        </template>
-                        <template slot="actions" scope="row">
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="fields"
+                                 :items="shiftHistoryItems"
+                                 :sort-by.sync="sortBy"
+                                 :sort-desc.sync="sortDesc"
+                                 class="shift-table"
+                        >
+                            <template slot="Day" scope="data">
+                                {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
+                            </template>
+                            <template slot="Client" scope="row">
+                                <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
+                            </template>
+                            <template slot="Caregiver" scope="row">
+                                <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
+                            </template>
+                            <template slot="EVV" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                    <span v-else-if="data.value === undefined"></span>
+                                    <span v-else style="color: darkred">
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
+                            <template slot="Confirmed" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                <span v-else-if="data.value === undefined"></span>
+                                <span v-else style="color: darkred">
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
+                            <template slot="actions" scope="row">
                             <span v-if="row.item.id">
                                 <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                             </span>
-                        </template>
-                    </b-table>
+                            </template>
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
@@ -350,7 +362,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
@@ -358,7 +370,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {},
 
         data() {
@@ -388,7 +404,7 @@
                     'Hours',
                     'Client',
                     'Caregiver',
-                    'Verified',
+                    'EVV',
                     'CG Rate',
                     'Reg Rate',
                     'Ally Fee',
@@ -401,6 +417,7 @@
                     'Other Expenses',
                     'Shift Total',
                     'Type',
+                    'Confirmed',
                 ],
                 filteredFields: [],
             }
@@ -438,7 +455,7 @@
                         'Hours': item.duration,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
-                        'Verified': item.verified,
+                        'EVV': item.verified,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
@@ -451,6 +468,8 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
+                        'Confirmed': (item.status !== 'UNCONFIRMED'),
+                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning'
                     }
                 });
                 items.push({
@@ -591,15 +610,27 @@
                     });
             },
 
-            verifySelected() {
-                let component = this;
+            deleteShift(item) {
+                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(this.Day) + '?';
+                if (confirm(message)) {
+                    let form = new Form();
+                    form.submit('delete', '/business/shifts/' + item.id)
+                        .then(response => {
+                            this.items.shifts = this.items.shifts.filter(function(shift) {
+                                return (shift.id !== item.id);
+                            });
+                        })
+                }
+            },
+
+            confirmSelected() {
                 let form = new Form();
-                form.post('/business/shifts/' + component.selectedItem.id + '/verify')
-                    .then(function(response) {
-                        component.detailsModal = false;
-                        component.items.shifts.map(function(shift) {
-                            if (shift.id === component.selectedItem.id) {
-                                shift.verified = 1;
+                form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
+                    .then(response => {
+                        this.detailsModal = false;
+                        this.items.shifts.map(function(shift) {
+                            if (shift.id === this.selectedItem.id) {
+                                shift.status = response.data.data.status;
                             }
                             return shift;
                         });
