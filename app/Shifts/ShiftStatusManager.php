@@ -32,7 +32,8 @@ class ShiftStatusManager
     public function __construct(Shift $shift)
     {
         // Always load a fresh instance from the database to avoid outdated info
-        $this->shift = $shift->fresh();
+        $this->shift = $shift;
+        $this->shift->refresh();
     }
 
     public function __toString()
@@ -224,6 +225,17 @@ class ShiftStatusManager
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return $this->update(Shift::WAITING_FOR_APPROVAL);
+    }
+
+    /**
+     * Acknowledge a confirmation of an unconfirmed shift
+     */
+    public function ackConfirmation()
+    {
+        if ($this->status() === Shift::UNCONFIRMED) {
+            return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
+        }
+        return false;
     }
 
     /**

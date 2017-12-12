@@ -362,7 +362,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
@@ -464,7 +464,8 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
-                        'Confirmed': (item.status !== 'UNCONFIRMED')
+                        'Confirmed': (item.status !== 'UNCONFIRMED'),
+                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning'
                     }
                 });
                 items.push({
@@ -605,15 +606,14 @@
                     });
             },
 
-            verifySelected() {
-                let component = this;
+            confirmSelected() {
                 let form = new Form();
-                form.post('/business/shifts/' + component.selectedItem.id + '/verify')
-                    .then(function(response) {
-                        component.detailsModal = false;
-                        component.items.shifts.map(function(shift) {
-                            if (shift.id === component.selectedItem.id) {
-                                shift.verified = 1;
+                form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
+                    .then(response => {
+                        this.detailsModal = false;
+                        this.items.shifts.map(function(shift) {
+                            if (shift.id === this.selectedItem.id) {
+                                shift.status = response.data.data.status;
                             }
                             return shift;
                         });

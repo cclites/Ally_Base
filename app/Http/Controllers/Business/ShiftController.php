@@ -154,6 +154,22 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, "This shift could not be deleted.");
     }
 
+    public function confirm(Shift $shift)
+    {
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        if ($shift->status()->ackConfirmation()) {
+            return new SuccessResponse('The shift has been confirmed.', $shift->toArray());
+        }
+
+        if ($shift->status !== Shift::UNCONFIRMED) {
+            return new ErrorResponse(400, 'The shift has already been confirmed.');
+        }
+        return new ErrorResponse(500, 'The shift could not be confirmed due to a system error.');
+    }
+
 
     public function verify(Shift $shift)
     {
@@ -165,7 +181,7 @@ class ShiftController extends BaseController
         if ($shift->update(['verified' => true])) {
             event(new UnverifiedShiftApproved($shift));
             event(new ShiftModified($shift));
-            return new SuccessResponse('The shift has been verified');
+            return new SuccessResponse('The shift has been verified', $shift->toArray());
         }
 
         return new ErrorResponse('The shift could not be verified');

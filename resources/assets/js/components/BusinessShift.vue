@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
-            <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save &amp; Verify".
+            <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
         </div>
         <b-card
                 :header="title"
@@ -282,8 +282,8 @@
                 <b-row>
                     <b-col lg="12" v-if="!shift.readOnly">
                         <span v-if="!deleted">
-                            <b-button variant="success" type="submit">Save Shift</b-button>
-                            <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
+                            <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
@@ -342,6 +342,7 @@
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
+                status: (this.shift) ? this.shift.status : null,
                 checked_in_time: '',
                 checked_in_date: '',
                 checked_out_time: '',
@@ -452,9 +453,15 @@
                     this.form.post('/business/shifts');
                 }
             },
-            saveAndVerify() {
-                this.form.verified = true;
+            saveAndConfirm() {
                 this.saveShift();
+                if (this.shift.id) {
+                    let form = new Form();
+                    form.post('/business/shifts/' + this.shift.id + '/confirm')
+                        .then(response => {
+                            this.status = response.data.data.status;
+                        });
+                }
             },
             validateTimeDifference(field) {
                 this.$nextTick(function() {
