@@ -9,8 +9,8 @@
                         <span v-else>Not Sent</span>
                     </template>
                     <template slot="onboarded" scope="data">
-                        <span v-if="data.item.onboarded">{{ formatDateTime(data.item.onboarded) }}</span>
-                        <span v-else>Not Onboard</span>
+                        <span v-if="data.item.onboarded">Yes</span>
+                        <span v-else>No</span>
                     </template>
                 </b-table>
             </b-card>
@@ -37,7 +37,8 @@
                         label: 'Name'
                     },
                     {
-                        key: 'emailSentAt'
+                        key: 'emailSentAt',
+                        label: 'Email Sent'
                     },
                     {
                         key: 'onboarded'
@@ -58,7 +59,7 @@
             fetchCaregiverData() {
                 axios.post('/business/reports/caregivers-onboarded')
                     .then(response => {
-                        this.caregivers = response.data;
+                        this.caregivers = _.sortBy(response.data, 'nameLastFirst');
                     }).catch(error => {
                         console.error(error.response);
                     });
