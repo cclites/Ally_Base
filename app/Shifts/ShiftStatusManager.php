@@ -33,7 +33,9 @@ class ShiftStatusManager
     {
         // Always load a fresh instance from the database to avoid outdated info
         $this->shift = $shift;
-        $this->shift->refresh();
+        if ($this->shift->id) {
+            $this->shift->refresh();
+        }
     }
 
     public function __toString()
