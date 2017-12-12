@@ -24,7 +24,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         'bank_account_id',
         'title',
         'hire_date',
-        'gender'
+        'gender',
+        'misc'
     ];
 
     ///////////////////////////////////////////

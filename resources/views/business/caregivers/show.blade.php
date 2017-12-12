@@ -43,6 +43,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -60,6 +63,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
                 <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
+                <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
             </div>
         </li>
     </ul>
@@ -122,6 +126,9 @@
             <!-- Preferences Placeholder -->
             <h4>Preferences coming soon</h4>
             <p>This will be where caregivers can set their environment preferences.</p>
+        </div>
+        <div class="tab-pane" id="misc" role="tabpanel">
+            <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
         </div>
     </div>
 @endsection
