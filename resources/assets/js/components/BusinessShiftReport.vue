@@ -185,6 +185,7 @@
                             <span v-if="row.item.id">
                                 <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                             </span>
                             </template>
                         </b-table>
@@ -370,7 +371,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {},
 
         data() {
@@ -604,6 +609,19 @@
                     .catch(function(error) {
                         alert('Error loading shift details');
                     });
+            },
+
+            deleteShift(item) {
+                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(this.Day) + '?';
+                if (confirm(message)) {
+                    let form = new Form();
+                    form.submit('delete', '/business/shifts/' + item.id)
+                        .then(response => {
+                            this.items.shifts = this.items.shifts.filter(function(shift) {
+                                return (shift.id !== item.id);
+                            });
+                        })
+                }
             },
 
             confirmSelected() {
