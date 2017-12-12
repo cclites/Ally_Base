@@ -23,8 +23,6 @@ use Illuminate\Http\Request;
 
 class ReportsController extends BaseController
 {
-    use ActiveBusiness;
-
     public function medicaidReport(Request $request)
     {
         return view('business.reports.medicaid', $this->medicaidData($request));
