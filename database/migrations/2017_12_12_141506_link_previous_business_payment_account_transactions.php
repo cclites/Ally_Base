@@ -13,6 +13,9 @@ class LinkPreviousBusinessPaymentAccountTransactions extends Migration
      */
     public function up()
     {
+        // One time migration for production only
+        if (env('APP_ENV') !== 'production') return;
+
         $businesses = \App\Business::has('paymentAccount')->orderBy('id')->get();
         $transactions = GatewayTransaction::where('transaction_type', 'sale')->where('success', 1)->orderBy('id')->get();
 
