@@ -250,7 +250,8 @@ class ReportsController extends BaseController
         return view('business.reports.certifications', compact('certifications'));
     }
 
-    public function shifts(Request $request) {
+    public function shifts(Request $request)
+    {
         $report = new ShiftsReport();
         $report->where('business_id', $this->business()->id);
 
@@ -261,6 +262,12 @@ class ReportsController extends BaseController
         }
         if ($request->has('transaction_id')) {
             $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
         }
 
         return $report->rows();
@@ -273,6 +280,15 @@ class ReportsController extends BaseController
 
         $report = new CaregiverPaymentsReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
+
+
         return $report->rows();
     }
 
@@ -283,6 +299,14 @@ class ReportsController extends BaseController
 
         $report = new ClientChargesReport();
         $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
+
         return $report->rows();
     }
 
@@ -320,5 +344,28 @@ class ReportsController extends BaseController
         })->get();
 
         return view('business.reports.client_email_missing', compact('clients'));
+    }
+
+    public function creditCardExpiration()
+    {
+        return view('business.reports.cc_expiration', compact('cards'));
+    }
+
+    public function creditCards()
+    {
+        $report_date = Carbon::now()->addDays(request('daysFromNow'));
+        $cards = CreditCard::with('user')
+            ->whereIn('user_id', $this->business()->clients()->select('id')->pluck('id'))
+            ->get()
+            ->filter(function ($card) use ($report_date) {
+                return $card->expirationDate->lt($report_date);
+            })
+            ->map(function ($card) {
+                $card->expires_in = Carbon::now()->diffForHumans($card->expirationDate);
+                return $card;
+            });
+
+
+        return response()->json($cards);
     }
 }
