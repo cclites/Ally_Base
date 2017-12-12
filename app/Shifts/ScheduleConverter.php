@@ -84,18 +84,6 @@ class ScheduleConverter
      */
     public function shiftExistsFor(Schedule $schedule, Carbon $expectedClockIn)
     {
-        if ($schedule->id == 415 && $expectedClockIn->dayOfWeek === Carbon::FRIDAY) {
-            dump(
-            Shift::where('schedule_id', $schedule->id)
-                ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(8), $expectedClockIn->copy()->addHours(8)])
-                ->get(),
-            Shift::where('client_id', $schedule->client_id)
-                ->where('caregiver_id', $schedule->caregiver_id)
-                ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(2), $expectedClockIn->copy()->addHours(2)])
-                ->exists()
-            );
-        }
-
         return Shift::where(function($q) use ($schedule, $expectedClockIn) {
             $q->where('schedule_id', $schedule->id)
                 ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(8), $expectedClockIn->copy()->addHours(8)]);
