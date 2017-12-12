@@ -30,8 +30,7 @@ class ShiftStatusManager
 
     public function __construct(Shift $shift)
     {
-        // Always load a fresh instance from the database to avoid outdated info
-        $this->shift = $shift->fresh();
+        $this->shift = $shift;
     }
 
     public function __toString()
