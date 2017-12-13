@@ -46,7 +46,7 @@
         <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
         <li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>
         <li><a href="{{ route('business.reports.reconciliation') }}">Reconciliation Report</a></li>
-        <li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>
+        {{--<li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>--}}
         <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
         <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
         <li><a href="{{ route('business.reports.cc_expiration') }}">Credit Card Expiration</a></li>
