@@ -4,9 +4,14 @@ namespace App\Reports;
 use App\Contracts\Report;
 use App\Shift;
 use Carbon\Carbon;
+use File;
+use PHPExcel_IOFactory;
 
 abstract class BaseReport implements Report
 {
+    const CSV_DELIMITER = ';';
+    const CSV_REPLACE_DELIMITER_WITH = ',';
+
     /**
      * @var bool
      */
@@ -110,5 +115,70 @@ abstract class BaseReport implements Report
     {
         $this->query()->orderBy($column, $direction);
         return $this;
+    }
+
+    /**
+     * Return a CSV format of the report data
+     *
+     * @return string
+     */
+    public function toCsv()
+    {
+        $rows = $this->rows();
+
+        if (!$rows) {
+            return '';
+        }
+
+        $headers = array_map(
+            function($value) {
+                return (is_string($value)) ? str_replace(self::CSV_DELIMITER, self::CSV_REPLACE_DELIMITER_WITH, $value) : $value;
+            },
+            array_keys($rows->first())
+        );
+        $csv = [implode(self::CSV_DELIMITER, $headers)];
+
+        foreach($rows as $row) {
+            $data = array_map(
+                function($value) {
+                    return (is_string($value)) ? str_replace(self::CSV_DELIMITER, self::CSV_REPLACE_DELIMITER_WITH, $value) : $value;
+                },
+                $row
+            );
+            $csv[] = [implode(self::CSV_DELIMITER, $data)];
+        }
+
+        return implode("\n", $csv);
+    }
+
+    /**
+     * Start a download of a spreadsheet export of the report
+     *
+     * @return void
+     */
+    public function download()
+    {
+        header('Content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $this->getDownloadName() . '.xlsx";');
+
+        $csvFile = tempnam(sys_get_temp_dir(), 'export');
+        File::put($csvFile, $this->toCsv());
+
+        $PHPExcel = PHPExcel_IOFactory::load($csvFile);
+        unlink($csvFile);
+
+        $objWriter = PHPExcel_IOFactory::createWriter($PHPExcel, "Excel2007");
+        $objWriter->save('php://output');
+        exit();
+    }
+
+    /**
+     * Return the name of the downloaded file
+     *
+     * @return string
+     */
+    public function getDownloadName()
+    {
+        return 'Report';
     }
 }
