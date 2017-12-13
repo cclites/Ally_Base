@@ -4,6 +4,7 @@ namespace App\Traits;
 use App\Address;
 use App\BankAccount;
 use App\CreditCard;
+use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 use App\Document;
@@ -264,5 +265,10 @@ trait IsUserRole
     public function documents()
     {
         return $this->hasMany(Document::class, 'user_id', 'id');
+    }
+
+    public function emergencyContacts()
+    {
+        return $this->hasMany(EmergencyContact::class, 'user_id', 'id');
     }
 }
