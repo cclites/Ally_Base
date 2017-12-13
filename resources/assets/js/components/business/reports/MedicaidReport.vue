@@ -49,6 +49,7 @@
                                  :filter="filter"
                                  :sort-by.sync="sortBy"
                                  :sort-desc.sync="sortDesc"
+                                 :empty-text="emptyText"
                                  @filtered="onFiltered">
                             <template slot="firstname" slot-scope="data">
                                 {{ data.item.caregiver.firstname }}
@@ -102,6 +103,7 @@
 
         data() {
             return {
+                emptyText: 'No records for ' + this.formatDate(this.dates.start.date) + ' through ' + this.formatDate(this.dates.end.date),
                 form: {
                     start_date: moment(this.dates.start.date).format('MM/DD/YYYY'),
                     end_date: moment(this.dates.end.date).format('MM/DD/YYYY'),
@@ -179,6 +181,10 @@
                         this.reportTotals = response.data.totals;
                         this.items = response.data.shifts;
                         this.fetchingData = false;
+                        this.emptyText = 'No records for ' + this.formatDate(this.form.start_date) + ' through ' + this.formatDate(this.form.end_date);
+                        if (this.items.length === 0) {
+                            alerts.addMessage('warning', 'No results for ' + this.formatDate(this.form.start_date) + ' through ' + this.formatDate(this.form.end_date) + ' ');
+                        }
                     }).catch(error => {
                         console.error(error.response);
                         this.fetchingData = false;
