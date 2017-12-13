@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
 use App\Console\Commands\ImportGenerationsCaregivers;
 use App\Console\Commands\ImportPaychexCaregivers;
@@ -21,6 +22,7 @@ class Kernel extends ConsoleKernel
         ImportGenerationsCaregivers::class,
         ImportPaychexCaregivers::class,
         CronUpdateTransactionLog::class,
+        CronScheduleConverter::class,
     ];
 
     /**
@@ -33,6 +35,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('cron:transaction_log')
             ->dailyAt('18:00'); // 1PM EST / 2PM EDT
+        $schedule->command('cron:schedule_converter')
+            ->hourly();
     }
 
     /**
