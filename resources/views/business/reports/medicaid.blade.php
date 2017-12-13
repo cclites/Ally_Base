@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Medicaid Report')
+@section('title', 'Medicaid Payroll Report')
 
 @section('content')
     <business-medicaid-report
