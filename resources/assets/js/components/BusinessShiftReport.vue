@@ -172,13 +172,7 @@
                                 </span>
                             </template>
                             <template slot="Confirmed" scope="data">
-                                <span v-if="data.value" style="color: green">
-                                    <i class="fa fa-check-square-o"></i>
-                                </span>
-                                <span v-else-if="data.value === undefined"></span>
-                                <span v-else style="color: darkred">
-                                    <i class="fa fa-times-rectangle-o"></i>
-                                </span>
+                                {{ (data.value) ? 'Yes' : 'No' }}
                             </template>
                             <template slot="actions" scope="row">
                             <span v-if="row.item.id">
