@@ -160,7 +160,7 @@
             <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $client->emergencyContacts }}"
+            <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
                                     :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
     </div>

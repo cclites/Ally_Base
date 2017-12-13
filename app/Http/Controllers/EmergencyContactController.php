@@ -49,9 +49,7 @@ class EmergencyContactController extends Controller
             'relationship' => 'nullable|string|max:80'
         ]);
 
-        $data['user_id'] = $user->id;
-
-        $contact = EmergencyContact::create($data);
+        $contact = $user->emergencyContacts()->create($data);
 
         return response()->json($contact);
     }
@@ -98,6 +96,7 @@ class EmergencyContactController extends Controller
      */
     public function destroy(EmergencyContact $contact)
     {
+        $this->authorize('delete', $contact);
         return response()->json($contact->delete());
     }
 }

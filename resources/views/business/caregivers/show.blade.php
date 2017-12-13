@@ -128,7 +128,7 @@
             <p>This will be where caregivers can set their environment preferences.</p>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
-            <emergency-contacts-tab :emergency-contacts="{{ $caregiver->emergencyContacts }}"
+            <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
                                     :user-id="{{ $caregiver->id }}"></emergency-contacts-tab>
         </div>
     </div>

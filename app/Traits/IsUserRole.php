@@ -266,9 +266,4 @@ trait IsUserRole
     {
         return $this->hasMany(Document::class, 'user_id', 'id');
     }
-
-    public function emergencyContacts()
-    {
-        return $this->hasMany(EmergencyContact::class, 'user_id', 'id');
-    }
 }
