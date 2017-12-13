@@ -65,7 +65,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td><strong>Total</strong></td>
+                                <td><strong>Total for Confirmed Shifts</strong></td>
                                 <td>{{ clientTotals.hours }}</td>
                                 <td>{{ clientTotals.total }}</td>
                                 <td></td>
@@ -100,7 +100,7 @@
                         </tbody>
                         <tfoot>
                         <tr>
-                            <td><strong>Total</strong></td>
+                            <td><strong>Total for Confirmed Shifts</strong></td>
                             <td>{{ caregiverTotals.hours }}</td>
                             <td>{{ caregiverTotals.amount }}</td>
                         </tr>
