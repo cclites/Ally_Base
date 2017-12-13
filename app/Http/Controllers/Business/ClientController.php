@@ -41,7 +41,11 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()->clients()
+        return $this->business()
+            ->clients()
+            ->whereHas('user', function ($query) {
+                $query->where('active', true);
+            })
             ->with(['user'])->get()->map(function($client) {
                 return [
                     'id' => $client->id,
