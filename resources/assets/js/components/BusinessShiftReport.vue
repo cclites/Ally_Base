@@ -662,9 +662,12 @@
 
             setInitialFields() {
                 if (this.getLocalStorage('fields')) {
-                    // Temporary fix for invalid objects stored
                     let fields = JSON.parse(this.getLocalStorage('fields'));
                     if (fields[0] && typeof(fields[0]) !== 'object') {
+                        // Temporarily Force 'Confirmed'
+                        if (fields.indexOf('Confirmed') === -1) {
+                            fields.push('Confirmed');
+                        }
                         this.filteredFields = fields;
                         return;
                     }
