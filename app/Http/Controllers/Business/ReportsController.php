@@ -162,25 +162,8 @@ class ReportsController extends BaseController
 
     public function payments()
     {
-        $year_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
-        $month_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
-
-        $month_sum = Payment::where('business_id', $this->business()->id)
-            ->where('created_at', '>=', $month_start)
-            ->sum('business_allotment');
-        $month_sum = number_format($month_sum, 2);
-        $year_sum = Payment::where('business_id', $this->business()->id)
-            ->where('created_at', '>=', $year_start)
-            ->sum('business_allotment');
-        $year_sum = number_format($year_sum, 2);
-
-        $report = new ScheduledPaymentsReport();
-        $report->where('business_id', $this->business()->id)
-            ->between($year_start, null);
-        $scheduled_sum = $report->sum('business_allotment');
-        $scheduled_sum = number_format($scheduled_sum, 2);
-
         $payments = Payment::where('business_id', $this->business()->id)
+            ->whereNotNull('client_id')
             ->orderBy('created_at', 'DESC')
             ->get()
             ->map(function (Payment $payment) {
@@ -193,7 +176,7 @@ class ReportsController extends BaseController
                     'date' => $payment->created_at->format(\DateTime::ISO8601),
                 ];
             });
-        return view('business.reports.payments', compact('payments', 'month_sum', 'year_sum', 'scheduled_sum'));
+        return view('business.reports.payments', compact('payments'));
     }
 
     public function scheduled()
