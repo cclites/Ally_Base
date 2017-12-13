@@ -3,6 +3,9 @@
         <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
             <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
         </div>
+        <div class="alert alert-warning" v-if="status === 'UNCONFIRMED'">
+            <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
+        </div>
         <b-card
                 :header="title"
                 header-text-variant="white"
