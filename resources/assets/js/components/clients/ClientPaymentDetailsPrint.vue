@@ -60,7 +60,7 @@
                             {{ item.mileage }}
                         </td>
                         <td>
-                            {{ item.roundedShiftLength }}
+                            {{ item.duration }}
                         </td>
                         <td>
                             {{ moneyFormat(item.shift_total) }}

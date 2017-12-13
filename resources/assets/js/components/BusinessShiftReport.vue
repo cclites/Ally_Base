@@ -3,7 +3,7 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Select Date Range"
+                        header="Select Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -18,16 +18,25 @@
                                 placeholder="End Date"
                         >
                         </date-picker>
-                        &nbsp;&nbsp;
-                        <b-button type="submit" variant="info">Generate Report</b-button>
+                        <b-form-select v-model="caregiver_id">
+                            <option value="">All Caregivers</option>
+                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                        </b-form-select>
+                        <b-form-select v-model="client_id">
+                            <option value="">All Clients</option>
+                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                        </b-form-select>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card
-                        header="Client Charges for Date Range"
+                        header="Client Charges for Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -70,7 +79,7 @@
             </b-col>
             <b-col lg="6">
                 <b-card
-                        header="Caregiver Payments for Date Range"
+                        header="Caregiver Payments for Date Range &amp; Filters"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
@@ -100,12 +109,12 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="showSummary">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
                         <tr>
-                            <td><strong>Provider Payment For Date Range:</strong></td>
+                            <td><strong>Provider Payment For Date Range &amp; Filters:</strong></td>
                             <td>{{ clientTotals.provider_total }}</td>
                         </tr>
                     </table>
@@ -115,7 +124,7 @@
                 <b-card>
                     <table class="table table-bordered">
                         <tr>
-                            <td><strong>Processing Fee For Date Range:</strong></td>
+                            <td><strong>Processing Fee For Date Range &amp; Filters:</strong></td>
                             <td>{{ clientTotals.ally_total }}</td>
                         </tr>
                     </table>
@@ -125,61 +134,61 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                        header="Actual Shifts"
+                        header="Shifts"
                         header-text-variant="white"
                         header-bg-variant="info"
+                        title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
                     <b-row>
-                        <b-col sm="6">
+                        <b-col sm="12">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
-                        <b-col sm="6">
-                            <b-row>
-                                <b-col cols="6">
-                                    <b-form-select v-model="filterCaregiverId">
-                                        <option value="">All Caregivers</option>
-                                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
-                                    </b-form-select>
-                                </b-col>
-                                <b-col cols="6">
-                                    <b-form-select v-model="filterClientId">
-                                        <option value="">All Clients</option>
-                                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
-                                    </b-form-select>
-                                </b-col>
-                            </b-row>
-                        </b-col>
                     </b-row>
-                    <b-table bordered striped hover show-empty
-                             :fields="fields"
-                             :items="shiftHistoryItems"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                             class="shift-table"
-                    >
-                        <template slot="Day" scope="data">
-                            {{ dayFormat(data.value) }}
-                        </template>
-                        <template slot="Client" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
-                        </template>
-                        <template slot="Caregiver" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
-                        </template>
-                        <template slot="Verified" scope="data">
-                            <span v-if="data.value" style="color: green">
-                                <i class="fa fa-check-square-o"></i>
-                            </span>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="fields"
+                                 :items="shiftHistoryItems"
+                                 :sort-by.sync="sortBy"
+                                 :sort-desc.sync="sortDesc"
+                                 class="shift-table"
+                        >
+                            <template slot="Day" scope="data">
+                                {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
+                            </template>
+                            <template slot="Client" scope="row">
+                                <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
+                            </template>
+                            <template slot="Caregiver" scope="row">
+                                <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
+                            </template>
+                            <template slot="EVV" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                    <span v-else-if="data.value === undefined"></span>
                                     <span v-else style="color: darkred">
-                                <i class="fa fa-times-rectangle-o"></i>
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
+                            <template slot="Confirmed" scope="data">
+                                <span v-if="data.value" style="color: green">
+                                    <i class="fa fa-check-square-o"></i>
+                                </span>
+                                <span v-else-if="data.value === undefined"></span>
+                                <span v-else style="color: darkred">
+                                    <i class="fa fa-times-rectangle-o"></i>
+                                </span>
+                            </template>
+                            <template slot="actions" scope="row">
+                            <span v-if="row.item.id">
+                                <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                             </span>
-                        </template>
-                        <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                        </template>
-                    </b-table>
+                            </template>
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
@@ -353,7 +362,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                <b-btn variant="info" @click="verifySelected()" v-if="!selectedItem.verified">Mark Verified</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
@@ -361,7 +370,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {},
 
         data() {
@@ -373,10 +386,11 @@
                 },
                 start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                caregiver_id: "",
+                client_id: "",
                 clients: [],
                 caregivers: [],
-                filterCaregiverId: "",
-                filterClientId: "",
+                showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
                 detailsModal: false,
@@ -390,7 +404,7 @@
                     'Hours',
                     'Client',
                     'Caregiver',
-                    'Verified',
+                    'EVV',
                     'CG Rate',
                     'Reg Rate',
                     'Ally Fee',
@@ -403,6 +417,7 @@
                     'Other Expenses',
                     'Shift Total',
                     'Type',
+                    'Confirmed',
                 ],
                 filteredFields: [],
             }
@@ -410,8 +425,8 @@
 
         mounted() {
             this.setInitialFields();
-            this.loadData();
             this.loadFiltersData();
+            this.loadData();
         },
 
         computed: {
@@ -429,26 +444,18 @@
                 return fields;
             },
             shiftHistoryItems() {
-                let component = this;
                 let items = this.items.shifts;
-                if (component.filterCaregiverId || component.filterClientId) {
-                    items = items.filter(function(item) {
-                        if (component.filterCaregiverId && component.filterCaregiverId != item.caregiver_id) return false;
-                        if (component.filterClientId && component.filterClientId != item.client_id) return false;
-                        return true;
-                    });
-                }
-                return items.map(function(item) {
+                items = items.map(function(item) {
                     return {
                         'id': item.id,
                         'client_id': item.client_id,
                         'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
-                        'Hours': item.roundedShiftLength,
+                        'Hours': item.duration,
                         'Client': item.client.nameLastFirst,
                         'Caregiver': item.caregiver.nameLastFirst,
-                        'Verified': item.verified,
+                        'EVV': item.verified,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
@@ -461,33 +468,62 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
+                        'Confirmed': (item.status !== 'UNCONFIRMED'),
+                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning'
                     }
                 });
+                items.push({
+                    '_rowVariant': 'info',
+                    'Day': 'Total',
+                    'Hours': this.shiftTotals.duration,
+                    'Mileage': this.shiftTotals.mileage,
+                    'CG Total': this.shiftTotals.caregiver_total,
+                    'Reg Total': this.shiftTotals.provider_total,
+                    'Ally Total': this.shiftTotals.ally_total,
+                    'Mileage Costs': this.shiftTotals.mileage_costs,
+                    'Other Expenses': this.shiftTotals.other_expenses,
+                    'Shift Total': this.shiftTotals.shift_total,
+                })
+                return items;
             },
             clientTotals() {
-                let component = this;
-                if (this.items.clientCharges.length === 0) return [];
-                return this.items.clientCharges.reduce(function(totals, item) {
-                    console.log(totals, item);
+                if (this.items.clientCharges.length === 0) return {};
+                return this.items.clientCharges.reduce((totals, item) => {
                     return {
-                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
-                        total: (component.parseFloat(totals.total) + component.parseFloat(item.total)).toFixed(2),
-                        caregiver_total: (component.parseFloat(totals.caregiver_total) + component.parseFloat(item.caregiver_total)).toFixed(2),
-                        provider_total: (component.parseFloat(totals.provider_total) + component.parseFloat(item.provider_total)).toFixed(2),
-                        ally_total: (component.parseFloat(totals.ally_total) + component.parseFloat(item.ally_total)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
+                        total: (this.parseFloat(totals.total) + this.parseFloat(item.total)).toFixed(2),
+                        caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
+                        provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
+                        ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
                     }
                 })
             },
             caregiverTotals() {
-                let component = this;
-                if (this.items.caregiverPayments.length === 0) return [];
-                return this.items.caregiverPayments.reduce(function(totals, item) {
-                    console.log(totals, item);
+                if (this.items.caregiverPayments.length === 0) return {};
+                return this.items.caregiverPayments.reduce((totals, item) => {
                     return {
-                        amount: (component.parseFloat(totals.amount) + component.parseFloat(item.amount)).toFixed(2),
-                        hours: (component.parseFloat(totals.hours) + component.parseFloat(item.hours)).toFixed(2),
+                        amount: (this.parseFloat(totals.amount) + this.parseFloat(item.amount)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
                     }
                 })
+            },
+            shiftTotals() {
+                if (this.items.shifts.length === 0) return {};
+                return this.items.shifts.reduce((totals, item) => {
+                    return {
+                        duration: (this.parseFloat(totals.duration) + this.parseFloat(item.duration)).toFixed(2),
+                        caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
+                        provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
+                        ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
+                        shift_total: (this.parseFloat(totals.shift_total) + this.parseFloat(item.shift_total)).toFixed(2),
+                        mileage: (this.parseFloat(totals.mileage) + this.parseFloat(item.mileage)).toFixed(2),
+                        mileage_costs: (this.parseFloat(totals.mileage_costs) + this.parseFloat(item.mileage_costs)).toFixed(2),
+                        other_expenses: (this.parseFloat(totals.other_expenses) + this.parseFloat(item.other_expenses)).toFixed(2),
+                    }
+                })
+            },
+            summaryButtonText() {
+                return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             }
         },
 
@@ -498,8 +534,6 @@
                 return this.loadData();
             },
             loadData() {
-                let prefix = '/business/reports/data/';
-
                 // Attempt to load local storage information first
                 if (typeof(Storage) !== "undefined") {
                     let startDate = this.getLocalStorage('startDate');
@@ -507,16 +541,22 @@
                     let endDate = this.getLocalStorage('endDate');
                     if (endDate) this.end_date = endDate;
                     let filterCaregiverId = this.getLocalStorage('filterCaregiverId');
-                    if (filterCaregiverId) this.filterCaregiverId = filterCaregiverId;
+                    if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
-                    if (filterClientId) this.filterClientId = filterClientId;
+                    if (filterClientId) this.client_id = filterClientId;
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
                     if (sortDesc === false || sortDesc === true) this.sortDesc = sortDesc;
+                    let showSummary = this.getLocalStorage('showSummary');
+                    if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
-                axios.get(prefix + 'caregiver_payments?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                // Global query information
+                let prefix = '/business/reports/data/';
+                let queryString = '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
+
+                axios.get(prefix + 'caregiver_payments' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -525,7 +565,7 @@
                             this.items.caregiverPayments = [];
                         }
                     });
-                axios.get(prefix + 'client_charges?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get(prefix + 'client_charges' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -534,7 +574,7 @@
                             this.items.clientCharges = [];
                         }
                     });
-                axios.get(prefix + 'shifts?start_date=' + this.start_date + '&end_date=' + this.end_date)
+                axios.get(prefix + 'shifts' + queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.shifts = response.data;
@@ -570,15 +610,27 @@
                     });
             },
 
-            verifySelected() {
-                let component = this;
+            deleteShift(item) {
+                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(this.Day) + '?';
+                if (confirm(message)) {
+                    let form = new Form();
+                    form.submit('delete', '/business/shifts/' + item.id)
+                        .then(response => {
+                            this.items.shifts = this.items.shifts.filter(function(shift) {
+                                return (shift.id !== item.id);
+                            });
+                        })
+                }
+            },
+
+            confirmSelected() {
                 let form = new Form();
-                form.post('/business/shifts/' + component.selectedItem.id + '/verify')
-                    .then(function(response) {
-                        component.detailsModal = false;
-                        component.items.shifts.map(function(shift) {
-                            if (shift.id === component.selectedItem.id) {
-                                shift.verified = 1;
+                form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
+                    .then(response => {
+                        this.detailsModal = false;
+                        this.items.shifts.map(function(shift) {
+                            if (shift.id === this.selectedItem.id) {
+                                shift.status = response.data.data.status;
                             }
                             return shift;
                         });
@@ -629,14 +681,18 @@
                     case 'holiday':
                         return 'HOL';
                 }
+            },
+
+            showHideSummary() {
+                this.showSummary = !this.showSummary;
             }
         },
 
         watch: {
-            filterCaregiverId(val) {
+            caregiver_id(val) {
                 this.setLocalStorage('filterCaregiverId', val);
             },
-            filterClientId(val) {
+            client_id(val) {
                 this.setLocalStorage('filterClientId', val);
             },
             start_date(val) {
@@ -653,7 +709,10 @@
             },
             filteredFields(val) {
                 this.setLocalStorage('fields', JSON.stringify(val));
-            }
+            },
+            showSummary(val) {
+                this.setLocalStorage('showSummary', JSON.stringify(val));
+            },
         }
     }
 </script>
@@ -661,5 +720,10 @@
 <style>
     table {
         font-size: 14px;
+    }
+    .table-info, .table-info>td, .table-info>th {
+        font-weight: bold;
+        font-size: 13px;
+        background-color: #ecf7f9;
     }
 </style>

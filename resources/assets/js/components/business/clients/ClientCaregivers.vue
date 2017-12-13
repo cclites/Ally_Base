@@ -60,7 +60,7 @@
                                 name="caregiver_id"
                                 v-model="form.caregiver_id"
                                 >
-                                <option v-for="item in list" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
@@ -123,7 +123,6 @@
 <script>
     export default {
         props: {
-            'list': {},
             'client_id': {},
             'paymentTypeMessage': {
                 default() {
@@ -135,6 +134,7 @@
         data() {
             return {
                 items: [],
+                caregiverList: [],
                 clientCaregiverModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
@@ -150,6 +150,7 @@
                         this.items = [];
                     }
                 });
+            axios.get('/business/caregivers').then(response => this.caregiverList = response.data);
         },
 
         methods: {

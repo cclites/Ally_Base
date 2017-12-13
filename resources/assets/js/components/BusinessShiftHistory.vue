@@ -251,7 +251,7 @@
                             date: start.local().format('L LTS'),
                             client_name: shift.client_name,
                             caregiver_name: shift.caregiver_name,
-                            hours: (shift.checked_out_time) ? shift.roundedShiftLength : 'CLOCKED IN',
+                            hours: (shift.checked_out_time) ? shift.duration : 'CLOCKED IN',
                             verified: shift.verified
                         }
                     }),

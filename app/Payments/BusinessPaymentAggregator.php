@@ -6,6 +6,7 @@ use App\Contracts\ChargeableInterface;
 use App\Payment;
 use App\Shift;
 use Carbon\Carbon;
+use DB;
 
 class BusinessPaymentAggregator
 {
@@ -41,7 +42,7 @@ class BusinessPaymentAggregator
         $this->startDate = $startDate->copy()->setTimezone('UTC');
         $this->endDate = $endDate->copy()->setTimezone('UTC');
 
-        $this->shifts = Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE])
+        $this->shifts = Shift::whereAwaitingCharge()
             ->whereNull('payment_id')
             ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
             ->whereIn('client_id', $this->getClientIdsUsingProviderPayment())
@@ -106,22 +107,44 @@ class BusinessPaymentAggregator
         if (!$this->method instanceof ChargeableInterface) {
             return false;
         }
-        $transaction = $this->method->charge($payment->amount);
 
-        if ($transaction) {
-            $payment->fill([
+        try {
+            // Process Payment and Update Status in a Transaction
+            DB::beginTransaction();
+
+            // Persist the payment
+            $payment->save();
+
+            // Attempt to update status of all shifts
+            foreach($this->getShifts() as $shift) {
+                if (!$shift->status()->ackPayment($payment->id)) {
+                    DB::rollBack();
+                    return false;
+                }
+                // Persist shift costs
+                $shift->costs()->setPaymentType($this->method)->persist();
+            }
+
+            // Process Payments
+            if (!$transaction = $this->method->charge($payment->amount)) {
+                DB::rollBack();
+                return false;
+            }
+
+            // Commit database transaction now that payment has completed
+            DB::commit();
+
+            // Save transaction details to payment
+            $payment->update([
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
             ]);
-            // Save the payment to the client
-            $this->business->payments()->save($payment);
-            // Update shifts' payment id
-            Shift::whereIn('id', $this->getShiftIds())->update([
-                'payment_id' => $payment->id,
-                'status' => Shift::WAITING_FOR_PAYOUT,
-            ]);
-        }
 
-        return $transaction;
+            return $transaction;
+        }
+        catch(\Exception $e) {
+            DB::rollBack();
+            return false;
+        }
     }
 }

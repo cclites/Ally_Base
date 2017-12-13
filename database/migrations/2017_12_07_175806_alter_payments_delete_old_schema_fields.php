@@ -13,11 +13,19 @@ class AlterPaymentsDeleteOldSchemaFields extends Migration
      */
     public function up()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropForeign('fk_payments_caregiver_id');
-            $table->dropColumn('caregiver_id');
-            $table->dropColumn('deposited');
-        });
+        try {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropForeign('fk_payments_caregiver_id');
+            });
+        }
+        catch(Exception $e) {}
+
+        if (Schema::hasColumn('payments', 'caregiver_id')) {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropColumn('caregiver_id');
+                $table->dropColumn('deposited');
+            });
+        }
     }
 
     /**
@@ -27,10 +35,6 @@ class AlterPaymentsDeleteOldSchemaFields extends Migration
      */
     public function down()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->integer('caregiver_id')->unsigned();
-            $table->boolean('deposited')->default(0);
-            $table->foreign('caregiver_id', 'fk_payments_caregiver_id')->references('id')->on('caregivers')->onUpdate('CASCADE')->onDelete('RESTRICT');
-        });
+
     }
 }

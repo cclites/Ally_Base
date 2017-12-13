@@ -26,8 +26,8 @@ class ShiftController extends Controller
             ->orderBy('checked_in_time')
             ->get();
 
-        $shifts = $shifts->map(function($shift) {
-            $shift->total = $shift->roundedShiftLength * $shift->caregiver_rate + $shift->provider_fee + $shift->other_expenses;
+        $shifts = $shifts->map(function(Shift $shift) {
+            $shift->total = $shift->duration() * $shift->caregiver_rate + $shift->provider_fee + $shift->other_expenses;
             return $shift;
         });
 

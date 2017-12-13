@@ -98,7 +98,7 @@ class PhoneNumber extends Model
      *
      * @return $this
      */
-    public function input($number, $extension=null)
+    public function input($number, $extension = null)
     {
         $parsed = $this->parse($number, $extension);
         $this->country_code = $parsed->getCountryCode();
@@ -115,7 +115,7 @@ class PhoneNumber extends Model
      *
      * @return \libphonenumber\PhoneNumber
      */
-    public function parse($number, $extension=null)
+    public function parse($number, $extension = null)
     {
         if ($extension) $number .= ' x' . ltrim($extension, 'x');
         return $this->phoneNumberUtil->parse($number, self::DEFAULT_REGION);
@@ -130,7 +130,7 @@ class PhoneNumber extends Model
      *
      * @return string
      */
-    public function format($number, $extension=null, $format = self::DEFAULT_FORMAT)
+    public function format($number, $extension = null, $format = self::DEFAULT_FORMAT)
     {
         $parsed = $this->parse($number, $extension);
         return $this->phoneNumberUtil->format($parsed, $format);

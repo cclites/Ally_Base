@@ -11,13 +11,14 @@ class Shift extends Model
 {
     public $timestamps = false;
     protected $guarded = ['id'];
-    protected $appends = ['roundedShiftLength', 'readOnly'];
+    protected $appends = ['duration', 'readOnly'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
 
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////
 
+    const UNCONFIRMED = 'UNCONFIRMED'; // unconfirmed shift (automatically added from schedule but not clocked in)
     const CLOCKED_IN = 'CLOCKED_IN';
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
@@ -93,11 +94,16 @@ class Shift extends Model
         return $this->morphMany(SystemException::class, 'reference');
     }
 
+    public function costHistory()
+    {
+        return $this->hasOne(ShiftCostHistory::class, 'id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
-    public function getRoundedShiftLengthAttribute()
+    public function getDurationAttribute()
     {
         return $this->duration();
     }
@@ -204,28 +210,38 @@ class Shift extends Model
     /// Query Scopes
     ///////////////////////////////////////////
 
-    public function scopeIsReadOnly($query)
+    public function scopeWhereReadOnly($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getReadOnlyStatuses());
     }
 
-    public function scopeIsPending($query)
+    public function scopeWherePending($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getPendingStatuses());
     }
 
-    public function scopeIsAwaitingCharge($query)
+    public function scopeWhereAwaitingCharge($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingChargeStatuses());
     }
 
-    public function scopeIsAwaitingBusinessDeposit($query)
+    public function scopeWhereAwaitingBusinessDeposit($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingBusinessDepositStatuses());
     }
 
-    public function scopeIsAwaitingCaregiverDeposit($query)
+    public function scopeWhereAwaitingCaregiverDeposit($query)
     {
         return $query->whereIn('status', ShiftStatusManager::getAwaitingCaregiverDepositStatuses());
+    }
+
+    public function scopeWhereConfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getConfirmedStatuses());
+    }
+
+    public function scopeWhereUnconfirmed($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 }

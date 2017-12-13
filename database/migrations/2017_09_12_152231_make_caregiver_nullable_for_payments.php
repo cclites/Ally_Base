@@ -13,12 +13,12 @@ class MakeCaregiverNullableForPayments extends Migration
      */
     public function up()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->unsignedInteger('caregiver_id')->nullable()->change();
-        });
-        Schema::table('payment_queue', function (Blueprint $table) {
-            $table->unsignedInteger('caregiver_id')->nullable()->change();
-        });
+//        Schema::table('payments', function (Blueprint $table) {
+//            $table->unsignedInteger('caregiver_id')->nullable()->change();
+//        });
+//        Schema::table('payment_queue', function (Blueprint $table) {
+//            $table->unsignedInteger('caregiver_id')->nullable()->change();
+//        });
     }
 
     /**
@@ -28,11 +28,11 @@ class MakeCaregiverNullableForPayments extends Migration
      */
     public function down()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->unsignedInteger('caregiver_id')->change();
-        });
-        Schema::table('payment_queue', function (Blueprint $table) {
-            $table->unsignedInteger('caregiver_id')->change();
-        });
+//        Schema::table('payments', function (Blueprint $table) {
+//            $table->unsignedInteger('caregiver_id')->change();
+//        });
+//        Schema::table('payment_queue', function (Blueprint $table) {
+//            $table->unsignedInteger('caregiver_id')->change();
+//        });
     }
 }

@@ -24,7 +24,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
         $this->endDate = $endDate->setTimezone('UTC');
         $this->business = $business;
 
-        $this->shifts = Shift::isAwaitingBusinessDeposit()
+        $this->shifts = Shift::whereAwaitingBusinessDeposit()
                 ->whereBetween('checked_in_time', [$startDate, $endDate])
                 ->where('business_id', $this->business->id)
                 ->get();

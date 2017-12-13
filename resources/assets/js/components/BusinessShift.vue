@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
-            <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save &amp; Verify".
+            <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
         </div>
         <b-card
                 :header="title"
@@ -61,17 +61,6 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
-                        <b-form-group label="Other Expenses" label-for="other_expenses">
-                            <b-form-input
-                                    id="other_expenses"
-                                    name="other_expenses"
-                                    type="number"
-                                    v-model="form.other_expenses"
-                                    step="any"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="other_expenses" text="Confirm the dollar amount of other expenses on this shift."></input-help>
-                        </b-form-group>
                         <b-form-group label="Mileage" label-for="mileage">
                             <b-form-input
                                     id="mileage"
@@ -82,6 +71,17 @@
                             >
                             </b-form-input>
                             <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Other Expenses" label-for="other_expenses">
+                            <b-form-input
+                                    id="other_expenses"
+                                    name="other_expenses"
+                                    type="number"
+                                    v-model="form.other_expenses"
+                                    step="any"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="other_expenses" text="Confirm the dollar amount of other expenses on this shift."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -149,11 +149,21 @@
                         </b-form-group>
                     </b-col>
                     <b-col md="7" sm="6">
+                        <b-form-group label="Other Expenses Description" label-for="other_expenses_desc">
+                            <b-textarea
+                                    id="other_expenses_desc"
+                                    name="other_expenses_desc"
+                                    :rows="2"
+                                    v-model="form.other_expenses_desc"
+                            >
+                            </b-textarea>
+                            <input-help :form="form" field="other_expenses_desc" text=""></input-help>
+                        </b-form-group>
                         <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
                                     name="caregiver_comments"
-                                    :rows="6"
+                                    :rows="5"
                                     v-model="form.caregiver_comments"
                             >
                             </b-textarea>
@@ -282,8 +292,8 @@
                 <b-row>
                     <b-col lg="12" v-if="!shift.readOnly">
                         <span v-if="!deleted">
-                            <b-button variant="success" type="submit">Save Shift</b-button>
-                            <b-button variant="info" type="button" @click="saveAndVerify()" v-if="!form.verified">Save &amp; Verify</b-button>
+                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
+                            <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
@@ -335,6 +345,7 @@
                     checked_out_time: (this.shift) ? this.shift.checked_out_time : null,
                     mileage: (this.shift) ? this.shift.mileage : 0,
                     other_expenses: (this.shift) ? this.shift.other_expenses : 0,
+                    other_expenses_desc: (this.shift) ? this.shift.other_expenses_desc : null,
                     hours_type: (this.shift) ? this.shift.hours_type : 'default',
                     verified: (this.shift) ? this.shift.verified : true,
                     caregiver_rate: (this.shift) ? this.shift.caregiver_rate : '',
@@ -342,6 +353,7 @@
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                 }),
+                status: (this.shift) ? this.shift.status : null,
                 checked_in_time: '',
                 checked_in_date: '',
                 checked_out_time: '',
@@ -452,9 +464,15 @@
                     this.form.post('/business/shifts');
                 }
             },
-            saveAndVerify() {
-                this.form.verified = true;
+            saveAndConfirm() {
                 this.saveShift();
+                if (this.shift.id) {
+                    let form = new Form();
+                    form.post('/business/shifts/' + this.shift.id + '/confirm')
+                        .then(response => {
+                            this.status = response.data.data.status;
+                        });
+                }
             },
             validateTimeDifference(field) {
                 this.$nextTick(function() {

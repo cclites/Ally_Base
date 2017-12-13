@@ -213,14 +213,7 @@
                                     The schedule will repeat every month on the {{ dayOfMonth(form.selected_date) }}.
                                 </p>
                                 <b-form-group label="End date" label-for="end_date">
-                                    <b-form-input
-                                            id="edit-end-date"
-                                            name="end_date"
-                                            type="text"
-                                            v-model="form.end_date"
-                                            class="datepicker"
-                                    >
-                                    </b-form-input>
+                                    <date-picker v-model="form.end_date"></date-picker>
                                     <input-help :form="form" field="end_date" text="Repeat the schedule until this date."></input-help>
                                 </b-form-group>
                             </b-col>
@@ -252,7 +245,7 @@
     import ScheduleForm from '../mixins/ScheduleForm';
 
     export default {
-     
+
         props: {
             client: {},
             model: {},
@@ -268,15 +261,7 @@
         },
 
         mounted() {
-            let endDate = jQuery('#edit-end-date');
-            let component = this;
-            endDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function() {
-                component.form.end_date = endDate.val();
-            });
+
         },
 
         methods: {

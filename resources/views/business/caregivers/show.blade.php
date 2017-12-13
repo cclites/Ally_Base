@@ -81,14 +81,7 @@
             </div>
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
-            <div class="row">
-                <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Cell Number" type="work" action="{{ route('business.caregivers.phone', [$caregiver->id, 'work']) }}" :phone="{{ json_phone($caregiver->user, 'work') }}"></phone-number>
-                </div>
-                <div class="col-lg-6 col-sm-12">
-                    <phone-number title="Home Number" type="home" action="{{ route('business.caregivers.phone', [$caregiver->id, 'home']) }}" :phone="{{ json_phone($caregiver->user, 'home') }}"></phone-number>
-                </div>
-            </div>
+            <business-caregiver-phone-numbers-tab :user="{{ $caregiver }}"></business-caregiver-phone-numbers-tab>
         </div>
         <div class="tab-pane" id="bankaccount" role="tabpanel">
             <div class="row">

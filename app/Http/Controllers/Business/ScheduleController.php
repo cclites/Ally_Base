@@ -14,7 +14,7 @@ class ScheduleController extends BaseController
 
     public function index()
     {
-        return view('business.schedule');
+        return view('business.schedule', ['business' => $this->business()]);
     }
 
     public function events(Request $request)
