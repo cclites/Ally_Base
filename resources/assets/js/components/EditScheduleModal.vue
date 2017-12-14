@@ -355,7 +355,8 @@
 
         computed: {
             clientType() {
-                let type =  _.find(this.$parent.clients, { id: this.client_id }).client_type;
+                let client = _.find(this.clients, { id: this.client_id });
+                let type =  (client) ? client.client_type : '';
 
                 return _.startCase(type);
             }

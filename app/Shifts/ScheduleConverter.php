@@ -43,7 +43,7 @@ class ScheduleConverter
         $start = Carbon::now($this->timezone)->startOfWeek();
         $end = Carbon::now($this->timezone)->subHours(6);
 
-        if ($start->dayOfWeek === Carbon::MONDAY && $start->hour < 12) {
+        if (Carbon::now()->dayOfWeek === Carbon::MONDAY && Carbon::now()->hour < 12) {
             // If monday morning, still use last week
             $start->subWeek();
         }

@@ -65,7 +65,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td><strong>Total</strong></td>
+                                <td><strong>Total for Confirmed Shifts</strong></td>
                                 <td>{{ clientTotals.hours }}</td>
                                 <td>{{ clientTotals.total }}</td>
                                 <td></td>
@@ -100,7 +100,7 @@
                         </tbody>
                         <tfoot>
                         <tr>
-                            <td><strong>Total</strong></td>
+                            <td><strong>Total for Confirmed Shifts</strong></td>
                             <td>{{ caregiverTotals.hours }}</td>
                             <td>{{ caregiverTotals.amount }}</td>
                         </tr>
@@ -172,7 +172,7 @@
                                 </span>
                             </template>
                             <template slot="Confirmed" scope="data">
-                                {{ (data.value) ? 'Yes' : 'No' }}
+                                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
                             </template>
                             <template slot="actions" scope="row">
                             <span v-if="row.item.id">
