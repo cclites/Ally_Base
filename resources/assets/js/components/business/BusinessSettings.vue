@@ -5,17 +5,7 @@
             header-bg-variant="info"
     >
         <b-row>
-            <b-col lg="6">
-                <b-form-group label="Scheduling" label-for="scheduling">
-                    <b-form-select id="scheduling" 
-                                   v-model="form.scheduling"
-                    >
-                        <option value="1">Enabled</option>
-                        <option value="0">Disabled</option>
-                    </b-form-select>
-                    <input-help :form="form" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
-                </b-form-group>
-
+            <b-col lg="6">                
                 <b-form-group label="Mileage Rate" label-for="mileageRate">
                     <b-form-input type="number"
                                   step="any"
@@ -27,6 +17,17 @@
                 </b-form-group>
             </b-col>
             <b-col lg="6">
+                <b-form-group label="Scheduling" label-for="scheduling">
+                    <b-form-select id="scheduling" 
+                                   v-model="form.scheduling"
+                                   disabled="true"
+                    >
+                        <option value="1">Enabled</option>
+                        <option value="0">Disabled</option>
+                    </b-form-select>
+                    <input-help :form="form" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
+                </b-form-group>
+
                 <b-form-group label="Calendar Default View" label-for="calendar_default_view">
                     <b-form-select id="calendar_default_view"
                                    v-model="form.calendar_default_view"
