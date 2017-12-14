@@ -122,7 +122,7 @@ class ClientPaymentAggregator
 
             // Attempt to update status of all shifts
             foreach($this->getShifts() as $shift) {
-                if (!$shift->status()->ackPayment($payment->id)) {
+                if (!$shift->statusManager()->ackPayment($payment->id)) {
                     DB::rollBack();
                     return false;
                 }

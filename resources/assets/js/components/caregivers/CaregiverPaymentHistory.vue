@@ -47,7 +47,7 @@
             return {
                 fields: [
                     { key: 'created_at', label: 'Paid' },
-                    { key: 'week', label: 'Shifts'},
+                    { key: 'week', label: 'Shifts Added'},
                     {
                         key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value); }

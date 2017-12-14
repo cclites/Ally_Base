@@ -72,7 +72,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
 
             // Attempt to update status of all shifts
             foreach($this->getShifts() as $shift) {
-                if (!$shift->status()->ackBusinessDeposit()) {
+                if (!$shift->statusManager()->ackBusinessDeposit()) {
                     DB::rollBack();
                     return false;
                 }

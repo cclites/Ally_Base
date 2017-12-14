@@ -162,7 +162,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        if ($shift->status()->ackConfirmation()) {
+        if ($shift->statusManager()->ackConfirmation()) {
             return new SuccessResponse('The shift has been confirmed.', $shift->toArray());
         }
 

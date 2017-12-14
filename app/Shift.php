@@ -183,7 +183,7 @@ class Shift extends Model
      *
      * @return \App\Shifts\ShiftStatusManager
      */
-    public function status()
+    public function statusManager()
     {
         return new ShiftStatusManager($this);
     }
@@ -203,7 +203,7 @@ class Shift extends Model
      */
     public function isReadOnly()
     {
-        return $this->status()->isReadOnly();
+        return $this->statusManager()->isReadOnly();
     }
 
     ///////////////////////////////////////////
