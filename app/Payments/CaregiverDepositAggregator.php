@@ -72,7 +72,7 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
 
             // Attempt to update status of all shifts
             foreach($this->getShifts() as $shift) {
-                if (!$shift->status()->ackCaregiverDeposit()) {
+                if (!$shift->statusManager()->ackCaregiverDeposit()) {
                     DB::rollBack();
                     return false;
                 }

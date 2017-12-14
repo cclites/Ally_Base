@@ -148,6 +148,11 @@ class ReportsController extends BaseController
             return $report->rows();
         }
 
+        if ($request->input('export')) {
+            $report = new ProviderReconciliationReport($this->business());
+            $report->download();
+        }
+
         return view('business.reports.reconciliation');
     }
 
