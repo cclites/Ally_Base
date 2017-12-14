@@ -1,6 +1,6 @@
 <template>
     <b-card
-            header="Business Settings"
+            header="Provider Settings"
             header-text-variant="white"
             header-bg-variant="info"
     >
