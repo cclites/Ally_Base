@@ -52,7 +52,7 @@
                                  :empty-text="emptyText"
                                  @filtered="onFiltered">
                             <template slot="firstname" scope="data">
-                                <span>{{ data.item.caregiver.firstname }}
+                                {{ data.item.caregiver.firstname }}
                             </template>
                             <template slot="lastname" scope="data">
                                 {{ data.item.caregiver.lastname }}
