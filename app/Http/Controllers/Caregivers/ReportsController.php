@@ -6,6 +6,7 @@ use App\Caregiver;
 use App\Deposit;
 use App\Http\Controllers\Controller;
 use App\Payment;
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
@@ -30,6 +31,8 @@ class ReportsController extends Controller
 
     public function paymentHistory()
     {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
         $caregiver = Caregiver::find(auth()->id());
 
         $deposits = Deposit::with(['shifts.client', 'shifts' => function ($query) {
@@ -38,8 +41,8 @@ class ReportsController extends Controller
             ->where('caregiver_id', $caregiver->id)
             ->get()
             ->map(function ($deposit) {
-                $deposit->start = $deposit->shifts->first()->checked_in_time->toDateString();
-                $deposit->end = $deposit->shifts->last()->checked_in_time->toDateString();
+                $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
+                $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
 
