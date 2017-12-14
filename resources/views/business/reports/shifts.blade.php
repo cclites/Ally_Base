@@ -3,7 +3,7 @@
 @section('title', 'Shift History')
 
 @section('breadcrumbs')
-    Only Confirmed Shifts are included in the totals, charges, &amp; payments.
+    Only Confirmed Shifts will be charged and paid.
 @endsection
 
 @section('content')
