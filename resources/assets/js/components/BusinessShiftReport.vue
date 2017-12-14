@@ -172,7 +172,7 @@
                                 </span>
                             </template>
                             <template slot="Confirmed" scope="data">
-                                {{ (data.value) ? 'Yes' : 'No' }}
+                                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
                             </template>
                             <template slot="actions" scope="row">
                             <span v-if="row.item.id">
