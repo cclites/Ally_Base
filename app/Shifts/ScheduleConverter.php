@@ -48,8 +48,6 @@ class ScheduleConverter
             $start->subWeek();
         }
 
-        dd($start, $end);
-
         return $this->convertAllBetween($start, $end);
     }
 
