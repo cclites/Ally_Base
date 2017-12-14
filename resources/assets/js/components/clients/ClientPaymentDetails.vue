@@ -13,10 +13,10 @@
                  :items="items"
                  :fields="fields">
             <template slot="checked_in_time" scope="data">
-                {{ formatDate(data.item.checked_in_time) }}
+                {{ formatDateFromUTC(data.item.checked_in_time) }}
             </template>
             <template slot="care_time" scope="data">
-                {{ formatTime(data.item.checked_in_time) }} - {{ formatTime(data.item.checked_out_time) }}
+                {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
             </template>
             <template slot="activities" scope="data">
                 <div v-for="activity in activities(data.item.activities)" :key="activity">{{ activity }}</div>
