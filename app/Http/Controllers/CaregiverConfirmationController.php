@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Business;
 use App\Caregiver;
 use App\Confirmations\Confirmation;
 use App\PhoneNumber;
@@ -24,12 +25,13 @@ class CaregiverConfirmationController extends Controller
         }
 
         $caregiver = Caregiver::find($confirmation->user->id);
+        $business = $caregiver->businesses->first();
         $phoneNumber = $caregiver->phoneNumbers->where('type', 'work')->first();
         if ($phoneNumber) $phoneNumber = $phoneNumber->national_number;
         $address = $caregiver->addresses->first();
         $termsUrl = '';
 
-        return view('confirmation.caregiver', compact('token', 'caregiver', 'phoneNumber', 'address', 'termsUrl'));
+        return view('confirmation.caregiver', compact('token', 'caregiver', 'business', 'phoneNumber', 'address', 'termsUrl'));
     }
 
     public function store(Request $request, $token)
