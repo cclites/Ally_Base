@@ -18,7 +18,7 @@
     {{--<client-profile :user="{{ Auth::user() }}" :client="{{ Auth::user()->role }}"></client-profile>--}}
 
     <!-- Nav tabs -->
-    <ul class="nav nav-pills with-padding-bottom" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Profile</a>
         </li>
@@ -30,6 +30,23 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
+        </li>
+    </ul>
+
+    <!-- Smaller device tabs -->
+    <ul class="nav nav-pills with-padding-bottom hidden-xl-up" role="tablist">
+        <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Change Tab: <span class="tab-name">Profile</span></a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" data-toggle="tab" href="#profile" role="tab">Profile</a>
+                <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
+                <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Info</a>
+                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+            </div>
         </li>
     </ul>
 
@@ -63,5 +80,24 @@
         <div class="tab-pane" id="payment" role="tabpanel">
 
         </div>
+        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
+            <emergency-contacts-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></emergency-contacts-tab>
+        </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            $('.nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
+        }
+
+        // Change hash for page-reload
+        $('.nav-item a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash;
+            window.scrollTo(0,0);
+        })
+    </script>
+@endpush

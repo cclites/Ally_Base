@@ -51,16 +51,16 @@
                                  :sort-desc.sync="sortDesc"
                                  :empty-text="emptyText"
                                  @filtered="onFiltered">
-                            <template slot="firstname" slot-scope="data">
+                            <template slot="firstname" scope="data">
                                 {{ data.item.caregiver.firstname }}
                             </template>
-                            <template slot="lastname" slot-scope="data">
+                            <template slot="lastname" scope="data">
                                 {{ data.item.caregiver.lastname }}
                             </template>
-                            <template slot="wages" slot-scope="data">
+                            <template slot="wages" scope="data">
                                 {{ moneyFormat(data.item.duration * data.item.caregiver_rate) }}
                             </template>
-                            <template slot="actions" slot-scope="row">
+                            <template slot="actions" scope="row">
 
                             </template>
                         </b-table>
