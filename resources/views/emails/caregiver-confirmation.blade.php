@@ -2,9 +2,9 @@
 
 <p>We are now processing payments on behalf of {{ $business->name }}.  To ensure no interruption in your pay, please follow the link below to enter your information and to create your online account.</p>
 
-<p>Click here to confirm your information and setup your online account:  <a href="{{ $url }}">{{ $url }}</a></p>
+<p>Click here to enter your information and create your online account:  <a href="{{ $url }}">{{ $url }}</a></p>
 
-<p>You can login to your account at any time to view past payments and service reports. Visit https://app.allyms.com and login with your username and password (set by visiting the link above).</p>
+<p>You can login to your account at any time to view past payment reports. Visit https://app.allyms.com and login with your username and password (set by visiting the link above).</p>
 
 <p>Thank you for choosing Ally and {{ $business->name }}.</p>
 
