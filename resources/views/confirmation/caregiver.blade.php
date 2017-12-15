@@ -1,8 +1,8 @@
 @extends('layouts.guest')
 
-@section('title', 'Please confirm your information below.')
+@section('title', 'Ally is now processing payments for ' . $business->name ?? '')
 
-@section('breadcrumbs', 'Then, click the "Accept and Verify" button at the bottom of the page.')
+@section('breadcrumbs', 'Please confirm your information below, then, click the "Accept and Verify" button at the bottom of the page.')
 
 @section('content')
     <caregiver-confirmation token="{{ $token }}"
