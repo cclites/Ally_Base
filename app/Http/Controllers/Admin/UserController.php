@@ -16,9 +16,28 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $users = User::orderBy('lastname')
+            $users = User::with([])
+                ->leftJoin($sql = \DB::raw("
+                    (
+                        SELECT 
+                            u.id AS user_id,
+                            b.id AS business_id,
+                            b.name AS registry
+                        FROM users AS u
+                        LEFT JOIN clients AS c ON u.id = c.id
+                        LEFT JOIN business_office_users AS bou ON u.id = bou.office_user_id
+                        LEFT JOIN business_caregivers AS bcg ON u.id = bcg.caregiver_id
+                        LEFT JOIN businesses AS b ON b.id = c.business_id 
+                            OR b.id = bou.business_id 
+                            OR b.id = bcg.business_id
+                    ) AS user_business
+                "), function($join) {
+                    $join->on('user_business.user_id', '=', 'users.id');
+                })
+                ->orderBy('lastname')
                 ->orderBy('firstname')
                 ->get();
+                            
             return $users;
         }
         return view('admin.users.index');
