@@ -127,9 +127,9 @@
         },
 
         computed: {
-            items() {                               
+            items() {
                 return this.charges.map(item => {
-                    item.name = (item.business) ? item.business.name : item.client.nameLastFirst;                    
+                    item.name = (item.business) ? item.business.name : item.client.nameLastFirst;
                     return item;
                 })
             },
