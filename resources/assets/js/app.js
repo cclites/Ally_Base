@@ -35,6 +35,7 @@ Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
 Vue.component('activity-list', require('./components/ActivityList.vue'));
 Vue.component('emergency-contacts-tab', require('./components/users/EmergencyContactsTab'));
+Vue.component('signature-pad', require('./components/SignaturePad'));
 
 
 // Client
