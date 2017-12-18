@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Caregivers;
 use App\Caregiver;
 use App\Deposit;
 use App\Http\Controllers\Controller;
-use App\Payment;
+use App\Reports\ShiftsReport;
 use Carbon\Carbon;
 
 class ReportsController extends Controller
@@ -34,8 +34,7 @@ class ReportsController extends Controller
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
         $caregiver = Caregiver::find(auth()->id());
-
-        $deposits = Deposit::where('caregiver_id', $caregiver->id)
+        $deposits = Deposit::with('shifts')->where('caregiver_id', $caregiver->id)
             ->get()
             ->map(function ($deposit) {
                 $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
@@ -48,9 +47,14 @@ class ReportsController extends Controller
 
     public function paymentDetails($id)
     {
-        $deposit = Deposit::with(['shifts.client', 'shifts' => function ($query) {
-            $query->orderBy('checked_in_time');
-        }])->find($id);
-        return view('caregivers.reports.payment_details', compact('deposit'));
+        $report = new ShiftsReport();
+        $report->query()->with('deposits')
+            ->whereHas('deposits', function ($query) use ($id) {
+                $query->where('deposits.id', $id);
+            })
+            ->where('caregiver_id', auth()->id());
+        $shifts = $report->rows();
+
+        return view('caregivers.reports.payment_details', compact('shifts'));
     }
 }
