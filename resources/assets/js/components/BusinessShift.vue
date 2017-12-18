@@ -298,6 +298,7 @@
                             <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
+                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'UNCONFIRMED'">Unconfirm</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
@@ -472,6 +473,15 @@
                 if (this.shift.id) {
                     let form = new Form();
                     form.post('/business/shifts/' + this.shift.id + '/confirm')
+                        .then(response => {
+                            this.status = response.data.data.status;
+                        });
+                }
+            },
+            unconfirm() {
+                if (this.shift.id) {
+                    let form = new Form();
+                    form.post('/business/shifts/' + this.shift.id + '/unconfirm')
                         .then(response => {
                             this.status = response.data.data.status;
                         });
