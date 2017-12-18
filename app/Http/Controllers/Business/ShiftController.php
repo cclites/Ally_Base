@@ -172,6 +172,23 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be confirmed due to a system error.');
     }
 
+    public function unconfirm(Shift $shift)
+    {
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        if ($shift->status === Shift::UNCONFIRMED) {
+            return new ErrorResponse(400, 'The shift is already unconfirmed.');
+        }
+
+        if ($shift->statusManager()->unconfirm()) {
+            return new SuccessResponse('The shift has been unconfirmed.', $shift->toArray());
+        }
+
+        return new ErrorResponse(400, 'The shift is locked for modification.');
+    }
+
 
     public function verify(Shift $shift)
     {

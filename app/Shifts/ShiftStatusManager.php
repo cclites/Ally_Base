@@ -237,6 +237,15 @@ class ShiftStatusManager
     }
 
     /**
+     * Acknowledge a confirmation of an unconfirmed shift
+     */
+    public function unconfirm()
+    {
+        if ($this->isReadOnly()) return false;
+        return $this->update(Shift::UNCONFIRMED);
+    }
+
+    /**
      * Acknowledge a manual approval
      *
      * @return bool
