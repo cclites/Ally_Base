@@ -74,7 +74,7 @@
                     firstname: this.user.firstname,
                     lastname: this.user.lastname,
                     email: this.user.email,
-                    date_of_birth: moment(this.user.date_of_birth).format('L')
+                    date_of_birth: (this.user.date_of_birth) ? moment(this.user.date_of_birth).format('L') : '',
                 })
             }
         },
