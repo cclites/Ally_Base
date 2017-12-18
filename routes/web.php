@@ -181,6 +181,7 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
