@@ -26,6 +26,7 @@ class OfficeUserController extends Controller
             'lastname' => 'required',
             'password' => 'required|confirmed',
         ]);
+        $data['password'] = bcrypt($data['password']);
 
         if ($user = $business->users()->create($data)) {
             return new CreatedResponse('The user has been created.', $user->toArray());
