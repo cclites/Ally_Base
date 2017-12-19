@@ -45,6 +45,9 @@
                     <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                     <td>
                         <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
+                        <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
+                            <!--<i class="fa fa-times"></i>-->
+                        <!--</b-btn>-->
                     </td>
                 </tr>
                 </tbody>
@@ -73,15 +76,12 @@
                                 <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
-                        <!--<b-form-group>-->
-                            <!--<b-btn @click="excludeCaregiver">Exclude</b-btn>-->
-                        <!--</b-form-group>-->
                     </b-col>
                 </b-row>
             </b-container>
         </b-modal>
 
-        <b-modal id="clientCaregiverModal" :title="modalTitle" v-model="clientCaregiverModal">
+        <b-modal id="clientCaregiverModal" :title="modalTitle" v-model="clientCaregiverModal" ref="clientCaregiverModal">
             <b-container fluid>
                 <b-row v-if="!selectedCaregiver.id">
                     <b-col lg="12">
@@ -141,6 +141,15 @@
                         </b-form-group> -->
                     </b-col>
                </b-row>
+                <b-row v-if="form.caregiver_id">
+                    <b-col>
+                        <b-form-group>
+                            <b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">
+                                Remove from Client
+                            </b-btn>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
             </b-container>
             <div slot="modal-footer">
                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
@@ -166,7 +175,6 @@
             return {
                 caregiverList: [],
                 items: [],
-                caregiverList: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
                 selectedCaregiver: {},
@@ -177,15 +185,7 @@
         },
 
         mounted() {
-            axios.get('/business/clients/' + this.client_id + '/caregivers')
-                .then(response => {
-                    if (Array.isArray(response.data)) {
-                        this.items = _.sortBy(response.data, ['lastname', 'firstname']);
-                    } else {
-                        this.items = [];
-                    }
-                });
-            axios.get('/business/caregivers').then(response => this.caregiverList = response.data);
+            this.fetchAssignedCaregivers();
         },
 
         created() {
@@ -231,6 +231,17 @@
                     })
             },
 
+            fetchAssignedCaregivers() {
+                axios.get('/business/clients/' + this.client_id + '/caregivers')
+                    .then(response => {
+                        if (Array.isArray(response.data)) {
+                            this.items = _.sortBy(response.data, ['lastname', 'firstname']);
+                        } else {
+                            this.items = [];
+                        }
+                    });
+            },
+
             fetchCaregivers() {
                 axios.get('/business/clients/' + this.client_id + '/potential-caregivers')
                     .then(response => {
@@ -265,6 +276,18 @@
                         this.fetchCaregivers();
                     }).catch(error => {
                         console.error(error.response);
+                    });
+            },
+
+            removeAssignedCaregiver(caregiver_id) {
+                console.log('Removing caregiver from client.');
+                let form = new Form({caregiver_id: caregiver_id});
+                form.post('/business/clients/'+this.client_id+'/detach-caregiver')
+                    .then(() => {
+                        this.fetchAssignedCaregivers();
+                        if (this.clientCaregiverModal) {
+                            this.clientCaregiverModal = false;
+                        }
                     });
             }
         },
