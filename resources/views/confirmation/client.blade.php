@@ -10,6 +10,7 @@
                          phone-number="{{ $phoneNumber }}"
                          :address="{{ $client->evvAddress OR '{}' }}"
                          terms-url="{{ $termsUrl }}"
+                         terms="{{ $terms }}"
     >
     </client-confirmation>
 @endsection
