@@ -19,13 +19,19 @@ class ReportsController extends Controller
     {
         $shifts = auth()->user()->role
             ->shifts()
+            ->with('activities')
             ->whereNotNull('checked_out_time')
             ->orderBy('checked_in_time', 'DESC')
             ->get();
         $shifts = $shifts->map(function($shift) {
             $shift->client_name = ($shift->client) ? $shift->client->name() : '';
+            $shift->activity_names = collect($shift->activities)
+                ->sortBy('name')
+                ->pluck('name')
+                ->implode(', ');
             return $shift;
         });
+
         return view('caregivers.reports.shifts', compact('shifts'));
     }
 
