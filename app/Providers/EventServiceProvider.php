@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\FailedTransaction;
+use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftApproved;
 use App\Events\UnverifiedShiftCreated;
@@ -27,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
             UnverifiedShiftAcknowledgement::class,
         ],
         ShiftModified::class => [
+            ShiftStatusUpdate::class,
+        ],
+        ShiftCreated::class => [
             ShiftStatusUpdate::class,
         ],
         FailedTransaction::class => [
