@@ -17,7 +17,6 @@ use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
-use App\Traits\ActiveBusiness;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

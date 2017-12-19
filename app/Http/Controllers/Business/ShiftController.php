@@ -186,7 +186,7 @@ class ShiftController extends BaseController
             return new SuccessResponse('The shift has been verified', $shift->toArray());
         }
 
-        return new ErrorResponse('The shift could not be verified');
+        return new ErrorResponse(500, 'The shift could not be verified');
     }
 
     public function storeIssue(Request $request, Shift $shift)
@@ -278,5 +278,10 @@ class ShiftController extends BaseController
 
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
+    }
+
+    protected function hasAccessTo(Shift $shift)
+    {
+        return ($this->business()->id == $shift->business_id);
     }
 }
