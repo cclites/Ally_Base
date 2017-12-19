@@ -9,5 +9,32 @@
 @endsection
 
 @section('content')
-    <business-edit :business="{{ $business OR '{}' }}"></business-edit>
+    <!-- Nav tabs -->
+    <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#settings" role="tab">Settings</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#users" role="tab">Users</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="settings" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <business-edit :business="{{ $business OR '{}' }}"></business-edit>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="users" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <business-office-user-list :business="{{ $business OR '{}' }}"></business-office-user-list>
+                </div>
+            </div>
+        </div>
+
+    </div>
 @endsection

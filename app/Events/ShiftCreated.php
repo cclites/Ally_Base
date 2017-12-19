@@ -2,12 +2,13 @@
 
 namespace App\Events;
 
+use App\Contracts\ShiftEventInterface;
 use App\Shift;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class ShiftCreated
+class ShiftCreated implements ShiftEventInterface
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -24,5 +25,13 @@ class ShiftCreated
     public function __construct(Shift $shift)
     {
         $this->shift = $shift;
+    }
+
+    /**
+     * @return \App\Shift
+     */
+    public function shift()
+    {
+        return $this->shift;
     }
 }

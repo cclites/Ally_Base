@@ -107,7 +107,11 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        if ($shift->isReadOnly()) {
+        // Allow admin overrides on locked shifts
+        if (is_admin() && $request->input('override')) {
+            $adminOverride = true;
+        }
+        else if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
@@ -134,6 +138,10 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
+            if (isset($adminOverride)) {
+                // Update persisted costs
+                $shift->costs()->persist();
+            }
             $shift->activities()->sync($request->input('activities', []));
             return new SuccessResponse('You have successfully updated this shift.');
         }
@@ -171,6 +179,23 @@ class ShiftController extends BaseController
         return new ErrorResponse(500, 'The shift could not be confirmed due to a system error.');
     }
 
+    public function unconfirm(Shift $shift)
+    {
+        if ($this->business()->id != $shift->business_id) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        if ($shift->status === Shift::UNCONFIRMED) {
+            return new ErrorResponse(400, 'The shift is already unconfirmed.');
+        }
+
+        if ($shift->statusManager()->unconfirm()) {
+            return new SuccessResponse('The shift has been unconfirmed.', $shift->toArray());
+        }
+
+        return new ErrorResponse(400, 'The shift is locked for modification.');
+    }
+
 
     public function verify(Shift $shift)
     {
@@ -184,7 +209,7 @@ class ShiftController extends BaseController
             return new SuccessResponse('The shift has been verified', $shift->toArray());
         }
 
-        return new ErrorResponse('The shift could not be verified');
+        return new ErrorResponse(500, 'The shift could not be verified');
     }
 
     public function storeIssue(Request $request, Shift $shift)
@@ -276,5 +301,10 @@ class ShiftController extends BaseController
 
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
+    }
+
+    protected function hasAccessTo(Shift $shift)
+    {
+        return ($this->business()->id == $shift->business_id);
     }
 }

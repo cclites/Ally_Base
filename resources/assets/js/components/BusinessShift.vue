@@ -298,12 +298,14 @@
                             <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
+                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'UNCONFIRMED'">Unconfirm</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                        <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
@@ -337,6 +339,7 @@
                     return [];
                 }
             },
+            'admin': Number,
         },
         data() {
             return {
@@ -355,6 +358,7 @@
                     provider_fee: (this.shift) ? this.shift.provider_fee : '',
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    override: false,
                 }),
                 status: (this.shift) ? this.shift.status : null,
                 checked_in_time: '',
@@ -467,11 +471,24 @@
                     this.form.post('/business/shifts');
                 }
             },
+            adminOverride() {
+                this.form.override = 1;
+                return this.saveShift();
+            },
             saveAndConfirm() {
                 this.saveShift();
                 if (this.shift.id) {
                     let form = new Form();
                     form.post('/business/shifts/' + this.shift.id + '/confirm')
+                        .then(response => {
+                            this.status = response.data.data.status;
+                        });
+                }
+            },
+            unconfirm() {
+                if (this.shift.id) {
+                    let form = new Form();
+                    form.post('/business/shifts/' + this.shift.id + '/unconfirm')
                         .then(response => {
                             this.status = response.data.data.status;
                         });

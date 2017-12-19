@@ -160,6 +160,7 @@ Route::group([
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');
+    Route::post('shifts/{shift}/unconfirm', 'Business\ShiftController@unconfirm')->name('shifts.unconfirm');
     Route::get('shifts/{shift}/duplicate', 'Business\ShiftController@duplicate')->name('shifts.duplicate');
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
@@ -188,6 +189,7 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
@@ -214,3 +216,4 @@ Route::group([
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
+Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');

@@ -19,6 +19,7 @@
                 out_distance="{{ $checked_out_distance }}"
                 :activities="{{ $activities OR '[]' }}"
                 :issues="{{ $shift->issues OR '[]' }}"
+                :admin="{{ (int) is_admin() }}"
             ></business-shift>
         </div>
     </div>
