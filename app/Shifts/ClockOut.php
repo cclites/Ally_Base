@@ -63,10 +63,11 @@ class ClockOut extends ClockBase
             'verified' => $verified,
         ]);
 
+        $shift->statusManager()->ackClockOut($verified);
+
         if (!$verified) {
             event(new UnverifiedShiftCreated($shift));
         }
-        event(new ShiftModified($shift));
 
         return $update;
     }

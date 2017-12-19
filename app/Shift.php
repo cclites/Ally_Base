@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Events\ShiftCreated;
+use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
@@ -9,10 +11,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shift extends Model
 {
-    public $timestamps = false;
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
+
+    ///////////////////////////////////////////
+    /// Events
+    ///////////////////////////////////////////
+
+    protected $dispatchesEvents = [
+        'created' => ShiftCreated::class,
+        'updated' => ShiftModified::class,
+    ];
 
     ///////////////////////////////////////
     /// Shift Statuses
@@ -97,6 +107,11 @@ class Shift extends Model
     public function costHistory()
     {
         return $this->hasOne(ShiftCostHistory::class, 'id');
+    }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(ShiftStatusHistory::class);
     }
 
     ///////////////////////////////////////////
