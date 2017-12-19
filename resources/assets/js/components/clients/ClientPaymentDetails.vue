@@ -3,7 +3,7 @@
         <b-row>
             <b-col>
                 <div class="pull-right">
-                    <a :href="'/payment-history/' + payment.id + '/print'" target="_blank">
+                    <a :href="printUrl" target="_blank">
                         Print
                     </a>
                 </div>
@@ -33,7 +33,7 @@
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
-        props: ['payment'],
+        props: ['payment', 'printUrl'],
 
         mixins: [FormatsDates, FormatsNumbers],
 

@@ -8,5 +8,6 @@
 @endsection
 
 @section('content')
-    <client-payment-details :payment="{{ $payment }}"></client-payment-details>
+    <client-payment-details :payment="{{ json_encode($payment) }}" print-url="{{ $print_url }}">
+    </client-payment-details>
 @endsection

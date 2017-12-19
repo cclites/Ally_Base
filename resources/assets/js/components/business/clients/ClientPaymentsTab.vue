@@ -4,6 +4,9 @@
             <template slot="for_care_week" scope="data">
                 {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
             </template>
+            <template slot="actions" scope="data">
+                <b-btn :href="'/business/clients/payments/'+data.item.id">View Details</b-btn>
+            </template>
         </b-table>
     </b-card>
 </template>
@@ -36,7 +39,8 @@
                     {
                         key: 'amount',
                         formatter: (value) => { return numeral(value).format('$0,0.00') }
-                    }
+                    },
+                    'actions'
                 ]
             }
         },
