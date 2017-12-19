@@ -154,6 +154,7 @@ Route::group([
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
     Route::get('schedule', 'Business\ScheduleController@index')->name('schedule');
+    Route::get('schedule/print', 'Business\ScheduleController@print');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
 

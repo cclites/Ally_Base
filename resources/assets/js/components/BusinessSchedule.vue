@@ -3,6 +3,7 @@
         <b-row>
             <b-col md="7">
                 <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
+                <a href="/business/schedule/print" class="pull-right">Print</a>
             </b-col>
             <b-col md="5">
                 <b-row v-if="isFilterable()">
