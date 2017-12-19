@@ -84,6 +84,8 @@ class ScheduleConverter
      */
     public function shiftExistsFor(Schedule $schedule, Carbon $expectedClockIn)
     {
+        // Use UTC when comparing against checked_in_time
+        $expectedClockIn = $expectedClockIn->copy()->setTimezone('UTC');
         return Shift::where(function($q) use ($schedule, $expectedClockIn) {
             $q->where('schedule_id', $schedule->id)
                 ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(8), $expectedClockIn->copy()->addHours(8)]);
