@@ -39,6 +39,7 @@ class TransactionsController extends Controller
         $user = null;
         $userType = null;
         if ($payment = $transaction->payment) {
+            $payment->load(['client', 'business']);
             if ($payment->client) {
                 $userType = 'client';
                 $user = $payment->client;
