@@ -54,7 +54,7 @@ Route::group(['middleware' => 'auth'], function() {
 Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
-    'namespace' => 'Clients',
+    'namespace' => 'Clients'
 ], function () {
     Route::post('shift-history/approve', 'ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'ShiftController@index');
@@ -64,7 +64,7 @@ Route::group([
 
 Route::group([
     'middleware' => ['auth', 'roles'],
-    'roles' => ['caregiver'],
+    'roles' => ['caregiver']
 ], function() {
     Route::get('schedule', 'ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
@@ -84,7 +84,7 @@ Route::group([
     'as' => 'business.',
     'prefix' => 'business',
     'middleware' => ['auth', 'roles'],
-    'roles' => ['office_user'],
+    'roles' => ['office_user']
 ], function() {
     Route::get('phone-numbers/{user}', 'UserController@phoneNumbers');
 
@@ -138,6 +138,8 @@ Route::group([
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
     Route::post('clients/{client}/detach-caregiver', 'Business\ClientCaregiverController@detachCaregiver')->name('clients.detach-caregiver');
+    Route::get('clients/{id}/statements', 'Clients\PaymentHistoryController@show');
+    Route::get('clients/statements/{id}/print', 'Clients\PaymentHistoryController@printDetails');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');

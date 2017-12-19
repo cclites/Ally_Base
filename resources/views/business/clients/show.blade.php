@@ -49,7 +49,7 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
@@ -157,7 +157,7 @@
             ></document-list>
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
-            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
+            <client-statements-tab :payments="{{ $client->payments }}"></client-statements-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"

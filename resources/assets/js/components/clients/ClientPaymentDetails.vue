@@ -3,7 +3,7 @@
         <b-row>
             <b-col>
                 <div class="pull-right">
-                    <a :href="'/payment-history/' + payment.id + '/print'" target="_blank">
+                    <a :href="printUrl()" target="_blank">
                         Print
                     </a>
                 </div>
@@ -33,7 +33,7 @@
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
-        props: ['payment'],
+        props: ['payment', 'roleType'],
 
         mixins: [FormatsDates, FormatsNumbers],
 
@@ -71,7 +71,17 @@
         methods: {
             activities(activities) {
                 return _.uniq(_.map(_.sortBy(activities, 'name'), 'name'));
+            },
+
+            printUrl() {
+                switch (this.roleType) {
+                    case 'client':
+                        return '/payment-history/' + this.payment.id + '/print';
+                    case 'office_user':
+                        return '/business/clients/statements/' + this.payment.id + '/print';
+                }
             }
+
         }
     }
 </script>

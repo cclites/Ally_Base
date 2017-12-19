@@ -9,8 +9,28 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>@yield('title', 'Login') | {{ env('APP_NAME', 'Ally Management System') }}</title>
-    @include('layouts.partials.head')
-    @stack('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
+
+    <!-- Bootstrap  -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Homemade+Apple" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <!-- Full Calendar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.5.1/fullcalendar.min.css" />
+
+    <!-- App CSS -->
+    <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
     <style>
         .page-wrapper {
             margin-left: 0 !important;
@@ -22,32 +42,19 @@
     </style>
 </head>
 
-<body class="fix-header fix-sidebar card-no-border">
+<body>
 <!-- ============================================================== -->
 <!-- Preloader - style you can find in spinners.css -->
 <!-- ============================================================== -->
-<div class="preloader">
-    <svg class="circular" viewBox="25 25 50 50">
-        <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" /> </svg>
-</div>
-<!-- Alert Messages - see alerts.js and Message.vue -->
-<div id="alerts">
-    <message v-for="message in messages" :msg="message" :key="message.id"></message>
-</div>
 <!-- ============================================================== -->
 <!-- Main wrapper - style you can find in pages.scss -->
 <!-- ============================================================== -->
-<div id="main-wrapper">
-    @yield('content')
-</div>
+
+@yield('content')
+
 <!-- ============================================================== -->
 <!-- End Wrapper -->
 <!-- ============================================================== -->
-
-@include('layouts.partials.scripts')
-
-<!-- Page Level JavaScript -->
-@stack('scripts')
 </body>
 
 </html>
