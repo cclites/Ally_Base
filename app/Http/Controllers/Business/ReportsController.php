@@ -392,5 +392,17 @@ class ReportsController extends BaseController
     {
         return response()->json($this->business()->clients);
     }
+
+    public function caregiverOnboardedReport()
+    {
+        return view('business.reports.caregiver_onboarded');
+    }
+
+    public function caregiverOnboardedData()
+    {
+        $caregivers = $this->business()->caregivers;
+
+        return response()->json($caregivers);
+    }
 }
 
