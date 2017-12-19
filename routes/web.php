@@ -209,3 +209,4 @@ Route::group([
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
+Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');

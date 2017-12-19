@@ -60,3 +60,24 @@ function utc_date($input, $to_format='Y-m-d H:i:s', $from_timezone='America/New_
     $carbon->timezone('UTC');
     return $carbon->format($to_format);
 }
+
+/**
+ * Check if an administrator is logged in or impersonating
+ *
+ * @return bool
+ */
+function is_admin() {
+    if ($impersonator = Auth::user()->impersonator()) {
+        return $impersonator->role_type === 'admin';
+    }
+    return Auth::user()->role_type === 'admin';
+}
+
+/**
+ * Check if the logged in user is an office user
+ *
+ * @return bool
+ */
+function is_office_user() {
+    return Auth::user()->role_type === 'office_user';
+}
