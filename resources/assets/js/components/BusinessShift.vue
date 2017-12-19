@@ -304,7 +304,7 @@
                     </b-col>
                     <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                        <b-button variant="success" @click="adminOverride()">Admin Override: Save Anyways</b-button>
+                        <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
