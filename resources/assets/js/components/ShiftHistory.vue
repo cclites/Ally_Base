@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-row>
+        <b-row class="mb-2">
             <b-col lg="6">
             </b-col>
             <b-col lg="6" class="text-right">
@@ -10,7 +10,7 @@
 
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="items"
+                     :items="shifts"
                      :fields="fields"
                      :current-page="currentPage"
                      :per-page="perPage"
@@ -34,6 +34,9 @@
 </template>
 
 <script>
+    import FormatsDates from '../mixins/FormatsDates';
+    import FormatsNumbers from '../mixins/FormatsNumbers';
+
     export default {
         props: {
             'shifts': {
@@ -42,6 +45,8 @@
                 }
             },
         },
+
+        mixins: [FormatsDates, FormatsNumbers],
 
         data() {
             return {
@@ -56,24 +61,42 @@
                 selectedItem: {},
                 fields: [
                     {
-                        key: 'date',
-                        label: 'Date',
-                        sortable: true,
-                    },
-                    {
                         key: 'client_name',
                         label: 'Client',
-                        sortable: true,
+                        sortable: true
                     },
                     {
-                        key: 'hours',
+                        key: 'checked_in_time',
+                        label: 'Clocked In',
+                        formatter: (value) => { return this.formatDateTimeFromUTC(value); },
+                        sortable: true
+                    },
+                    {
+                        key: 'checked_out_time',
+                        label: 'Clocked Out',
+                        formatter: (value) => { return this.formatDateTimeFromUTC(value); },
+                        sortable: true
+                    },
+                    {
+                        key: 'duration',
                         label: 'Hours',
-                        sortable: true,
+                        sortable: true
+                    },
+                    {
+                        key: 'caregiver_rate',
+                        label: 'Rate',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    },
+                    {
+                        key: 'activity_names',
+                        label: 'Activities'
                     },
                     {
                         key: 'verified',
                         label: 'Verified',
                         sortable: true,
+                        formatter: (value) => { return value ? 'Verified' : 'Unverified'; }
                     },
                 ]
             }
@@ -81,21 +104,6 @@
 
         mounted() {
             this.totalRows = this.items.length;
-        },
-
-        computed: {
-            items() {
-                return this.shifts.map(function(shift) {
-                    let start = moment.utc(shift.checked_in_time);
-                    return {
-                        id: shift.id,
-                        date: start.local().format('L LTS'),
-                        client_name: shift.client_name,
-                        hours: shift.duration,
-                        verified: (shift.verified) ? 'Verified' : 'Unverified'
-                    }
-                })
-            },
         },
 
         methods: {
