@@ -60,4 +60,27 @@ class ClientCaregiverController extends BaseController
         $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
         return new ClientCaregiver($client, $caregiver);
     }
+
+    public function potentialCaregivers(Client $client)
+    {
+        $current_caregivers = $client->caregivers()->select('caregivers.id')->pluck('id');
+        $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
+        $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
+        $caregivers = $this->business()
+            ->caregivers()
+            ->whereNotIn('caregivers.id', $excluded_caregivers->values())
+            ->select('caregivers.id')
+            ->get()
+            ->map(function ($caregiver) {
+                return [
+                    'id' => $caregiver->id,
+                    'name' => $caregiver->nameLastFirst
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
+
+        return response()->json($caregivers);
+    }
 }

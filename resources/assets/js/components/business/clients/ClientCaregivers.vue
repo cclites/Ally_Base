@@ -7,6 +7,7 @@
         <b-row class="mb-2">
             <b-col sm="6">
                 <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
+                <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
             </b-col>
             <b-col sm="6" class="text-right">
                 {{ paymentTypeMessage }}
@@ -48,7 +49,37 @@
                 </tr>
                 </tbody>
             </table>
+            <hr>
+            <div class="h6">Excluded Caregivers</div>
+            <b-form-field v-for="exGiver in excludedCaregivers">
+                <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
+            </b-form-field>
         </div>
+
+        <b-modal id="clientExcludeCargiver"
+                 title="Exclude Caregiver"
+                 v-model="clientExcludeCaregiverModal"
+                 ok-title="Exclude"
+                 @ok="excludeCaregiver">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Caregiver" label-for="exclude_caregiver_id">
+                            <b-form-select
+                                    id="exclude_caregiver_id"
+                                    name="exclude_caregiver_id"
+                                    v-model="excludeForm.caregiver_id"
+                            >
+                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <!--<b-form-group>-->
+                            <!--<b-btn @click="excludeCaregiver">Exclude</b-btn>-->
+                        <!--</b-form-group>-->
+                    </b-col>
+                </b-row>
+            </b-container>
+        </b-modal>
 
         <b-modal id="clientCaregiverModal" :title="modalTitle" v-model="clientCaregiverModal">
             <b-container fluid>
@@ -133,11 +164,15 @@
 
         data() {
             return {
+                caregiverList: [],
                 items: [],
                 caregiverList: [],
                 clientCaregiverModal: false,
+                clientExcludeCaregiverModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
+                excludeForm: {},
+                excludedCaregivers: []
             }
         },
 
@@ -153,6 +188,11 @@
             axios.get('/business/caregivers').then(response => this.caregiverList = response.data);
         },
 
+        created() {
+            this.fetchCaregivers();
+            this.fetchExcludedCaregivers();
+        },
+
         methods: {
             addCaregiver() {
                 this.selectedCaregiver = {};
@@ -165,6 +205,7 @@
                 });
                 this.clientCaregiverModal = true;
             },
+
             editCaregiver(item) {
                 this.selectedCaregiver = item;
                 this.form = new Form({
@@ -176,16 +217,55 @@
                 });
                 this.clientCaregiverModal = true;
             },
+
             saveCaregiver() {
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
-                    .then(function(response) {
+                    .then((response) => {
+                        this.fetchCaregivers()
                         component.items = component.items.filter(caregiver => {
                             return caregiver.id != response.data.data.id;
                         });
                         component.items.unshift(response.data.data);
                         component.clientCaregiverModal = false;
                     })
+            },
+
+            fetchCaregivers() {
+                axios.get('/business/clients/' + this.client_id + '/potential-caregivers')
+                    .then(response => {
+                        this.caregiverList = response.data;
+                    });
+            },
+
+            fetchExcludedCaregivers() {
+                axios.get('/business/clients/'+this.client_id+'/excluded-caregivers')
+                    .then(response => {
+                        this.excludedCaregivers = response.data;
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
+            },
+
+            excludeCaregiver() {
+                console.log('Excluding ' + this.excludeForm.caregiver_id);
+                axios.post('/business/clients/'+this.client_id+'/exclude-caregiver', this.excludeForm)
+                    .then(response => {
+                        this.fetchExcludedCaregivers();
+                        this.fetchCaregivers();
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
+            },
+
+            removeExcludedCaregiver(id) {
+                axios.delete('/business/clients/excluded-caregiver/'+id)
+                    .then(response => {
+                        this.fetchExcludedCaregivers();
+                        this.fetchCaregivers();
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
             }
         },
 
