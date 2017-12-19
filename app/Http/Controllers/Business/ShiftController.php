@@ -143,7 +143,6 @@ class ShiftController extends BaseController
                 $shift->costs()->persist();
             }
             $shift->activities()->sync($request->input('activities', []));
-            event(new ShiftModified($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -207,7 +206,6 @@ class ShiftController extends BaseController
 
         if ($shift->update(['verified' => true])) {
             event(new UnverifiedShiftApproved($shift));
-            event(new ShiftModified($shift));
             return new SuccessResponse('The shift has been verified', $shift->toArray());
         }
 
