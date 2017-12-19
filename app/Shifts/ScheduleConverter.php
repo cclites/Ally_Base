@@ -66,7 +66,10 @@ class ScheduleConverter
         foreach($events as $event) {
             $schedule = Schedule::find($event['schedule_id']);
             $expectedClockIn = Carbon::instance($event['start']);
-            if (!$this->shiftExistsFor($schedule, $expectedClockIn)) {
+            if (
+                !$this->shiftExistsFor($schedule, $expectedClockIn)
+                && !$this->hasBeenConverted($schedule, $expectedClockIn)
+            ) {
                 $shift = $this->convert($schedule, $expectedClockIn);
                 if ($shift) $shifts[] = $shift;
             }
@@ -94,6 +97,23 @@ class ScheduleConverter
                 ->where('caregiver_id', $schedule->caregiver_id)
                 ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(2), $expectedClockIn->copy()->addHours(2)]);
         })->exists();
+    }
+
+    /**
+     * Check if this particular schedule and time has already been converted
+     *
+     * @param \App\Schedule $schedule
+     * @param \Carbon\Carbon $expectedClockIn
+     * @return bool
+     */
+    public function hasBeenConverted(Schedule $schedule, Carbon $expectedClockIn)
+    {
+        // Use UTC when comparing against checked_in_time
+        $expectedClockIn = $expectedClockIn->copy()->setTimezone('UTC');
+        return \DB::table('converted_schedules')
+                  ->where('schedule_id', $schedule->id)
+                  ->where('checked_in_time', $expectedClockIn)
+                  ->exists();
     }
 
     /**
@@ -125,6 +145,14 @@ class ScheduleConverter
             'provider_fee' => $schedule->getProviderFee(),
             'status' => $status,
         ]);
+
+        if ($shift) {
+            \DB::table('converted_schedules')->insert([
+                'schedule_id' => $schedule->id,
+                'checked_in_time' => $start,
+                'created_at' => Carbon::now()
+            ]);
+        }
 
         return $shift;
     }
