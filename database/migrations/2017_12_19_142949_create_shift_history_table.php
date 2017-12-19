@@ -16,7 +16,7 @@ class CreateShiftHistoryTable extends Migration
         Schema::create('shift_status_history', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('shift_id');
-            $table->string('new_status');
+            $table->string('new_status')->nullable();
             $table->timestamps();
         });
     }
