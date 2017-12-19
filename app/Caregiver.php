@@ -206,4 +206,24 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         $confirmation->touchTimestamp();
         \Mail::to($this->email)->send(new CaregiverConfirmation($this, $this->businesses()->first()));
     }
+
+    /**
+     * Override name to suffix title
+     *
+     * @return string
+     */
+    public function name()
+    {
+        return trim($this->user->name() . ' ' . $this->title);
+    }
+
+    /**
+     * Override nameFirstLast to suffix title
+     *
+     * @return string
+     */
+    public function nameLastFirst()
+    {
+        return trim($this->user->nameLastFirst() . ' ' . $this->title);
+    }
 }
