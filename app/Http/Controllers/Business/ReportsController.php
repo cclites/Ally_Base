@@ -382,4 +382,15 @@ class ReportsController extends BaseController
 
         return response()->json($cards);
     }
+
+    public function clientOnboardedReport()
+    {
+        return view('business.reports.client_onboarded');
+    }
+
+    public function clientOnboardedData()
+    {
+        return response()->json($this->business()->clients);
+    }
 }
+
