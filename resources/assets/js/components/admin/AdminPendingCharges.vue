@@ -83,21 +83,25 @@
                         key: 'amount',
                         label: 'Amount',
                         sortable: true,
+                        formatter: this.numberFormat
                     },
                     {
                         key: 'caregiver_allotment',
                         label: 'Caregiver Allotment',
                         sortable: true,
+                        formatter: this.numberFormat
                     },
                     {
                         key: 'business_allotment',
                         label: 'Business Allotment',
                         sortable: true,
+                        formatter: this.numberFormat
                     },
                     {
                         key: 'system_allotment',
                         label: 'Ally Allotment',
                         sortable: true,
+                        formatter: this.numberFormat
                     },
                     {
                         key: 'payment_type',
@@ -124,7 +128,7 @@
 
         computed: {
             items() {
-                return this.charges.map(function(item) {
+                return this.charges.map(item => {
                     item.name = (item.business) ? item.business.name : item.client.nameLastFirst;
                     return item;
                 })
