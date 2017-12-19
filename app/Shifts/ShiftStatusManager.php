@@ -122,6 +122,13 @@ class ShiftStatusManager
         return array_diff(self::$statuses, self::getUnconfirmedStatuses());
     }
 
+    public static function getClockedInStatuses()
+    {
+        return [
+            null,
+            Shift::CLOCKED_IN,
+        ];
+    }
 
     ///////////////////////////////////////////
     /// Check Methods
@@ -199,6 +206,18 @@ class ShiftStatusManager
         );
     }
 
+    /**
+     * Returns true if a shift has a clocked in status
+     * @return bool
+     */
+    public function isClockedIn()
+    {
+        return in_array(
+            $this->status(),
+            self::getClockedInStatuses()
+        );
+    }
+
 
     ///////////////////////////////////////////
     /// Acknowledgements (Status Updates)
@@ -237,7 +256,7 @@ class ShiftStatusManager
     }
 
     /**
-     * Acknowledge a confirmation of an unconfirmed shift
+     * Revert a shift back to unconfirmed
      */
     public function unconfirm()
     {

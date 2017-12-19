@@ -138,7 +138,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
-            if ($adminOverride) {
+            if (isset($adminOverride)) {
                 // Update persisted costs
                 $shift->costs()->persist();
             }

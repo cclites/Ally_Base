@@ -7,6 +7,7 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftApproved;
 use App\Events\UnverifiedShiftCreated;
+use App\Listeners\CheckForClockOut;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
@@ -29,9 +30,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         ShiftModified::class => [
             ShiftStatusUpdate::class,
+            CheckForClockOut::class,
         ],
         ShiftCreated::class => [
             ShiftStatusUpdate::class,
+            CheckForClockOut::class,
         ],
         FailedTransaction::class => [
             PostToSlackOnFailedTransaction::class,
