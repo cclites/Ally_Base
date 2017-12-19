@@ -107,7 +107,11 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        if ($shift->isReadOnly()) {
+        // Allow admin overrides on locked shifts
+        if (is_admin() && $request->input('override')) {
+            $adminOverride = true;
+        }
+        else if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
@@ -134,6 +138,10 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
+            if ($adminOverride) {
+                // Update persisted costs
+                $shift->costs()->persist();
+            }
             $shift->activities()->sync($request->input('activities', []));
             event(new ShiftModified($shift));
             return new SuccessResponse('You have successfully updated this shift.');
