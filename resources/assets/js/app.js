@@ -91,6 +91,7 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
 Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
+Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
