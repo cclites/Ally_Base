@@ -16,10 +16,33 @@
                 </tr>
                 <tr>
                     <th>Amount</th>
-                    <td>{{ numberFormat(transaction.amount) }}</td>
+                    <td>{{ moneyFormat(transaction.amount) }}</td>
                 </tr>
             </table>
         </b-card>
+
+        <b-row>
+            <b-col lg="6">
+                <b-card header="Client Summary"
+                        header-text-variant="white"
+                        header-bg-variant="info">
+                    <b-table bordered striped hover show-empty
+                             :fields="clientSummaryFields"
+                             :items="clientSummary">
+                    </b-table>
+                </b-card>
+            </b-col>
+            <b-col lg="6">
+                <b-card header="Caregiver Summary"
+                        header-text-variant="white"
+                        header-bg-variant="info">
+                    <b-table bordered striped hover show-empty
+                             :fields="caregiverSummaryFields"
+                             :items="caregiverSummary">
+                    </b-table>
+                </b-card>
+            </b-col>
+        </b-row>
 
         <b-row>
             <b-col lg="12">
@@ -39,10 +62,10 @@
                             {{ formatDate(data.value) }} {{ formatTime(data.value) }}
                         </template>
                         <template slot="client_name" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client_name }}</a>
+                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client.name }}</a>
                         </template>
                         <template slot="caregiver_name" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver_name }}</a>
+                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver.name }}</a>
                         </template>
                         <template slot="actions" scope="row">
                             <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
@@ -51,7 +74,6 @@
                 </b-card>
             </b-col>
         </b-row>
-
     </div>
 </template>
 
@@ -67,13 +89,15 @@
 
         props: {
             'transaction': Object,
+            'shifts': Array,
+            'clientSummary': Array,
+            'caregiverSummary': Array
         },
 
         data() {
             return {
                 'sortBy': 'checked_in_time',
                 'sortDesc': false,
-                'shifts': [],
                 'shiftFields': [
                     {
                         key: 'checked_in_time',
@@ -99,79 +123,110 @@
                         key: 'caregiver_rate',
                         label: 'CG Rate',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'provider_fee',
                         label: 'Reg Rate',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'ally_fee',
                         label: 'Ally Fee',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'hourly_total',
                         label: 'Total Hourly',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'caregiver_total',
                         label: 'CG Total',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'provider_total',
                         label: 'Reg Total',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'ally_total',
                         label: 'Ally Total',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'mileage_costs',
                         label: 'Mileage Costs',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'other_expenses',
                         label: 'Other',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'shift_total',
                         label: 'Shift Total',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     'actions'
+                ],
+                'clientSummaryFields': [
+                    {
+                        key: 'name',
+                        sortable: true
+                    },
+                    {
+                        key: 'cg_total',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    },
+                    {
+                        key: 'hours',
+                        sortable: true
+                    },
+                    {
+                        key: 'ally_total',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    },
+                    {
+                        key: 'provider_total',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    },
+                    {
+                        key: 'total',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    }
+                ],
+                'caregiverSummaryFields': [
+                    {
+                        key: 'name',
+                        sortable: true
+                    },
+                    {
+                        key: 'hours',
+                        sortable: true
+                    },
+                    {
+                        key: 'total',
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true
+                    }
                 ]
             }
-        },
-
-        mounted() {
-            this.loadData();
-        },
-
-        methods: {
-
-            loadData() {
-                axios.get('/business/reports/data/shifts?transaction_id=' + this.transaction.id)
-                    .then(response => {
-                        if (Array.isArray(response.data)) {
-                            this.shifts = response.data.map(function(item) {
-                                item.checked_in_time = moment.utc(item.checked_in_time).local();
-                                item.client_name = item.client.nameLastFirst;
-                                item.caregiver_name = item.caregiver.nameLastFirst;
-                                return item;
-                            })
-                        }
-                        else {
-                            this.shifts = [];
-                        }
-                    });
-            }
-        },
+        }
     }
 </script>
