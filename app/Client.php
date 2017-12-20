@@ -67,6 +67,9 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->belongsTo(Business::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function caregivers()
     {
         return $this->belongsToMany(Caregiver::class, 'client_caregivers')
