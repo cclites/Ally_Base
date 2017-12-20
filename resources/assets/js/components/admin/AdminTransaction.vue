@@ -46,6 +46,15 @@
                             <th>Name</th>
                             <td><a :href="userLink">{{ user.name }}</a></td>
                         </tr>
+                        <tr v-if="transaction.payment">
+                            <th>Payment Type &nbsp;</th>
+                            <td>{{ transaction.payment.payment_type || 'N/A' }}</td>
+                        </tr>
+                        <tr v-if="transaction.payment">
+                            <th>Registry</th>
+                            <td v-if="transaction.payment.business">{{ transaction.payment.business.name }}</td>
+                            <td v-else>N/A</td>
+                        </tr>
                     </table>
                 </b-card>
             </b-col>
@@ -196,8 +205,7 @@
             this.loadData();
         },
 
-        methods: {
-
+        methods: {            
             loadData() {
                 axios.get('/admin/shifts/data?transaction_id=' + this.transaction.id)
                     .then(response => {

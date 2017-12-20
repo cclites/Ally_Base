@@ -4,8 +4,13 @@ use App\Activity;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Deposit;
+use App\OfficeUser;
 use App\Payment;
+use App\Schedule;
+use App\Shift;
 use App\ShiftActivity;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -30,8 +35,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Ally Demo Business'
         ]);
 
-        $this->generateActivities($business);
-
         $client = factory(Client::class)->create([
             'firstname' => 'Demo',
             'lastname' => 'Client',
@@ -41,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'business_id' => $business->id
         ]);
 
-        $officeUser = factory(\App\OfficeUser::class)->create([
+        $officeUser = factory(OfficeUser::class)->create([
             'firstname' => 'Demo',
             'lastname' => 'User',
             'email' => 'officeuser@allyms.com',
@@ -59,103 +62,49 @@ class DatabaseSeeder extends Seeder
         ]);
         $business->caregivers()->attach($caregiver, ['default_rate' => 20.00]);
 
-        $this->generateShifts($caregiver, $client, $business);
-
-        // Create Others
+        // Create Other Users
         factory(Business::class, 3)->create();
-        factory(Client::class, 20)->create();
-        factory(Caregiver::class, 10)->create();
-        factory(\App\OfficeUser::class, 6)->create();
+        factory(Client::class, 30)->create();
+        factory(Caregiver::class, 20)->create()->each(function($user) {
+            Business::inRandomOrder()->first()->caregivers()->attach($user);
+        });
+        factory(OfficeUser::class, 6)->create()->each(function($user) {
+            Business::inRandomOrder()->first()->users()->attach($user);
+        });
 
-        // Batch deposits
-        $date = new DateTime('monday 3 months ago');
-        while($date->format('U') < time()) {
-            $start = $date->format('Y-m-d') . ' 00:00:00';
-            $date->add(new \DateInterval('P1W'));
-            $end = $date->format('Y-m-d') . ' 23:59:59';
+        // Attach phone numbers and addresses
+        User::all()->each(function (User $user) {
+            $user->phoneNumbers()->save(factory(\App\PhoneNumber::class)->make());
+            $user->addresses()->save(factory(\App\Address::class)->make());
+        });
 
-            \DB::beginTransaction();
-            $businessDeposit = \App\Deposit::create([
-                'deposit_type' => 'business',
-                'business_id' => $business->id,
-                'amount' => 0.00,
-                'created_at' => $end,
-            ]);
-            $caregiverDeposit = \App\Deposit::create([
-                'deposit_type' => 'caregiver',
-                'business_id' => $caregiver->id,
-                'amount' => 0.00,
-                'created_at' => $end,
-            ]);
+        // Create Activities
+        factory(Activity::class, 15)->create();
 
-            if ($businessDeposit->amount == 0) $businessDeposit->delete();
-            if ($caregiverDeposit->amount == 0) $caregiverDeposit->delete();
+        // Create schedules
+        factory(Schedule::class, 40)->create();
 
-            \DB::commit();
-        }
-    }
+        // Create some payment-less shifts
+        factory(Shift::class, 30)->create(['status' => 'WAITING_FOR_AUTHORIZATION']);
 
-    private function generateShifts(Caregiver $caregiver, Client $client, Business $business)
-    {
-        for ($i = 1; $i < 6; $i++) {
-            $start = Carbon::now()->subWeeks($i + 1);
-            $end = $start->copy()->addHours(2);
-            // Create shift and payment entries
-            $data = [
-                'caregiver_id' => $caregiver->id,
-                'client_id' => $client->id,
-                'business_id' => $business->id,
-                'checked_in_time' => $start,
-                'checked_out_time' => $end
-            ];
+        // Create some payments
+        $payments = factory(Payment::class, 20)->create();
 
-            $shifts = factory(\App\Shift::class, 10)->create($data);
+        // Create some charged shifts
+        factory(Shift::class, 40)->create()->each(function(Shift $shift) use ($payments) {
+            $shift->status = 'WAITING_FOR_PAYOUT';
+            $shift->payment_id = $payments->shuffle()->first()->id;
+            $shift->save();
+        });
 
-            $duration = $shifts->reduce(function ($carry, $shift) {
-                return $carry + round((strtotime($shift->checked_out_time) - strtotime($shift->checked_in_time)) / 3600);
-            });
+        // Create some deposits
+        $deposits = factory(Deposit::class, 20)->create();
 
-            $amount = $duration * 20.00;
-            $business_fee = $duration * 4.00;
-            $system_fee = $amount * 0.05;
-
-            $payment = Payment::create([
-                'client_id' => $shifts->first()->client_id,
-                'business_id' => $shifts->first()->business_id,
-                'amount' => $amount,
-                'business_allotment' => $business_fee,
-                'system_allotment' => $system_fee,
-                'caregiver_allotment' => $amount - ($business_fee + $system_fee),
-                'success' => 1
-            ]);
-
-            $shifts->each(function($shift) use ($payment) {
-                ShiftActivity::create(['shift_id' => $shift->id, 'activity_id' => rand(1, 7)]);
-                $shift->payment_id = $payment->id;
-                $shift->save();
-            });
-        }
-    }
-
-    private function generateActivities(Business $business)
-    {
-        // Demo activities
-        $activities = [
-            'Bathing - Shower',
-            'Bathing - Bed',
-            'Shave',
-            'Mouth Care',
-            'Incontinence Care',
-            'Medication Reminders',
-            'Turning',
-            'Feeding',
-        ];
-        for ($i = 0; $i < count($activities)-1; $i++) {
-            Activity::create([
-                'code' => str_pad($i+1, 3, 0,STR_PAD_LEFT),
-                'name' => $activities[$i],
-                'business_id' => $business->id,
-            ]);
-        }
+        // Create some fully paid shifts
+        factory(Shift::class, 60)->create()->each(function(Shift $shift) use ($deposits) {
+            $shift->status = 'PAID';
+            $shift->save();
+            $deposits->shuffle()->first()->shifts()->attach($shift);
+        });
     }
 }

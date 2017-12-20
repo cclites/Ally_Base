@@ -1,40 +1,61 @@
 <template>
-    <b-card title="Payment Details">
+    <b-card
+            header-tag="header">
+        <div slot="header">
+            <b-row>
+                <b-col>
+                    <h5>Payment Details</h5>
+                </b-col>
+                <b-col>
+                    <div class="pull-right">
+                        Total: {{ total }}
+                    </div>
+                </b-col>
+            </b-row>
+        </div>
         <b-table hover
                  :items="items"
                  :fields="fields">
             <template slot="checked_in_time" scope="data">
-                {{ formatDate(data.item.checked_in_time) }}
+                {{ formatDateFromUTC(data.item.checked_in_time) }}
             </template>
             <template slot="care_time" scope="data">
-                {{ formatTime(data.item.checked_in_time) }} - {{ formatTime(data.item.checked_out_time) }}
+                {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
             </template>
             <template slot="client_name" scope="data">
                 {{ data.item.client.name }}
             </template>
-            <template slot="amount" scope="data">
-                &dollar;{{ parseFloat(data.item.caregiver_rate) * parseFloat(data.item.duration) }}
+            <template slot="caregiver_total" scope="data">
+                {{ moneyFormat(parseFloat(data.item.caregiver_total)) }}
             </template>
         </b-table>
     </b-card>
 </template>
 
 <script>
-    import FormatsDates from '../../mixins/FormatsDates'
-    export default {
-        props: ['deposit'],
+    import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
 
-        mixins: [FormatsDates],
+    export default {
+        props: ['shifts'],
+
+        mixins: [FormatsDates, FormatsNumbers],
+
+        computed: {
+            total() {
+                return this.moneyFormat(_.sumBy(this.items, (item) => { return parseFloat(item.caregiver_total); }));
+            }
+        },
 
         data() {
             return{
-                items: this.deposit.shifts,
+                items: this.shifts,
                 fields: [
                     { key: 'checked_in_time', label: 'Care Date' },
                     { key: 'care_time', label: 'Care Time' },
                     { key: 'duration', label: 'Hours of Care Received' },
                     { key: 'client_name', label: 'Client Name' },
-                    { key: 'amount', label: 'Amount' }
+                    { key: 'caregiver_total', label: 'Amount' }
                 ]
             }
         }

@@ -49,7 +49,10 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
     </ul>
 
@@ -68,6 +71,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
             </div>
         </li>
     </ul>
@@ -118,10 +122,22 @@
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $defaultPaymentTypeMessage }}" :business="true" />
+                    <payment-method title="Primary Payment Method"
+                                    source="primary"
+                                    :method="{{ $client->defaultPayment OR '{}' }}"
+                                    :client="{{ $client }}"
+                                    payment-type-message="{{ $defaultPaymentTypeMessage }}"
+                                    :business="true">
+                    </payment-method>
                 </div>
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" :business="true" />
+                    <payment-method title="Backup Payment Method"
+                                    source="backup"
+                                    :method="{{ $client->backupPayment OR '{}' }}"
+                                    :client="{{ $client }}"
+                                    payment-type-message="{{ $backupPaymentTypeMessage }}"
+                                    :business="true">
+                    </payment-method>
                 </div>
             </div>
         </div>
@@ -141,7 +157,11 @@
             ></document-list>
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
-            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
+            <client-statements-tab :payments="{{ $client->payments }}"></client-statements-tab>
+        </div>
+        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
+            <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
+                                    :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
     </div>
 @endsection

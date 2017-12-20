@@ -44,15 +44,16 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.reports.payments') }}">Payment History</a></li>
         <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
-        <li><a href="{{ route('business.reports.scheduled_vs_actual') }}">Scheduled vs. Actual</a></li>
-        <li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>
+        {{--<li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>--}}
         <li><a href="{{ route('business.reports.reconciliation') }}">Reconciliation Report</a></li>
-        <li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>
+        {{--<li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>--}}
         <li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime Report</a></li>
         <li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>
         <li><a href="{{ route('business.reports.cc_expiration') }}">Credit Card Expiration</a></li>
         <li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver Rates</a></li>
         <li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>
+        <li><a href="{{ route('business.reports.client_onboarded') }}">Client Online Setup</a></li>
+        <li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>
     </ul>
 </li>
 <li>

@@ -2,6 +2,7 @@
 namespace App\Reports;
 
 use App\Caregiver;
+use App\Shift;
 
 /**
  * Class CaregiverPaymentsReport
@@ -20,30 +21,32 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
     public function rows()
     {
         if (!$this->generated) {
-            $shifts = $this->query->get();
+            $shifts = $this->query
+                ->where('status', '!=', Shift::UNCONFIRMED)
+                ->get();
             $this->rows = [];
 
-            foreach($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
+            foreach ($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
                 $caregiver = Caregiver::find($caregiver_id);
                 $row = [
-                    'id' => $caregiver_id,
-                    'name' => $caregiver->name(),
+                    'id'            => $caregiver_id,
+                    'name'          => $caregiver->name(),
                     'nameLastFirst' => $caregiver->nameLastFirst(),
-                    'hours' => 0,
-                    'amount' => 0,
+                    'hours'         => 0,
+                    'amount'        => 0,
                 ];
-                foreach($caregiver_shifts as $shift) {
+                foreach ($caregiver_shifts as $shift) {
                     /** @var \App\Shift $shift */
                     $row['hours'] += $shift->duration();
                     $row['amount'] += $shift->costs()->getCaregiverCost();
                 }
-                $this->rows[] = array_map(function($value) {
+                $this->rows[] = array_map(function ($value) {
                     return is_float($value) ? number_format($value, 2) : $value;
                 }, $row);
             }
 
             // Sort by name
-            usort($this->rows, function($a, $b) {
+            usort($this->rows, function ($a, $b) {
                 return strcmp($a['nameLastFirst'], $b['nameLastFirst']);
             });
         }

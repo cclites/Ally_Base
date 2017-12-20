@@ -13,9 +13,12 @@ class AlterShiftsTableForStatuses extends Migration
      */
     public function up()
     {
+        Schema::table('shifts', function(Blueprint $table) {
+            $table->string('status')->nullable();
+        });
+
         Schema::table('shifts', function (Blueprint $table) {
             $table->dropColumn('paid');
-            $table->string('status')->nullable();
         });
     }
 

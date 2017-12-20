@@ -41,7 +41,11 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()->clients()
+        return $this->business()
+            ->clients()
+            ->whereHas('user', function ($query) {
+                $query->where('active', true);
+            })
             ->with(['user'])->get()->map(function($client) {
                 return [
                     'id' => $client->id,
@@ -107,7 +111,7 @@ class ClientController extends BaseController
      * Display the specified resource.
      *
      * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|\Illuminate\Http\Response
      */
     public function show(Client $client)
     {

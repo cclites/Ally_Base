@@ -62,12 +62,12 @@
                     },
                     {
                         key: 'amount',
-                        label: 'Amount',
+                        label: 'Client Charge',
                         sortable: true,
                     },
                     {
                         key: 'business_allotment',
-                        label: 'Business Allotment',
+                        label: 'Provider Allotment',
                         sortable: true,
                     },
 //                    'actions'

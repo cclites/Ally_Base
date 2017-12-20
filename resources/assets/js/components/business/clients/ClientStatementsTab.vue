@@ -4,24 +4,23 @@
             <template slot="for_care_week" scope="data">
                 {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
             </template>
+            <template slot="actions" scope="data">
+                <a :href="'/business/clients/' + data.item.id + '/statements'" class="btn btn-secondary">
+                    View Details
+                </a>
+            </template>
         </b-table>
     </b-card>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
     import FormatsDates from '../../../mixins/FormatsDates';
+    import FormatsNumbers from '../../../mixins/FormatsNumbers';
 
     export default {
         props: ['payments'],
         
-        mixins: [FormatsDates],
-        
-        components: {
-        
-        },
+        mixins: [FormatsDates, FormatsNumbers],
         
         data() {
             return{
@@ -35,8 +34,9 @@
                     'for_care_week',
                     {
                         key: 'amount',
-                        formatter: (value) => { return numeral(value).format('$0,0.00') }
-                    }
+                        formatter: (value) => { return this.moneyFormat(value) }
+                    },
+                    'actions'
                 ]
             }
         },

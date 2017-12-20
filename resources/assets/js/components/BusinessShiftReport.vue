@@ -65,7 +65,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td><strong>Total</strong></td>
+                                <td><strong>Total for Confirmed Shifts</strong></td>
                                 <td>{{ clientTotals.hours }}</td>
                                 <td>{{ clientTotals.total }}</td>
                                 <td></td>
@@ -100,7 +100,7 @@
                         </tbody>
                         <tfoot>
                         <tr>
-                            <td><strong>Total</strong></td>
+                            <td><strong>Total for Confirmed Shifts</strong></td>
                             <td>{{ caregiverTotals.hours }}</td>
                             <td>{{ caregiverTotals.amount }}</td>
                         </tr>
@@ -172,13 +172,7 @@
                                 </span>
                             </template>
                             <template slot="Confirmed" scope="data">
-                                <span v-if="data.value" style="color: green">
-                                    <i class="fa fa-check-square-o"></i>
-                                </span>
-                                <span v-else-if="data.value === undefined"></span>
-                                <span v-else style="color: darkred">
-                                    <i class="fa fa-times-rectangle-o"></i>
-                                </span>
+                                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
                             </template>
                             <template slot="actions" scope="row">
                             <span v-if="row.item.id">
@@ -363,6 +357,7 @@
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
+                <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
@@ -628,7 +623,21 @@
                 form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
-                        this.items.shifts.map(function(shift) {
+                        this.items.shifts.map(shift => {
+                            if (shift.id === this.selectedItem.id) {
+                                shift.status = response.data.data.status;
+                            }
+                            return shift;
+                        });
+                    });
+            },
+
+            unconfirmSelected() {
+                let form = new Form();
+                form.post('/business/shifts/' + this.selectedItem.id + '/unconfirm')
+                    .then(response => {
+                        this.detailsModal = false;
+                        this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
                             }
@@ -662,9 +671,12 @@
 
             setInitialFields() {
                 if (this.getLocalStorage('fields')) {
-                    // Temporary fix for invalid objects stored
                     let fields = JSON.parse(this.getLocalStorage('fields'));
                     if (fields[0] && typeof(fields[0]) !== 'object') {
+                        // Temporarily Force 'Confirmed'
+                        if (fields.indexOf('Confirmed') === -1) {
+                            fields.push('Confirmed');
+                        }
                         this.filteredFields = fields;
                         return;
                     }

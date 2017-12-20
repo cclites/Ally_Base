@@ -69,7 +69,7 @@ File: scss
         .navbar-nav > .nav-item > .nav-link {
             padding-left: .75rem;
             padding-right: .75rem;
-            font-size: 19px;
+            //font-size: 19px;
             line-height: 50px;
         }
         .navbar-nav > .nav-item.show {
@@ -3495,7 +3495,7 @@ $url_1: url(../../assets/images/tooltip/shape1.svg);
 	color: $white;
 	opacity: 0;
 	cursor: default;
-	font-size: 14;
+	font-size: 14px;
 	line-height: 27px;
 	pointer-events: none;
 	//Instead of the line below you could use @include transform($scale, $rotate, $transx, $transy, $skewx, $skewy, $originx, $originy)

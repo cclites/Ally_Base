@@ -40,39 +40,46 @@
                         </b-form-input>
                         <input-help :form="form" field="email" text="Confirm your email address.  Ex: user@domain.com"></input-help>
                     </b-form-group>
-                    <b-form-group label="Username" label-for="username">
-                        <b-form-input
-                                id="email"
-                                name="email"
-                                type="text"
-                                :value="caregiver.username"
-                                disabled
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="email" text="View your username which will be used to logging in."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Password" label-for="password">
-                        <b-form-input
-                                id="password"
-                                name="password"
-                                type="password"
-                                v-model="form.password"
-                                required
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="password" text="Enter a new password that will be used for logging in."></input-help>
-                    </b-form-group>
-                    <b-form-group label="Confirm Password" label-for="password_confirmation">
-                        <b-form-input
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                type="password"
-                                v-model="form.password_confirmation"
-                                required
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="password_confirmation" text="Re-enter the above password for confirmation."></input-help>
-                    </b-form-group>
+                    <div class="username-password-box">
+                        <b-form-group label="Username" label-for="username">
+                            <b-form-input
+                                    id="email"
+                                    name="email"
+                                    type="text"
+                                    :value="caregiver.username"
+                                    disabled
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="email" text="View your username which will be used to logging in."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Password" label-for="password">
+                            <b-form-input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    v-model="form.password"
+                                    required
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="password" text="Enter a new password that will be used for logging in."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Confirm Password" label-for="password_confirmation">
+                            <b-form-input
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    type="password"
+                                    v-model="form.password_confirmation"
+                                    required
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="password_confirmation" text="Re-enter the above password for confirmation."></input-help>
+                        </b-form-group>
+                        <small class="blue-text">
+                            Please remember your username and password.  Once you click "Accept and Verify" below, you will be able to login to your account
+                            and access payment history and service reports.  Visit <a href="https://app.allyms.com" target="_blank">https://app.allyms.com</a> to login any time.
+                        </small>
+                    </div>
+
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
@@ -362,3 +369,14 @@
 
     }
 </script>
+
+<style scoped>
+    .blue-text {
+        color: #00aeef;
+    }
+    .username-password-box {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #eee;
+    }
+</style>

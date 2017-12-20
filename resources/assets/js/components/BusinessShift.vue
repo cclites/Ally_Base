@@ -3,6 +3,9 @@
         <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
             <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
         </div>
+        <div class="alert alert-warning" v-if="status === 'UNCONFIRMED'">
+            <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
+        </div>
         <b-card
                 :header="title"
                 header-text-variant="white"
@@ -295,12 +298,14 @@
                             <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
+                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'UNCONFIRMED'">Unconfirm</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
                     <b-col lg="12" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                        <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
@@ -334,24 +339,26 @@
                     return [];
                 }
             },
+            'admin': Number,
         },
         data() {
             return {
                 form: new Form({
-                    client_id: (this.shift) ? this.shift.client_id : null,
-                    caregiver_id: (this.shift) ? this.shift.caregiver_id : null,
-                    caregiver_comments: (this.shift) ? this.shift.caregiver_comments : null,
-                    checked_in_time: (this.shift) ? this.shift.checked_in_time : null,
-                    checked_out_time: (this.shift) ? this.shift.checked_out_time : null,
-                    mileage: (this.shift) ? this.shift.mileage : 0,
-                    other_expenses: (this.shift) ? this.shift.other_expenses : 0,
-                    other_expenses_desc: (this.shift) ? this.shift.other_expenses_desc : null,
-                    hours_type: (this.shift) ? this.shift.hours_type : 'default',
-                    verified: (this.shift) ? this.shift.verified : true,
-                    caregiver_rate: (this.shift) ? this.shift.caregiver_rate : '',
-                    provider_fee: (this.shift) ? this.shift.provider_fee : '',
+                    client_id: ('client_id' in this.shift) ? this.shift.client_id : null,
+                    caregiver_id: ('caregiver_id' in this.shift) ? this.shift.caregiver_id : null,
+                    caregiver_comments: ('caregiver_comments' in this.shift) ? this.shift.caregiver_comments : null,
+                    checked_in_time: ('checked_in_time' in this.shift) ? this.shift.checked_in_time : null,
+                    checked_out_time: ('checked_out_time' in this.shift) ? this.shift.checked_out_time : null,
+                    mileage: ('mileage' in this.shift) ? this.shift.mileage : 0,
+                    other_expenses: ('other_expenses' in this.shift) ? this.shift.other_expenses : 0,
+                    other_expenses_desc: ('other_expenses_desc' in this.shift) ? this.shift.other_expenses_desc : null,
+                    hours_type: ('hours_type' in this.shift) ? this.shift.hours_type : 'default',
+                    verified: ('verified' in this.shift) ? this.shift.verified : true,
+                    caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
+                    provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    override: false,
                 }),
                 status: (this.shift) ? this.shift.status : null,
                 checked_in_time: '',
@@ -464,11 +471,24 @@
                     this.form.post('/business/shifts');
                 }
             },
+            adminOverride() {
+                this.form.override = 1;
+                return this.saveShift();
+            },
             saveAndConfirm() {
                 this.saveShift();
                 if (this.shift.id) {
                     let form = new Form();
                     form.post('/business/shifts/' + this.shift.id + '/confirm')
+                        .then(response => {
+                            this.status = response.data.data.status;
+                        });
+                }
+            },
+            unconfirm() {
+                if (this.shift.id) {
+                    let form = new Form();
+                    form.post('/business/shifts/' + this.shift.id + '/unconfirm')
                         .then(response => {
                             this.status = response.data.data.status;
                         });

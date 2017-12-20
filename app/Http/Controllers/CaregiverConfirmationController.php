@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Business;
 use App\Caregiver;
 use App\Confirmations\Confirmation;
 use App\PhoneNumber;
@@ -24,12 +25,13 @@ class CaregiverConfirmationController extends Controller
         }
 
         $caregiver = Caregiver::find($confirmation->user->id);
+        $business = $caregiver->businesses->first();
         $phoneNumber = $caregiver->phoneNumbers->where('type', 'work')->first();
         if ($phoneNumber) $phoneNumber = $phoneNumber->national_number;
         $address = $caregiver->addresses->first();
         $termsUrl = '';
 
-        return view('confirmation.caregiver', compact('token', 'caregiver', 'phoneNumber', 'address', 'termsUrl'));
+        return view('confirmation.caregiver', compact('token', 'caregiver', 'business', 'phoneNumber', 'address', 'termsUrl'));
     }
 
     public function store(Request $request, $token)
@@ -65,7 +67,10 @@ class CaregiverConfirmationController extends Controller
 
         // Save Bank Account
         $account = $this->updateBankAccount($request, $caregiver);
-        $caregiver->update(['bank_account_id' => $account->id]);
+        $caregiver->update([
+            'bank_account_id' => $account->id,
+            'onboarded' => Carbon::now()
+        ]);
 
         // Save Address
         $response = (new AddressController())->update($request, $caregiver->user, 'home', 'Your address');
@@ -85,8 +90,7 @@ class CaregiverConfirmationController extends Controller
                     'type' => 'work',
                 ]);
                 $caregiver->phoneNumbers()->save($phone);
-            }
-            else {
+            } else {
                 $phone->update(['national_number' => $phone_data['phone_number']]);
             }
 

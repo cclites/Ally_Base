@@ -13,14 +13,6 @@ use Faker\Generator as Faker;
 |
 */
 
-$factory->define(\App\Activity::class, function(Faker $faker) {
-    return [
-        'code' => str_pad(mt_rand(0, 999), 3, '0', STR_PAD_LEFT),
-        'name' => $faker->word,
-        'description' => $faker->sentence,
-    ];
-});
-
 $companies = [];
 $factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
     // Ensure a unique company name when creating multiple

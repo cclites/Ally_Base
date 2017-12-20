@@ -39,10 +39,10 @@
                     <tbody>
                     <tr v-for="item in items" :key="item.id">
                         <td>
-                            {{ formatDate(item.checked_in_time) }}
+                            {{ formatDateFromUTC(item.checked_in_time) }}
                         </td>
                         <td>
-                            {{ formatTime(item.checked_in_time) }} - {{ formatTime(item.checked_out_time) }}
+                            {{ formatTimeFromUTC(item.checked_in_time) }} - {{ formatTimeFromUTC(item.checked_out_time) }}
                         </td>
                         <td>
                             <div v-for="activity in activities(item.activities)" :key="activity">{{ activity }}</div>
