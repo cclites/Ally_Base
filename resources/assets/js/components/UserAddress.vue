@@ -105,11 +105,11 @@
 
             saveAddress() {
                 let action = (this.action) ? this.action : '/profile/address/' + this.type;
-                this.form.post(action);
+                this.form.post(action)
+                    .then(() => {
+                        window.scroll(0, 0);
+                    });
             }
-
         }
-
-
     }
 </script>
