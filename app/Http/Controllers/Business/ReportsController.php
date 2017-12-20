@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Business;
 
 use App\Client;
-use App\Caregiver;
 use App\CreditCard;
 use App\Deposit;
 use App\GatewayTransaction;
@@ -17,7 +16,6 @@ use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
-use App\Traits\ActiveBusiness;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -187,23 +185,62 @@ class ReportsController extends BaseController
     public function scheduled()
     {
         $year_start = date('Y-m-d H:i:s', strtotime('first day of this year 00:00:00'));
-        $month_sum = Payment::where('business_id', $this->business()->id)
-            ->where('created_at', '>=', $year_start)
-            ->sum('business_allotment');
-        $month_sum = number_format($month_sum, 2);
 
-        $year_sum = Payment::where('business_id', $this->business()->id)
-            ->where('created_at', '>=', $year_start)
-            ->sum('business_allotment');
-        $year_sum = number_format($year_sum, 2);
+        $date = Carbon::now();
+        $dates = collect([
+            'start' => $date->startOfMonth()->toDateString(),
+            'end' => $date->endOfMonth()->toDateString()
+        ]);
+        if (request()->filled('start_date') && request()->filled('end_date')) {
+            $dates = collect([
+                'start' => Carbon::parse(request('start_date')),
+                'end' => Carbon::parse(request('end_date'))
+            ]);
+        }
 
         $report = new ScheduledPaymentsReport();
-        $report->where('business_id', $this->business()->id);
-        $scheduled_sum = $report->sum('business_allotment');
-        $scheduled_sum = number_format($scheduled_sum, 2);
-
+        $report->query()->where('business_id', $this->business()->id);
+        $scheduled = $report->rows()->sum('business_allotment');
+        $report->query()
+            ->whereBetween('checked_in_time', $dates->values()->toArray())
+            ->when(request()->filled('client_id'), function ($query) {
+                return $query->where('client_id', request('client_id'));
+            })
+            ->when(request()->filled('caregiver_id'), function ($query) {
+                return $query->where('caregiver_id', request('caregiver_id'));
+            })
+            ->orderBy('checked_in_time');
         $payments = $report->rows();
-        return view('business.reports.scheduled', compact('payments', 'month_sum', 'year_sum', 'scheduled_sum'));
+
+        $totals = [
+            'selected' => $payments->sum('business_allotment'),
+            'year' => Payment::where('business_id', $this->business()->id)
+                ->where('created_at', '>=', $year_start)
+                ->sum('business_allotment'),
+            'scheduled' => $scheduled
+        ];
+
+        $caregivers = $this->business()
+            ->caregivers()
+            ->select('caregivers.id')
+            ->get()
+            ->sortBy('nameLastFirst')
+            ->values()
+            ->all();
+        $clients = $this->business()
+            ->clients()
+            ->select('clients.id')
+            ->get()
+            ->sortBy('nameLastFirst')
+            ->values()
+            ->all();
+
+        $response = compact('payments', 'totals', 'dates', 'caregivers', 'clients');
+        if (request()->expectsJson()) {
+            return response()->json($response);
+        }
+
+        return view('business.reports.scheduled', $response);
     }
 
     public function shiftsReport()
@@ -345,4 +382,27 @@ class ReportsController extends BaseController
 
         return response()->json($cards);
     }
+
+    public function clientOnboardedReport()
+    {
+        return view('business.reports.client_onboarded');
+    }
+
+    public function clientOnboardedData()
+    {
+        return response()->json($this->business()->clients);
+    }
+
+    public function caregiverOnboardedReport()
+    {
+        return view('business.reports.caregiver_onboarded');
+    }
+
+    public function caregiverOnboardedData()
+    {
+        $caregivers = $this->business()->caregivers;
+
+        return response()->json($caregivers);
+    }
 }
+

@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <caregiver-payment-details :deposit="{{ $deposit }}"></caregiver-payment-details>
+    <caregiver-payment-details :shifts="{{ $shifts }}"></caregiver-payment-details>
 @endsection

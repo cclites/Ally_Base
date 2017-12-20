@@ -42,10 +42,13 @@ class ShiftController extends Controller
         }
         $shift = $this->caregiver()->getActiveShift();
         $activities = $shift->business->allActivities();
-        $notes = $shift->schedule->notes;
         $carePlanActivityIds = [];
-        if ($shift->schedule->carePlan) {
-            $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
+        $notes =  '';
+        if ($shift && $shift->schedule) {
+            $notes = $shift->schedule->notes;
+            if ($shift->schedule->carePlan) {
+                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
+            }
         }
         return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
     }

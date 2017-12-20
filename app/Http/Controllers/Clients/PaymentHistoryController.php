@@ -6,7 +6,8 @@ use App\Client;
 use App\Http\Controllers\Controller;
 use App\Payment;
 use App\Reports\ShiftsReport;
-use Carbon\Carbon;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Carbon;
 
 class PaymentHistoryController extends Controller
 {
@@ -53,7 +54,7 @@ class PaymentHistoryController extends Controller
 
     public function printDetails($id)
     {
-        $payment = Payment::with('business', 'client')->find($id)->toArray();
+        $payment = Payment::with('business', 'client')->find($id);
 
         $report = new ShiftsReport();
         $report->query()
@@ -61,7 +62,16 @@ class PaymentHistoryController extends Controller
             ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 
-        $payment['shifts'] = $report->rows()->values();
-        return view('clients.print.payment_details', compact('payment'));
+        $payment->shifts = $report->rows()->values()->map(function ($value) {
+            $value = (object) $value;
+            $value->checked_in_time = Carbon::parse($value->checked_in_time);
+            $value->checked_out_time = Carbon::parse($value->checked_out_time);
+            return $value;
+        });
+
+        $pdf = PDF::loadView('clients.print.payment_details', compact('payment'))->setOrientation('landscape');
+        return $pdf->download('payment_details.pdf');
+
+        //return view('clients.print.payment_details', compact('payment'));
     }
 }

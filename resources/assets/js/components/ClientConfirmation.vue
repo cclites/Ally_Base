@@ -147,9 +147,7 @@
                 header-bg-variant="info"
                 header-text-variant="white"
         >
-            <div class="embed-responsive" style="height:200px;">
-                <iframe class="embed-responsive-item" :src="termsUrl"></iframe>
-            </div>
+            <div v-html="terms" style="overflow-y: scroll;max-height:220px;"></div>
         </b-card>
         <b-row>
             <b-col lg="12" class="text-right">
@@ -175,6 +173,7 @@
             'phoneNumber': {},
             'address': {},
             'termsUrl': String,
+            'terms': String
         },
 
         data() {

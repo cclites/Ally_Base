@@ -7,6 +7,8 @@ use App\Client;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientCaregiver;
+use App\Responses\SuccessResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
@@ -59,5 +61,61 @@ class ClientCaregiverController extends BaseController
 
         $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
         return new ClientCaregiver($client, $caregiver);
+    }
+
+    public function potentialCaregivers(Client $client)
+    {
+        $current_caregivers = $client->caregivers()->select('caregivers.id')->pluck('id');
+        $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
+        $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
+        $caregivers = $this->business()
+            ->caregivers()
+            ->whereNotIn('caregivers.id', $excluded_caregivers->values())
+            ->select('caregivers.id')
+            ->get()
+            ->map(function ($caregiver) {
+                return [
+                    'id' => $caregiver->id,
+                    'name' => $caregiver->nameLastFirst
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
+
+        return response()->json($caregivers);
+    }
+
+    /**
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     */
+    public function detachCaregiver(Client $client)
+    {
+        $caregiver = Caregiver::find(request('caregiver_id'));
+
+        if ($caregiver->isClockedIn($client->id)) {
+            return new ErrorResponse(500, $caregiver->name() . ' is clocked in for this client.');
+        }
+
+        // check for scheduled shifts and or clockin
+        $check = $caregiver->schedules()
+            ->where('client_id', $client->id)
+            ->where('end_date', '>', Carbon::now())
+            ->orWhere(function ($query) {
+                $query->where('end_date', Carbon::now())
+                    ->where('time', '>=', Carbon::now());
+            })
+            ->get()
+            ->toArray();
+
+        if ($check) {
+            $msg = $caregiver->name() . ' has future items on the schedule for ' . $client->name() . ' and can\'t be removed';
+            return new ErrorResponse(500, $msg);
+        }
+
+        $client->caregivers()->detach($caregiver->id);
+
+        return new SuccessResponse($caregiver->name() . ' detached from ' . $client->name());
     }
 }

@@ -357,6 +357,7 @@
             <div slot="modal-footer">
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
+                <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
         </b-modal>
@@ -622,7 +623,21 @@
                 form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
-                        this.items.shifts.map(function(shift) {
+                        this.items.shifts.map(shift => {
+                            if (shift.id === this.selectedItem.id) {
+                                shift.status = response.data.data.status;
+                            }
+                            return shift;
+                        });
+                    });
+            },
+
+            unconfirmSelected() {
+                let form = new Form();
+                form.post('/business/shifts/' + this.selectedItem.id + '/unconfirm')
+                    .then(response => {
+                        this.detailsModal = false;
+                        this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
                             }

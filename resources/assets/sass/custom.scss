@@ -3,7 +3,7 @@
   max-height: 50px;
 }
 
-.nav-link .mdi-account-circle {
+.nav-link .mdi-account-circle, .nav-link .mdi-briefcase {
   font-size: 30px;
 }
 
@@ -64,3 +64,6 @@ td .fc-event-container {
   padding: 0 2px;
 }
 
+.active-business {
+  line-height: 16px;
+}

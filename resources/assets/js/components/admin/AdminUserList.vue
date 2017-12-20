@@ -83,6 +83,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'registry',
+                        label: 'Registry',
+                        sortable: true,
+                    },
+                    {
                         key: 'role_type',
                         label: 'Type',
                         sortable: true,

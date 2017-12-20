@@ -5,17 +5,18 @@ namespace App;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\UserRole;
-use App\Mail\ClientConfirmation;
 use App\Shifts\AllyFeeCalculator;
+use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 
 class Client extends Model implements UserRole, CanBeConfirmedInterface
 {
-    use IsUserRole;
+    use IsUserRole, Notifiable;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -66,6 +67,9 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->belongsTo(Business::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function caregivers()
     {
         return $this->belongsToMany(Caregiver::class, 'client_caregivers')
@@ -107,6 +111,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     public function notes()
     {
         return $this->hasMany(Note::class);
+    }
+
+    public function excludedCaregivers()
+    {
+        return $this->hasMany(ClientExcludedCaregiver::class);
     }
 
     ///////////////////////////////////////////
@@ -242,6 +251,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         $history = new OnboardStatusHistory(compact('status'));
         $this->onboardStatusHistory()->save($history);
 
-        \Mail::to($this->email)->send(new ClientConfirmation($this, $this->business));
+        $this->notify(new ClientConfirmation($this, $this->business));
     }
 }

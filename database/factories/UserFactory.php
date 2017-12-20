@@ -35,16 +35,18 @@ $factory->define(\App\Admin::class, function(Faker $faker) {
 $factory->define(\App\Caregiver::class, function(Faker $faker) {
     return array_merge(userFactory($faker), [
         'ssn' => $faker->randomNumber(3) . '-' . $faker->randomNumber(2) . '-' . $faker->randomNumber(4),
+        'title' => $faker->randomElement(['CNA', 'LPN', 'RN']),
+        'hire_date' => $faker->date(),
+        'gender' => $faker->randomElement([null, null, 'M', 'F']),
     ]);
 });
 
 $factory->define(\App\Client::class, function(Faker $faker) {
-    if (!\App\Business::first()) {
-        factory(\App\Business::class, 3)->create();
-    }
     return array_merge(userFactory($faker), [
+        'ssn' => $faker->randomNumber(3) . '-' . $faker->randomNumber(2) . '-' . $faker->randomNumber(4),
         'business_id' => \App\Business::inRandomOrder()->value('id'),
-        'business_fee' => mt_rand(100,900) / 100,
+        'client_type' => $faker->randomElement(['private_pay', 'medicaid', 'LTCI']),
+        'onboard_status' => $faker->randomElement([null, 'needs_agreement', 'reconfirmed_checkbox']),
     ]);
 });
 
@@ -54,9 +56,9 @@ $factory->define(\App\OfficeUser::class, function(Faker $faker) {
 
 $factory->define(\App\Address::class, function(Faker $faker) {
     return [
-        'type' => $faker->randomElement(['billing', 'mailing']),
+        'type' => $faker->randomElement(['billing', 'evv', 'home']),
         'address1' => $faker->streetAddress,
-        'address2' => null,
+        'address2' => $faker->randomElement([null, 'Apt' . mt_rand(1,2000), 'Suite #' . mt_rand(100,200)]),
         'city' => $faker->city,
         'state' => $faker->randomElement(['CA', 'OH', 'NY', 'MI', 'PA', 'FL', 'TX', 'WA']),
         'country' => 'US',
@@ -66,7 +68,7 @@ $factory->define(\App\Address::class, function(Faker $faker) {
 
 $factory->define(\App\PhoneNumber::class, function(Faker $faker) {
     return [
-        'type' => $faker->randomElement(['home', 'mobile', 'work']),
+        'type' => $faker->randomElement(['primary', 'primary', 'billing']),
         'number' => $faker->phoneNumber
     ];
 });
@@ -76,6 +78,7 @@ $factory->define(\App\CreditCard::class, function(Faker $faker) {
         'nickname' => $faker->streetName,
         'name_on_card' => $faker->name,
         'number' => $faker->creditCardNumber,
+        'type' => $faker->randomElement(['visa', 'mastercard', 'amex']),
         'expiration_month' => mt_rand(1,12),
         'expiration_year' => mt_rand(date('Y'), date('Y') + 3),
     ];
@@ -83,11 +86,12 @@ $factory->define(\App\CreditCard::class, function(Faker $faker) {
 
 $factory->define(\App\BankAccount::class, function(Faker $faker) {
     return [
-        'nickname' => $faker->streetName,
-        'name_on_account' => $faker->streetName,
-        'routing_number' => $faker->bankAccountNumber,
+        'nickname' => $name = $faker->name,
+        'name_on_account' => $name,
+        'routing_number' => mt_rand(100000000,999999999),
         'account_number' => $faker->bankAccountNumber,
-        'account_type' => 'Checking',
+        'account_type' => 'checking',
+        'account_holder_type' => $faker->randomElement(['personal', 'business']),
         'verified' => $faker->randomElement([0,1,1])
     ];
 });

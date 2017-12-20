@@ -15,6 +15,8 @@ use Faker\Generator as Faker;
 
 $factory->define(\App\Payment::class, function(Faker $faker) {
     return [
+        'client_id' => ($client = App\Client::inRandomOrder()->first()) ? $client->id : null,
+        'business_id' => $client->business_id ?? null,
         'amount' => $faker->randomFloat(2, 0, 500),
         'transaction_id' => $faker->randomAscii,
         'transaction_code' => mt_rand(0,5),
@@ -23,6 +25,7 @@ $factory->define(\App\Payment::class, function(Faker $faker) {
 
 $factory->define(\App\Deposit::class, function(Faker $faker) {
     return [
+        
         'deposit_type' => $faker->randomElement(['caregiver', 'business']),
         'amount' => $faker->randomFloat(2, 0, 500),
         'transaction_id' => $faker->randomAscii,
