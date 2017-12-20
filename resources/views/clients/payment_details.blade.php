@@ -16,6 +16,6 @@
 @endsection
 
 @section('content')
-    <client-payment-details :payment="{{ $payment }}"
+    <client-payment-details :payment="{{ json_encode($payment) }}"
                             role-type="{{ auth()->user()->role_type }}"></client-payment-details>
 @endsection

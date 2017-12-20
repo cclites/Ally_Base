@@ -78,7 +78,7 @@
                     case 'client':
                         return '/payment-history/' + this.payment.id + '/print';
                     case 'office_user':
-                        return '/business/clients/statements/' + this.payment.id + '/print';
+                        return '/business/clients/payments/' + this.payment.id + '/print';
                 }
             }
 

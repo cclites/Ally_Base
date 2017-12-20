@@ -35,11 +35,21 @@ class PaymentHistoryController extends Controller
             ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 
-        $payment = json_encode([
+        $payment = (object) [
             'id' => $id,
-            'shifts' => $report->rows()->toArray()
-        ]);
-        return view('clients.payment_details', compact('payment'));
+            'shifts' => $report->rows()
+        ];
+
+        switch (auth()->user()->role_type) {
+            case 'office_user':
+                $print_url = '/business/clients/payments/' . $payment->id . '/print';
+                break;
+            case 'client':
+                $print_url = '/payment-history/' . $payment->id . '/print';
+                break;
+        }
+
+        return view('clients.payment_details', compact('payment', 'print_url'));
     }
 
     public function printDetails($id)
