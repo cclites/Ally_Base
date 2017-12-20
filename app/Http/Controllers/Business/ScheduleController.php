@@ -20,7 +20,7 @@ class ScheduleController extends BaseController
 
     public function events(Request $request)
     {
-        $schedules = $this->business()->schedules()->with('client', 'caregiver')->get();
+        $schedules = $this->business()->schedules()->with('client', 'caregiver.phoneNumbers')->get();
 
         // Filter by client or caregiver
         if ($request->has('caregiver_id') || $request->has('client_id')) {
@@ -80,8 +80,9 @@ class ScheduleController extends BaseController
 
     public function print(Request $request)
     {
-        $request->start = Carbon::now();
-        $request->end = Carbon::now()->addMonth();
+        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
+        $request->start = Carbon::parse($request->start_date);
+        $request->end = Carbon::parse($request->end_date);
         $events = collect($this->events($request)->events)->map(function ($event) {
             $event["date"] = $event['start']->format('m/d/y');
             return $event;

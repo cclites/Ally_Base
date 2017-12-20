@@ -345,4 +345,9 @@ class ReportsController extends BaseController
 
         return response()->json($cards);
     }
+
+    public function printableSchedule()
+    {
+        return view('business.reports.printable_schedule');
+    }
 }

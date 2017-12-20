@@ -1,5 +1,9 @@
 @extends('layouts.print')
 
+@section('title')
+    Printable Schedule
+@endsection
+
 @section('content')
     <div class="container">
         <div class="row">
@@ -18,7 +22,16 @@
                         @foreach($event_group as $event)
                             <tr>
                                 <td>{{ $event['client_name'] }}</td>
-                                <td>{{ $event['caregiver_name'] }}</td>
+                                <td>
+                                    {{ $event['caregiver_name'] }} -
+                                    @if($event['caregiver_phones'])
+                                        @if($event['caregiver_phones']->count() == 1)
+                                            {{ $event['caregiver_phones']->first()->number }}
+                                        @else
+                                            {{ optional($event['caregiver_phones']->where('type', 'primary')->first())->number }}
+                                        @endif
+                                    @endif
+                                </td>
                                 <td>{{ $event['start']->format('g:i a') }}</td>
                                 <td>{{ $event['end']->format('g:i a') }}</td>
                             </tr>

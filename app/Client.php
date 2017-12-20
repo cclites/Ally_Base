@@ -58,7 +58,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     public function evvPhone()
     {
         return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
-                    ->where('type', 'evv');
+                    ->where('type', 'primary');
     }
 
     public function business()
