@@ -62,6 +62,13 @@ interface Report
     public function sum($column);
 
     /**
+     * Return an array of the rows
+     *
+     * @return array
+     */
+    public function toArray();
+
+    /**
      * Return a CSV format of the report data
      *
      * @return string

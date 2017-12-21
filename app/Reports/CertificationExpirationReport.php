@@ -5,7 +5,7 @@ use App\CaregiverLicense;
 use App\Contracts\Report;
 use Carbon\Carbon;
 
-class CertificationExpirationReport implements Report
+class CertificationExpirationReport extends BaseReport
 {
     /**
      * @var bool
@@ -100,40 +100,19 @@ class CertificationExpirationReport implements Report
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
-        if (!$this->generated) {
-            $licenses = $this->query->get();
-            $this->rows = $licenses->map(function(CaregiverLicense $license) {
-                return [
-                    'id' => $license->id,
-                    'name' => $license->name,
-                    'expiration_date' => (new Carbon($license->expires_at))->format('Y-m-d'),
-                    'caregiver_id' => $license->caregiver->id,
-                    'caregiver_name' => $license->caregiver->nameLastFirst(),
-                ];
-            });
-        }
-        return $this->rows;
+        $licenses = $this->query->get();
+        $rows = $licenses->map(function(CaregiverLicense $license) {
+            return [
+                'id' => $license->id,
+                'name' => $license->name,
+                'expiration_date' => (new Carbon($license->expires_at))->format('Y-m-d'),
+                'caregiver_id' => $license->caregiver->id,
+                'caregiver_name' => $license->caregiver->nameLastFirst(),
+            ];
+        });
+        return $rows;
     }
 
-    /**
-     * Count the number of rows
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return $this->rows()->count();
-    }
-
-    /**
-     * Return the sum of a column
-     *
-     * @return float
-     */
-    public function sum($column)
-    {
-        return $this->rows()->sum($column);
-    }
 }
