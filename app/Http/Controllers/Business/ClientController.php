@@ -30,7 +30,16 @@ class ClientController extends BaseController
         $clients = $clients->sort(function(Client $clientA, Client $clientB) {
             $strcmp = strcmp($clientA->lastname, $clientB->lastname);
             return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
-        })->values();
+        })
+            ->map(function ($client) {
+                if ($client->addresses->count() == 1) {
+                    $client->county = $client->addresses->first()->county;
+                } elseif ($client->addresses()->count() > 1) {
+                    $client->county = optional($client->addresses->where('type', 'evv')->first())->county;
+                }
+                return $client;
+            })
+            ->values();
 
         if ($request->expectsJson()) {
             return $clients;
