@@ -54,6 +54,7 @@
         <li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>
         <li><a href="{{ route('business.reports.client_onboarded') }}">Client Online Setup</a></li>
         <li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>
+        <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule Report</a></li>
     </ul>
 </li>
 <li>

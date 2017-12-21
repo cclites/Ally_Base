@@ -7,6 +7,7 @@ use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ScheduleController extends BaseController
@@ -19,7 +20,7 @@ class ScheduleController extends BaseController
 
     public function events(Request $request)
     {
-        $schedules = $this->business()->schedules;
+        $schedules = $this->business()->schedules()->with('client', 'caregiver.phoneNumbers')->get();
 
         // Filter by client or caregiver
         if ($request->has('caregiver_id') || $request->has('client_id')) {
@@ -29,8 +30,7 @@ class ScheduleController extends BaseController
                 }
                 if ($caregiver_id = $request->input('caregiver_id')) {
                     if ($schedule->caregiver_id != $caregiver_id) return false;
-                }
-                else if ($request->input('caregiver_id') === "0") {
+                } elseif ($request->input('caregiver_id') === "0") {
                     // Unassigned shifts only
                     if ($schedule->caregiver_id) return false;
                 }
@@ -49,8 +49,8 @@ class ScheduleController extends BaseController
         $activeSchedules = $this->business()->shifts()->whereNull('checked_out_time')->pluck('schedule_id')->toArray();
         $aggregator->addActiveSchedules($activeSchedules);
 
-        $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
-        $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
+        $start = $request->start ?: date('Y-m-d', strtotime('First day of last month -2 months'));
+        $end = $request->end ?: date('Y-m-d', strtotime('First day of this month +13 months'));
 
         if (strlen($start) > 10) $start = substr($start, 0, 10);
         if (strlen($end) > 10) $end = substr($end, 0, 10);
@@ -76,6 +76,18 @@ class ScheduleController extends BaseController
         }
 
         return new ScheduleResponse($schedule);
+    }
+
+    public function print(Request $request)
+    {
+        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
+        $request->start = Carbon::parse($request->start_date);
+        $request->end = Carbon::parse($request->end_date);
+        $events = collect($this->events($request)->events)->map(function ($event) {
+            $event["date"] = $event['start']->format('m/d/y');
+            return $event;
+        });
+        return view('business.schedule_print', compact('events'));
     }
 
 }

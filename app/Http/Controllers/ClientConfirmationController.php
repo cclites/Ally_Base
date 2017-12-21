@@ -105,11 +105,10 @@ class ClientConfirmationController extends Controller
                 $phone = new PhoneNumber([
                     'national_number' => $phone_data['phone_number'],
                     'country_code' => '1',
-                    'type' => 'evv',
+                    'type' => 'primary',
                 ]);
                 $client->phoneNumbers()->save($phone);
-            }
-            else {
+            } else {
                 $client->evvPhone->update(['national_number' => $phone_data['phone_number']]);
             }
 
