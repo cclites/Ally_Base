@@ -46,15 +46,15 @@
 
         <b-row>
             <b-col lg="12">
-                <div class="text-right">
-                    <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                    <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                </div>
                 <b-card
                         header="Related Shifts"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
+                    <div class="text-right">
+                        <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                        <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                    </div>
                     <b-table bordered striped hover show-empty
                              :fields="shiftFields"
                              :items="shifts"
@@ -63,10 +63,10 @@
                              class="shift-table"
                     >
                         <template slot="client_name" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client.name }}</a>
+                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client_name }}</a>
                         </template>
                         <template slot="caregiver_name" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver.name }}</a>
+                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver_name }}</a>
                         </template>
                         <template slot="actions" scope="row">
                             <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
@@ -220,7 +220,7 @@
                         sortable: true
                     },
                     {
-                        key: 'total',
+                        key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value) },
                         sortable: true
                     }
@@ -243,28 +243,28 @@
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
-                            this.items.caregiverPayments = response.data;
+                            this.caregiverSummary = response.data;
                         }
                         else {
-                            this.items.caregiverPayments = [];
+                            this.caregiverSummary = [];
                         }
                     });
                 axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
-                            this.items.clientCharges = response.data;
+                            this.clientSummary = response.data;
                         }
                         else {
-                            this.items.clientCharges = [];
+                            this.clientSummary = [];
                         }
                     });
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
-                            this.items.shifts = response.data;
+                            this.shifts = response.data;
                         }
                         else {
-                            this.items.shifts = [];
+                            this.shifts = [];
                         }
                     });
             }

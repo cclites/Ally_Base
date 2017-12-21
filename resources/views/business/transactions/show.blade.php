@@ -9,8 +9,5 @@
 @endsection
 
 @section('content')
-    <business-transaction :transaction="{{ $transaction }}"
-                          :shifts="{{ $shifts }}"
-                          :caregiver-summary="{{ $caregiver_summary }}"
-                          :client-summary="{{ $client_summary }}"></business-transaction>
+    <business-transaction :transaction="{{ $transaction }}" />
 @endsection

@@ -297,12 +297,17 @@ class ReportsController extends BaseController
 
     public function caregiverPayments(Request $request)
     {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-
         $report = new CaregiverPaymentsReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id);
 
+        if ($request->has('start_date') || $request->has('end_date')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
+            $report->between($startDate, $endDate);
+        }
+        if ($request->has('transaction_id')) {
+            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
         if ($caregiver_id = $request->input('caregiver_id')) {
             $report->where('caregiver_id', $caregiver_id);
         }
@@ -316,12 +321,17 @@ class ReportsController extends BaseController
 
     public function clientCharges(Request $request)
     {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-
         $report = new ClientChargesReport();
-        $report->where('business_id', $this->business()->id)->between($startDate, $endDate);
+        $report->where('business_id', $this->business()->id);
 
+        if ($request->has('start_date') || $request->has('end_date')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
+            $report->between($startDate, $endDate);
+        }
+        if ($request->has('transaction_id')) {
+            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
         if ($caregiver_id = $request->input('caregiver_id')) {
             $report->where('caregiver_id', $caregiver_id);
         }

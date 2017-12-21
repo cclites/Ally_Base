@@ -2,6 +2,7 @@
 namespace App\Reports;
 
 use App\Client;
+use App\GatewayTransaction;
 use App\Shift;
 
 /**
@@ -12,6 +13,19 @@ use App\Shift;
  */
 class ClientChargesReport extends ScheduledPaymentsReport
 {
+
+    public function forTransaction(GatewayTransaction $transaction) {
+        if ($transaction->payment) {
+            $this->query()->whereHas('payment', function($q) use ($transaction) {
+                $q->where('payments.id', $transaction->payment->id);
+            });
+        }
+        elseif ($transaction->deposit) {
+            $this->query()->whereHas('deposits', function($q) use ($transaction) {
+                $q->where('deposits.id', $transaction->deposit->id);
+            });
+        }
+    }
 
     /**
      * Return the collection of rows matching report criteria
