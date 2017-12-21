@@ -1,3 +1,13 @@
+/* Printing support: Hide menus */
+@media print {
+  header.topbar,
+  aside.left-sidebar,
+  #impersonator-bar
+  {
+    visibility: hidden;
+  }
+}
+
 /* Logo */
 .light-logo, .dark-logo {
   max-height: 50px;
@@ -8,7 +18,7 @@
 }
 
 /* Smaller device adjustments */
-@media (max-width:768px) {
+@media (max-width: 768px) {
   .container-fluid {
     padding: 0 15px;
   }
@@ -39,9 +49,11 @@
 .with-padding-bottom {
   padding-bottom: 15px;
 }
+
 .with-padding-top {
   padding-top: 15px;
 }
+
 .with-padding-bottom-top {
   padding-top: 15px;
   padding-bottom: 15px;

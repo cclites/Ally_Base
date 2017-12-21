@@ -100,60 +100,58 @@ class ScheduledVsActualReport extends BaseReport
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
-        if (!$this->generated) {
-            $shifts = $this->query->get();
-            // Filter out events that were clocked in to (comparing against $shifts)
-            $events = array_filter($this->events, function($event) use (&$shifts) {
-                 $matchingShiftsBySchedule = $shifts->where('schedule_id', $event['schedule_id']);
-                 foreach ($matchingShiftsBySchedule as $shift) {
+        $shifts = $this->query->get();
+        // Filter out events that were clocked in to (comparing against $shifts)
+        $events = array_filter($this->events, function($event) use (&$shifts) {
+             $matchingShiftsBySchedule = $shifts->where('schedule_id', $event['schedule_id']);
+             foreach ($matchingShiftsBySchedule as $shift) {
+                 /** @var Shift $shift */
+                 $eventTime = Carbon::instance($event['start']);
+                 $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
+                 // clocked in to within 10 hours of start time, filter from array
+                 if ($eventTime->diffInMinutes($shiftTime) <= 600) return false;
+             }
+
+             if ($event['caregiver_id']) {
+                 $matchingShiftsByClient = $shifts->where('client_id', $event['client_id']);
+                 $matchingShiftsByClientCaregiver = $matchingShiftsByClient->where('caregiver_id', $event['caregiver_id']);
+                 foreach ($matchingShiftsByClientCaregiver as $shift) {
                      /** @var Shift $shift */
                      $eventTime = Carbon::instance($event['start']);
                      $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
-                     // clocked in to within 10 hours of start time, filter from array
-                     if ($eventTime->diffInMinutes($shiftTime) <= 600) return false;
+                     // clocked in to within 3 hours of start time, filter from array
+                     if ($eventTime->diffInMinutes($shiftTime) <= 180) return false;
                  }
+             }
 
-                 if ($event['caregiver_id']) {
-                     $matchingShiftsByClient = $shifts->where('client_id', $event['client_id']);
-                     $matchingShiftsByClientCaregiver = $matchingShiftsByClient->where('caregiver_id', $event['caregiver_id']);
-                     foreach ($matchingShiftsByClientCaregiver as $shift) {
-                         /** @var Shift $shift */
-                         $eventTime = Carbon::instance($event['start']);
-                         $shiftTime = (new Carbon($shift->checked_in_time, 'UTC'))->setTimezone($this->business->timezone);
-                         // clocked in to within 3 hours of start time, filter from array
-                         if ($eventTime->diffInMinutes($shiftTime) <= 180) return false;
-                     }
-                 }
+             return true;
+        });
+        // Map the report fields
+        $events = array_map(function($event) {
+            $schedule = Schedule::with(['client', 'caregiver'])->find($event['schedule_id']);
+            $hours = round($schedule->duration / 60, 2);
+            $caregiverRate = $schedule->getCaregiverRate();
+            $providerFee = $schedule->getProviderFee();
+            $allyFee = AllyFeeCalculator::getHourlyRate($schedule->client, null, $caregiverRate, $providerFee);
+            $hourlyTotal = $caregiverRate + $providerFee + $allyFee;
+            return array_merge($event, [
+                'start' => Carbon::instance($event['start'])->toIso8601String(),
+                'end' => Carbon::instance($event['end'])->toIso8601String(),
+                'client' => $schedule->client,
+                'caregiver' => $schedule->caregiver,
+                'hours' => $hours,
+                'caregiver_rate' => number_format($caregiverRate, 2),
+                'provider_fee' => number_format($providerFee, 2),
+                'ally_fee' => number_format($allyFee, 2),
+                'hourly_total' => number_format($hourlyTotal, 2),
+                'shift_total' => number_format($hourlyTotal * $hours, 2),
+                'hours_type' => $schedule->hours_type,
+            ]);
+        }, $events);
 
-                 return true;
-            });
-            // Map the report fields
-            $events = array_map(function($event) {
-                $schedule = Schedule::with(['client', 'caregiver'])->find($event['schedule_id']);
-                $hours = round($schedule->duration / 60, 2);
-                $caregiverRate = $schedule->getCaregiverRate();
-                $providerFee = $schedule->getProviderFee();
-                $allyFee = AllyFeeCalculator::getHourlyRate($schedule->client, null, $caregiverRate, $providerFee);
-                $hourlyTotal = $caregiverRate + $providerFee + $allyFee;
-                return array_merge($event, [
-                    'start' => Carbon::instance($event['start'])->toIso8601String(),
-                    'end' => Carbon::instance($event['end'])->toIso8601String(),
-                    'client' => $schedule->client,
-                    'caregiver' => $schedule->caregiver,
-                    'hours' => $hours,
-                    'caregiver_rate' => number_format($caregiverRate, 2),
-                    'provider_fee' => number_format($providerFee, 2),
-                    'ally_fee' => number_format($allyFee, 2),
-                    'hourly_total' => number_format($hourlyTotal, 2),
-                    'shift_total' => number_format($hourlyTotal * $hours, 2),
-                    'hours_type' => $schedule->hours_type,
-                ]);
-            }, $events);
-            $this->rows = collect(array_values($events));
-        }
-        return $this->rows;
+        return collect(array_values($events));
     }
 
 }

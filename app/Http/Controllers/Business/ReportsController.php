@@ -144,12 +144,15 @@ class ReportsController extends BaseController
     {
         if ($request->expectsJson() && $request->input('json')) {
             $report = new ProviderReconciliationReport($this->business());
-            return $report->rows();
+            return $report->orderBy('created_at', 'DESC')
+                          ->rows();
         }
 
         if ($request->input('export')) {
             $report = new ProviderReconciliationReport($this->business());
-            $report->download();
+            return $report->orderBy('created_at', 'DESC')
+                          ->setDateFormat('m/d/Y H:i A', $this->business()->timezone)
+                          ->download();
         }
 
         return view('business.reports.reconciliation');
@@ -229,7 +232,8 @@ class ReportsController extends BaseController
     public function shifts(Request $request)
     {
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id);
+        $report->where('business_id', $this->business()->id)
+               ->orderBy('checked_in_time');
 
         if ($request->has('start_date') || $request->has('end_date')) {
             $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
@@ -244,6 +248,10 @@ class ReportsController extends BaseController
         }
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
+        }
+
+        if ($request->input('export')) {
+            return $report->download();
         }
 
         return $report->rows();

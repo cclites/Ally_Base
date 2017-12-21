@@ -23,6 +23,10 @@
 
         <b-row>
             <b-col lg="12">
+                <div class="text-right">
+                    <b-btn :href="'/business/reports/data/shifts?transaction_id=' + transaction.id + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                    <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                </div>
                 <b-card
                         header="Related Shifts"
                         header-text-variant="white"
@@ -36,7 +40,7 @@
                              class="shift-table"
                     >
                         <template slot="checked_in_time" scope="data">
-                            {{ formatDate(data.value) }} {{ formatTime(data.value) }}
+                            {{ formatDateTimeFromUTC(data.value) }}
                         </template>
                         <template slot="client_name" scope="row">
                             <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client_name }}</a>
@@ -81,7 +85,7 @@
                         sortable: true,
                     },
                     {
-                        key: 'duration',
+                        key: 'hours',
                         label: 'Hours',
                         sortable: true,
                     },
@@ -160,12 +164,7 @@
                 axios.get('/business/reports/data/shifts?transaction_id=' + this.transaction.id)
                     .then(response => {
                         if (Array.isArray(response.data)) {
-                            this.shifts = response.data.map(function(item) {
-                                item.checked_in_time = moment.utc(item.checked_in_time).local();
-                                item.client_name = item.client.nameLastFirst;
-                                item.caregiver_name = item.caregiver.nameLastFirst;
-                                return item;
-                            })
+                            this.shifts = response.data;
                         }
                         else {
                             this.shifts = [];
@@ -175,3 +174,19 @@
         },
     }
 </script>
+
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .shift-table, .shift-table * {
+            visibility: visible;
+        }
+        .shift-table {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+</style>
