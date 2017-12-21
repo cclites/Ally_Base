@@ -39,7 +39,7 @@ class ProviderReconciliationReport extends BaseReport
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
         return $this->query()->get();
     }

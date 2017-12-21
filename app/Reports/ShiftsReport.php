@@ -45,27 +45,38 @@ class ShiftsReport extends BaseReport
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
-        if (!$this->generated) {
-            $shifts = $this->query->with(['caregiver', 'client'])->get();
-            $this->rows = $shifts->map(function(Shift $shift) {
-                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-                $row = array_merge($shift->toArray(), [
-                    'ally_fee' => number_format($allyFee, 2),
-                    'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
-                    'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
-                    'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
-                    'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
-                    'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
-                    'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
-                    'payment_method' => 'TBD',
-                    'duration' => $shift->duration()
-                ]);
-                return $row;
-            });
-        }
-        return $this->rows;
+        $shifts = $this->query->with(['caregiver', 'client'])->get();
+        $rows = $shifts->map(function(Shift $shift) {
+            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+            $row = [
+                'id' => $shift->id,
+                'checked_in_time' => $shift->checked_in_time->format('c'),
+                'checked_out_time' => $shift->checked_out_time->format('c'),
+                'hours' => $shift->duration(),
+                'client_id' => $shift->client_id,
+                'client_name' => optional($shift->client)->nameLastFirst(),
+                'caregiver_id' => $shift->caregiver_id,
+                'caregiver_name' => optional($shift->caregiver)->nameLastFirst(),
+                'caregiver_rate' => $shift->caregiver_rate,
+                'provider_fee' => $shift->provider_fee,
+                'ally_fee' => number_format($allyFee, 2),
+                'other_expenses' => number_format($shift->other_expenses, 2),
+                'mileage' => number_format($shift->mileage, 2),
+                'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
+                'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
+                'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
+                'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
+                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
+                'hours_type' => $shift->hours_type,
+                'confirmed' => $shift->statusManager()->isConfirmed(),
+                'EVV' => $shift->verified,
+            ];
+            return $row;
+        });
+        return $rows;
     }
 
     public function forTransaction(GatewayTransaction $transaction) {
