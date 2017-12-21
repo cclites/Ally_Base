@@ -5,9 +5,7 @@
                 {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
             </template>
             <template slot="actions" scope="data">
-                <a :href="'/business/clients/' + data.item.id + '/statements'" class="btn btn-secondary">
-                    View Details
-                </a>
+                <b-btn :href="'/business/clients/payments/'+data.item.id">View Details</b-btn>
             </template>
         </b-table>
     </b-card>

@@ -139,8 +139,8 @@ Route::group([
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
     Route::post('clients/{client}/detach-caregiver', 'Business\ClientCaregiverController@detachCaregiver')->name('clients.detach-caregiver');
-    Route::get('clients/{id}/statements', 'Clients\PaymentHistoryController@show');
-    Route::get('clients/statements/{id}/print', 'Clients\PaymentHistoryController@printDetails');
+    Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
+    Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
