@@ -91,7 +91,7 @@
                                 name="caregiver_id"
                                 v-model="form.caregiver_id"
                                 >
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.nameLastFirst }}</option>
+                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
