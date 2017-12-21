@@ -21,7 +21,6 @@
                         No notes for this shift.
                     @endif
                 </div>
-                <signature-pad w="300px" h="300px"></signature-pad>
             </div>
         </div>
         <div class="col-lg-6">
@@ -32,8 +31,6 @@
                 <div class="card-body">
                     <h4 class="card-title">Schedule Notes</h4>
                     {!! nl2br(htmlentities($notes)) !!}
-
-                    <signature-pad w="300px" h="300px"></signature-pad>
                 </div>
             </div>
             
