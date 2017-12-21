@@ -359,6 +359,7 @@
                 </b-row>
             </b-container>
             <div slot="modal-footer">
+                <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
@@ -648,6 +649,10 @@
                             return shift;
                         });
                     });
+            },
+
+            printSelected() {
+                $("#detailsModal .container-fluid").print();
             },
 
             parseFloat(float) {
