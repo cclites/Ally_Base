@@ -17,4 +17,15 @@ class Signature extends Model
         return $this->morphTo();
     }
     
+    public static function onModelInstance(Model $model, $content)
+    {
+        if ($content) {
+            return Signature::create([
+                'signable_id' => $model->getKey(),
+                'signable_type' => $model->getMorphClass(),
+                'content' => $content,
+            ]);
+        }
+        return null;
+    }
 }
