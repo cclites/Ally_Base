@@ -228,8 +228,7 @@
                 <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
                     <b-col>
                         <strong>Client Signature</strong>
-                        <br />
-                        <span class="signature">{{ selectedItem.client_name }}</span>
+                        <div v-html="selectedItem.signature.content" class="signature"></div>
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-bottom">
@@ -746,6 +745,10 @@
         font-weight: bold;
         font-size: 13px;
         background-color: #ecf7f9;
+    }   
+    .signature > svg {
+        width: 100%;
+        height: auto;
     }
 
     @media print {

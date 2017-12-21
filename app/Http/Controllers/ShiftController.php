@@ -46,6 +46,7 @@ class ShiftController extends Controller
         $carePlanActivityIds = [];
         $notes =  '';
         if ($shift && $shift->schedule) {
+            $shift->load('client');
             $notes = $shift->schedule->notes;
             if ($shift->schedule->carePlan) {
                 $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
