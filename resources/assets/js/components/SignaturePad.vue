@@ -1,6 +1,28 @@
 <template>
-    <div :style="{width:w,height:h}">
-        <canvas :id="uid" class="canvas" :data-uid="uid"></canvas>
+    <div>
+        <button @click="draw()" type="button" 
+                class="btn" :class="signature.length ? 'btn-info' : 'btn-outline-info'">
+            <span v-if="signature.length">
+                <i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;Signed
+            </span>
+            <span v-else>Add a Signature</span>
+        </button>
+        
+        <input type="hidden" name="signature" v-model="signature" />
+        <img :src="preview" class="img-responsive" v-if="preview" />
+        
+        <div class="signature-pad" v-show="signing">
+            <canvas :id="uid" class="canvas" :data-uid="uid"></canvas>
+            <div class="dotted-line"></div>
+            <div class="actions">
+                <button @click="clear()" type="button" class="btn btn-secondary">
+                    Clear Signature
+                </button>
+                <button @click="save()" type="button" class="btn btn-success">
+                    Done Signing
+                </button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -8,7 +30,7 @@
     import SignaturePad from 'signature_pad'
     export default {
         name:"signaturePad",
-        props:{
+        props: {
             sigOption: {
                 type:Object,
                 default:()=>{penColor : 'rgb(0, 0, 0)'},
@@ -22,53 +44,94 @@
                 default:"100%"
             }
         },
-        data(){
+        data() {
             return {
-                sig:()=>{},
-                uid:""
+                sig: ()=>{},
+                uid: "",
+                signing: false,
+                canvas: null,
+                preview: "",
+                signature: "",
             }
         },
-        created(){
-            var _this = this;
-            console.log(_this)
-            this.uid = "canvas" + _this._uid
+        created() {
+            this.uid = "canvas" + this._uid
         },
-        methods:{
-            draw(){
-                var _this = this;
-                var canvas = document.getElementById(_this.uid)
-                _this.sig = new SignaturePad(canvas,_this.sigOption);
-                function resizeCanvas() {
-                    var ratio =  Math.max(window.devicePixelRatio || 1, 1);
-                    canvas.width = canvas.offsetWidth * ratio;
-                    canvas.height = canvas.offsetHeight * ratio;
-                    canvas.getContext("2d").scale(ratio, ratio);
+        methods: {
+            checkOrientation() {
+                if (window.innerHeight > window.innerWidth) {
+                    alert("You are now in portrait");
+                } else {
+                    alert("You are now in landscape");
                 }
-                window.addEventListener("resize", resizeCanvas);
-                resizeCanvas();
             },
-            clear(){
-                var _this = this;
-                _this.sig.clear();
+            draw() {
+                this.signing = true;
+                this.$nextTick(() => {
+                    this.canvas = document.getElementById(this.uid);
+                    this.sig = new SignaturePad(this.canvas, this.sigOption);                
+                    window.addEventListener("resize", this.resizeCanvas);
+                    this.resizeCanvas();
+                });
             },
-            save(format){
-                var _this = this;
-                return format ? _this.sig.toDataURL(format) :  _this.sig.toDataURL()
-                // signaturePad.toDataURL(); // save image as PNG
-                // signaturePad.toDataURL("image/jpeg"); // save image as JPEG
-                // signaturePad.toDataURL("image/svg+xml"); // save image as SVG
+            resizeCanvas() {
+                var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+                this.canvas.width = this.canvas.offsetWidth * ratio;
+                this.canvas.height = this.canvas.offsetHeight * ratio;
+                this.canvas.getContext("2d").scale(ratio, ratio);
+                this.clear();
+            },
+            clear() {                
+                this.sig.clear();
+            },
+            save(format = "image/svg+xml") {
+                var dataUrl = format ? this.sig.toDataURL(format) :  this.sig.toDataURL()                
+                var blob = atob(dataUrl.split(',')[1])
+                //console.log(blob);
+                this.signature = blob;
+                this.signing = false;                                               
+                this.preview = this.sig.toDataURL()
+                this.$emit('input', this.signature)
+                /*
+                    signaturePad.toDataURL(); // save image as PNG
+                    signaturePad.toDataURL("image/jpeg"); // save image as JPEG
+                    signaturePad.toDataURL("image/svg+xml"); // save image as SVG
+                */
             }
-        },
-        mounted(){
-            var _this = this;
-            _this.draw()
         }
     }
 </script>
 
 <style>
+    .signature-pad {        
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        background: #eeeeee;
+        z-index: 999;
+        text-align: center;
+    }
+    .dotted-line {
+        border-bottom: 2px dashed #dddddd;
+        max-width: 650px;
+        position: relative;
+        margin: auto;
+        margin-top: -80px;
+        margin-bottom: 80px;
+    }
     canvas {
         width: 100%;
-        height: 100%;
+        height: 80%;
+        max-width: 800px;
+        max-height: 300px;
+        background: white;
+        margin: auto;
+        z-index: 9999;
+    }
+    .actions {
+        position: relative;
+        bottom: 0px;
     }
 </style>
