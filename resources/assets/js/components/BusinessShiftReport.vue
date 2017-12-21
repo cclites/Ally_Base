@@ -140,9 +140,13 @@
                         title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
                     <b-row>
-                        <b-col sm="12">
+                        <b-col sm="6">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                        </b-col>
+                        <b-col sm="6" class="text-right">
+                            <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                            <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
                     <div class="table-responsive">
@@ -415,6 +419,7 @@
                     'Confirmed',
                 ],
                 filteredFields: [],
+                urlPrefix: '/business/reports/data/',
             }
         },
 
@@ -447,10 +452,10 @@
                         'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
-                        'Hours': item.duration,
-                        'Client': item.client.nameLastFirst,
-                        'Caregiver': item.caregiver.nameLastFirst,
-                        'EVV': item.verified,
+                        'Hours': item.hours,
+                        'Client': item.client_name,
+                        'Caregiver': item.caregiver_name,
+                        'EVV': item.EVV,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
@@ -463,8 +468,8 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
-                        'Confirmed': (item.status !== 'UNCONFIRMED'),
-                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning'
+                        'Confirmed': item.confirmed,
+                        '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
                 items.push({
@@ -519,6 +524,9 @@
             },
             summaryButtonText() {
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
+            },
+            queryString() {
+                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
             }
         },
 
@@ -547,11 +555,7 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
-                // Global query information
-                let prefix = '/business/reports/data/';
-                let queryString = '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
-
-                axios.get(prefix + 'caregiver_payments' + queryString)
+                axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -560,7 +564,7 @@
                             this.items.caregiverPayments = [];
                         }
                     });
-                axios.get(prefix + 'client_charges' + queryString)
+                axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -569,7 +573,7 @@
                             this.items.clientCharges = [];
                         }
                     });
-                axios.get(prefix + 'shifts' + queryString)
+                axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.shifts = response.data;
@@ -737,5 +741,19 @@
         font-weight: bold;
         font-size: 13px;
         background-color: #ecf7f9;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .shift-table, .shift-table * {
+            visibility: visible;
+        }
+        .shift-table {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
     }
 </style>

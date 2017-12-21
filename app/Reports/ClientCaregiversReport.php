@@ -27,7 +27,7 @@ class ClientCaregiversReport extends BaseReport
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
         $clients = $this->query()->get();
         $rows = [];

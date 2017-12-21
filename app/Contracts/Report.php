@@ -60,4 +60,32 @@ interface Report
      * @return float
      */
     public function sum($column);
+
+    /**
+     * Return an array of the rows
+     *
+     * @return array
+     */
+    public function toArray();
+
+    /**
+     * Return a CSV format of the report data
+     *
+     * @return string
+     */
+    public function toCsv();
+
+    /**
+     * Start a download of a spreadsheet export of the report
+     *
+     * @return void
+     */
+    public function download();
+
+    /**
+     * Return the name of the downloaded file
+     *
+     * @return string
+     */
+    public function getDownloadName();
 }
