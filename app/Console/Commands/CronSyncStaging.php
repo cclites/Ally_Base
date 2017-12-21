@@ -71,7 +71,8 @@ class CronSyncStaging extends Command
         }
 
         $this->output->writeln('Syncing production database to staging database');
-        passthru(sprintf('mysql -e "DROP DATABASE %s; CREATE DATABASE %s"', escapeshellarg($stagingDb), escapeshellarg($stagingDb)));
+        passthru(sprintf('echo DROP DATABASE %s | mysql', escapeshellarg($stagingDb)));
+        passthru(sprintf('echo CREATE DATABASE %s | mysql', escapeshellarg($stagingDb)));
         passthru(sprintf('mysqldump %s | mysql %s', escapeshellarg($productionDb), escapeshellarg($stagingDb)), $exit);
         if ($exit) {
             $this->output->error('Error syncing production database to staging database.');
