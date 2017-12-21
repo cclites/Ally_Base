@@ -50,25 +50,36 @@ class CronSyncStaging extends Command
 
         $stagingDb = env('DB_DATABASE');
         $productionDb = 'ally';
-        $backupPath = '/root/backups/ally_staging_pre_sync.sql.gz';
+        $backupPathStag = '/root/backups/ally_staging_pre_sync.sql.gz';
+        $backupPathProd = '/root/backups/ally_production_pre_sync.sql.gz';
 
 
         if ($stagingDb == 'ally') exit(); // extra check
 
-        $this->output->writeln('Backing up staging database to ' . $backupPath);
-        passthru(sprintf('mysqldump %s | gzip > %s', escapeshellarg($stagingDb), escapeshellarg($backupPath)), $exit);
+        $this->output->writeln('Backing up staging database to ' . $backupPathStag);
+        passthru(sprintf('mysqldump %s | gzip > %s', escapeshellarg($stagingDb), escapeshellarg($backupPathStag)), $exit);
+        if ($exit) {
+            $this->output->error('Error backing up staging database.');
+            exit();
+        }
+
+        $this->output->writeln('Backing up production database to ' . $backupPathProd);
+        passthru(sprintf('mysqldump %s | gzip > %s', escapeshellarg($productionDb), escapeshellarg($backupPathProd)), $exit);
         if ($exit) {
             $this->output->error('Error backing up staging database.');
             exit();
         }
 
         $this->output->writeln('Syncing production database to staging database');
-        passthru(sprintf('mysqldump %s | mysql %s', escapeshellarg($productionDb), escapeshellarg($stagingDb)), $exit);
+        passthru(sprintf('mysqldump --add-drop-database --opt %s | mysql %s', escapeshellarg($productionDb), escapeshellarg($stagingDb)), $exit);
         if ($exit) {
             $this->output->error('Error syncing production database to staging database.');
         }
 
         // Update admin password
         User::find(138)->changePassword('StagingAdmin!@');
+
+        // Re-run migrations
+        \Artisan::call('migrate');
     }
 }
