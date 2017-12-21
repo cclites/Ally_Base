@@ -108,6 +108,11 @@ class Shift extends Model
     {
         return $this->hasOne(ShiftCostHistory::class, 'id');
     }
+    
+    public function signature()
+    {
+        return $this->morphOne(Signature::class, 'signable');
+    }
 
     public function statusHistory()
     {
