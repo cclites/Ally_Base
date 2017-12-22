@@ -21,9 +21,6 @@
             <template slot="activities" scope="data">
                 <div v-for="activity in activities(data.item.activities)" :key="activity">{{ activity }}</div>
             </template>
-            <template slot="caregiver_name" scope="data">
-                {{ data.item.caregiver.name }}
-            </template>
         </b-table>
     </b-card>
 </template>
@@ -50,7 +47,7 @@
                         label: 'Care Time'
                     },
                     {
-                        key: 'duration',
+                        key: 'hours',
                         label: 'Hours of Care Received'
                     },
                     {
