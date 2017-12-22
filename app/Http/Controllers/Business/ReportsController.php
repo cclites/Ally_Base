@@ -152,7 +152,7 @@ class ReportsController extends BaseController
         if ($request->input('export')) {
             $report = new ProviderReconciliationReport($this->business());
             return $report->orderBy('created_at', 'DESC')
-                          ->setDateFormat('m/d/Y H:i A', $this->business()->timezone)
+                          ->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
                           ->download();
         }
 
@@ -278,7 +278,8 @@ class ReportsController extends BaseController
         $this->addShiftReportFilters($report, $request);
 
         if ($request->input('export')) {
-            return $report->download();
+            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+                          ->download();
         }
 
         return $report->rows();
