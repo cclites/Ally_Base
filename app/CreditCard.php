@@ -25,6 +25,11 @@ class CreditCard extends Model implements ChargeableInterface
         return $this->belongsTo(User::class);
     }
 
+    public function transactions()
+    {
+        return $this->morphMany(GatewayTransaction::class, 'method');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

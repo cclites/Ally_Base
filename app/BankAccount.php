@@ -27,6 +27,16 @@ class BankAccount extends Model implements ChargeableInterface
         return $this->belongsTo(User::class);
     }
 
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function transactions()
+    {
+        return $this->morphMany(GatewayTransaction::class, 'method');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

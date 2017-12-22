@@ -24,11 +24,6 @@ class Deposit extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function method()
-    {
-        return $this->morphTo();
-    }
-
     public function transaction()
     {
         return $this->belongsTo(GatewayTransaction::class, 'transaction_id');

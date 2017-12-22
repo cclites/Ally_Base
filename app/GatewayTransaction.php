@@ -34,6 +34,11 @@ class GatewayTransaction extends Model
             ->orderBy('created_at', 'DESC');
     }
 
+    public function method()
+    {
+        return $this->morphTo();
+    }
+
     ////////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

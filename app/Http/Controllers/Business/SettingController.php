@@ -44,6 +44,7 @@ class SettingController extends BaseController
             case 'deposit':
                 $account = $business->bankAccount;
                 $account_data = $this->validateBankAccount($request, $account);
+                $account_data['business_id'] = $business->id;
                 if ($account) {
                     $account->update($account_data);
                 } else {
@@ -54,6 +55,7 @@ class SettingController extends BaseController
             case 'payment':
                 $account = $business->paymentAccount;
                 $account_data = $this->validateBankAccount($request, $account);
+                $account_data['business_id'] = $business->id;
                 if ($account) {
                     $account->update($account_data);
                 } else {

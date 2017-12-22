@@ -119,6 +119,7 @@ class Business extends Model
         }
 
         $account->user_id = null;
+        $account->business_id = $this->id;
         if (!$account->save()) {
             throw new \Exception('Could not save the bank account to the database.');
         }
