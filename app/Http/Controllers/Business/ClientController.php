@@ -143,6 +143,7 @@ class ClientController extends BaseController
         ]);
         $schedules = $client->schedules()->get();
 
+        $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
