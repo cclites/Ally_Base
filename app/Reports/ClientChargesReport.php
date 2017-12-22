@@ -3,6 +3,7 @@ namespace App\Reports;
 
 use App\Client;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 /**
  * Class ClientChargesReport
@@ -12,6 +13,7 @@ use App\Shift;
  */
 class ClientChargesReport extends ScheduledPaymentsReport
 {
+    use ShiftReportFilters;
 
     /**
      * Return the collection of rows matching report criteria
