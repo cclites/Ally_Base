@@ -94,21 +94,14 @@
 
         data() {
             return {
-                form: new Form({
-                    address1: this.address.address1,
-                    address2: this.address.address2,
-                    city: this.address.city,
-                    state: this.address.state,
-                    zip: this.address.zip,
-                    country: (this.address.country) ? this.address.country : 'US',
-                    county: this.address.county
-                }),
+                form: {},
                 countries: new Countries()
             }
         },
 
         mounted() {
-
+            this.setForm();
+            this.$watch('address', () => {this.setForm()});
         },
 
         methods: {
@@ -119,6 +112,18 @@
                     .then(() => {
                         window.scroll(0, 0);
                     });
+            },
+
+            setForm() {
+                this.form = new Form({
+                    address1: this.address.address1,
+                    address2: this.address.address2,
+                    city: this.address.city,
+                    state: this.address.state,
+                    zip: this.address.zip,
+                    country: (this.address.country) ? this.address.country : 'US',
+                    county: this.address.county
+                });
             }
         }
     }
