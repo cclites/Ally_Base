@@ -108,7 +108,7 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col sm="5" xs="6">
+                            <b-col sm="4" xs="5">
                                 <b-form-input
                                         id="city"
                                         name="city"
@@ -120,6 +120,16 @@
                             </b-col>
                             <b-col sm="3" xs="2">
                                 <b-form-input
+                                        id="county"
+                                        name="county"
+                                        type="text"
+                                        v-model="form.county"
+                                >
+                                </b-form-input>
+                                <input-help :form="form" field="state" text="Confirm your county."></input-help>
+                            </b-col>
+                            <b-col sm="2" xs="1">
+                                <b-form-input
                                         id="state"
                                         name="state"
                                         type="text"
@@ -128,7 +138,7 @@
                                 </b-form-input>
                                 <input-help :form="form" field="state" text="Confirm your state."></input-help>
                             </b-col>
-                            <b-col sm="4" xs="4">
+                            <b-col sm="3" xs="3">
                                 <b-form-input
                                         id="zip"
                                         name="zip"
@@ -187,6 +197,7 @@
                     address1: this.address.address1,
                     address2: this.address.address2,
                     city: this.address.city,
+                    county: this.address.county,
                     state: this.address.state,
                     zip: this.address.zip,
                     country: 'US', // This form assumes US addresses ONLY!

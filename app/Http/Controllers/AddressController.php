@@ -24,6 +24,7 @@ class AddressController
             'city' => 'required',
             'state' => 'required',
             'country' => 'required|size:2',
+            'county' => 'nullable',
             'zip' => 'required|min:5'
         ]);
 
@@ -36,8 +37,7 @@ class AddressController
                     return new SuccessResponse($reference . ' has been saved.');
                 }
             }
-        }
-        else {
+        } else {
             $address = new Address($data);
             $address->type = $type;
             if ($user->addresses()->save($address)) {
