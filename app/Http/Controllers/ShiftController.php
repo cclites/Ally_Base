@@ -13,6 +13,7 @@ use App\Shifts\ClockIn;
 use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
+use App\Signature;
 use Illuminate\Http\Request;
 
 
@@ -45,6 +46,7 @@ class ShiftController extends Controller
         $carePlanActivityIds = [];
         $notes =  '';
         if ($shift && $shift->schedule) {
+            $shift->load('client');
             $notes = $shift->schedule->notes;
             if ($shift->schedule->carePlan) {
                 $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
@@ -177,6 +179,7 @@ class ShiftController extends Controller
                     ]);
                     $shift->issues()->save($issue);
                 }
+                Signature::onModelInstance($shift, request('signature'));
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');

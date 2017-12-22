@@ -30,7 +30,7 @@
                                 <option v-for="item in events" :value="item.id">{{ getTitle(item) }}</option>
 
                             </b-form-select>
-                            <input-help :form="form" field="" text="Only shifts scheduled within 1 hour of the current time will show."></input-help>
+                            <input-help :form="form" field="" text="Only shifts scheduled within 12 Hours of the current time will show."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>

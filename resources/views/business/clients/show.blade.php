@@ -49,7 +49,10 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
     </ul>
 
@@ -68,6 +71,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
             </div>
         </li>
     </ul>
@@ -82,31 +86,22 @@
             </div>
         </div>
         <div class="tab-pane" id="addresses" role="tabpanel">
-            <div class="row">
-                <div class="col-md-6 col-sm-12">
-                    <user-address title="Service Address" type="evv" action="{{ route('business.clients.address', [$client->id, 'evv']) }}" :address="{{ $client->addresses->where('type', 'evv')->first() ?? '{}' }}"></user-address>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <user-address title="Billing Address" type="billing" action="{{ route('business.clients.address', [$client->id, 'billing']) }}" :address="{{ $client->addresses->where('type', 'billing')->first() ?? '{}' }}"></user-address>
-                </div>
-            </div>
-        </div>
-        <div class="tab-pane" id="phones" role="tabpanel">
-            <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
+            <business-client-addresses-tab :addresses="{{ $client->addresses }}" client-id="{{ $client->id }}"></business-client-addresses-tab>
             {{--<div class="row">--}}
-                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
-                    {{--<phone-number title="Service Number" type="evv" action="{{ route('business.clients.phone', [$client->id, 'evv']) }}" :phone="{{ json_phone($client->user, 'evv') }}"></phone-number>--}}
+                {{--<div class="col-md-6 col-sm-12">--}}
+                    {{--<user-address title="Service Address" type="evv" action="{{ route('business.clients.address', [$client->id, 'evv']) }}" :address="{{ $client->addresses->where('type', 'evv')->first() ?? '{}' }}"></user-address>--}}
                 {{--</div>--}}
-                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
-                    {{--<phone-number title="Billing Number" type="billing" action="{{ route('business.clients.phone', [$client->id, 'billing']) }}" :phone="{{ json_phone($client->user, 'billing') }}"></phone-number>--}}
-                {{--</div>--}}
-                {{--<div class="col-12 col-lg-6 col-xlg-4">--}}
-                    {{--<phone-number title="Home Number" type="home" action="{{ route('business.clients.phone', [$client->id, 'home']) }}" :phone="{{ json_phone($client->user, 'home') }}"></phone-number>--}}
+                {{--<div class="col-md-6 col-sm-12">--}}
+                    {{--<user-address title="Billing Address" type="billing" action="{{ route('business.clients.address', [$client->id, 'billing']) }}" :address="{{ $client->addresses->where('type', 'billing')->first() ?? '{}' }}"></user-address>--}}
                 {{--</div>--}}
             {{--</div>--}}
         </div>
+        <div class="tab-pane" id="phones" role="tabpanel">
+            <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
+        </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
             <business-client-caregivers :client_id="{{ $client->id }}"
+                                        :ally-fee="{{ floatval($client->allyFee) }}"
                                         payment-type-message="{{ $defaultPaymentTypeMessage }}"
             ></business-client-caregivers>
         </div>
@@ -118,10 +113,22 @@
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Primary Payment Method" source="primary" :method="{{ $client->defaultPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $defaultPaymentTypeMessage }}" :business="true" />
+                    <payment-method title="Primary Payment Method"
+                                    source="primary"
+                                    :method="{{ $client->defaultPayment OR '{}' }}"
+                                    :client="{{ $client }}"
+                                    payment-type-message="{{ $defaultPaymentTypeMessage }}"
+                                    :business="true">
+                    </payment-method>
                 </div>
                 <div class="col-lg-6 col-sm-12">
-                    <payment-method title="Backup Payment Method" source="backup" :method="{{ $client->backupPayment OR '{}' }}" :client="{{ $client }}" payment-type-message="{{ $backupPaymentTypeMessage }}" :business="true" />
+                    <payment-method title="Backup Payment Method"
+                                    source="backup"
+                                    :method="{{ $client->backupPayment OR '{}' }}"
+                                    :client="{{ $client }}"
+                                    payment-type-message="{{ $backupPaymentTypeMessage }}"
+                                    :business="true">
+                    </payment-method>
                 </div>
             </div>
         </div>
@@ -141,7 +148,11 @@
             ></document-list>
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
-            <client-payments-tab :payments="{{ $client->payments }}"></client-payments-tab>
+            <client-statements-tab :payments="{{ $client->payments }}"></client-statements-tab>
+        </div>
+        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
+            <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
+                                    :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
     </div>
 @endsection

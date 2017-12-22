@@ -24,8 +24,12 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         'bank_account_id',
         'title',
         'hire_date',
-        'gender'
+        'gender',
+        'onboarded',
+        'misc',
     ];
+
+    public $dates = ['onboarded', 'hire_date', 'deleted_at'];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -164,11 +168,17 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
     /**
      * Check if the caregiver is currently clocked in to a shift
      *
+     * @param null $client_id
      * @return bool
      */
-    public function isClockedIn()
+    public function isClockedIn($client_id = null)
     {
-        return $this->shifts()->whereNull('checked_out_time')->exists();
+        return $this->shifts()
+            ->whereNull('checked_out_time')
+            ->when($client_id, function ($query) use ($client_id) {
+                return $query->where('client_id', $client_id);
+            })
+            ->exists();
     }
 
     /**
@@ -205,5 +215,25 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         $confirmation = new Confirmation($this);
         $confirmation->touchTimestamp();
         \Mail::to($this->email)->send(new CaregiverConfirmation($this, $this->businesses()->first()));
+    }
+
+    /**
+     * Override name to suffix title
+     *
+     * @return string
+     */
+    public function name()
+    {
+        return trim($this->user->name() . ' ' . $this->title);
+    }
+
+    /**
+     * Override nameFirstLast to suffix title
+     *
+     * @return string
+     */
+    public function nameLastFirst()
+    {
+        return trim($this->user->nameLastFirst() . ' ' . $this->title);
     }
 }

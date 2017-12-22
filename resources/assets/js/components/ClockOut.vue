@@ -113,6 +113,16 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <b-row v-if="shift.client.client_type == 'LTCI' ">
+                <b-col lg="12">
+                    <b-form-group>
+                        <signature-pad 
+                            v-model="form.signature">
+                        </signature-pad>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+                
             <b-row>
                 <b-col lg="12">
                     <b-button id="manual-clock-out" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock Out</b-button>
@@ -143,7 +153,8 @@
                     activities: [],
                     caregiver_injury: 0,
                     issue_text: null,
-                    other_expenses_desc: null
+                    other_expenses_desc: null,
+                    signature: null
                 }),
                 showManual: false
             }

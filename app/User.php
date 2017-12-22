@@ -86,6 +86,11 @@ class User extends Authenticatable
         return $this->hasMany(Document::class);
     }
 
+    public function emergencyContacts()
+    {
+        return $this->hasMany(EmergencyContact::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

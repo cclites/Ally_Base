@@ -30,7 +30,16 @@ class ClientController extends BaseController
         $clients = $clients->sort(function(Client $clientA, Client $clientB) {
             $strcmp = strcmp($clientA->lastname, $clientB->lastname);
             return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
-        })->values();
+        })
+            ->map(function ($client) {
+                if ($client->addresses->count() == 1) {
+                    $client->county = $client->addresses->first()->county;
+                } elseif ($client->addresses()->count() > 1) {
+                    $client->county = optional($client->addresses->where('type', 'evv')->first())->county;
+                }
+                return $client;
+            })
+            ->values();
 
         if ($request->expectsJson()) {
             return $clients;
@@ -41,7 +50,11 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()->clients()
+        return $this->business()
+            ->clients()
+            ->whereHas('user', function ($query) {
+                $query->where('active', true);
+            })
             ->with(['user'])->get()->map(function($client) {
                 return [
                     'id' => $client->id,
@@ -107,7 +120,7 @@ class ClientController extends BaseController
      * Display the specified resource.
      *
      * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|\Illuminate\Http\Response
      */
     public function show(Client $client)
     {
@@ -130,6 +143,7 @@ class ClientController extends BaseController
         ]);
         $schedules = $client->schedules()->get();
 
+        $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();

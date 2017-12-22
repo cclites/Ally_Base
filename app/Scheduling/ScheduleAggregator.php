@@ -53,8 +53,7 @@ class ScheduleAggregator
             $schedule    = $event['schedule'];
             if ($this->onlyStartTime) {
                 $occurrences = $schedule->getOccurrencesStartingBetween($start_date, $end_date, $limitPerEvent);
-            }
-            else {
+            } else {
                 $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $limitPerEvent);
             }
             $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
@@ -75,6 +74,9 @@ class ScheduleAggregator
                     'checked_in'  => $checked_in,
                     'client_id'   => $schedule->client_id,
                     'caregiver_id'=> $schedule->caregiver_id,
+                    'client_name' => $schedule->client->name,
+                    'caregiver_name' => $schedule->caregiver->name,
+                    'caregiver_phones' => $schedule->caregiver->phoneNumbers
                 ];
             }, $occurrences));
         }

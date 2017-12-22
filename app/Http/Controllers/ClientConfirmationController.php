@@ -41,12 +41,18 @@ class ClientConfirmationController extends Controller
 
         // Allow custom terms per business (terms-inc-$id.html)
         $businessId = $client->business_id;
-        $termsUrl = url('terms-inc.html');
+        $termsFile = 'terms-inc.html';
+        $termsUrl = url($termsFile);
+        $terms = str_after(file_get_contents($termsFile), '<body>');
+        $terms = str_before($terms, '</body>');
         if (file_exists(public_path('terms-inc-' . $businessId . '.html'))) {
+            $termsFile = 'terms-inc-' . $businessId . '.html';
             $termsUrl = url('terms-inc-' . $businessId . '.html');
+            $terms = str_after(file_get_contents($termsFile), '<body>');
+            $terms = str_before($terms, '</body>');
         }
 
-        return view('confirmation.client', compact('token', 'client', 'phoneNumber', 'termsUrl'));
+        return view('confirmation.client', compact('token', 'client', 'phoneNumber', 'termsUrl', 'terms'));
     }
 
     public function store(Request $request, $token)
@@ -99,11 +105,10 @@ class ClientConfirmationController extends Controller
                 $phone = new PhoneNumber([
                     'national_number' => $phone_data['phone_number'],
                     'country_code' => '1',
-                    'type' => 'evv',
+                    'type' => 'primary',
                 ]);
                 $client->phoneNumbers()->save($phone);
-            }
-            else {
+            } else {
                 $client->evvPhone->update(['national_number' => $phone_data['phone_number']]);
             }
 

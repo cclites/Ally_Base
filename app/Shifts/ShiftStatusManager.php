@@ -66,6 +66,11 @@ class ShiftStatusManager
     /// Static Methods
     ///////////////////////////////////////////
 
+    public static function getAllStatuses()
+    {
+        return self::$statuses;
+    }
+
     public static function getReadOnlyStatuses()
     {
         return [

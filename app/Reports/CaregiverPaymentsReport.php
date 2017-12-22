@@ -2,7 +2,9 @@
 namespace App\Reports;
 
 use App\Caregiver;
+use App\GatewayTransaction;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 /**
  * Class CaregiverPaymentsReport
@@ -12,45 +14,53 @@ use App\Shift;
  */
 class CaregiverPaymentsReport extends ScheduledPaymentsReport
 {
+    use ShiftReportFilters;
+
+    public function forTransaction(GatewayTransaction $transaction) {
+        if ($transaction->payment) {
+            $this->query()->whereHas('payment', function($q) use ($transaction) {
+                $q->where('payments.id', $transaction->payment->id);
+            });
+        }
+        elseif ($transaction->deposit) {
+            $this->query()->whereHas('deposits', function($q) use ($transaction) {
+                $q->where('deposits.id', $transaction->deposit->id);
+            });
+        }
+    }
 
     /**
      * Return the collection of rows matching report criteria
      *
      * @return \Illuminate\Support\Collection
      */
-    public function rows()
+    protected function results()
     {
-        if (!$this->generated) {
-            $shifts = $this->query
-                ->where('status', '!=', Shift::UNCONFIRMED)
-                ->get();
-            $this->rows = [];
+        $shifts = $this->query
+            ->where('status', '!=', Shift::UNCONFIRMED)
+            ->get();
+        $rows = [];
 
-            foreach ($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
-                $caregiver = Caregiver::find($caregiver_id);
-                $row = [
-                    'id'            => $caregiver_id,
-                    'name'          => $caregiver->name(),
-                    'nameLastFirst' => $caregiver->nameLastFirst(),
-                    'hours'         => 0,
-                    'amount'        => 0,
-                ];
-                foreach ($caregiver_shifts as $shift) {
-                    /** @var \App\Shift $shift */
-                    $row['hours'] += $shift->duration();
-                    $row['amount'] += $shift->costs()->getCaregiverCost();
-                }
-                $this->rows[] = array_map(function ($value) {
-                    return is_float($value) ? number_format($value, 2) : $value;
-                }, $row);
+        foreach ($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
+            $caregiver = Caregiver::find($caregiver_id);
+            $row = [
+                'id'            => $caregiver_id,
+                'name'          => $caregiver->name(),
+                'nameLastFirst' => $caregiver->nameLastFirst(),
+                'hours'         => 0,
+                'amount'        => 0,
+            ];
+            foreach ($caregiver_shifts as $shift) {
+                /** @var \App\Shift $shift */
+                $row['hours'] += $shift->duration();
+                $row['amount'] += $shift->costs()->getCaregiverCost();
             }
-
-            // Sort by name
-            usort($this->rows, function ($a, $b) {
-                return strcmp($a['nameLastFirst'], $b['nameLastFirst']);
-            });
+            $rows[] = array_map(function ($value) {
+                return is_float($value) ? number_format($value, 2) : $value;
+            }, $row);
         }
-        return collect($this->rows);
+
+        return collect($rows)->sortBy('nameLastFirst')->values();
     }
 
 }

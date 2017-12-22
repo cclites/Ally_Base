@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Business;
 
 use App\GatewayTransaction;
 use App\Responses\ErrorResponse;
-use Illuminate\Http\Request;
 
 class TransactionController extends BaseController
 {

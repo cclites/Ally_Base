@@ -16,7 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * Class ScheduleTest
- * Every test runs on multiple "businesses" to verify different environments / time zones
+ * Every test runs on multiple businesses to verify different environments / time zones
  *
  *
  * @package Tests\Unit
@@ -33,7 +33,11 @@ class ScheduleTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->businesses = factory(Business::class, 8)->create(); // Create 8 businesses to test timezone differences
+        $this->businesses = collect([
+            factory(Business::class)->create(['timezone' => 'UTC']),
+            factory(Business::class)->create(['timezone' => 'America/New_York']),
+            factory(Business::class)->create(['timezone' => 'America/Los_Angeles']),
+        ]);
         $this->caregiver = factory(Caregiver::class)->create();
         $this->client = factory(Client::class)->create();
         $this->scheduleAttributes = [

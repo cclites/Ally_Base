@@ -7,7 +7,7 @@ use Illuminate\Http\JsonResponse;
 
 class ScheduleEvents implements Responsable
 {
-    protected $events;
+    public $events;
     protected $routeName;
     protected $routeParams;
     protected $additionalOptions = [

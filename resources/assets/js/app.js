@@ -33,8 +33,10 @@ Vue.use(BootstrapVue);
 // App Components
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
-
 Vue.component('activity-list', require('./components/ActivityList.vue'));
+Vue.component('emergency-contacts-tab', require('./components/users/EmergencyContactsTab'));
+Vue.component('loading-card', require('./components/LoadingCard.vue'));
+Vue.component('signature-pad', require('./components/SignaturePad'));
 
 
 // Client
@@ -68,6 +70,7 @@ Vue.component('business-office-user-modal', require('./components/admin/Business
 // Office User
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
+Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
@@ -83,12 +86,15 @@ Vue.component('business-reconciliation-report', require('./components/BusinessRe
 Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
-Vue.component('business-scheduled-payments', require('./components/BusinessScheduledPayments.vue'));
+Vue.component('business-scheduled-payments', require('./components/business/reports/ScheduledPaymentsReport.vue'));
 Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
 Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
 Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
+Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
+Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
+Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
@@ -120,7 +126,8 @@ Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-list', require('./components/ClientList.vue'));
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
-Vue.component('client-payments-tab', require('./components/business/clients/ClientPaymentsTab'));
+Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
+Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 
 Vue.component('create-schedule-modal', require('./components/CreateScheduleModal.vue'));

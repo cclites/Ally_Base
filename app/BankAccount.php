@@ -86,15 +86,13 @@ class BankAccount extends Model implements ChargeableInterface
 
         if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
             $gateway->setBillingAddress($address);
-        }
-        elseif ($this->user && $address = $this->user->addresses->where('type', 'evv')->first()) {
+        } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
             $gateway->setBillingAddress($address);
         }
 
         if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
             $gateway->setBillingPhone($phone);
-        }
-        elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'evv')->first()) {
+        } elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'primary')->first()) {
             $gateway->setBillingPhone($phone);
         }
 

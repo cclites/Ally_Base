@@ -257,6 +257,7 @@
             return {
                 editModel: this.model,
                 editType: null,
+                client_id: null
             }
         },
 
@@ -355,7 +356,7 @@
 
         computed: {
             clientType() {
-                let client = _.find(this.clients, { id: this.client_id });
+                let client = _.find(this.$parent.clients, { id: this.client_id });
                 let type =  (client) ? client.client_type : '';
 
                 return _.startCase(type);

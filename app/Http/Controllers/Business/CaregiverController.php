@@ -132,7 +132,8 @@ class CaregiverController extends BaseController
      *
      * @param  \Illuminate\Http\Request $request
      * @param  \App\Caregiver $caregiver
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(Request $request, Caregiver $caregiver)
     {
@@ -147,6 +148,7 @@ class CaregiverController extends BaseController
             'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
+            'misc' => 'nullable|string'
         ]);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
@@ -263,6 +265,16 @@ class CaregiverController extends BaseController
             return new SuccessResponse('The caregiver\'s password has been updated.');
         }
         return new ErrorResponse(500, 'Unable to update caregiver password.');
+    }
+
+    public function misc(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+        $data = $request->validate(['misc' => 'required|string']);
+        $caregiver->update($data);
+        return new SuccessResponse('Caregiver updated');
     }
 
 }

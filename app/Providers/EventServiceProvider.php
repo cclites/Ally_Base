@@ -36,6 +36,9 @@ class EventServiceProvider extends ServiceProvider
             ShiftStatusUpdate::class,
             CheckForClockOut::class,
         ],
+        ShiftCreated::class => [
+            ShiftStatusUpdate::class,
+        ],
         FailedTransaction::class => [
             PostToSlackOnFailedTransaction::class,
         ]

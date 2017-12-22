@@ -26,6 +26,12 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
+                        <b-form-select v-model="payment_method">
+                            <option value="">All Payment Methods</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="bank_account">Bank Account</option>
+                            <option value="business">Provider Payment</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -33,7 +39,9 @@
             </b-col>
         </b-row>
 
-        <b-row v-show="showSummary">
+        <loading-card v-show="loading < 2"></loading-card>
+
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
@@ -109,7 +117,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row v-show="showSummary">
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -131,7 +139,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="loading >= 2">
             <b-col lg="12">
                 <b-card
                         header="Shifts"
@@ -140,9 +148,13 @@
                         title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
                     <b-row>
-                        <b-col sm="12">
+                        <b-col sm="6">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                        </b-col>
+                        <b-col sm="6" class="text-right">
+                            <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                            <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
                     <div class="table-responsive">
@@ -224,8 +236,7 @@
                 <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
                     <b-col>
                         <strong>Client Signature</strong>
-                        <br />
-                        <span class="signature">{{ selectedItem.client_name }}</span>
+                        <div v-html="selectedItem.signature.content" class="signature"></div>
                     </b-col>
                 </b-row>
                 <b-row class="with-padding-bottom">
@@ -355,6 +366,7 @@
                 </b-row>
             </b-container>
             <div slot="modal-footer">
+                <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
@@ -383,6 +395,7 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 caregiver_id: "",
                 client_id: "",
+                payment_method: "",
                 clients: [],
                 caregivers: [],
                 showSummary: false,
@@ -415,6 +428,8 @@
                     'Confirmed',
                 ],
                 filteredFields: [],
+                urlPrefix: '/business/reports/data/',
+                loading: 0,
             }
         },
 
@@ -447,10 +462,10 @@
                         'caregiver_id': item.caregiver_id,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
-                        'Hours': item.duration,
-                        'Client': item.client.nameLastFirst,
-                        'Caregiver': item.caregiver.nameLastFirst,
-                        'EVV': item.verified,
+                        'Hours': item.hours,
+                        'Client': item.client_name,
+                        'Caregiver': item.caregiver_name,
+                        'EVV': item.EVV,
                         'CG Rate': item.caregiver_rate,
                         'Reg Rate': item.provider_fee,
                         'Ally Fee': item.ally_fee,
@@ -463,8 +478,8 @@
                         'Other Expenses': item.other_expenses,
                         'Shift Total': item.shift_total,
                         'Type': item.hours_type,
-                        'Confirmed': (item.status !== 'UNCONFIRMED'),
-                        '_rowVariant': (item.status !== 'UNCONFIRMED') ? null : 'warning'
+                        'Confirmed': item.confirmed,
+                        '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
                 items.push({
@@ -519,6 +534,9 @@
             },
             summaryButtonText() {
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
+            },
+            queryString() {
+                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method;
             }
         },
 
@@ -539,6 +557,8 @@
                     if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
+                    let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
+                    if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
@@ -547,11 +567,9 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
-                // Global query information
-                let prefix = '/business/reports/data/';
-                let queryString = '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
+                this.loading = 0;
 
-                axios.get(prefix + 'caregiver_payments' + queryString)
+                axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.caregiverPayments = response.data;
@@ -559,8 +577,9 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
+                        this.loading++;
                     });
-                axios.get(prefix + 'client_charges' + queryString)
+                axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.clientCharges = response.data;
@@ -568,8 +587,9 @@
                         else {
                             this.items.clientCharges = [];
                         }
+                        this.loading++;
                     });
-                axios.get(prefix + 'shifts' + queryString)
+                axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.items.shifts = response.data;
@@ -577,6 +597,7 @@
                         else {
                             this.items.shifts = [];
                         }
+                        this.loading++;
                     });
             },
 
@@ -646,6 +667,10 @@
                     });
             },
 
+            printSelected() {
+                $("#detailsModal .container-fluid").print();
+            },
+
             parseFloat(float) {
                 if (typeof(float) === 'string') {
                     float = float.replace(',', '');
@@ -706,6 +731,11 @@
             },
             client_id(val) {
                 this.setLocalStorage('filterClientId', val);
+                if (val) this.payment_method = ""; // Set payment method filter back to all if client is selected
+            },
+            payment_method(val) {
+                this.setLocalStorage('filterPaymentMethod', val);
+                if (val) this.client_id = ""; // Set client filter back to all if payment method is selected
             },
             start_date(val) {
                 this.setLocalStorage('startDate', val);
@@ -737,5 +767,23 @@
         font-weight: bold;
         font-size: 13px;
         background-color: #ecf7f9;
+    }   
+    .signature > svg {
+        width: 100%;
+        height: auto;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .shift-table, .shift-table * {
+            visibility: visible;
+        }
+        .shift-table {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
     }
 </style>
