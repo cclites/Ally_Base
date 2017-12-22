@@ -48,7 +48,7 @@
                             <div v-for="activity in activities(item.activities)" :key="activity">{{ activity }}</div>
                         </td>
                         <td>
-                            {{ item.caregiver.name }}
+                            {{ item.caregiver_name }}
                         </td>
                         <td>
                             {{ moneyFormat(item.hourly_total) }}
@@ -60,7 +60,7 @@
                             {{ item.mileage }}
                         </td>
                         <td>
-                            {{ item.duration }}
+                            {{ item.hours }}
                         </td>
                         <td>
                             {{ moneyFormat(item.shift_total) }}
