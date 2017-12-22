@@ -33,6 +33,7 @@
                     {!! nl2br(htmlentities($notes)) !!}
                 </div>
             </div>
+            
 
             @if(env('GMAPS_API_KEY'))
                 <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ env('GMAPS_API_KEY') }}"></iframe>
