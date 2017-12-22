@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Business;
 use App\Shift;
+use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
 
 class ShiftImporter
@@ -71,6 +72,10 @@ class ShiftImporter
         if (!in_array($data['hours_type'], ['default', 'overtime', 'holiday'])) {
             throw new \Exception('Invalid hours type on row ' . $row);
         }
+
+        if (!in_array($data['status'], ShiftStatusManager::getAllStatuses())) {
+            throw new \Exception('Invalid status on row ' . $row);
+        }
     }
 
     public function getDataFromRow(int $row)
@@ -82,8 +87,9 @@ class ShiftImporter
             'caregiver_rate' => floatval($this->sheet->getValue('caregiver_rate', $row)),
             'provider_fee'   => floatval($this->sheet->getValue('provider_fee', $row)),
             'hours_type'     => $this->sheet->getValue('hours_type', $row) ?? 'default',
-            'mileage'          => floatval($this->sheet->getValue('mileage', $row)),
-            'other_expenses'   => floatval($this->sheet->getValue('mileage', $row)),
+            'mileage'        => floatval($this->sheet->getValue('mileage', $row)),
+            'other_expenses' => floatval($this->sheet->getValue('other_expenses', $row)),
+            'status'         => $this->sheet->getValue('status', $row) ?? Shift::WAITING_FOR_AUTHORIZATION,
         ];
 
         // Calculate timing
