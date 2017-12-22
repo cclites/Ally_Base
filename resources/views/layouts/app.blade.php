@@ -44,7 +44,11 @@
     <!-- ============================================================== -->
     <!-- Topbar header - style you can find in pages.scss -->
     <!-- ============================================================== -->
-    <header class="topbar">
+    <header  
+        @if (env('APP_ENV') == 'staging') 
+            style="background:#ce4747;" 
+        @endif
+        class="topbar">
         <nav class="navbar top-navbar navbar-expand-md navbar-light">
 
             @include('layouts.partials.logo')
