@@ -26,6 +26,12 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
+                        <b-form-select v-model="payment_method">
+                            <option value="">All Payment Methods</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="bank_account">Bank Account</option>
+                            <option value="business">Provider Payment</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -33,7 +39,9 @@
             </b-col>
         </b-row>
 
-        <b-row v-show="showSummary">
+        <loading-card v-show="loading < 2"></loading-card>
+
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
@@ -109,7 +117,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row v-show="showSummary">
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -131,7 +139,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="loading >= 2">
             <b-col lg="12">
                 <b-card
                         header="Shifts"
@@ -388,6 +396,7 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 caregiver_id: "",
                 client_id: "",
+                payment_method: "",
                 clients: [],
                 caregivers: [],
                 showSummary: false,
@@ -421,6 +430,7 @@
                 ],
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
+                loading: 0,
             }
         },
 
@@ -527,7 +537,7 @@
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
             queryString() {
-                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
+                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method;
             }
         },
 
@@ -548,6 +558,8 @@
                     if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
+                    let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
+                    if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
@@ -555,6 +567,8 @@
                     let showSummary = this.getLocalStorage('showSummary');
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
+
+                this.loading = 0;
 
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
@@ -564,6 +578,7 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
+                        this.loading++;
                     });
                 axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
@@ -573,6 +588,7 @@
                         else {
                             this.items.clientCharges = [];
                         }
+                        this.loading++;
                     });
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
@@ -582,6 +598,7 @@
                         else {
                             this.items.shifts = [];
                         }
+                        this.loading++;
                     });
             },
 
@@ -715,6 +732,11 @@
             },
             client_id(val) {
                 this.setLocalStorage('filterClientId', val);
+                if (val) this.payment_method = ""; // Set payment method filter back to all if client is selected
+            },
+            payment_method(val) {
+                this.setLocalStorage('filterPaymentMethod', val);
+                if (val) this.client_id = ""; // Set client filter back to all if payment method is selected
             },
             start_date(val) {
                 this.setLocalStorage('startDate', val);

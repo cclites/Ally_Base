@@ -4,9 +4,12 @@ namespace App\Reports;
 use App\GatewayTransaction;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 class ShiftsReport extends BaseReport
 {
+    use ShiftReportFilters;
+
     /**
      * @var bool
      */
@@ -78,18 +81,4 @@ class ShiftsReport extends BaseReport
         });
         return $rows;
     }
-
-    public function forTransaction(GatewayTransaction $transaction) {
-        if ($transaction->payment) {
-            $this->query()->whereHas('payment', function($q) use ($transaction) {
-                $q->where('payments.id', $transaction->payment->id);
-            });
-        }
-        elseif ($transaction->deposit) {
-            $this->query()->whereHas('deposits', function($q) use ($transaction) {
-                $q->where('deposits.id', $transaction->deposit->id);
-            });
-        }
-    }
-
 }

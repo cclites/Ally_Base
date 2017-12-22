@@ -4,6 +4,7 @@ namespace App\Reports;
 use App\Caregiver;
 use App\GatewayTransaction;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 /**
  * Class CaregiverPaymentsReport
@@ -13,6 +14,7 @@ use App\Shift;
  */
 class CaregiverPaymentsReport extends ScheduledPaymentsReport
 {
+    use ShiftReportFilters;
 
     public function forTransaction(GatewayTransaction $transaction) {
         if ($transaction->payment) {
