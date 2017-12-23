@@ -146,23 +146,27 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
      * Set the caregiver's primary deposit account
      *
      * @param \App\BankAccount $account
-     * @return bool
+     * @return \App\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
-     * @throws \Exception
      */
     public function setBankAccount(BankAccount $account)
     {
         if ($account->id && $account->user_id != $this->id) {
             throw new ExistingBankAccountException('Bank account is owned by another user.');
         }
+        $account->user_id = $this->id;
 
-        if (!$account->id) {
-            if (!$this->bankAccounts()->save($account)) {
-                throw new \Exception('Unable to save bank account to database.');
+        $existing = $this->bankAccount;
+        if ($existing && $existing->canBeMergedWith($account)) {
+            if ($existing->mergeWith($account)) {
+                return $existing;
             }
+            return false;
         }
 
-        return $this->update(['bank_account_id' => $account->id]);
+        if ($account->persistChargeable() && $this->bankAccount()->associate($account)->save()) {
+            return $account;
+        }
     }
 
     /**

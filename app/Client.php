@@ -4,6 +4,7 @@ namespace App;
 
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
+use App\Contracts\ChargeableInterface;
 use App\Contracts\UserRole;
 use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
@@ -202,10 +203,29 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     public function getPaymentMethod($backup = false)
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
-        if ($method instanceof Business) {
-            return $method->paymentAccount;
-        }
         return $method;
+    }
+
+    /**
+     * @param \App\Contracts\ChargeableInterface $method
+     * @param bool $backup
+     * @return ChargeableInterface|false
+     */
+    public function setPaymentMethod(ChargeableInterface $method, $backup = false)
+    {
+        $method->user_id = $this->id;
+        $relation = ($backup) ? 'backupPayment' : 'defaultPayment';
+        $existing = $this->getPaymentMethod($backup);
+        if ($existing && $existing->canBeMergedWith($method)) {
+            if ($existing->mergeWith($method)) {
+                return $existing;
+            }
+            return false;
+        }
+
+        if ($method->persistChargeable() && $this->$relation()->associate($method)->save()) {
+            return $method;
+        }
     }
 
     /**
@@ -213,16 +233,15 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
      * @return mixed|null|string
      */
     public function getPaymentType($method = null) {
+        if ($method instanceof Business) {
+            return 'ACH-P';
+        }
         switch($this->client_type) {
             case 'private_pay':
             case 'LTCI':
             case 'medicaid':
             case 'VA':
                 if (!$method) $method = $this->getPaymentMethod();
-                if ($method instanceof BankAccount) {
-                    if (!$method->user_id) return 'ACH-P';
-                    return 'ACH';
-                }
                 if ($method instanceof CreditCard) {
                     if ($method->type == 'amex') return 'AMEX';
                     return 'CC';

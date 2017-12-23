@@ -2,11 +2,12 @@
 
 namespace App;
 
+use App\Contracts\ChargeableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
 use Illuminate\Database\Eloquent\Model;
 
-class Business extends Model
+class Business extends Model implements ChargeableInterface
 {
     protected $table = 'businesses';
     protected $guarded = ['id'];
@@ -105,36 +106,6 @@ class Business extends Model
     ///////////////////////////////////////////
 
     /**
-     * Set the Business' primary deposit account
-     *
-     * @param \App\BankAccount $account
-     * @return bool
-     * @throws \App\Exceptions\ExistingBankAccountException
-     * @throws \Exception
-     */
-    public function setBankAccount(BankAccount $account)
-    {
-        if ($account->id) {
-            throw new ExistingBankAccountException('setBankAccount only accepts new bank accounts.');
-        }
-
-        $account->user_id = null;
-        $account->business_id = $this->id;
-        if (!$account->save()) {
-            throw new \Exception('Could not save the bank account to the database.');
-        }
-
-        $existingAccount = $this->bankAccount;
-        $update = $this->update(['bank_account_id' => $account->id]);
-        $this->load('bankAccount'); // reload bankAccount related model
-        if ($update && $existingAccount) {
-            $existingAccount->delete();
-        }
-
-        return $update;
-    }
-
-    /**
      * Find an activity by the activity code
      *
      * @param $code
@@ -170,5 +141,83 @@ class Business extends Model
         }
 
         return $aggregator->onlyStartTime($onlyStartTime)->events($start, $end);
+    }
+
+    /**
+     * @param string $relation  Ex: paymentAccount
+     * @return \App\BankAccount|null
+     */
+    public function getBankAccount($relation)
+    {
+        return $this->$relation;
+    }
+
+    /**
+     * @param string $relation Ex: paymentAccount
+     * @param \App\BankAccount $account
+     * @return \App\BankAccount|bool
+     * @throws \App\Exceptions\ExistingBankAccountException
+     */
+    public function setBankAccount($relation, BankAccount $account)
+    {
+        if ($account->id && $account->business_id != $this->id) {
+            throw new ExistingBankAccountException('Bank account is owned by another user.');
+        }
+        $account->business_id = $this->id;
+
+        $existing = $this->getBankAccount($relation);
+        if ($existing && $existing->canBeMergedWith($account)) {
+            if ($existing->mergeWith($account)) {
+                return $existing;
+            }
+            return false;
+        }
+
+        if ($account->persistChargeable() && $this->$relation()->associate($account)->save()) {
+            return $account;
+        }
+    }
+
+    /**
+     * @param float $amount
+     * @param string $currency
+     * @return \App\GatewayTransaction|false
+     */
+    public function charge($amount, $currency = 'USD')
+    {
+        if ($this->paymentAccount) {
+            return $this->paymentAccount->charge($amount, $currency);
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the existing record can be updated
+     * This is used for the preservation of payment method on transaction history records
+     *
+     * @return bool
+     */
+    public function canBeMergedWith(ChargeableInterface $newPaymentMethod)
+    {
+        return false;
+    }
+
+    /**
+     * Merge the existing record with the new values
+     *
+     * @return bool
+     */
+    public function mergeWith(ChargeableInterface $newPaymentMethod)
+    {
+        return false;
+    }
+
+    /**
+     * Save a new Chargeable instance to the database
+     */
+    public function persistChargeable()
+    {
+        // Businesses should already be persisted
+        return ($this->id > 0);
     }
 }
