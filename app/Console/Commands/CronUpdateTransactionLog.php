@@ -77,7 +77,7 @@ class CronUpdateTransactionLog extends Command
             $status = (string) $result->condition;
             $transaction = GatewayTransaction::where('transaction_id', $transactionId)->first();
             if (!$transaction) {
-                $transaction = $this->createTransaction($result);
+                $transaction = $this->createTransaction($transactionId);
             }
 
             $changes = 0;
@@ -109,11 +109,11 @@ class CronUpdateTransactionLog extends Command
         }
     }
 
-    protected function createTransaction($result)
+    protected function createTransaction($transactionId)
     {
-        $result = $this->query->find($result->transaction_id)->transaction;
+        $result = $this->query->find($transactionId)->transaction;
         $action = $result->action[0];
-        $this->output->writeln("Creating transaction record for ID " . $result->transaction_id);
+        $this->output->writeln("Creating transaction record for ID " . $transactionId);
         return GatewayTransaction::create([
             'gateway_id' => 'ecs',
             'transaction_id' => (string) $result->transaction_id,
