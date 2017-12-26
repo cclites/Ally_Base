@@ -283,6 +283,34 @@ class ShiftStatusManager
     }
 
     /**
+     * Acknowledge an authorization
+     * @return bool
+     */
+    public function ackAuthorization()
+    {
+        if (in_array($this->status(), [Shift::WAITING_FOR_APPROVAL, Shift::WAITING_FOR_AUTHORIZATION])) {
+            return $this->update(Shift::WAITING_FOR_CHARGE);
+        }
+        return false;
+    }
+
+    /**
+     * Unauthorize a shift (revert authorization)
+     * @return bool
+     */
+    public function unauthorize()
+    {
+        if ($this->status() === Shift::WAITING_FOR_CHARGE) {
+            return ($this->shift->verified)
+                ? $this->update(Shift::WAITING_FOR_AUTHORIZATION)
+                : $this->update(Shift::WAITING_FOR_APPROVAL);
+        }
+        return false;
+    }
+
+
+
+    /**
      * Acknowledge a successful payment
      * @return bool
      */
