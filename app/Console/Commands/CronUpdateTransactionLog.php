@@ -64,8 +64,8 @@ class CronUpdateTransactionLog extends Command
      */
     public function handle()
     {
-        $endDate = $this->option('end_date') ? new Carbon($this->option('end_date')) : Carbon::now('UTC');
-        $startDate = $this->option('start_date') ? new Carbon($this->option('start_date')) : $endDate->copy()->subDays(2);
+        $endDate = $this->option('end_date') ? (new Carbon($this->option('end_date')))->setTime(23, 59, 59) : Carbon::now('UTC');
+        $startDate = $this->option('start_date') ? (new Carbon($this->option('start_date')))->setTime(0, 0, 0) : $endDate->copy()->subDays(2);
 
         $results = $this->query->where('start_date', $startDate->format($this->dateFormat))
                                ->where('end_date', $endDate->format($this->dateFormat))
