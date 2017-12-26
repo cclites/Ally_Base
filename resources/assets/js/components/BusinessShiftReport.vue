@@ -485,7 +485,7 @@
                 items.push({
                     '_rowVariant': 'info',
                     'Day': 'Total',
-                    'Hours': this.shiftTotals.duration,
+                    'Hours': this.shiftTotals.hours,
                     'Mileage': this.shiftTotals.mileage,
                     'CG Total': this.shiftTotals.caregiver_total,
                     'Reg Total': this.shiftTotals.provider_total,
@@ -521,7 +521,7 @@
                 if (this.items.shifts.length === 0) return {};
                 return this.items.shifts.reduce((totals, item) => {
                     return {
-                        duration: (this.parseFloat(totals.duration) + this.parseFloat(item.duration)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
                         caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
                         provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
                         ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
