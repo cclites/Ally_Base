@@ -159,7 +159,6 @@
                         this.items = response.data.map(function (item) {
                             item.client_name = (item.client) ? item.client.name : '';
                             item.caregiver_name = (item.caregiver) ? item.caregiver.name : '';
-                            item.verified = (item.status !== 'WAITING_FOR_APPROVAL');
                             item.authorized = (item.status === 'WAITING_FOR_CHARGE');
                             return item;
                         });

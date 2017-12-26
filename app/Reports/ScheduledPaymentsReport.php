@@ -41,6 +41,7 @@ class ScheduledPaymentsReport extends ShiftsReport
                 'caregiver_allotment' => number_format($shift->costs()->getCaregiverCost(), 2),
                 'mileage' => $shift->mileage,
                 'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
+                'verified' => $shift->verified,
             ];
         });
         return $rows;
