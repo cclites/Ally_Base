@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-row>
-            <b-col lg="6">
+            <b-col lg="4">
                 <b-card
                         header="Transaction Details"
                         header-text-variant="white"
@@ -31,7 +31,22 @@
                     </table>
                 </b-card>
             </b-col>
-            <b-col lg="6">
+            <b-col lg="4">
+                <b-card
+                        header="Transaction History"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <table>
+                        <tr v-for="item of transaction.history">
+                            <td>{{ formatDateTimeFromUTC(item.created_at) }}</td>
+                            <td v-html="getIcon(item.status)"></td>
+                            <td>{{ item.action }}</td>
+                        </tr>
+                    </table>
+                </b-card>
+            </b-col>
+            <b-col lg="4">
                 <b-card
                         header="Payer/Payee Details"
                         header-text-variant="white"
@@ -221,7 +236,22 @@
                             this.shifts = [];
                         }
                     });
+            },
+
+            getIcon(status) {
+                if (status == 'complete') {
+                    return '<i class="fa fa-check green"></i>';
+                }
+                else if (status == 'pendingsettlement' || status == 'pending') {
+                    return '<i class="fa fa-spinner text-warning"></i>';
+                }
+                return '<i class="fa fa-times red"></i>';
             }
         },
     }
 </script>
+
+<style>
+    .red { color: darkred; }
+    .green { color: darkgreen }
+ </style>
