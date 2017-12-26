@@ -56,7 +56,7 @@ class ShiftsReport extends BaseReport
             $row = [
                 'id' => $shift->id,
                 'checked_in_time' => $shift->checked_in_time->format('c'),
-                'checked_out_time' => $shift->checked_out_time->format('c'),
+                'checked_out_time' => optional($shift->checked_out_time)->format('c'),
                 'hours' => $shift->duration(),
                 'client_id' => $shift->client_id,
                 'client_name' => optional($shift->client)->nameLastFirst(),
