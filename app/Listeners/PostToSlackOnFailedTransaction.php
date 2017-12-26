@@ -38,7 +38,8 @@ class PostToSlackOnFailedTransaction
         Transaction Type: %s
         Transaction Amount: %s
         Last Action: %s
-        Action Date: %s";
+        Action Date: %s
+        Link: %s";
 
         $message = sprintf(
             $template,
@@ -46,7 +47,8 @@ class PostToSlackOnFailedTransaction
             $event->transaction->transaction_type,
             $lastHistory->amount,
             $lastHistory->action,
-            $lastHistory->created_at->setTimezone('America/New_York')->format('m/d/Y H:i:s T')
+            $lastHistory->created_at->setTimezone('America/New_York')->format('m/d/Y H:i:s T'),
+            route('admin.transactions.show', [$event->transaction->id])
         );
 
         if ($this->chatService->isAvailable()) {
