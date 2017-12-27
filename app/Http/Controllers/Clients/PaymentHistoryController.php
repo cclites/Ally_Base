@@ -58,7 +58,7 @@ class PaymentHistoryController extends Controller
 
         $report = new ShiftsReport();
         $report->query()
-            ->with('activities')
+//            ->with('activities')  // This does not work
             ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 

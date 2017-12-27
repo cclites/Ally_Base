@@ -46,10 +46,6 @@
 
         <b-row>
             <b-col lg="12">
-                <div class="text-right">
-                    <b-btn :href="'/business/reports/data/shifts?transaction_id=' + transaction.id + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                    <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                </div>
                 <b-card
                         header="Related Shifts"
                         header-text-variant="white"
@@ -57,7 +53,7 @@
                 >
                     <div class="text-right">
                         <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                        <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                        <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                     </div>
                     <b-table bordered striped hover show-empty
                              :fields="shiftFields"
@@ -182,7 +178,10 @@
                         sortable: true,
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 'clientSummaryFields': [
                     {
@@ -243,6 +242,10 @@
 
         methods: {
 
+            printTable() {
+                $(".shift-table").print();
+            },
+
             loadData() {
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
@@ -275,19 +278,3 @@
         },
     }
 </script>
-
-<style>
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .shift-table, .shift-table * {
-            visibility: visible;
-        }
-        .shift-table {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    }
-</style>

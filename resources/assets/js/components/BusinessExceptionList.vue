@@ -60,7 +60,10 @@
                         label: 'Acknowledged',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: this.exceptions.map(function(exception) {
                     exception.date = moment.utc(exception.created_at).local().format('L LT');

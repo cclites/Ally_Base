@@ -90,7 +90,10 @@
                         label: 'Type',
                         sortable: true
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },

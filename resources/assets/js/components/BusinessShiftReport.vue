@@ -154,7 +154,7 @@
                         </b-col>
                         <b-col sm="6" class="text-right">
                             <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                            <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                            <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
                     <div class="table-responsive">
@@ -450,7 +450,10 @@
                         });
                     }
                 }
-                fields.push('actions');
+                fields.push({
+                    key: 'actions',
+                    class: 'hidden-print'
+                });
                 return fields;
             },
             shiftHistoryItems() {
@@ -671,6 +674,10 @@
                 $("#detailsModal .container-fluid").print();
             },
 
+            printTable() {
+                $(".shift-table").print();
+            },
+
             parseFloat(float) {
                 if (typeof(float) === 'string') {
                     float = float.replace(',', '');
@@ -771,19 +778,5 @@
     .signature > svg {
         width: 100%;
         height: auto;
-    }
-
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .shift-table, .shift-table * {
-            visibility: visible;
-        }
-        .shift-table {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
     }
 </style>

@@ -74,9 +74,9 @@ class ScheduleAggregator
                     'checked_in'  => $checked_in,
                     'client_id'   => $schedule->client_id,
                     'caregiver_id'=> $schedule->caregiver_id,
-                    'client_name' => $schedule->client->name,
-                    'caregiver_name' => $schedule->caregiver->name,
-                    'caregiver_phones' => $schedule->caregiver->phoneNumbers
+                    'client_name' => optional($schedule->client)->name,
+                    'caregiver_name' => optional($schedule->caregiver)->name,
+                    'caregiver_phones' => optional($schedule->caregiver)->phoneNumbers
                 ];
             }, $occurrences));
         }

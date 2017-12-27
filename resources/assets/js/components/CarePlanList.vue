@@ -56,7 +56,10 @@
                         label: 'Last Updated',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 planItems: this.plans, // store to avoid mutating prop
                 planModal: false,

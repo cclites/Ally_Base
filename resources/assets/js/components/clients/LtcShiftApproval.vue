@@ -177,7 +177,10 @@
                         formatter: (value) => { return this.formatMoney(value); }
 
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },

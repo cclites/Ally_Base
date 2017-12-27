@@ -79,7 +79,10 @@
                         key: 'response_text',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },
