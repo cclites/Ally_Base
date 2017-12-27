@@ -68,7 +68,10 @@
                         label: 'Caregiver',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: this.certifications,
             }

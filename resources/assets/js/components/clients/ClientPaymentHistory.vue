@@ -39,7 +39,10 @@
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
                     { key: 'method', label: 'Type' },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         }
