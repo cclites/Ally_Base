@@ -46,10 +46,6 @@
 
         <b-row>
             <b-col lg="12">
-                <div class="text-right">
-                    <b-btn :href="'/business/reports/data/shifts?transaction_id=' + transaction.id + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                    <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                </div>
                 <b-card
                         header="Related Shifts"
                         header-text-variant="white"
