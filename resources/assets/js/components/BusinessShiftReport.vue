@@ -154,7 +154,7 @@
                         </b-col>
                         <b-col sm="6" class="text-right">
                             <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                            <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                            <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
                     <div class="table-responsive">
@@ -450,7 +450,10 @@
                         });
                     }
                 }
-                fields.push('actions');
+                fields.push({
+                    key: 'actions',
+                    class: 'hidden-print'
+                });
                 return fields;
             },
             shiftHistoryItems() {
@@ -485,7 +488,7 @@
                 items.push({
                     '_rowVariant': 'info',
                     'Day': 'Total',
-                    'Hours': this.shiftTotals.duration,
+                    'Hours': this.shiftTotals.hours,
                     'Mileage': this.shiftTotals.mileage,
                     'CG Total': this.shiftTotals.caregiver_total,
                     'Reg Total': this.shiftTotals.provider_total,
@@ -521,7 +524,7 @@
                 if (this.items.shifts.length === 0) return {};
                 return this.items.shifts.reduce((totals, item) => {
                     return {
-                        duration: (this.parseFloat(totals.duration) + this.parseFloat(item.duration)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
                         caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
                         provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
                         ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
@@ -671,6 +674,10 @@
                 $("#detailsModal .container-fluid").print();
             },
 
+            printTable() {
+                $(".shift-table").print();
+            },
+
             parseFloat(float) {
                 if (typeof(float) === 'string') {
                     float = float.replace(',', '');
@@ -771,19 +778,5 @@
     .signature > svg {
         width: 100%;
         height: auto;
-    }
-
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .shift-table, .shift-table * {
-            visibility: visible;
-        }
-        .shift-table {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
     }
 </style>

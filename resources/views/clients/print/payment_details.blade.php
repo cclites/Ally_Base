@@ -1,6 +1,6 @@
 @extends('layouts.print')
 
-@section('title', '$payment Details - Print')
+@section('title', 'Payment Details - Print')
 
 @section('content')
     <div class="container-fluid">
@@ -48,12 +48,12 @@
                                 {{ $shift->checked_in_time->format('g:i a') }} - {{ $shift->checked_out_time->format('g:i a') }}
                             </td>
                             <td>
-                                @foreach(collect($shift->activities)->unique()->sortBy('name') as $activity)
-                                    <div>{{ $activity['name'] }}</div>
-                                @endforeach
+                                {{--@foreach(collect($shift->activities)->unique()->sortBy('name') as $activity)--}}
+                                    {{--<div>{{ $activity['name'] }}</div>--}}
+                                {{--@endforeach--}}
                             </td>
                             <td>
-                                {{ $shift->caregiver['name'] }}
+                                {{ $shift->caregiver_name }}
                             </td>
                             <td>
                                 ${{ $shift->hourly_total }}
@@ -65,7 +65,7 @@
                                 {{ $shift->mileage }}
                             </td>
                             <td>
-                                {{ $shift->duration }}
+                                {{ $shift->hours }}
                             </td>
                             <td>
                                 &dollar;{{ $shift->shift_total }}

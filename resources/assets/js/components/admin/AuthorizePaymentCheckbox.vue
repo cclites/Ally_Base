@@ -31,9 +31,6 @@
                 this.form.post('/admin/charges/pending_shifts/' + this.item.shift_id)
                     .then(response => {
                         this.item.authorized = authorized;
-                        if (authorized) {
-                            this.item.verified = true;
-                        }
                     })
                     .catch(response => {
                         this.form.authorized = !authorized;

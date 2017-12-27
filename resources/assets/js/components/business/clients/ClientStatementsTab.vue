@@ -34,7 +34,10 @@
                         key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },

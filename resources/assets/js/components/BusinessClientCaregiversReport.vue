@@ -81,7 +81,10 @@
                     }
 
                 }
-                fields.push('actions');
+                fields.push({
+                    key: 'actions',
+                    class: 'hidden-print'
+                });
                 return fields;
             },
             filteredItems() {

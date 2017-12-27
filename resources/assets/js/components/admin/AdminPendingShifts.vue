@@ -27,6 +27,7 @@
                             <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button @click="authorizeAll()" variant="primary">Authorize All Shifts</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -147,6 +148,16 @@
         },
 
         methods: {
+            authorizeAll() {
+                let form = new Form({
+                   start_date: this.start_date,
+                   end_date: this.end_date,
+                   business_id: this.business_id,
+                   authorized: 1
+                });
+                form.post('/admin/charges/pending_shifts');
+            },
+
             loadBusinesses() {
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
@@ -159,7 +170,6 @@
                         this.items = response.data.map(function (item) {
                             item.client_name = (item.client) ? item.client.name : '';
                             item.caregiver_name = (item.caregiver) ? item.caregiver.name : '';
-                            item.verified = (item.status !== 'WAITING_FOR_APPROVAL');
                             item.authorized = (item.status === 'WAITING_FOR_CHARGE');
                             return item;
                         });

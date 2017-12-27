@@ -242,7 +242,10 @@
                         label: 'Verified',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: this.shifts.map(function(shift) {
                         let start = moment.utc(shift.checked_in_time);

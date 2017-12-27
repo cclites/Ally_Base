@@ -202,7 +202,10 @@
                         label: 'Shift Total',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },
