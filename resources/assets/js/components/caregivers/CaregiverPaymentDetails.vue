@@ -22,9 +22,6 @@
             <template slot="care_time" scope="data">
                 {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
             </template>
-            <template slot="client_name" scope="data">
-                {{ data.item.client.name }}
-            </template>
             <template slot="caregiver_total" scope="data">
                 {{ moneyFormat(parseFloat(data.item.caregiver_total)) }}
             </template>
@@ -53,7 +50,7 @@
                 fields: [
                     { key: 'checked_in_time', label: 'Care Date' },
                     { key: 'care_time', label: 'Care Time' },
-                    { key: 'duration', label: 'Hours of Care Received' },
+                    { key: 'hours', label: 'Hours of Care Received' },
                     { key: 'client_name', label: 'Client Name' },
                     { key: 'caregiver_total', label: 'Amount' }
                 ]
