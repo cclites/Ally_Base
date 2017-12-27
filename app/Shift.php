@@ -162,6 +162,10 @@ class Shift extends Model
      */
     public function scheduledEndTime()
     {
+        if (!$this->schedule) {
+            // Return now if no schedule
+            return Carbon::now();
+        }
         $shiftStart = new Carbon($this->checked_in_time);
         $scheduleStart = Carbon::now()->setTimeFromTimeString($this->schedule->time);
 
