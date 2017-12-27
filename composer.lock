@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bb4cfeae75e4fe7971bfb026c352f833",
-    "content-hash": "d03fd8a46612592edf4cec8233bd49b1",
+    "hash": "3dbf869a1a8b48e1f4cbfddd5ca50535",
+    "content-hash": "420da4ff573f1857ef00e657bdda26b5",
     "packages": [
         {
             "name": "barryvdh/laravel-snappy",
@@ -720,6 +720,46 @@
                 "url"
             ],
             "time": "2017-03-20 17:10:46"
+        },
+        {
+            "name": "h4cc/wkhtmltopdf-amd64",
+            "version": "0.12.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/h4cc/wkhtmltopdf-amd64.git",
+                "reference": "b80ce6720349e98cebac7e8a19426455805fa7e1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/h4cc/wkhtmltopdf-amd64/zipball/b80ce6720349e98cebac7e8a19426455805fa7e1",
+                "reference": "b80ce6720349e98cebac7e8a19426455805fa7e1",
+                "shasum": ""
+            },
+            "bin": [
+                "bin/wkhtmltopdf-amd64"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL Version 3"
+            ],
+            "authors": [
+                {
+                    "name": "Julius Beckmann",
+                    "email": "github@h4cc.de"
+                }
+            ],
+            "description": "Convert html to pdf using webkit (qtwebkit). Static linked linux binary for amd64 systems.",
+            "homepage": "http://wkhtmltopdf.org/",
+            "keywords": [
+                "binary",
+                "convert",
+                "pdf",
+                "snapshot",
+                "thumbnail",
+                "wkhtmltopdf"
+            ],
+            "time": "2016-02-02 19:38:55"
         },
         {
             "name": "inacho/php-credit-card-validator",
@@ -3291,7 +3331,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/43ba768e201d0c0c12d12c513b2ff7ae7ec256a3",
+                "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/d5c46b6a51b2773c6c8fbd149517a7719f4ff1f7",
                 "reference": "43ba768e201d0c0c12d12c513b2ff7ae7ec256a3",
                 "shasum": ""
             },
