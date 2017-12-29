@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Events\ShiftModified;
-use App\Events\UnverifiedShiftApproved;
+use App\Events\UnverifiedShiftConfirmed;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -134,7 +134,7 @@ class ShiftController extends BaseController
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
 
         if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
-             event(new UnverifiedShiftApproved($shift));
+             event(new UnverifiedShiftConfirmed($shift));
         }
 
         if ($shift->update($data)) {
@@ -170,10 +170,13 @@ class ShiftController extends BaseController
         }
 
         if ($shift->statusManager()->ackConfirmation()) {
+            if (!$shift->isVerified()) {
+                event(new UnverifiedShiftConfirmed($shift));
+            }
             return new SuccessResponse('The shift has been confirmed.', $shift->toArray());
         }
 
-        if ($shift->status !== Shift::UNCONFIRMED) {
+        if ($shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift has already been confirmed.');
         }
         return new ErrorResponse(500, 'The shift could not be confirmed due to a system error.');
@@ -185,7 +188,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        if ($shift->status === Shift::UNCONFIRMED) {
+        if (!$shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift is already unconfirmed.');
         }
 
@@ -194,22 +197,6 @@ class ShiftController extends BaseController
         }
 
         return new ErrorResponse(400, 'The shift is locked for modification.');
-    }
-
-
-    public function verify(Shift $shift)
-    {
-        $shift->load(['activities', 'issues']);
-        if ($this->business()->id != $shift->business_id) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        if ($shift->update(['verified' => true])) {
-            event(new UnverifiedShiftApproved($shift));
-            return new SuccessResponse('The shift has been verified', $shift->toArray());
-        }
-
-        return new ErrorResponse(500, 'The shift could not be verified');
     }
 
     public function storeIssue(Request $request, Shift $shift)

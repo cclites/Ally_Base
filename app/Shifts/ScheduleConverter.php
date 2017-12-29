@@ -124,7 +124,7 @@ class ScheduleConverter
      * @param string $status
      * @return Shift|false
      */
-    public function convert(Schedule $schedule, Carbon $clockIn, $status = Shift::UNCONFIRMED)
+    public function convert(Schedule $schedule, Carbon $clockIn, $status = Shift::WAITING_FOR_CONFIRMATION)
     {
         // Make sure schedule has proper assignments
         if ($schedule->business_id !== $this->business->id) return false;
