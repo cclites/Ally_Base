@@ -36,8 +36,7 @@ class ClockIn extends ClockBase
         if ($shift->verified) {
             if (!is_null($this->latitude)) {
                 $this->verifyGeocode($schedule->client);
-            }
-            else {
+            } else {
                 $this->verifyPhoneNumber($schedule->client);
             }
         }
