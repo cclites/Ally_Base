@@ -8,6 +8,52 @@ use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Schedule
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property int|null $caregiver_id
+ * @property int $client_id
+ * @property string $start_date
+ * @property string $end_date
+ * @property string $time
+ * @property int $duration
+ * @property mixed $rrule
+ * @property string|null $notes
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property float|null $caregiver_rate
+ * @property float|null $provider_fee
+ * @property int $all_day
+ * @property string $hours_type
+ * @property int|null $care_plan_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \App\Business $business
+ * @property-read \App\CarePlan|null $carePlan
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read \App\Client $client
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ScheduleException[] $exceptions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereAllDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCarePlanId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereHoursType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereRrule($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Schedule extends Model
 {
     /**

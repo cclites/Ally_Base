@@ -28,7 +28,7 @@ class PendingShiftsController extends Controller
     public function update(Request $request, Shift $shift = null)
     {
         $authorized = $request->input('authorized');
-        $validCurrentStatuses = [Shift::WAITING_FOR_APPROVAL, Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE];
+        $validCurrentStatuses = [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE];
         if (!$shift && $request->has('start_date')) {
             $startDate = (new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
             $endDate = (new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');

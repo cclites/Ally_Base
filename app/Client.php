@@ -14,6 +14,66 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * App\Client
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property float|null $business_fee
+ * @property string|null $default_payment_type
+ * @property string|null $default_payment_id
+ * @property string|null $backup_payment_type
+ * @property string|null $backup_payment_id
+ * @property string $client_type
+ * @property null|string $ssn
+ * @property string|null $onboard_status
+ * @property string|null $deleted_at
+ * @property float|null $fee_override
+ * @property float $max_weekly_hours
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Business $business
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read \App\Address $evvAddress
+ * @property-read \App\PhoneNumber $evvPhone
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
+ * @property-read string $ally_percentage
+ * @property-read mixed $date_of_birth
+ * @property-read mixed $email
+ * @property-read mixed $first_name
+ * @property-read mixed $last_name
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read string $payment_type
+ * @property-read mixed $username
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereClientType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMaxWeeklyHours($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
+ * @mixin \Eloquent
+ */
 class Client extends Model implements UserRole, CanBeConfirmedInterface
 {
     use IsUserRole, Notifiable;
