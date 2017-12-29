@@ -137,6 +137,7 @@ class ScheduleConverter
             'business_id' => $schedule->business_id,
             'caregiver_id' => $schedule->caregiver_id,
             'client_id' => $schedule->client_id,
+            'checked_in' => false,
             'checked_in_time' => $start,
             'checked_out_time' => $start->copy()->addMinutes($schedule->duration),
             'schedule_id' => $schedule->id,
