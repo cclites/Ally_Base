@@ -102,6 +102,61 @@ class ClockOutTest extends TestCase
         $this->assertEquals($issue->id, $shift->issues()->value('id'));
     }
 
+    public function test_auto_confirm_does_create_unverified_exceptions()
+    {
+        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+        $shift = $this->createShift();
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->clockOut($shift);
+
+        // Exception should not exist
+        $this->assertEquals(1, $shift->exceptions()->count());
+    }
+
+    public function test_auto_confirm_creates_verified_shifts_waiting_for_authorization()
+    {
+        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+
+        // Make a client phone number
+        $phone = factory(PhoneNumber::class)->make();
+        $this->client->phoneNumbers()->save($phone);
+
+        $shift = $this->createShift(['verified' => true, 'checked_in_number' => $phone->national_number]);
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->setNumber($phone->national_number)
+                           ->clockOut($shift);
+
+        $this->assertEquals(Shift::WAITING_FOR_AUTHORIZATION, $shift->status);
+    }
+
+    public function test_auto_confirm_disabled_does_not_create_exceptions()
+    {
+        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
+        $shift = $this->createShift();
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->clockOut($shift);
+
+        // Exception should not exist
+        $this->assertEquals(0, $shift->exceptions()->count());
+    }
+
+    public function test_auto_confirm_disabled_creates_verified_shifts_waiting_for_confirmation()
+    {
+        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
+
+        // Make a client phone number
+        $phone = factory(PhoneNumber::class)->make();
+        $this->client->phoneNumbers()->save($phone);
+
+        $shift = $this->createShift(['verified' => true, 'checked_in_number' => $phone->national_number]);
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->setNumber($phone->national_number)
+                           ->clockOut($shift);
+
+        $this->assertEquals(Shift::WAITING_FOR_CONFIRMATION, $shift->status);
+    }
+
+
     /**
      * @param array $attributes
      * @return \App\Shift
