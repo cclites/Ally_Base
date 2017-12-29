@@ -23,7 +23,7 @@ class TelefonyCheckInTest extends TelefonyBase
         $response->assertSee('<Gather numDigits="4" action="' . route('telefony.check-in.accept-digits') . '">');
     }
 
-    public function test_accept_caregiver_digits()
+    public function test_accept_caregiver_phone_number_digits()
     {
         $phone = factory(PhoneNumber::class)->make(['national_number' => '5555551000']);
         $this->caregiver->phoneNumbers()->save($phone);
