@@ -20,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // caregiver shift routes
 
 // Backwards Compatibility with Telefony v1
-Route::get('/caregiver/greeting', 'Api\Telefony\TelefonyGreetingController@greeting');
+Route::redirect('/caregiver/greeting', url('/api/telefony'));
 
 Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::get('/', 'Api\Telefony\TelefonyGreetingController@greeting')->name('greeting');

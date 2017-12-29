@@ -67,7 +67,7 @@ class TelefonyManager
      */
     public function response()
     {
-        return response($this->getTwilioResponse())->header('Content-Type', 'text/xml');
+        return response($this->getTwilioResponse())->header('Content-Type', 'text/xml; charset=UTF-8');
     }
 
     public function gather($options = []) {
