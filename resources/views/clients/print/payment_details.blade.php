@@ -1,4 +1,4 @@
-@extends('layouts.print')
+@extends('layouts.print', ['use_old_bootstrap' => true])
 
 @section('title', 'Payment Details - Print')
 
