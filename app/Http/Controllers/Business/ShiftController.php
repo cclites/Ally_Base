@@ -48,6 +48,8 @@ class ShiftController extends BaseController
         $data['business_id'] = $this->business()->id;
         $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
         $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
+        
         if ($shift = Shift::create($data)) {
             $shift->activities()->sync($request->input('activities', []));
             foreach($request->input('issues', []) as $issue) {
@@ -133,6 +135,7 @@ class ShiftController extends BaseController
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
 
         if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
              event(new UnverifiedShiftConfirmed($shift));
