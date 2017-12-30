@@ -141,6 +141,7 @@ class ShiftController extends Controller
             'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
         ]);
+        $data['mileage'] = request('mileage', 0);
 
         // Get active shift
         $shift = $this->caregiver()->getActiveShift();
