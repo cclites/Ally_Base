@@ -7,12 +7,14 @@
         <div class="row" style="padding: 10px 0;">
             <div class="col-xs-4 col-sm-4">
                 <div>{{ with($c = $payment->client)->name }}</div>
-                {{--<pre>{{ print_r($c->toArray()) }}</pre>--}}
-                <div>{{ $payment->business->address2 }}</div>
-                <span>{{ $payment->business->city }}</span>,
-                <span>{{ $payment->business->state }}</span>
-                <span>{{ $payment->business->zip }}</span>
-                <div>{{ $payment->business->phone1 }}</div>
+                @if ($a = $c->evvAddress)
+                    <div>{{ $a->address1 }}</div>
+                    <div>{{ $a->address2 }}</div>
+                    <span>{{ $a->city }}</span>,
+                    <span>{{ $a->state }}</span>
+                    <span>{{ $a->zip }}</span>
+                    {{--<div> WHAT ABOUT PHONE ?? </div>--}}
+                @endif
             </div>
             <div class="col-xs-4 col-sm-4 text-center">
                 <h2 style="margin-top: 0px;">Statement</h2>
@@ -95,10 +97,14 @@
                     <tr>
                         <td colspan="6"></td>
                         <td>
-                            Total:
+                            <strong>
+                                Total:
+                            </strong>
                         </td>
                         <td>
-                            &dollar;{{ number_format($payment->shifts->sum('shift_total'), 2) }}
+                            <strong>
+                                &dollar;{{ number_format($payment->shifts->sum('shift_total'), 2) }}
+                            </strong>
                         </td>
                     </tr>
                     </tbody>

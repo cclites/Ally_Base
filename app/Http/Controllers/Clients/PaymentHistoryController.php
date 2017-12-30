@@ -54,7 +54,7 @@ class PaymentHistoryController extends Controller
 
     public function printDetails($id)
     {
-        $payment = Payment::with('business', 'client')->find($id);
+        $payment = Payment::with('business', 'client.evvAddress')->find($id);
 
         $report = new ShiftsReport();
         $report->query()
