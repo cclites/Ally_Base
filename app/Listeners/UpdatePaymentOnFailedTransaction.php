@@ -29,5 +29,9 @@ class UpdatePaymentOnFailedTransaction
         if ($payment = $event->transaction->payment) {
             $payment->update(['success' => 0]);
         }
+
+        foreach($payment->shifts as $shift) {
+            $shift->statusManager()->ackReturnedPayment();
+        }
     }
 }
