@@ -24,7 +24,7 @@ class TelefonyBase extends TestCase
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();
-        $this->client = factory(Client::class)->create(['business_id' => $this->business->id]);
+        $this->client = factory(Client::class)->create(['business_id' => $this->business->id, 'client_type' => 'private_pay']);
         $this->caregiver = factory(Caregiver::class)->create();
         $this->phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $this->client->phoneNumbers()->save($this->phone);
