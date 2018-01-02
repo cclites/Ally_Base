@@ -69,9 +69,11 @@ class PaymentHistoryController extends Controller
             return $value;
         });
 
+        if (request('view')) {
+            return view('clients.print.payment_details', compact('payment'));
+        }
+        
         $pdf = PDF::loadView('clients.print.payment_details', compact('payment'))->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
-
-        //return view('clients.print.payment_details', compact('payment'));
     }
 }
