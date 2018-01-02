@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Business;
 use App\BankAccount;
 use App\Business;
 use App\OfficeUser;
+use App\Payments\PaymentMethodReplace;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Traits\Request\BankAccountRequest;
 use Illuminate\Http\Request;
@@ -39,31 +41,22 @@ class SettingController extends BaseController
      */
     public function storeBankAccount(Request $request, string $type)
     {
-        $business = $this->business();
         switch($type) {
             case 'deposit':
-                $account = $business->bankAccount;
-                $account_data = $this->validateBankAccount($request, $account);
-                if ($account) {
-                    $account->update($account_data);
-                } else {
-                    $account = new BankAccount($account_data);
-                    $business->setBankAccount($account);
-                }
+                $relation = 'bankAccount';
                 break;
             case 'payment':
-                $account = $business->paymentAccount;
-                $account_data = $this->validateBankAccount($request, $account);
-                if ($account) {
-                    $account->update($account_data);
-                } else {
-                    $account = BankAccount::create($account_data);
-                    $business->payment_account_id = $account->id;
-                    $business->save();
-                }
+                $relation = 'paymentAccount';
                 break;
         }
-        return new SuccessResponse( ucfirst($type) . ' Account updated.');
+
+        $newAccount = $this->validateBankAccount($request, $this->business()->getBankAccount($relation));
+        $newAccount->business_id = $this->business()->id;
+        if ($this->business()->setBankAccount($relation, $newAccount)) {
+            return new SuccessResponse('The bank account has been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unable to replace bank account');
     }
 
     /**
@@ -80,7 +73,8 @@ class SettingController extends BaseController
             'scheduling' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
-            'calendar_caregiver_filter' => 'required|in:all,unassigned'
+            'calendar_caregiver_filter' => 'required|in:all,unassigned',
+            'auto_confirm' => 'boolean',
         ]);
         $business->update($data);
         return new SuccessResponse('Business settings updated.');

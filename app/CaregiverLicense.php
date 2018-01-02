@@ -4,6 +4,26 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\CaregiverLicense
+ *
+ * @property int $id
+ * @property int $caregiver_id
+ * @property string $name
+ * @property string $description
+ * @property string $expires_at
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Caregiver $caregiver
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class CaregiverLicense extends Model
 {
     protected $table = 'caregiver_licenses';

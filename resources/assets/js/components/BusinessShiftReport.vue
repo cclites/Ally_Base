@@ -368,7 +368,7 @@
             <div slot="modal-footer">
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
@@ -650,6 +650,7 @@
                         this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = true;
                             }
                             return shift;
                         });
@@ -664,6 +665,7 @@
                         this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = false;
                             }
                             return shift;
                         });

@@ -4,6 +4,26 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\GatewayTransactionHistory
+ *
+ * @property int $id
+ * @property int $internal_transaction_id
+ * @property string $action
+ * @property string $status
+ * @property float $amount
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\GatewayTransaction $transaction
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereInternalTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class GatewayTransactionHistory extends Model
 {
     protected $table = 'gateway_transaction_history';

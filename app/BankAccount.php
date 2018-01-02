@@ -7,6 +7,37 @@ use App\Gateway\ACHPaymentInterface;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\BankAccount
+ *
+ * @property int $id
+ * @property int|null $user_id
+ * @property int|null $business_id
+ * @property string|null $nickname
+ * @property mixed $routing_number
+ * @property mixed $account_number
+ * @property string $account_type
+ * @property string $account_holder_type
+ * @property string $name_on_account
+ * @property int $verified
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read mixed $last_four
+ * @property-read \App\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountHolderType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNameOnAccount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNickname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereRoutingNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
+ * @mixin \Eloquent
+ */
 class BankAccount extends Model implements ChargeableInterface
 {
     protected $table = 'bank_accounts';
@@ -25,6 +56,16 @@ class BankAccount extends Model implements ChargeableInterface
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
+
+    public function transactions()
+    {
+        return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
     ///////////////////////////////////////////
@@ -89,4 +130,42 @@ class BankAccount extends Model implements ChargeableInterface
         return $gateway->chargeAccount($this, $amount, $currency);
     }
 
+    /**
+     * Determine if a new database record needs to be created
+     * This is used for the preservation of payment method on transaction history records
+     *
+     * @return bool
+     */
+    public function canBeMergedWith(ChargeableInterface $newPaymentMethod)
+    {
+        if ($newPaymentMethod instanceof self) {
+            if (!$newPaymentMethod->account_number && !$newPaymentMethod->routing_number) {
+                return true;
+            }
+            // If routing number and account number are present, check that there are no differences
+            if (!array_diff($this->only('account_number', 'routing_number'), $newPaymentMethod->only('account_number', 'routing_number'))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Merge the existing record with the new values
+     *
+     * @return bool
+     */
+    public function mergeWith(ChargeableInterface $newPaymentMethod)
+    {
+        $this->fill($newPaymentMethod->getAttributes());
+        return $this->save();
+    }
+
+    /**
+     * Save a new Chargeable instance to the database
+     */
+    public function persistChargeable()
+    {
+        return $this->save();
+    }
 }

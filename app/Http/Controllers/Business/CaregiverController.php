@@ -9,14 +9,14 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
-use App\Traits\Request\PaymentMethodUpdate;
+use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class CaregiverController extends BaseController
 {
-    use PaymentMethodUpdate;
+    use BankAccountRequest;
 
     /**
      * Display a listing of the resource.
@@ -234,18 +234,15 @@ class CaregiverController extends BaseController
         return new SuccessResponse('Email Sent to Caregiver');
     }
 
-    public function bankAccount(Request $request, $caregiver_id)
+    public function bankAccount(Request $request, Caregiver $caregiver)
     {
-        $caregiver = Caregiver::findOrFail($caregiver_id);
-
         if (!$this->hasCaregiver($caregiver->id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
         $existing = $caregiver->bankAccount;
-        $account = $this->updateBankAccount($request, $caregiver, $existing);
-        if ($account) {
-            if (!$existing) $caregiver->update(['bank_account_id' => $account->id]);
+        $account = $this->validateBankAccount($request, $existing);
+        if ($caregiver->setBankAccount($account)) {
             return new SuccessResponse('The bank account has been saved.');
         }
         return new ErrorResponse(500, 'The bank account could not be saved.');

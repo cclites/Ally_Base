@@ -15,6 +15,15 @@
                     </b-form-input>
                     <input-help :form="form" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
                 </b-form-group>
+                <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
+                    <b-form-select id="auto_confirm" 
+                                   v-model="form.auto_confirm"
+                    >
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </b-form-select>
+                    <input-help :form="form" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
+                </b-form-group>
             </b-col>
             <b-col lg="6">
                 <b-form-group label="Scheduling" label-for="scheduling">
@@ -74,6 +83,7 @@
                     mileage_rate: this.business.mileage_rate,
                     calendar_default_view: this.business.calendar_default_view,
                     calendar_caregiver_filter: this.business.calendar_caregiver_filter,
+                    auto_confirm: this.business.auto_confirm,
                 }),
             }
         },

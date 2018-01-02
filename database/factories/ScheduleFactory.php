@@ -38,6 +38,7 @@ $factory->define(\App\Schedule::class, function(Faker $faker) {
         'caregiver_id' => $client->caregivers->shuffle()->first()->id ?? null,
         'start_date' => $start,
         'end_date' => $end,
+        'all_day' => 0,
         'time' => $faker->randomElement(['08', '09', '11', '14', '15']) . ':' . $faker->randomElement(['00', '15', '30']) . ':00',
         'duration' => $faker->randomElement([90, 120, 180, 240]),
         'rrule' => sprintf('FREQ=%s;BYDAY=%s;INTERVAL=%s', $rruleFreq, $rruleByday, $rruleInterval),

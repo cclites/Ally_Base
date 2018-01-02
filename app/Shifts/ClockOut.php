@@ -77,6 +77,7 @@ class ClockOut extends ClockBase
         if (count($activities)) {
             $shift->activities()->attach($activities);
         }
+        return true;
     }
 
     public function attachIssue(Shift $shift, ShiftIssue $issue) {
