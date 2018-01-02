@@ -650,6 +650,7 @@
                         this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = true;
                             }
                             return shift;
                         });
@@ -664,6 +665,7 @@
                         this.items.shifts.map(shift => {
                             if (shift.id === this.selectedItem.id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = false;
                             }
                             return shift;
                         });
