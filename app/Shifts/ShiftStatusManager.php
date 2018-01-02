@@ -381,7 +381,7 @@ class ShiftStatusManager
      * Acknowledge a returned (failed) caregiver deposit
      * @return bool
      */
-    public function ackFailedCaregiverDeposit()
+    public function ackReturnedCaregiverDeposit()
     {
         switch($this->status()) {
             case Shift::PAID_CAREGIVER_ONLY:
