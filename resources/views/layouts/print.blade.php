@@ -15,11 +15,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/ico/favicon.ico">
 
     <!-- Bootstrap  -->
-@if ($use_bootstrap_3 ?? false)
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-@else
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-@endif
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Homemade+Apple" rel="stylesheet">
