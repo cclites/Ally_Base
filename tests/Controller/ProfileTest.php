@@ -24,8 +24,6 @@ class ProfileTest extends TestCase
         Log::useFiles('php://stderr');
 
         $this->client = factory(Client::class)->create();
-        $this->caregiver = factory(Caregiver::class)->create();
-        $this->officeUser = factory(OfficeUser::class)->create();
     }
 
     public function testClientProfileResponse()
