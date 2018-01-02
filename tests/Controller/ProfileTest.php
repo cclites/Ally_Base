@@ -4,6 +4,7 @@ namespace Tests\Controller;
 use App\Client;
 use App\Caregiver;
 use App\OfficeUser;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -18,6 +19,9 @@ class ProfileTest extends TestCase
     public function setUp()
     {
         parent::setUp();
+
+        // Log exceptions to stderr
+        Log::useFiles('php://stderr');
 
         $this->client = factory(Client::class)->create();
         $this->caregiver = factory(Caregiver::class)->create();
