@@ -20,11 +20,15 @@ class AlterMoveMethodToTransactions extends Migration
 
         Schema::table('payments', function (Blueprint $table) {
             $table->dropColumn('method_type');
+        });
+        Schema::table('payments', function (Blueprint $table) {
             $table->dropColumn('method_id');
         });
 
         Schema::table('deposits', function (Blueprint $table) {
             $table->dropColumn('method_type');
+        });
+        Schema::table('deposits', function (Blueprint $table) {
             $table->dropColumn('method_id');
         });
     }
