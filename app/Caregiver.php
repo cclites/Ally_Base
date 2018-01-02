@@ -12,6 +12,52 @@ use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Caregiver
+ *
+ * @property int $id
+ * @property null|string $ssn
+ * @property int|null $bank_account_id
+ * @property string|null $title
+ * @property \Carbon\Carbon|null $deleted_at
+ * @property \Carbon\Carbon|null $hire_date
+ * @property string|null $gender
+ * @property \Carbon\Carbon|null $onboarded
+ * @property string|null $misc
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \App\BankAccount|null $bankAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read mixed $date_of_birth
+ * @property-read mixed $email
+ * @property-read mixed $first_name
+ * @property-read mixed $last_name
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read mixed $username
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverLicense[] $licenses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereBankAccountId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereGender($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereHireDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereMisc($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereOnboarded($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereSsn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereTitle($value)
+ * @mixin \Eloquent
+ */
 class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
 {
     use IsUserRole;

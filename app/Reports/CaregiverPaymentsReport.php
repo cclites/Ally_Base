@@ -37,7 +37,7 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
     protected function results()
     {
         $shifts = $this->query
-            ->where('status', '!=', Shift::UNCONFIRMED)
+            ->whereConfirmed()
             ->get();
         $rows = [];
 

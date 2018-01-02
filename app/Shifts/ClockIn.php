@@ -22,6 +22,7 @@ class ClockIn extends ClockBase
             'client_id' => $schedule->client_id,
             'schedule_id' => $schedule->id,
             'verified' => !$this->manual,
+            'checked_in' => true,
             'checked_in_time' => Carbon::now(),
             'checked_in_latitude' => $this->latitude,
             'checked_in_longitude' => $this->longitude,
@@ -35,8 +36,7 @@ class ClockIn extends ClockBase
         if ($shift->verified) {
             if (!is_null($this->latitude)) {
                 $this->verifyGeocode($schedule->client);
-            }
-            else {
+            } else {
                 $this->verifyPhoneNumber($schedule->client);
             }
         }
@@ -65,6 +65,7 @@ class ClockIn extends ClockBase
             'client_id' => $client->id,
             'schedule_id' => null,
             'verified' => !$this->manual,
+            'checked_in' => true,
             'checked_in_time' => Carbon::now(),
             'checked_in_latitude' => $this->latitude,
             'checked_in_longitude' => $this->longitude,

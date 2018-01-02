@@ -3,7 +3,7 @@
         <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
             <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
         </div>
-        <div class="alert alert-warning" v-if="status === 'UNCONFIRMED'">
+        <div class="alert alert-warning" v-if="status === 'WAITING_FOR_CONFIRMATION'">
             <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
         </div>
         <b-card
@@ -144,7 +144,7 @@
                                     name="hours_type"
                                     v-model="form.hours_type"
                             >
-                                <option value="default">None - Regular Shift</option>
+                                <option value="default">Regular Shift</option>
                                 <option value="holiday">Holiday</option>
                                 <option value="overtime">Overtime</option>
                             </b-form-select>
@@ -295,10 +295,10 @@
                 <b-row>
                     <b-col lg="12" v-if="!shift.readOnly">
                         <span v-if="!deleted">
-                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'UNCONFIRMED'">Save &amp; Confirm</b-button>
+                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'WAITING_FOR_CONFIRMATION'">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'UNCONFIRMED'">Unconfirm</b-button>
+                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'WAITING_FOR_CONFIRMATION'">Unconfirm</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>

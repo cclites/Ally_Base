@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Events\FailedTransaction;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
-use App\Events\UnverifiedShiftApproved;
+use App\Events\UnverifiedShiftConfirmed;
 use App\Events\UnverifiedShiftCreated;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\PostToSlackOnFailedTransaction;
@@ -22,24 +22,24 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        UnverifiedShiftCreated::class => [
+        UnverifiedShiftCreated::class   => [
             UnverifiedShiftException::class,
         ],
-        UnverifiedShiftApproved::class => [
+        UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,
         ],
-        ShiftModified::class => [
+        ShiftModified::class            => [
             ShiftStatusUpdate::class,
             CheckForClockOut::class,
         ],
-        ShiftCreated::class => [
+        ShiftCreated::class             => [
             ShiftStatusUpdate::class,
             CheckForClockOut::class,
         ],
-        ShiftCreated::class => [
+        ShiftCreated::class             => [
             ShiftStatusUpdate::class,
         ],
-        FailedTransaction::class => [
+        FailedTransaction::class        => [
             PostToSlackOnFailedTransaction::class,
         ]
     ];
