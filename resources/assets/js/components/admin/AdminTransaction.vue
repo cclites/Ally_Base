@@ -93,12 +93,6 @@
                         <template slot="checked_in_time" scope="data">
                             {{ formatDate(data.value) }} {{ formatTime(data.value) }}
                         </template>
-                        <template slot="client_name" scope="row">
-                            <a href="#">{{ row.item.client_name }}</a>
-                        </template>
-                        <template slot="caregiver_name" scope="row">
-                            <a href="#">{{ row.item.caregiver_name }}</a>
-                        </template>
                         <template slot="actions" scope="row">
 
                         </template>
@@ -230,8 +224,6 @@
                         if (Array.isArray(response.data)) {
                             this.shifts = response.data.map(function(item) {
                                 item.checked_in_time = moment.utc(item.checked_in_time).local();
-                                item.client_name = item.client.nameLastFirst;
-                                item.caregiver_name = item.caregiver.nameLastFirst;
                                 return item;
                             })
                         }

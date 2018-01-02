@@ -22,7 +22,10 @@
         </b-card>
 
         <b-row>
-            <b-col lg="6">
+            <b-col cols="12" class="with-padding-bottom">
+                <b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
+            </b-col>
+            <b-col lg="6" v-show="showSummary">
                 <b-card header="Client Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
@@ -32,7 +35,7 @@
                     </b-table>
                 </b-card>
             </b-col>
-            <b-col lg="6">
+            <b-col lg="6" v-show="showSummary">
                 <b-card header="Caregiver Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
@@ -233,7 +236,14 @@
                 'caregiverSummary': [],
                 'urlPrefix': '/business/reports/data/',
                 'queryString': '?transaction_id=' + this.transaction.id,
+                'showSummary': false,
             }
+        },
+
+        computed: {
+            summaryButtonText() {
+                return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
+            },
         },
 
         mounted() {
@@ -274,6 +284,10 @@
                             this.shifts = [];
                         }
                     });
+            },
+
+            showHideSummary() {
+                this.showSummary = !this.showSummary;
             }
         },
     }

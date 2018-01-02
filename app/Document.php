@@ -8,12 +8,35 @@ use Illuminate\Support\Facades\File;
 
 /**
  * Class Document
+ *
  * @package App
  * @property string $name
  * @property string $filename
  * @property string $original_filename
  * @property string $type
  * @property string $description
+ * @property int $id
+ * @property int|null $user_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \App\User|null $user
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Query\Builder|\App\Document onlyTrashed()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereOriginalFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereUserId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Document withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Document withoutTrashed()
+ * @mixin \Eloquent
  */
 class Document extends Model
 {

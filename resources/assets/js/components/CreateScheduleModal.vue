@@ -147,7 +147,7 @@
                                         name="hours_type"
                                         v-model="form.hours_type"
                                 >
-                                    <option value="default">None - Regular Shift</option>
+                                    <option value="default">Regular Shift</option>
                                     <option value="holiday">Holiday</option>
                                     <option value="overtime">Overtime</option>
                                 </b-form-select>

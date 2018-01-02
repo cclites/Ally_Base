@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Model;
 
 use App\Address;
 use App\BankAccount;

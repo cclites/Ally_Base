@@ -9,6 +9,87 @@ use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Shift
+ *
+ * @property int $id
+ * @property int|null $caregiver_id
+ * @property int|null $client_id
+ * @property int|null $business_id
+ * @property int $checked_in
+ * @property \Carbon\Carbon|null $checked_in_time
+ * @property float|null $checked_in_latitude
+ * @property float|null $checked_in_longitude
+ * @property string|null $checked_in_number evv phone number
+ * @property \Carbon\Carbon|null $checked_out_time
+ * @property float|null $checked_out_latitude
+ * @property float|null $checked_out_longitude
+ * @property string|null $checked_out_number evv phone number
+ * @property string|null $caregiver_comments
+ * @property string|null $hours_type
+ * @property float $mileage
+ * @property float $other_expenses
+ * @property int $verified
+ * @property int|null $schedule_id
+ * @property int $all_day
+ * @property float $caregiver_rate
+ * @property float $provider_fee
+ * @property string|null $status
+ * @property int|null $payment_id
+ * @property string|null $other_expenses_desc
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \App\Business|null $business
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read \App\Client|null $client
+ * @property-read \App\ShiftCostHistory $costHistory
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
+ * @property-read mixed $duration
+ * @property-read mixed $read_only
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftIssue[] $issues
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
+ * @property-read \App\Payment|null $payment
+ * @property-read \App\Schedule|null $schedule
+ * @property-read \App\Signature $signature
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAllDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCharge()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedIn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereConfirmed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHoursType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpenses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpensesDesc($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePending()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereReadOnly()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereScheduleId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUnconfirmed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
+ * @mixin \Eloquent
+ */
 class Shift extends Model
 {
     protected $guarded = ['id'];
@@ -28,11 +109,10 @@ class Shift extends Model
     /// Shift Statuses
     ///////////////////////////////////////
 
-    const UNCONFIRMED = 'UNCONFIRMED'; // unconfirmed shift (automatically added from schedule but not clocked in)
     const CLOCKED_IN = 'CLOCKED_IN';
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
-    const WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL';  // Unverified shift that needs to be approved
-    const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Verified shift that needs to be authorized for payment
+    const WAITING_FOR_CONFIRMATION = 'WAITING_FOR_CONFIRMATION';  // Unconfirmed shift that needs to be approved
+    const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Confirmed shift that needs to be authorized for payment
     const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
     // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)

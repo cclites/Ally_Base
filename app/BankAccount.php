@@ -7,6 +7,37 @@ use App\Gateway\ACHPaymentInterface;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\BankAccount
+ *
+ * @property int $id
+ * @property int|null $user_id
+ * @property int|null $business_id
+ * @property string|null $nickname
+ * @property mixed $routing_number
+ * @property mixed $account_number
+ * @property string $account_type
+ * @property string $account_holder_type
+ * @property string $name_on_account
+ * @property int $verified
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read mixed $last_four
+ * @property-read \App\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountHolderType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNameOnAccount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereNickname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereRoutingNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
+ * @mixin \Eloquent
+ */
 class BankAccount extends Model implements ChargeableInterface
 {
     protected $table = 'bank_accounts';

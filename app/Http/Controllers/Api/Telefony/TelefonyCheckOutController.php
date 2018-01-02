@@ -87,7 +87,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
                     'action' => route('telefony.check-out', [$shift])
                 ]);
                 $this->telefony->repeat(
-                    sprintf('If this is %s, press 2 to clock out<PAUSE>press 3 to re-enter.<PAUSE>press 0 to return to the main menu<PAUSE>', $caregiver->firstname),
+                    sprintf('If this is %s, press 2 to continue clocking out<PAUSE>press 3 to re-enter.<PAUSE>press 0 to return to the main menu<PAUSE>', $caregiver->firstname),
                     $gather
                 );
             }
@@ -181,7 +181,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         $gather = $this->telefony->gather([
             'timeout' => 10,
             'finishOnKey' => '#',
-            'action' => route('telefony.confirm_activity'),
+            'action' => route('telefony.check-out.confirm-activity', [$shift]),
         ]);
 
         $this->telefony->say(
@@ -204,7 +204,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
         );
 
         // Finalize if no digits are entered
-        $this->telefony->redirect(route('telefony.check_for_activities'));
+        $this->telefony->redirect(route('telefony.check-out.check-for-activities', [$shift]));
 
         return $this->telefony->response();
     }

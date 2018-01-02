@@ -4,6 +4,37 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Deposit
+ *
+ * @property int $id
+ * @property string $deposit_type
+ * @property int|null $caregiver_id
+ * @property int|null $business_id
+ * @property float|null $amount
+ * @property string|null $transaction_id
+ * @property string|null $transaction_code
+ * @property int|null $success
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Business|null $business
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read mixed $week
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $method
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @property-read \App\GatewayTransaction|null $transaction
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereDepositType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereSuccess($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereTransactionCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Deposit extends Model
 {
     protected $table = 'deposits';

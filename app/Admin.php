@@ -6,6 +6,28 @@ use App\Contracts\UserRole;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Admin
+ *
+ * @property int $id
+ * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read mixed $date_of_birth
+ * @property-read mixed $email
+ * @property-read mixed $first_name
+ * @property-read mixed $last_name
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read mixed $username
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereId($value)
+ * @mixin \Eloquent
+ */
 class Admin extends Model implements UserRole
 {
     use IsUserRole;
