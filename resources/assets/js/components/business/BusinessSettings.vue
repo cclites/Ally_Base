@@ -22,7 +22,7 @@
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </b-form-select>
-                    <input-help :form="form" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telefony."></input-help>
+                    <input-help :form="form" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
                 </b-form-group>
             </b-col>
             <b-col lg="6">

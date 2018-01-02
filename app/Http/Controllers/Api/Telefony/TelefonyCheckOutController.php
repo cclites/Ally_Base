@@ -140,7 +140,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
             case 2:
                 $issue = new ShiftIssue();
                 $issue->caregiver_injury = true;
-                $issue->comments = 'Injury recorded via Telefony System';
+                $issue->comments = 'Injury recorded via Telephony System';
                 $shift->issues()->save($issue);
 
                 $this->telefony->say('We will be in touch with you regarding your injury.  Please continue clocking out.');
