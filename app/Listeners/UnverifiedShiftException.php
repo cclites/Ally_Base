@@ -34,7 +34,7 @@ class UnverifiedShiftException
         $checked_in_time = local_date($shift->checked_in_time, 'm/d/Y g:iA', $business->timezone);
         $checked_out_time = local_date($shift->checked_out_time, 'm/d/Y g:iA', $business->timezone);
         $description = $shift->caregiver->name() . "'s shift for " . $shift->client->name() .
-            " clocked in at $checked_in_time and clocked out at $checked_out_time was NOT verified through our geolocation or telefony services." .
+            " clocked in at $checked_in_time and clocked out at $checked_out_time was NOT verified through our geolocation or telephony services." .
             " You will need to manually confirm this shift to qualify it for payment.";
 
         $exception = new SystemException([
