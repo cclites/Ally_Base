@@ -15,11 +15,11 @@ class TelefonyGreetingTest extends TelefonyBase
         $response->assertStatus(403);
     }
 
-    public function test_403_error_without_xml_request()
-    {
-        $response = $this->get('/api/telefony?From=1234567890');
-        $response->assertStatus(403);
-    }
+//    public function test_403_error_without_xml_request()
+//    {
+//        $response = $this->get('/api/telefony?From=1234567890');
+//        $response->assertStatus(403);
+//    }
 
     public function test_number_mismatch_response()
     {
