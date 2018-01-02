@@ -80,7 +80,8 @@ class SettingController extends BaseController
             'scheduling' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
-            'calendar_caregiver_filter' => 'required|in:all,unassigned'
+            'calendar_caregiver_filter' => 'required|in:all,unassigned',
+            'auto_confirm' => 'boolean',
         ]);
         $business->update($data);
         return new SuccessResponse('Business settings updated.');

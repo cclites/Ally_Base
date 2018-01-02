@@ -7,7 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
-class UnverifiedShiftApproved
+class UnverifiedShiftConfirmed
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

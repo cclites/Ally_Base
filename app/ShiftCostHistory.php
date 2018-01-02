@@ -3,6 +3,34 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\ShiftCostHistory
+ *
+ * @property int $id
+ * @property float $caregiver_shift
+ * @property float $caregiver_expenses
+ * @property float $caregiver_mileage
+ * @property float $caregiver_total
+ * @property float $provider_fee
+ * @property float $ally_fee
+ * @property float $total_cost
+ * @property float $ally_pct
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Shift $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyPct($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverExpenses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverShift($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverTotal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereTotalCost($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ShiftCostHistory extends Model
 {
     protected $table = 'shift_cost_history';
