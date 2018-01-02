@@ -1,11 +1,11 @@
-@extends('layouts.print', ['use_old_bootstrap' => true])
+@extends('layouts.print')
 
 @section('title', 'Payment Details - Print')
 
 @section('content')
     <div class="container-fluid">
         <div class="row" style="padding: 10px 0;">
-            <div class="col-xs-4 col-sm-4">
+            <div class="col-xs-4">
                 <div>{{ with($c = $payment->client)->name }}</div>
                 @if ($a = $c->evvAddress)
                     <div>{{ $a->address1 }}</div>
@@ -16,7 +16,7 @@
                     {{--<div> WHAT ABOUT PHONE ?? </div>--}}
                 @endif
             </div>
-            <div class="col-xs-4 col-sm-4 text-center">
+            <div class="col-xs-4 text-center">
                 <h2 style="margin-top: 0px;">Statement</h2>
             </div>
             {{--
@@ -25,7 +25,7 @@
                     <div>{{ $payment->client->name }}</div>
                 </div>
             --}}
-            <div class="col-xs-4 col-sm-4 text-right">
+            <div class="col-xs-4 text-right">
                 <div>{{ with($b = $payment->business)->name }}</div>
                 <div>{{ $b->address1 }}</div>
                 <div>{{ $b->address2 }}</div>
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col">
+            <div class="col-xs-12">
                 <table class="table table-bordered mt-2">
                     <tbody>
                     <tr>
