@@ -53,6 +53,11 @@ class CreditCard extends Model implements ChargeableInterface
         return $this->belongsTo(User::class);
     }
 
+    public function transactions()
+    {
+        return $this->morphMany(GatewayTransaction::class, 'method');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -108,5 +113,44 @@ class CreditCard extends Model implements ChargeableInterface
         }
 
         return $gateway->chargeCard($this, $amount, $currency);
+    }
+
+    /**
+     * Determine if a new database record needs to be created
+     * This is used for the preservation of payment method on transaction history records
+     *
+     * @return bool
+     */
+    public function canBeMergedWith(ChargeableInterface $newPaymentMethod)
+    {
+        if ($newPaymentMethod instanceof self) {
+            if (!$newPaymentMethod->number) {
+                return true;
+            }
+            // If number is present, check that there are no differences
+            if (!array_diff($this->only('number'), $newPaymentMethod->only('number'))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Merge the existing record with the new values
+     *
+     * @return bool
+     */
+    public function mergeWith(ChargeableInterface $newPaymentMethod)
+    {
+        $this->fill($newPaymentMethod->getAttributes());
+        return $this->save();
+    }
+
+    /**
+     * Save a new Chargeable instance to the database
+     */
+    public function persistChargeable()
+    {
+        return $this->save();
     }
 }

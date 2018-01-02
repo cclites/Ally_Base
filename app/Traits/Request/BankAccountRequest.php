@@ -4,6 +4,7 @@
 namespace App\Traits\Request;
 
 
+use App\BankAccount;
 use Illuminate\Http\Request;
 
 trait BankAccountRequest
@@ -18,7 +19,8 @@ trait BankAccountRequest
         ];
 
         if (!$existing
-            || strpos($request->input('account_number'), '****') !== 0
+            || substr($request->input('account_number'), 0, 1) !== '*'
+            || $request->input('routing_number') !== '*********'
             || substr($existing->account_number, -4) !== substr($request->input('account_number'), -4)
             ) {
             $rules += [
@@ -27,7 +29,8 @@ trait BankAccountRequest
             ];
         }
 
-        return $request->validate($rules);
+        $data = $request->validate($rules);
+        return new BankAccount($data);
     }
 
 }
