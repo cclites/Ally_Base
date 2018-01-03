@@ -38,7 +38,6 @@
                         label: 'Amount',
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
-                    { key: 'method', label: 'Type' },
                     {
                         key: 'actions',
                         class: 'hidden-print'                        
