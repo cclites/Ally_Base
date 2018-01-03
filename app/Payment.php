@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -83,13 +84,13 @@ class Payment extends Model
 
     public function getWeekAttribute()
     {
-        if ($this->shifts()->exists()) {
-            $checked_in_time = $this->shifts->first()->checked_in_time;
-            return (object) [
-                'start' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear)->toDateString(),
-                'end' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear, 7)->toDateString()
-            ];
-        }
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+        $time = ($this->created_at instanceof Carbon) ? $this->created_at : Carbon::now();
+        $time->subWeek(); // Use the previous week
+        return (object) [
+            'start' => $time->startOfWeek()->toDateString(),
+            'end' => $time->endOfWeek()->toDateString()
+        ];
         return null;
     }
 }
