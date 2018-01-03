@@ -7,7 +7,7 @@
                 {{ formatDate(data.item.created_at) }}
             </template>
             <template slot="week" scope="data">
-                {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
+                {{ start_end(data) }}
             </template>
             <template slot="actions" scope="data">
                 <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
@@ -18,7 +18,7 @@
     </b-card>
 </template>
 
-<script>
+<script lang=babel>
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
@@ -28,7 +28,7 @@
         mixins: [FormatsDates, FormatsNumbers],
 
         data() {
-            return{
+            return {
                 items: this.client.payments,
                 fields: [
                     { key: 'created_at', label: 'Date Paid' },
@@ -41,9 +41,19 @@
                     { key: 'method', label: 'Type' },
                     {
                         key: 'actions',
-                        class: 'hidden-print'
+                        class: 'hidden-print'                        
                     }
                 ]
+            }
+        },
+        methods: {
+            start_end(data) {
+                if (data.item.week) {
+                    if ('start' in data.item.week) {
+                        return `${this.formatDate(data.item.week.start)} - ${this.formatDate(data.item.week.end)}`;
+                    }
+                }
+                return 'Shift N/A';
             }
         }
     }
