@@ -25,7 +25,6 @@ $factory->define(\App\Payment::class, function(Faker $faker) {
 
 $factory->define(\App\Deposit::class, function(Faker $faker) {
     return [
-        
         'deposit_type' => $faker->randomElement(['caregiver', 'business']),
         'amount' => $faker->randomFloat(2, 0, 500),
         'transaction_id' => $faker->randomAscii,

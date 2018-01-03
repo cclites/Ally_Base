@@ -8,11 +8,11 @@ use App\Client;
 use App\OfficeUser;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Faker\Factory as Faker;
+use Illuminate\Foundation\Testing\WithFaker;
 
 class SettingTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     protected $officeUser;
     
@@ -64,20 +64,19 @@ class SettingTest extends TestCase
 
     public function testAnOfficeUserCanUpdateBusinessSettings()
     {
-        $faker = Faker::create();
         $this->actingAs($this->officeUser->user);
 
         $data = [
             'scheduling' => false,
-            'mileage_rate' => $faker->numberBetween(0, 200),
+            'mileage_rate' => $this->faker->numberBetween(0, 200),
             'calendar_default_view' => 'week',
             'calendar_caregiver_filter' => 'all',
-            'phone1' => $faker->phoneNumber,
-            'phone2' => $faker->phoneNumber,
-            'address1' => $faker->streetAddress,
-            'city' => $faker->city,
+            'phone1' => $this->faker->phoneNumber,
+            'phone2' => $this->faker->phoneNumber,
+            'address1' => $this->faker->streetAddress,
+            'city' => $this->faker->city,
             'state' => str_random(2),
-            'zip' => $faker->postcode
+            'zip' => $this->faker->postcode
         ];
 
         $business = Business::inRandomOrder()->first();
