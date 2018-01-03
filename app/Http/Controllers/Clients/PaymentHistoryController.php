@@ -54,26 +54,29 @@ class PaymentHistoryController extends Controller
 
     public function printDetails($id)
     {
-        $payment = Payment::with('business', 'client.evvAddress')->find($id);
+        $payment = Payment::with('business', 'client', 'shifts.activities')->find($id);
 
         $report = new ShiftsReport();
         $report->query()
-//            ->with('activities')  // This does not work
             ->where('payment_id', $id)
             ->orderBy('checked_in_time');
 
-        $payment->shifts = $report->rows()->values()->map(function ($value) {
+        $shifts = $report->rows()->values()->map(function ($value) use ($payment) {
             $value = (object) $value;
+            $value->activities = optional($payment->shifts->where('id', $value->id)->first())
+                ->activities
+                ->pluck('name')
+                ->unique()
+                ->sortBy('name')
+                ->values();
             $value->checked_in_time = Carbon::parse($value->checked_in_time);
             $value->checked_out_time = Carbon::parse($value->checked_out_time);
             return $value;
         });
 
-        if (request('view')) {
-            return view('clients.print.payment_details', compact('payment'));
-        }
-        
-        $pdf = PDF::loadView('clients.print.payment_details', compact('payment'))->setOrientation('landscape');
+        $pdf = PDF::loadView('clients.print.payment_details', compact('payment', 'shifts'))->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
+
+        //return view('clients.print.payment_details', compact('payment', 'shifts'));
     }
 }
