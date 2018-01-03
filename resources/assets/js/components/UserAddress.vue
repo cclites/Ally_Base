@@ -94,7 +94,7 @@
 
         data() {
             return {
-                form: {},
+                form: new Form(),
                 countries: new Countries()
             }
         },
