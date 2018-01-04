@@ -23,7 +23,7 @@
                                 v-model="business_id"
                                 required
                         >
-                            <option value="">--Select a Business--</option>
+                            <option value="">--Select a Provider--</option>
                             <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button @click="loadItemsPerClient()" variant="info">Generate Per Client Report</b-button>
@@ -93,7 +93,7 @@
                     },
                     {
                         key: 'business_allotment',
-                        label: 'Business Allotment',
+                        label: 'Provider Allotment',
                         sortable: true,
                         formatter: this.numberFormat
                     },

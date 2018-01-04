@@ -44,7 +44,7 @@
                         <option value="month">Month</option>
                         <option value="agendaWeek">Week</option>
                     </b-form-select>
-                    <input-help :form="form" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
+                    <input-help :form="form" field="calendar_default_view" text="Choose the default view for the Provider Schedule"></input-help>
                 </b-form-group>
                 <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
                     <b-form-select id="calendar_caregiver_filter"
@@ -53,7 +53,7 @@
                         <option value="all">All Caregivers</option>
                         <option value="unassigned">Unassigned Shifts</option>
                     </b-form-select>
-                    <input-help :form="form" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                    <input-help :form="form" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Provider Schedule"></input-help>
                 </b-form-group>
             </b-col>
         </b-row>

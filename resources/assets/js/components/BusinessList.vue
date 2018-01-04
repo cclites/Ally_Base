@@ -2,7 +2,7 @@
     <b-card>
         <b-row>
             <b-col lg="6">
-                <b-btn variant="info" href="/admin/businesses/create">Add a New Business</b-btn>
+                <b-btn variant="info" href="/admin/businesses/create">Add a New Provider</b-btn>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -54,7 +54,7 @@
                 fields: [
                     {
                         key: 'name',
-                        label: 'Business Name',
+                        label: 'Provider Name',
                         sortable: true,
                     },
                     {
