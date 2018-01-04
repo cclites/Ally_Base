@@ -58,7 +58,8 @@
                         <td>Care Week</td>
                         <td>
                             @if(!is_null($payment->week))
-                                {{ $payment->week->start->format('m/d') }} - {{ $payment->week->end->format('m/d') }}
+                                {{ \Carbon\Carbon::parse($payment->week->start)->format('m/d') }} -
+                                {{ \Carbon\Carbon::parse($payment->week->end)->format('m/d') }}
                             @else
                                 N/A
                             @endif

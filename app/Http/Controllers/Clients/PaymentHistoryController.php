@@ -14,51 +14,43 @@ class PaymentHistoryController extends Controller
     public function index()
     {
         $client = Client::with('payments.shifts.caregiver', 'payments')->find(auth()->id());
-        $client->payments = $client->payments->map(function ($payment) {
-            if ($payment->shifts()->exists()) {
-                $checked_in_time = $payment->shifts->first()->checked_in_time;
-                $payment->week = [
-                    'start' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear)->toDateString(),
-                    'end' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear,7)->toDateString()
-                ];
-            }
-            return $payment;
-        });
         return view('clients.payment_history', compact('client'));
     }
 
     public function show($id)
     {
-        $report = new ShiftsReport();
-        $report->query()
-            ->with('activities')
-            ->where('payment_id', $id)
-            ->orderBy('checked_in_time');
-
-        $payment = (object) [
-            'id' => $id,
-            'shifts' => $report->rows()
-        ];
+        $payment_details = $this->getPaymentDetails($id);
 
         switch (auth()->user()->role_type) {
             case 'office_user':
-                $print_url = '/business/clients/payments/' . $payment->id . '/print';
+                $print_url = '/business/clients/payments/' . $id . '/print';
                 break;
             case 'client':
-                $print_url = '/payment-history/' . $payment->id . '/print';
+                $print_url = '/payment-history/' . $id . '/print';
                 break;
         }
 
-        return view('clients.payment_details', compact('payment', 'print_url'));
+        $payment_details['print_url'] = $print_url;
+        return view('clients.payment_details', $payment_details);
     }
 
     public function printDetails($id)
     {
-        $payment = Payment::with('business', 'client', 'shifts.activities')->find($id);
+        $payment_details = $this->getPaymentDetails($id);
+
+        //return view('clients.print.payment_details', $payment_details);
+
+        $pdf = PDF::loadView('clients.print.payment_details', $payment_details)->setOrientation('landscape');
+        return $pdf->download('payment_details.pdf');
+    }
+
+    protected function getPaymentDetails($payment_id)
+    {
+        $payment = Payment::with('business', 'client', 'shifts.activities')->find($payment_id);
 
         $report = new ShiftsReport();
         $report->query()
-            ->where('payment_id', $id)
+            ->where('payment_id', $payment_id)
             ->orderBy('checked_in_time');
 
         $shifts = $report->rows()->values()->map(function ($value) use ($payment) {
@@ -74,9 +66,6 @@ class PaymentHistoryController extends Controller
             return $value;
         });
 
-        $pdf = PDF::loadView('clients.print.payment_details', compact('payment', 'shifts'))->setOrientation('landscape');
-        return $pdf->download('payment_details.pdf');
-
-        //return view('clients.print.payment_details', compact('payment', 'shifts'));
+        return compact('payment', 'shifts');
     }
 }

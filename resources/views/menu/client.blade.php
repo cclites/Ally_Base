@@ -1,8 +1,3 @@
-<li>
-    <a href="/home" aria-expanded="false">
-        <i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard</span>
-    </a>
-</li>
 @if(auth()->user()->role->client_type == 'LTCI')
     <li>
         <a href="/shift-history" aria-expanded="false">
