@@ -45,7 +45,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'gender']);
     }
 
     ///////////////////////////////////////////
@@ -146,6 +146,11 @@ trait IsUserRole
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+    public function getGenderAttribute()
+    {
+        return $this->user->gender;
+    }
 
     public function getFirstNameAttribute()
     {
