@@ -152,7 +152,8 @@
                     state: this.business.state,
                     zip: this.business.zip,
                     country: this.business.country,
-                    timezone: this.business.timezone
+                    timezone: this.business.timezone,
+                    auto_confirm: this.business.auto_confirm
                 }),
                 timezones: [
                     "America/New_York",
