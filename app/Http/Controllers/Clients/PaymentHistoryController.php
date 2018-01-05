@@ -14,7 +14,7 @@ class PaymentHistoryController extends Controller
     public function index()
     {
         $client = Client::with('payments.shifts.caregiver', 'payments')->find(auth()->id());
-        $client->payments = $client->payments->map(function ($payment) {
+        $client->payments = $client->payments->orderBy('created_at', 'DESC')->map(function ($payment) {
             if ($payment->shifts()->exists()) {
                 $checked_in_time = $payment->shifts->first()->checked_in_time;
                 $payment->week = [
