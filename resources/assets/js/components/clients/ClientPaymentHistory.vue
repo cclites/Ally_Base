@@ -11,7 +11,10 @@
             </template>
             <template slot="actions" scope="data">
                 <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
-                    View Details
+                    View Statement
+                </a>
+                <a :href="'/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">
+                    Download Statement
                 </a>
             </template>
         </b-table>
