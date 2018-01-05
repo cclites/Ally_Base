@@ -382,9 +382,10 @@
 
 <script>
     import FormatsDates from "../mixins/FormatsDates";
+    import BusinessSettings from "../mixins/BusinessSettings";
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, BusinessSettings],
 
         props: {},
 
@@ -441,6 +442,7 @@
             this.setInitialFields();
             this.loadFiltersData();
             this.loadData();
+            console.log(this.businessSettings());
         },
 
         computed: {
