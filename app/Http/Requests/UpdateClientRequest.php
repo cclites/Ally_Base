@@ -40,7 +40,11 @@ class UpdateClientRequest extends FormRequest
             'service_start_date' => 'nullable|date',
             'referral' => 'nullable|string',
             'diagnosis' => 'nullable|string',
-            'ambulatory' => 'nullable|boolean'
+            'ambulatory' => 'nullable|boolean',
+            'poa_first_name' => 'nullable|string',
+            'poa_last_name' => 'nullable|string',
+            'poa_phone' => 'nullable|string',
+            'poa_relationship' => 'nullable|string'
         ];
     }
 }
