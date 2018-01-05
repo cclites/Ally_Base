@@ -190,6 +190,10 @@
                             <span v-if="row.item.id">
                                 <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <span>
+                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else><i class="fa fa-calendar-check-o"></i></b-btn>
+                                </span>
                                 <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                             </span>
                             </template>
@@ -642,13 +646,13 @@
                 }
             },
 
-            confirmSelected() {
+            confirmShift(id) {
                 let form = new Form();
-                form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
+                form.post('/business/shifts/' + id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
                         this.items.shifts.map(shift => {
-                            if (shift.id === this.selectedItem.id) {
+                            if (shift.id === id) {
                                 shift.status = response.data.data.status;
                                 shift.confirmed = true;
                             }
@@ -657,19 +661,27 @@
                     });
             },
 
-            unconfirmSelected() {
+            unconfirmShift(id) {
                 let form = new Form();
-                form.post('/business/shifts/' + this.selectedItem.id + '/unconfirm')
+                form.post('/business/shifts/' + id + '/unconfirm')
                     .then(response => {
                         this.detailsModal = false;
                         this.items.shifts.map(shift => {
-                            if (shift.id === this.selectedItem.id) {
+                            if (shift.id === id) {
                                 shift.status = response.data.data.status;
                                 shift.confirmed = false;
                             }
                             return shift;
                         });
                     });
+            },
+
+            confirmSelected() {
+                return this.confirmShift(this.selectedItem.id);
+            },
+
+            unconfirmSelected() {
+                return this.unconfirmShift(this.selectedItem.id);
             },
 
             printSelected() {
