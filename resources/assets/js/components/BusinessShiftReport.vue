@@ -630,7 +630,7 @@
             },
 
             deleteShift(item) {
-                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(this.Day) + '?';
+                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(item.Day) + '?';
                 if (confirm(message)) {
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + item.id)
