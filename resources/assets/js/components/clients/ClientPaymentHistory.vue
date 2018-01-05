@@ -1,6 +1,7 @@
 <template>
     <b-card title="Payment History">
         <b-table hover
+                 sort-by="created_at"
                 :items="items"
                 :fields="fields">
             <template slot="created_at" scope="data">
