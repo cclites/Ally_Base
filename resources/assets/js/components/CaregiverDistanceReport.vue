@@ -122,7 +122,10 @@
                         label: 'Distance',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: [],
                 form: new Form({

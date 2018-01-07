@@ -63,7 +63,10 @@
                         label: 'Last Updated',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 licenseItems: this.licenses, // store to avoid mutating prop
                 licenseModal: false,

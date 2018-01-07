@@ -13,16 +13,13 @@
                  :items="items"
                  :fields="fields">
             <template slot="checked_in_time" scope="data">
-                {{ formatDateFromUTC(data.item.checked_in_time) }}
+                {{ formatDateFromUTC(data.item.checked_in_time.date) }}
             </template>
             <template slot="care_time" scope="data">
-                {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
+                {{ formatTimeFromUTC(data.item.checked_in_time.date) }} - {{ formatTimeFromUTC(data.item.checked_out_time.date) }}
             </template>
             <template slot="activities" scope="data">
-                <div v-for="activity in activities(data.item.activities)" :key="activity">{{ activity }}</div>
-            </template>
-            <template slot="caregiver_name" scope="data">
-                {{ data.item.caregiver.name }}
+                <div v-for="activity in data.item.activities" :key="activity">{{ activity }}</div>
             </template>
         </b-table>
     </b-card>
@@ -33,13 +30,13 @@
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
-        props: ['payment', 'roleType'],
+        props: ['payment', 'shifts', 'roleType'],
 
         mixins: [FormatsDates, FormatsNumbers],
 
         data() {
             return {
-                items: this.payment.shifts,
+                items: this.shifts,
                 fields: [
                     {
                         key: 'checked_in_time',
@@ -50,7 +47,7 @@
                         label: 'Care Time'
                     },
                     {
-                        key: 'duration',
+                        key: 'hours',
                         label: 'Hours of Care Received'
                     },
                     {
@@ -69,9 +66,6 @@
         },
 
         methods: {
-            activities(activities) {
-                return _.uniq(_.map(_.sortBy(activities, 'name'), 'name'));
-            },
 
             printUrl() {
                 switch (this.roleType) {

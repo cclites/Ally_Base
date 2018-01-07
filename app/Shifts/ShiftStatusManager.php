@@ -14,10 +14,9 @@ class ShiftStatusManager
      * @var array
      */
     protected static $statuses = [
-        Shift::UNCONFIRMED,
         Shift::CLOCKED_IN,
         Shift::CLOCKED_OUT,
-        Shift::WAITING_FOR_APPROVAL,
+        Shift::WAITING_FOR_CONFIRMATION,
         Shift::WAITING_FOR_AUTHORIZATION,
         Shift::WAITING_FOR_CHARGE,
         Shift::WAITING_FOR_PAYOUT,
@@ -66,6 +65,11 @@ class ShiftStatusManager
     /// Static Methods
     ///////////////////////////////////////////
 
+    public static function getAllStatuses()
+    {
+        return self::$statuses;
+    }
+
     public static function getReadOnlyStatuses()
     {
         return [
@@ -113,7 +117,7 @@ class ShiftStatusManager
     public static function getUnconfirmedStatuses()
     {
         return [
-            Shift::UNCONFIRMED,
+            Shift::WAITING_FOR_CONFIRMATION,
         ];
     }
 
@@ -238,10 +242,10 @@ class ShiftStatusManager
      */
     public function ackClockOut($verified)
     {
-        if ($verified) {
+        if ($verified && $this->shift->business->auto_confirm) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
-        return $this->update(Shift::WAITING_FOR_APPROVAL);
+        return $this->update(Shift::WAITING_FOR_CONFIRMATION);
     }
 
     /**
@@ -249,7 +253,7 @@ class ShiftStatusManager
      */
     public function ackConfirmation()
     {
-        if ($this->status() === Shift::UNCONFIRMED) {
+        if ($this->status() === Shift::WAITING_FOR_CONFIRMATION) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return false;
@@ -261,21 +265,34 @@ class ShiftStatusManager
     public function unconfirm()
     {
         if ($this->isReadOnly()) return false;
-        return $this->update(Shift::UNCONFIRMED);
+        return $this->update(Shift::WAITING_FOR_CONFIRMATION);
     }
 
     /**
-     * Acknowledge a manual approval
-     *
+     * Acknowledge an authorization
      * @return bool
      */
-    public function ackApproval()
+    public function ackAuthorization()
     {
-        if ($this->status() === Shift::WAITING_FOR_APPROVAL) {
+        if (in_array($this->status(), [Shift::WAITING_FOR_AUTHORIZATION])) {
+            return $this->update(Shift::WAITING_FOR_CHARGE);
+        }
+        return false;
+    }
+
+    /**
+     * Unauthorize a shift (revert authorization)
+     * @return bool
+     */
+    public function unauthorize()
+    {
+        if ($this->status() === Shift::WAITING_FOR_CHARGE) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return false;
     }
+
+
 
     /**
      * Acknowledge a successful payment
@@ -364,7 +381,7 @@ class ShiftStatusManager
      * Acknowledge a returned (failed) caregiver deposit
      * @return bool
      */
-    public function ackFailedCaregiverDeposit()
+    public function ackReturnedCaregiverDeposit()
     {
         switch($this->status()) {
             case Shift::PAID_CAREGIVER_ONLY:

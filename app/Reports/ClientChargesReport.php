@@ -4,6 +4,7 @@ namespace App\Reports;
 use App\Client;
 use App\GatewayTransaction;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 /**
  * Class ClientChargesReport
@@ -13,6 +14,7 @@ use App\Shift;
  */
 class ClientChargesReport extends ScheduledPaymentsReport
 {
+    use ShiftReportFilters;
 
     public function forTransaction(GatewayTransaction $transaction) {
         if ($transaction->payment) {
@@ -35,7 +37,7 @@ class ClientChargesReport extends ScheduledPaymentsReport
     protected function results()
     {
         $shifts = $this->query
-            ->where('status', '!=', Shift::UNCONFIRMED)
+            ->whereConfirmed()
             ->get();
         $rows = [];
 

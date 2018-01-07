@@ -4,9 +4,12 @@ namespace App\Reports;
 use App\GatewayTransaction;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;
+use App\Traits\ShiftReportFilters;
 
 class ShiftsReport extends BaseReport
 {
+    use ShiftReportFilters;
+
     /**
      * @var bool
      */
@@ -53,7 +56,7 @@ class ShiftsReport extends BaseReport
             $row = [
                 'id' => $shift->id,
                 'checked_in_time' => $shift->checked_in_time->format('c'),
-                'checked_out_time' => $shift->checked_out_time->format('c'),
+                'checked_out_time' => optional($shift->checked_out_time)->format('c'),
                 'hours' => $shift->duration(),
                 'client_id' => $shift->client_id,
                 'client_name' => optional($shift->client)->nameLastFirst(),
@@ -62,6 +65,7 @@ class ShiftsReport extends BaseReport
                 'caregiver_rate' => $shift->caregiver_rate,
                 'provider_fee' => $shift->provider_fee,
                 'ally_fee' => number_format($allyFee, 2),
+                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
                 'other_expenses' => number_format($shift->other_expenses, 2),
                 'mileage' => number_format($shift->mileage, 2),
                 'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
@@ -69,7 +73,6 @@ class ShiftsReport extends BaseReport
                 'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
                 'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
                 'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),
                 'EVV' => $shift->verified,
@@ -78,18 +81,4 @@ class ShiftsReport extends BaseReport
         });
         return $rows;
     }
-
-    public function forTransaction(GatewayTransaction $transaction) {
-        if ($transaction->payment) {
-            $this->query()->whereHas('payment', function($q) use ($transaction) {
-                $q->where('payments.id', $transaction->payment->id);
-            });
-        }
-        elseif ($transaction->deposit) {
-            $this->query()->whereHas('deposits', function($q) use ($transaction) {
-                $q->where('deposits.id', $transaction->deposit->id);
-            });
-        }
-    }
-
 }

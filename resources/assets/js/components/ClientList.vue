@@ -69,24 +69,31 @@
                     {
                         key: 'firstname',
                         label: 'First Name',
-                        sortable: true,
+                        sortable: true
                     },
                     {
                         key: 'lastname',
                         label: 'Last Name',
-                        sortable: true,
+                        sortable: true
                     },
                     {
                         key: 'email',
                         label: 'Email Address',
-                        sortable: true,
+                        sortable: true
+                    },
+                    {
+                        key: 'county',
+                        sortable: true
                     },
                     {
                         key: 'client_type',
                         label: 'Type',
-                        sortable: true,
+                        sortable: true
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ]
             }
         },
@@ -104,7 +111,8 @@
                         lastname: client.user.lastname,
                         email: client.user.email,
                         client_type: _.upperFirst(_.replace(client.client_type, '_', ' ')),
-                        active: client.user.active
+                        active: client.user.active,
+                        county: client.county
                     }
                 });
 

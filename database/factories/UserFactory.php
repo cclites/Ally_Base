@@ -42,6 +42,10 @@ $factory->define(\App\Caregiver::class, function(Faker $faker) {
 });
 
 $factory->define(\App\Client::class, function(Faker $faker) {
+    if (!\App\Business::exists()) {
+        // Create a business if one does not exist.  Client's need to be attached to a business.
+        factory(\App\Business::class)->create();
+    }
     return array_merge(userFactory($faker), [
         'ssn' => $faker->randomNumber(3) . '-' . $faker->randomNumber(2) . '-' . $faker->randomNumber(4),
         'business_id' => \App\Business::inRandomOrder()->value('id'),

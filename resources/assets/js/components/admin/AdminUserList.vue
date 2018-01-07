@@ -97,7 +97,10 @@
                         label: 'Date Created',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: [],
             }

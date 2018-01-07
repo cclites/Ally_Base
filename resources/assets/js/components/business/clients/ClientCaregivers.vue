@@ -35,10 +35,10 @@
                 <tbody>
                 <tr v-for="item in items">
                     <td>{{ item.firstname }} {{ item.lastname }}</td>
-                    <td class="hourly">{{ item.pivot.caregiver_hourly_rate }}</td>
-                    <td class="hourly">{{ item.pivot.provider_hourly_fee }}</td>
-                    <td class="hourly">{{ item.pivot.ally_hourly_fee }}</td>
-                    <td class="hourly">{{ item.pivot.total_hourly_fee }}</td>
+                    <td class="hourly">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
+                    <td class="hourly">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
+                    <td class="hourly">{{ moneyFormat(item.pivot.ally_hourly_fee) }}</td>
+                    <td class="hourly">{{ moneyFormat(item.pivot.total_hourly_fee) }}</td>
                     <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
                     <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
                     <!--<td class="hourly">{{ item.pivot.ally_daily_fee }}</td>-->
@@ -139,9 +139,21 @@
                             </b-form-input>
                             <input-help :form="form" field="provider_daily_fee" text="Enter the provider referral fee for daily shifts."></input-help>
                         </b-form-group> -->
+                        <b-row>
+                            <b-col>
+                                <b-form-group label="Ally Fee">
+                                    {{ moneyFormat(allyTotal) }}
+                                </b-form-group>
+                            </b-col>
+                            <b-col>
+                                <b-form-group label="Total">
+                                    {{ moneyFormat(total) }}
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                     </b-col>
                </b-row>
-                <b-row v-if="form.caregiver_id">
+                <b-row v-if="this.selectedCaregiver.id">
                     <b-col>
                         <b-form-group>
                             <b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">
@@ -161,15 +173,20 @@
 </template>
 
 <script>
+    import FormatsNumbers from '../../../mixins/FormatsNumbers'
+
     export default {
         props: {
             'client_id': {},
+            'allyFee': Number,
             'paymentTypeMessage': {
                 default() {
                     return '';
                 }
             }
         },
+
+        mixins: [FormatsNumbers],
 
         data() {
             return {
@@ -298,6 +315,18 @@
                     return 'Edit Caregiver Assignment';
                 }
                 return 'Add Caregiver Assignment';
+            },
+
+            subTotal() {
+                return parseFloat(this.form.provider_hourly_fee) + parseFloat(this.form.caregiver_hourly_rate);
+            },
+
+            allyTotal() {
+                return this.subTotal * this.allyFee;
+            },
+
+            total() {
+                return this.subTotal + this.allyTotal;
             }
         }
     }

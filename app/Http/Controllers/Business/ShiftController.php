@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Events\ShiftModified;
-use App\Events\UnverifiedShiftApproved;
+use App\Events\UnverifiedShiftConfirmed;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -47,7 +47,9 @@ class ShiftController extends BaseController
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['business_id'] = $this->business()->id;
         $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-
+        $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
+        
         if ($shift = Shift::create($data)) {
             $shift->activities()->sync($request->input('activities', []));
             foreach($request->input('issues', []) as $issue) {
@@ -129,12 +131,14 @@ class ShiftController extends BaseController
             'provider_fee' => 'required|numeric|max:1000|min:0',
             'hours_type' => 'required|in:default,overtime,holiday',
         ]);
-
+        
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+        $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
 
         if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
-             event(new UnverifiedShiftApproved($shift));
+             event(new UnverifiedShiftConfirmed($shift));
         }
 
         if ($shift->update($data)) {
@@ -170,10 +174,13 @@ class ShiftController extends BaseController
         }
 
         if ($shift->statusManager()->ackConfirmation()) {
+            if (!$shift->isVerified()) {
+                event(new UnverifiedShiftConfirmed($shift));
+            }
             return new SuccessResponse('The shift has been confirmed.', $shift->toArray());
         }
 
-        if ($shift->status !== Shift::UNCONFIRMED) {
+        if ($shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift has already been confirmed.');
         }
         return new ErrorResponse(500, 'The shift could not be confirmed due to a system error.');
@@ -185,7 +192,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
-        if ($shift->status === Shift::UNCONFIRMED) {
+        if (!$shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift is already unconfirmed.');
         }
 
@@ -194,22 +201,6 @@ class ShiftController extends BaseController
         }
 
         return new ErrorResponse(400, 'The shift is locked for modification.');
-    }
-
-
-    public function verify(Shift $shift)
-    {
-        $shift->load(['activities', 'issues']);
-        if ($this->business()->id != $shift->business_id) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        if ($shift->update(['verified' => true])) {
-            event(new UnverifiedShiftApproved($shift));
-            return new SuccessResponse('The shift has been verified', $shift->toArray());
-        }
-
-        return new ErrorResponse(500, 'The shift could not be verified');
     }
 
     public function storeIssue(Request $request, Shift $shift)

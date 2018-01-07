@@ -41,6 +41,7 @@ class ReportsController extends Controller
 
         $caregiver = Caregiver::find(auth()->id());
         $deposits = Deposit::with('shifts')->where('caregiver_id', $caregiver->id)
+            ->orderBy('created_at', 'DESC')
             ->get()
             ->map(function ($deposit) {
                 $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();

@@ -51,13 +51,7 @@
                                  :sort-desc.sync="sortDesc"
                                  :empty-text="emptyText"
                                  @filtered="onFiltered">
-                            <template slot="firstname" scope="data">
-                                {{ data.item.caregiver.firstname }}
-                            </template>
-                            <template slot="lastname" scope="data">
-                                {{ data.item.caregiver.lastname }}
-                            </template>
-                            <template slot="wages" scope="data">
+                            <template slot="wages" slot-scope="data">
                                 {{ moneyFormat(data.item.duration * data.item.caregiver_rate) }}
                             </template>
                             <template slot="actions" scope="row">
@@ -129,17 +123,12 @@
 
                     },
                     {
-                        key: 'firstname',
-                        label: 'First Name',
+                        key: 'caregiver_name',
+                        label: 'Caregiver',
                         sortable: true
                     },
                     {
-                        key: 'lastname',
-                        label: 'Last Name',
-                        sortable: true
-                    },
-                    {
-                        key: 'duration',
+                        key: 'hours',
                         label: 'Hours',
                         sortable: true,
                     },

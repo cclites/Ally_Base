@@ -22,7 +22,10 @@
         </b-card>
 
         <b-row>
-            <b-col lg="6">
+            <b-col cols="12" class="with-padding-bottom">
+                <b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
+            </b-col>
+            <b-col lg="6" v-show="showSummary">
                 <b-card header="Client Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
@@ -32,7 +35,7 @@
                     </b-table>
                 </b-card>
             </b-col>
-            <b-col lg="6">
+            <b-col lg="6" v-show="showSummary">
                 <b-card header="Caregiver Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
@@ -53,7 +56,7 @@
                 >
                     <div class="text-right">
                         <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                        <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                        <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                     </div>
                     <b-table bordered striped hover show-empty
                              :fields="shiftFields"
@@ -178,7 +181,10 @@
                         sortable: true,
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 'clientSummaryFields': [
                     {
@@ -230,7 +236,14 @@
                 'caregiverSummary': [],
                 'urlPrefix': '/business/reports/data/',
                 'queryString': '?transaction_id=' + this.transaction.id,
+                'showSummary': false,
             }
+        },
+
+        computed: {
+            summaryButtonText() {
+                return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
+            },
         },
 
         mounted() {
@@ -238,6 +251,10 @@
         },
 
         methods: {
+
+            printTable() {
+                $(".shift-table").print();
+            },
 
             loadData() {
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
@@ -267,23 +284,11 @@
                             this.shifts = [];
                         }
                     });
+            },
+
+            showHideSummary() {
+                this.showSummary = !this.showSummary;
             }
         },
     }
 </script>
-
-<style>
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .shift-table, .shift-table * {
-            visibility: visible;
-        }
-        .shift-table {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    }
-</style>

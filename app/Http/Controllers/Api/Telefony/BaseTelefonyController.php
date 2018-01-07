@@ -35,10 +35,15 @@ abstract class BaseTelefonyController extends Controller
         $this->request = $request;
         $this->telefony = $telefony;
 
-        if ($request->input('From')) {
-            $this->number = $phoneNumber->input($request->input('From'));
+        if (!$request->input('From')) {
+            abort(403);
         }
 
+//        if ($request->getContentType() !== 'xml') {
+//            abort(403);
+//        }
+
+        $this->number = $phoneNumber->input($request->input('From'));
         $this->client = $telefony->findClientByNumber($this->number);
         if (!$this->client) {
             throw new TelefonyMessageException('The number you are calling from is not recognized.  The phone number needs to be linked to the client account for verification purposes.');

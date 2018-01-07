@@ -14,6 +14,12 @@ use Faker\Generator as Faker;
 */
 
 $factory->define(\App\Shift::class, function(Faker $faker) {
+    if (!\App\Client::exists()) {
+        // Create a client & caregiver if none exist.  Shifts need to be attached to clients & caregivers
+        factory(\App\Client::class)->create();
+        factory(\App\Caregiver::class)->create();
+    }
+
     $duration = mt_rand(60, 720);
     $start = date('Y-m-d H:i:s', time() - mt_rand(1200, 86400*90));
     $end = date('Y-m-d H:i:s', strtotime($start . ' +' . $duration . ' minutes'));

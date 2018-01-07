@@ -26,6 +26,12 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
+                        <b-form-select v-model="payment_method">
+                            <option value="">All Payment Methods</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="bank_account">Bank Account</option>
+                            <option value="business">Provider Payment</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -33,7 +39,9 @@
             </b-col>
         </b-row>
 
-        <b-row v-show="showSummary">
+        <loading-card v-show="loading < 2"></loading-card>
+
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
@@ -109,7 +117,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row v-show="showSummary">
+        <b-row v-show="showSummary && loading >= 2">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -131,7 +139,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-show="loading >= 2">
             <b-col lg="12">
                 <b-card
                         header="Shifts"
@@ -146,7 +154,7 @@
                         </b-col>
                         <b-col sm="6" class="text-right">
                             <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                            <b-btn href="javascript:print()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                            <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
                     <div class="table-responsive">
@@ -182,6 +190,10 @@
                             <span v-if="row.item.id">
                                 <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <span>
+                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else><i class="fa fa-calendar-check-o"></i></b-btn>
+                                </span>
                                 <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                             </span>
                             </template>
@@ -371,7 +383,7 @@
             <div slot="modal-footer">
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'UNCONFIRMED'">Confirm Shift</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
             </div>
@@ -398,6 +410,7 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 caregiver_id: "",
                 client_id: "",
+                payment_method: "",
                 clients: [],
                 caregivers: [],
                 showSummary: false,
@@ -431,6 +444,7 @@
                 ],
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
+                loading: 0,
             }
         },
 
@@ -451,7 +465,10 @@
                         });
                     }
                 }
-                fields.push('actions');
+                fields.push({
+                    key: 'actions',
+                    class: 'hidden-print'
+                });
                 return fields;
             },
             shiftHistoryItems() {
@@ -486,7 +503,7 @@
                 items.push({
                     '_rowVariant': 'info',
                     'Day': 'Total',
-                    'Hours': this.shiftTotals.duration,
+                    'Hours': this.shiftTotals.hours,
                     'Mileage': this.shiftTotals.mileage,
                     'CG Total': this.shiftTotals.caregiver_total,
                     'Reg Total': this.shiftTotals.provider_total,
@@ -522,7 +539,7 @@
                 if (this.items.shifts.length === 0) return {};
                 return this.items.shifts.reduce((totals, item) => {
                     return {
-                        duration: (this.parseFloat(totals.duration) + this.parseFloat(item.duration)).toFixed(2),
+                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
                         caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
                         provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
                         ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
@@ -537,7 +554,7 @@
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
             queryString() {
-                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id;
+                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method;
             }
         },
 
@@ -558,6 +575,8 @@
                     if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
+                    let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
+                    if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
@@ -565,6 +584,8 @@
                     let showSummary = this.getLocalStorage('showSummary');
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
+
+                this.loading = 0;
 
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
@@ -574,6 +595,7 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
+                        this.loading++;
                     });
                 axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
@@ -583,6 +605,7 @@
                         else {
                             this.items.clientCharges = [];
                         }
+                        this.loading++;
                     });
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
@@ -592,6 +615,7 @@
                         else {
                             this.items.shifts = [];
                         }
+                        this.loading++;
                     });
             },
 
@@ -621,7 +645,7 @@
             },
 
             deleteShift(item) {
-                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(this.Day) + '?';
+                let message = 'Are you sure you wish to delete the ' + item.Hours + ' hour shift for ' + item.Caregiver + ' on ' + this.formatDate(item.Day) + '?';
                 if (confirm(message)) {
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + item.id)
@@ -633,36 +657,50 @@
                 }
             },
 
-            confirmSelected() {
+            confirmShift(id) {
                 let form = new Form();
-                form.post('/business/shifts/' + this.selectedItem.id + '/confirm')
+                form.post('/business/shifts/' + id + '/confirm')
                     .then(response => {
                         this.detailsModal = false;
                         this.items.shifts.map(shift => {
-                            if (shift.id === this.selectedItem.id) {
+                            if (shift.id === id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = true;
                             }
                             return shift;
                         });
                     });
             },
 
-            unconfirmSelected() {
+            unconfirmShift(id) {
                 let form = new Form();
-                form.post('/business/shifts/' + this.selectedItem.id + '/unconfirm')
+                form.post('/business/shifts/' + id + '/unconfirm')
                     .then(response => {
                         this.detailsModal = false;
                         this.items.shifts.map(shift => {
-                            if (shift.id === this.selectedItem.id) {
+                            if (shift.id === id) {
                                 shift.status = response.data.data.status;
+                                shift.confirmed = false;
                             }
                             return shift;
                         });
                     });
+            },
+
+            confirmSelected() {
+                return this.confirmShift(this.selectedItem.id);
+            },
+
+            unconfirmSelected() {
+                return this.unconfirmShift(this.selectedItem.id);
             },
 
             printSelected() {
                 $("#detailsModal .container-fluid").print();
+            },
+
+            printTable() {
+                $(".shift-table").print();
             },
 
             parseFloat(float) {
@@ -725,6 +763,11 @@
             },
             client_id(val) {
                 this.setLocalStorage('filterClientId', val);
+                if (val) this.payment_method = ""; // Set payment method filter back to all if client is selected
+            },
+            payment_method(val) {
+                this.setLocalStorage('filterPaymentMethod', val);
+                if (val) this.client_id = ""; // Set client filter back to all if payment method is selected
             },
             start_date(val) {
                 this.setLocalStorage('startDate', val);
@@ -765,19 +808,5 @@
         width: 100%;
         height: auto;
         max-width: 400px;
-    }
-
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .shift-table, .shift-table * {
-            visibility: visible;
-        }
-        .shift-table {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
     }
 </style>

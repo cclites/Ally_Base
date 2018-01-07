@@ -16,7 +16,7 @@ class ScheduledPaymentsReport extends ShiftsReport
     protected function results()
     {
         $shifts = $this->query->with(['caregiver', 'client'])
-            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE, Shift::WAITING_FOR_APPROVAL])
+            ->whereIn('status', [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE])
             ->get();
         $rows = $shifts->map(function(Shift $shift) {
             return [
@@ -41,6 +41,7 @@ class ScheduledPaymentsReport extends ShiftsReport
                 'caregiver_allotment' => number_format($shift->costs()->getCaregiverCost(), 2),
                 'mileage' => $shift->mileage,
                 'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
+                'verified' => $shift->verified,
             ];
         });
         return $rows;

@@ -1,10 +1,31 @@
-/* Printing support: Hide menus */
+/* Printing support */
 @media print {
+  /* Hide menus */
   header.topbar,
   aside.left-sidebar,
   #impersonator-bar
   {
     visibility: hidden;
+  }
+  /* Repeat table headers */
+  thead {
+    display: table-header-group !important;
+  }
+  th {
+    position: static !important;
+  }
+  th.sorting:before {
+    display: none;
+  }
+  th.sorting:after {
+    display: none;
+  }
+  /* Reduce table font size */
+  table td, table th {
+    font-size: 12px;
+  }
+  .hidden-print {
+    display: none;
   }
 }
 

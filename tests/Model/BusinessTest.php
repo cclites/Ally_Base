@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Model;
 
 use App\BankAccount;
 use App\Business;
@@ -71,7 +71,7 @@ class BusinessTest extends TestCase
     public function testBusinessCanHaveABankAccount()
     {
         $account = factory(BankAccount::class)->make();
-        $this->business->setBankAccount($account);
+        $this->business->setBankAccount('bankAccount', $account);
 
         $definedAccount = $this->business->bankAccount;
         $this->assertEquals($account->account_number, $definedAccount->account_number);
@@ -81,10 +81,10 @@ class BusinessTest extends TestCase
     {
         $newBusiness = factory(Business::class)->create();
         $account = factory(BankAccount::class)->make();
-        $newBusiness->setBankAccount($account);
+        $newBusiness->setBankAccount('bankAccount', $account);
 
         $this->expectException(ExistingBankAccountException::class);
-        $this->business->setBankAccount($account);
+        $this->business->setBankAccount('bankAccount', $account);
     }
 
     public function testBusinessCanNotAddAnOwnedUserBankAccount()
@@ -94,7 +94,7 @@ class BusinessTest extends TestCase
         $user->bankAccounts()->save($account);
 
         $this->expectException(ExistingBankAccountException::class);
-        $this->business->setBankAccount($account);
+        $this->business->setBankAccount('bankAccount', $account);
     }
 
 

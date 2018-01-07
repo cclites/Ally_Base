@@ -97,7 +97,10 @@
                         label: 'Activity Name',
                         sortable: true,
                     },
-                    'actions'
+                    {
+                        key: 'actions',
+                        class: 'hidden-print'
+                    }
                 ],
                 items: this.activities,
             }

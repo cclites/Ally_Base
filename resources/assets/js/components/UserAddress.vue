@@ -37,6 +37,15 @@
                         </b-form-input>
                         <input-help :form="form" field="city" text="Enter the city here."></input-help>
                     </b-form-group>
+                    <b-form-group label="County" label-for="county">
+                        <b-form-input
+                            id="county"
+                            name="county"
+                            type="text"
+                            v-model="form.county">
+                        </b-form-input>
+                        <input-help :form="form" field="county" text="Enter the county here."></input-help>
+                    </b-form-group>
                     <b-form-group label="State" label-for="state">
                         <b-form-input
                             id="state"
@@ -80,25 +89,19 @@
             'type': '',
             'user': null,
             'address': null,
-            'action': null,
+            'action': null
         },
 
         data() {
             return {
-                form: new Form({
-                    address1: this.address.address1,
-                    address2: this.address.address2,
-                    city: this.address.city,
-                    state: this.address.state,
-                    zip: this.address.zip,
-                    country: (this.address.country) ? this.address.country : 'US',
-                }),
+                form: new Form(),
                 countries: new Countries()
             }
         },
 
         mounted() {
-
+            this.setForm();
+            this.$watch('address', () => {this.setForm()});
         },
 
         methods: {
@@ -109,6 +112,18 @@
                     .then(() => {
                         window.scroll(0, 0);
                     });
+            },
+
+            setForm() {
+                this.form = new Form({
+                    address1: this.address.address1,
+                    address2: this.address.address2,
+                    city: this.address.city,
+                    state: this.address.state,
+                    zip: this.address.zip,
+                    country: (this.address.country) ? this.address.country : 'US',
+                    county: this.address.county
+                });
             }
         }
     }

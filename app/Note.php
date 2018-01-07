@@ -4,6 +4,33 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Note
+ *
+ * @property int $id
+ * @property int|null $caregiver_id
+ * @property int|null $client_id
+ * @property string $body
+ * @property string|null $tags
+ * @property int $created_by
+ * @property int $business_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read \App\Client|null $client
+ * @property-read \App\User $creator
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereTags($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Note extends Model
 {
     protected $guarded = ['id'];

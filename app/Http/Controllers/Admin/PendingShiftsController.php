@@ -25,16 +25,37 @@ class PendingShiftsController extends Controller
         return view('admin.charges.pending_shifts');
     }
 
-    public function update(Request $request, Shift $shift)
+    public function update(Request $request, Shift $shift = null)
     {
-        $status = ($request->input('authorized')) ? Shift::WAITING_FOR_CHARGE : Shift::WAITING_FOR_AUTHORIZATION;
-        $validCurrentStatuses = [Shift::WAITING_FOR_APPROVAL, Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE];
+        $authorized = $request->input('authorized');
+        $validCurrentStatuses = [Shift::WAITING_FOR_AUTHORIZATION, Shift::WAITING_FOR_CHARGE];
+        if (!$shift && $request->has('start_date')) {
+            $startDate = (new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+            $endDate = (new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
+
+            $query = Shift::whereBetween('checked_in_time', [$startDate, $endDate])
+                          ->whereIn('status', $validCurrentStatuses);
+            if ($request->input('business_id')) $query->where('business_id', $request->input('business_id'));
+            $shifts = $query->get();
+            foreach($shifts as $shift) {
+                if ($authorized) {
+                    $shift->statusManager()->ackAuthorization();
+                }
+                else {
+                    $shift->statusManager()->unauthorize();
+                }
+            }
+            return new SuccessResponse('The shifts have been updated.');
+        }
         if (!in_array($shift->status, $validCurrentStatuses)) {
             return new ErrorResponse(400, 'Shift is not pending and therefore cannot be updated.');
         }
-        if ($shift->update(['status' => $status])) {
-            return new SuccessResponse('The shift has been updated.');
+        if ($authorized) {
+            $shift->statusManager()->ackAuthorization();
         }
-        return new ErrorResponse(500, 'Unable to update shift.');
+        else {
+            $shift->statusManager()->unauthorize();
+        }
+        return new SuccessResponse('The shift has been updated.');
     }
 }

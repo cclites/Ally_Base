@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\BankAccount;
+use App\Business;
 use App\Client;
 use App\CreditCard;
 use App\Deposit;
@@ -150,7 +152,7 @@ class ReportsController extends BaseController
         if ($request->input('export')) {
             $report = new ProviderReconciliationReport($this->business());
             return $report->orderBy('created_at', 'DESC')
-                          ->setDateFormat('m/d/Y H:i A', $this->business()->timezone)
+                          ->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
                           ->download();
         }
 
@@ -273,23 +275,11 @@ class ReportsController extends BaseController
         $report->where('business_id', $this->business()->id)
                ->orderBy('checked_in_time');
 
-        if ($request->has('start_date') || $request->has('end_date')) {
-            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-            $report->between($startDate, $endDate);
-        }
-        if ($request->has('transaction_id')) {
-            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
-        }
-        if ($caregiver_id = $request->input('caregiver_id')) {
-            $report->where('caregiver_id', $caregiver_id);
-        }
-        if ($client_id = $request->input('client_id')) {
-            $report->where('client_id', $client_id);
-        }
+        $this->addShiftReportFilters($report, $request);
 
         if ($request->input('export')) {
-            return $report->download();
+            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+                          ->download();
         }
 
         return $report->rows();
@@ -300,21 +290,7 @@ class ReportsController extends BaseController
         $report = new CaregiverPaymentsReport();
         $report->where('business_id', $this->business()->id);
 
-        if ($request->has('start_date') || $request->has('end_date')) {
-            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-            $report->between($startDate, $endDate);
-        }
-        if ($request->has('transaction_id')) {
-            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
-        }
-        if ($caregiver_id = $request->input('caregiver_id')) {
-            $report->where('caregiver_id', $caregiver_id);
-        }
-        if ($client_id = $request->input('client_id')) {
-            $report->where('client_id', $client_id);
-        }
-
+        $this->addShiftReportFilters($report, $request);
 
         return $report->rows();
     }
@@ -324,20 +300,7 @@ class ReportsController extends BaseController
         $report = new ClientChargesReport();
         $report->where('business_id', $this->business()->id);
 
-        if ($request->has('start_date') || $request->has('end_date')) {
-            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-            $report->between($startDate, $endDate);
-        }
-        if ($request->has('transaction_id')) {
-            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
-        }
-        if ($caregiver_id = $request->input('caregiver_id')) {
-            $report->where('caregiver_id', $caregiver_id);
-        }
-        if ($client_id = $request->input('client_id')) {
-            $report->where('client_id', $client_id);
-        }
+        $this->addShiftReportFilters($report, $request);
 
         return $report->rows();
     }
@@ -426,6 +389,39 @@ class ReportsController extends BaseController
     public function printableSchedule()
     {
         return view('business.reports.printable_schedule');
+    }
+
+    protected function addShiftReportFilters($report, Request $request)
+    {
+        if ($request->has('start_date') || $request->has('end_date')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
+            $report->between($startDate, $endDate);
+        }
+        if ($request->has('transaction_id')) {
+            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
+        if ($request->has('payment_method')) {
+            $method = null;
+            switch($request->input('payment_method')) {
+                case 'credit_card':
+                    $method = CreditCard::class;
+                    break;
+                case 'bank_account':
+                    $method = BankAccount::class;
+                    break;
+                case 'business':
+                    $method = Business::class;
+                    break;
+            }
+            if ($method) $report->forPaymentMethod($method);
+        }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
     }
 }
 
