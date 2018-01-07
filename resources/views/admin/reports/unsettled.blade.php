@@ -20,4 +20,29 @@
             ])) }}"
     >
     </admin-unsettled-report>
+
+{{--
+
+    SAMPLE LINK leading to this view:
+    
+    
+    <a class="my-report-link" 
+       href="{{ 
+            route('admin.reports.unsettled', $params = [
+                'caregiver_id' => 2,
+                'status'=> [
+                    \App\Shift::PAID_NOT_CHARGED,
+                    \App\Shift::PAID_BUSINESS_ONLY,
+                ]
+            ]) 
+       }}" 
+    >
+       View Unsettled Shifts
+    </a>
+    <!-- 
+        To Generate query-string like: 
+            ?caregiver_id=2&status[]=PAID_NOT_CHARGED&status[]=PAID_BUSINESS_ONLY 
+    -->
+    
+--}}
 @endsection
