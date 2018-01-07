@@ -225,12 +225,6 @@
                         {{ selectedItem.caregiver_name }}
                     </b-col>
                 </b-row>
-                <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
-                    <b-col>
-                        <strong>Client Signature</strong>
-                        <div v-html="selectedItem.signature.content" class="signature"></div>
-                    </b-col>
-                </b-row>
                 <b-row class="with-padding-bottom">
                     <b-col sm="6">
                         <strong>Clocked In Time</strong><br />
@@ -243,7 +237,7 @@
                 </b-row>
                 <b-row>
                     <b-col sm="6" class="with-padding-bottom">
-                        <strong>Special Designation</strong><br>
+                        <strong>Shift Type</strong><br>
                         {{ hoursType(selectedItem)}}
                     </b-col>
                 </b-row>
@@ -259,7 +253,8 @@
                         {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
                     </b-col>
                 </b-row>
-                <h4>Issues on Shift</h4>
+                
+                <strong>Issues on Shift</strong>
                 <b-row>
                     <b-col sm="12">
                         <p v-if="!selectedItem.issues || !selectedItem.issues.length">
@@ -271,13 +266,21 @@
                         </p>
                     </b-col>
                 </b-row>
-                <h4>Activities Performed</h4>
+                
+                <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
+                    <b-col>
+                        <strong>Client Signature</strong>
+                        <div v-html="selectedItem.signature.content" class="signature"></div>
+                    </b-col>
+                </b-row>
+                
+                <strong>Activities Performed</strong>
                 <b-row>
                     <b-col sm="12">
                         <p v-if="!selectedItem.activities || !selectedItem.activities.length">
                             No activities recorded
                         </p>
-                        <table class="table" v-else>
+                        <table class="table table-sm" v-else>
                             <thead>
                             <tr>
                                 <th>Code</th>
@@ -293,24 +296,31 @@
                         </table>
                     </b-col>
                 </b-row>
-                <h4>EVV</h4>
+                
+                <strong>Was this Shift Electronically Verified?</strong>
                 <b-row>
                     <b-col sm="6">
-                        <table class="table">
+                        <span v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">Yes</span>
+                        <span v-else>No</span>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col sm="6">
+                        <table class="table table-sm">
                             <thead>
                             <tr>
                                 <th colspan="2">Clock In</th>
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
-                            <!-- <tr>
-                                <th>Geocode</th>
-                                <td>{{ selectedItem.checked_in_latitude.slice(0,8) }},<br />{{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
-                            </tr> -->
-                            <tr>
-                                <th>Distance</th>
-                                <td>{{ selectedItem.checked_in_distance }}m</td>
-                            </tr>
+                                <tr>
+                                    <th>Geocode</th>
+                                    <td>{{ selectedItem.checked_in_latitude.slice(0,8) }}, {{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Distance</th>
+                                    <td>{{ selectedItem.checked_in_distance }}m</td>
+                                </tr>
                             </tbody>
                             <tbody v-else-if="selectedItem.checked_in_number">
                             <tr>
@@ -326,32 +336,33 @@
                         </table>
                     </b-col>
                     <b-col sm="6">
-                        <table class="table">
+                        <table class="table table-sm">
                             <thead>
                             <tr>
                                 <th colspan="2">Clock Out</th>
                             </tr>
                             </thead>
                             <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
-                            <!-- <tr>
-                                 <th>Geocode</th>
-                                 <td>{{ selectedItem.checked_out_latitude.slice(0,8) }},<br />{{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
-                             </tr> -->
-                            <tr>
-                                <th>Distance</th>
-                                <td>{{ selectedItem.checked_out_distance }}m</td>
-                            </tr>
+                                <tr>
+                                    <th>Geocode</th>
+                                    <td>{{ selectedItem.checked_out_latitude.slice(0,8) }}, {{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
+                                </tr> 
+                                
+                                <tr>
+                                    <th>Distance</th>
+                                    <td>{{ selectedItem.checked_out_distance }}m</td>
+                                </tr>
                             </tbody>
                             <tbody v-else-if="selectedItem.checked_out_number">
-                            <tr>
-                                <th>Phone Number</th>
-                                <td>{{ selectedItem.checked_out_number }}</td>
-                            </tr>
+                                <tr>
+                                    <th>Phone Number</th>
+                                    <td>{{ selectedItem.checked_out_number }}</td>
+                                </tr>
                             </tbody>
                             <tbody v-else>
-                            <tr>
-                                <td colspan="2">No EVV data</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="2">No EVV data</td>
+                                </tr>
                             </tbody>
                         </table>
                     </b-col>
@@ -695,7 +706,7 @@
             hoursType(item) {
                 switch (item.hours_type) {
                     case 'default':
-                        return 'None';
+                        return 'Regular';
                     case 'overtime':
                         return 'OT';
                     case 'holiday':
@@ -746,9 +757,14 @@
         font-size: 13px;
         background-color: #ecf7f9;
     }   
+    .table-sm {
+        padding: .2rem 0px;
+    }
     .signature > svg {
+        margin: -25px 0;
         width: 100%;
         height: auto;
+        max-width: 400px;
     }
 
     @media print {
