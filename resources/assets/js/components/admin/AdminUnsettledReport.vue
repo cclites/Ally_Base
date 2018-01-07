@@ -71,7 +71,39 @@
             </b-col>
         </b-row>
         <div class="table-responsive">
-            
+            <b-table bordered striped hover show-empty
+                :items="items"
+                :fields="fields"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :per-page="perPage"
+                :current-page="currentPage"
+            >
+                <template slot="checked_in_time" scope="data">
+                    {{ dayFormat(data.value) }}
+                </template>
+                <template slot="business_id" scope="{value:id}">
+                    {{ provider(id).name }}
+                </template>
+                <template slot="EVV" scope="data">
+                    <span v-if="data.value" style="color: green">
+                        <i class="fa fa-check-square-o"></i>
+                    </span>
+                    <span v-else style="color: darkred">
+                        <i class="fa fa-times-rectangle-o"></i>
+                    </span>
+                </template>
+                <template slot="bottom-row" scope="data">
+                    <th colspan="5" class="text-right">Totals</th>
+                    <th>{{ sum('hours') }}</th>
+                    <th>{{ sum('mileage_costs') }}</th>
+                    <th>{{ sum('shift_total') }}</th>
+                    <th>{{ sum('caregiver_total') }}</th>
+                    <th>{{ sum('provider_total') }}</th>
+                    <th>{{ sum('ally_total') }}</th>
+                    <th colspan="2"></th>
+                </template>
+            </b-table>
         </div>
         <b-row>
             <b-col lg="6">
@@ -198,7 +230,78 @@
         },
 
         methods: {
+            sum(prop) {
+                let total = 0;
+                total = this.items.reduce((sum, item) => {                     
+                    let parsed = parseFloat(
+                        // remove commas
+                        item[prop].replace(/,/g, '')
+                    )
+                    console.log({[`${prop} parsed`]: parsed})
+                    
+                    return sum + parsed
+                }, total);
+                
+                return this.numberFormat(total);
+            },
             
+            provider(id) {
+                return Object.assign(
+                    { name:'N/A' }, 
+                    this.businesses.find(b => b.id == id)
+                );
+            },
+            
+            authorizeAll() {
+                let form = new Form({
+                   start_date: this.start_date,
+                   end_date: this.end_date,
+                   business_id: this.business_id,
+                   authorized: 1
+                });
+                form.post('/admin/charges/pending_shifts');
+            },
+            
+            loadFilters() {
+                axios.get('/admin/businesses').then(response => this.businesses = response.data);
+                axios.get('/admin/clients').then(response => this.clients = response.data);
+                axios.get('/admin/caregivers').then(response => this.caregivers = response.data);
+                axios.get('/admin/reports/unsettled/statuses').then(response => {
+                    this.statuses = response.data.map(status => ({
+                        text: status.replace(/\_/g,' ').toLowerCase(),
+                        value: status
+                    }));
+                });
+            },
+            
+            loadUnsettledItems() {
+                let params = {
+                    start_date: this.start_date,
+                    end_date: this.end_date,
+                    status: this.selected_statuses
+                }
+                
+                if (this.business_id) params.business_id = this.business_id;
+                if (this.caregiver_id) params.caregiver_id = this.caregiver_id;
+                if (this.client_id) params.client_id = this.client_id;
+                
+                axios.get('/admin/reports/unsettled/data', {params})
+                    .then(response => {
+                        this.items = response.data.map(item => {
+                            return item;
+                        });
+                        this.totalRows = this.items.length;
+                    });
+            },
+
+            loadItems() {
+                return this.loadUnsettledItems();
+            },
+
+            dayFormat(date) {
+                //return this.formatDateFromUTC(date)
+                return moment(date).local().format('ddd MMM D');
+            },
         }
     }
 </script>
