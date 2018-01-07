@@ -7,6 +7,7 @@ use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\UnverifiedLocationException;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Rules\SignedLTCI;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Shifts\ClockIn;
@@ -141,13 +142,17 @@ class ShiftController extends Controller
             'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
             'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
         ]);
-
+        
         // Get active shift
         $shift = $this->caregiver()->getActiveShift();
         if (!$shift || !$shift->client) {
             return new ErrorResponse(400, 'Could not find an active shift.');
         }
-
+        
+        $request->validate([
+            'signature' => [new SignedLTCI($shift->client->client_type)]
+        ]);
+        
         // If not private pay, ADL and comments are required
         if ($shift->client->client_type != 'private_pay') {
             $request->validate(
