@@ -1094,12 +1094,14 @@ Buttons
   transition: 0.2s ease-in;
   background-color: $white;
   color: $bodytext;
-  &:hover{
+  &:hover {
     box-shadow: $default-shadow-hover;
     color:$white!important;
   }
   &.active, &:focus{
     box-shadow: $default-shadow-hover;
+  }
+  &:active {
     color:$white!important;
   }
 }

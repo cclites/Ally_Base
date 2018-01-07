@@ -1,7 +1,8 @@
 <template>
     <div>
         <button @click="draw()" type="button" 
-                class="btn" :class="signature.length ? 'btn-info' : 'btn-outline-info'">
+                class="btn" :class="signature.length ? 'btn-info' : 'btn-outline-info'"
+                :disabled="signature.length > 0">
             <span v-if="signature.length">
                 <i class="fa fa-check"></i>&nbsp;&nbsp;&nbsp;Signed
             </span>
@@ -15,6 +16,9 @@
             <canvas :id="uid" class="canvas" :data-uid="uid"></canvas>
             <div class="dotted-line"></div>
             <div class="actions">
+                <button @click="signing = false" type="button" class="btn btn-danger">
+                    Cancel
+                </button>
                 <button @click="clear()" type="button" class="btn btn-secondary">
                     Clear Signature
                 </button>
@@ -22,11 +26,21 @@
                     Done Signing
                 </button>
             </div>
+            <div class="landscape-warning" v-show="landscapeMode == false">
+                Please use landscape mode to provide your signature 
+                <i class="fa fa-refresh fa-lg"></i>
+                <!--<i class="fa fa-rotate-left fa-lg"></i>-->
+                <!--
+                    <button @click="signing = false" type="button" class="btn btn-danger btn-lg">
+                        No Thanks
+                    </button>
+                -->
+            </div>
         </div>
     </div>
 </template>
 
-<script>
+<script lang=babel>
     import SignaturePad from 'signature_pad'
     export default {
         name:"signaturePad",
@@ -44,26 +58,25 @@
                 default:"100%"
             }
         },
-        data() {
-            return {
-                sig: ()=>{},
-                uid: "",
-                signing: false,
-                canvas: null,
-                preview: "",
-                signature: "",
-            }
-        },
+        data:() => ({
+            sig: () => {},
+            uid: "",
+            signing: false,
+            canvas: null,
+            preview: "",
+            signature: "",
+            landscapeMode: ""
+        }),
         created() {
             this.uid = "canvas" + this._uid
         },
         methods: {
-            checkOrientation() {
+            setLandscapeMode() {
                 if (window.innerHeight > window.innerWidth) {
-                    alert("You are now in portrait");
-                } else {
-                    alert("You are now in landscape");
+                    return this.landscapeMode = false;
                 }
+                //alert("You are now in landscape");
+                return this.landscapeMode = true;
             },
             draw() {
                 this.signing = true;
@@ -75,21 +88,28 @@
                 });
             },
             resizeCanvas() {
-                var ratio =  Math.max(window.devicePixelRatio || 1, 1);
-                this.canvas.width = this.canvas.offsetWidth * ratio;
-                this.canvas.height = this.canvas.offsetHeight * ratio;
-                this.canvas.getContext("2d").scale(ratio, ratio);
-                this.clear();
+                this.setLandscapeMode();
+                
+                if (this.sig.isEmpty()) {
+                    var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+                    console.log(ratio)
+                    this.canvas.width = this.canvas.offsetWidth * ratio;
+                    this.canvas.height = this.canvas.offsetHeight * ratio;
+                    this.canvas.getContext("2d").scale(ratio, ratio);
+                }
             },
-            clear() {                
+            clear() {
                 this.sig.clear();
             },
             save(format = "image/svg+xml") {
+                if (this.sig.isEmpty()) {
+                    return;
+                }
                 var dataUrl = format ? this.sig.toDataURL(format) :  this.sig.toDataURL()                
                 var blob = atob(dataUrl.split(',')[1])
                 //console.log(blob);
                 this.signature = blob;
-                this.signing = false;                                               
+                this.signing = false;
                 this.preview = this.sig.toDataURL()
                 this.$emit('input', this.signature)
                 /*
@@ -103,7 +123,7 @@
 </script>
 
 <style>
-    .signature-pad {        
+    .signature-pad {
         position: fixed;
         height: 100%;
         width: 100%;
@@ -113,6 +133,22 @@
         z-index: 999;
         text-align: center;
     }
+    .fa-lg {
+        font-size:80px; 
+        display:block;
+        padding: 40px 0;
+    }
+    .landscape-warning {
+        visibility: hidden;
+        background: #1f88e5;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        font-size: 2rem;
+        padding: 50px;
+        color: white;
+    }    
     .dotted-line {
         border-bottom: 2px dashed #dddddd;
         max-width: 650px;
@@ -133,5 +169,10 @@
     .actions {
         position: relative;
         bottom: 0px;
+    }
+    @media screen and (max-width: 600px) {    
+        .landscape-warning {
+            visibility: visible;
+        }
     }
 </style>
