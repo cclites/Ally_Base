@@ -310,7 +310,7 @@
                 </b-row>
                 
                 <strong>Was this Shift Electronically Verified?</strong>
-                <b-row>
+                <b-row class="with-padding-bottom">
                     <b-col sm="6">
                         <span v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">Yes</span>
                         <span v-else>No</span>
@@ -382,16 +382,16 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
-                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
-                <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate to a New Shift</b-btn>
+                <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate</b-btn>
+                <b-btn variant="default" @click="detailsModal=false" class="d-inline d-sm-none" style="margin:10px 0;">Close</b-btn>
             </div>
         </b-modal>
     </div>
 </template>
 
-<script>
+<script lang=babel>
     import FormatsDates from "../mixins/FormatsDates";
 
     export default {
@@ -799,9 +799,10 @@
         font-weight: bold;
         font-size: 13px;
         background-color: #ecf7f9;
-    }   
-    .table-sm {
-        padding: .2rem 0px;
+    }
+    .table-sm td, 
+    .table-sm th {
+        padding: 0.2rem 0;
     }
     .signature > svg {
         margin: -25px 0;
