@@ -9,31 +9,31 @@
                 >
                     <b-form inline @submit.prevent="reloadData()">
                         <date-picker
+                                class="mb-1"
                                 v-model="start_date"
-                                placeholder="Start Date"
-                        >
+                                placeholder="Start Date">
                         </date-picker> &nbsp;to&nbsp;
                         <date-picker
+                                class="mb-1"
                                 v-model="end_date"
-                                placeholder="End Date"
-                        >
+                                placeholder="End Date">
                         </date-picker>
-                        <b-form-select v-model="caregiver_id">
+                        <b-form-select v-model="caregiver_id" class="mx-1 mb-1">
                             <option value="">All Caregivers</option>
                             <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
-                        <b-form-select v-model="client_id">
+                        <b-form-select v-model="client_id" class="mr-1 mb-1">
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
-                        <b-form-select v-model="payment_method">
+                        <b-form-select v-model="payment_method" class="mb-1">
                             <option value="">All Payment Methods</option>
                             <option value="credit_card">Credit Card</option>
                             <option value="bank_account">Bank Account</option>
                             <option value="business">Provider Payment</option>
                         </b-form-select>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
-                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary">{{ summaryButtonText }}</b-button>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -64,7 +64,7 @@
                         <tr v-for="item in items.clientCharges">
                             <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
-                            <td>{{ item.total }}</td>
+                            <td>{{ moneyFormat(item.total) }}</td>
                             <!--<td>{{ item.caregiver_total }}</td>-->
                             <!--<td>{{ item.provider_total }}</td>-->
                             <!--<td>{{ item.ally_total }}</td>-->
@@ -75,7 +75,7 @@
                             <tr>
                                 <td><strong>Total for Confirmed Shifts</strong></td>
                                 <td>{{ clientTotals.hours }}</td>
-                                <td>{{ clientTotals.total }}</td>
+                                <td>{{ moneyFormat(clientTotals.total) }}</td>
                                 <td></td>
                                 <!--<td>{{ clientTotals.caregiver_total }}</td>-->
                                 <!--<td>{{ clientTotals.provider_total }}</td>-->
@@ -103,14 +103,14 @@
                         <tr v-for="item in items.caregiverPayments">
                             <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
                             <td>{{ item.hours }}</td>
-                            <td>{{ item.amount }}</td>
+                            <td>{{ moneyFormat(item.amount) }}</td>
                         </tr>
                         </tbody>
                         <tfoot>
                         <tr>
                             <td><strong>Total for Confirmed Shifts</strong></td>
                             <td>{{ caregiverTotals.hours }}</td>
-                            <td>{{ caregiverTotals.amount }}</td>
+                            <td>{{ moneyFormat(caregiverTotals.amount) }}</td>
                         </tr>
                         </tfoot>
                     </table>
@@ -123,7 +123,7 @@
                     <table class="table table-bordered">
                         <tr>
                             <td><strong>Provider Payment For Date Range &amp; Filters:</strong></td>
-                            <td>{{ clientTotals.provider_total }}</td>
+                            <td>{{ moneyFormat(clientTotals.provider_total) }}</td>
                         </tr>
                     </table>
                 </b-card>
@@ -133,7 +133,7 @@
                     <table class="table table-bordered">
                         <tr>
                             <td><strong>Processing Fee For Date Range &amp; Filters:</strong></td>
-                            <td>{{ clientTotals.ally_total }}</td>
+                            <td>{{ moneyFormat(clientTotals.ally_total) }}</td>
                         </tr>
                     </table>
                 </b-card>
@@ -147,7 +147,7 @@
                         header-bg-variant="info"
                         title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 >
-                    <b-row>
+                    <b-row class="mb-2">
                         <b-col sm="6">
                             <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
@@ -370,7 +370,8 @@
                 </b-row>
             </b-container>
             <div slot="modal-footer">
-                <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
+                <b-btn variant="primary" @click="printSelected(selectedItem.id, 'pdf')"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
+                <b-btn variant="primary" @click="printSelected(selectedItem.id)"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
@@ -381,10 +382,11 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsNumbers],
 
         props: {},
 
@@ -462,7 +464,7 @@
             },
             shiftHistoryItems() {
                 let items = this.items.shifts;
-                items = items.map(function(item) {
+                items = items.map((item) => {
                     return {
                         'id': item.id,
                         'client_id': item.client_id,
@@ -473,17 +475,17 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': item.caregiver_rate,
-                        'Reg Rate': item.provider_fee,
-                        'Ally Fee': item.ally_fee,
-                        'Total Hourly': item.hourly_total,
+                        'CG Rate': this.moneyFormat(item.caregiver_rate),
+                        'Reg Rate': this.moneyFormat(item.provider_fee),
+                        'Ally Fee': this.moneyFormat(item.ally_fee),
+                        'Total Hourly': this.moneyFormat(item.hourly_total),
                         'Mileage': item.mileage,
-                        'CG Total': item.caregiver_total,
-                        'Reg Total': item.provider_total,
-                        'Ally Total': item.ally_total,
-                        'Mileage Costs': item.mileage_costs,
-                        'Other Expenses': item.other_expenses,
-                        'Shift Total': item.shift_total,
+                        'CG Total': this.moneyFormat(item.caregiver_total),
+                        'Reg Total': this.moneyFormat(item.provider_total),
+                        'Ally Total': this.moneyFormat(item.ally_total),
+                        'Mileage Costs': this.moneyFormat(item.mileage_costs),
+                        'Other Expenses': this.moneyFormat(item.other_expenses),
+                        'Shift Total': this.moneyFormat(item.shift_total),
                         'Type': item.hours_type,
                         'Confirmed': item.confirmed,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
@@ -684,8 +686,13 @@
                 return this.unconfirmShift(this.selectedItem.id);
             },
 
-            printSelected() {
-                $("#detailsModal .container-fluid").print();
+            printSelected(shiftId, type = '') {
+                let url = '/business/shifts/' + shiftId + '/print';
+                if (type === 'pdf') {
+                    url += '?type=pdf';
+                }
+                window.location = url;
+                //$("#detailsModal .container-fluid").print();
             },
 
             printTable() {
