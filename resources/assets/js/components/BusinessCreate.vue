@@ -1,17 +1,17 @@
 <template>
-    <b-card header="New Business"
+    <b-card header="New Provider"
         header-bg-variant="info"
         header-text-variant="white"
         >
         <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">
-                    <h4>Business Details</h4>
+                    <h4>Provider Details</h4>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Business Name" label-for="name">
+                    <b-form-group label="Provider Name" label-for="name">
                         <b-form-input
                                 id="name"
                                 name="name"
@@ -20,7 +20,7 @@
                                 required
                         >
                         </b-form-input>
-                        <input-help :form="form" field="name" text="Enter the business name."></input-help>
+                        <input-help :form="form" field="name" text="Enter the provider name."></input-help>
                     </b-form-group>
                     <b-form-group label="Phone Number" label-for="phone1">
                         <b-form-input
@@ -201,7 +201,6 @@
         },
 
         methods: {
-
             copyEmailToUsername() {
                 if (this.form.email && !this.form.username) {
                     this.form.username = this.form.email;
@@ -211,9 +210,6 @@
             submitForm() {
                 this.form.post('/admin/businesses');
             }
-
         }
-
-
     }
 </script>
