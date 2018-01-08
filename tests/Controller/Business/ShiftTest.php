@@ -42,7 +42,7 @@ class ShiftTest extends TestCase
             'caregiver_id' => $caregiver->id
         ]);
 
-        $issue = factory(ShiftIssue::class)->create(['shift_id' => $shift->id]);
+        $issue = factory(ShiftIssue::class)->create(['shift_id' => $shift->id, 'comments' => 'Test comment']);
         $activity = factory(Activity::class)->create(['business_id' => $business->id]);
         $shift->activities()->attach($activity->id);
 
