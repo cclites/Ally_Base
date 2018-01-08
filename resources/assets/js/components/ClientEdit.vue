@@ -42,6 +42,12 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
+                    <b-form-group label="Gender">
+                        <b-form-radio-group id="gender" v-model="form.gender">
+                            <b-form-radio value="m">Male</b-form-radio>
+                            <b-form-radio value="f">Female</b-form-radio>
+                        </b-form-radio-group>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -71,6 +77,32 @@
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Date inquired about Service">
+                        <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
+                    </b-form-group>
+                    <b-form-group label="How were they referred?">
+                        <b-form-input id="referral" v-model="form.referral"></b-form-input>
+                    </b-form-group>
+                    <b-form-group>
+                        <b-form-checkbox id="ambulatory"
+                                         v-model="form.ambulatory"
+                                         :value="true"
+                                         :unchecked-value="false">
+                            Ambulatory
+                        </b-form-checkbox>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Service Start Date">
+                        <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
+                    </b-form-group>
+                    <b-form-group label="Diagnosis">
+                        <b-form-input id="diagnosis" v-model="form.diagnosis"></b-form-input>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -129,12 +161,20 @@
 
 <script>
     import ClientForm from '../mixins/ClientForm';
+    import DatePicker from './DatePicker';
+    import FormatsDates from '../mixins/FormatsDates';
 
     export default {
         props: {
             'client': {},
             'lastStatusDate' : {},
             'confirmUrl': {},
+        },
+
+        mixins: [ClientForm, FormatsDates],
+
+        components: {
+            DatePicker
         },
 
         data() {
@@ -144,10 +184,16 @@
                     lastname: this.client.lastname,
                     email: this.client.email,
                     username: this.client.username,
-                    date_of_birth: (this.client.date_of_birth) ? moment(this.client.date_of_birth).format('L') : null,
+                    date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
                     ssn: (this.client.hasSsn) ? '***-**-****' : '',
                     onboard_status: this.client.onboard_status,
+                    inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
+                    service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
+                    referral: this.client.referral,
+                    diagnosis: this.client.diagnosis,
+                    ambulatory: !!this.client.ambulatory,
+                    gender: this.client.gender
                 }),
                 passwordModal: false,
             }
@@ -155,7 +201,7 @@
 
         mounted() {
             if (!this.client) {
-                form: new Form({
+                this.form = new Form({
                     firstname: null,
                     lastname: null,
                     email: null,
@@ -163,6 +209,12 @@
                     date_of_birth: null,
                     ssn: null,
                     onboard_status: null,
+                    inquiry_date: '',
+                    service_start_date: '',
+                    referral: null,
+                    diagnosis: null,
+                    ambulatory: false,
+                    gender: null
                 })
             }
         },
@@ -209,9 +261,7 @@
                 }
                 return 'Select the Ally Agreement status of the client.';
             }
-        },
-
-        mixins: [ClientForm],
+        }
 
     }
 </script>

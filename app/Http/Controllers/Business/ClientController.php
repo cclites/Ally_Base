@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
 use App\Responses\CreatedResponse;
@@ -13,6 +14,7 @@ use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -175,23 +177,16 @@ class ClientController extends BaseController
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Client $client)
+    public function update(UpdateClientRequest $request, Client $client)
     {
         if (!$this->business()->clients()->where('id', $client->id)->exists()) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $data = $request->validate([
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'email' => 'required|email',
-            'username' => ['required', 'email', Rule::unique('users')->ignore($client->id)],
-            'date_of_birth' => 'nullable|date',
-            'business_fee' => 'nullable|numeric',
-            'client_type' => 'required',
-            'ssn' => ['nullable', new ValidSSN()],
-            'onboard_status' => 'required',
-        ]);
+        $data = $request->all();
+
+        $data['inquiry_date'] = $data['inquiry_date'] ? Carbon::parse($data['inquiry_date']) : null;
+        $data['service_start_date'] = $data['service_start_date'] ? Carbon::parse($data['service_start_date']) : null;
 
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
