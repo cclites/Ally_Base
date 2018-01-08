@@ -98,7 +98,7 @@ class ImportPaychexCaregivers extends BaseImport
                     if ($phone1) {
                         $phone = new PhoneNumber();
                         $phone->input($phone1);
-                        $phone->type = 'work';
+                        $phone->type = 'primary';
                         $caregiver->phoneNumbers()->save($phone);
                     }
                     if ($phone2) {
