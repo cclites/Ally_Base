@@ -11,8 +11,6 @@
                         <!--<b-form-group label="Logo">-->
                         <!--<b-form-file id="logo" v-model="businessSettings.logo" tabindex="0"></b-form-file>-->
                         <!--</b-form-group>-->
-
-<<<<<<< HEAD
                         <b-form-group label="Mileage Rate" label-for="mileageRate">
                             <b-form-input type="number"
                                           step="any"
@@ -128,35 +126,6 @@
                 </b-row>
             </b-tab>
         </b-tabs>
-=======
-                <b-form-group label="Calendar Default View" label-for="calendar_default_view">
-                    <b-form-select id="calendar_default_view"
-                                   v-model="form.calendar_default_view"
-                    >
-                        <option value="month">Month</option>
-                        <option value="agendaWeek">Week</option>
-                    </b-form-select>
-                    <input-help :form="form" field="calendar_default_view" text="Choose the default view for the Provider Schedule"></input-help>
-                </b-form-group>
-                <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
-                    <b-form-select id="calendar_caregiver_filter"
-                                   v-model="form.calendar_caregiver_filter"
-                    >
-                        <option value="all">All Caregivers</option>
-                        <option value="unassigned">Unassigned Shifts</option>
-                    </b-form-select>
-                    <input-help :form="form" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Provider Schedule"></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="12">
-                <b-form-group>
-                    <b-button @click="update" variant="info">Save</b-button>
-                </b-form-group>
-            </b-col>
-        </b-row>
->>>>>>> remotes/origin/ALLY-8-change-business-to-provider-in-al
     </b-card>
 </template>
 
