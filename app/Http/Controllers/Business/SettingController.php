@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\BankAccount;
 use App\Business;
+use App\Http\Requests\UpdateBusinessRequest;
 use App\OfficeUser;
 use App\Payments\PaymentMethodReplace;
 use App\Responses\ErrorResponse;
@@ -37,7 +38,11 @@ class SettingController extends BaseController
     /**
      * Show the form for creating a new resource.
      *
+     * @param Request $request
      * @param string $type
+     * @return ErrorResponse|SuccessResponse
+     * @throws \App\Exceptions\ExistingBankAccountException
+     * @throws \Exception
      */
     public function storeBankAccount(Request $request, string $type)
     {
@@ -62,21 +67,14 @@ class SettingController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param UpdateBusinessRequest $request
+     * @param  int $id
+     * @return SuccessResponse
      */
-    public function update(Request $request, $id)
+    public function update(UpdateBusinessRequest $request, $id)
     {
         $business = Business::find($id);
-        $data = $request->validate([
-            'scheduling' => 'required|bool',
-            'mileage_rate' => 'required|numeric',
-            'calendar_default_view' => 'required',
-            'calendar_caregiver_filter' => 'required|in:all,unassigned',
-            'auto_confirm' => 'boolean',
-        ]);
-        $business->update($data);
+        $business->update($request->all());
         return new SuccessResponse('Business settings updated.');
     }
 

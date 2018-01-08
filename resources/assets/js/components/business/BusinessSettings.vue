@@ -1,74 +1,133 @@
 <template>
-    <b-card
-            header="Provider Settings"
-            header-text-variant="white"
-            header-bg-variant="info"
-    >
-        <b-row>
-            <b-col lg="6">                
-                <b-form-group label="Mileage Rate" label-for="mileageRate">
-                    <b-form-input type="number"
-                                  step="any"
-                                  id="mileageRate"
-                                  v-model="form.mileage_rate"
-                    >
-                    </b-form-input>
-                    <input-help :form="form" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
-                </b-form-group>
-                <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
-                    <b-form-select id="auto_confirm" 
-                                   v-model="form.auto_confirm"
-                    >
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </b-form-select>
-                    <input-help :form="form" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
-                </b-form-group>
-            </b-col>
-            <b-col lg="6">
-                <b-form-group label="Scheduling" label-for="scheduling">
-                    <b-form-select id="scheduling" 
-                                   v-model="form.scheduling"
-                                   disabled="true"
-                    >
-                        <option value="1">Enabled</option>
-                        <option value="0">Disabled</option>
-                    </b-form-select>
-                    <input-help :form="form" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
-                </b-form-group>
+    <b-card no-body>
+        <b-tabs pills card>
+            <b-tab title="System" active>
+                <b-row>
+                    <b-col lg="6">
+                        <!--<div v-if="business.logo" class="mb-3">-->
+                        <!--{{ business.logo }}-->
+                        <!--</div>-->
+                        <!--<b-alert v-else show variant="info">Logo not set.</b-alert>-->
+                        <!--<b-form-group label="Logo">-->
+                        <!--<b-form-file id="logo" v-model="businessSettings.logo" tabindex="0"></b-form-file>-->
+                        <!--</b-form-group>-->
+                        <b-form-group label="Mileage Rate" label-for="mileageRate">
+                            <b-form-input type="number"
+                                          step="any"
+                                          id="mileageRate"
+                                          tabindex="1"
+                                          v-model="businessSettings.mileage_rate">
+                            </b-form-input>
+                            <input-help :form="businessSettings" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Scheduling" label-for="scheduling">
+                            <b-form-select id="scheduling"
+                                           v-model="businessSettings.scheduling"
+                                           tabindex="2"
+                                           disabled="true">
+                                <option value="1">Enabled</option>
+                                <option value="0">Disabled</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
+                        </b-form-group>
 
-                <b-form-group label="Calendar Default View" label-for="calendar_default_view">
-                    <b-form-select id="calendar_default_view"
-                                   v-model="form.calendar_default_view"
-                    >
-                        <option value="month">Month</option>
-                        <option value="agendaWeek">Week</option>
-                    </b-form-select>
-                    <input-help :form="form" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
-                </b-form-group>
-                <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
-                    <b-form-select id="calendar_caregiver_filter"
-                                   v-model="form.calendar_caregiver_filter"
-                    >
-                        <option value="all">All Caregivers</option>
-                        <option value="unassigned">Unassigned Shifts</option>
-                    </b-form-select>
-                    <input-help :form="form" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col lg="12">
-                <b-form-group>
-                    <b-button @click="update" variant="info">Save</b-button>
-                </b-form-group>
-            </b-col>
-        </b-row>
+                        <b-form-group label="Calendar Default View" label-for="calendar_default_view">
+                            <b-form-select id="calendar_default_view"
+                                           tabindex="3"
+                                           v-model="businessSettings.calendar_default_view">
+                                <option value="month">Month</option>
+                                <option value="agendaWeek">Week</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
+                        </b-form-group>
+                        <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
+                            <b-form-select id="calendar_caregiver_filter"
+                                           tabindex="4"
+                                           v-model="businessSettings.calendar_caregiver_filter">
+                                <option value="all">All Caregivers</option>
+                                <option value="unassigned">Unassigned Shifts</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group>
+                            <b-button @click="update" variant="info">Save</b-button>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+            </b-tab>
+            <b-tab title="Phone &amp; Address">
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Phone 1">
+                            <b-form-input v-model="businessSettings.phone1"
+                                          tabindex="5"
+                                          id="phone1">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Address 1">
+                            <b-form-input v-model="businessSettings.address1"
+                                          tabindex="7"
+                                          id="phone2">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="City">
+                            <b-form-input v-model="businessSettings.city"
+                                          tabindex="9"
+                                          id="city">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Zip">
+                            <b-form-input v-model="businessSettings.zip"
+                                          tabindex="11"
+                                          id="zip">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Timezone">
+                            <b-form-select id="timezone" v-model="businessSettings.timezone" tabindex="13">
+                                <option v-for="timezone in timezones" :value="timezone">{{ timezone }}</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-btn @click="update" variant="info">
+                            Save
+                        </b-btn>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Phone 2">
+                            <b-form-input v-model="businessSettings.phone2"
+                                          tabindex="6"
+                                          id="phone2">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Address 2">
+                            <b-form-input v-model="businessSettings.address2"
+                                          tabindex="8"
+                                          id="address2">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="State">
+                            <b-form-input v-model="businessSettings.state"
+                                          tabindex="10"
+                                          id="state">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Country">
+                            <b-form-input v-model="businessSettings.country"
+                                          tabindex="12"
+                                          id="country">
+                            </b-form-input>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+            </b-tab>
+        </b-tabs>
     </b-card>
 </template>
-
-<style lang="scss">
-</style>
 
 <script>
     export default {
@@ -78,19 +137,36 @@
 
         data() {
             return {
-                form: new Form({
+                businessSettings: new Form({
+                    //logo: this.business.logo,
                     scheduling: this.business.scheduling,
                     mileage_rate: this.business.mileage_rate,
                     calendar_default_view: this.business.calendar_default_view,
                     calendar_caregiver_filter: this.business.calendar_caregiver_filter,
-                    auto_confirm: this.business.auto_confirm,
+                    phone1: this.business.phone1,
+                    phone2: this.business.phone2,
+                    address1: this.business.address1,
+                    address2: this.business.address2,
+                    city: this.business.city,
+                    state: this.business.state,
+                    zip: this.business.zip,
+                    country: this.business.country,
+                    timezone: this.business.timezone,
+                    auto_confirm: this.business.auto_confirm
                 }),
+                timezones: [
+                    "America/New_York",
+                    "America/Chicago",
+                    "America/Denver",
+                    "America/Phoenix",
+                    "America/Los_Angeles"
+                ]
             }
         },
 
         methods: {
             update() {
-                this.form.put('/business/settings/' + this.business.id);
+                this.businessSettings.put('/business/settings/' + this.business.id);
             }
         }
     }

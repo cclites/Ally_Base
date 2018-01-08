@@ -82,6 +82,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
+    public $dates = ['service_start_date', 'inquiry_date'];
     public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
@@ -95,6 +96,15 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         'onboard_status',
         'fee_override',
         'max_weekly_hours',
+        'inquiry_date',
+        'service_start_date',
+        'referral',
+        'diagnosis',
+        'ambulatory',
+        'poa_first_name',
+        'poa_last_name',
+        'poa_phone',
+        'poa_relationship'
     ];
 
     ///////////////////////////////////////////
