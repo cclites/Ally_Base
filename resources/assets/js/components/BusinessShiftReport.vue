@@ -384,9 +384,10 @@
 <script>
     import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
+    import BusinessSettings from "../mixins/BusinessSettings";
 
     export default {
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
 
         props: {},
 
@@ -443,6 +444,7 @@
             this.setInitialFields();
             this.loadFiltersData();
             this.loadData();
+            console.log(this.businessSettings());
         },
 
         computed: {
@@ -649,6 +651,12 @@
             },
 
             confirmShift(id) {
+                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+                    if (!confirm('Are you sure you wish to confirm this shift?')) {
+                        return;
+                    }
+                }
+
                 let form = new Form();
                 form.post('/business/shifts/' + id + '/confirm')
                     .then(response => {
@@ -664,6 +672,12 @@
             },
 
             unconfirmShift(id) {
+                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+                    if (!confirm('Are you sure you wish to un-confirm this shift?')) {
+                        return;
+                    }
+                }
+
                 let form = new Form();
                 form.post('/business/shifts/' + id + '/unconfirm')
                     .then(response => {
