@@ -26,6 +26,8 @@ class UpdateBusinessRequest extends FormRequest
         return [
             'logo' => 'nullable|image|max:4000',
             'scheduling' => 'required|bool',
+            'auto_confirm' => 'required|bool',
+            'ask_on_confirm' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',

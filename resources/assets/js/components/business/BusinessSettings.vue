@@ -20,6 +20,24 @@
                             </b-form-input>
                             <input-help :form="businessSettings" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
                         </b-form-group>
+                        <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
+                            <b-form-select id="auto_confirm"
+                                           v-model="businessSettings.auto_confirm"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
+                            <b-form-select id="ask_on_confirm"
+                                           v-model="businessSettings.ask_on_confirm"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -152,7 +170,8 @@
                     zip: this.business.zip,
                     country: this.business.country,
                     timezone: this.business.timezone,
-                    auto_confirm: this.business.auto_confirm
+                    auto_confirm: this.business.auto_confirm,
+                    ask_on_confirm: this.business.ask_on_confirm
                 }),
                 timezones: [
                     "America/New_York",
