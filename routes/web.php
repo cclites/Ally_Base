@@ -207,6 +207,8 @@ Route::group([
 ], function() {
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
+    Route::resource('clients', 'Admin\ClientController');
+    Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
@@ -228,7 +230,9 @@ Route::group([
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
-
+    Route::redirect('reports', 'reports/unsettled');
+    Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
+    Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
