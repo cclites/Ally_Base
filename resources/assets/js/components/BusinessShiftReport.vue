@@ -392,12 +392,8 @@
     </div>
 </template>
 
-<<<<<<< HEAD
 <script>
     import FormatsNumbers from "../mixins/FormatsNumbers";
-=======
-<script lang=babel>
->>>>>>> remotes/origin/issues/81-LTL-signature-capture-on-mobile-app
     import FormatsDates from "../mixins/FormatsDates";
     import BusinessSettings from "../mixins/BusinessSettings";
 
