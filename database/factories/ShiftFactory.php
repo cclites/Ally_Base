@@ -56,6 +56,9 @@ $factory->define(\App\Shift::class, function(Faker $faker) {
 
 $factory->define(App\ShiftIssue::class, function(Faker $faker) {
     return [
+        'shift_id' => function () {
+            return factory('App\Shift')->create()->id;
+        },
         'client_injury' => $faker->randomElement([0,0,1]),
         'caregiver_injury' => $faker->randomElement([0,0,1]),
         'comments' => (mt_rand(0,1) === 0) ? $faker->paragraph : null,
