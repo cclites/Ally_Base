@@ -381,12 +381,12 @@
                 </b-row>
             </b-container>
             <div slot="modal-footer">
-                <b-btn variant="primary" @click="printSelected(selectedItem.id, 'pdf')"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
-                <b-btn variant="primary" @click="printSelected(selectedItem.id)"><i class="fa fa-print"></i> Print</b-btn>
+                <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
+                <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate</b-btn>
-                <b-btn variant="default" @click="detailsModal=false" class="d-inline d-sm-none" style="margin:10px 0;">Close</b-btn>
+                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
             </div>
         </b-modal>
     </div>
@@ -711,13 +711,13 @@
                 return this.unconfirmShift(this.selectedItem.id);
             },
 
-            printSelected(shiftId, type = '') {
-                let url = '/business/shifts/' + shiftId + '/print';
-                if (type === 'pdf') {
-                    url += '?type=pdf';
-                }
+            printSelected() {
+                $("#detailsModal .container-fluid").print();
+            },
+
+            downloadSelected() {
+                let url = '/business/shifts/' + this.selectedItem.id + '/print?type=pdf';
                 window.location = url;
-                //$("#detailsModal .container-fluid").print();
             },
 
             printTable() {
