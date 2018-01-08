@@ -55,7 +55,7 @@
             },
             cssClass() {
                 let classes = 'form-control datepicker';
-                if (this.invalidDate) {
+                if (this.value !== '' && this.invalidDate) {
                     classes = classes + ' is-invalid';
                 }
                 return classes;

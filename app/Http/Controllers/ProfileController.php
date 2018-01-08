@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Address;
+use App\Client;
+use App\Http\Requests\UpdateProfileRequest;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -15,7 +17,7 @@ class ProfileController extends Controller
     {
         $type = auth()->user()->role_type;
         $user = auth()->user()->load('phoneNumbers');
-
+        
         // include a placeholder for the primary number if one doesn't already exist
         if ($user->phoneNumbers->where('type', 'primary')->count() == 0) {
             $user->phoneNumbers->push(['type' => 'primary', 'extension' => '', 'number' => '']);
@@ -29,14 +31,18 @@ class ProfileController extends Controller
         return view('profile.' . $type, compact('user'));
     }
 
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $data = $request->validate([
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'email' => 'required|email',
-            'date_of_birth' => 'nullable|date',
-        ]);
+        $poa_fields = ['poa_first_name', 'poa_last_name', 'poa_phone', 'poa_relationship'];
+        $data = $request->except($poa_fields);
+
+        if(auth()->user()->role_type == 'client') {
+            $client_data = $request->only($poa_fields);
+            if(!empty($client_data)) {
+                $client = Client::find(auth()->id());
+                $client->update($client_data);
+            }
+        }
 
         $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
