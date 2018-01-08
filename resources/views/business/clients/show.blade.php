@@ -159,7 +159,8 @@
         // Javascript to enable link to tab
         var url = document.location.toString();
         if (url.match('#')) {
-            $('.nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
+            $('.nav-item a[href="#' +
+                url.split('#')[1] + '"]').tab('show');
         }
 
         // Change hash for page-reload

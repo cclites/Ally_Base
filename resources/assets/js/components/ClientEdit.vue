@@ -180,7 +180,8 @@
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="danger" @click="deleteClient()"><i class="fa fa-times"></i> Delete Client</b-button>
+                    <b-button variant="danger" @click="archiveClient()" v-if="active"><i class="fa fa-times"></i> Archive Client</b-button>
+                    <b-button variant="info" @click="reactivateClient()" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -230,6 +231,7 @@
                     poa_relationship: this.client.poa_relationship
                 }),
                 passwordModal: false,
+                active: this.client.active,
             }
         },
 
@@ -255,10 +257,18 @@
 
         methods: {
 
-            deleteClient() {
+            archiveClient() {
                 let form = new Form();
-                if (confirm('Are you sure you wish to delete ' + this.client.name + '?')) {
+                if (confirm('Are you sure you wish to archive ' + this.client.name + '?  This will remove all future schedules.')) {
                     form.submit('delete', '/business/clients/' + this.client.id);
+                }
+            },
+
+            reactivateClient() {
+                let form = new Form();
+                if (confirm('Are you sure you wish to re-activate ' + this.client.name + '?')) {
+                    form.post('/business/clients/' + this.client.id + '/reactivate')
+                        .then(response => this.active = 1);
                 }
             },
 
