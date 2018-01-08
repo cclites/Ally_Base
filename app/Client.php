@@ -100,7 +100,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         'service_start_date',
         'referral',
         'diagnosis',
-        'ambulatory'
+        'ambulatory',
+        'poa_first_name',
+        'poa_last_name',
+        'poa_phone',
+        'poa_relationship'
     ];
 
     ///////////////////////////////////////////

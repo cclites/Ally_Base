@@ -106,6 +106,36 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+
+            <b-row>
+                <b-col>
+                    <p class="h6">Power of Attorney</p>
+                    <hr>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name">
+                        <b-form-input id="poa_first_name"
+                                      v-model="form.poa_first_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Phone">
+                        <b-form-input id="poa_phone"
+                                      v-model="form.poa_phone"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name">
+                        <b-form-input id="poa_last_name"
+                                      v-model="form.poa_last_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Relationship">
+                        <b-form-input id="poa_relationship"
+                                      v-model="form.poa_relationship"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
             <b-row>
                 <b-col lg="12">
                     <hr />
@@ -193,7 +223,11 @@
                     referral: this.client.referral,
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
-                    gender: this.client.gender
+                    gender: this.client.gender,
+                    poa_first_name: this.client.poa_first_name,
+                    poa_last_name: this.client.poa_last_name,
+                    poa_phone: this.client.poa_phone,
+                    poa_relationship: this.client.poa_relationship
                 }),
                 passwordModal: false,
             }
