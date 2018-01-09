@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/phone', 'PhoneController@store');
     Route::put('/profile/phone/{id}', 'PhoneController@update');
     Route::delete('/profile/phone/{id}', 'PhoneController@destroy');
+    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');

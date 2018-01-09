@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Address;
+use App\BankAccount;
 use App\Client;
+use App\CreditCard;
+use App\Http\Requests\UpdatePaymentMethodRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
@@ -28,7 +31,19 @@ class ProfileController extends Controller
             $user->phoneNumbers->push(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
-        return view('profile.' . $type, compact('user'));
+        $payment_type_message = [];
+        if ($type == 'client') {
+            $payment_type_message = [
+                'default' => "Active Payment Type: " . $user->role->getPaymentType() . " (" .
+                    round($user->role->getAllyPercentage() * 100, 2) .
+                    "% Processing Fee)",
+                'backup' => "Active Payment Type: " . $user->role->getPaymentType($user->role->backupPayment) . " (" .
+                    round($user->role->getAllyPercentage($user->role->backupPayment) * 100, 2) .
+                    "% Processing Fee)"
+            ];
+        }
+
+        return view('profile.' . $type, compact('user', 'payment_type_message'));
     }
 
     public function update(UpdateProfileRequest $request)
@@ -75,5 +90,22 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         return (new PhoneController())->upsert($request, $user, $type, 'Your phone number');
+    }
+
+    public function paymentMethod(UpdatePaymentMethodRequest $request, $type)
+    {
+        $client = $request->user()->role;
+        $backup = ($type === 'backup');
+
+        if ($request->filled('number')) {
+            $method = new CreditCard($request->validated());
+        } else if ($request->filled('account_number')) {
+            $method = new BankAccount($request->validated());
+        }
+
+        if ($client->setPaymentMethod($method, $backup)) {
+            return new SuccessResponse('The payment method has been updated.');
+        }
+        return new ErrorResponse(500, 'The payment method could not be updated.');
     }
 }
