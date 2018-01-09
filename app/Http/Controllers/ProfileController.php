@@ -98,7 +98,7 @@ class ProfileController extends Controller
         $backup = ($type === 'backup');
 
         if ($request->filled('number')) {
-            $method = new CreditCard($request->validated());
+            $method = new CreditCard(collect($request->validated())->except('cvv')->toArray());
         } else if ($request->filled('account_number')) {
             $method = new BankAccount($request->validated());
         }
