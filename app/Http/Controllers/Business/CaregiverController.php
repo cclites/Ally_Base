@@ -105,6 +105,7 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
+        $caregiver->masked_ssn = '***-**-' . collect(explode('-', $caregiver->getSsnAttribute()))->last();
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -112,7 +113,7 @@ class CaregiverController extends BaseController
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
-
+        
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
@@ -148,8 +149,17 @@ class CaregiverController extends BaseController
             'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
-            'misc' => 'nullable|string'
+            'misc' => 'nullable|string',
+            'ssn' => 'nullable'
         ]);
+
+        if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
+            if (!str_contains($request->ssn, '-')) {
+                $data['ssn'] = substr($request->ssn, 0, 3) . '-' . substr($request->ssn, 3, 2) . '-' . substr($request->ssn, 5, 4);
+            } else {
+                $data['ssn'] = $request->ssn;
+            }
+        }
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
