@@ -77,11 +77,6 @@ class Schedule extends Model
         static::addGlobalScope('hasClient', function ($builder) {
             $builder->has('client');
         });
-
-        // For closed schedules before they start
-        static::addGlobalScope('age', function ($builder) {
-            $builder->whereColumn('start_date', '<=', 'end_date');
-        });
     }
 
     ///////////////////////////////////////////
@@ -123,23 +118,38 @@ class Schedule extends Model
         return $this->belongsTo(CarePlan::class);
     }
 
+    public function note()
+    {
+        return $this->belongsTo(ScheduleNote::class, 'note_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
-    /**
-     * Mutate to use the rrule() method
-     *
-     * @return mixed
-     */
-    public function getRruleAttribute()
+    public function getNotesAttribute()
     {
-        return $this->rrule();
+        return (string) $this->note;
     }
 
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Attach a schedule note to the schedule
+     *
+     * @param int|\App\ScheduleNote $note
+     * @return bool
+     */
+    public function attachNote($note)
+    {
+        if (!is_numeric($note)) {
+            if (empty($note->id)) return false;
+            $note = $note->id;
+        }
+        return $this->update(['note_id' => $note]);
+    }
 
     public function isRecurring()
     {
@@ -151,63 +161,6 @@ class Schedule extends Model
         return (strlen($this->rrule) === 0);
     }
 
-    /**
-     * Create a schedule exception
-     *
-     * @param $date
-     *
-     * @return \App\ScheduleException|false
-     */
-    public function createException($date)
-    {
-        $exception = new ScheduleException(['date' => $date]);
-        if ($this->exceptions()->save($exception)) {
-            return $exception;
-        }
-        return false;
-    }
-
-    /**
-     * Close the schedule on all days on and after the specified $date
-     *
-     * @param $date
-     */
-    public function closeSchedule($date) {
-        $last_date = (new \DateTime($date))
-            ->sub(new \DateInterval('P1D'))
-            ->format('Y-m-d');
-
-        if ($last_date < $this->start_date) {
-            if (!$this->shifts()->exists()) {
-                return $this->delete();
-            }
-        }
-
-        return $this->update(['end_date' => $last_date]);
-    }
-
-    /**
-     * Output full RRULE, append UNTIL rule based on end time in database.
-     * @return mixed
-     */
-    public function rrule()
-    {
-        if (!$this->attributes['rrule']) return null;
-        return ($this->end_date == self::FOREVER_ENDDATE) ? $this->attributes['rrule']
-            : $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()); // add an hour to handle DST shifts
-    }
-
-    /**
-     * Produce a human readable string describing the schedule timing
-     *
-     * @param array $opts
-     * @return string
-     */
-    public function humanReadable($opts = [])
-    {
-        $parser = new RuleParser($this->getStartDateTime(), $this->rrule());
-        return $parser->humanReadable($opts);
-    }
 
     /**
      * @param int $limit
