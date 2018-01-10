@@ -1,5 +1,15 @@
 <template>
     <b-card>
+        <b-row class="mb-2">
+            <b-col lg="3">
+                <b-form-group label="Caregiver">
+                    <b-form-select v-model="caregiver_id">
+                        <option value="">All</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                    </b-form-select>
+                </b-form-group>
+            </b-col>
+        </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -38,8 +48,13 @@
             },
         },
 
+        mounted() {
+            this.totalRows = this.items.length;
+        },
+
         data() {
             return {
+                caregiver_id: '',
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -72,17 +87,30 @@
                         key: 'actions',
                         class: 'hidden-print'
                     }
-                ],
-                items: this.certifications,
+                ]
             }
         },
 
-        mounted() {
-            this.totalRows = this.items.length;
-        },
-
         computed: {
+            items() {
+                if (this.caregiver_id !== '') {
+                    return _.filter(this.certifications, (cert) => {
+                        return cert.caregiver_id === this.caregiver_id;
+                    });
+                }
+                return this.certifications;
+            },
 
+            caregivers() {
+                let caregivers = _.map(this.certifications, (cert) => {
+                    return {
+                        'id': cert.caregiver_id,
+                        'name': cert.caregiver_name
+                    }
+                });
+
+                return _.uniqBy(caregivers, 'id');
+            }
         },
 
         methods: {
