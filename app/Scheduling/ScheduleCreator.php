@@ -4,149 +4,225 @@ namespace App\Scheduling;
 
 use App\Exceptions\InvalidScheduleParameters;
 use App\Schedule;
+use App\ScheduleNote;
+use Carbon\Carbon;
 
 class ScheduleCreator
 {
-    protected $aliases = [
-        'selected_date' => 'start_date',
-    ];
+    /**
+     * @var Carbon
+     */
+    protected $startsAt;
 
+    /**
+     * @var int|ScheduleNote
+     */
+    protected $note;
+
+    /**
+     * @var string
+     */
+    protected $rrule;
+
+    /**
+     * @var string
+     */
+    protected $endingDate;
+
+    /**
+     * @var array
+     */
     protected $data = [];
 
+    /**
+     * @var \App\Scheduling\RuleGenerator
+     */
+    protected $ruleGenerator;
 
-    public function __construct($data)
+    /**
+     * @var \App\Scheduling\RuleParser
+     */
+    protected $ruleParser;
+
+    public function __construct(RuleGenerator $ruleGenerator, RuleParser $ruleParser)
     {
-        $this->data = $data;
+        $this->ruleGenerator = $ruleGenerator;
+        $this->ruleParser = $ruleParser;
     }
 
     /**
-     * Make the model but do not persist to the database
+     * Set the date and time that the first shift begins
      *
-     * @param array $attributes
-     *
-     * @return \App\Schedule
+     * @param \Carbon\Carbon $date
+     * @return $this
      */
-    public function make($attributes = [])
+    public function startsAt(Carbon $date)
     {
-        return new Schedule(array_merge($this->getData(), $attributes));
+        $this->startsAt = $date;
+        return $this;
     }
 
     /**
-     * Create the model and store in the database
+     * Set the duration in minutes for each shift of the created schedules
      *
-     * @param array $attributes
-     *
-     * @return \App\Schedule|false
+     * @param int $duration
+     * @return $this
      */
-    public function create($attributes = [])
+    public function duration(int $duration)
     {
-        $schedule = $this->make($attributes);
-        if ($schedule->save()) {
-            return $schedule;
-        }
-        return false;
+        $this->data['duration'] = $duration;
+        return $this;
     }
 
     /**
-     * Copy an existing schedule and recreate with new parameters
+     * Set the amount of overtime in minutes for each shift, if duration is null, the full shift duration is used
+     * Note: this cannot be combined with holiday
      *
-     * @param \App\Schedule $schedule
-     * @param array $attributes
-     *
-     * @return bool|\Illuminate\Database\Eloquent\Model
+     * @param int|null $duration
+     * @throws \Exception
+     * @return $this
      */
-    public function recreate(Schedule $schedule, $attributes = [])
+    public function overtime(int $duration = null)
     {
-        $newSchedule = $schedule->replicate();
-        $newSchedule->fill(array_merge($this->getData(), $attributes));
-        if ($newSchedule->save()) {
-            return $newSchedule;
+        if ($duration === null && !$this->data['duration']) {
+            throw new \Exception('ScheduleCreator: overtime must be declared after duration()');
         }
-        return false;
-    }
-
-    public function hasChangesFrom(Schedule $schedule)
-    {
-        $schedule = clone $schedule;
-        $schedule->fill(array_merge($this->getData(), [
-            // These variables always change, so ignore them
-            'start_date' => $schedule->start_date
-        ]));
-        return $schedule->isDirty();
-    }
-
-    public function getData()
-    {
-        $this->handleAliases();
-        $this->checkRequired(['start_date', 'end_date', 'time', 'duration', 'interval_type']);
-        if (!$rule = $this->generateRule()) {
-            throw new InvalidScheduleParameters('Unable to generate rule.');
+        if ($duration === null) {
+            $duration = $this->data['duration'];
         }
-        $this->validateDuration();
-        $this->validateStartDate();
-
-        return [
-            'start_date' => $this->data['start_date'],
-            'end_date' => $this->data['end_date'],
-            'time' => $this->data['time'],
-            'duration' => $this->data['duration'],
-            'rrule' => $rule,
-            'notes' => $this->data['notes'] ?? null,
-            'care_plan_id' => $this->data['care_plan_id'] ?? null,
-            'caregiver_id' => $this->data['caregiver_id'] ?? null,
-            'caregiver_rate' => $this->data['caregiver_rate'] ?? null,
-            'provider_fee' => $this->data['provider_fee'] ?? null,
-            'hours_type' => $this->data['hours_type'] ?? null,
-        ];
+        $this->data['overtime_duration'] = $duration;
+        $this->data['hours_type'] = 'overtime';
+        return $this;
     }
 
-    protected function handleAliases()
+    /**
+     * Set the amount of holiday time in minutes for each shift, if duration is null, the full shift duration is used
+     * Note: this cannot be combined with overtime
+     *
+     * @param int|null $duration
+     * @throws \Exception
+     * @return $this
+     */
+    public function holiday(int $duration = null)
     {
-        foreach ($this->aliases as $alias => $actual) {
-            if (
-                in_array($alias, array_keys($this->data))
-                && ! in_array($actual, array_keys($this->data))
-            ) {
-                $this->data[$actual] = $this->data[$alias];
-                unset($this->data[$alias]);
+        if ($duration === null && !$this->data['duration']) {
+            throw new \Exception('ScheduleCreator: holiday must be declared after duration()');
+        }
+        if ($duration === null) {
+            $duration = $this->data['duration'];
+        }
+        $this->data['overtime_duration'] = $duration;
+        $this->data['hours_type'] = 'holiday';
+        return $this;
+    }
+
+    /**
+     * Set the assignments for the created schedules
+     *
+     * @param int $business_id
+     * @param int $client_id
+     * @param int|null $caregiver_id
+     * @return $this
+     */
+    public function assignments(int $business_id, int $client_id, int $caregiver_id = null)
+    {
+        $this->data = array_merge($this->data, compact('business_id', 'client_id', 'caregiver_id'));
+        return $this;
+    }
+
+    /**
+     * Set the rates for the created schedules
+     *
+     * @param int $caregiver_rate
+     * @param int $provider_fee
+     * @return $this
+     */
+    public function rates(int $caregiver_rate = 0, int $provider_fee = 0)
+    {
+        $this->data = array_merge($this->data, compact('caregiver_rate', 'provider_fee'));
+        return $this;
+    }
+
+    /**
+     * Set the note to be attached to the created schedules
+     *
+     * @param int|\App\ScheduleNote $note
+     * @return $this
+     */
+    public function attachNote($note)
+    {
+        $this->note = $note;
+        return $this;
+    }
+
+    /**
+     * Set the recurring interval for the schedule
+     *
+     * @param string $intervalType
+     * @param array $byDays
+     * @return $this
+     * @throws \Exception
+     */
+    public function interval($intervalType, $endingDate, $byDays = [])
+    {
+        $this->endingDate = $endingDate;
+
+        if (in_array($intervalType, ['weekly', 'biweekly'])) {
+            if (empty($byDays)) {
+                throw new InvalidScheduleParameters('By days is required for recurring weekly intervals.');
             }
+            $this->rrule = $this->ruleGenerator->setIntervalType($intervalType)
+                                               ->byday(implode(',', $byDays))
+                                               ->getRule();
+            return $this;
         }
+
+        if (!$this->startsAt) {
+            throw new \Exception('ScheduleCreator: startsAt must be called before interval');
+        }
+        $byMonthDay = $this->startsAt->format('j');
+        $this->rrule = $this->ruleGenerator->setIntervalType($intervalType)
+                                           ->bymonthdays($byMonthDay)
+                                           ->getRule();
+        return $this;
+    }
+
+    /**
+     * Create the schedules from the provided data and return a collection
+     *
+     * @return \Illuminate\Support\Collection|\App\Schedule[]
+     * @throws \App\Exceptions\InvalidScheduleParameters
+     */
+    public function create()
+    {
+        $this->checkRequired(['duration', 'business_id', 'client_id']);
+        $this->validateDuration();
+
+        $occurrences = $this->generateOccurrences();
+        $this->validateStartDate($occurrences);
+
+        $schedules = $this->createSchedulesFromOccurrences($occurrences);
+        $this->attachNoteToSchedules($schedules);
+
+        return collect($schedules);
     }
 
     protected function checkRequired($required = [])
     {
-        foreach($required as $field) {
+        if (!$this->startsAt) {
+            throw new InvalidScheduleParameters('startsAt is required for schedule generation.');
+        }
+        foreach ($required as $field) {
             if (empty($this->data[$field])) {
                 throw new InvalidScheduleParameters($field . ' is required for schedule generation.');
             }
         }
     }
 
-    protected function generateRule()
+    protected function validateDuration()
     {
-        $generator = new RuleGenerator();
-        $intervalType = $this->data['interval_type'];
-        if (in_array($intervalType, ['weekly', 'biweekly'])) {
-            $this->checkRequired(['bydays']);
-            return $generator->setIntervalType($intervalType)
-                             ->byday(implode(',', $this->data['bydays']))
-                             ->getRule();
-        }
-        else if (in_array($intervalType, ['monthly', 'bimonthly', 'quarterly', 'semiannually', 'annually'])) {
-            $date = $this->data['start_date'];
-            $dayOfMonth = (new \DateTime($date))->format('j');
-            if (empty($bymonthdays)) {
-                $bymonthdays = [$dayOfMonth];
-            }
-            return $generator->setIntervalType($intervalType)
-                              ->bymonthday(implode(',', $bymonthdays))
-                              ->getRule();
-        }
-    }
-
-    protected function validateDuration() {
         $this->data['duration'] = intval($this->data['duration']);
-        if (!$this->data['duration'] > 0) {
+        if ($this->data['duration'] <= 0) {
             throw new InvalidScheduleParameters('Duration must be an integer greater than 0.');
         }
     }
@@ -154,26 +230,57 @@ class ScheduleCreator
     /**
      * Start date must exist in the generated schedule
      */
-    protected function validateStartDate()
+    protected function validateStartDate($occurrences)
     {
-        if (in_array($this->data['interval_type'], ['weekly', 'biweekly'])) {
-            $daysOfWeek = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
-            $bydays     = array_map('strtolower', $this->data['bydays']);
-            $weekdayNo  = (int)(new \DateTime($this->data['start_date']))->format('w');
-            $weekdayId  = $daysOfWeek[$weekdayNo];
-            $i=0;
-            while ( ! in_array($weekdayId, $bydays)) {
-                $i++;
-                $weekdayNo++;
-                if ($weekdayNo >= 7) {
-                    $weekdayNo -= 7;
-                }
-                $weekdayId = $daysOfWeek[$weekdayNo];
+        if (!in_array($this->startsAt, $occurrences)) {
+            throw new InvalidScheduleParameters('The schedule start date does not exist within the recurring periods.');
+        }
+    }
+
+    protected function generateOccurrences()
+    {
+        if (!$this->rrule) {
+            return [$this->startsAt];
+        }
+
+        $endingDate = new Carbon($this->endingDate);
+        $endsAt = $this->startsAt->copy()
+                                 ->setDate($endingDate->format('Y'), $endingDate->format('n'), $endingDate->format('j'))
+                                 ->addMinute();
+        return $this->ruleParser->setRule($this->startsAt, $this->rrule)
+                                ->getOccurrencesBetween($this->startsAt, $endsAt, 730);
+    }
+
+    protected function createSchedulesFromOccurrences($occurrences)
+    {
+        $schedules = [];
+
+        \DB::beginTransaction();
+        try {
+            foreach ($occurrences as $date) {
+                $schedules[] = Schedule::create(
+                    array_merge(
+                        $this->data,
+                        [
+                            'starts_at' => $date, // keep in business timezone
+                            'weekday'   => $date->format('w'),
+                        ]
+                    )
+                );
             }
-            if ($i>0) {
-                $this->data['start_date'] = (new \DateTime($this->data['start_date']))
-                    ->add(new \DateInterval('P' . $i . 'D'))
-                    ->format('Y-m-d');
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            $schedules = [];
+        }
+        return $schedules;
+    }
+
+    protected function attachNoteToSchedules($schedules)
+    {
+        if ($this->note) {
+            foreach ($schedules as $schedule) {
+                $schedule->attachNote($this->note);
             }
         }
     }
