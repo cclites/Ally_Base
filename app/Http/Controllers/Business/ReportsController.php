@@ -389,7 +389,13 @@ class ReportsController extends BaseController
 
     public function caregiversMissingBankAccounts()
     {
-        $caregivers = $this->business()->caregivers()->doesntHave('bankAccount')->get();
+        $caregivers = $this->business()
+            ->caregivers()
+            ->with(['shifts' => function ($query) {
+                $query->where('status', 'WAITING_FOR_PAYOUT');
+            }])
+            ->doesntHave('bankAccount')
+            ->get();
         return view('business.reports.caregivers_missing_bank_accounts', compact('caregivers'));
     }
 

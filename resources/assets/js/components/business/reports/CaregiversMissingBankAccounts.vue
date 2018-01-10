@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-table :items="caregivers"
+        <b-table :items="items"
                  :fields="fields">
         </b-table>
     </b-card>
@@ -13,19 +13,21 @@
         data() {
             return {
                 fields: [
-                    {
-                        key: 'name'
-                    }
+                    'name',
+                    'email'
                 ]
             }
         },
         
-        methods: {
-        
-        },
-        
         computed: {
-        
+            items() {
+                return _.map(this.caregivers, (caregiver) => {
+                    if (caregiver.shifts.length > 0) {
+                        caregiver._rowVariant = 'danger';
+                    }
+                    return caregiver;
+                });
+            }
         }
     }
 </script>
