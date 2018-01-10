@@ -23,6 +23,11 @@
             >
                 <template slot="actions" scope="row">
                     <b-btn size="sm" :href="'/business/caregivers/' + row.item.caregiver_id">View Caregiver</b-btn>
+                    <b-btn size="sm" @click="sendEmailReminder(row.item)">
+                        <i class="fa fa-spinner fa-spin" v-if="row.item.sendingEmail"></i>
+                        <i class="fa fa-envelope" v-else></i>
+                        Email Reminder
+                    </b-btn>
                 </template>
             </b-table>
         </div>
@@ -39,6 +44,8 @@
 </template>
 
 <script>
+
+    import FormatsDates from '../mixins/FormatsDates';
     export default {
         props: {
             'certifications': {
@@ -47,6 +54,8 @@
                 }
             },
         },
+
+        mixins: [FormatsDates],
 
         mounted() {
             this.totalRows = this.items.length;
@@ -62,6 +71,7 @@
                 sortDesc: false,
                 editModalVisible: false,
                 filter: null,
+                sendingEmail: false,
                 fields: [
                     {
                         key: 'name',
@@ -77,6 +87,7 @@
                         key: 'expiration_date',
                         label: 'Expiration Date',
                         sortable: true,
+                        formatter: (value) => { return this.formatDate(value) }
                     },
                     {
                         key: 'caregiver_name',
@@ -93,12 +104,17 @@
 
         computed: {
             items() {
+                let certifications = _.map(this.certifications, (cert) => {
+                    cert.sendingEmail = false;
+                    return cert;
+                });
+
                 if (this.caregiver_id !== '') {
-                    return _.filter(this.certifications, (cert) => {
+                    return _.filter(certifications, (cert) => {
                         return cert.caregiver_id === this.caregiver_id;
                     });
                 }
-                return this.certifications;
+                return certifications;
             },
 
             caregivers() {
@@ -121,14 +137,32 @@
 //                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
                 this.editModalVisible = true;
             },
+
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
             },
+
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            },
+
+            sendEmailReminder(item) {
+                if (item.sendingEmail) {
+                    return;
+                }
+                item.sendingEmail = true;
+                axios.get('/business/caregivers/licenses/' + item.id + '/send-reminder')
+                    .then(response => {
+                        console.log(response.data);
+                        window.alerts.addMessage('success', 'Reminder email sent.');
+                        item.sendingEmail = false;
+                    }).catch(error => {
+                        console.error(error.response);
+                        item.sendingEmail = false;
+                    });
             }
         }
     }

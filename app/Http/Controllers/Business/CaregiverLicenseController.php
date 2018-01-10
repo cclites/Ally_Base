@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\CaregiverLicense;
+use App\Notifications\LicenseExpirationReminder;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
@@ -94,5 +95,10 @@ class CaregiverLicenseController extends BaseController
             return new SuccessResponse('The license has been deleted.');
         }
         return new ErrorResponse(500, 'The license could not be deleted.');
+    }
+
+    public function expirationReminder(CaregiverLicense $license)
+    {
+        $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
     }
 }
