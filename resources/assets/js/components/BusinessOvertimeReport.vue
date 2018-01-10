@@ -1,7 +1,8 @@
 <template>
     <b-card>
-        <b-row>
+        <b-row class="mb-2">
             <b-col lg="6">
+                <date-picker v-model="dateRange.start"></date-picker>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -38,6 +39,7 @@
 
 <script>
     import Form from "../classes/Form";
+    import FormatsDates from '../mixins/FormatsDates'
 
     export default {
         props: {
@@ -46,6 +48,13 @@
                     return [];
                 }
             },
+            'dateRange': []
+        },
+
+        mixins: [FormatsDates],
+
+        mounted() {
+            this.totalRows = this.items.length;
         },
 
         data() {
@@ -95,16 +104,7 @@
                             total: caregiver.total,
                         }
                     }),
-
             }
-        },
-
-        mounted() {
-            this.totalRows = this.items.length;
-        },
-
-        computed: {
-
         },
 
         methods: {

@@ -44,7 +44,7 @@ class ScheduleAggregator
      *
      * @return array
      */
-    public function events($start_date, $end_date, $timezone='UTC', $limitPerEvent = 300)
+    public function events($start_date, $end_date, $timezone = 'UTC', $limitPerEvent = 300)
     {
         $events = [];
         foreach($this->data as $event) {

@@ -98,10 +98,15 @@ class ReportsController extends BaseController
 
         $weekStart = (new Carbon())->setISODate($year, $week, 1)->setTime(0, 0, 0);
         $weekEnd = (new Carbon())->setISODate($year, $week, 7)->setTime(23, 59, 59);
+        $businessCaregivers = $this->business()
+            ->caregivers()
+            ->with(['shifts' => function ($query) use ($weekStart, $weekEnd) {
+                $query->whereBetween('checked_in_time', [$weekStart, $weekEnd]);
+            }])
+            ->get();
+
         $caregivers = [];
-
-        foreach ($this->business()->caregivers as $caregiver) {
-
+        foreach ($businessCaregivers as $caregiver) {
             $hours = [
                 'user' => $caregiver->user,
                 'worked' => 0,
@@ -109,16 +114,14 @@ class ReportsController extends BaseController
             ];
 
             // Calculate total number of hours in finished shifts
-            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
-                ->whereNotNull('checked_out_time')->get()
+            $caregiver->shifts->where('checked_out_time', '!=', null)
                 ->each(function ($shift) use ($hours) {
                     $hours['worked'] += $shift->duration();
                 });
 
             // Calculate number of hours in current shift
             $lastShiftEnd = new Carbon();
-            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
-                ->whereNull('checked_out_time')->get()
+            $caregiver->shifts->where('checked_out_time', null)
                 ->each(function ($shift) use ($hours, $lastShiftEnd) {
                     $hours['worked'] += $shift->duration();
                     $hours['scheduled'] += $shift->remaining();
@@ -138,7 +141,12 @@ class ReportsController extends BaseController
             $caregivers[] = $hours;
         }
 
-        return view('business.reports.overtime', compact('caregivers'));
+        $date_range = [
+            'start' => $weekStart->toDateString(),
+            'end' => $weekEnd->toDateString()
+        ];
+
+        return view('business.reports.overtime', compact('caregivers', 'date_range'));
     }
 
     public function reconciliation(Request $request)
