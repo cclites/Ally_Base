@@ -21,7 +21,9 @@ class CaregiverController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function index(Request $request)
     {
@@ -54,7 +56,8 @@ class CaregiverController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return CreatedResponse|ErrorResponse
+     * @throws \Exception
      */
     public function store(Request $request)
     {
@@ -89,6 +92,7 @@ class CaregiverController extends BaseController
      *
      * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function show(Caregiver $caregiver)
     {
@@ -121,6 +125,7 @@ class CaregiverController extends BaseController
      *
      * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function edit(Caregiver $caregiver)
     {
@@ -133,7 +138,6 @@ class CaregiverController extends BaseController
      * @param  \Illuminate\Http\Request $request
      * @param  \App\Caregiver $caregiver
      * @return ErrorResponse|SuccessResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(Request $request, Caregiver $caregiver)
     {
@@ -167,7 +171,8 @@ class CaregiverController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  \App\Caregiver $caregiver
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
      */
     public function destroy(Caregiver $caregiver)
     {

@@ -44,6 +44,7 @@ class ReportsController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get()
             ->map(function ($deposit) {
+                $deposit->amount = floatval($deposit->amount);
                 $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
