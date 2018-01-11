@@ -18,7 +18,8 @@
                     {{ formatDate(data.item.start) }} - {{ formatDate(data.item.end) }}
                 </template>
                 <template slot="actions" scope="data">
-                    <b-btn :href="'/reports/payment-history/' + data.item.id" class="btn btn-secondary">View Details</b-btn>
+                    <b-btn :href="'/reports/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">View Details</b-btn>
+                    <b-btn :href="'/reports/payment-history/' + data.item.id + '/print?type=pdf'" class="btn btn-secondary">Download</b-btn>
                 </template>
                 <template slot="FOOT_created_at" scope="data">
                     Total YTD
