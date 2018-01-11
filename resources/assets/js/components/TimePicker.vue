@@ -5,6 +5,9 @@
                 :class="cssClass"
                 type="text"
                 :placeholder="placeholder"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
                 v-model="value"
                 @change="onChange($event.target.value, $event)"
         />
@@ -15,20 +18,29 @@
 <script>
     export default {
         props: {
-            'value': {
-                default() {
-                    return '';
-                }
+            value: {
+                type: String,
+                default: '',
             },
-            'format': {
-                default() {
-                    return 'h:mm A';
-                }
+            format: {
+                type: String,
+                default: 'h:mm A',
             },
-            'placeholder': {
-                default() {
-                    return '';
-                }
+            placeholder: {
+                type: String,
+                default: '',
+            },
+            disabled: {
+                type: Boolean,
+                default: false
+            },
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            required: {
+                type: Boolean,
+                default: false
             }
         },
 
@@ -47,7 +59,7 @@
                 return classes;
             },
             invalidTime() {
-                return !moment(this.value, this.format, true).isValid();
+                return (this.required || this.value) && !moment(this.value, this.format, true).isValid();
             }
         },
 

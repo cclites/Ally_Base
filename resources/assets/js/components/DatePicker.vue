@@ -6,6 +6,9 @@
                 type="text"
                 v-model="value"
                 :placeholder="placeholder"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
                 @change="updateInput()"
         />
     </div>
@@ -14,26 +17,34 @@
 <script>
     export default {
         props: {
-            'value': {
-                default() {
-                    return '';
-                }
+            value: {
+                type: String,
+                default: '',
             },
-            'options': {
-                default() {
-                    return {};
-                },
+            format: {
+                type: String,
+                default: 'MM/DD/YYYY',
             },
-            'format': {
-                default() {
-                    return 'MM/DD/YYYY';
-                }
+            placeholder: {
+                type: String,
+                default: '',
             },
-            'placeholder': {
-                default() {
-                    return '';
-                }
-            }
+            disabled: {
+                type: Boolean,
+                default: false
+            },
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            required: {
+                type: Boolean,
+                default: false
+            },
+            options: {
+                type: Object,
+                default: {},
+            },
         },
 
         data() {
@@ -61,7 +72,7 @@
                 return classes;
             },
             invalidDate() {
-                return !moment(this.value, this.format, true).isValid();
+                return (this.required || this.value) && !moment(this.value, this.format, true).isValid();
             }
         },
 
