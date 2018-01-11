@@ -119,7 +119,7 @@
                                         </b-form-group>
                                     </b-col>
                                     <b-col>
-                                        <b-form-group label="End Time" label-for="new_end_time">
+                                        <b-form-group :label="endTimeLabel" label-for="new_end_time">
                                             <time-picker id="new_end_time"
                                                          v-model="new_end_time"
                                                          :readonly="lockTiming"
@@ -264,7 +264,11 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             value: {},
             selectedItem: {},
@@ -294,6 +298,7 @@
                     'bydays': [],
 
                     'new_start_time': '',
+                    'new_duration': null,
                     'new_hours_type': '',
                     'new_overtime_duration': '',
                     'new_caregiver_id': '',
@@ -314,6 +319,13 @@
                     this.$emit('input', value);
                 }
             },
+            endTimeLabel() {
+                let label = 'End Time';
+                if (this.form.new_duration) {
+                    label = label + ' (' + this.numberFormat(this.form.new_duration / 60) + ' Hours)';
+                }
+                return label;
+            }
         },
 
         methods: {
@@ -323,12 +335,36 @@
                 event.target.removeAttribute("readonly");
                 event.target.focus();
             },
+
             unlockOvertimeHours(event) {
                 this.entireShiftOvertime = false;
                 this.lockOvertimeHours = false;
                 event.target.removeAttribute("readonly");
                 event.target.focus();
             },
+
+            calculateDuration(end_time) {
+                if (end_time && this.form.new_start_time) {
+                    if (this.form.new_start_time == end_time) {
+                        return 1440; // have 12:00am to 12:00am = 24 hours
+                    }
+                    let start = moment('2017-01-01 ' + this.form.new_start_time, 'YYYY-MM-DD h:mm A');
+                    let end = moment('2017-01-01 ' + end_time, 'YYYY-MM-DD h:mm A');
+                    console.log(start, end);
+                    if (start && end) {
+                        if (end.isBefore(start)) {
+                            end = moment('2017-01-02 ' + end_time, 'YYYY-MM-DD h:mm A');
+                        }
+                        let diff = end.diff(start, 'minutes');
+                        console.log(diff);
+                        if (diff) {
+                            return parseInt(diff);
+                        }
+                    }
+                }
+                return null;
+            },
+
             save() {
                 let component = this;
                 let method = 'post';
@@ -359,30 +395,38 @@
             allFutureDates(val) {
                 this.form.end_date = (val) ? '01/01/2100' : moment().format('MM/DD/YYYY');
             },
+
             anyStartTime(val) {
                 this.form.start_time = (val) ? null : '09:00 AM';
             },
+
             entireShiftOvertime(val) {
                 if (val) this.lockOvertimeHours = false;
                 this.form.new_overtime_duration = (val) ? -1 : null; // -1 is designated to mean equals to duration
             },
+
             lockCaregiverRate(val) {
                 this.form.new_caregiver_rate = null;
             },
+
             lockHoursType(val) {
                 this.form.new_hours_type = null;
             },
+
             lockOvertimeHours(val) {
                 if (val) this.entireShiftOvertime = false;
                 this.form.new_overtime_duration = null;
             },
+
             lockProviderFee(val) {
                 this.form.new_provider_fee = null;
             },
+
             lockTiming(val) {
                 this.form.new_start_time = null;
                 this.new_end_time = null;
             },
+
             selectAllDays(val) {
                 if (val) {
                     // If selected, set by days to every day of the week
@@ -393,6 +437,11 @@
                     this.form.bydays = [];
                 }
             },
+
+            new_end_time(val) {
+                this.form.new_duration = this.calculateDuration(val);
+            },
+
             'form.bydays': function(val, old_val) {
                 if (old_val == this.daysOfWeek) {
                     // If the previous value was every day of the week, uncheck All Days
