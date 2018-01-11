@@ -1,23 +1,23 @@
 <template>
     <b-card
-        :header="title"
-        header-text-variant="white"
-        header-bg-variant="info"
-        >
+            :header="title"
+            header-text-variant="white"
+            header-bg-variant="info"
+    >
         <b-row>
             <b-col lg="12">
                 <b-form-group label="Payment Type" label-for="type">
                     <b-form-select
-                        id="type"
-                        name="type"
-                        v-model="type"
-                        :options="types"
-                        >
+                            id="type"
+                            name="type"
+                            v-model="type"
+                            :options="types"
+                    >
                     </b-form-select>
                 </b-form-group>
-                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" />
-                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="'/business/clients/' + client.id + '/payment/' + source" />
-                <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="'/business/clients/' + client.id + '/payment/' + source" />
+                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client"/>
+                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl"/>
+                <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="submitUrl"/>
                 <small class="form-text text-muted">
                     {{ paymentTypeMessage }}
                 </small>
@@ -29,6 +29,7 @@
 <script>
     export default {
         props: {
+            'role': String,
             'title': {},
             'method': {},
             'source': {},
@@ -38,7 +39,7 @@
                     return '';
                 }
             },
-            'business': null,
+            'business': null
         },
 
         data() {
@@ -56,7 +57,7 @@
                 type: null,
                 submitted: false,
                 existing_card: {},
-                existing_account: {},
+                existing_account: {}
             }
         },
 
@@ -71,19 +72,24 @@
                 if (this.method.account_type) {
                     this.type = 'bank_account';
                     this.existing_account = this.method;
-                }
-                else if (this.method.expiration_year) {
+                } else if (this.method.expiration_year) {
                     this.type = 'credit_card';
                     this.existing_card = this.method;
-                }
-                else if (this.method.payment_account_id) {
+                } else if (this.method.payment_account_id) {
                     this.type = 'provider';
                 }
             }
         },
 
-        methods: {
-
-        },
+        computed: {
+            submitUrl() {
+                switch (this.role) {
+                    case 'client':
+                        return '/profile/payment/' + this.source;
+                    case 'office_user':
+                        return '/business/clients/' + this.client.id + '/payment/' + this.source;
+                }
+            }
+        }
     }
 </script>
