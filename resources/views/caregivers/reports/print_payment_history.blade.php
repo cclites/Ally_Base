@@ -1,5 +1,9 @@
 @extends('layouts.print')
 
+@section('title')
+    Payment History
+@endsection
+
 @section('content')
     <div class="container">
         <div class="row" style="margin-top: 1rem;">
