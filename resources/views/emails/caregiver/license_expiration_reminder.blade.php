@@ -1,0 +1,10 @@
+@component('mail::message')
+Hello {{ $caregiver->user->firstname }},
+
+This is a friendly reminder that your {{ $license->name }} certification is set to expire on {{ $license->expires_at->format('m/d/Y') }}.
+Please contact {{ $business->name }} with your updated certification information as soon as possible.
+
+Thank you!
+
+{{ config('app.name') }}
+@endcomponent
