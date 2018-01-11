@@ -30,6 +30,8 @@ Vue.use(BootstrapVue);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.component('test-component', require('./components/TestComponent'));
+
 // App Components
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
@@ -95,6 +97,7 @@ Vue.component('business-transaction', require('./components/BusinessTransaction.
 Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
 Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
+Vue.component('business-edit-schedule-modal', require('./components/business/EditScheduleModal'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 

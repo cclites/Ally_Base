@@ -43,7 +43,6 @@
             },
             options: {
                 type: Object,
-                default: {},
             },
         },
 
