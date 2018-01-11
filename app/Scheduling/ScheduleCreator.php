@@ -2,7 +2,9 @@
 
 namespace App\Scheduling;
 
+use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
+use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Schedule;
 use App\ScheduleNote;
 use Carbon\Carbon;
@@ -30,6 +32,16 @@ class ScheduleCreator
     protected $endingDate;
 
     /**
+     * @var bool
+     */
+    protected $overrideMaxHours = false;
+
+    /**
+     * @var int
+     */
+    protected $maxHours;
+
+    /**
      * @var array
      */
     protected $data = [];
@@ -44,10 +56,16 @@ class ScheduleCreator
      */
     protected $ruleParser;
 
-    public function __construct(RuleGenerator $ruleGenerator, RuleParser $ruleParser)
+    /**
+     * @var \App\Scheduling\ScheduleAggregator
+     */
+    protected $scheduleAggregator;
+
+    public function __construct(RuleGenerator $ruleGenerator, RuleParser $ruleParser, ScheduleAggregator $aggregator)
     {
         $this->ruleGenerator = $ruleGenerator;
         $this->ruleParser = $ruleParser;
+        $this->scheduleAggregator = $aggregator;
     }
 
     /**
@@ -188,6 +206,18 @@ class ScheduleCreator
     }
 
     /**
+     * Ignore the max weekly hours limit
+     *
+     * @param bool $enable
+     * @return $this
+     */
+    public function overrideMaxHours($enable = true)
+    {
+        $this->overrideMaxHours = $enable;
+        return $this;
+    }
+
+    /**
      * Create the schedules from the provided data and return a collection
      *
      * @return \Illuminate\Support\Collection|\App\Schedule[]
@@ -227,6 +257,27 @@ class ScheduleCreator
         }
     }
 
+    protected function validateMaxHours(Carbon $date)
+    {
+        if ($this->overrideMaxHours) {
+            return;
+        }
+
+        if (!strlen($this->maxHours)) {
+            $this->maxHours = Client::find($this->data['client_id'])->max_weekly_hours ?? 999;
+        }
+
+        $weekStart = $date->copy()->startOfWeek();
+        $weekEnd = $date->copy()->endOfWeek();
+        $schedules = $this->scheduleAggregator->fresh()
+                                              ->where('client_id', $this->data['client_id'])
+                                              ->getSchedulesStartingBetween($weekStart, $weekEnd);
+
+        if (($schedules->sum('duration') / 60) > $this->maxHours) {
+            throw new MaximumWeeklyHoursExceeded('The week of ' . $weekStart->toDateString() . ' exceeds the maximum allowed hours for this client.');
+        }
+    }
+
     /**
      * Start date must exist in the generated schedule
      */
@@ -254,8 +305,8 @@ class ScheduleCreator
     protected function createSchedulesFromOccurrences($occurrences)
     {
         $schedules = [];
-
         \DB::beginTransaction();
+
         try {
             foreach ($occurrences as $date) {
                 $schedules[] = Schedule::create(
@@ -267,13 +318,14 @@ class ScheduleCreator
                         ]
                     )
                 );
+                $this->validateMaxHours(Carbon::instance($date));
             }
             \DB::commit();
+            return $schedules;
         } catch (\Exception $e) {
             \DB::rollBack();
-            $schedules = [];
+            throw $e;
         }
-        return $schedules;
     }
 
     protected function attachNoteToSchedules($schedules)

@@ -1,7 +1,9 @@
 <?php
 namespace Tests\Feature;
 
+use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
+use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Schedule;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
@@ -87,5 +89,49 @@ class ScheduleCreatorTest extends TestCase
                               ->interval('weekly', '2017-12-31', ['mo']);
         $schedules = $this->scheduleCreator->create();
     }
+
+    public function testClientMaxWeeklyHoursExceededThrowsException()
+    {
+        $this->expectException(MaximumWeeklyHoursExceeded::class);
+
+        $client = factory(Client::class)->create(['max_weekly_hours' => 10]);
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+                              ->duration(240)
+            ->assignments($client->business_id, $client->id)
+            ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+            ->create();
+    }
+
+    public function testClientMaxWeeklyHoursExceededIncludesExistingSchedules()
+    {
+        $client = factory(Client::class)->create(['max_weekly_hours' => 10]);
+
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-14'))
+                              ->duration(60)
+                              ->assignments($client->business_id, $client->id)
+                              ->interval('weekly', '2018-02-28', ['th','fr','sa'])
+                              ->create();
+
+        $this->expectException(MaximumWeeklyHoursExceeded::class);
+        $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+                              ->duration(180)
+                              ->assignments($client->business_id, $client->id)
+                              ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+                              ->create();
+    }
+
+    public function testOverrideAllowsClientMaxWeeklyHoursExceeded()
+    {
+        $client = factory(Client::class)->create(['max_weekly_hours' => 10]);
+        $results = $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
+                              ->duration(240)
+                              ->assignments($client->business_id, $client->id)
+                              ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+                              ->overrideMaxHours()
+                              ->create();
+
+        $this->assertTrue($results->count() > 0);
+    }
+
 
 }

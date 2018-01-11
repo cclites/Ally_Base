@@ -2,26 +2,62 @@
 
 namespace App\Scheduling;
 
+use App\Schedule;
 use Carbon\Carbon;
 
 class ScheduleAggregator
 {
-    protected $data = [];
-    protected $activeSchedules = [];
+    /**
+     * @var array
+     */
+    protected $eagerLoaded = ['client', 'caregiver', 'shifts'];
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Builder
+     */
+    protected $query;
+
+    /**
+     * @var bool
+     */
     protected $onlyStartTime = true;
 
-    public function add($title, $schedule)
+    /**
+     * Start a fresh query
+     */
+    public function fresh()
     {
-        $this->data[] = [
-            'title' => $title,
-            'schedule' => $schedule
-        ];
+        $this->query = null;
+        return $this;
     }
 
-    public function addActiveSchedules($active = [])
+    /**
+     * Access the query builder object used for aggregation
+     *
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
+    public function query()
     {
-        $active = (array) $active;
-        $this->activeSchedules = array_merge($this->activeSchedules, $active);
+        if (!$this->query) $this->query = Schedule::with($this->eagerLoaded)->orderBy('starts_at');
+        return $this->query;
+    }
+
+    /**
+     * Filter the aggregation query
+     *
+     * @param $field
+     * @param $delimiter
+     * @param $value
+     * @return $this
+     */
+    public function where($field, $delimiter, $value = null)
+    {
+        if ($delimiter === null && $value === null) {
+            $this->query()->whereNull($field);
+            return $this;
+        }
+        $this->query()->where($field, $delimiter, $value);
+        return $this;
     }
 
     /**
@@ -37,6 +73,45 @@ class ScheduleAggregator
     }
 
     /**
+     * @param \Carbon\Carbon $start
+     * @param \Carbon\Carbon $end
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getSchedulesStartingBetween(Carbon $start, Carbon $end)
+    {
+        $startUtc = $start->copy()->setTimezone('UTC');
+        $endUtc = $end->copy()->setTimezone('UTC');
+
+        return $this->query()->whereBetween('starts_at', [$startUtc, $endUtc->addSecond()])->get();
+    }
+
+    /**
+     * Get all schedule models occurring between $start and $end
+     *
+     * @param \Carbon\Carbon $start
+     * @param \Carbon\Carbon $end
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getSchedulesBetween(Carbon $start, Carbon $end)
+    {
+        $startUtc = $start->copy()->setTimezone('UTC');
+        $endUtc = $end->copy()->setTimezone('UTC');
+
+        switch(\DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
+            case 'mysql':
+                $endFormat = "`starts_at` + INTERVAL `duration` MINUTE";
+                break;
+            case 'sqlite':
+                $endFormat = "datetime(starts_at, '+' || duration || ' minutes')";
+                break;
+        }
+
+        return $this->query->whereRaw('(starts_at >= ? AND ' . $endFormat . ' <= ?)', [$startUtc, $endUtc])->get();
+    }
+
+    /**
+     * Return an array format optimized for Event APIs
+     *
      * @param string|\DateTime $start_date
      * @param string|\DateTime $end_date
      * @param string $timezone
@@ -44,50 +119,31 @@ class ScheduleAggregator
      *
      * @return array
      */
-    public function events($start_date, $end_date, $timezone='UTC', $limitPerEvent = 300)
+    public function events(Carbon $start, Carbon $end)
     {
-        $events = [];
-        foreach($this->data as $event) {
-            $title       = $event['title'];
-            /** @var \App\Schedule $schedule */
-            $schedule    = $event['schedule'];
-            if ($this->onlyStartTime) {
-                $occurrences = $schedule->getOccurrencesStartingBetween($start_date, $end_date, $limitPerEvent);
-            } else {
-                $occurrences = $schedule->getOccurrencesBetween($start_date, $end_date, $limitPerEvent);
-            }
-            $events = array_merge($events, array_map(function ($date) use ($schedule, $title) {
-                $end = clone $date;
-                $end->add(new \DateInterval('PT' . $schedule->duration . 'M'));
-
-                // checked in logic
-                $now = Carbon::now();
-                $diff = $now->diffInMinutes(Carbon::instance($date));
-                $checked_in = ($diff < ($schedule->duration) * 1.2) && in_array($schedule->id, $this->activeSchedules);
-
-                return [
-                    'schedule_id' => $schedule->id,
-                    'title'       => $title,
-                    'start'       => $date,
-                    'end'         => $end,
-                    'duration'    => $schedule->duration,
-                    'checked_in'  => $checked_in,
-                    'client_id'   => $schedule->client_id,
-                    'caregiver_id'=> $schedule->caregiver_id,
-                    'client_name' => optional($schedule->client)->name,
-                    'caregiver_name' => optional($schedule->caregiver)->name,
-                    'caregiver_phones' => optional($schedule->caregiver)->phoneNumbers
-                ];
-            }, $occurrences));
+        if ($this->onlyStartTime) {
+            $schedules = $this->getSchedulesStartingBetween($start, $end);
+        } else {
+            $schedules = $this->getSchedulesBetween($start, $end);
         }
-        usort($events, function($eventA, $eventB) {
-            $a = (int) $eventA['start']->format('U');
-            $b = (int) $eventB['start']->format('U');
-            if ($a == $b) {
-                return 0;
-            }
-            return ($a < $b) ? -1 : 1;
+
+        return $schedules->map(function(Schedule $schedule) {
+            return [
+                'schedule_id' => $schedule->id,
+                'title'       => $this->resolveEventTitle($schedule),
+                'start'       => $schedule->starts_at->format('c'),
+                'end'         => $schedule->starts_at->copy()->addMinutes($schedule->duration)->format('c'),
+                'duration'    => $schedule->duration,
+                'checked_in'  => $schedule->isClockedIn(),
+                'client_id'   => $schedule->client_id,
+                'caregiver_id'=> $schedule->caregiver_id,
+                'client_name' => optional($schedule->client)->name,
+                'caregiver_name' => $schedule->caregiver_id ? optional($schedule->caregiver)->name : 'No Caregiver Assigned',
+                'caregiver_phones' => optional($schedule->caregiver)->phoneNumbers
+            ];
         });
-        return $events;
     }
+
+
+
 }

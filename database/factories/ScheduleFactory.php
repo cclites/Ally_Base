@@ -21,11 +21,11 @@ $factory->define(\App\Schedule::class, function(Faker $faker) {
     // Create a client if one doesn't exist
     $client = App\Client::inRandomOrder()->first();
     if (!$client) {
-        $client = factory(\App\Client::class);
+        $client = factory(\App\Client::class)->create();
     }
 
     // Attach a random caregiver to a client if client does not have caregivers already
-    if ($client && !$client->caregivers->count()) {
+    if (!$client->caregivers->count()) {
         $caregiver = $client->business->caregivers()->inRandomOrder()->first() ?? null;
         if ($caregiver) {
             $client->caregivers()->attach($caregiver, [
