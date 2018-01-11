@@ -18,44 +18,35 @@ class ScheduleController extends BaseController
         return view('business.schedule', ['business' => $this->business()]);
     }
 
-    public function events(Request $request)
+    public function events(Request $request, ScheduleAggregator $aggregator)
     {
-        $schedules = $this->business()->schedules()->with('client', 'caregiver.phoneNumbers')->get();
+        $aggregator->where('business_id', $this->business()->id);
 
         // Filter by client or caregiver
-        if ($request->has('caregiver_id') || $request->has('client_id')) {
-            $schedules = $schedules->filter(function(Schedule $schedule) use ($request) {
-                if ($client_id = $request->input('client_id')) {
-                    if ($schedule->client_id != $client_id) return false;
-                }
-                if ($caregiver_id = $request->input('caregiver_id')) {
-                    if ($schedule->caregiver_id != $caregiver_id) return false;
-                } elseif ($request->input('caregiver_id') === "0") {
-                    // Unassigned shifts only
-                    if ($schedule->caregiver_id) return false;
-                }
-                return true;
-            });
+        if ($client_id = $request->input('client_id')) {
+            $aggregator->where('client_id', $client_id);
+        }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $aggregator->where('caregiver_id', $caregiver_id);
+        } elseif ($request->input('caregiver_id') === "0") {
+            $aggregator->where('caregiver_id', null);
         }
 
-        $aggregator = new ScheduleAggregator();
-        foreach($schedules as $schedule) {
+        $start = new Carbon(
+            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
+            $this->business()->timezone
+        );
+        $end = new Carbon(
+            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
+            $this->business()->timezone
+        );
+
+        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
+        $events->setTitleCallback(function(Schedule $schedule) {
             $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            $title = $clientName . ' (' . $caregiverName . ')';
-            $aggregator->add($title, $schedule);
-        }
-
-        $activeSchedules = $this->business()->shifts()->whereNull('checked_out_time')->pluck('schedule_id')->toArray();
-        $aggregator->addActiveSchedules($activeSchedules);
-
-        $start = $request->start ?: date('Y-m-d', strtotime('First day of last month -2 months'));
-        $end = $request->end ?: date('Y-m-d', strtotime('First day of this month +13 months'));
-
-        if (strlen($start) > 10) $start = substr($start, 0, 10);
-        if (strlen($end) > 10) $end = substr($end, 0, 10);
-
-        $events = new ScheduleEventsResponse($aggregator->events($start, $end));
+            return $clientName . ' (' . $caregiverName . ')';
+        });
         return $events;
     }
 

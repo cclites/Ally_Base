@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Scheduling\ScheduleAggregator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
@@ -13,17 +15,21 @@ class ScheduleController extends Controller
         return view('caregivers.schedule');
     }
 
-    public function events(Request $request)
+    public function events(Request $request, ScheduleAggregator $aggregator)
     {
         $caregiver = auth()->user()->role;
+        $aggregator->where('caregiver_id', $caregiver->id);
 
-        $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
-        $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
+        $start = new Carbon(
+            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
+            $caregiver->businesses->first()->timezone ?? 'America/New_York'
+        );
+        $end = new Carbon(
+            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
+            $caregiver->businesses->first()->timezone ?? 'America/New_York'
+        );
 
-        if (strlen($start) > 10) $start = substr($start, 0, 10);
-        if (strlen($end) > 10) $end = substr($end, 0, 10);
-
-        $events = new ScheduleEventsResponse($caregiver->getEvents($start, $end));
+        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
         return $events;
     }
 }
