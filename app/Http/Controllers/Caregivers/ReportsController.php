@@ -7,9 +7,12 @@ use App\Deposit;
 use App\Http\Controllers\Controller;
 use App\Reports\ShiftsReport;
 use Carbon\Carbon;
+use App\Traits\ActiveBusiness;
 
 class ReportsController extends Controller
 {
+    use ActiveBusiness;
+
     public function deposits()
     {
         return view('caregivers.reports.deposits');
@@ -50,7 +53,26 @@ class ReportsController extends Controller
                 return $deposit;
             });
 
-        return view('caregivers.reports.payment_history', compact('caregiver', 'deposits'));
+        return view('caregivers.reports.payment_history', compact('caregiver', 'deposits', 'business'));
+    }
+
+    public function printPaymentHistory($year)
+    {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
+        $caregiver = Caregiver::with('businesses')->find(auth()->id());
+        $deposits = Deposit::with('shifts')
+            ->where('caregiver_id', $caregiver->id)
+            ->whereYear('created_at', request()->year)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->map(function ($deposit) {
+                $deposit->amount = floatval($deposit->amount);
+                $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
+                $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
+                return $deposit;
+            });
+        return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits'));
     }
 
     public function paymentDetails($id)

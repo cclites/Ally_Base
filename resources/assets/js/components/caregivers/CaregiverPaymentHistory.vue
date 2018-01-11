@@ -71,7 +71,7 @@
 
         methods: {
             printSummary() {
-                $('#caregiver_payment_history').print();
+                window.location = '/reports/payment-history/print/' + this.selectedYear;
             }
         },
 
