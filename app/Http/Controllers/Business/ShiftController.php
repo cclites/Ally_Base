@@ -218,13 +218,13 @@ class ShiftController extends BaseController
             }
         }
 
+        $timezone = $this->business()->timezone;
+
         if (request()->filled('type') && strtolower(request('type')) == 'pdf') {
             // return pdf
-            $pdf = PDF::loadView('business.shifts.print', compact('shift'));
+            $pdf = PDF::loadView('business.shifts.print', compact('shift', 'timezone'));
             return $pdf->download('payment_details.pdf');
         }
-
-        $timezone = $this->business()->timezone;
 
         return view('business.shifts.print', compact('shift', 'timezone'));
     }

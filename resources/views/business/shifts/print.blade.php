@@ -48,13 +48,13 @@
                 <strong>Special Designation</strong><br>
                 @switch($shift->hours_type)
                     @case('default')
-                    None
+                    Regular
                     @break
                     @case('overtime')
-                    OT
+                    Overtime
                     @break
                     @case('holiday')
-                    HOL
+                    Holiday
                     @break
                 @endswitch
             </div>
