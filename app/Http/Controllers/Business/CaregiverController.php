@@ -274,4 +274,15 @@ class CaregiverController extends BaseController
         return new SuccessResponse('Caregiver updated');
     }
 
+    public function preferences(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+        $data = $request->validate(['preferences' => 'required|string']);
+        $caregiver->update($data);
+        return new SuccessResponse('Caregiver updated');
+    }
+
+
 }

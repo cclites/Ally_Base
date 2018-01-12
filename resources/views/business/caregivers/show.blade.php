@@ -127,9 +127,7 @@
             <p>This will be where caregivers can set their days and hours of availability.</p>
         </div>
         <div class="tab-pane" id="preferences" role="tabpanel">
-            <!-- Preferences Placeholder -->
-            <h4>Preferences coming soon</h4>
-            <p>This will be where caregivers can set their environment preferences.</p>
+            <business-caregiver-preferences-tab :caregiver="{{ $caregiver }}"></business-caregiver-preferences-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
