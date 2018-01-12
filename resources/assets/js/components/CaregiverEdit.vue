@@ -39,7 +39,7 @@
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
-                        <b-form-input type="text" v-model="form.ssn"></b-form-input>
+                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">

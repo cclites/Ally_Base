@@ -9,6 +9,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Rules\ValidSSN;
 use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -105,7 +106,7 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
-        $caregiver->masked_ssn = '***-**-' . collect(explode('-', $caregiver->getSsnAttribute()))->last();
+        $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -142,7 +143,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $data = $request->validate([
+        $rules = [
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required_unless:no_email,1|nullable|email',
@@ -150,16 +151,15 @@ class CaregiverController extends BaseController
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
             'misc' => 'nullable|string',
-            'ssn' => 'nullable'
-        ]);
+        ];
 
         if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
-            if (!str_contains($request->ssn, '-')) {
-                $data['ssn'] = substr($request->ssn, 0, 3) . '-' . substr($request->ssn, 3, 2) . '-' . substr($request->ssn, 5, 4);
-            } else {
-                $data['ssn'] = $request->ssn;
-            }
+            $rules += [
+                'ssn' => new ValidSSN()
+            ];
         }
+
+        $data = $request->validate($rules);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
