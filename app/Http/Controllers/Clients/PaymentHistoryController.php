@@ -36,11 +36,12 @@ class PaymentHistoryController extends Controller
 
     public function printDetails($id)
     {
+        $client = Client::find(auth()->id());
         $payment_details = $this->getPaymentDetails($id);
-
+        $timezone = $client->business->timezone ?? 'America/New_York';
         //return view('clients.print.payment_details', $payment_details);
 
-        $pdf = PDF::loadView('clients.print.payment_details', $payment_details)->setOrientation('landscape');
+        $pdf = PDF::loadView('clients.print.payment_details', compact('payment_details', 'timezone'))->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
     }
 

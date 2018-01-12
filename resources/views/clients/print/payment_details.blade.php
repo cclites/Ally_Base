@@ -52,7 +52,7 @@
                 <table style="float: right;">
                     <tr>
                         <td>Payment Date</td>
-                        <td>{{ $payment->created_at->format('m/d/Y') }}</td>
+                        <td>{{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }}</td>
                     </tr>
                     <tr>
                         <td>Care Week</td>
@@ -94,7 +94,8 @@
                                 {{ $shift->checked_in_time->format('m/d/Y') }}
                             </td>
                             <td>
-                                {{ $shift->checked_in_time->format('g:i a') }} - {{ $shift->checked_out_time->format('g:i a') }}
+                                {{ $shift->checked_in_time->setTimezone($timezone)->format('g:i a') }} -
+                                {{ $shift->checked_out_time->setTimezone($timezone)->format('g:i a') }}
                             </td>
                             <td>
                                 @foreach($shift->activities as $activity)
@@ -127,7 +128,7 @@
         </div>
         <div class="row">
             <div class="footer-left">
-                <p>This is a statement. Your payment was processed on {{ $payment->created_at->format('m/d/Y') }} using your payment information on file.</p>
+                <p>This is a statement. Your payment was processed on {{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }} using your payment information on file.</p>
             </div>
             <div class="footer-right">
                 <table class="table">
