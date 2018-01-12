@@ -9,6 +9,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Rules\ValidSSN;
 use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -109,6 +110,7 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
+        $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -116,7 +118,7 @@ class CaregiverController extends BaseController
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
-
+        
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
@@ -145,15 +147,23 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $data = $request->validate([
+        $rules = [
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
-            'misc' => 'nullable|string'
-        ]);
+            'misc' => 'nullable|string',
+        ];
+
+        if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
+            $rules += [
+                'ssn' => new ValidSSN()
+            ];
+        }
+
+        $data = $request->validate($rules);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
