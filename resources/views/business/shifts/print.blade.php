@@ -36,11 +36,11 @@
         <div class="row with-padding-bottom">
             <div class="col-sm-6">
                 <strong>Clocked In Time</strong><br/>
-                {{ $shift->checked_in_time }}
+                {{ $shift->checked_in_time->setTimezone($timezone)->format('m/d/Y g:i A') }}
             </div>
             <div class="col-sm-6">
                 <strong>Clocked Out Time</strong><br/>
-                {{ $shift->checked_out_time }}<br/>
+                {{ $shift->checked_out_time->setTimezone($timezone)->format('m/d/Y g:i A') }}<br/>
             </div>
         </div>
         <div class="row">

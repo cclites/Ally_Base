@@ -223,7 +223,10 @@ class ShiftController extends BaseController
             $pdf = PDF::loadView('business.shifts.print', compact('shift'));
             return $pdf->download('payment_details.pdf');
         }
-        return view('business.shifts.print', compact('shift'));
+
+        $timezone = $this->business()->timezone;
+
+        return view('business.shifts.print', compact('shift', 'timezone'));
     }
 
     public function storeIssue(Request $request, Shift $shift)
