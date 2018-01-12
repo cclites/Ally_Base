@@ -22,8 +22,8 @@
                                 name="business_id"
                                 v-model="business_id"
                         >
-                            <option value="">--Select a Business--</option>
-                            <option value="">All Businesses</option>
+                            <option value="">--Select a Provider--</option>
+                            <option value="">All Providers</option>
                             <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
@@ -110,7 +110,7 @@
                     },
                     {
                         key: 'business_allotment',
-                        label: 'Business Allotment',
+                        label: 'Provider Allotment',
                         sortable: true,
                     },
                     {

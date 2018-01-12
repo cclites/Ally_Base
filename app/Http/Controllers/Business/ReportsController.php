@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\BankAccount;
 use App\Business;
+use App\Caregiver;
 use App\Client;
 use App\CreditCard;
 use App\Deposit;
@@ -384,6 +385,18 @@ class ReportsController extends BaseController
         $caregivers = $this->business()->caregivers;
 
         return response()->json($caregivers);
+    }
+
+    public function caregiversMissingBankAccounts()
+    {
+        $caregivers = $this->business()
+            ->caregivers()
+            ->with(['shifts' => function ($query) {
+                $query->where('status', 'WAITING_FOR_PAYOUT');
+            }])
+            ->doesntHave('bankAccount')
+            ->get();
+        return view('business.reports.caregivers_missing_bank_accounts', compact('caregivers'));
     }
 
     public function printableSchedule()

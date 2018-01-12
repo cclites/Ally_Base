@@ -1,24 +1,28 @@
 <template>
     <b-card title="Payment History">
         <b-table hover
+                 sort-by="created_at"
                 :items="items"
                 :fields="fields">
             <template slot="created_at" scope="data">
                 {{ formatDate(data.item.created_at) }}
             </template>
             <template slot="week" scope="data">
-                {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
+                {{ start_end(data) }}
             </template>
             <template slot="actions" scope="data">
                 <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
-                    View Details
+                    View Statement
+                </a>
+                <a :href="'/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">
+                    Download Statement
                 </a>
             </template>
         </b-table>
     </b-card>
 </template>
 
-<script>
+<script lang=babel>
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
@@ -28,7 +32,7 @@
         mixins: [FormatsDates, FormatsNumbers],
 
         data() {
-            return{
+            return {
                 items: this.client.payments,
                 fields: [
                     { key: 'created_at', label: 'Date Paid' },
@@ -38,12 +42,21 @@
                         label: 'Amount',
                         formatter: (value) => { return this.moneyFormat(value) }
                     },
-                    { key: 'method', label: 'Type' },
                     {
                         key: 'actions',
-                        class: 'hidden-print'
+                        class: 'hidden-print'                        
                     }
                 ]
+            }
+        },
+        methods: {
+            start_end(data) {
+                if (data.item.week) {
+                    if ('start' in data.item.week) {
+                        return `${this.formatDate(data.item.week.start)} - ${this.formatDate(data.item.week.end)}`;
+                    }
+                }
+                return 'Shift N/A';
             }
         }
     }

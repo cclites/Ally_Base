@@ -82,6 +82,21 @@ class ShiftStatusManager
             Shift::PAID,
         ];
     }
+    
+    public static function getUnsettledStatuses()
+    {
+        return [
+            Shift::WAITING_FOR_CONFIRMATION,
+            Shift::WAITING_FOR_AUTHORIZATION,
+            Shift::WAITING_FOR_CHARGE,
+            Shift::WAITING_FOR_PAYOUT,
+            Shift::PAID_NOT_CHARGED,
+            Shift::PAID_BUSINESS_ONLY,
+            Shift::PAID_CAREGIVER_ONLY,
+            Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
+            Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
+        ];
+    }
 
     public static function getPendingStatuses()
     {
@@ -381,7 +396,7 @@ class ShiftStatusManager
      * Acknowledge a returned (failed) caregiver deposit
      * @return bool
      */
-    public function ackFailedCaregiverDeposit()
+    public function ackReturnedCaregiverDeposit()
     {
         switch($this->status()) {
             case Shift::PAID_CAREGIVER_ONLY:

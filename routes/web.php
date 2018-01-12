@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/phone', 'PhoneController@store');
     Route::put('/profile/phone/{id}', 'PhoneController@update');
     Route::delete('/profile/phone/{id}', 'PhoneController@destroy');
+    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -74,6 +75,8 @@ Route::group([
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
+    Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
+    Route::get('reports/payment-history/{id}/print', 'Caregivers\ReportsController@printPaymentDetails')->name('caregivers.reports.print_payment_details');
     Route::get('reports/payment-history/{id}', 'Caregivers\ReportsController@paymentDetails')->name('caregivers.reports.payment_details');
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
@@ -106,12 +109,12 @@ Route::group([
     Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
     Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
     Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
-    Route::post('caregivers/{id}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
+    Route::post('caregivers/{caregiver}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
     Route::post('caregivers/{id}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
     Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
 
-
+    Route::get('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
@@ -120,6 +123,7 @@ Route::group([
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');
     Route::delete('clients/excluded-caregiver/{id}', 'Business\ClientExcludedCaregiverController@destroy')->name('clients.remove-excluded-caregiver');
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
+    Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
     Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
@@ -134,7 +138,7 @@ Route::group([
     Route::patch('clients/{id}/schedule/{schedule_id}/single', 'Business\ClientScheduleController@updateSingle')->name('clients.schedule.update.single');
     Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
-    Route::post('clients/{id}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
+    Route::post('clients/{client}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
@@ -160,6 +164,7 @@ Route::group([
     Route::post('reports/clients-onboarded', 'Business\ReportsController@clientOnboardedData')->name('reports.client_onboarded_data');
     Route::get('reports/caregivers-onboarded', 'Business\ReportsController@caregiverOnboardedReport')->name('reports.caregiver_onboarded');
     Route::post('reports/caregivers-onboarded', 'Business\ReportsController@caregiverOnboardedData')->name('reports.caregiver_onboarded_data');
+    Route::get('reports/caregivers-missing-bank-accounts', 'Business\ReportsController@caregiversMissingBankAccounts')->name('reports.caregivers_missing_bank_accounts');
     Route::get('reports/printable-schedule', 'Business\ReportsController@printableSchedule')->name('reports.printable_schedule');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
@@ -174,6 +179,7 @@ Route::group([
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');
+    Route::get('shifts/{shift}/print', 'Business\ShiftController@printPage')->name('shifts.print');
     Route::post('shifts/{shift}/unconfirm', 'Business\ShiftController@unconfirm')->name('shifts.unconfirm');
     Route::get('shifts/{shift}/duplicate', 'Business\ShiftController@duplicate')->name('shifts.duplicate');
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
@@ -205,6 +211,8 @@ Route::group([
 ], function() {
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
+    Route::resource('clients', 'Admin\ClientController');
+    Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
@@ -226,7 +234,9 @@ Route::group([
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
-
+    Route::redirect('reports', 'reports/unsettled');
+    Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
+    Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

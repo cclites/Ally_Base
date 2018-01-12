@@ -5,11 +5,18 @@ namespace App\Http\Controllers\Caregivers;
 use App\Caregiver;
 use App\Deposit;
 use App\Http\Controllers\Controller;
+use App\Payment;
 use App\Reports\ShiftsReport;
+use App\Shift;
+use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
+use App\Traits\ActiveBusiness;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ReportsController extends Controller
 {
+    use ActiveBusiness;
+
     public function deposits()
     {
         return view('caregivers.reports.deposits');
@@ -23,7 +30,7 @@ class ReportsController extends Controller
             ->whereNotNull('checked_out_time')
             ->orderBy('checked_in_time', 'DESC')
             ->get();
-        $shifts = $shifts->map(function($shift) {
+        $shifts = $shifts->map(function ($shift) {
             $shift->client_name = ($shift->client) ? $shift->client->name() : '';
             $shift->activity_names = collect($shift->activities)
                 ->sortBy('name')
@@ -41,14 +48,35 @@ class ReportsController extends Controller
 
         $caregiver = Caregiver::find(auth()->id());
         $deposits = Deposit::with('shifts')->where('caregiver_id', $caregiver->id)
+            ->orderBy('created_at', 'DESC')
             ->get()
             ->map(function ($deposit) {
+                $deposit->amount = floatval($deposit->amount);
                 $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
 
-        return view('caregivers.reports.payment_history', compact('caregiver', 'deposits'));
+        return view('caregivers.reports.payment_history', compact('caregiver', 'deposits', 'business'));
+    }
+
+    public function printPaymentHistory($year)
+    {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
+        $caregiver = Caregiver::with('businesses')->find(auth()->id());
+        $deposits = Deposit::with('shifts')
+            ->where('caregiver_id', $caregiver->id)
+            ->whereYear('created_at', request()->year)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->map(function ($deposit) {
+                $deposit->amount = floatval($deposit->amount);
+                $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
+                $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
+                return $deposit;
+            });
+        return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits'));
     }
 
     public function paymentDetails($id)
@@ -62,5 +90,56 @@ class ReportsController extends Controller
         $shifts = $report->rows();
 
         return view('caregivers.reports.payment_details', compact('shifts'));
+    }
+
+    public function printPaymentDetails($id)
+    {
+        $deposit = Deposit::find($id);
+        $shifts = $this->getPaymentShifts($id);
+        $business = auth()->user()->role->businesses->first();
+
+        if (strtolower(request()->type) == 'pdf') {
+            $pdf = PDF::loadView('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'))->setOrientation('landscape');
+            return $pdf->download('deposit_details.pdf');
+        }
+
+        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'));
+    }
+
+    protected function getPaymentShifts($id)
+    {
+        $shifts = Shift::with('deposits', 'activities')
+            ->whereHas('deposits', function ($query) use ($id) {
+                $query->where('deposits.id', $id);
+            })
+            ->where('caregiver_id', auth()->id())
+            ->orderBy('checked_in_time')
+            ->get()
+            ->map(function ($shift) {
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+                $row = (object) collect($shift->toArray())
+                    ->merge([
+                        'hours' => $shift->duration(),
+                        'ally_fee' => number_format($allyFee, 2),
+                        'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
+                        'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
+                        'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                        'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
+                        'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
+                        'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
+                        'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
+                        'confirmed' => $shift->statusManager()->isConfirmed(),
+                        'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
+                        'EVV' => $shift->verified,
+                    ])->toArray();
+
+                $row->checked_in_time = Carbon::parse($row->checked_in_time);
+                $row->checked_out_time = Carbon::parse($row->checked_out_time);
+                $row->activities = collect($row->activities)->sortBy('name');
+
+                return $row;
+            });
+
+        return $shifts;
     }
 }

@@ -78,7 +78,28 @@
             <client-phone-numbers-tab :phone-numbers="{{ $user->phoneNumbers }}"></client-phone-numbers-tab>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
-
+            <div class="row">
+                <div class="col-lg-6 col-sm-12">
+                    <payment-method title="Primary Payment Method"
+                                    source="primary"
+                                    :method="{{ $user->role->defaultPayment OR '{}' }}"
+                                    :client="{{ $user->role }}"
+                                    payment-type-message="{{ $payment_type_message['default'] }}"
+                                    role="{{ auth()->user()->role_type }}"
+                                    :business="true">
+                    </payment-method>
+                </div>
+                <div class="col-lg-6 col-sm-12">
+                    <payment-method title="Backup Payment Method"
+                                    source="backup"
+                                    :method="{{ $user->role->backupPayment OR '{}' }}"
+                                    :client="{{ $user->role }}"
+                                    payment-type-message="{{ $payment_type_message['backup'] }}"
+                                    role="{{ auth()->user()->role_type }}"
+                                    :business="true">
+                    </payment-method>
+                </div>
+            </div>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $user->emergencyContacts }}" :user-id="{{ $user->id }}"></emergency-contacts-tab>

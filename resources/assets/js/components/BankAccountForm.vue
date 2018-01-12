@@ -29,6 +29,9 @@
                             type="text"
                             autocomplete="off"
                             v-model="form.routing_number"
+                            v-on:cut.native.prevent
+                            v-on:copy.native.prevent
+                            v-on:paste.native.prevent
                     >
                     </b-form-input>
                     <input-help :form="form" field="routing_number" text="Provide your bank's routing number"></input-help>
@@ -42,6 +45,9 @@
                             type="text"
                             autocomplete="off"
                             v-model="form.routing_number_confirmation"
+                            v-on:cut.native.prevent
+                            v-on:copy.native.prevent
+                            v-on:paste.native.prevent
                     >
                     </b-form-input>
                     <input-help :form="form" field="routing_number_confirmation" text="Re-enter your bank's routing number"></input-help>
@@ -57,6 +63,9 @@
                             type="text"
                             autocomplete="off"
                             v-model="form.account_number"
+                            v-on:cut.native.prevent
+                            v-on:copy.native.prevent
+                            v-on:paste.native.prevent
                     >
                     </b-form-input>
                     <input-help :form="form" field="account_number" text="Provide your bank's account number"></input-help>
@@ -70,6 +79,9 @@
                             type="text"
                             autocomplete="off"
                             v-model="form.account_number_confirmation"
+                            v-on:cut.native.prevent
+                            v-on:copy.native.prevent
+                            v-on:paste.native.prevent
                     >
                     </b-form-input>
                     <input-help :form="form" field="account_number_confirmation" text="Re-enter your bank's account number"></input-help>
@@ -110,7 +122,7 @@
     </form>
 </template>
 
-<script>
+<script lang=babel>
     export default {
         props: {
             'submitUrl': '',

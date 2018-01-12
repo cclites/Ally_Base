@@ -87,14 +87,6 @@
         </div>
         <div class="tab-pane" id="addresses" role="tabpanel">
             <business-client-addresses-tab :addresses="{{ $client->addresses }}" client-id="{{ $client->id }}"></business-client-addresses-tab>
-            {{--<div class="row">--}}
-                {{--<div class="col-md-6 col-sm-12">--}}
-                    {{--<user-address title="Service Address" type="evv" action="{{ route('business.clients.address', [$client->id, 'evv']) }}" :address="{{ $client->addresses->where('type', 'evv')->first() ?? '{}' }}"></user-address>--}}
-                {{--</div>--}}
-                {{--<div class="col-md-6 col-sm-12">--}}
-                    {{--<user-address title="Billing Address" type="billing" action="{{ route('business.clients.address', [$client->id, 'billing']) }}" :address="{{ $client->addresses->where('type', 'billing')->first() ?? '{}' }}"></user-address>--}}
-                {{--</div>--}}
-            {{--</div>--}}
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
             <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
@@ -118,6 +110,7 @@
                                     :method="{{ $client->defaultPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $defaultPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>
@@ -127,6 +120,7 @@
                                     :method="{{ $client->backupPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $backupPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>
@@ -167,7 +161,8 @@
         // Javascript to enable link to tab
         var url = document.location.toString();
         if (url.match('#')) {
-            $('.nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
+            $('.nav-item a[href="#' +
+                url.split('#')[1] + '"]').tab('show');
         }
 
         // Change hash for page-reload

@@ -3,8 +3,8 @@
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bank"></i><span class="hide-menu">Businesses</span></a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('admin.businesses.index') }}">Business List</a></li>
-        <li><a href="{{ route('admin.businesses.create') }}">Add Business</a></li>
+        <li><a href="{{ route('admin.businesses.index') }}">Provider List</a></li>
+        <li><a href="{{ route('admin.businesses.create') }}">Add Provider</a></li>
     </ul>
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Users</span></a>
@@ -26,6 +26,11 @@
         <li><a href="{{ route('admin.deposits') }}">Deposit Report</a></li>
     </ul>
 </li>
-
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
+    </ul>
+</li>
 
 

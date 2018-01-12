@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Reports;
 
 use App\CaregiverLicense;
@@ -62,11 +63,9 @@ class CertificationExpirationReport extends BaseReport
 
         if ($start && $end) {
             $this->query->whereBetween('expires_at', [$start, $end]);
-        }
-        elseif ($start) {
+        } elseif ($start) {
             $this->query->where('expires_at', '>=', $start);
-        }
-        else {
+        } else {
             $this->query->where('expires_at', '<=', $end);
         }
         return $this;
@@ -76,10 +75,10 @@ class CertificationExpirationReport extends BaseReport
      * Specify the sort order for the report
      *
      * @param $column
-     * @param string $direction  ASC | DESC
+     * @param string $direction ASC | DESC
      * @return $this
      */
-    public function orderBy($column, $direction='ASC')
+    public function orderBy($column, $direction = 'ASC')
     {
         $this->query()->orderBy($column, $direction);
         return $this;
@@ -103,7 +102,7 @@ class CertificationExpirationReport extends BaseReport
     protected function results()
     {
         $licenses = $this->query->get();
-        $rows = $licenses->map(function(CaregiverLicense $license) {
+        $rows = $licenses->map(function (CaregiverLicense $license) {
             return [
                 'id' => $license->id,
                 'name' => $license->name,

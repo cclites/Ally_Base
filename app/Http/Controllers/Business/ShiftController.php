@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -12,6 +11,7 @@ use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ShiftController extends BaseController
 {
@@ -47,10 +47,12 @@ class ShiftController extends BaseController
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['business_id'] = $this->business()->id;
         $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
+        $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
 
         if ($shift = Shift::create($data)) {
             $shift->activities()->sync($request->input('activities', []));
-            foreach($request->input('issues', []) as $issue) {
+            foreach ($request->input('issues', []) as $issue) {
                 $issue = new ShiftIssue([
                     'caregiver_injury' => $issue['caregiver_injury'] ?? 0,
                     'client_injury' => $issue['client_injury'] ?? 0,
@@ -102,7 +104,8 @@ class ShiftController extends BaseController
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
     }
 
-    public function update(Request $request, Shift $shift) {
+    public function update(Request $request, Shift $shift)
+    {
         if ($this->business()->id != $shift->business_id) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
@@ -110,8 +113,7 @@ class ShiftController extends BaseController
         // Allow admin overrides on locked shifts
         if (is_admin() && $request->input('override')) {
             $adminOverride = true;
-        }
-        else if ($shift->isReadOnly()) {
+        } else if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
@@ -132,9 +134,11 @@ class ShiftController extends BaseController
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+        $data['mileage'] = request('mileage', 0);
+        $data['other_expenses'] = request('other_expenses', 0);
 
         if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
-             event(new UnverifiedShiftConfirmed($shift));
+            event(new UnverifiedShiftConfirmed($shift));
         }
 
         if ($shift->update($data)) {
@@ -147,7 +151,6 @@ class ShiftController extends BaseController
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
-
 
     public function destroy(Shift $shift)
     {
@@ -199,6 +202,33 @@ class ShiftController extends BaseController
         return new ErrorResponse(400, 'The shift is locked for modification.');
     }
 
+    public function printPage(Shift $shift)
+    {
+        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
+
+        // Calculate distances
+        $checked_in_distance = null;
+        $checked_out_distance = null;
+        if ($address = $shift->client->evvAddress) {
+            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
+                $shift->checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
+            }
+            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
+                $shift->checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
+            }
+        }
+
+        $timezone = $this->business()->timezone;
+
+        if (request()->filled('type') && strtolower(request('type')) == 'pdf') {
+            // return pdf
+            $pdf = PDF::loadView('business.shifts.print', compact('shift', 'timezone'));
+            return $pdf->download('payment_details.pdf');
+        }
+
+        return view('business.shifts.print', compact('shift', 'timezone'));
+    }
+
     public function storeIssue(Request $request, Shift $shift)
     {
         $shift->load(['activities', 'issues']);
@@ -247,15 +277,15 @@ class ShiftController extends BaseController
         $date = $request->input('date');
 
         // Make sure schedule has proper assignments
-        if (!$schedule->caregiver_id) return new ErrorResponse(400,'There is no caregiver assigned to this scheduled shift, cannot convert.');
-        if (!$schedule->client_id) return new ErrorResponse(400,'There is no client assigned to this scheduled shift, cannot convert.');
+        if (!$schedule->caregiver_id) return new ErrorResponse(400, 'There is no caregiver assigned to this scheduled shift, cannot convert.');
+        if (!$schedule->client_id) return new ErrorResponse(400, 'There is no client assigned to this scheduled shift, cannot convert.');
 
         $searchStart = (new Carbon($date, $this->business()->timezone))->setTime(0, 0, 0);
         $searchEnd = $searchStart->copy()->addDay();
         $occurrences = $schedule->getOccurrencesStartingBetween($searchStart, $searchEnd);
 
         // Make sure 1 occurrence was found
-        if (count($occurrences) !== 1) return new ErrorResponse(400,'Unable to match the schedule for conversion.');
+        if (count($occurrences) !== 1) return new ErrorResponse(400, 'Unable to match the schedule for conversion.');
 
         // Create Shift
         $start = Carbon::instance(current($occurrences))->setTimezone('UTC');
