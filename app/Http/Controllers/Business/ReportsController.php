@@ -19,6 +19,7 @@ use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
+use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -435,6 +436,51 @@ class ReportsController extends BaseController
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
         }
+    }
+
+    public function exportTimesheets()
+    {
+        $caregivers = $this->business()->caregivers;
+        $clients = $this->business()->clients;
+        return view('business.reports.export_timesheets', compact('caregivers', 'clients'));
+    }
+
+    public function timesheetData(Request $request)
+    {
+        $query = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'client_id' => 'nullable|int',
+            'caregiver_id' => 'nullable|int',
+            'client_type' => 'nullable|string',
+            'export_type' => 'required|string'
+        ]);
+
+        $start_date = $query['start_date'];
+        $end_date = $query['end_date'];
+
+        $client_shift_groups = $this->business()->shifts()
+            ->with('activities', 'client', 'caregiver')
+            ->whereBetween('checked_in_time', [Carbon::parse($query['start_date']), Carbon::parse($query['end_date'])])
+            ->orderBy('checked_in_time')
+            ->take(200)
+            ->get()
+            ->map(function ($shift) {
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+                $shift->ally_fee = number_format($allyFee, 2);
+                $shift->hourly_total = number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2);
+                $shift->other_expenses = number_format($shift->other_expenses, 2);
+                $shift->mileage = number_format($shift->mileage, 2);
+                $shift->mileage_costs = number_format($shift->costs()->getMileageCost(), 2);
+                $shift->caregiver_total = number_format($shift->costs()->getCaregiverCost(), 2);
+                $shift->provider_total = number_format($shift->costs()->getProviderFee(), 2);
+                $shift->ally_total = number_format($shift->costs()->getAllyFee(), 2);
+                $shift->ally_pct = AllyFeeCalculator::getPercentage($shift->client, null);
+                $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2);
+                return $shift;
+            })
+            ->groupBy('client_id');
+        return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
     }
 }
 

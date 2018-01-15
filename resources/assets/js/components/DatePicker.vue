@@ -5,6 +5,7 @@
                 :class="cssClass"
                 type="text"
                 v-model="value"
+                :name="name"
                 :placeholder="placeholder"
                 @change="updateInput()"
         />
@@ -30,6 +31,11 @@
                 }
             },
             'placeholder': {
+                default() {
+                    return '';
+                }
+            },
+            'name': {
                 default() {
                     return '';
                 }
