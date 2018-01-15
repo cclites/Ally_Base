@@ -4,7 +4,7 @@
                 ref="datepicker"
                 :class="cssClass"
                 type="text"
-                v-model="value"
+                v-model="localValue"
                 :placeholder="placeholder"
                 :disabled="disabled"
                 :required="required"
@@ -48,6 +48,7 @@
 
         data() {
             return {
+                localValue: this.value,
                 defaultOptions: {
                     forceParse: false,
                     autoclose: true,
@@ -85,7 +86,7 @@
 
         methods: {
             updateInput() {
-                this.value = this.selector().val();
+                this.localValue = this.selector().val();
                 this.$emit('input', this.selector().val());
             },
             selector() {
@@ -94,10 +95,13 @@
         },
 
         watch: {
-            value(val) {
-                // Update the datepicker's highlighted date when external value changes occur
-                this.selector().datepicker('update', val);
-            }
+            value(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.localValue = newVal;
+                    // Update the datepicker's highlighted date when external value changes occur
+                    this.selector().datepicker('update', newVal);
+                }
+            },
         }
     }
 </script>

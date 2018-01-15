@@ -3,8 +3,12 @@
            :autocomplete="autocomplete"
            :id="id"
            :name="name"
+           :placeholder="placeholderValue"
+           :disabled="disabled"
+           :required="required"
+           :readonly="readonly"
            v-model="localValue"
-           @change="updateInput()"
+           v-mask="maskConfig"
     ></b-input>
 </template>
 
@@ -15,7 +19,16 @@
     export default {
         data() {
             return {
-                localValue: this.value
+                localValue: this.value,
+                tokens: {
+                    '#': {pattern: /\d/},
+                    'N': {pattern: /[0-9a-zA-Z]/}, // Alphanumeric
+                    'S': {pattern: /[a-zA-Z]/},
+                    'A': {pattern: /[a-zA-Z]/, transform: v => v.toLocaleUpperCase()},
+                    'a': {pattern: /[a-zA-Z]/, transform: v => v.toLocaleLowerCase()},
+                    '!': {escape: true},
+                    '*': {pattern: /[*0-9]/}, // Asterisk or number
+                }
             }
         },
 
@@ -35,34 +48,75 @@
                 type: String,
                 default: '',
             },
+            placeholder: {
+                type: String,
+                default: '',
+            },
+            disabled: {
+                type: Boolean,
+                default: false
+            },
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            required: {
+                type: Boolean,
+                default: false
+            }
         },
 
         mounted() {
-            switch(this.type)
-            {
-                case 'phone':
-                    $(this.$el).mask('(000) 000-0000');
-                    break;
-                case 'ssn':
-                    $(this.$el).mask('***-**-****', {'translation': {
-                        '*': {pattern: /[\*0-9]/},
-                    }});
-                    break;
-                case 'date':
-                    $(this.$el).mask('00/00/0000');
-                    break;
-            }
+
         },
 
         computed: {
             autocomplete() {
-                switch(this.type)
-                {
+                switch (this.type) {
                     case 'ssn':
                         return 'off';
                     default:
                         return 'on';
                 }
+            },
+            maskConfig() {
+                switch (this.type) {
+                    case 'phone':
+                        return {
+                            'mask': '(###) ###-####',
+                            'tokens': this.tokens
+                        };
+                    case 'ssn':
+                        return {
+                            'mask': '***-**-****',
+                            'tokens': this.tokens,
+                        };
+                    case 'date':
+                        return {
+                            'mask': '##/##/####',
+                            'tokens': this.tokens
+                        };
+                    case 'time':
+                        return {
+                            'mask': '0#:## XM',
+                            'tokens': {
+                                '0': {pattern: /[0-1]/},
+                                '#': {pattern: /\d/},
+                                'X': {pattern: /[AaPp]/, transform: v => v.toLocaleUpperCase()},
+                                // 'M': {pattern: /[Mm]/, transform: v => v.toLocaleUpperCase()},
+                            }
+                        }
+                }
+            },
+            placeholderValue() {
+                if (this.placeholder) return this.placeholder;
+                switch (this.type) {
+                    case 'date':
+                        return 'MM/DD/YYYY';
+                    case 'time':
+                        return '00:00 AM';
+                }
+                return '';
             }
         },
 
@@ -72,12 +126,15 @@
                     this.localValue = newVal;
                 }
             },
+            localValue(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.$emit('input', newVal);
+                }
+            }
         },
 
         methods: {
-            updateInput() {
-                this.$emit('input', $(this.$el).val());
-            },
+
         }
     }
 </script>

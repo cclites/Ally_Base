@@ -21,6 +21,9 @@ window.Vue = require('vue');
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
+import VueTheMask from 'vue-the-mask';
+Vue.use(VueTheMask);
+
 // import vSelect from "vue-select"
 // Vue.component('v-select', vSelect);
 

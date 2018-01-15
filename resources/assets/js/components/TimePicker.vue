@@ -1,22 +1,33 @@
 <template>
     <div>
-        <input
-                ref="timepicker"
+        <mask-input
+                v-if="usingIE"
                 :class="cssClass"
-                type="text"
-                :placeholder="placeholder"
+                type="time"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
+                v-model="localValue"
+        />
+        <input
+                v-else
+                :class="cssClass"
+                type="time"
                 :disabled="disabled"
                 :required="required"
                 :readonly="readonly"
                 v-model="value"
                 @change="onChange($event.target.value, $event)"
         />
-        <b-tooltip :target="$refs.timepicker" title="Invalid time format (Example: 12:00 PM)" placement="top" v-if="invalidTime"></b-tooltip>
     </div>
 </template>
 
 <script>
+    import InternetExplorer from "../mixins/InternetExplorer";
+
     export default {
+        mixins: [InternetExplorer],
+
         props: {
             value: {
                 type: String,
@@ -25,10 +36,6 @@
             format: {
                 type: String,
                 default: 'h:mm A',
-            },
-            placeholder: {
-                type: String,
-                default: '',
             },
             disabled: {
                 type: Boolean,
@@ -46,8 +53,12 @@
 
         data() {
             return {
-
+                localValue: this.value,
             }
+        },
+
+        mounted() {
+
         },
 
         computed: {
@@ -63,10 +74,17 @@
             }
         },
 
-        methods: {
-            onChange(value, e) {
-                this.$emit('input', value);
+        watch: {
+            value(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.localValue = newVal;
+                }
             },
+            localValue(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.$emit('input', newVal);
+                }
+            }
         }
     }
 </script>
