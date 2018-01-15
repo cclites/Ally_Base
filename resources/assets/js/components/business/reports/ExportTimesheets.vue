@@ -34,7 +34,7 @@
                                 <b-form-group label="Caregiver">
                                     <b-form-select v-model="form.caregiver_id" class="mx-1 mb-1" name="caregiver_id">
                                         <option value="">All Caregivers</option>
-                                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}
+                                        <option v-for="item in caregiverList" :value="item.id">{{ item.nameLastFirst }}
                                         </option>
                                     </b-form-select>
                                 </b-form-group>
@@ -43,7 +43,7 @@
                                 <b-form-group label="Client">
                                     <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
                                         <option value="">All Clients</option>
-                                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}
+                                        <option v-for="item in clientList" :value="item.id">{{ item.nameLastFirst }}
                                         </option>
                                     </b-form-select>
                                 </b-form-group>
@@ -71,8 +71,8 @@
                             </b-col>
                             <b-col lg="3">
                                 <b-form-group label="&nbsp;">
-                                    <b-button type="submit">Preview</b-button>
-                                    <b-button variant="info">Export</b-button>
+                                    <!--<b-button type="submit">Preview</b-button>-->
+                                    <b-button variant="info" type="submit">Export</b-button>
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -81,22 +81,22 @@
             </b-col>
         </b-row>
 
-        <b-row>
-            <b-col lg="12">
-                <b-card
-                        header="Preview"
-                        header-text-variant="white"
-                        header-bg-variant="info"
-                >
-                    <div v-if="preview.length === 0" class="text-center">
-                        No Results.
-                    </div>
-                    <div v-for="shift in preview">
-                        {{ shift.caregiver.name }}
-                    </div>
-                </b-card>
-            </b-col>
-        </b-row>
+        <!--<b-row>-->
+            <!--<b-col lg="12">-->
+                <!--<b-card-->
+                        <!--header="Preview"-->
+                        <!--header-text-variant="white"-->
+                        <!--header-bg-variant="info"-->
+                <!--&gt;-->
+                    <!--<div v-if="preview.length === 0" class="text-center">-->
+                        <!--No Results.-->
+                    <!--</div>-->
+                    <!--<div v-for="shift in preview">-->
+                        <!--{{ shift.caregiver.name }}-->
+                    <!--</div>-->
+                <!--</b-card>-->
+            <!--</b-col>-->
+        <!--</b-row>-->
     </div>
 </template>
 
@@ -121,6 +121,16 @@
                     export_type: 'pdf'
                 }),
                 selectedItem: {}
+            }
+        },
+
+        computed: {
+            caregiverList() {
+                return _.sortBy(this.caregivers, 'nameLastFirst');
+            },
+
+            clientList() {
+                return _.sortBy(this.clients, 'nameLastFirst');
             }
         },
 

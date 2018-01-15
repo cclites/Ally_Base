@@ -16,24 +16,40 @@
         .client-head h4 {
             color: white;
         }
+
+        .client-entry {
+            margin-top: 1rem;
+            border: 2px solid lightgrey;
+        }
+
+        .caregiver-entry {
+            margin-top: 1rem;
+        }
+
+        @media print {
+            .client-entry {
+                page-break-after: always;
+            }
+        }
     </style>
+    @if($client_shift_groups->count() == 0)
+        <h3 class="text-center">No Results</h3>
+    @endif
     @foreach($client_shift_groups as $group)
-        <div class="container" style="margin-top: 1rem;border: 2px solid lightgrey;">
+        <div class="container client-entry">
             <div class="with-padding-bottom row client-head">
                 <div class="col-sm-6">
                     <h4>{{ $group->first()->client->name }}&nbsp;&nbsp; {{ $start_date }} - {{ $end_date }}</h4>
                 </div>
             </div>
             @foreach($group->groupBy('caregiver_id') as $caregiver_shifts)
-
-                <div class="row with-padding-bottom" style="margin-top: 1rem;">
+                <div class="row with-padding-bottom caregiver-entry">
                     <div class="col-sm-12">
                         <h5><strong>Caregiver</strong> - {{ $caregiver_shifts->first()->caregiver->name }}</h5>
                     </div>
                 </div>
-
                 @foreach($caregiver_shifts as $shift)
-                    <div style="margin: 0 2rem 1rem;">
+                    <div style="margin: 0 2rem 1rem;" class="timesheet-entry">
                         <table class="table">
                             <tr>
                                 <th>Clocked In</th>
@@ -50,8 +66,8 @@
                                 <th>Shift Total</th>
                             </tr>
                             <tr>
-                                <td>{{ $shift->checked_in_time->format('m/d/y g:i a') }}</td>
-                                <td>{{ $shift->checked_out_time->format('m/d/y g:i a') }}</td>
+                                <td>{{ optional($shift->checked_in_time)->format('m/d/y g:i a') }}</td>
+                                <td>{{ optional($shift->checked_out_time)->format('m/d/y g:i a') }}</td>
                                 <td>
                                     @switch($shift->hours_type)
                                         @case('default')

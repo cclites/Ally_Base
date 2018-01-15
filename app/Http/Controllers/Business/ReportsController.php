@@ -22,6 +22,7 @@ use App\Schedule;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ReportsController extends BaseController
 {
@@ -447,7 +448,7 @@ class ReportsController extends BaseController
 
     public function timesheetData(Request $request)
     {
-        $query = $request->validate([
+        $data = $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'client_id' => 'nullable|int',
@@ -456,14 +457,25 @@ class ReportsController extends BaseController
             'export_type' => 'required|string'
         ]);
 
-        $start_date = $query['start_date'];
-        $end_date = $query['end_date'];
+        $start_date = $data['start_date'];
+        $end_date = $data['end_date'];
 
         $client_shift_groups = $this->business()->shifts()
             ->with('activities', 'client', 'caregiver')
-            ->whereBetween('checked_in_time', [Carbon::parse($query['start_date']), Carbon::parse($query['end_date'])])
+            ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
+            ->when($data['client_id'], function ($query) use ($data) {
+                return $query->where('client_id', $data['client_id']);
+            })
+            ->when($data['caregiver_id'], function ($query) use ($data) {
+                return $query->where('caregiver_id', $data['caregiver_id']);
+            })
+            ->when($data['client_type'], function ($query) use ($data) {
+                return $query->whereHas('client', function ($query) use ($data) {
+                    $query->where('client_type', $data['client_type']);
+                });
+            })
             ->orderBy('checked_in_time')
-            ->take(200)
+            //->take(500)
             ->get()
             ->map(function ($shift) {
                 $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
@@ -480,7 +492,14 @@ class ReportsController extends BaseController
                 return $shift;
             })
             ->groupBy('client_id');
-        return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+
+        switch ($data['export_type']) {
+            case 'pdf':
+                $pdf = PDF::loadView('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                return $pdf->download('timesheet_export.pdf');
+            default:
+                return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+        }
     }
 }
 
