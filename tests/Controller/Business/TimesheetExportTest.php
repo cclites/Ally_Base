@@ -1,0 +1,57 @@
+<?php
+
+namespace Tests\Controller\Business;
+
+use App\Business;
+use App\Caregiver;
+use App\Client;
+use App\OfficeUser;
+use App\Shift;
+use Carbon\Carbon;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class TimesheetExportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * A basic test example.
+     *
+     * @return void
+     */
+    public function testAnOfficeUserCanExportTimesheets()
+    {
+        $business = factory(Business::class)->create();
+        $client = factory(Client::class)->create(['business_id' => $business->id]);
+        $caregiver = factory(Caregiver::class)->create();
+        $office_user = factory(OfficeUser::class)->create();
+
+        $business->users()->attach($office_user->id);
+        $business->caregivers()->attach($caregiver->id);
+
+        $shift = factory(Shift::class)->create([
+            'client_id' => $client->id,
+            'business_id' => $business->id,
+            'caregiver_id' => $caregiver->id,
+            'checked_in_time' => Carbon::now()->subDay(),
+            'checked_out_time' => Carbon::now()->subDay()->addHours(2)
+        ]);
+
+        $this->actingAs($office_user->user);
+        $response = $this->post('/business/reports/print/timesheet-data', [
+            'start_date' => Carbon::now()->subDays(2),
+            'end_date' => Carbon::now(),
+            'client_id' => null,
+            'caregiver_id' => null,
+            'client_type' => null,
+            'export_type' => 'text'
+        ]);
+
+        $response->assertSeeText($client->name);
+        $response->assertSeeText($caregiver->name);
+        $response->assertSeeText($shift->caregiver_comments);
+
+    }
+}
