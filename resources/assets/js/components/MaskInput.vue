@@ -98,23 +98,24 @@
                         };
                     case 'time':
                         return {
-                            'mask': '0#:## XM',
+                            'mask': '0#:5#',
                             'tokens': {
-                                '0': {pattern: /[0-1]/},
+                                '0': {pattern: /[0-2]/},
+                                '5': {pattern: /[0-5]/},
                                 '#': {pattern: /\d/},
                                 'X': {pattern: /[AaPp]/, transform: v => v.toLocaleUpperCase()},
-                                // 'M': {pattern: /[Mm]/, transform: v => v.toLocaleUpperCase()},
                             }
                         }
                 }
             },
             placeholderValue() {
+                if (this.disabled || this.readonly) return '';
                 if (this.placeholder) return this.placeholder;
                 switch (this.type) {
                     case 'date':
                         return 'MM/DD/YYYY';
                     case 'time':
-                        return '00:00 AM';
+                        return '13:00 (24-Hour on IE)';
                 }
                 return '';
             }

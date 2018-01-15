@@ -31,6 +31,7 @@
                                 <b-form-group label="Start Time" label-for="start_time" style="margin-bottom: 0;">
                                     <time-picker v-model="form.start_time"
                                                  :readonly="anyStartTime"
+                                                 :placeholder="anyStartTime ? 'Any' : ''"
                                                  @click.native="unlockAndFocus('anyStartTime', $event)"
                                     />
                                     <input-help :form="form" field="start_time" text=""/>
@@ -397,7 +398,7 @@
             },
 
             anyStartTime(val) {
-                this.form.start_time = (val) ? null : '09:00 AM';
+                this.form.start_time = null;
             },
 
             entireShiftOvertime(val) {

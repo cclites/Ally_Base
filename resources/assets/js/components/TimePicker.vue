@@ -33,10 +33,6 @@
                 type: String,
                 default: '',
             },
-            format: {
-                type: String,
-                default: 'h:mm A',
-            },
             disabled: {
                 type: Boolean,
                 default: false
@@ -54,6 +50,7 @@
         data() {
             return {
                 localValue: this.value,
+                format: 'HH:mm'
             }
         },
 
