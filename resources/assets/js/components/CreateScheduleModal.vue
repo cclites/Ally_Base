@@ -159,9 +159,9 @@
                                     <p v-show="form.interval_type === 'monthly'">
                                         The schedule will repeat every month on the {{ dayOfMonth(form.start_date) }}.
                                     </p>
-                                    <b-form-group label="End date" label-for="end_date">
-                                        <date-picker v-model="form.recurring_end_date" />
-                                        <input-help :form="form" field="end_date" text="Repeat the schedule until this date." />
+                                    <b-form-group label="End date" label-for="endDate">
+                                        <date-picker v-model="endDate" />
+                                        <input-help :form="form" field="recurring_end_date" text="Repeat the schedule until this date." />
                                     </b-form-group>
                                 </div>
                             </b-col>
@@ -188,7 +188,10 @@
 
             <div slot="modal-footer">
                 <b-btn variant="default" @click="createModel=false">Close</b-btn>
-                <b-btn variant="info" @click="submitForm()">Save</b-btn>
+                <b-btn variant="info" @click="submitForm()" :disabled="submitting">
+                    <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    Save
+                </b-btn>
             </div>
         </b-modal>
         <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="createModel" v-else-if="maxHoursWarning">
@@ -197,7 +200,10 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="createModel=false">No, Cancel</b-btn>
-                <b-btn variant="danger" @click="submitForm()">Yes, Save</b-btn>
+                <b-btn variant="danger" @click="submitForm()" :disabled="submitting">
+                    <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    Yes, Save
+                </b-btn>
             </div>
         </b-modal>
     </div>
@@ -236,6 +242,7 @@
         
         data() {
             return {
+                submitting: false,
                 startDate: "",
                 startTime: "",
                 endTime: "",
@@ -253,7 +260,6 @@
 
         methods: {
             makeForm() {
-                console.log('makeForm init');
                 this.form = new Form({
                     'starts_at':  "",
                     'duration': 0,
@@ -280,6 +286,8 @@
             },
 
             submitForm() {
+                this.submitting = true;
+
                 if (this.form.hours_type !== 'default') {
                     // Temporarily: Set overtime duration to duration
                     this.form.overtime_duration = this.duration;
@@ -299,9 +307,11 @@
                 this.form.post('/business/schedule')
                     .then(response => {
                         this.refreshEvents();
+                        this.submitting = false;
                     })
                     .catch(error => {
                         this.handleErrors(error);
+                        this.submitting = false;
                     });
             },
         },

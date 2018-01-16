@@ -26,6 +26,7 @@
 
         <create-schedule-modal :model.sync="createModal"
                                :selected-event="selectedEvent"
+                               :defaultValues="initialCreateValues"
                                @refresh-events="refreshEvents()"
         ></create-schedule-modal>
 
@@ -85,6 +86,12 @@
                     url = url + '?client_id=' + this.filterClientId;
                 }
                 return url;
+            },
+            initialCreateValues() {
+                return {
+                    'client_id': this.filterClientId,
+                    'caregiver_id': this.filterCaregiverId,
+                }
             }
         },
 
