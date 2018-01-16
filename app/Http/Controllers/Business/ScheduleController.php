@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\CreateScheduleRequest;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
+use App\Responses\SuccessResponse;
 use App\Schedule;
+use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
+use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -69,16 +74,49 @@ class ScheduleController extends BaseController
         return new ScheduleResponse($schedule);
     }
 
-    public function print(Request $request)
+
+    public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
     {
-        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
-        $request->start = Carbon::parse($request->start_date);
-        $request->end = Carbon::parse($request->end_date);
-        $events = collect($this->events($request)->events)->map(function ($event) {
-            $event["date"] = $event['start']->format('m/d/y');
-            return $event;
-        });
-        return view('business.schedule_print', compact('events'));
+        if (!$this->businessHasClient($request->client_id)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        if ($request->caregiver_id && !$this->businessHasCaregiver($request->caregiver_id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        $creator->startsAt($startsAt)
+            ->duration($request->duration)
+            ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
+            ->rates($request->caregiver_rate, $request->provider_fee);
+
+        if ($request->hours_type == 'overtime') {
+            $creator->overtime($request->overtime_duration);
+        }
+        else if ($request->hours_type == 'holiday') {
+            $creator->holiday($request->overtime_duration);
+        }
+
+        if ($request->notes) {
+            $note = new ScheduleNote(['note' => $request->notes]);
+            $creator->attachNote($note);
+        }
+
+        if ($request->interval_type) {
+            $endDate = Carbon::createFromTimestamp($request->recurring_end_date, $this->business()->timezone);
+            $creator->interval($request->interval_type, $endDate, $request->bydays ?? []);
+        }
+
+        $created = $creator->create();
+        if ($count = $created->count()) {
+            if ($count > 1) {
+                return new CreatedResponse('The scheduled shifts have been created.');
+            }
+            return new CreatedResponse('The scheduled shift has been created.');
+        }
+
+        return new ErrorResponse(500, 'Unknown error');
     }
+
 
 }

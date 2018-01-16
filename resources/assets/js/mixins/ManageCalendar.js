@@ -16,7 +16,7 @@ export default {
                 this.selectedEvent = date;
             }
             else {
-                this.selectedEvent = moment().local().add(59, 'minutes').startOf('hour');
+                this.selectedEvent = moment().add(59, 'minutes').startOf('hour');
             }
         },
 

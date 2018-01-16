@@ -177,11 +177,13 @@ class ScheduleCreator
      * Set the recurring interval for the schedule
      *
      * @param string $intervalType
+     * @param \Carbon\Carbon $endingDate
      * @param array $byDays
      * @return $this
+     * @throws \App\Exceptions\InvalidScheduleParameters
      * @throws \Exception
      */
-    public function interval($intervalType, $endingDate, $byDays = [])
+    public function interval($intervalType, Carbon $endingDate, $byDays = [])
     {
         $this->endingDate = $endingDate;
 
@@ -294,7 +296,7 @@ class ScheduleCreator
             return [$this->startsAt];
         }
 
-        $endingDate = new Carbon($this->endingDate);
+        $endingDate = $this->endingDate;
         $endsAt = $this->startsAt->copy()
                                  ->setDate($endingDate->format('Y'), $endingDate->format('n'), $endingDate->format('j'))
                                  ->addMinute();

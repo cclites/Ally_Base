@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Update Schedules" v-model="showModal" size="lg">
+    <b-modal title="Update Schedules" v-model="showModal" size="lg" class="modal-fit-more">
         <b-container fluid>
             <b-row>
                 <b-col>
@@ -452,25 +452,3 @@
         }
     }
 </script>
-
-<style>
-    .modal-body {
-        font-size: 14px;
-    }
-    .card-title {
-        font-size: 14px;
-        font-weight: bold;
-        text-transform: uppercase;
-        margin-bottom: 0;
-    }
-    .custom-control-description {
-        padding-top: 2px;
-    }
-    .form-control {
-        font-size: 14px;
-        min-height: 28px;
-    }
-    .form-group {
-        margin-bottom: 15px;
-    }
-</style>

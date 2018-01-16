@@ -54,7 +54,7 @@ class ScheduleCreatorTest extends TestCase
         $this->scheduleCreator->startsAt(Carbon::now())
                               ->duration(60)
                               ->assignments(1, 1)
-                              ->interval('weekly', Carbon::now()->addMonth()->format('Y-m-d'));
+                              ->interval('weekly', Carbon::now()->addMonth());
 
     }
 
@@ -72,7 +72,7 @@ class ScheduleCreatorTest extends TestCase
         $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
                               ->duration(60)
                               ->assignments(1, 1)
-                              ->interval('weekly', '2017-12-31', ['mo', 'tu']);
+                              ->interval('weekly', new Carbon('2017-12-31'), ['mo', 'tu']);
 
         $schedules = $this->scheduleCreator->create();
 
@@ -86,7 +86,7 @@ class ScheduleCreatorTest extends TestCase
         $this->scheduleCreator->startsAt(new Carbon('2017-12-01'))
                               ->duration(60)
                               ->assignments(1, 1)
-                              ->interval('weekly', '2017-12-31', ['mo']);
+                              ->interval('weekly', new Carbon('2017-12-31'), ['mo']);
         $schedules = $this->scheduleCreator->create();
     }
 
@@ -98,7 +98,7 @@ class ScheduleCreatorTest extends TestCase
         $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
                               ->duration(240)
             ->assignments($client->business_id, $client->id)
-            ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+            ->interval('weekly', new Carbon('2017-12-31'), ['mo','tu','we'])
             ->create();
     }
 
@@ -109,14 +109,14 @@ class ScheduleCreatorTest extends TestCase
         $this->scheduleCreator->startsAt(new Carbon('2017-12-14'))
                               ->duration(60)
                               ->assignments($client->business_id, $client->id)
-                              ->interval('weekly', '2018-02-28', ['th','fr','sa'])
+                              ->interval('weekly', new Carbon('2018-02-28'), ['th','fr','sa'])
                               ->create();
 
         $this->expectException(MaximumWeeklyHoursExceeded::class);
         $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
                               ->duration(180)
                               ->assignments($client->business_id, $client->id)
-                              ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+                              ->interval('weekly', new Carbon('2018-01-31'), ['mo','tu','we'])
                               ->create();
     }
 
@@ -126,7 +126,7 @@ class ScheduleCreatorTest extends TestCase
         $results = $this->scheduleCreator->startsAt(new Carbon('2017-12-04'))
                               ->duration(240)
                               ->assignments($client->business_id, $client->id)
-                              ->interval('weekly', '2018-01-31', ['mo','tu','we'])
+                              ->interval('weekly', new Carbon('2018-01-31'), ['mo','tu','we'])
                               ->overrideMaxHours()
                               ->create();
 

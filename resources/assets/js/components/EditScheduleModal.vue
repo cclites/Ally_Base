@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-modal id="editScheduleModal" title="Edit Schedule" v-model="editModel" v-if="!maxHoursWarning">
+        <b-modal id="editScheduleModal" title="Edit Schedule" v-model="editModel" v-if="!maxHoursWarning"  :no-close-on-backdrop="true">
             <b-container fluid>
                 <b-row v-if="!selectedSchedule">
                     <b-col lg="12" class="text-center">

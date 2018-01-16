@@ -17,7 +17,6 @@
                 :required="required"
                 :readonly="readonly"
                 v-model="value"
-                @change="onChange($event.target.value, $event)"
         />
     </div>
 </template>

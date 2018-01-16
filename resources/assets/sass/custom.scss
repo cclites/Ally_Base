@@ -143,3 +143,25 @@ td .fc-event-container {
     width: 8.33333333%;
   }
 }
+
+.modal-fit-more {
+  .modal-body {
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+  .custom-control-description {
+    padding-top: 2px;
+  }
+  .form-control {
+    font-size: 14px;
+    min-height: 28px;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+}

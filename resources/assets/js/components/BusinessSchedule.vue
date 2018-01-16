@@ -29,11 +29,11 @@
                                @refresh-events="refreshEvents()"
         ></create-schedule-modal>
 
-        <edit-schedule-modal :model.sync="editModal"
-                             :selected-event="selectedEvent"
-                             :selected-schedule="selectedSchedule"
-                             @refresh-events="refreshEvents()"
-        ></edit-schedule-modal>
+        <!--<edit-schedule-modal :model.sync="editModal"-->
+                             <!--:selected-event="selectedEvent"-->
+                             <!--:selected-schedule="selectedSchedule"-->
+                             <!--@refresh-events="refreshEvents()"-->
+        <!--&gt;</edit-schedule-modal>-->
     </b-card>
 </template>
 
