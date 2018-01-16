@@ -302,24 +302,24 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
      * @param $method
      * @return mixed|null|string
      */
-    public function getPaymentType($method = null) {
+    public function getPaymentType($method = null)
+    {
+        if (!$method) $method = $this->getPaymentMethod();
+
         if ($method instanceof Business) {
             return 'ACH-P';
         }
-        switch($this->client_type) {
-            case 'private_pay':
-            case 'LTCI':
-            case 'medicaid':
-            case 'VA':
-                if (!$method) $method = $this->getPaymentMethod();
-                if ($method instanceof CreditCard) {
-                    if ($method->type == 'amex') return 'AMEX';
-                    return 'CC';
-                }
-                return 'NONE';
-            default:
-                return $this->client_type;
+
+        if ($method instanceof CreditCard) {
+            if ($method->type == 'amex') return 'AMEX';
+            return 'CC';
         }
+
+        if ($method instanceof BankAccount) {
+            return 'ACH';
+        }
+
+        return 'NONE';
     }
 
     /**
