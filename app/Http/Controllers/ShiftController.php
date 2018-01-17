@@ -30,12 +30,12 @@ class ShiftController extends Controller
         return auth()->user()->role;
     }
 
-    public function index($schedule_id = null)
+    public function index(ScheduleAggregator $aggregator, $schedule_id = null)
     {
         if ($this->caregiver()->isClockedIn()) {
             return redirect()->route('clocked_in');
         }
-        $events = $this->getRecentEvents()->toArray();
+        $events = $this->getRecentEvents($aggregator)->toArray();
         return view('caregivers.clock_in', compact('events', 'schedule_id'));
     }
 
