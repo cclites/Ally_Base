@@ -101,6 +101,16 @@ class RecreateAndMigrateScheduleTables extends Migration
             }
 
             foreach($occurrences as $occurrence) {
+                // Check for a schedule exception
+                if (
+                    DB::table('schedule_exceptions')
+                      ->where('schedule_id', $schedule->id)
+                      ->where('date', $occurrence->format('Y-m-d'))
+                      ->exists()
+                ) {
+                    continue;
+                }
+
                 // Create schedule entry for the specific date
                 $entry = \App\Schedule::create([
                     'business_id' => $schedule->business_id,
