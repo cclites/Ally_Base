@@ -28,6 +28,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @mixin \Eloquent
+ * @property-read mixed $active
+ * @property-read mixed $gender
  */
 class OfficeUser extends Model implements UserRole
 {

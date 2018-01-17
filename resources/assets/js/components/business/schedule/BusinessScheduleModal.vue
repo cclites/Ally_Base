@@ -187,9 +187,7 @@
             </b-card>
 
             <div slot="modal-footer">
-                <div class="text-left">
-                    <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id">Copy</b-btn>
-                </div>
+                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto">Copy</b-btn>
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
@@ -449,7 +447,7 @@
                     this.selectedSchedule = {};
                     this.makeCreateForm();
                 }
-            }
+            },
 
             dayOfMonth(date) {
                 return moment(date).format('Do');

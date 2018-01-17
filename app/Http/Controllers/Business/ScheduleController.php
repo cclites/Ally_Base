@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\BulkDestroyScheduleRequest;
+use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\CreatedResponse;
@@ -72,6 +74,15 @@ class ScheduleController extends BaseController
         return new ScheduleResponse($schedule);
     }
 
+    /**
+     * Create a new schedule, including recurrence
+     *
+     * @param \App\Http\Requests\CreateScheduleRequest $request
+     * @param \App\Scheduling\ScheduleCreator $creator
+     * @return \App\Responses\CreatedResponse|\App\Responses\ErrorResponse
+     * @throws \App\Exceptions\InvalidScheduleParameters
+     * @throws \Exception
+     */
     public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
     {
         if (!$this->businessHasClient($request->client_id)) {
@@ -115,8 +126,20 @@ class ScheduleController extends BaseController
         return new ErrorResponse(500, 'Unknown error');
     }
 
+    /**
+     * Update a single schedule
+     *
+     * @param \App\Http\Requests\UpdateScheduleRequest $request
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
+        if ($schedule->business_id != $this->business()->id) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
         if ($schedule->starts_at < Carbon::now()) {
             return new ErrorResponse(400, 'Past schedules are unable to be modified.');
         }
@@ -139,5 +162,128 @@ class ScheduleController extends BaseController
         return new SuccessResponse('The schedule has been updated.');
     }
 
+    /**
+     * Delete a single schedule
+     *
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function destroy(Schedule $schedule)
+    {
+        if ($schedule->business_id != $this->business()->id) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        if ($schedule->starts_at < Carbon::now()) {
+            return new ErrorResponse(400, 'Past schedules are unable to be deleted.');
+        }
+
+        $schedule->delete();
+        return new SuccessResponse('The scheduled shift has been deleted.');
+    }
+
+    /**
+     * Bulk Update Schedules
+     *
+     * @param \App\Http\Requests\BulkUpdateScheduleRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function bulkUpdate(BulkUpdateScheduleRequest $request)
+    {
+        $data = $request->getUpdateData();
+        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $schedules = $query->get();
+
+        if (!$schedules->count()) {
+            return new ErrorResponse(400, 'No matching schedules could be found.');
+        }
+
+        $updatedNotes = [];
+
+        /**
+         * @var Schedule $schedule
+         */
+        foreach($query->get() as $schedule) {
+
+            foreach($data as $field => $value) {
+
+                switch($field) {
+
+                    case 'new_start_time':
+                        $parts = explode(':', $value);
+                        $schedule->starts_at = $schedule->starts_at->setTime((int) $parts[0], (int) $parts[1]);
+                        break;
+
+                    case 'new_note_method':
+                        $text = $data['new_note_text'];
+                        if (!strlen($text)) {
+                            break;
+                        }
+                        if (!$schedule->note_id) {
+                            $schedule->note_id = 0;
+                        }
+                        if (!isset($updatedNotes[$schedule->note_id])) {
+                            $notes = '';
+                            if ($value == 'append') {
+                                $notes .= $schedule->notes . "\n\n";
+                            }
+                            $notes .= $text;
+                            $note = ScheduleNote::create(['note' => $notes]);
+                            $updatedNotes[$schedule->note_id] = $note;
+                        }
+                        $schedule->attachNote($updatedNotes[$schedule->note_id]);
+                        break;
+
+                    case 'new_note_text':
+                        // handled above
+                        break;
+
+                    case 'new_overtime_duration':
+                        if ($value == -1) {
+                            $schedule->overtime_duration = $schedule->duration;
+                            break;
+                        }
+                        $schedule->overtime_duration = $value;
+                        break;
+
+                    default:
+                        $field = substr($field, 4);
+                        $schedule->$field = $value;
+                }
+
+                // Save the updated schedule details
+                $schedule->save();
+
+            }
+
+        }
+
+        return new SuccessResponse('Matching schedules have been updated.');
+    }
+
+    /**
+     * Bulk Delete Schedules
+     *
+     * @param \App\Http\Requests\BulkDestroyScheduleRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function bulkDestroy(BulkDestroyScheduleRequest $request)
+    {
+        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $schedules = $query->get();
+
+        if (!$schedules->count()) {
+            return new ErrorResponse(400, 'No matching schedules could be found.');
+        }
+
+        foreach($query->get() as $schedule) {
+            $schedule->delete();
+        }
+
+        return new SuccessResponse('Matching schedules have been deleted.');
+    }
 
 }

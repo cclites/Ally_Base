@@ -1,9 +1,9 @@
 <template>
-    <b-modal title="Bulk Update Schedules" v-model="showModal" size="lg" class="modal-fit-more">
+    <b-modal title="Bulk Delete Schedules" v-model="showModal" size="lg" class="modal-fit-more">
         <b-container fluid>
             <b-row>
                 <b-col>
-                    <b-card title="Match Against">
+                    <b-card title="Delete All Matching">
                         <b-row>
                             <b-col>
                                 <b-form-group label="Start Date" label-for="date" style="margin-bottom: 0;">
@@ -101,171 +101,12 @@
                     </b-card>
                 </b-col>
             </b-row>
-            <b-row>
-                <b-col>
-                    <b-card title="Update Values">
-                        <b-row>
-                            <b-col>
-                                <label class="custom-control custom-checkbox" style="margin: 5px 0 0 0;">
-                                    <input type="checkbox" class="custom-control-input" v-model="lockTiming" :value="true">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">No Shift Timing Change</span>
-                                </label>
-                                <b-row>
-                                    <b-col>
-                                        <b-form-group label="Start Time" label-for="new_start_time">
-                                            <time-picker id="new_start_time"
-                                                         v-model="form.new_start_time"
-                                                         :readonly="lockTiming"
-                                                         @click.native="unlockAndFocus('lockTiming', $event)"
-                                            />
-                                            <input-help :form="form" field="new_start_time" text=""/>
-                                        </b-form-group>
-                                    </b-col>
-                                    <b-col>
-                                        <b-form-group :label="endTimeLabel" label-for="new_end_time">
-                                            <time-picker id="new_end_time"
-                                                         v-model="new_end_time"
-                                                         :readonly="lockTiming"
-                                                         @click.native="unlockAndFocus('lockTiming', $event)"
-                                            />
-                                            <input-help :form="form" field="new_duration" text=""/>
-                                        </b-form-group>
-                                    </b-col>
-                                </b-row>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col>
-                                <b-form-group label="Special Designation" label-for="new_hours_type">
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" v-model="lockHoursType" :value="true">
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">No change</span>
-                                    </label>
-                                    <b-form-select id="new_hours_type"
-                                                   v-model="form.new_hours_type"
-                                                   :readonly="lockHoursType"
-                                                   @click.native="unlockAndFocus('lockHoursType', $event)"
-                                    >
-                                        <option value="default">Regular Shift</option>
-                                        <option value="holiday">Holiday</option>
-                                        <option value="overtime">Overtime</option>
-                                    </b-form-select>
-                                    <input-help :form="form" field="new_hours_type" text=""/>
-                                </b-form-group>
-                            </b-col>
-                            <b-col>
-                                <b-form-group label="Overtime Hours" label-for="new_provider_fee">
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox"
-                                               class="custom-control-input"
-                                               v-model="lockOvertimeHours"
-                                               :value="true">
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">No change</span>
-                                    </label>
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox"
-                                               class="custom-control-input"
-                                               v-model="entireShiftOvertime"
-                                               :value="true">
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">Entire Shift</span>
-                                    </label>
-                                    <b-form-input type="number"
-                                                  id="new_overtime_duration"
-                                                  v-model="form.new_overtime_duration"
-                                                  step="any"
-                                                  :readonly="lockOvertimeHours || entireShiftOvertime"
-                                                  @click.native="unlockOvertimeHours($event)"
-                                    />
-                                    <input-help :form="form" field="new_overtime_duration" text=""/>
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col>
-                                <b-form-group label="Caregiver" label-for="new_caregiver_id">
-                                    <b-form-select id="new_caregiver_id"
-                                                   v-model="form.new_caregiver_id"
-                                    >
-                                        <option value="">No Change</option>
-                                        <option value="0">Unassigned</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                                    </b-form-select>
-                                    <input-help :form="form" field="new_caregiver_id" text=""/>
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col>
-                                <b-form-group label="Caregiver Rate" label-for="new_caregiver_rate">
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" v-model="lockCaregiverRate" :value="true">
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">No change</span>
-                                    </label>
-                                    <b-form-input type="number"
-                                                  id="new_caregiver_rate"
-                                                  v-model="form.new_caregiver_rate"
-                                                  step="any"
-                                                  :readonly="lockCaregiverRate"
-                                                  @click.native="unlockAndFocus('lockCaregiverRate', $event)"
-                                    />
-                                    <input-help :form="form" field="new_caregiver_rate" text=""/>
-                                </b-form-group>
-                            </b-col>
-                            <b-col>
-                                <b-form-group label="Provider Fee" label-for="new_provider_fee">
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" v-model="lockProviderFee" :value="true">
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">No change</span>
-                                    </label>
-                                    <b-form-input type="number"
-                                                  id="new_provider_fee"
-                                                  v-model="form.new_provider_fee"
-                                                  step="any"
-                                                  :readonly="lockProviderFee"
-                                                  @click.native="unlockAndFocus('lockProviderFee', $event)"
-                                    />
-                                    <input-help :form="form" field="new_provider_fee" text=""/>
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col>
-                                <b-form-group label="New Note" label-for="new_note_method">
-                                    <b-form-select id="new_note_method"
-                                                   v-model="form.new_note_method"
-                                    >
-                                        <option value="">No Change</option>
-                                        <option value="append">Append Note</option>
-                                        <option value="overwrite">Overwrite Existing</option>
-                                    </b-form-select>
-                                    <b-form-textarea
-                                            id="notes"
-                                            name="notes"
-                                            :rows="3"
-                                            v-model="form.new_note_text"
-                                            :readonly="!form.new_note_method"
-                                    >
-                                    </b-form-textarea>
-                                    <input-help :form="form" field="new_note_method" text=""/>
-                                    <input-help :form="form" field="new_note_text" text=""/>
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
-                    </b-card>
-                </b-col>
-            </b-row>
         </b-container>
         <div slot="modal-footer">
            <b-btn variant="default" @click="showModal=false">Close</b-btn>
-            <b-btn variant="info" @click="save()" :disabled="submitting">
+            <b-btn variant="danger" @click="save()" :disabled="submitting">
                 <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
-                Update Schedules
+                Delete Schedules
             </b-btn>
         </div>
     </b-modal>
@@ -306,16 +147,16 @@
                     'client_id': '',
                     'caregiver_id': '',
                     'bydays': [],
-
-                    'new_start_time': '',
-                    'new_duration': null,
-                    'new_hours_type': '',
-                    'new_overtime_duration': '',
-                    'new_caregiver_id': '',
-                    'new_caregiver_rate': '',
-                    'new_provider_fee': '',
-                    'new_note_method': '',
-                    'new_note_text': '',
+                    //
+                    // 'new_start_time': '',
+                    // 'new_duration': null,
+                    // 'new_hours_type': '',
+                    // 'new_overtime_duration': '',
+                    // 'new_caregiver_id': '',
+                    // 'new_caregiver_rate': '',
+                    // 'new_provider_fee': '',
+                    // 'new_note_method': '',
+                    // 'new_note_text': '',
                 }),
                 submitting: false,
             }
@@ -381,11 +222,11 @@
             },
 
             save() {
-                let message = 'Are you sure you wish to update all schedules between ' + this.form.start_date +
+                let message = 'Are you sure you wish to delete all schedules between ' + this.form.start_date +
                     ' and ' + this.form.end_date + ' matching the given criteria?';
 
                 if (this.form.end_date === '01/01/2100') {
-                    message = 'Are you sure you wish to update all schedules after ' + this.form.start_date +
+                    message = 'Are you sure you wish to delete all schedules after ' + this.form.start_date +
                             ' matching the given criteria?';
                 }
 
@@ -393,7 +234,7 @@
                     return;
                 }
 
-                let url = '/business/schedule/bulk_update';
+                let url = '/business/schedule/bulk_delete';
                 this.submitting = true;
                 this.form.post(url)
                     .then(response => {

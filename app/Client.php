@@ -74,6 +74,26 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
  * @mixin \Eloquent
+ * @property \Carbon\Carbon|null $inquiry_date
+ * @property \Carbon\Carbon|null $service_start_date
+ * @property string|null $referral
+ * @property string|null $diagnosis
+ * @property int|null $ambulatory
+ * @property string|null $poa_first_name
+ * @property string|null $poa_last_name
+ * @property string|null $poa_phone
+ * @property string|null $poa_relationship
+ * @property-read mixed $active
+ * @property-read mixed $gender
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereAmbulatory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDiagnosis($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereInquiryDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
 class Client extends Model implements UserRole, CanBeConfirmedInterface
 {

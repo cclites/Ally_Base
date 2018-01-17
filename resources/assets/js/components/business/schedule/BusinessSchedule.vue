@@ -3,6 +3,8 @@
         <b-row>
             <b-col md="7">
                 <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
+                <b-btn size="sm" variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
+                <b-btn size="sm" variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
             </b-col>
             <b-col md="5">
                 <b-row v-if="isFilterable()">
@@ -29,7 +31,15 @@
                                :selected-schedule="selectedSchedule"
                                :initial-values="initialCreateValues"
                                @refresh-events="refreshEvents()"
-        ></business-schedule-modal>
+        />
+
+        <bulk-edit-schedule-modal v-model="bulkUpdateModal"
+                                  @refresh-events="refreshEvents()"
+        />
+
+        <bulk-delete-schedule-modal v-model="bulkDeleteModal"
+                                  @refresh-events="refreshEvents()"
+        />
     </b-card>
 </template>
 
@@ -59,6 +69,8 @@
                 clients: [],
                 caregivers: [],
                 events: '/business/schedule/events',
+                bulkUpdateModal: false,
+                bulkDeleteModal: false,
             }
         },
 

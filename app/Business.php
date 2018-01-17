@@ -72,6 +72,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
+ * @property int $ask_on_confirm
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
 class Business extends Model implements ChargeableInterface
 {
