@@ -246,15 +246,8 @@ class Shift extends Model
             // Return now if no schedule
             return Carbon::now();
         }
-        $shiftStart = new Carbon($this->checked_in_time);
-        $scheduleStart = Carbon::now()->setTimeFromTimeString($this->schedule->time);
 
-        if ($scheduleStart->diffInMinutes($shiftStart) > 60 && $scheduleStart > $shiftStart) {
-            $scheduleStart->subDay();
-        }
-
-        $end = $scheduleStart->copy()->addMinutes($this->schedule->duration);
-        return $end;
+        return $this->schedule->getEndDateTime();
     }
 
     /**

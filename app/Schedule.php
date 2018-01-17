@@ -134,7 +134,7 @@ class Schedule extends Model
     }
 
     public function setStartsAtAttribute($value) {
-        if ($value instanceof \DateTimeInterface) {
+        if ($value instanceof \DateTimeInterface && $this->business) {
             $value->setTimezone(new \DateTimeZone($this->business->timezone));
         }
         $this->attributes['starts_at'] = $value;

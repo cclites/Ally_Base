@@ -79,10 +79,7 @@ class ScheduleAggregator
      */
     public function getSchedulesStartingBetween(Carbon $start, Carbon $end)
     {
-        $startUtc = $start->copy()->setTimezone('UTC');
-        $endUtc = $end->copy()->setTimezone('UTC');
-
-        return $this->query()->whereBetween('starts_at', [$startUtc, $endUtc->addSecond()])->get();
+        return $this->query()->whereBetween('starts_at', [$start, $end])->get();
     }
 
     /**
