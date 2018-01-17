@@ -4,8 +4,11 @@
                 ref="datepicker"
                 :class="cssClass"
                 type="text"
-                v-model="value"
+                v-model="localValue"
                 :placeholder="placeholder"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
                 @change="updateInput()"
         />
     </div>
@@ -14,30 +17,38 @@
 <script>
     export default {
         props: {
-            'value': {
-                default() {
-                    return '';
-                }
+            value: {
+                type: String,
+                default: '',
             },
-            'options': {
-                default() {
-                    return {};
-                },
+            format: {
+                type: String,
+                default: 'MM/DD/YYYY',
             },
-            'format': {
-                default() {
-                    return 'MM/DD/YYYY';
-                }
+            placeholder: {
+                type: String,
+                default: '',
             },
-            'placeholder': {
-                default() {
-                    return '';
-                }
-            }
+            disabled: {
+                type: Boolean,
+                default: false
+            },
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            required: {
+                type: Boolean,
+                default: false
+            },
+            options: {
+                type: Object,
+            },
         },
 
         data() {
             return {
+                localValue: this.value,
                 defaultOptions: {
                     forceParse: false,
                     autoclose: true,
@@ -61,7 +72,7 @@
                 return classes;
             },
             invalidDate() {
-                return !moment(this.value, this.format, true).isValid();
+                return (this.required || this.value) && !moment(this.value, this.format, true).isValid();
             }
         },
 
@@ -75,7 +86,7 @@
 
         methods: {
             updateInput() {
-                this.value = this.selector().val();
+                this.localValue = this.selector().val();
                 this.$emit('input', this.selector().val());
             },
             selector() {
@@ -84,10 +95,13 @@
         },
 
         watch: {
-            value(val) {
-                // Update the datepicker's highlighted date when external value changes occur
-                this.selector().datepicker('update', val);
-            }
+            value(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.localValue = newVal;
+                    // Update the datepicker's highlighted date when external value changes occur
+                    this.selector().datepicker('update', newVal);
+                }
+            },
         }
     }
 </script>

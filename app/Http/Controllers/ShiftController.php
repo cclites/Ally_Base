@@ -10,11 +10,13 @@ use App\Responses\SuccessResponse;
 use App\Rules\SignedLTCI;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Scheduling\ScheduleAggregator;
 use App\Shifts\ClockIn;
 use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 use App\Signature;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 
@@ -200,12 +202,14 @@ class ShiftController extends Controller
         }
     }
 
-    protected function getRecentEvents()
+    protected function getRecentEvents(ScheduleAggregator $aggregator)
     {
-        $start = new \DateTime('-12 hours');
-        $end = new \DateTime('+12 hours');
+        $start = new Carbon('-12 hours');
+        $end = new Carbon('+12 hours');
+        $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
+                                ->getSchedulesBetween($start, $end);
 
-        $events = new ScheduleEventsResponse($this->caregiver()->getEvents($start, $end));
+        $events = new ScheduleEventsResponse($schedules);
         return $events;
     }
 }

@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
         factory(Activity::class, 15)->create();
 
         // Create schedules
-        factory(Schedule::class, 40)->create();
+        factory(Schedule::class, 1000)->create();
 
         // Create some payment-less shifts
         factory(Shift::class, 30)->create(['status' => 'WAITING_FOR_AUTHORIZATION']);

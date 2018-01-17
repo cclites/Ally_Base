@@ -19,6 +19,7 @@ use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
+use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -83,22 +84,20 @@ class ReportsController extends BaseController
         return compact('totals', 'shifts', 'dates');
     }
 
-    public function overtime(Request $request)
+    public function overtime(Request $request, ScheduleAggregator $aggregator)
     {
-        if (!$offset = $request->input('offset')) {
-            $offset = "America/New_York";
-        }
+        $timezone = $this->business()->timezone;
 
         if (!$week = $request->input('week')) {
-            $week = Carbon::now($offset)->weekOfYear;
+            $week = Carbon::now($timezone)->weekOfYear;
         }
 
         if (!$year = $request->input('year')) {
-            $year = Carbon::now($offset)->year;
+            $year = Carbon::now($timezone)->year;
         }
 
-        $weekStart = (new Carbon())->setISODate($year, $week, 1)->setTime(0, 0, 0);
-        $weekEnd = (new Carbon())->setISODate($year, $week, 7)->setTime(23, 59, 59);
+        $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
+        $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
         $caregivers = [];
 
         foreach ($this->business()->caregivers as $caregiver) {
@@ -119,7 +118,8 @@ class ReportsController extends BaseController
             // Calculate number of hours in current shift
             $lastShiftEnd = new Carbon();
             $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
-                ->whereNull('checked_out_time')->get()
+                ->whereNull('checked_out_time')
+                ->get()
                 ->each(function ($shift) use ($hours, $lastShiftEnd) {
                     $hours['worked'] += $shift->duration();
                     $hours['scheduled'] += $shift->remaining();
@@ -127,9 +127,10 @@ class ReportsController extends BaseController
                 });
 
             // Calculate number of hours in future shifts
-            $events = $caregiver->getEvents($lastShiftEnd, $weekEnd);
-            foreach ($events as $event) {
-                $schedule = Schedule::find($event['schedule_id']);
+            $schedules = $aggregator->fresh()
+                                    ->where('caregiver_id', $caregiver->id)
+                                    ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
+            foreach ($schedules as $schedule) {
                 $hours['scheduled'] += round($schedule->duration / 60, 2);
             }
 

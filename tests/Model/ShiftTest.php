@@ -28,7 +28,7 @@ class ShiftTest extends TestCase
         parent::setUp();
         $this->client = factory(Client::class)->create();
         $this->caregiver = factory(Caregiver::class)->create();
-        $this->business = factory(Business::class)->create();
+        $this->business = factory(Business::class)->create(['timezone' => 'UTC']);
         $this->shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
             'caregiver_id' => $this->caregiver->id,
@@ -110,12 +110,10 @@ class ShiftTest extends TestCase
     public function testShiftCanCalculateRemainingHours()
     {
         $schedule = Schedule::create([
-            'start_date' => '2017-10-11',
-            'end_date' => '2017-10-11',
-            'time' => '12:00:00',
+            'starts_at' => '2017-10-11 12:00:00',
+            'weekday' => 3,
             'duration' => 300,
             'business_id' => $this->business->id,
-            'rrule' => null,
             'client_id' => $this->client->id,
         ]);
 
@@ -133,12 +131,10 @@ class ShiftTest extends TestCase
     public function testShiftCanCalculateRemainingHoursOnALateShift()
     {
         $schedule = Schedule::create([
-            'start_date' => '2017-10-11',
-            'end_date' => '2017-10-11',
-            'time' => '12:00:00',
+            'starts_at' => '2017-10-11 12:00:00',
+            'weekday' => 3,
             'duration' => 300,
             'business_id' => $this->business->id,
-            'rrule' => null,
             'client_id' => $this->client->id,
         ]);
 
@@ -157,12 +153,10 @@ class ShiftTest extends TestCase
     public function testShiftHasRemainingHoursOnDifferentDay()
     {
         $schedule = Schedule::create([
-            'start_date' => '2017-10-11',
-            'end_date' => '2017-10-12',
-            'time' => '20:00:00',
+            'starts_at' => '2017-10-11 20:00:00',
+            'weekday' => 3,
             'duration' => 480,
             'business_id' => $this->business->id,
-            'rrule' => null,
             'client_id' => $this->client->id,
         ]);
 
@@ -181,12 +175,10 @@ class ShiftTest extends TestCase
     public function testShiftHasRemainingHoursOnDifferentDayOnALateShift()
     {
         $schedule = Schedule::create([
-            'start_date' => '2017-10-11',
-            'end_date' => '2017-10-12',
-            'time' => '20:00:00',
+            'starts_at' => '2017-10-11 20:00:00',
+            'weekday' => 3,
             'duration' => 480,
             'business_id' => $this->business->id,
-            'rrule' => null,
             'client_id' => $this->client->id,
         ]);
 

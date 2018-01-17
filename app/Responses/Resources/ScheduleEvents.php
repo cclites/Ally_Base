@@ -2,18 +2,33 @@
 
 namespace App\Responses\Resources;
 
+use App\Schedule;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 
 class ScheduleEvents implements Responsable
 {
-    public $events;
-    protected $routeName;
-    protected $routeParams;
+    /**
+     * @var \App\Schedule[]
+     */
+    public $schedules;
+
+    /**
+     * @var \Closure
+     */
+    protected $titleCallback;
+
+    /**
+     * @var array
+     */
     protected $additionalOptions = [
             'all' => [],
         ];
 
+    /**
+     * @var array
+     */
     protected $backgroundColors = [
         'past' => [
             '#7f7f6f',
@@ -45,11 +60,9 @@ class ScheduleEvents implements Responsable
         ],
     ];
 
-    public function __construct($events, $routeName=null, $routeParams = [])
+    public function __construct($schedules)
     {
-        $this->events = $events;
-        $this->routeName = $routeName;
-        $this->routeParams = $routeParams;
+        $this->schedules = $schedules;
     }
 
     public function additionalOptions($schedule_id, $options)
@@ -61,32 +74,34 @@ class ScheduleEvents implements Responsable
 
     public function toArray()
     {
-        return array_map(function($array) {
-            $this->routeParams['schedule_id'] = $array['schedule_id'];
+        return $this->schedules->map(function(Schedule $schedule) {
             $additionalOptions = array_merge(
                 $this->additionalOptions['all'],
-                ($this->additionalOptions[$array['schedule_id']] ?? [])
+                $this->additionalOptions[$schedule->id] ?? []
             );
-            if (!empty($array['checked_in'])) {
-                $backgroundColor = $this->getBackgroundColor('current', $array['title']);
-                $array['title'] .= ': Clocked In';
+
+            $title = $this->resolveEventTitle($schedule);
+
+            if ($schedule->isClockedIn()) {
+                $backgroundColor = $this->getBackgroundColor('current', $title);
+                $title .= ': Clocked In';
             }
-            elseif($array['end']->format('U') < time()) {
-                $backgroundColor = $this->getBackgroundColor('past', $array['title']);
+            elseif($schedule->starts_at > Carbon::now()) {
+                $backgroundColor = $this->getBackgroundColor('past', $title);
             }
             else {
-                $backgroundColor = $this->getBackgroundColor('future', $array['title']);
+                $backgroundColor = $this->getBackgroundColor('future', $title);
             }
+
             return array_merge([
-                'id' => $array['schedule_id'],
-                'title' => $array['title'],
-                'start' => $array['start']->format(\DateTime::ISO8601),
-                // Needs to add 1 second to end time for FullCalendar support
-                'end' => $array['end']->add(new \DateInterval('PT1S'))->format(\DateTime::ISO8601),
+                'id' => $schedule->id,
+                'title' => $title,
+                'start' => $schedule->starts_at->format(\DateTime::ISO8601),
+                // Needs to add 1 extra second to end time for FullCalendar support
+                'end' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format(\DateTime::ISO8601),
                 'backgroundColor' => $backgroundColor,
- //                'url' => route($this->routeName, $this->routeParams)
             ], $additionalOptions);
-        }, $this->events);
+        });
     }
 
     public function __toString()
@@ -122,5 +137,26 @@ class ScheduleEvents implements Responsable
         $title = substr($title, 0, 6) . substr($title, -6);
         $id = base_convert($title, 36, 10) % (count($bgs)-1);
         return $bgs[$id];
+    }
+
+    /**
+     * Define a closure to use for formatting an event title
+     *
+     * @param \Closure $callback
+     */
+    public function setTitleCallback(\Closure $callback) {
+        $this->titleCallback = $callback;
+    }
+
+    /**
+     * Resolve event titles
+     *
+     * @param \App\Schedule $schedule
+     * @return mixed
+     */
+    protected function resolveEventTitle(Schedule $schedule) {
+        if ($this->titleCallback) return call_user_func($this->titleCallback, $schedule);
+
+        return $schedule->client->name();
     }
 }

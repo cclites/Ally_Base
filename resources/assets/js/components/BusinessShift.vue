@@ -433,10 +433,10 @@
                 this.issueModal = true;
             },
             getClockedInMoment() {
-                return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY h:mm A');
+                return this.formatDate(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
             },
             getClockedOutMoment() {
-                return moment(this.checked_out_date + ' ' + this.checked_out_time, 'MM/DD/YYYY h:mm A');
+                return moment(this.checked_out_date + ' ' + this.checked_out_time, 'MM/DD/YYYY HH:mm');
             },
             getHalfOfActivities(leftHalf = true)
             {

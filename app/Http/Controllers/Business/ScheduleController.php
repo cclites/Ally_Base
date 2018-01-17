@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\BulkDestroyScheduleRequest;
+use App\Http\Requests\BulkUpdateScheduleRequest;
+use App\Http\Requests\CreateScheduleRequest;
+use App\Http\Requests\UpdateScheduleRequest;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
+use App\Responses\SuccessResponse;
 use App\Schedule;
+use App\ScheduleNote;
 use App\Scheduling\ScheduleAggregator;
+use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -18,76 +26,264 @@ class ScheduleController extends BaseController
         return view('business.schedule', ['business' => $this->business()]);
     }
 
-    public function events(Request $request)
+    public function events(Request $request, ScheduleAggregator $aggregator)
     {
-        $schedules = $this->business()->schedules()->with('client', 'caregiver.phoneNumbers')->get();
+        $aggregator->where('business_id', $this->business()->id);
 
         // Filter by client or caregiver
-        if ($request->has('caregiver_id') || $request->has('client_id')) {
-            $schedules = $schedules->filter(function(Schedule $schedule) use ($request) {
-                if ($client_id = $request->input('client_id')) {
-                    if ($schedule->client_id != $client_id) return false;
-                }
-                if ($caregiver_id = $request->input('caregiver_id')) {
-                    if ($schedule->caregiver_id != $caregiver_id) return false;
-                } elseif ($request->input('caregiver_id') === "0") {
-                    // Unassigned shifts only
-                    if ($schedule->caregiver_id) return false;
-                }
-                return true;
-            });
+        if ($client_id = $request->input('client_id')) {
+            $aggregator->where('client_id', $client_id);
+        }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $aggregator->where('caregiver_id', $caregiver_id);
+        } elseif ($request->input('caregiver_id') === "0") {
+            $aggregator->where('caregiver_id', null);
         }
 
-        $aggregator = new ScheduleAggregator();
-        foreach($schedules as $schedule) {
+        $start = new Carbon(
+            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
+            $this->business()->timezone
+        );
+        $end = new Carbon(
+            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
+            $this->business()->timezone
+        );
+
+        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
+        $events->setTitleCallback(function(Schedule $schedule) {
             $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            $title = $clientName . ' (' . $caregiverName . ')';
-            $aggregator->add($title, $schedule);
-        }
-
-        $activeSchedules = $this->business()->shifts()->whereNull('checked_out_time')->pluck('schedule_id')->toArray();
-        $aggregator->addActiveSchedules($activeSchedules);
-
-        $start = $request->start ?: date('Y-m-d', strtotime('First day of last month -2 months'));
-        $end = $request->end ?: date('Y-m-d', strtotime('First day of this month +13 months'));
-
-        if (strlen($start) > 10) $start = substr($start, 0, 10);
-        if (strlen($end) > 10) $end = substr($end, 0, 10);
-
-        $events = new ScheduleEventsResponse($aggregator->events($start, $end));
+            return $clientName . ' (' . $caregiverName . ')';
+        });
         return $events;
     }
 
     /**
      * Retrieve the details of a schedule
      *
-     * @param $client_id
-     * @param $schedule_id
-     *
+     * @param \App\Schedule $schedule
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
      */
-    public function show($schedule_id)
+    public function show(Schedule $schedule)
     {
-        $schedule = Schedule::findOrFail($schedule_id);
-
         if ($schedule->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.');
+            return new ErrorResponse(403, 'You do not have access to this schedule.', $schedule);
         }
 
         return new ScheduleResponse($schedule);
     }
 
-    public function print(Request $request)
+    /**
+     * Create a new schedule, including recurrence
+     *
+     * @param \App\Http\Requests\CreateScheduleRequest $request
+     * @param \App\Scheduling\ScheduleCreator $creator
+     * @return \App\Responses\CreatedResponse|\App\Responses\ErrorResponse
+     * @throws \App\Exceptions\InvalidScheduleParameters
+     * @throws \Exception
+     */
+    public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
     {
-        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
-        $request->start = Carbon::parse($request->start_date);
-        $request->end = Carbon::parse($request->end_date);
-        $events = collect($this->events($request)->events)->map(function ($event) {
-            $event["date"] = $event['start']->format('m/d/y');
-            return $event;
-        });
-        return view('business.schedule_print', compact('events'));
+        if (!$this->businessHasClient($request->client_id)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        if ($request->caregiver_id && !$this->businessHasCaregiver($request->caregiver_id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        $creator->startsAt($startsAt)
+            ->duration($request->duration)
+            ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
+            ->rates($request->caregiver_rate, $request->provider_fee);
+
+        if ($request->hours_type == 'overtime') {
+            $creator->overtime($request->overtime_duration);
+        }
+        else if ($request->hours_type == 'holiday') {
+            $creator->holiday($request->overtime_duration);
+        }
+
+        if ($request->notes) {
+            $note = ScheduleNote::create(['note' => $request->notes]);
+            $creator->attachNote($note);
+        }
+
+        if ($request->interval_type) {
+            $endDate = Carbon::createFromTimestamp($request->recurring_end_date, $this->business()->timezone);
+            $creator->interval($request->interval_type, $endDate, $request->bydays ?? []);
+        }
+
+        $created = $creator->create();
+        if ($count = $created->count()) {
+            if ($count > 1) {
+                return new CreatedResponse('The scheduled shifts have been created.');
+            }
+            return new CreatedResponse('The scheduled shift has been created.');
+        }
+
+        return new ErrorResponse(500, 'Unknown error');
+    }
+
+    /**
+     * Update a single schedule
+     *
+     * @param \App\Http\Requests\UpdateScheduleRequest $request
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    {
+        if ($schedule->business_id != $this->business()->id) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        if ($schedule->starts_at < Carbon::now()) {
+            return new ErrorResponse(400, 'Past schedules are unable to be modified.');
+        }
+
+        $notes = $request->input('notes');
+        if ($schedule->notes != $notes) {
+            if (strlen($notes)) {
+                $note = ScheduleNote::create(['note' => $notes]);
+                $schedule->attachNote($note);
+            }
+            else {
+                $schedule->deleteNote();
+            }
+        }
+
+        $data = $request->validated();
+        $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        unset($data['notes']);
+        $schedule->update($data);
+        return new SuccessResponse('The schedule has been updated.');
+    }
+
+    /**
+     * Delete a single schedule
+     *
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function destroy(Schedule $schedule)
+    {
+        if ($schedule->business_id != $this->business()->id) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        if ($schedule->starts_at < Carbon::now()) {
+            return new ErrorResponse(400, 'Past schedules are unable to be deleted.');
+        }
+
+        $schedule->delete();
+        return new SuccessResponse('The scheduled shift has been deleted.');
+    }
+
+    /**
+     * Bulk Update Schedules
+     *
+     * @param \App\Http\Requests\BulkUpdateScheduleRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function bulkUpdate(BulkUpdateScheduleRequest $request)
+    {
+        $data = $request->getUpdateData();
+        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $schedules = $query->get();
+
+        if (!$schedules->count()) {
+            return new ErrorResponse(400, 'No matching schedules could be found.');
+        }
+
+        $updatedNotes = [];
+
+        /**
+         * @var Schedule $schedule
+         */
+        foreach($query->get() as $schedule) {
+
+            foreach($data as $field => $value) {
+
+                switch($field) {
+
+                    case 'new_start_time':
+                        $parts = explode(':', $value);
+                        $schedule->starts_at = $schedule->starts_at->setTime((int) $parts[0], (int) $parts[1]);
+                        break;
+
+                    case 'new_note_method':
+                        $text = $data['new_note_text'];
+                        if (!strlen($text)) {
+                            break;
+                        }
+                        if (!$schedule->note_id) {
+                            $schedule->note_id = 0;
+                        }
+                        if (!isset($updatedNotes[$schedule->note_id])) {
+                            $notes = '';
+                            if ($value == 'append') {
+                                $notes .= $schedule->notes . "\n\n";
+                            }
+                            $notes .= $text;
+                            $note = ScheduleNote::create(['note' => $notes]);
+                            $updatedNotes[$schedule->note_id] = $note;
+                        }
+                        $schedule->attachNote($updatedNotes[$schedule->note_id]);
+                        break;
+
+                    case 'new_note_text':
+                        // handled above
+                        break;
+
+                    case 'new_overtime_duration':
+                        if ($value == -1) {
+                            $schedule->overtime_duration = $schedule->duration;
+                            break;
+                        }
+                        $schedule->overtime_duration = $value;
+                        break;
+
+                    default:
+                        $field = substr($field, 4);
+                        $schedule->$field = $value;
+                }
+
+                // Save the updated schedule details
+                $schedule->save();
+
+            }
+
+        }
+
+        return new SuccessResponse('Matching schedules have been updated.');
+    }
+
+    /**
+     * Bulk Delete Schedules
+     *
+     * @param \App\Http\Requests\BulkDestroyScheduleRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function bulkDestroy(BulkDestroyScheduleRequest $request)
+    {
+        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $schedules = $query->get();
+
+        if (!$schedules->count()) {
+            return new ErrorResponse(400, 'No matching schedules could be found.');
+        }
+
+        foreach($query->get() as $schedule) {
+            $schedule->delete();
+        }
+
+        return new SuccessResponse('Matching schedules have been deleted.');
     }
 
 }
