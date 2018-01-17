@@ -169,7 +169,6 @@ Route::group([
 
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
-    Route::get('schedule/events/{schedule_id}', 'Business\ScheduleController@show')->name('schedule.show');
     Route::resource('schedule', 'Business\ScheduleController');
 
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');

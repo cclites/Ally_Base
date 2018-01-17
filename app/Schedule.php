@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Exceptions\MissingTimezoneException;
-use App\Scheduling\RuleGenerator;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +58,8 @@ class Schedule extends Model
     protected $table = 'schedules';
     protected $guarded = ['id'];
     protected $dates = ['starts_at'];
+    protected $with = ['business', 'note'];
+    protected $appends = ['notes'];
 
     /**
      * The "booting" method of the model.
@@ -128,6 +129,18 @@ class Schedule extends Model
         return (string) $this->note;
     }
 
+    public function getStartsAtAttribute()
+    {
+        return new Carbon($this->attributes['starts_at'], $this->business->timezone);
+    }
+
+    public function setStartsAtAttribute($value) {
+        if ($value instanceof \DateTimeInterface) {
+            $value->setTimezone(new \DateTimeZone($this->business->timezone));
+        }
+        $this->attributes['starts_at'] = $value;
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -145,6 +158,16 @@ class Schedule extends Model
             $note = $note->id;
         }
         return $this->update(['note_id' => $note]);
+    }
+
+    /**
+     * Remove the attached note from the schedule
+     *
+     * @return bool
+     */
+    public function deleteNote()
+    {
+        return $this->update(['note_id' => null]);
     }
 
     /**

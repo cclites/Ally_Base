@@ -24,22 +24,17 @@
         </b-row>
         <full-calendar ref="calendar" :events="filteredEventsUrl" :default-view="defaultView" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
 
-        <create-schedule-modal :model.sync="createModal"
+        <business-schedule-modal :model.sync="scheduleModal"
                                :selected-event="selectedEvent"
-                               :defaultValues="initialCreateValues"
+                               :selected-schedule="selectedSchedule"
+                               :initial-values="initialCreateValues"
                                @refresh-events="refreshEvents()"
-        ></create-schedule-modal>
-
-        <!--<edit-schedule-modal :model.sync="editModal"-->
-                             <!--:selected-event="selectedEvent"-->
-                             <!--:selected-schedule="selectedSchedule"-->
-                             <!--@refresh-events="refreshEvents()"-->
-        <!--&gt;</edit-schedule-modal>-->
+        ></business-schedule-modal>
     </b-card>
 </template>
 
 <script>
-    import ManageCalendar from '../mixins/ManageCalendar';
+    import ManageCalendar from '../../../mixins/ManageCalendar';
 
     export default {
         props: {

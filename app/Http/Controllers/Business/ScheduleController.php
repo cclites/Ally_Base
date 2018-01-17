@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Http\Requests\CreateScheduleRequest;
+use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
@@ -58,22 +59,18 @@ class ScheduleController extends BaseController
     /**
      * Retrieve the details of a schedule
      *
-     * @param $client_id
-     * @param $schedule_id
-     *
+     * @param \App\Schedule $schedule
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
      */
-    public function show($schedule_id)
+    public function show(Schedule $schedule)
     {
-        $schedule = Schedule::findOrFail($schedule_id);
-
         if ($schedule->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.');
+            return new ErrorResponse(403, 'You do not have access to this schedule.', $schedule);
         }
 
         return new ScheduleResponse($schedule);
     }
-
 
     public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
     {
@@ -98,7 +95,7 @@ class ScheduleController extends BaseController
         }
 
         if ($request->notes) {
-            $note = new ScheduleNote(['note' => $request->notes]);
+            $note = ScheduleNote::create(['note' => $request->notes]);
             $creator->attachNote($note);
         }
 
@@ -116,6 +113,30 @@ class ScheduleController extends BaseController
         }
 
         return new ErrorResponse(500, 'Unknown error');
+    }
+
+    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    {
+        if ($schedule->starts_at < Carbon::now()) {
+            return new ErrorResponse(400, 'Past schedules are unable to be modified.');
+        }
+
+        $notes = $request->input('notes');
+        if ($schedule->notes != $notes) {
+            if (strlen($notes)) {
+                $note = ScheduleNote::create(['note' => $notes]);
+                $schedule->attachNote($note);
+            }
+            else {
+                $schedule->deleteNote();
+            }
+        }
+
+        $data = $request->validated();
+        $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        unset($data['notes']);
+        $schedule->update($data);
+        return new SuccessResponse('The schedule has been updated.');
     }
 
 

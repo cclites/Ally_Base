@@ -265,7 +265,7 @@
 </template>
 
 <script>
-    import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
         mixins: [FormatsNumbers],

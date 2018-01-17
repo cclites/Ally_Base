@@ -1,11 +1,11 @@
 <template>
     <div>
-        <b-modal id="createScheduleModal"
-                 title="Schedule Shift"
+        <b-modal id="businessScheduleModal"
+                 :title="title"
                  class="modal-fit-more"
                  size="lg"
                  :no-close-on-backdrop="true"
-                 v-model="createModel"
+                 v-model="scheduleModal"
                  v-if="!maxHoursWarning"
         >
             <b-card no-body>
@@ -131,7 +131,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Recurrence">
+                    <b-tab title="Recurrence" v-if="!selectedSchedule.id">
                         <b-row>
                             <b-col lg="12">
                                 <b-form-group label="Recurring Period" label-for="interval_type">
@@ -187,19 +187,22 @@
             </b-card>
 
             <div slot="modal-footer">
-                <b-btn variant="default" @click="createModel=false">Close</b-btn>
+                <div class="text-left">
+                    <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id">Copy</b-btn>
+                </div>
+                <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
-                    Save
+                    {{ submitText }}
                 </b-btn>
             </div>
         </b-modal>
-        <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="createModel" v-else-if="maxHoursWarning">
+        <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="scheduleModal" v-else-if="maxHoursWarning">
             <b-container fluid>
                 <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
             </b-container>
             <div slot="modal-footer">
-                <b-btn variant="default" @click="createModel=false">No, Cancel</b-btn>
+                <b-btn variant="default" @click="scheduleModal=false">No, Cancel</b-btn>
                 <b-btn variant="danger" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
                     Yes, Save
@@ -210,12 +213,9 @@
 </template>
 
 <script>
-    import ScheduleForm from '../mixins/ScheduleForm';
-    import DatePicker from "./DatePicker";
+    import ScheduleForm from '../../../mixins/ScheduleForm';
 
     export default {
-        components: {DatePicker},
-
         mixins: [ScheduleForm],
 
         props: {
@@ -226,7 +226,7 @@
                 }
             },
             model: Boolean,
-            defaultValues: {
+            initialValues: {
                 type: Object,
                 default() {
                     return {};
@@ -236,6 +236,12 @@
                 type: Object,
                 default() {
                     return moment();
+                }
+            },
+            selectedSchedule: {
+                type: Object,
+                default() {
+                    return {};
                 }
             }
         },
@@ -247,8 +253,24 @@
                 startTime: "",
                 endTime: "",
                 endDate: "",
-                createModel: this.model,
+                scheduleModal: this.model,
                 form: new Form(),
+                copiedSchedule: {},
+                allyPct: 0.05,
+                paymentType: 'NONE',
+                caregivers: [],
+                clients: [],
+                daysOfWeek: {
+                    'Sunday': 'su',
+                    'Monday': 'mo',
+                    'Tuesday': 'tu',
+                    'Wednesday': 'we',
+                    'Thursday': 'th',
+                    'Friday': 'fr',
+                    'Saturday': 'sa',
+                },
+                specialHoursChange: false,
+                maxHoursWarning: false,
             }
         },
 
@@ -256,10 +278,85 @@
             this.loadClientData();
         },
 
-        computed: {},
+        computed: {
+            title() {
+                if (this.selectedSchedule.id) {
+                    return 'Editing a Scheduled Shift';
+                }
+                if (!_.isEmpty(this.copiedSchedule)) {
+                    return 'Copying Schedule';
+                }
+                return 'Schedule Shift';
+            },
+
+            submitText() {
+                if (this.selectedSchedule.id) {
+                    return 'Save';
+                }
+                return 'Create Schedule';
+            },
+
+            defaultValues() {
+                if (this.copiedSchedule.starts_at) {
+                    return {
+                        'starts_at': this.copiedSchedule.starts_at,
+                        'duration': this.copiedSchedule.duration,
+                        'caregiver_id': this.copiedSchedule.caregiver_id,
+                        'client_id': this.copiedSchedule.client_id,
+                        'caregiver_rate': this.copiedSchedule.caregiver_rate,
+                        'provider_fee': this.copiedSchedule.provider_fee,
+                        'notes': this.copiedSchedule.notes,
+                        'hours_type': this.copiedSchedule.hours_type,
+                        'overtime_duration': this.copiedSchedule.overtime_duration,
+                    }
+                }
+                return this.initialValues;
+            },
+
+            allyFee() {
+                if (!parseFloat(this.form.caregiver_rate)) return null;
+                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+                let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
+                return allyFee.toFixed(2);
+            },
+
+            displayAllyPct() {
+                return (parseFloat(this.allyPct) * 100).toFixed(2);
+            },
+
+            totalRate() {
+                if (this.allyFee === null) return null;
+                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
+                let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
+                return totalRate.toFixed(2);
+            },
+
+            selectedCaregiver() {
+                if (this.form.caregiver_id) {
+                    for(let index in this.caregivers) {
+                        let caregiver = this.caregivers[index];
+                        if (caregiver.id == this.form.caregiver_id) {
+                            return caregiver;
+                        }
+                    }
+                }
+                return {
+                    pivot: {}
+                };
+            },
+        },
 
         methods: {
             makeForm() {
+                if (this.selectedSchedule.id) {
+                    return this.makeEditForm();
+                }
+                return this.makeCreateForm();
+            },
+
+            makeCreateForm() {
                 this.form = new Form({
                     'starts_at':  "",
                     'duration': 0,
@@ -275,13 +372,38 @@
                     'bydays': [],
                     ...this.defaultValues
                 });
+                if (this.form.starts_at) {
+                    this.setDateTimeFromEvent(moment(this.form.starts_at, 'X'));
+                }
             },
 
-            setDateTimeFromEvent() {
-                if (this.selectedEvent) {
-                    this.startDate = this.selectedEvent.format('MM/DD/YYYY');
-                    this.startTime = (this.selectedEvent._ambigTime) ? '09:00' : this.selectedEvent.format('HH:mm');
-                    this.endTime = (this.selectedEvent._ambigTime) ? '10:00' : moment(this.selectedEvent).add(60, 'minutes').format('HH:mm');
+            makeEditForm() {
+                this.form = new Form({
+                    'starts_at': this.selectedSchedule.starts_at,
+                    'duration': this.selectedSchedule.duration,
+                    'caregiver_id': this.selectedSchedule.caregiver_id,
+                    'client_id': this.selectedSchedule.client_id,
+                    'caregiver_rate': this.selectedSchedule.caregiver_rate,
+                    'provider_fee': this.selectedSchedule.provider_fee,
+                    'notes': this.selectedSchedule.notes,
+                    'hours_type': this.selectedSchedule.hours_type,
+                    'overtime_duration': this.selectedSchedule.overtime_duration,
+                });
+                this.setDateTimeFromEvent(moment(this.selectedSchedule.starts_at, 'X'));
+            },
+
+            setDateTimeFromEvent(event = null) {
+                if (!event) {
+                    event = this.selectedEvent;
+                }
+                if (!this.form.duration) {
+                    this.form.duration = 60;
+                }
+                if (event) {
+                    event = moment(event);
+                    this.startDate = event.format('MM/DD/YYYY');
+                    this.startTime = (event._ambigTime) ? '09:00' : event.format('HH:mm');
+                    this.endTime = (event._ambigTime) ? '10:00' : moment(event).add(this.form.duration, 'minutes').format('HH:mm');
                 }
             },
 
@@ -304,7 +426,13 @@
                 this.form.recurring_end_date = moment(this.endDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').add(1, 'minutes').format('X');
 
                 // Submit form
-                this.form.post('/business/schedule')
+                let url = '/business/schedule';
+                let method = 'post';
+                if (this.selectedSchedule.id) {
+                    method = 'patch';
+                    url = url + '/' + this.selectedSchedule.id;
+                }
+                this.form.submit(method, url)
                     .then(response => {
                         this.refreshEvents();
                         this.submitting = false;
@@ -314,15 +442,126 @@
                         this.submitting = false;
                     });
             },
+
+            copySchedule() {
+                if (this.selectedSchedule.id) {
+                    this.copiedSchedule = Object.assign({}, this.selectedSchedule);
+                    this.selectedSchedule = {};
+                    this.makeCreateForm();
+                }
+            }
+
+            dayOfMonth(date) {
+                return moment(date).format('Do');
+            },
+
+            loadAllyPctFromClient(client_id) {
+                let component = this;
+                axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
+                    component.allyPct = response.data.percentage_fee;
+                    component.paymentType = response.data.payment_type;
+                });
+            },
+
+            loadCaregivers() {
+                if (this.form.client_id) {
+                    axios.get('/business/clients/' + this.form.client_id + '/caregivers')
+                        .then(response => {
+                            this.caregivers = response.data;
+                        });
+                }
+            },
+
+            loadClientData() {
+                if (!this.client.id) {
+                    let component = this;
+                    axios.get('/business/clients/list')
+                        .then(response => {
+                            component.clients = response.data;
+                            this.loadCaregivers();
+                        });
+                }
+                else {
+                    // Load caregivers and ally pct immediately
+                    this.loadCaregivers();
+                    this.loadAllyPctFromClient(this.client.id);
+                }
+            },
+
+            getDuration() {
+                if (this.endTime && this.startTime) {
+                    if (this.startTime === this.endTime) {
+                        return 1440; // have 12:00am to 12:00am = 24 hours
+                    }
+                    let start = moment('2017-01-01 ' + this.startTime, 'YYYY-MM-DD HH:mm');
+                    let end = moment('2017-01-01 ' + this.endTime, 'YYYY-MM-DD HH:mm');
+                    console.log(start, end);
+                    if (start && end) {
+                        if (end.isBefore(start)) {
+                            end = moment('2017-01-02 ' + this.endTime, 'YYYY-MM-DD HH:mm');
+                        }
+                        let diff = end.diff(start, 'minutes');
+                        if (diff) {
+                            return parseInt(diff);
+                        }
+                    }
+                }
+                return null;
+            },
+
+            getStartsAt() {
+                if (this.startDate && this.startTime) {
+                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format('X');
+                }
+                return null;
+            },
+
+            refreshEvents() {
+                this.$emit('refresh-events');
+                this.scheduleModal = false;
+            },
+
+            showMaxHoursWarning(response) {
+                this.maxHoursWarning = true;
+                // Recreate the form with max override
+                let data = this.form.data();
+                data.override_max_hours = 1;
+                this.form = new Form(data);
+            },
+
+            hideMaxHoursWarning() {
+                this.maxHoursWarning = false;
+            },
+
+            handleErrors(error) {
+                if (error.response) {
+                    switch(error.response.status) {
+                        case 449:
+                            this.showMaxHoursWarning(error.response);
+                            break;
+                    }
+                }
+            },
         },
 
         watch: {
             model(val) {
-                this.createModel = val;
+                // Hide warning modal if hiding this modal
+                if (!val) {
+                    this.hideMaxHoursWarning();
+                }
+
+                // Clear copied values
+                this.copiedSchedule = {};
+
+                // Update local modal bool
+                this.scheduleModal = val;
+
+                // Re-create the form object
                 this.makeForm();
             },
 
-            createModel(val) {
+            scheduleModal(val) {
                 this.createType = null;
                 this.$emit('update:model', val);
                 if (val) {
@@ -332,6 +571,35 @@
 
             selectedEvent() {
                 this.setDateTimeFromEvent();
+            },
+
+            'form.client_id': function(val) {
+                this.loadAllyPctFromClient(val);
+                this.loadCaregivers();
+            },
+
+            'form.caregiver_id': function(val, old_val) {
+                if (this.selectedSchedule) {
+                    // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
+                    if (this.selectedSchedule.caregiver_id == val) {
+                        this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
+                        this.form.provider_fee = this.selectedSchedule.provider_fee
+                        return;
+                    }
+                }
+
+                this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
+                this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+            },
+
+            'form.hours_type': function(val, old_val) {
+                if (old_val) {
+                    if (val === 'holiday' || val === 'overtime') {
+                        this.specialHoursChange = true;
+                        return;
+                    }
+                }
+                this.specialHoursChange = false;
             },
         },
     }
