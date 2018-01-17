@@ -25,8 +25,11 @@ class BulkDestroyScheduleRequest extends FormRequest
                 filter_date($this->start_date) . ' 00:00:00',
                 filter_date($this->end_date) . ' 23:59:59',
             ]
-        )
-            ->where('starts_at', 'LIKE', '% ' . $this->start_time . '%');
+        );
+
+        if ($this->start_time) {
+            $query->where('starts_at', 'LIKE', '% ' . $this->start_time . '%');
+        }
 
         if ($this->client_id) {
             $query->where('client_id', $this->client_id);
@@ -80,7 +83,7 @@ class BulkDestroyScheduleRequest extends FormRequest
             // query items
             'start_date'   => 'required|date|after_or_equal:' . $minDate . '|before:' . $maxDate,
             'end_date'     => 'required|date|after_or_equal:' . $minDate,
-            'start_time'   => 'required|date_format:H:i',
+            'start_time'   => 'nullable|date_format:H:i',
             'client_id'    => 'nullable|exists:clients,id',
             'caregiver_id' => 'nullable|integer', // cannot use exists rule because 0 is used for unassigned
             'hours_type'   => 'nullable|in:default,overtime,holiday',
