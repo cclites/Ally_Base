@@ -140,8 +140,12 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now()) {
+        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
             return new ErrorResponse(400, 'Past schedules are unable to be modified.');
+        }
+
+        if ($schedule->shifts->count()) {
+            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
         }
 
         $notes = $request->input('notes');
@@ -175,8 +179,12 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now()) {
+        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
             return new ErrorResponse(400, 'Past schedules are unable to be deleted.');
+        }
+
+        if ($schedule->shifts->count()) {
+            return new ErrorResponse(400, 'This schedule cannot be deleted because it already has an active shift.');
         }
 
         $schedule->delete();
