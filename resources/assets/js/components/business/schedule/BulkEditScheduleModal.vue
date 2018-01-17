@@ -155,7 +155,8 @@
                                     <input-help :form="form" field="new_hours_type" text=""/>
                                 </b-form-group>
                             </b-col>
-                            <b-col>
+                            <!-- HIDE OVERTIME DURATION FOR NOW -->
+                            <b-col v-if="false">
                                 <b-form-group label="Overtime Hours" label-for="new_provider_fee">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox"
