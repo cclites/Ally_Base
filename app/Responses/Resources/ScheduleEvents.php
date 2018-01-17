@@ -86,7 +86,7 @@ class ScheduleEvents implements Responsable
                 $backgroundColor = $this->getBackgroundColor('current', $title);
                 $title .= ': Clocked In';
             }
-            elseif($schedule->starts_at > Carbon::now()) {
+            elseif($schedule->starts_at < Carbon::now()) {
                 $backgroundColor = $this->getBackgroundColor('past', $title);
             }
             else {
