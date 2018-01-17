@@ -14,8 +14,13 @@
                 <template slot="created_at" scope="data">
                     {{ formatDate(data.item.created_at) }}
                 </template>
-                <template slot="week" scope="data">
-                    {{ formatDate(data.item.start) }} - {{ formatDate(data.item.end) }}
+                <template slot="week" scope="row">
+                    <span v-if="row.item.adjustment">
+                        Manual Adjustment
+                    </span>
+                    <span v-else>
+                        {{ formatDate(row.item.start) }} - {{ formatDate(row.item.end) }}
+                    </span>
                 </template>
                 <template slot="actions" scope="data">
                     <b-btn :href="'/reports/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">View Details</b-btn>

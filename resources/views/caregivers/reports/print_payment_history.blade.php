@@ -39,7 +39,13 @@
             @foreach($deposits as $deposit)
                 <tr>
                     <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($deposit->start)->format('m/d/Y') }} - {{ \Carbon\Carbon::parse($deposit->end)->format('m/d/Y') }}</td>
+                    <td>
+                        @if($deposit->adjustment)
+                            Manual Adjustment
+                        @else
+                            {{ \Carbon\Carbon::parse($deposit->start)->format('m/d/Y') }} - {{ \Carbon\Carbon::parse($deposit->end)->format('m/d/Y') }}
+                        @endif
+                    </td>
                     <td>&dollar;{{ number_format($deposit->amount, 2) }}</td>
                 </tr>
             @endforeach

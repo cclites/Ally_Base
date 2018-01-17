@@ -2,9 +2,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\Caregiver;
 use App\Deposit;
 use App\Http\Controllers\Controller;
 use App\Payments\DepositProcessor;
+use App\Payments\SingleDepositProcessor;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -63,6 +66,44 @@ class DepositsController extends Controller
         $processor = new DepositProcessor($business, $startDate, $endDate, logger());
         $count = $processor->process();
         return new SuccessResponse('There were ' . $count . ' successful transactions.');
+    }
+
+    public function depositAdjustment()
+    {
+        return view('admin.deposits.adjustment');
+    }
+
+    public function manualDeposit(Request $request)
+    {
+        $request->validate([
+            'business_id' => 'required_without:caregiver_id',
+            'caregiver_id' => 'required_without:business_id',
+            'type' => 'required|in:withdrawal,deposit',
+            'amount' => 'required|numeric|min:0.1',
+            'adjustment' => 'nullable|boolean',
+            'notes' => 'nullable|max:1024',
+        ]);
+
+        $amount = (float) $request->amount;
+        if ($request->type == 'withdrawal') {
+            $amount = $amount * -1.0;
+        }
+
+        if ($request->caregiver_id) {
+            $caregiver = Caregiver::findOrFail($request->caregiver_id);
+            if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
+            $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes);
+        }
+        else if ($request->business_id) {
+            $business = Business::findOrFail($request->business_id);
+            if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
+            $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
+        }
+
+        if ($transaction) {
+            return new SuccessResponse('Transaction processed for $' . $amount);
+        }
+        return new ErrorResponse(400, 'Transaction failure');
     }
 
 }

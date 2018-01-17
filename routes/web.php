@@ -226,6 +226,8 @@ Route::group([
     Route::get('charges/{business}', 'Admin\ChargesController@report')->name('charges.report');
     Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
+    Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
+    Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
     Route::get('deposits/{business}', 'Admin\DepositsController@report')->name('deposits.report');
     Route::get('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.pending.business');
     Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');

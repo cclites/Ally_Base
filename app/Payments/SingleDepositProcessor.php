@@ -1,5 +1,6 @@
 <?php
 namespace App\Payments;
+use App\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Deposit;
@@ -23,36 +24,52 @@ class SingleDepositProcessor
         return new ECSPayment();
     }
 
-    public static function depositCaregiver(Caregiver $caregiver, $amount)
+    public static function depositCaregiver(Caregiver $caregiver, $amount, $adjustment = false, $notes = null)
     {
         $account = $caregiver->bankAccount;
-        if ($transaction = self::gateway()->depositFunds($account, $amount)) {
+        if ($transaction = self::handleTransaction($account, $amount)) {
             $deposit = Deposit::create([
                 'deposit_type' => 'caregiver',
                 'caregiver_id' => $caregiver->id,
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
+                'adjustment' => $adjustment,
+                'notes' => $notes,
                 'success' => $transaction->success,
             ]);
-            $deposit->method()->associate($account);
         }
+
         return $transaction;
     }
 
-    public static function depositBusiness(Business $business, $amount)
+    public static function depositBusiness(Business $business, $amount, $adjustment = false, $notes = null)
     {
         $account = $business->bankAccount;
-        if ($transaction = self::gateway()->depositFunds($account, $amount)) {
+        if ($transaction = self::handleTransaction($account, $amount)) {
             $deposit = Deposit::create([
                 'deposit_type' => 'business',
                 'business_id' => $business->id,
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
+                'adjustment' => $adjustment,
+                'notes' => $notes,
                 'success' => $transaction->success,
             ]);
-            $deposit->method()->associate($account);
         }
+
         return $transaction;
+    }
+
+    protected static function handleTransaction(BankAccount $account, $amount)
+    {
+        if ($amount > 0) {
+            return self::gateway()->depositFunds($account, $amount);
+        }
+        if ($amount < 0) {
+            $amount = $amount * -1.0;
+            return $account->charge($amount);
+        }
+        return false;
     }
 
 }
