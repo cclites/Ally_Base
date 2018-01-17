@@ -153,11 +153,14 @@ class ShiftController extends Controller
         if (!$shift || !$shift->client) {
             return new ErrorResponse(400, 'Could not find an active shift.');
         }
-        
+
+        /* Signature Requirement Disabled For Now
+        // LTCI Clients Required Signature
         $request->validate([
             'signature' => [new SignedLTCI($shift->client->client_type)]
         ]);
-        
+        */
+
         // If not private pay, ADL and comments are required
         if ($shift->client->client_type != 'private_pay') {
             $request->validate(
