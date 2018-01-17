@@ -1,7 +1,7 @@
 export default {
     methods: {
         formatDate(date, format='MM/DD/YYYY', fromFormat = null) {
-            return moment(dateTime, fromFormat).format(format);
+            return moment(date, fromFormat).format(format);
         },
 
         formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null) {
