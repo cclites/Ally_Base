@@ -74,7 +74,7 @@ class SettingController extends BaseController
     public function update(UpdateBusinessRequest $request, $id)
     {
         $business = Business::find($id);
-        $business->update($request->all());
+        $business->update($request->validated());
         return new SuccessResponse('Business settings updated.');
     }
 

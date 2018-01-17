@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Scheduling\ScheduleAggregator;
+use App\Rules\ValidSSN;
 use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,7 +23,9 @@ class CaregiverController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function index(Request $request)
     {
@@ -55,7 +58,8 @@ class CaregiverController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return CreatedResponse|ErrorResponse
+     * @throws \Exception
      */
     public function store(Request $request)
     {
@@ -90,6 +94,7 @@ class CaregiverController extends BaseController
      *
      * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function show(Caregiver $caregiver)
     {
@@ -106,6 +111,7 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
+        $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -113,7 +119,7 @@ class CaregiverController extends BaseController
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
-
+        
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
@@ -122,6 +128,7 @@ class CaregiverController extends BaseController
      *
      * @param  \App\Caregiver $caregiver
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function edit(Caregiver $caregiver)
     {
@@ -134,7 +141,6 @@ class CaregiverController extends BaseController
      * @param  \Illuminate\Http\Request $request
      * @param  \App\Caregiver $caregiver
      * @return ErrorResponse|SuccessResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(Request $request, Caregiver $caregiver)
     {
@@ -142,15 +148,23 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $data = $request->validate([
+        $rules = [
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => ['required', Rule::unique('users')->ignore($caregiver->id)],
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
-            'misc' => 'nullable|string'
-        ]);
+            'misc' => 'nullable|string',
+        ];
+
+        if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
+            $rules += [
+                'ssn' => new ValidSSN()
+            ];
+        }
+
+        $data = $request->validate($rules);
 
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
 
@@ -168,6 +182,11 @@ class CaregiverController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  \App\Caregiver $caregiver
+<<<<<<< HEAD
+=======
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
+>>>>>>> e00e9ee48668173c581006e17570a0babb346832
      */
     public function destroy(ScheduleAggregator $aggregator, Caregiver $caregiver)
     {

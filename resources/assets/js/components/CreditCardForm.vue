@@ -100,7 +100,14 @@
         },
 
         computed: {
-
+            submitUrl() {
+                switch (this.$parent.role) {
+                    case 'client':
+                        return '/profile/payment/' + this.source;
+                    case 'office_user':
+                        return '/business/clients/' + this.client.id + '/payment/' + this.source
+                }
+            }
         },
 
         mounted() {
@@ -114,7 +121,7 @@
         methods: {
             submit() {
                 var component = this;
-                this.form.post('/business/clients/' + this.client.id + '/payment/' + this.source)
+                this.form.post(this.submitUrl)
                     .then(function(response) {
                         component.form.number = '************ ' + component.form.number.slice(-4);
                         component.form.cvv = '***';

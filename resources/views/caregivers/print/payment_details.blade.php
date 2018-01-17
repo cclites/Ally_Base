@@ -11,11 +11,19 @@
             padding-left: 0;
         }
 
+        .footer-left {
+            padding-left: 1rem;
+        }
+
         .header-right,
         .footer-right {
             float: left;
             width: 25%;
             padding-right: 0;
+        }
+
+        .footer-right {
+            padding-right: 1.2rem;
         }
 
         .header-right table tr td {
@@ -29,41 +37,29 @@
     <div class="container-fluid">
         <div class="row print-header">
             <div class="header-left">
-                {{--<img src="{{ asset('images/') }}" alt="">--}}
-                <div class="h4">{{ $payment->business->name }}</div>
-                <div>{{ $payment->business->address1 }}</div>
-                @if($payment->business->address2)
-                    <div>{{ $payment->business->address2 }}</div>
+                <div class="h4">{{ $business->name }}</div>
+                <div>{{ $business->address1 }}</div>
+                @if($business->address2)
+                    <div>{{ $business->address2 }}</div>
                 @endif
-                @if($payment->business->city && $payment->business->state)
-                    <span>{{ $payment->business->city }}</span>,
-                    <span>{{ $payment->business->state }}</span>
-                @elseif($payment->business->city)
-                    {{ $payment->busienss->city }}
-                @elseif($payment->business->state)
-                    {{ $payment->business->state }}
+                @if($business->city && $business->state)
+                    <span>{{ $business->city }}</span>,
+                    <span>{{ $business->state }}</span>
+                @elseif($business->city)
+                    {{ $busienss->city }}
+                @elseif($business->state)
+                    {{ $business->state }}
                 @endif
-                <span>{{ $payment->business->zip }}</span>
-                <div>{{ $payment->business->phone1 }}</div>
+                <span>{{ $business->zip }}</span>
+                <div>{{ $business->phone1 }}</div>
             </div>
             <div class="text-right header-right">
                 <div class="h4">Statement</div>
-                <div>{{ $payment->client->name }}</div>
+                <div>{{ $deposit->caregiver->name }}</div>
                 <table style="float: right;">
                     <tr>
-                        <td>Payment Date</td>
-                        <td>{{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Care Week</td>
-                        <td>
-                            @if(!is_null($payment->week))
-                                {{ \Carbon\Carbon::parse($payment->week->start)->format('m/d') }} -
-                                {{ \Carbon\Carbon::parse($payment->week->end)->format('m/d') }}
-                            @else
-                                N/A
-                            @endif
-                        </td>
+                        <td>Deposit Date</td>
+                        <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
                     </tr>
                 </table>
             </div>
@@ -81,7 +77,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Activities Performed</th>
-                        <th>Caregiver</th>
+                        <th>Client</th>
                         <th>Rate</th>
                         <th>Hours Type</th>
                         <th>Mileage</th>
@@ -94,19 +90,18 @@
                                 {{ $shift->checked_in_time->format('m/d/Y') }}
                             </td>
                             <td>
-                                {{ $shift->checked_in_time->setTimezone($timezone)->format('g:i a') }} -
-                                {{ $shift->checked_out_time->setTimezone($timezone)->format('g:i a') }}
+                                {{ $shift->checked_in_time->format('g:i a') }} - {{ $shift->checked_out_time->format('g:i a') }}
                             </td>
                             <td>
                                 @foreach($shift->activities as $activity)
-                                    <div>{{ $activity }}</div>
+                                    <div>{{ $activity['name'] }}</div>
                                 @endforeach
                             </td>
                             <td>
-                                {{ $shift->caregiver_name }}
+                                {{ $shift->client['name'] }}
                             </td>
                             <td>
-                                ${{ $shift->hourly_total }}
+                                ${{ $shift->caregiver_rate }}
                             </td>
                             <td>
                                 {{ $shift->hours_type }}
@@ -118,7 +113,7 @@
                                 {{ $shift->hours }}
                             </td>
                             <td>
-                                &dollar;{{ $shift->shift_total }}
+                                &dollar;{{ $shift->caregiver_total }}
                             </td>
                         </tr>
                     @endforeach
@@ -128,7 +123,7 @@
         </div>
         <div class="row">
             <div class="footer-left">
-                <p>This is a statement. Your payment was processed on {{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }} using your payment information on file.</p>
+                <p>This is a deposit statement.</p>
             </div>
             <div class="footer-right">
                 <table class="table">
@@ -136,12 +131,7 @@
                     <tr>
                         <td>Total</td>
                         <td>
-                            &dollar;{{ number_format($shifts->sum('shift_total'), 2) }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <em>Nothing due. This is a payment statement only.</em>
+                            &dollar;{{ number_format($shifts->sum('caregiver_total'), 2) }}
                         </td>
                     </tr>
                     </tbody>
@@ -151,7 +141,7 @@
         <div class="row">
             <div class="col">
                 <p class="text-center">
-                    Ally Contact Info
+
                 </p>
             </div>
         </div>

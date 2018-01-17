@@ -110,6 +110,7 @@
                                     :method="{{ $client->defaultPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $defaultPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>
@@ -119,6 +120,7 @@
                                     :method="{{ $client->backupPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $backupPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>

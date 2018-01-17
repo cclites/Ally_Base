@@ -1,18 +1,16 @@
 <template>
     <div>
-        <!--<b-row>-->
-            <!--<b-col lg="4">-->
-                <!--<dashboard-metric variant="info" value="$0" text="This Month" />-->
-            <!--</b-col>-->
-            <!--<b-col lg="4">-->
-                <!--<dashboard-metric variant="primary" value="$0" text="Scheduled" />-->
-            <!--</b-col>-->
-            <!--<b-col lg="4">-->
-                <!--<dashboard-metric variant="success" value="$0" text="Year to Date" />-->
-            <!--</b-col>-->
-        <!--</b-row>-->
         <b-card>
-            <b-table :items="deposits" :fields="fields">
+            <b-row>
+                <b-col lg="3">
+                    <b-form-group label="Year">
+                        <b-form-select v-model="selectedYear">
+                            <option v-for="year in years" :value="year">{{ year }}</option>
+                        </b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-table id="caregiver_payment_history" :items="items" :fields="fields" foot-clone>
                 <template slot="created_at" scope="data">
                     {{ formatDate(data.item.created_at) }}
                 </template>
@@ -20,20 +18,31 @@
                     {{ formatDate(data.item.start) }} - {{ formatDate(data.item.end) }}
                 </template>
                 <template slot="actions" scope="data">
-                    <b-btn :href="'/reports/payment-history/' + data.item.id" class="btn btn-secondary">View Details</b-btn>
+                    <b-btn :href="'/reports/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">View Details</b-btn>
+                    <b-btn :href="'/reports/payment-history/' + data.item.id + '/print?type=pdf'" class="btn btn-secondary">Download</b-btn>
+                </template>
+                <template slot="FOOT_created_at" scope="data">
+                    Total YTD
+                </template>
+                <template slot="FOOT_week" scope="data">
+                    {{ selectedYear }}
+                </template>
+                <template slot="FOOT_amount" scope="data">
+                    {{ total }}
+                </template>
+                <template slot="FOOT_actions" scope="data">
+                    <b-btn @click="printSummary()">Print Year Summary</b-btn>
                 </template>
             </b-table>
         </b-card>
     </div>
 </template>
 
-<style lang="scss">
-</style>
-
 <script>
     import DashboardMetric from '../DashboardMetric';
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
+    import moment from 'moment';
     export default {
         props: ['caregiver', 'deposits'],
 
@@ -45,6 +54,7 @@
 
         data() {
             return {
+                selectedYear: moment().year(),
                 fields: [
                     { key: 'created_at', label: 'Paid' },
                     { key: 'week', label: 'Shifts Added'},
@@ -60,19 +70,30 @@
             }
         },
 
-        created() {
-
-        },
-
-        mounted() {
-
-        },
-
         methods: {
-
+            printSummary() {
+                window.location = '/reports/payment-history/print/' + this.selectedYear;
+            }
         },
 
         computed: {
+            items() {
+                return _.filter(this.deposits, (deposit) => {
+                    return moment(deposit.created_at).year() === this.selectedYear;
+                })
+            },
+
+            total() {
+                return this.moneyFormat(_.sumBy(this.items, 'amount'));
+            },
+
+            years() {
+                let years = [];
+                for (let i = 0; i < 5; i++) {
+                    years.push(moment().subtract(i, 'years').year())
+                }
+                return years;
+            }
         }
     }
 </script>

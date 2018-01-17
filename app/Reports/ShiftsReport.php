@@ -59,6 +59,7 @@ class ShiftsReport extends BaseReport
                 'checked_out_time' => optional($shift->checked_out_time)->format('c'),
                 'hours' => $shift->duration(),
                 'client_id' => $shift->client_id,
+                'business_id' => $shift->business_id,
                 'client_name' => optional($shift->client)->nameLastFirst(),
                 'caregiver_id' => $shift->caregiver_id,
                 'caregiver_name' => optional($shift->caregiver)->nameLastFirst(),
@@ -72,9 +73,11 @@ class ShiftsReport extends BaseReport
                 'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
                 'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
                 'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
+                'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
                 'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),
+                'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
                 'EVV' => $shift->verified,
             ];
             return $row;
