@@ -129,9 +129,11 @@
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
         </div>
-        <div class="tab-pane" id="schedule" role="schedule">
-            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
-        </div>
+        @if($business->scheduling)
+            <div class="tab-pane" id="schedule" role="tabpanel">
+                <business-schedule :client="{{ $client }}"></business-schedule>
+            </div>
+        @endif
         <div class="tab-pane" id="client_notes" role="tabpanel">
             <notes-tab :notes="{{ $client->notes }}"></notes-tab>
         </div>

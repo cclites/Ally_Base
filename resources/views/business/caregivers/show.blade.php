@@ -60,7 +60,9 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
-                <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+                @if($business->scheduling)
+                    <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+                @endif
                 <a class="dropdown-item" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
@@ -103,9 +105,11 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="schedule" role="tabpanel">
-            <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
-        </div>
+        @if($business->scheduling)
+            <div class="tab-pane" id="schedule" role="tabpanel">
+                <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
+            </div>
+        @endif
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
             <notes-tab :notes="{{ $caregiver->notes }}"></notes-tab>
         </div>
