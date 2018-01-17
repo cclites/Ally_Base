@@ -211,11 +211,7 @@
 </template>
 
 <script>
-    import ScheduleForm from '../../../mixins/ScheduleForm';
-
     export default {
-        mixins: [ScheduleForm],
-
         props: {
             client: {
                 type: Object,
