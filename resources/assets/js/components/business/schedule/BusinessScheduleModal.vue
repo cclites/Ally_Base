@@ -195,8 +195,13 @@
                 </b-btn>
             </div>
         </b-modal>
-        <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="scheduleModal" v-else-if="maxHoursWarning">
+        <b-modal id="maxHoursWarning"
+                 title="Schedule Shift"
+                 :no-close-on-backdrop="true"
+                 v-model="scheduleModal"
+                 v-else-if="maxHoursWarning">
             <b-container fluid>
+                <h4>{{ lastErrorMessage }}</h4>
                 <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
             </b-container>
             <div slot="modal-footer">
@@ -265,6 +270,7 @@
                 },
                 specialHoursChange: false,
                 maxHoursWarning: false,
+                lastErrorMessage: "",
             }
         },
 
@@ -518,9 +524,10 @@
             showMaxHoursWarning(response) {
                 this.maxHoursWarning = true;
                 // Recreate the form with max override
-                let data = this.form.data();
-                data.override_max_hours = 1;
-                this.form = new Form(data);
+                this.form = new Form({
+                    ...this.form.data(),
+                    override_max_hours: 1
+                });
             },
 
             hideMaxHoursWarning() {
@@ -529,6 +536,8 @@
 
             handleErrors(error) {
                 if (error.response) {
+                    this.lastErrorMessage = error.response.data.message;
+
                     switch(error.response.status) {
                         case 449:
                             this.showMaxHoursWarning(error.response);
