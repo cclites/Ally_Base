@@ -50,7 +50,8 @@ $factory->define(\App\Shift::class, function(Faker $faker) {
         'checked_out_latitude' => ($end) ? $latitude : null,
         'checked_out_longitude' => ($end) ? $longitude : null,
         'checked_out_number' => null,
-        'status' => $faker->randomElement(['WAITING_FOR_AUTHORIZATION', 'WAITING_FOR_CHARGE', 'WAITING_FOR_PAYOUT', 'PAID', 'PAID'])
+        'status' => $faker->randomElement(['WAITING_FOR_AUTHORIZATION', 'WAITING_FOR_CHARGE', 'WAITING_FOR_PAYOUT', 'PAID', 'PAID']),
+        'caregiver_comments' => $faker->sentence
     ];
 });
 

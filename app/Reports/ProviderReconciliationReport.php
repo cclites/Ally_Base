@@ -16,12 +16,18 @@ class ProviderReconciliationReport extends BaseReport
         $deposits = DB::table('deposits')->join('gateway_transactions', 'gateway_transactions.id', '=', 'deposits.transaction_id')
             ->selectRaw("gateway_transactions.id, deposits.amount as amount_deposited,'0' as amount_withdrawn, gateway_transactions.created_at")
             ->where('business_id', $business->id)
+            ->where('deposits.amount', '>=', 0)
             ->whereNull('caregiver_id');
+        $withdrawals = DB::table('deposits')->join('gateway_transactions', 'gateway_transactions.id', '=', 'deposits.transaction_id')
+                      ->selectRaw("gateway_transactions.id, '0' as amount_deposited, deposits.amount * -1  as amount_withdrawn, gateway_transactions.created_at")
+                      ->where('business_id', $business->id)
+                      ->where('deposits.amount', '<', 0)
+                      ->whereNull('caregiver_id');
         $payments = DB::table('payments')->join('gateway_transactions', 'gateway_transactions.id', '=', 'payments.transaction_id')
             ->selectRaw("gateway_transactions.id, '0' as amount_deposited, payments.amount as amount_withdrawn, gateway_transactions.created_at")
             ->where('business_id', $business->id)
             ->whereNull('client_id');
-        $this->query = $deposits->union($payments);
+        $this->query = $deposits->union($payments)->union($withdrawals);
     }
 
     /**

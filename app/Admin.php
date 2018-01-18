@@ -27,6 +27,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereId($value)
  * @mixin \Eloquent
+ * @property-read mixed $active
+ * @property-read mixed $gender
  */
 class Admin extends Model implements UserRole
 {

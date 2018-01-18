@@ -1,46 +1,37 @@
 export default {
     data() {
         return {
-            editModal: false,
-            createModal: false,
-            selectedSchedule: null,
+            scheduleModal: false,
+            selectedSchedule: {},
             selectedEvent: null,
         };
     },
 
     methods: {
         createSchedule(date, jsEvent, view) {
-            this.createModal = true;
-            this.createType = null;
+            this.scheduleModal = true;
+            this.selectedSchedule = {};
             if (date) {
                 this.selectedEvent = date;
             }
             else {
-                this.selectedEvent = moment().local().add(59, 'minutes').startOf('hour');
+                this.selectedEvent = moment().add(59, 'minutes').startOf('hour');
             }
         },
 
         editSchedule(event, jsEvent, view) {
-            var component = this;
-            component.selectedEvent = event;
-            axios.get(this.events + '/' + event.id)
-                .then(function(response) {
-                    console.log(response.data);
-                    component.selectedSchedule = response.data;
-                    component.editModal = true;
+            axios.get('/business/schedule/' + event.id)
+                .then(response => {
+                    this.selectedSchedule = response.data;
+                    this.scheduleModal = true;
                 })
                 .catch(function(error) {
                     alert('Error loading schedule details');
                 });
-
         },
 
-        refreshEvents(hideModals = true) {
+        refreshEvents() {
             this.$refs.calendar.fireMethod('refetchEvents');
-            if (hideModals) {
-                this.createModal = false;
-                this.editModal = false;
-            }
         },
     }
 }

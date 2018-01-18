@@ -3,6 +3,8 @@
         <b-row>
             <b-col md="7">
                 <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
+                <b-btn size="sm" variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
+                <b-btn size="sm" variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
             </b-col>
             <b-col md="5">
                 <b-row v-if="isFilterable()">
@@ -24,21 +26,25 @@
         </b-row>
         <full-calendar ref="calendar" :events="filteredEventsUrl" :default-view="defaultView" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
 
-        <create-schedule-modal :model.sync="createModal"
+        <business-schedule-modal :model.sync="scheduleModal"
                                :selected-event="selectedEvent"
+                               :selected-schedule="selectedSchedule"
+                               :initial-values="initialCreateValues"
                                @refresh-events="refreshEvents()"
-        ></create-schedule-modal>
+        />
 
-        <edit-schedule-modal :model.sync="editModal"
-                             :selected-event="selectedEvent"
-                             :selected-schedule="selectedSchedule"
-                             @refresh-events="refreshEvents()"
-        ></edit-schedule-modal>
+        <bulk-edit-schedule-modal v-model="bulkUpdateModal"
+                                  @refresh-events="refreshEvents()"
+        />
+
+        <bulk-delete-schedule-modal v-model="bulkDeleteModal"
+                                  @refresh-events="refreshEvents()"
+        />
     </b-card>
 </template>
 
 <script>
-    import ManageCalendar from '../mixins/ManageCalendar';
+    import ManageCalendar from '../../../mixins/ManageCalendar';
 
     export default {
         props: {
@@ -63,6 +69,8 @@
                 clients: [],
                 caregivers: [],
                 events: '/business/schedule/events',
+                bulkUpdateModal: false,
+                bulkDeleteModal: false,
             }
         },
 
@@ -85,6 +93,12 @@
                     url = url + '?client_id=' + this.filterClientId;
                 }
                 return url;
+            },
+            initialCreateValues() {
+                return {
+                    'client_id': this.filterClientId,
+                    'caregiver_id': this.filterCaregiverId,
+                }
             }
         },
 

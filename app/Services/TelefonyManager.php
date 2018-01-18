@@ -5,6 +5,7 @@ use App\Caregiver;
 use App\Client;
 use App\PhoneNumber;
 use App\Schedule;
+use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -131,49 +132,38 @@ class TelefonyManager
      */
     public function scheduledShiftForClient(Client $client, $caregiver_id = null)
     {
-        $start = new \DateTime('-12 hours');
-        $end = new \DateTime('+12 hours');
+        $start = new Carbon('-12 hours');
+        $end = new Carbon('+12 hours');
 
-        $events = $client->getEvents($start, $end);
-        if (empty($events)) {
+        $aggregator = app()->make(ScheduleAggregator::class);
+        $aggregator->where('client_id', $client->id);
+        if ($caregiver_id) {
+            $aggregator->where('caregiver_id', $caregiver_id);
+        }
+        $schedules = $aggregator->getSchedulesBetween($start, $end);
+
+        if (empty($schedules)) {
             return null;
         }
 
-        // Filter events by caregiver if provided
-        if ($caregiver_id) {
-            $events = array_filter($events, function($event) use ($caregiver_id) {
-                return ($event['caregiver_id'] == $caregiver_id);
-            });
-        }
-
         // Find the closest event to the current time
-        $now = new Carbon();
-        usort($events, function($a, $b) use ($now) {
-            $diffA = $now->diffInSeconds(Carbon::instance($a['start']));
-            $diffB = $now->diffInSeconds(Carbon::instance($b['start']));
+        $now = Carbon::now();
+        $schedules->sort(function($a, $b) use ($now) {
+            $diffA = $now->diffInSeconds($a->starts_at);
+            $diffB = $now->diffInSeconds($b->starts_at);
             if ($diffA == $diffB) {
                 return 0;
             }
             return ($diffA < $diffB) ? -1 : 1;
         });
-        $event = current($events);
 
-        $schedule = Schedule::with(['client.business', 'caregiver'])->find($event['schedule_id']);
-        if (!$schedule) {
-            return null;
-        }
-
-        if (!$schedule->caregiver) {
-            if (count($events) > 1) {
-                $event = next($events);
-            }
-            $schedule = Schedule::with(['caregiver.user', 'client.business', 'client.user'])->find($event['schedule_id']);
-            if (!$schedule || !$schedule->caregiver) {
-                return null;
+        foreach($schedules as $schedule) {
+            if ($schedule->caregiver) {
+                return $schedule;
             }
         }
 
-        return $schedule;
+        return null;
     }
 
 }

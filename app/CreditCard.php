@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUserId($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
 class CreditCard extends Model implements ChargeableInterface
 {

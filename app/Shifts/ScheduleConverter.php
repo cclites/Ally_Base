@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Shifts;
 
 use App\Business;
 use App\Schedule;
+use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
 use DateTimeZone;
@@ -25,9 +27,15 @@ class ScheduleConverter
      */
     protected $timezone;
 
-    public function __construct(Business $business)
+    /**
+     * @var \App\Scheduling\ScheduleAggregator
+     */
+    protected $aggregator;
+
+    public function __construct(Business $business, ScheduleAggregator $aggregator = null)
     {
         $this->business = $business;
+        $this->aggregator = $aggregator ?? new ScheduleAggregator();
         $this->timezone = new DateTimeZone($business->timezone ?? 'America/New_York');
     }
 
@@ -61,17 +69,19 @@ class ScheduleConverter
     public function convertAllBetween(Carbon $start, Carbon $end)
     {
         $shifts = [];
+        $schedules = $this->aggregator->where('business_id', $this->business->id)
+                                      ->getSchedulesStartingBetween($start, $end);
 
-        $events = $this->business->getEvents($start, $end, true);
-        foreach($events as $event) {
-            $schedule = Schedule::find($event['schedule_id']);
-            $expectedClockIn = Carbon::instance($event['start']);
+        foreach ($schedules as $schedule) {
+            $expectedClockIn = $schedule->starts_at;
             if (
-                !$this->shiftExistsFor($schedule, $expectedClockIn)
-                && !$this->hasBeenConverted($schedule, $expectedClockIn)
+                !$this->shiftMatchesTime($schedule, $expectedClockIn)
+                && !$this->hasBeenConverted($schedule)
             ) {
                 $shift = $this->convert($schedule, $expectedClockIn);
-                if ($shift) $shifts[] = $shift;
+                if ($shift) {
+                    $shifts[] = $shift;
+                }
             }
         }
 
@@ -79,24 +89,23 @@ class ScheduleConverter
     }
 
     /**
-     * Check if a shift already exists for a scheduled event
+     * Check if a shift already exists for scheduled time
      *
      * @param \App\Schedule $schedule
      * @param Carbon $date
      * @return bool
      */
-    public function shiftExistsFor(Schedule $schedule, Carbon $expectedClockIn)
+    public function shiftMatchesTime(Schedule $schedule, Carbon $expectedClockIn)
     {
         // Use UTC when comparing against checked_in_time
         $expectedClockIn = $expectedClockIn->copy()->setTimezone('UTC');
-        return Shift::where(function($q) use ($schedule, $expectedClockIn) {
-            $q->where('schedule_id', $schedule->id)
-                ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(8), $expectedClockIn->copy()->addHours(8)]);
-        })->orWhere(function($q) use ($schedule, $expectedClockIn) {
-            $q->where('client_id', $schedule->client_id)
-                ->where('caregiver_id', $schedule->caregiver_id)
-                ->whereBetween('checked_in_time', [$expectedClockIn->copy()->subHours(2), $expectedClockIn->copy()->addHours(2)]);
-        })->exists();
+        return Shift::where('client_id', $schedule->client_id)
+                    ->where('caregiver_id', $schedule->caregiver_id)
+                    ->whereBetween('checked_in_time', [
+                        $expectedClockIn->copy()->subHours(2),
+                        $expectedClockIn->copy()->addHours(2)
+                    ])
+                    ->exists();
     }
 
     /**
@@ -106,14 +115,9 @@ class ScheduleConverter
      * @param \Carbon\Carbon $expectedClockIn
      * @return bool
      */
-    public function hasBeenConverted(Schedule $schedule, Carbon $expectedClockIn)
+    public function hasBeenConverted(Schedule $schedule)
     {
-        // Use UTC when comparing against checked_in_time
-        $expectedClockIn = $expectedClockIn->copy()->setTimezone('UTC');
-        return \DB::table('converted_schedules')
-                  ->where('schedule_id', $schedule->id)
-                  ->where('checked_in_time', $expectedClockIn)
-                  ->exists();
+        return Shift::where('schedule_id', $schedule->id)->exists();
     }
 
     /**
@@ -127,33 +131,32 @@ class ScheduleConverter
     public function convert(Schedule $schedule, Carbon $clockIn, $status = Shift::WAITING_FOR_CONFIRMATION)
     {
         // Make sure schedule has proper assignments
-        if ($schedule->business_id !== $this->business->id) return false;
-        if (!$schedule->caregiver_id) return false;
-        if (!$schedule->client_id) return false;
+        if ($schedule->business_id != $this->business->id) {
+            return false;
+        }
+        if (!$schedule->caregiver_id) {
+            return false;
+        }
+        if (!$schedule->client_id) {
+            return false;
+        }
+
 
         // Create Shift
         $start = $clockIn->setTimezone('UTC');
         $shift = Shift::create([
-            'business_id' => $schedule->business_id,
-            'caregiver_id' => $schedule->caregiver_id,
-            'client_id' => $schedule->client_id,
-            'checked_in' => false,
-            'checked_in_time' => $start,
+            'business_id'      => $schedule->business_id,
+            'caregiver_id'     => $schedule->caregiver_id,
+            'client_id'        => $schedule->client_id,
+            'checked_in'       => false,
+            'checked_in_time'  => $start,
             'checked_out_time' => $start->copy()->addMinutes($schedule->duration),
-            'schedule_id' => $schedule->id,
-            'hours_type' => $schedule->hours_type,
-            'caregiver_rate' => $schedule->getCaregiverRate(),
-            'provider_fee' => $schedule->getProviderFee(),
-            'status' => $status,
+            'schedule_id'      => $schedule->id,
+            'hours_type'       => $schedule->hours_type,
+            'caregiver_rate'   => $schedule->getCaregiverRate(),
+            'provider_fee'     => $schedule->getProviderFee(),
+            'status'           => $status,
         ]);
-
-        if ($shift) {
-            \DB::table('converted_schedules')->insert([
-                'schedule_id' => $schedule->id,
-                'checked_in_time' => $start,
-                'created_at' => Carbon::now()
-            ]);
-        }
 
         return $shift;
     }

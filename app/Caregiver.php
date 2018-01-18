@@ -57,6 +57,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereTitle($value)
  * @mixin \Eloquent
+ * @property-read mixed $active
  */
 class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
 {
@@ -73,6 +74,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
         'gender',
         'onboarded',
         'misc',
+        'preferences'
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];

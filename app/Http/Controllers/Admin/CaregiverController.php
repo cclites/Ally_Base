@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Caregiver;
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -15,7 +16,7 @@ class CaregiverController extends Controller
      */
     public function index(Request $request)
     {
-        $caregivers = Caregiver::orderBy('id')->get();
+        $caregivers = User::whereRoleType('caregiver')->whereActive(1)->orderBy('lastname')->orderBy('firstname')->get();
         return response($caregivers);
     }
 

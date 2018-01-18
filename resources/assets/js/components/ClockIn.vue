@@ -69,7 +69,7 @@
         data() {
             return {
                 form: new Form({
-                    schedule_id: null,
+                    schedule_id: "",
                     latitude: null,
                     longitude: null,
                     manual: 0,

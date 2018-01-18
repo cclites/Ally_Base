@@ -9,6 +9,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Scheduling\ScheduleAggregator;
 use App\Rules\ValidSSN;
 use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
@@ -181,19 +182,21 @@ class CaregiverController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  \App\Caregiver $caregiver
+<<<<<<< HEAD
+=======
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
+>>>>>>> e00e9ee48668173c581006e17570a0babb346832
      */
-    public function destroy(Caregiver $caregiver)
+    public function destroy(ScheduleAggregator $aggregator, Caregiver $caregiver)
     {
         if (!$this->hasCaregiver($caregiver->id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $events = $caregiver->getEvents(Carbon::now(), new Carbon('2100-01-01'));
-        if (count($events)) {
-            $event = current($events);
-            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $event['title'] . '.');
+        $schedules = $aggregator->where('caregiver_id', $caregiver->id)->getSchedulesBetween(Carbon::now(), Carbon::now()->addYears(2));
+        if (count($schedules)) {
+            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $schedules->first()->client->name() . '.');
         }
 
         if ($caregiver->delete()) {
@@ -224,7 +227,7 @@ class CaregiverController extends BaseController
         return (new PhoneController())->upsert($request, $caregiver->user, $type, 'The caregiver\'s phone number');
     }
 
-    public function schedule(Request $request, $caregiver_id)
+    public function schedule(Request $request, ScheduleAggregator $aggregator, $caregiver_id)
     {
         $caregiver = Caregiver::findOrFail($caregiver_id);
 
@@ -232,13 +235,18 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
-        $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
+        $aggregator->where('caregiver_id', $caregiver->id);
 
-        if (strlen($start) > 10) $start = substr($start, 0, 10);
-        if (strlen($end) > 10) $end = substr($end, 0, 10);
+        $start = new Carbon(
+            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
+            $caregiver->businesses->first()->timezone ?? 'America/New_York'
+        );
+        $end = new Carbon(
+            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
+            $caregiver->businesses->first()->timezone ?? 'America/New_York'
+        );
 
-        $events = new ScheduleEventsResponse($caregiver->getEvents($start, $end));
+        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
         return $events;
     }
 
@@ -288,5 +296,16 @@ class CaregiverController extends BaseController
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }
+
+    public function preferences(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->hasCaregiver($caregiver->id)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+        $data = $request->validate(['preferences' => 'required|string']);
+        $caregiver->update($data);
+        return new SuccessResponse('Caregiver updated');
+    }
+
 
 }

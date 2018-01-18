@@ -37,6 +37,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
  * @mixin \Eloquent
+ * @property-read \App\Business|null $business
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
 class BankAccount extends Model implements ChargeableInterface
 {

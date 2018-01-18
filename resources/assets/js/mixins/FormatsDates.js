@@ -1,30 +1,27 @@
 export default {
     methods: {
-        formatDate(date) {
-            return moment(date).format('L');
+        formatDate(date, format='MM/DD/YYYY', fromFormat = null) {
+            return moment(date, fromFormat).format(format);
         },
 
-        formatDateFromUTC(date) {
-            return moment.utc(date).local().format('L');
+        formatDateFromUTC(date, format='MM/DD/YYYY', fromFormat = null) {
+            return moment.utc(date, fromFormat).local().format(format);
         },
 
-        formatTime(dateTime, seconds = false) {
-            let format = 'h:mm a';
-            if (seconds) format = 'h:mm:ss a';
-            return moment(dateTime).format(format);
+        formatTime(dateTime, format='h:mm a', fromFormat = null) {
+            return this.formatDate(dateTime, format, fromFormat);
         },
 
-        formatTimeFromUTC(dateTime, seconds = false) {
-            dateTime = moment.utc(dateTime).local();
-            return this.formatTime(dateTime, seconds);
+        formatTimeFromUTC(dateTime, format='h:mm a', fromFormat = null) {
+            return this.formatDateFromUTC(dateTime, format, fromFormat);
         },
 
-        formatDateTime(dateTime) {
-            return this.formatDate(dateTime) + ' ' + this.formatTime(dateTime);
+        formatDateTime(dateTime, format='MM/DD/YYYY h:mm a', fromFormat=null) {
+            return this.formatDate(dateTime, format, fromFormat);
         },
 
-        formatDateTimeFromUTC(dateTime) {
-            return this.formatDateFromUTC(dateTime) + ' ' + this.formatTimeFromUTC(dateTime);
+        formatDateTimeFromUTC(dateTime, format='MM/DD/YYYY h:mm a', fromFormat=null) {
+            return this.formatDateFromUTC(dateTime, format, fromFormat);
         }
     }
 }

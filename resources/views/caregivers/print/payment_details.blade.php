@@ -84,6 +84,19 @@
                         <th>Hours</th>
                         <th>Total</th>
                     </tr>
+                    @if($deposit->adjustment)
+                        <tr>
+                            <td>
+                                {{ $deposit->created_at->format('m/d/Y') }}
+                            </td>
+                            <td colspan="7">
+                                {{ $deposit->notes }}
+                            </td>
+                            <td>
+                                {{ $deposit->amount }}
+                            </td>
+                        </tr>
+                    @endif
                     @foreach($shifts as $shift)
                         <tr >
                             <td>
@@ -131,7 +144,11 @@
                     <tr>
                         <td>Total</td>
                         <td>
-                            &dollar;{{ number_format($shifts->sum('caregiver_total'), 2) }}
+                            @if($deposit->adjustment)
+                            &dollar;{{ $deposit->amount }}
+                            @else
+                                &dollar;{{ number_format($shifts->sum('caregiver_total'), 2) }}
+                            @endif
                         </td>
                     </tr>
                     </tbody>

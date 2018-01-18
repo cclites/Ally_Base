@@ -3,66 +3,62 @@
 namespace App;
 
 use App\Exceptions\MissingTimezoneException;
-use App\Scheduling\RuleGenerator;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+
 
 /**
  * App\Schedule
  *
  * @property int $id
  * @property int $business_id
- * @property int|null $caregiver_id
  * @property int $client_id
- * @property string $start_date
- * @property string $end_date
- * @property string $time
+ * @property int|null $caregiver_id
+ * @property int $weekday
+ * @property \Carbon\Carbon $starts_at
  * @property int $duration
- * @property mixed $rrule
- * @property string|null $notes
+ * @property int $overtime_duration
+ * @property int|null $note_id
+ * @property float $caregiver_rate
+ * @property float $provider_fee
+ * @property string $hours_type
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
- * @property float|null $caregiver_rate
- * @property float|null $provider_fee
- * @property int $all_day
- * @property string $hours_type
- * @property int|null $care_plan_id
+ * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \App\Business $business
- * @property-read \App\CarePlan|null $carePlan
+ * @property-read \App\CarePlan $carePlan
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ScheduleException[] $exceptions
+ * @property-read mixed $notes
+ * @property-read \App\ScheduleNote|null $note
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereAllDay($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCarePlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDuration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereEndDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereNoteId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereOvertimeDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFee($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereRrule($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStartDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStartsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereWeekday($value)
  * @mixin \Eloquent
  */
 class Schedule extends Model
 {
-    /**
-     * A far-future date, that likely won't ever be chosen directly, to represent a never-ending schedule
-     */
-    const FOREVER_ENDDATE = '2100-12-31';
-
     protected $table = 'schedules';
     protected $guarded = ['id'];
+    protected $dates = ['starts_at'];
+    protected $with = ['business', 'note'];
+    protected $appends = ['notes'];
 
     /**
      * The "booting" method of the model.
@@ -76,11 +72,6 @@ class Schedule extends Model
         // Exclude schedules for deleted clients
         static::addGlobalScope('hasClient', function ($builder) {
             $builder->has('client');
-        });
-
-        // For closed schedules before they start
-        static::addGlobalScope('age', function ($builder) {
-            $builder->whereColumn('start_date', '<=', 'end_date');
         });
     }
 
@@ -123,23 +114,79 @@ class Schedule extends Model
         return $this->belongsTo(CarePlan::class);
     }
 
+    public function note()
+    {
+        return $this->belongsTo(ScheduleNote::class, 'note_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
-    /**
-     * Mutate to use the rrule() method
-     *
-     * @return mixed
-     */
-    public function getRruleAttribute()
+    public function getNotesAttribute()
     {
-        return $this->rrule();
+        return (string) $this->note;
+    }
+
+    public function getStartsAtAttribute()
+    {
+        return new Carbon($this->attributes['starts_at'], $this->business->timezone);
+    }
+
+    public function setStartsAtAttribute($value) {
+        if ($value instanceof \DateTimeInterface && $this->business) {
+            $value->setTimezone(new \DateTimeZone($this->business->timezone));
+        }
+        $this->attributes['starts_at'] = $value;
     }
 
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Attach a schedule note to the schedule
+     *
+     * @param int|\App\ScheduleNote $note
+     * @return bool
+     */
+    public function attachNote($note)
+    {
+        if (!is_numeric($note)) {
+            if (empty($note->id)) return false;
+            $note = $note->id;
+        }
+        return $this->update(['note_id' => $note]);
+    }
+
+    /**
+     * Remove the attached note from the schedule
+     *
+     * @return bool
+     */
+    public function deleteNote()
+    {
+        return $this->update(['note_id' => null]);
+    }
+
+    /**
+     * See if an active shift is clocked in on this schedule
+     * Dev Note:  Eager loading shifts is ideal if using this on a collection
+     *
+     * @return bool
+     */
+    public function isClockedIn()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isClockedIn()) return true;
+        }
+        return false;
+    }
+
+    /*
+     * OLD
+     */
 
     public function isRecurring()
     {
@@ -151,63 +198,6 @@ class Schedule extends Model
         return (strlen($this->rrule) === 0);
     }
 
-    /**
-     * Create a schedule exception
-     *
-     * @param $date
-     *
-     * @return \App\ScheduleException|false
-     */
-    public function createException($date)
-    {
-        $exception = new ScheduleException(['date' => $date]);
-        if ($this->exceptions()->save($exception)) {
-            return $exception;
-        }
-        return false;
-    }
-
-    /**
-     * Close the schedule on all days on and after the specified $date
-     *
-     * @param $date
-     */
-    public function closeSchedule($date) {
-        $last_date = (new \DateTime($date))
-            ->sub(new \DateInterval('P1D'))
-            ->format('Y-m-d');
-
-        if ($last_date < $this->start_date) {
-            if (!$this->shifts()->exists()) {
-                return $this->delete();
-            }
-        }
-
-        return $this->update(['end_date' => $last_date]);
-    }
-
-    /**
-     * Output full RRULE, append UNTIL rule based on end time in database.
-     * @return mixed
-     */
-    public function rrule()
-    {
-        if (!$this->attributes['rrule']) return null;
-        return ($this->end_date == self::FOREVER_ENDDATE) ? $this->attributes['rrule']
-            : $this->attributes['rrule'] . ';UNTIL=' . RuleGenerator::getUTCDate($this->getEndDateTime()->addHour()); // add an hour to handle DST shifts
-    }
-
-    /**
-     * Produce a human readable string describing the schedule timing
-     *
-     * @param array $opts
-     * @return string
-     */
-    public function humanReadable($opts = [])
-    {
-        $parser = new RuleParser($this->getStartDateTime(), $this->rrule());
-        return $parser->humanReadable($opts);
-    }
 
     /**
      * @param int $limit
@@ -294,7 +284,7 @@ class Schedule extends Model
      */
     public function getStartDateTime()
     {
-        return new Carbon($this->start_date . ' ' . $this->time, $this->getTimezone());
+        return $this->starts_at;
     }
 
     /**
@@ -304,7 +294,7 @@ class Schedule extends Model
      */
     public function getEndDateTime()
     {
-        return new Carbon($this->end_date . ' ' . $this->time, $this->getTimezone());
+        return $this->starts_at->copy()->addMinutes($this->duration);
     }
 
     /**
@@ -348,7 +338,7 @@ class Schedule extends Model
      */
     public function getCaregiverRate()
     {
-        if ((string) $this->caregiver_rate !== "") return $this->caregiver_rate;
+        if (strlen($this->caregiver_rate)) return $this->caregiver_rate;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
             if ($this->all_day) {
                 return $relation->pivot->caregiver_daily_rate;
@@ -365,7 +355,7 @@ class Schedule extends Model
      */
     public function getProviderFee()
     {
-        if ((string) $this->provider_fee !== "") return $this->provider_fee;
+        if (strlen($this->provider_fee)) return $this->provider_fee;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
             if ($this->all_day) {
                 return $relation->pivot->provider_daily_fee;

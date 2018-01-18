@@ -10,11 +10,13 @@ use App\Responses\SuccessResponse;
 use App\Rules\SignedLTCI;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
+use App\Scheduling\ScheduleAggregator;
 use App\Shifts\ClockIn;
 use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 use App\Signature;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 
@@ -28,12 +30,12 @@ class ShiftController extends Controller
         return auth()->user()->role;
     }
 
-    public function index($schedule_id = null)
+    public function index(ScheduleAggregator $aggregator, $schedule_id = null)
     {
         if ($this->caregiver()->isClockedIn()) {
             return redirect()->route('clocked_in');
         }
-        $events = $this->getRecentEvents()->toArray();
+        $events = $this->getRecentEvents($aggregator)->toArray();
         return view('caregivers.clock_in', compact('events', 'schedule_id'));
     }
 
@@ -151,11 +153,14 @@ class ShiftController extends Controller
         if (!$shift || !$shift->client) {
             return new ErrorResponse(400, 'Could not find an active shift.');
         }
-        
+
+        /* Signature Requirement Disabled For Now
+        // LTCI Clients Required Signature
         $request->validate([
             'signature' => [new SignedLTCI($shift->client->client_type)]
         ]);
-        
+        */
+
         // If not private pay, ADL and comments are required
         if ($shift->client->client_type != 'private_pay') {
             $request->validate(
@@ -200,12 +205,14 @@ class ShiftController extends Controller
         }
     }
 
-    protected function getRecentEvents()
+    protected function getRecentEvents(ScheduleAggregator $aggregator)
     {
-        $start = new \DateTime('-12 hours');
-        $end = new \DateTime('+12 hours');
+        $start = new Carbon('-12 hours');
+        $end = new Carbon('+12 hours');
+        $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
+                                ->getSchedulesBetween($start, $end);
 
-        $events = new ScheduleEventsResponse($this->caregiver()->getEvents($start, $end));
+        $events = new ScheduleEventsResponse($schedules);
         return $events;
     }
 }

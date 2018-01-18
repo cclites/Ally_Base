@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
+use App\Http\Requests\CreateScheduleRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -12,15 +13,15 @@ use App\Rules\ValidTimezoneOrOffset;
 use App\Schedule;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
+use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use App\Traits\Request\ClientScheduleRequest;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 
 class ClientScheduleController extends BaseController
 {
-    use ClientScheduleRequest;
-
     /**
      * Retrieve aggregated list of events generated from all client schedules
      *
@@ -29,20 +30,25 @@ class ClientScheduleController extends BaseController
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function index(Request $request, $client_id)
+    public function index(Request $request, ScheduleAggregator $aggregator, $client_id)
     {
         $client = Client::findOrFail($client_id);
         if (!$this->business()->clients()->where('id', $client->id)->exists()) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $start = $request->input('start', date('Y-m-d', strtotime('First day of last month -2 months')));
-        $end = $request->input('end', date('Y-m-d', strtotime('First day of this month +13 months')));
+        $aggregator->where('client_id', $client->id);
 
-        if (strlen($start) > 10) $start = substr($start, 0, 10);
-        if (strlen($end) > 10) $end = substr($end, 0, 10);
+        $start = new Carbon(
+            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
+            $this->business()->timezone
+        );
+        $end = new Carbon(
+            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
+            $this->business()->timezone
+        );
 
-        $events = new ScheduleEventsResponse($client->getEvents($start, $end), 'business.clients.schedule.show', ['id' => $client->id]);
+        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
         return $events;
     }
 
@@ -68,12 +74,13 @@ class ClientScheduleController extends BaseController
     /**
      * Create a new schedule or single event
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\CreateScheduleRequest $request
      * @param $client_id
      *
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
      */
-    public function create(Request $request, $client_id)
+    public function create(CreateScheduleRequest $request, $client_id)
     {
         $client = Client::findOrFail($client_id);
         if (!$this->business()->clients()->where('id', $client->id)->exists()) {

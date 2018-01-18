@@ -72,6 +72,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
+ * @property int $ask_on_confirm
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
 class Business extends Model implements ChargeableInterface
 {
@@ -186,27 +188,6 @@ class Business extends Model implements ChargeableInterface
             ->where('code', $code)
             ->first();
         return $activity;
-    }
-
-    /**
-     * Return all scheduled events for a business between $start and $end
-     *
-     * @param $start
-     * @param $end
-     * @param bool $onlyStartTime
-     * @return array
-     */
-    public function getEvents($start, $end, $onlyStartTime = false)
-    {
-        $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
-            $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
-            $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            $title = $clientName . ' (' . $caregiverName . ')';
-            $aggregator->add($title, $schedule);
-        }
-
-        return $aggregator->onlyStartTime($onlyStartTime)->events($start, $end);
     }
 
     /**

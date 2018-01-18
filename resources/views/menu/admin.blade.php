@@ -24,6 +24,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.deposits.pending') }}">Pending Deposits</a></li>
         <li><a href="{{ route('admin.deposits') }}">Deposit Report</a></li>
+        <li><a href="{{ route('admin.deposits.adjustment') }}">Manual Adjustment</a></li>
     </ul>
 </li>
 <li>
