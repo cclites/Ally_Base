@@ -18,7 +18,6 @@
         <li><a href="{{ route('business.caregivers.create') }}">Add Caregiver</a></li>
         <li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>
         <li><a href="{{ route('business.caregivers.applications') }}">Applications</a></li>
-
     </ul>
 </li>
 @if($active_business->scheduling)
@@ -56,6 +55,7 @@
         <li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>
         <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule Report</a></li>
         <li><a href="{{ route('business.reports.caregivers_missing_bank_accounts') }}">Caregivers Missing Bank Accounts</a></li>
+        <li><a href="{{ route('business.reports.export_timesheets') }}">Export Timesheets</a></li>
     </ul>
 </li>
 <li>
