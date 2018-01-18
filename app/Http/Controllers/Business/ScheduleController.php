@@ -294,4 +294,32 @@ class ScheduleController extends BaseController
         return new SuccessResponse('Matching schedules have been deleted.');
     }
 
+    /**
+     * Handles printable schedule report submission
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function print(Request $request, ScheduleAggregator $aggregator)
+    {
+        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
+        $start = new Carbon(
+            $request->input('start_date'),
+            $this->business()->timezone
+        );
+        $end = (new Carbon(
+            $request->input('end_date'),
+            $this->business()->timezone
+        ))->setTime(23, 59, 59);
+
+        $aggregator->where('business_id', $this->business()->id);
+        $schedules = $aggregator->getSchedulesBetween($start, $end);
+        $schedules->map(function($schedule) {
+            $schedule->date = $schedule->starts_at->format('m/d/Y');
+            $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
+            return $schedule;
+        });
+        return view('business.schedule_print', compact('schedules'));
+    }
+
 }
