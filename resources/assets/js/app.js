@@ -75,6 +75,7 @@ Vue.component('business-office-user-list', require('./components/admin/BusinessO
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
 
 // Office User
+Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
