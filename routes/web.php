@@ -218,6 +218,7 @@ Route::group([
     Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
+    Route::put('businesses/{business}/contact-info', 'Admin\BusinessController@updateContactInfo');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');

@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-row>
+        <b-row class="mb-2">
             <b-col lg="6">
                 <b-btn variant="info" href="/admin/businesses/create">Add a New Provider</b-btn>
             </b-col>
