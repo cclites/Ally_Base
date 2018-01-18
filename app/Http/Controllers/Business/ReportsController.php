@@ -20,8 +20,10 @@ use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
+use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ReportsController extends BaseController
 {
@@ -435,6 +437,69 @@ class ReportsController extends BaseController
         }
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
+        }
+    }
+
+    public function exportTimesheets()
+    {
+        $caregivers = $this->business()->caregivers;
+        $clients = $this->business()->clients;
+        return view('business.reports.export_timesheets', compact('caregivers', 'clients'));
+    }
+
+    public function timesheetData(Request $request)
+    {
+        $data = $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'client_id' => 'nullable|int',
+            'caregiver_id' => 'nullable|int',
+            'client_type' => 'nullable|string',
+            'export_type' => 'required|string'
+        ]);
+
+        $start_date = $data['start_date'];
+        $end_date = $data['end_date'];
+
+        $client_shift_groups = $this->business()->shifts()
+            ->with('activities', 'client', 'caregiver')
+            ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
+            ->when($data['client_id'], function ($query) use ($data) {
+                return $query->where('client_id', $data['client_id']);
+            })
+            ->when($data['caregiver_id'], function ($query) use ($data) {
+                return $query->where('caregiver_id', $data['caregiver_id']);
+            })
+            ->when($data['client_type'], function ($query) use ($data) {
+                return $query->whereHas('client', function ($query) use ($data) {
+                    $query->where('client_type', $data['client_type']);
+                });
+            })
+            ->orderBy('checked_in_time')
+            //->take(500)
+            ->get()
+            ->map(function ($shift) {
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+                $shift->ally_fee = number_format($allyFee, 2);
+                $shift->hourly_total = number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2);
+                $shift->other_expenses = number_format($shift->other_expenses, 2);
+                $shift->mileage = number_format($shift->mileage, 2);
+                $shift->mileage_costs = number_format($shift->costs()->getMileageCost(), 2);
+                $shift->caregiver_total = number_format($shift->costs()->getCaregiverCost(), 2);
+                $shift->provider_total = number_format($shift->costs()->getProviderFee(), 2);
+                $shift->ally_total = number_format($shift->costs()->getAllyFee(), 2);
+                $shift->ally_pct = AllyFeeCalculator::getPercentage($shift->client, null);
+                $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2);
+                return $shift;
+            })
+            ->groupBy('client_id');
+
+        switch ($data['export_type']) {
+            case 'pdf':
+                $pdf = PDF::loadView('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                return $pdf->download('timesheet_export.pdf');
+            default:
+                return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
         }
     }
 }

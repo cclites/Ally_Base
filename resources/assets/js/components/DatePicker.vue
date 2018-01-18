@@ -5,6 +5,7 @@
                 :class="cssClass"
                 type="text"
                 v-model="localValue"
+                :name="name"
                 :placeholder="placeholder"
                 :disabled="disabled"
                 :required="required"
@@ -44,6 +45,10 @@
             options: {
                 type: Object,
             },
+            'name': {
+                type: String,
+                default: ''
+            }
         },
 
         data() {
