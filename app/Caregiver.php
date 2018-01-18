@@ -78,7 +78,18 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'onboarded',
         'misc',
         'preferences',
-        'import_identifier'
+        'import_identifier',
+        'w9_name',
+        'w9_business_name',
+        'w9_tax_classification',
+        'w9_llc_type',
+        'w9_exempt_payee_code',
+        'w9_exempt_fatca_reporting_code',
+        'w9_address',
+        'w9_city_state_zip',
+        'w9_account_numbers',
+        'w9_ssn',
+        'w9_employer_id_number'
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
@@ -168,6 +179,25 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
+    /**
+     * Encrypt ssn on entry
+     *
+     * @param $value
+     */
+    public function setw9SsnAttribute($value)
+    {
+        $this->attributes['w9_ssn'] = Crypt::encrypt($value);
+    }
+
+    /**
+     * Decrypt ssn on retrieval
+     *
+     * @return null|string
+     */
+    public function getw9SsnAttribute()
+    {
+        return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
+    }
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

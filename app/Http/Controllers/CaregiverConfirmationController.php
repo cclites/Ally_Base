@@ -13,6 +13,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CaregiverConfirmationController extends Controller
 {
@@ -42,19 +43,26 @@ class CaregiverConfirmationController extends Controller
             return new ErrorResponse(400, 'This link has expired.  Please ask the provider to re-send your confirmation email.');
         }
 
-        $caregiver = Caregiver::find($confirmation->user->id);
+        //$caregiver = Caregiver::find($confirmation->user->id);
+        $caregiver = $confirmation->user;
 
         $request->validate(['accepted_terms' => 'accepted'], ['accepted_terms.accepted' => 'You must accept the terms of service by checking the box.']);
 
         // Profile Data
-        $profile_data = $request->validate([
+        $profile_data = collect($request->validate([
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required|email',
             'date_of_birth' => 'nullable|date',
-            'ssn' => ['required', new ValidSSN()],
-        ]);
+            'ssn' => ['required', new ValidSSN()]
+        ]));
         if ($profile_data['date_of_birth']) $profile_data['date_of_birth'] = filter_date($profile_data['date_of_birth']);
+
+        $w9_data = $this->validateW9Data();
+        // Merge in W9 data if any is set
+        if ($w9_data->count()) {
+            $profile_data = $profile_data->merge($w9_data);
+        }
 
         // Password Data
         $request->validate([
@@ -81,7 +89,7 @@ class CaregiverConfirmationController extends Controller
             return $response;
         }
 
-        if ($caregiver->update($profile_data)) {
+        if ($caregiver->update($profile_data->toArray())) {
             // Save Password
             $caregiver->user->changePassword($request->input('password'));
 
@@ -109,5 +117,33 @@ class CaregiverConfirmationController extends Controller
     public function saved()
     {
         return view('confirmation.saved');
+    }
+
+    /**
+     * Validate and Transform W9 data
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function validateW9Data()
+    {
+        request()->validate([
+            'w9.name' => 'nullable|string',
+            'w9.business_name' => 'nullable|string',
+            'w9.tax_classification' => 'nullable|string',
+            'w9.llc_type' => 'nullable|string',
+            'w9.exempt_payee_code' => 'nullable|string',
+            'w9.exempt_fatca_reporting_code' => 'nullable|string',
+            'w9.address' => 'nullable|string',
+            'w9.city_state_zip' => 'nullable|string',
+            'w9.account_numbers' => 'nullable|string',
+            'w9.ssn' => ['nullable', new ValidSSN()],
+            'w9.employer_id_number' => 'nullable|string'
+        ]);
+        // Transform the W9 data
+        $w9_data = collect([]);
+        foreach(collect(request()->only('w9')['w9'])->filter() as $key => $value) {
+            $w9_data['w9_'.$key] = $value;
+        }
+        return $w9_data;
     }
 }
