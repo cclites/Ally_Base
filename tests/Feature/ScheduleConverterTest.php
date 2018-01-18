@@ -80,16 +80,16 @@ class ScheduleConverterTest extends TestCase
 
     public function test_shiftMatchesTime_returns_true_on_a_similar_shift_within_2_hours()
     {
-        $date = Carbon::now();
+        $date = Carbon::now($this->business->timezone);
         $schedule = factory(Schedule::class)->create([
             'starts_at' => $date,
             'business_id' => $this->business->id,
             'client_id' => 1,
             'caregiver_id' => 1,
         ]);
-        factory(Shift::class)->create([
+        $shift = factory(Shift::class)->create([
             'schedule_id' => null,
-            'checked_in_time' => $date->copy()->subHour(),
+            'checked_in_time' => $date->copy()->subHour()->setTimezone('UTC'),
             'business_id' => $this->business->id,
             'client_id' => 1,
             'caregiver_id' => 1,
