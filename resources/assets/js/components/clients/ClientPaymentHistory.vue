@@ -22,7 +22,7 @@
     </b-card>
 </template>
 
-<script lang=babel>
+<script>
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
