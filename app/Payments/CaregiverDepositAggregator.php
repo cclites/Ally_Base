@@ -97,9 +97,6 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
             $deposit->success = $transaction->success;
             $deposit->save();
 
-            // Associate payment method
-            $deposit->method()->associate($account);
-
             return $transaction;
         }
         catch(\Exception $e) {

@@ -174,7 +174,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
      * @throws \App\Exceptions\PaymentMethodDeclined
      * @throws \App\Exceptions\PaymentMethodError
      */
-    public function post()
+    public function post($method)
     {
         if (!$this->params['type']) {
             throw new PaymentMethodError('Missing transaction type');
@@ -201,6 +201,8 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'response_data' => $raw
         ]);
 
+        $transaction->method()->associate($method);
+
         $transaction->save();
 
         if ($response == ECSPayment::DECLINED) {
@@ -226,7 +228,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     {
         $this->setParamsFromAccount($account);
         $this->params['type'] = 'validate';
-        return $this->post();
+        return $this->post($account);
     }
 
     /**
@@ -248,7 +250,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'amount' => $amount,
         ];
         $this->params['type'] = 'credit';
-        return $this->post();
+        return $this->post($account);
     }
 
     /**
@@ -270,7 +272,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'amount' => $amount,
         ];
         $this->params['type'] = 'auth';
-        return $this->post();
+        return $this->post($account);
     }
 
     /**
@@ -292,7 +294,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'amount' => $amount,
         ];
         $this->params['type'] = 'sale';
-        return $this->post();
+        return $this->post($account);
     }
 
     /**
@@ -308,7 +310,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     {
         $this->setParamsFromCard($card, $cvv);
         $this->params['type'] = 'validate';
-        return $this->post();
+        return $this->post($card);
     }
 
     /**
@@ -330,7 +332,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'amount' => $amount,
         ];
         $this->params['type'] = 'auth';
-        return $this->post();
+        return $this->post($card);
     }
 
     /**
@@ -352,7 +354,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'amount' => $amount,
         ];
         $this->params['type'] = 'sale';
-        return $this->post();
+        return $this->post($card);
     }
 
     protected function setParamsFromAccount(BankAccount $account, $secCode = 'PPD') {
