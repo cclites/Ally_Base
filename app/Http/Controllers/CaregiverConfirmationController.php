@@ -43,7 +43,6 @@ class CaregiverConfirmationController extends Controller
             return new ErrorResponse(400, 'This link has expired.  Please ask the provider to re-send your confirmation email.');
         }
 
-        //$caregiver = Caregiver::find($confirmation->user->id);
         $caregiver = $confirmation->user;
 
         $request->validate(['accepted_terms' => 'accepted'], ['accepted_terms.accepted' => 'You must accept the terms of service by checking the box.']);
