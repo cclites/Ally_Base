@@ -10,3 +10,8 @@
         <i class="mdi mdi-credit-card"></i><span class="hide-menu">Payment History</span>
     </a>
 </li>
+<li>
+    <a href="/profile" aria-expanded="false">
+        <i class="mdi mdi-account-circle"></i><span class="hide-menu">My Information</span>
+    </a>
+</li>
