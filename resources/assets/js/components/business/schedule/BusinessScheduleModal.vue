@@ -9,8 +9,8 @@
                  v-if="!maxHoursWarning"
         >
             <b-card no-body>
-                <b-tabs card>
-                    <b-tab title="Initial Shift" active>
+                <b-tabs card v-model="activeTab">
+                    <b-tab title="Initial Shift" id="schedule-main">
                         <b-row>
                             <b-col sm="6">
                                 <b-form-group label="Client" label-for="client_id">
@@ -131,7 +131,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Recurrence" v-if="!selectedSchedule.id">
+                    <b-tab title="Recurrence" id="schedule-recurrence" v-if="!selectedSchedule.id">
                         <b-row>
                             <b-col lg="12">
                                 <b-form-group label="Recurring Period" label-for="interval_type">
@@ -167,7 +167,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Notes">
+                    <b-tab title="Notes" id="schedule-notes">
                         <b-row>
                             <b-col lg="12">
                                 <b-form-group label="Schedule Notes" label-for="notes">
@@ -247,6 +247,7 @@
         
         data() {
             return {
+                activeTab: 0,
                 submitting: false,
                 startDate: "",
                 startTime: "",
@@ -545,6 +546,14 @@
                     }
                 }
             },
+
+            resetTabs() {
+                this.activeTab = 1;
+                this.$nextTick(function() {
+                    // (fix for tabs within tabs)
+                    this.activeTab = 0;
+                });
+            }
         },
 
         watch: {
@@ -553,6 +562,9 @@
                 if (!val) {
                     this.hideMaxHoursWarning();
                 }
+
+                // Force back to first tab
+                this.resetTabs();
 
                 // Clear copied values
                 this.copiedSchedule = {};
