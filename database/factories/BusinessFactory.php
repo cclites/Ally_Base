@@ -34,5 +34,8 @@ $factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
         'phone2' => $faker->phoneNumber,
         'default_commission_rate' => mt_rand(500, 9000) / 100,
         'timezone' => $faker->randomElement(['America/Los_Angeles', 'America/Phoenix', 'UTC', 'America/New_York']),
+        'contact_name' => $faker->name,
+        'contact_email' => $faker->safeEmail,
+        'contact_phone' => $faker->phoneNumber
     ];
 });

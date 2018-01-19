@@ -73,6 +73,7 @@ Vue.component('business-edit', require('./components/BusinessEdit.vue'));
 Vue.component('business-list', require('./components/BusinessList.vue'));
 Vue.component('business-office-user-list', require('./components/admin/BusinessOfficeUserList'));
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
+Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 
 // Office User
