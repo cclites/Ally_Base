@@ -52,8 +52,9 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
         return array_merge(
             parent::messages(),
             [
-                'new_duration'              => 'Invalid new end time',
-                'new_overtime_duration:max' => 'Overtime duration can not exceed schedule duration.'
+                'new_duration.required_with' => 'An end time is required when updating shift times.',
+                'new_duration.numeric'       => 'Invalid new end time',
+                'new_overtime_duration:max'  => 'Overtime duration can not exceed schedule duration.'
             ]
         );
     }
