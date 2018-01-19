@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Business;
+use App\Caregiver;
 use App\Http\Controllers\Controller;
 use App\Reports\ShiftsReport;
 use App\Reports\UnsettledReport;
@@ -16,13 +18,13 @@ class ReportsController extends Controller
     public function unsettled($data = 'data')
     {
         $statuses = ShiftStatusManager::getUnsettledStatuses();
-        
+
         if ($data === 'statuses') {
-            return response($statuses); 
+            return response($statuses);
         }
-        
+
         $statuses = request('status', $statuses);
-        
+
         $startDate = new Carbon(request('start_date') . ' 00:00:00', 'America/New_York');
         $endDate = new Carbon(request('end_date') . ' 23:59:59', 'America/New_York');
 
@@ -30,14 +32,35 @@ class ReportsController extends Controller
         $report->between($startDate, $endDate)
             ->query()
             ->whereIn('status', $statuses)
-            ->where(function(Builder $q){
+            ->where(function (Builder $q) {
                 foreach (['client_id', 'caregiver_id', 'business_id'] as $param) {
                     if (request($param)) {
-                        $q->orWhere($param, request($param));   
+                        $q->orWhere($param, request($param));
                     }
                 }
             });
-        
+
         return $report->rows();
+    }
+
+    public function caregiversDepositsWithoutBankAccount()
+    {
+        $businesses = Business::with([
+            'caregivers' => function ($query) {
+                $query->whereHas('shifts', function ($query) {
+                    $query->where('status', 'WAITING_FOR_PAYOUT');
+                })
+                    ->doesntHave('bankAccount');
+            }
+        ])
+            ->whereHas('caregivers', function ($query) {
+                $query->whereHas('shifts', function ($query) {
+                    $query->where('status', 'WAITING_FOR_PAYOUT');
+                })
+                    ->doesntHave('bankAccount');
+            })
+            ->get();
+
+        return view('admin.reports.caregivers.deposits_without_bank_account', compact('businesses'));
     }
 }

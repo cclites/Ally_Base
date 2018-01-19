@@ -1,3 +1,5 @@
+
+
 <li>
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li>
@@ -31,6 +33,7 @@
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
+        <li><a href="{{ route('admin.reports.caregivers.deposits_missing_bank_account') }}">CG Deposits w/o Bank Account</a></li>
     </ul>
 </li>
 

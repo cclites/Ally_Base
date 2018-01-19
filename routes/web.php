@@ -241,6 +241,9 @@ Route::group([
     Route::redirect('reports', 'reports/unsettled');
     Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
     Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
+
+    Route::get('reports/caregivers/deposits-missing-bank-account', 'Admin\ReportsController@caregiversDepositsWithoutBankAccount')
+        ->name('reports.caregivers.deposits_missing_bank_account');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
