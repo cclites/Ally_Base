@@ -94,9 +94,9 @@ class BulkDestroyScheduleRequest extends FormRequest
     public function messages()
     {
         return [
-            'required_unless:client_id'    => 'Either a client or a caregiver must be selected.',
-            'required_unless:caregiver_id' => 'Either a client or a caregiver must be selected.',
-            'hours_type:in'                => 'Invalid special designation',
+            'required_unless.client_id'    => 'Either a client or a caregiver must be selected.',
+            'required_unless.caregiver_id' => 'Either a client or a caregiver must be selected.',
+            'hours_type.in'                => 'Invalid special designation',
             'bydays.required'              => 'You must select at least one day of the week to match against.',
             'bydays.array'                 => 'You must select at least one day of the week to match against.',
         ];
