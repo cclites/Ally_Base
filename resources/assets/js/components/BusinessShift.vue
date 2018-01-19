@@ -122,7 +122,7 @@
                             <b-col sm="6">
                                 <b-form-group :label="'Processing Fee (' + percentageFormat(allyPct) + ')'">
                                     <b-form-input
-                                            v-model="allyFee"
+                                            :value="allyFee"
                                             readonly
                                     >
                                     </b-form-input>
@@ -131,7 +131,7 @@
                             <b-col sm="6">
                                 <b-form-group label="Total Hourly Rate">
                                     <b-form-input
-                                            v-model="totalRate"
+                                            :value="totalRate"
                                             readonly
                                     >
                                     </b-form-input>
@@ -319,9 +319,10 @@
 
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
+    import FormatsDates from "../mixins/FormatsDates";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDates],
 
         props: {
             'shift': {
@@ -382,9 +383,9 @@
                 let checkin = moment.utc(this.shift.checked_in_time).local();
                 let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
                 this.checked_in_date = checkin.format('MM/DD/YYYY');
-                this.checked_in_time = checkin.format('h:mm A');
+                this.checked_in_time = checkin.format('HH:mm');
                 this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-                this.checked_out_time = (checkout) ? checkout.format('h:mm A') : null;
+                this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
                 this.form.activities = this.getShiftActivityList();
             }
             else {
@@ -433,7 +434,7 @@
                 this.issueModal = true;
             },
             getClockedInMoment() {
-                return this.formatDate(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
+                return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
             },
             getClockedOutMoment() {
                 return moment(this.checked_out_date + ' ' + this.checked_out_time, 'MM/DD/YYYY HH:mm');
