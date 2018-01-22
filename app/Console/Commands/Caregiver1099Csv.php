@@ -91,19 +91,18 @@ class Caregiver1099Csv extends Command
                     'zip' => $address->zip,
                 ];
             }
-
-            $csv = implode($this->csvSeparator, array_keys($rows[0])) . "\n";
-            foreach($rows as $row) {
-                $csv .= implode($this->csvSeparator, $row) . "\n";
-            }
-
-            if ($this->option('output')) {
-                return file_put_contents($this->option('output'), $csv);
-            }
-            echo "\n";
-            echo $csv;
         }
 
+        $csv = implode($this->csvSeparator, array_keys($rows[0])) . "\n";
+        foreach($rows as $row) {
+            $csv .= implode($this->csvSeparator, $row) . "\n";
+        }
+
+        if ($this->option('output')) {
+            return file_put_contents($this->option('output'), $csv);
+        }
+        echo "\n";
+        echo $csv;
 
     }
 
