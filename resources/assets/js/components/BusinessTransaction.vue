@@ -55,7 +55,8 @@
             </b-col>
         </b-row>
 
-        <b-row>
+        <loading-card v-show="loading"></loading-card>
+        <b-row v-show="!loading">
             <b-col lg="12">
                 <b-card
                         header="Related Shifts"
@@ -112,7 +113,7 @@
                         key: 'checked_in_time',
                         label: 'Date',
                         sortable: true,
-                        formatter: this.formatDateTimeFromUTC,
+                        formatter: (value) => { return this.formatDateTimeFromUTC(value) }
                     },
                     {
                         key: 'hours',
@@ -245,6 +246,7 @@
                 'urlPrefix': '/business/reports/data/',
                 'queryString': '?transaction_id=' + this.transaction.id,
                 'showSummary': false,
+                'loading': false,
             }
         },
 
@@ -265,6 +267,8 @@
             },
 
             loadData() {
+                this.loading = true;
+
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -291,6 +295,10 @@
                         else {
                             this.shifts = [];
                         }
+                        this.loading = false;
+                    })
+                    .catch(error => {
+                        this.loading = false;
                     });
             },
 
