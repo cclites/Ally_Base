@@ -1,6 +1,8 @@
 <?php
 namespace App\Contracts;
 
+use App\GatewayTransaction;
+
 interface ChargeableInterface
 {
     /**
@@ -25,6 +27,14 @@ interface ChargeableInterface
      */
     public function mergeWith(ChargeableInterface $newPaymentMethod);
 
+    /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount);
 
     /**
      * Get all of the current attributes on the model.
