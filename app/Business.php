@@ -238,6 +238,22 @@ class Business extends Model implements ChargeableInterface
         return false;
     }
 
+
+    /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        if ($this->paymentAccount) {
+            return $this->paymentAccount->refund($transaction, $amount);
+        }
+        return false;
+    }
+
     /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
@@ -267,4 +283,5 @@ class Business extends Model implements ChargeableInterface
         // Businesses should already be persisted
         return ($this->id > 0);
     }
+
 }
