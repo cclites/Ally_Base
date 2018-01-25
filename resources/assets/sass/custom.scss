@@ -44,7 +44,30 @@
 }
 
 /* Different headers for mobile and desktop */
-/* TODO */
+#header-desktop {
+  display: none;
+}
+@media (min-width: 1025px) {
+  #header-desktop {
+    display: block;
+  }
+  #header-mobile {
+    display: none;
+  }
+}
+@media (max-width: 1024px) {
+  .mini-sidebar .top-navbar .navbar-header {
+    width: auto;
+    padding: 0 15px;
+  }
+  .navbar-brand img {
+    max-width: 120px;
+  }
+  .navbar-header .mdi .mdi-menu {
+    font-size: 24px;
+  }
+}
+
 
 /* Smaller device adjustments */
 @media (max-width: 768px) {
