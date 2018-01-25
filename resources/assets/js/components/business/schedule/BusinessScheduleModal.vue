@@ -187,12 +187,14 @@
             </b-card>
 
             <div slot="modal-footer">
-                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto">Copy</b-btn>
-                <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    <i class="fa fa-save" v-hide="submitting"></i>
                     {{ submitText }}
                 </b-btn>
+                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
+                <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
         </b-modal>
         <b-modal id="maxHoursWarning"
@@ -449,6 +451,16 @@
                     this.copiedSchedule = Object.assign({}, this.selectedSchedule);
                     this.selectedSchedule = {};
                     this.makeCreateForm();
+                }
+            },
+
+            deleteSchedule() {
+                if (this.selectedSchedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                    let form = new Form();
+                    form.submit('delete', '/business/schedule/' + this.selectedSchedule.id)
+                        .then(response => {
+                            this.refreshEvents();
+                        });
                 }
             },
 
