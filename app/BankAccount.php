@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Contracts\ChargeableInterface;
+use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -130,6 +131,19 @@ class BankAccount extends Model implements ChargeableInterface
         }
 
         return $gateway->chargeAccount($this, $amount, $currency);
+    }
+
+    /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        $gateway = app()->make(ACHDepositInterface::class);
+        return $gateway->depositFunds($this, $amount);
     }
 
     /**

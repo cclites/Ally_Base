@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransactionHistory[] $history
  * @property-read \App\GatewayTransactionHistory $lastHistory
  * @property-read \App\Payment $payment
+ * @property-read \Illuminate\Database\Eloquent\Model|\App\Contracts\ChargeableInterface $method
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAvsPass($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereCreatedAt($value)
@@ -42,7 +43,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereTransactionType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereUpdatedAt($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $method
  */
 class GatewayTransaction extends Model
 {

@@ -35,9 +35,13 @@ class RefundProcessor
            throw new \Exception('The refund amount cannot be greater than the transaction amount');
        }
 
+       if (!$method = $this->transaction->method) {
+           throw new \Exception('No transaction method found.  Cannot refund.');
+       }
+
        $payment = $this->transaction->payment;
 
-       if ($transaction = $this->ECSPayment->refund($this->transaction, $amount)) {
+       if ($transaction = $method->refund($this->transaction, $amount)) {
             $payment = Payment::create([
                 'client_id' => optional($payment)->client_id,
                 'business_id' => optional($payment)->business_id,
