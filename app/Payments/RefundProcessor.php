@@ -20,7 +20,7 @@ class RefundProcessor
     public function __construct(GatewayTransaction $transaction, ECSPayment $ECSPayment = null)
     {
         $this->transaction = $transaction;
-        $this->ECSPayment = $ECSPayment;
+        $this->ECSPayment = $ECSPayment ?? new ECSPayment();
     }
 
     /**
