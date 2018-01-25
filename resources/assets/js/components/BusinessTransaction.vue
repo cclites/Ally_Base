@@ -18,11 +18,11 @@
                     <th>Amount</th>
                     <td>{{ moneyFormat(transaction.amount) }}</td>
                 </tr>
-                <tr v-if="transaction.deposit.adjustment">
+                <tr v-if="transaction.deposit && transaction.deposit.adjustment">
                     <th>Manual Adjustment</th>
                     <th>Yes</th>
                 </tr>
-                <tr v-if="transaction.deposit.notes">
+                <tr v-if="transaction.deposit && transaction.deposit.notes">
                     <th>Notes</th>
                     <td>{{ transaction.deposit.notes }}</td>
                 </tr>
