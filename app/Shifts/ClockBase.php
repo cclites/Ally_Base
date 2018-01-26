@@ -6,6 +6,7 @@ use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\UnverifiedLocationException;
 use App\Schedule;
+use App\Shift;
 
 abstract class ClockBase
 {
@@ -63,6 +64,15 @@ abstract class ClockBase
     {
         if (!$client->phoneNumbers()->where('national_number', $this->number)->exists()) {
             throw new UnverifiedLocationException('The phone number does not match the client record.');
+        }
+    }
+
+    protected function verifyEVV(Client $client)
+    {
+        if (!is_null($this->latitude)) {
+            $this->verifyGeocode($client);
+        } else {
+            $this->verifyPhoneNumber($client);
         }
     }
 }
