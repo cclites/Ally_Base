@@ -182,7 +182,7 @@ class Business extends Model implements ChargeableInterface
     public function findActivity($code)
     {
         $activity = Activity::where(function ($q) {
-            $q->where('business_id', $this->business_id)
+            $q->where('business_id', $this->id)
                 ->orWhereNull('business_id');
         })
             ->where('code', $code)
