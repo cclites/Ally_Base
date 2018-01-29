@@ -40,14 +40,14 @@ class TransactionMatcher {
                     if ($accounts->count() > 1) {
                         // Try matching business transactions to business bank accounts
                         $gatewayTransaction = GatewayTransaction::where('transaction_id', $transaction_id)->first();
-                        if ($gatewayTransaction->payment) {
+                        if ($gatewayTransaction && $gatewayTransaction->payment) {
                             if ($gatewayTransaction->payment->business_id && !$gatewayTransaction->payment->client_id) {
                                 if ($account = $accounts->where('business_id', $gatewayTransaction->payment->business_id)->first()) {
                                     return $account;
                                 }
                             }
                         }
-                        if ($gatewayTransaction->deposit) {
+                        if ($gatewayTransaction && $gatewayTransaction->deposit) {
                             if ($gatewayTransaction->deposit->business_id) {
                                 if ($account = $accounts->where('business_id', $gatewayTransaction->deposit->business_id)->first()) {
                                     return $account;
