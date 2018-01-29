@@ -42,11 +42,11 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
         $rows = [];
 
         foreach ($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
-            $caregiver = Caregiver::find($caregiver_id);
+            $caregiver = Caregiver::withTrashed()->find($caregiver_id);
             $row = [
                 'id'            => $caregiver_id,
-                'name'          => $caregiver->name(),
-                'nameLastFirst' => $caregiver->nameLastFirst(),
+                'name'          => optional($caregiver)->name(),
+                'nameLastFirst' => optional($caregiver)->nameLastFirst(),
                 'hours'         => 0,
                 'amount'        => 0,
             ];
