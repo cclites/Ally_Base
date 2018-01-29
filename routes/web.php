@@ -238,6 +238,7 @@ Route::group([
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
+    Route::get('missing_transactions', 'Admin\MissingTransactionsController@index')->name('missing_transactions');
     Route::redirect('reports', 'reports/unsettled');
     Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
     Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');

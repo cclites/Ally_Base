@@ -18,6 +18,7 @@
         <li><a href="{{ route('admin.charges.pending') }}">Pending Charges</a></li>
         <li><a href="{{ route('admin.charges') }}">Charges Report</a></li>
         <li><a href="{{ route('admin.transactions') }}">Transactions Report</a></li>
+        <li><a href="{{ route('admin.missing_transactions') }}">Missing Transactions</a></li>
     </ul>
 </li>
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-money"></i><span class="hide-menu">Deposits</span></a>
