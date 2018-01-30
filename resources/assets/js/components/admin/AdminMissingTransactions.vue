@@ -91,6 +91,9 @@
                             transaction.owner_name = (transaction.owner) ? transaction.owner.name : null;
                             return transaction;
                         })
+                            .filter(transaction => {
+                                return transaction.last_status !== 'failed';
+                            });
                     });
             },
         },

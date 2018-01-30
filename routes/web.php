@@ -240,6 +240,10 @@ Route::group([
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
     Route::get('missing_transactions', 'Admin\MissingTransactionsController@index')->name('missing_transactions');
     Route::redirect('reports', 'reports/unsettled');
+    Route::get('reports/reconciliation', 'Admin\ReconciliationController@index')->name('reports.reconciliation');
+    Route::get('reports/reconciliation/business/{business}', 'Admin\ReconciliationController@business')->name('reports.reconciliation.business');
+    Route::get('reports/reconciliation/caregiver/{caregiver}', 'Admin\ReconciliationController@caregiver')->name('reports.reconciliation.caregiver');
+    Route::get('reports/reconciliation/client/{client}', 'Admin\ReconciliationController@client')->name('reports.reconciliation.client');
     Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
     Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
 });

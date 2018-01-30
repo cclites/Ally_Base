@@ -32,6 +32,7 @@
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
+        <li><a href="{{ route('admin.reports.reconciliation') }}">Reconciliation Report</a></li>
     </ul>
 </li>
 
