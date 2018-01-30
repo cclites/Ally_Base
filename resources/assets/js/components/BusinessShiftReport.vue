@@ -312,7 +312,7 @@
                 <strong>Was this Shift Electronically Verified?</strong>
                 <b-row class="with-padding-bottom">
                     <b-col sm="6">
-                        <span v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">Yes</span>
+                        <span v-if="selectedItem.verified">Yes</span>
                         <span v-else>No</span>
                     </b-col>
                 </b-row>
