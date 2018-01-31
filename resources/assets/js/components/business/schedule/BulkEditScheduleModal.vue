@@ -61,6 +61,7 @@
                                 <b-form-group label="Client" label-for="client_id">
                                     <b-form-select id="client_id" 
                                                    v-model="form.client_id"
+                                                   :disabled="disabled.client_id"
                                     >
                                         <option value="">--All Clients--</option>
                                         <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
@@ -72,6 +73,7 @@
                                 <b-form-group label="Caregiver" label-for="caregiver_id">
                                     <b-form-select id="caregiver_id"
                                                    v-model="form.caregiver_id"
+                                                   :disabled="disabled.caregiver_id"
                                     >
                                         <option value="">--All Caregivers--</option>
                                         <option value="0">Unassigned</option>
@@ -279,9 +281,11 @@
         mixins: [FormatsNumbers],
 
         props: {
-            value: {},
-            selectedItem: {},
-            items: {},
+            'value': Boolean,
+            'selectedItem': Object,
+            'items': Object,
+            'caregiver': Object,
+            'client': Object,
         },
 
         data() {
@@ -304,8 +308,8 @@
                     'end_date': moment().format('MM/DD/YYYY'),
                     'start_time': '09:00 AM',
                     'hours_type': '',
-                    'client_id': '',
-                    'caregiver_id': '',
+                    'client_id': (this.client) ? this.client.id : '',
+                    'caregiver_id': (this.caregiver) ? this.caregiver.id : '',
                     'bydays': [],
 
                     'new_start_time': '',
@@ -319,6 +323,10 @@
                     'new_note_text': '',
                 }),
                 submitting: false,
+                disabled: {
+                    caregiver_id: (this.caregiver) ? true : false,
+                    client_id: (this.client) ? true : false,
+                },
             }
         },
 
@@ -416,7 +424,8 @@
                     .then(response => {
                         this.caregivers = response.data;
                     });
-            }
+            },
+
         },
 
         watch: {
