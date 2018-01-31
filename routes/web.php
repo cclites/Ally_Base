@@ -224,12 +224,10 @@ Route::group([
     Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
     Route::post('charges/pending_shifts/{shift?}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
     Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
-    Route::get('charges/{business}', 'Admin\ChargesController@report')->name('charges.report');
     Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
-    Route::get('deposits/{business}', 'Admin\DepositsController@report')->name('deposits.report');
     Route::get('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.pending.business');
     Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');

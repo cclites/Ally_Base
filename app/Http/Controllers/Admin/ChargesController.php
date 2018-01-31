@@ -17,26 +17,27 @@ use App\Http\Controllers\Controller;
 
 class ChargesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->expectsJson() && $request->input('json')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+
+            // Make UTC to match DB
+            $startDate->setTimezone('UTC');
+            $endDate->setTimezone('UTC');
+
+            $query = Payment::with(['transaction', 'client', 'business'])
+                            ->whereBetween('created_at', [$startDate, $endDate])
+                            ->orderBy('created_at', 'DESC');
+
+            if ($business_id = $request->input('business_id')) {
+                $query->where('business_id', $business_id);
+            }
+
+            return $query->get();
+        }
         return view('admin.charges.index');
-    }
-
-    public function report(Request $request, Business $business)
-    {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-
-        // Make UTC to match DB
-        $startDate->setTimezone('UTC');
-        $endDate->setTimezone('UTC');
-
-        $deposits = Payment::with(['transaction', 'client', 'business'])
-            ->where('business_id', $business->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'DESC')
-            ->get();
-        return $deposits;
     }
 
     public function pending()
