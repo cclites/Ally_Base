@@ -14,34 +14,35 @@ use Illuminate\Http\Request;
 
 class DepositsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->expectsJson() && $request->input('json')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+
+            // Make UTC to match DB
+            $startDate->setTimezone('UTC');
+            $endDate->setTimezone('UTC');
+
+            $query = Deposit::with(['transaction', 'caregiver', 'business'])
+                               ->whereBetween('created_at', [$startDate, $endDate])
+                               ->orderBy('created_at', 'DESC');
+
+            if ($business = Business::find($request->input('business_id'))) {
+                $query->where(function($q) use ($business) {
+                    $q->where('business_id', $business->id)
+                      ->orWhereIn('caregiver_id', $business->caregivers->pluck('id')->toArray());
+                });
+            }
+
+            return $query->get();
+        }
         return view('admin.deposits.index');
     }
 
     public function pendingIndex()
     {
         return view('admin.deposits.pending');
-    }
-
-    public function report(Request $request, Business $business)
-    {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-
-        // Make UTC to match DB
-        $startDate->setTimezone('UTC');
-        $endDate->setTimezone('UTC');
-
-        $deposits = Deposit::with(['transaction', 'caregiver', 'business'])
-            ->where(function($q) use ($business) {
-                $q->where('business_id', $business->id)
-                    ->orWhereIn('caregiver_id', $business->caregivers->pluck('id')->toArray());
-            })
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'DESC')
-            ->get();
-        return $deposits;
     }
 
     public function pendingDeposits(Request $request, Business $business)
