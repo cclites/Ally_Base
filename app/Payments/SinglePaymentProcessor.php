@@ -15,7 +15,7 @@ use App\Payment;
 class SinglePaymentProcessor
 {
 
-    public static function chargeClient(Client $client, $amount)
+    public static function chargeClient(Client $client, $amount, $adjustment = false, $notes = null)
     {
         $method = $client->getPaymentMethod();
         $business = ($client->defaultPayment instanceof Business) ? $client->defaultPayment : null;
@@ -23,18 +23,19 @@ class SinglePaymentProcessor
         if ($transaction = $method->charge($amount)) {
             $payment = Payment::create([
                 'payment_type' => $type,
-                'client_id' => (!$business) ? $client->id : null,
-                'business_id' => ($business) ? $business->id : null,
+                'client_id' => ($business) ? null : $client->id,
+                'business_id' => ($business) ? $business->id : $client->business_id,
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
+                'adjustment' => $adjustment,
+                'notes' => $notes,
                 'success' => $transaction->success,
             ]);
-            $payment->method()->associate($method);
         }
         return $transaction;
     }
 
-    public static function chargeBusiness(Business $business, $amount)
+    public static function chargeBusiness(Business $business, $amount, $adjustment = false, $notes = null)
     {
         $method = $business->paymentAccount;
         $type = 'ACH-P';
@@ -44,9 +45,10 @@ class SinglePaymentProcessor
                 'business_id' => $business->id,
                 'amount' => $amount,
                 'transaction_id' => $transaction->id,
+                'adjustment' => $adjustment,
+                'notes' => $notes,
                 'success' => $transaction->success,
             ]);
-            $payment->method()->associate($method);
         }
         return $transaction;
     }
