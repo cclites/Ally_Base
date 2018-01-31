@@ -223,7 +223,8 @@ Route::group([
     Route::post('charges/pending/{business}', 'Admin\ChargesController@processCharges')->name('charges.process_charges');
     Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
     Route::post('charges/pending_shifts/{shift?}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
-    Route::post('charges/client/{client}', 'Admin\ChargesController@chargeClient')->name('charges.charge_client');
+    Route::view('charges/manual', 'admin.charges.manual')->name('charges.manual');
+    Route::post('charges/manual', 'Admin\ChargesController@manualCharge');
     Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');

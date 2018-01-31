@@ -8,6 +8,7 @@ use App\Payment;
 use App\Payments\ClientPaymentAggregator;
 use App\Payments\PaymentProcessor;
 use App\Payments\PendingPayments;
+use App\Payments\SinglePaymentProcessor;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -73,20 +74,30 @@ class ChargesController extends Controller
         return new SuccessResponse('There were ' . $count . ' successful transactions.');
     }
 
-    /**
-     * @deprecated NOT USED ANYMORE, CHARGES ARE DONE IN BUSINESS BATCHES
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Client $client
-     * @return \App\Responses\CreatedResponse|\App\Responses\ErrorResponse
-     */
-    public function chargeClient(Request $request, Client $client)
+    public function manualCharge(Request $request)
     {
-        $startDate = new Carbon($request->input('start_date'), 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-        $payment = new ClientPaymentAggregator($client, $startDate, $endDate);
-        if ($transaction = $payment->charge()) {
-            return new CreatedResponse('The client has been charged ' . $transaction->amount, $transaction);
+        $request->validate([
+            'business_id' => 'required_without:client_id',
+            'client_id' => 'required_without:business_id',
+            'amount' => 'required|numeric|min:0.1|max:10000',
+            'adjustment' => 'nullable|boolean',
+            'notes' => 'nullable|max:1024',
+        ]);
+
+        if ($request->client_id) {
+            $client = Client::findOrFail($request->client_id);
+            if (!$client->defaultPayment) return new ErrorResponse(400, 'Client does not have a payment method.');
+            $transaction = SinglePaymentProcessor::chargeClient($client, $request->amount, $request->adjustment ?? false, $request->notes);
         }
-        return new ErrorResponse(500, 'System error charging client.');
+        else if ($request->business_id) {
+            $business = Business::findOrFail($request->business_id);
+            if (!$business->paymentAccount) return new ErrorResponse(400, 'Business does not have a payment account.');
+            $transaction = SinglePaymentProcessor::chargeBusiness($business, $request->amount, $request->adjustment ?? false, $request->notes);
+        }
+
+        if ($transaction) {
+            return new SuccessResponse('Transaction processed for $' . $request->amount);
+        }
+        return new ErrorResponse(400, 'Transaction failure');
     }
 }

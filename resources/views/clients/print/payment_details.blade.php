@@ -119,10 +119,19 @@
                         <th>Hours</th>
                         <th>Total</th>
                     </tr>
+                    @if($payment->adjustment)
+                        <tr>
+                            <td>{{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }}</td>
+                            <td>Manual Adjustment</td>
+                            <td colspan="3">{{ $payment->notes }}</td>
+                            <td>${{ $payment->amount }}</td>
+                        </tr>
+
+                    @endif
                     @foreach($shifts as $shift)
                         <tr >
                             <td>
-                                {{ $shift->checked_in_time->format('m/d/Y') }}
+                                {{ $shift->checked_in_time->setTimezone($timezone)->format('m/d/Y') }}
                             </td>
                             <td>
                                 {{ $shift->checked_in_time->setTimezone($timezone)->format('g:ia') }} -
@@ -163,7 +172,7 @@
                     <tr>
                         <td><strong>Total</strong></td>
                         <td>
-                            &dollar;{{ number_format($shifts->sum('shift_total'), 2) }}
+                            &dollar;{{ $payment->amount }}
                         </td>
                     </tr>
                     <tr>
