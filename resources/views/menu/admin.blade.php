@@ -18,6 +18,7 @@
         <li><a href="{{ route('admin.charges.pending') }}">Pending Charges</a></li>
         <li><a href="{{ route('admin.charges') }}">Charges Report</a></li>
         <li><a href="{{ route('admin.transactions') }}">Transactions Report</a></li>
+        <li><a href="{{ route('admin.missing_transactions') }}">Missing Transactions</a></li>
         <li><a href="{{ route('admin.charges.manual') }}">Manual Adjustment</a></li>
     </ul>
 </li>
@@ -32,6 +33,7 @@
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
+        <li><a href="{{ route('admin.reports.reconciliation') }}">Reconciliation Report</a></li>
     </ul>
 </li>
 

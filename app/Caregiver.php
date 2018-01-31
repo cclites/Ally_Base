@@ -4,6 +4,7 @@ namespace App;
 
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
+use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
@@ -59,7 +60,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface
 {
     use IsUserRole;
 
@@ -287,5 +288,36 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface
     public function nameLastFirst()
     {
         return trim($this->user->nameLastFirst() . ' ' . $this->title);
+    }
+
+    /**
+     * Prepare a query for all gateway transactions that relate to this model
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function allTransactionsQuery()
+    {
+        return GatewayTransaction::select('gateway_transactions.*')
+                                 ->with('lastHistory')
+                                 ->leftJoin('bank_accounts', function($q) {
+                                     $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
+                                       ->where('gateway_transactions.method_type', BankAccount::class);
+                                 })
+                                 ->whereHas('deposit', function ($q) {
+                                     $q->where('caregiver_id', $this->id);
+                                 })
+                                 ->orWhere('bank_accounts.user_id', $this->id);
+    }
+
+    /**
+     * Get all gateway transactions that relate to this caregiver
+     *
+     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     */
+    public function getAllTransactions()
+    {
+        return $this->allTransactionsQuery()
+                    ->orderBy('created_at')
+                    ->get();
     }
 }

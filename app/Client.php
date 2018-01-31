@@ -5,6 +5,7 @@ namespace App;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;
+use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
@@ -95,11 +96,10 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface
+class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface
 {
     use IsUserRole, Notifiable;
 
-    protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
     public $dates = ['service_start_date', 'inquiry_date'];
@@ -126,6 +126,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         'poa_phone',
         'poa_relationship'
     ];
+    protected $table = 'clients';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -164,24 +165,14 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     public function caregivers()
     {
         return $this->belongsToMany(Caregiver::class, 'client_caregivers')
-            ->with('user')
-            ->withTimestamps()
-            ->withPivot([
-                'caregiver_hourly_rate',
-                'caregiver_daily_rate',
-                'provider_hourly_fee',
-                'provider_daily_fee',
-            ]);
-    }
-
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
-
-    public function shifts()
-    {
-        return $this->hasMany(Shift::class);
+                    ->with('user')
+                    ->withTimestamps()
+                    ->withPivot([
+                        'caregiver_hourly_rate',
+                        'caregiver_daily_rate',
+                        'provider_hourly_fee',
+                        'provider_daily_fee',
+                    ]);
     }
 
     public function defaultPayment()
@@ -194,11 +185,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
     }
 
-    public function onboardStatusHistory()
-    {
-        return $this->hasMany(OnboardStatusHistory::class);
-    }
-
     public function notes()
     {
         return $this->hasMany(Note::class);
@@ -208,10 +194,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
     {
         return $this->hasMany(ClientExcludedCaregiver::class);
     }
-
-    ///////////////////////////////////////////
-    /// Mutators
-    ///////////////////////////////////////////
 
     /**
      * Encrypt ssn on entry
@@ -241,12 +223,63 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->getPaymentType();
     }
 
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    /**
+     * @param $method
+     * @return mixed|null|string
+     */
+    public function getPaymentType($method = null)
+    {
+        if (!$method) {
+            $method = $this->getPaymentMethod();
+        }
+
+        if ($method instanceof Business) {
+            return 'ACH-P';
+        }
+
+        if ($method instanceof CreditCard) {
+            if ($method->type == 'amex') {
+                return 'AMEX';
+            }
+            return 'CC';
+        }
+
+        if ($method instanceof BankAccount) {
+            return 'ACH';
+        }
+
+        return 'NONE';
+    }
+
+    /**
+     * @param bool $backup
+     * @return \App\Contracts\ChargeableInterface
+     */
+    public function getPaymentMethod($backup = false)
+    {
+        $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
+        return $method;
+    }
+
     /**
      * @return string
      */
     public function getAllyPercentageAttribute()
     {
         return $this->getAllyPercentage();
+    }
+
+    /**
+     * @param $method
+     * @return float
+     */
+    public function getAllyPercentage($method = null)
+    {
+        return AllyFeeCalculator::getPercentage($this, $method);
     }
 
     ///////////////////////////////////////////
@@ -258,14 +291,14 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
      *
      * @param string|\DateTime $start
      * @param string|\DateTime $end
-     * @param bool $onlyStartTime  Only include events matching the start time within the date range, otherwise include events that match start or end time
+     * @param bool $onlyStartTime Only include events matching the start time within the date range, otherwise include events that match start or end time
      *
      * @return array
      */
     public function getEvents($start, $end, $onlyStartTime = false)
     {
         $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
+        foreach ($this->schedules as $schedule) {
             $title = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
             $aggregator->add($title, $schedule);
         }
@@ -278,22 +311,22 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         return $this->shifts()->whereNull('checked_out_time')->exists();
     }
 
+    public function shifts()
+    {
+        return $this->hasMany(Shift::class);
+    }
+
     public function clearFutureSchedules()
     {
         $yesterday = (new Carbon('yesterday'))->format('Y-m-d');
         $this->schedules()
-            ->where('end_date', '>', $yesterday)
-            ->update(['end_date' => $yesterday]);
+             ->where('end_date', '>', $yesterday)
+             ->update(['end_date' => $yesterday]);
     }
 
-    /**
-     * @param bool $backup
-     * @return \App\Contracts\ChargeableInterface
-     */
-    public function getPaymentMethod($backup = false)
+    public function schedules()
     {
-        $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
-        return $method;
+        return $this->hasMany(Schedule::class);
     }
 
     /**
@@ -318,38 +351,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         }
     }
 
-    /**
-     * @param $method
-     * @return mixed|null|string
-     */
-    public function getPaymentType($method = null)
-    {
-        if (!$method) $method = $this->getPaymentMethod();
-
-        if ($method instanceof Business) {
-            return 'ACH-P';
-        }
-
-        if ($method instanceof CreditCard) {
-            if ($method->type == 'amex') return 'AMEX';
-            return 'CC';
-        }
-
-        if ($method instanceof BankAccount) {
-            return 'ACH';
-        }
-
-        return 'NONE';
-    }
-
-    /**
-     * @param $method
-     * @return float
-     */
-    public function getAllyPercentage($method = null) {
-        return AllyFeeCalculator::getPercentage($this, $method);
-    }
-
     public function sendConfirmationEmail()
     {
         $confirmation = new Confirmation($this);
@@ -361,5 +362,46 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface
         $this->onboardStatusHistory()->save($history);
 
         $this->notify(new ClientConfirmation($this, $this->business));
+    }
+
+    public function onboardStatusHistory()
+    {
+        return $this->hasMany(OnboardStatusHistory::class);
+    }
+
+    /**
+     * Prepare a query for all gateway transactions that relate to this model
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function allTransactionsQuery()
+    {
+        return GatewayTransaction::select('gateway_transactions.*')
+                                 ->with('lastHistory')
+                                 ->leftJoin('bank_accounts', function($q) {
+                                     $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
+                                       ->where('gateway_transactions.method_type', BankAccount::class);
+                                 })
+                                 ->leftJoin('credit_cards', function($q) {
+                                     $q->on('credit_cards.id', '=', 'gateway_transactions.method_id')
+                                       ->where('gateway_transactions.method_type', CreditCard::class);
+                                 })
+                                 ->whereHas('payment', function ($q) {
+                                     $q->where('client_id', $this->id);
+                                 })
+                                 ->orWhere('bank_accounts.user_id', $this->id)
+                                 ->orWhere('credit_cards.user_id', $this->id);
+    }
+
+    /**
+     * Get all gateway transactions that relate to this client
+     *
+     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     */
+    public function getAllTransactions()
+    {
+        return $this->allTransactionsQuery()
+                    ->orderBy('created_at')
+                    ->get();
     }
 }
