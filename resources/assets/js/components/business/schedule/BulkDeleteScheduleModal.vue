@@ -124,8 +124,8 @@
             'value': Boolean,
             'selectedItem': Object,
             'items': Object,
-            'caregiver': Object,
-            'client': Object,
+            'caregiverId': {},
+            'clientId': {},
         },
 
         data() {
@@ -148,8 +148,8 @@
                     'end_date': moment().format('MM/DD/YYYY'),
                     'start_time': '09:00 AM',
                     'hours_type': '',
-                    'client_id': (this.client) ? this.client.id : '',
-                    'caregiver_id': (this.caregiver) ? this.caregiver.id : '',
+                    'client_id': (this.clientId > 0) ? this.clientId : '',
+                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '',
                     'bydays': [],
                     //
                     // 'new_start_time': '',
@@ -164,8 +164,8 @@
                 }),
                 submitting: false,
                 disabled: {
-                    caregiver_id: (this.caregiver) ? true : false,
-                    client_id: (this.client) ? true : false,
+                    caregiver_id: (this.caregiverId > 0),
+                    client_id: (this.clientId > 0),
                 },
             }
         },
@@ -274,6 +274,16 @@
 
             anyStartTime(val) {
                 this.form.start_time = null;
+            },
+
+            caregiverId(val) {
+                this.disabled.caregiver_id = (val > 0);
+                this.form.caregiver_id = val;
+            },
+
+            clientId(val) {
+                this.disabled.client_id = (val > 0);
+                this.form.client_id = val;
             },
 
             entireShiftOvertime(val) {
