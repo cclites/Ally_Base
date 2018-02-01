@@ -189,7 +189,7 @@
             <div slot="modal-footer">
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
-                    <i class="fa fa-save" v-hide="submitting"></i>
+                    <i class="fa fa-save" v-show="!submitting"></i>
                     {{ submitText }}
                 </b-btn>
                 <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>

@@ -34,14 +34,14 @@
         />
 
         <bulk-edit-schedule-modal v-model="bulkUpdateModal"
-                                  :caregiver="caregiver"
-                                  :client="client"
+                                  :caregiver-id="filterCaregiverId"
+                                  :client-id="filterClientId"
                                   @refresh-events="refreshEvents()"
         />
 
         <bulk-delete-schedule-modal v-model="bulkDeleteModal"
-                                    :caregiver="caregiver"
-                                    :client="client"
+                                    :caregiver-id="filterCaregiverId"
+                                    :client-id="filterClientId"
                                     @refresh-events="refreshEvents()"
         />
     </b-card>
