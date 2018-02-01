@@ -100,8 +100,8 @@
             },
             initialCreateValues() {
                 return {
-                    'client_id': this.filterClientId,
-                    'caregiver_id': this.filterCaregiverId,
+                    'client_id': (this.filterClientId > 0) ? this.filterClientId : "",
+                    'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : "",
                 }
             }
         },
