@@ -6,6 +6,7 @@
  */
 
 require('./bootstrap');
+require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
