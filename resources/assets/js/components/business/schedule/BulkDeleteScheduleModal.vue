@@ -145,26 +145,8 @@
                 lockProviderFee: true,
                 clients: [],
                 caregivers: [],
-                form: new Form({
-                    'start_date': moment().format('MM/DD/YYYY'),
-                    'end_date': moment().format('MM/DD/YYYY'),
-                    'start_time': '09:00 AM',
-                    'hours_type': '',
-                    'client_id': (this.clientId > 0) ? this.clientId : '-',
-                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
-                    'bydays': [],
-                    //
-                    // 'new_start_time': '',
-                    // 'new_duration': null,
-                    // 'new_hours_type': '',
-                    // 'new_overtime_duration': '',
-                    // 'new_caregiver_id': '',
-                    // 'new_caregiver_rate': '',
-                    // 'new_provider_fee': '',
-                    // 'new_note_method': '',
-                    // 'new_note_text': '',
-                }),
                 submitting: false,
+                form: new Form(),
                 disabled: {
                     caregiver_id: (this.caregiverId > 0),
                     client_id: (this.clientId > 0),
@@ -195,6 +177,41 @@
         },
 
         methods: {
+            makeForm() {
+                // Reset all data values back to defaults
+                this.new_end_time = '';
+                this.allFutureDates = false;
+                this.selectAllDays = false;
+                this.anyStartTime = false;
+                this.lockTiming = true;
+                this.lockHoursType = true;
+                this.entireShiftOvertime = false;
+                this.lockOvertimeHours = true;
+                this.lockCaregiverRate = true;
+                this.lockProviderFee = true;
+
+                // Recreate default form
+                this.form = new Form({
+                    'start_date': moment().format('MM/DD/YYYY'),
+                    'end_date': moment().format('MM/DD/YYYY'),
+                    'start_time': '09:00 AM',
+                    'hours_type': '',
+                    'client_id': (this.clientId > 0) ? this.clientId : '-',
+                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
+                    'bydays': [],
+                    //
+                    // 'new_start_time': '',
+                    // 'new_duration': null,
+                    // 'new_hours_type': '',
+                    // 'new_overtime_duration': '',
+                    // 'new_caregiver_id': '',
+                    // 'new_caregiver_rate': '',
+                    // 'new_provider_fee': '',
+                    // 'new_note_method': '',
+                    // 'new_note_text': '',
+                });
+            },
+
             unlockAndFocus(lock, event) {
                 console.log(lock, event);
                 this[lock] = false;
@@ -270,6 +287,10 @@
         },
 
         watch: {
+            value(val) {
+                if (val) this.makeForm();
+            },
+
             allFutureDates(val) {
                 this.form.end_date = (val) ? '01/01/2100' : moment().format('MM/DD/YYYY');
             },
