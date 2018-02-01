@@ -29,7 +29,7 @@ class RefundProcessor
      * @param $amount
      * @return \App\GatewayTransaction|false
      */
-    public function refund($amount)
+    public function refund($amount, $notes = '')
     {
        if ($amount > $this->transaction->amount) {
            throw new \Exception('The refund amount cannot be greater than the transaction amount');
@@ -52,6 +52,8 @@ class RefundProcessor
                 'business_allotment' => 0,
                 'caregiver_allotment' => 0,
                 'system_allotment' => 0,
+                'adjustment' => true,
+                'notes' => $notes,
             ]);
             if (!$payment) {
                 echo "Payment could not be recorded for refund.\n";
