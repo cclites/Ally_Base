@@ -77,7 +77,7 @@ class BulkDestroyScheduleRequest extends FormRequest
 
     public function rules()
     {
-        $minDate = Carbon::now()->setTime(0, 0, 0);
+        $minDate = Carbon::now()->subHours(8)->setTime(0, 0, 0);
         $maxDate = Carbon::now()->addYears(2);
         return [
             // query items
@@ -99,6 +99,8 @@ class BulkDestroyScheduleRequest extends FormRequest
             'hours_type.in'                => 'Invalid special designation',
             'bydays.required'              => 'You must select at least one day of the week to match against.',
             'bydays.array'                 => 'You must select at least one day of the week to match against.',
+            'client_id.exists'             => 'You must select which client(s) to match against.',
+            'caregiver_id.integer'         => 'You must select which caregiver(s) to match against.'
         ];
     }
 }

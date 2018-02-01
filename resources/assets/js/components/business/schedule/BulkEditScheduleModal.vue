@@ -63,7 +63,8 @@
                                                    v-model="form.client_id"
                                                    :disabled="disabled.client_id"
                                     >
-                                        <option value="">--All Clients--</option>
+                                        <option value="-">--Please Select--</option>
+                                        <option value="">All Clients</option>
                                         <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text=""/>
@@ -75,7 +76,8 @@
                                                    v-model="form.caregiver_id"
                                                    :disabled="disabled.caregiver_id"
                                     >
-                                        <option value="">--All Caregivers--</option>
+                                        <option value="-">--Please Select--</option>
+                                        <option value="">All Caregivers</option>
                                         <option value="0">Unassigned</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
@@ -308,8 +310,8 @@
                     'end_date': moment().format('MM/DD/YYYY'),
                     'start_time': '09:00 AM',
                     'hours_type': '',
-                    'client_id': (this.clientId > 0) ? this.clientId : '',
-                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '',
+                    'client_id': (this.clientId > 0) ? this.clientId : '-',
+                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
                     'bydays': [],
 
                     'new_start_time': '',
@@ -439,12 +441,12 @@
 
             caregiverId(val) {
                 this.disabled.caregiver_id = (val > 0);
-                this.form.caregiver_id = val;
+                this.form.caregiver_id = (val > 0) ? val : '-';
             },
 
             clientId(val) {
                 this.disabled.client_id = (val > 0);
-                this.form.client_id = val;
+                this.form.client_id = (val > 0) ? val : '-';
             },
 
             entireShiftOvertime(val) {
