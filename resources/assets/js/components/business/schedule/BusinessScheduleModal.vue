@@ -215,12 +215,6 @@
 <script>
     export default {
         props: {
-            client: {
-                type: Object,
-                default() {
-                    return {};
-                }
-            },
             model: Boolean,
             initialValues: {
                 type: Object,
@@ -358,7 +352,7 @@
                     'starts_at':  "",
                     'duration': 0,
                     'caregiver_id': "",
-                    'client_id': (this.client.id) ? this.client.id : "",
+                    'client_id': "",
                     'caregiver_rate': "",
                     'provider_fee': "",
                     'notes': "",
@@ -480,7 +474,7 @@
             },
 
             loadClientData() {
-                if (!this.client.id) {
+                if (!this.client_id) {
                     let component = this;
                     axios.get('/business/clients/list')
                         .then(response => {
@@ -491,7 +485,7 @@
                 else {
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers();
-                    this.loadAllyPctFromClient(this.client.id);
+                    this.loadAllyPctFromClient(this.client_id);
                 }
             },
 
