@@ -38,6 +38,14 @@
   font-size: 30px;
 }
 
+/* IE Sidebar Fix */
+.sidebar-nav {
+  padding-bottom: 45px;
+}
+
+/* Different headers for mobile and desktop */
+/* TODO */
+
 /* Smaller device adjustments */
 @media (max-width: 768px) {
   .container-fluid {
@@ -164,4 +172,23 @@ td .fc-event-container {
   .form-group {
     margin-bottom: 15px;
   }
+}
+
+/* Chartist */
+.ct-series-a .ct-line,
+.ct-series-a .ct-point,
+.ct-series-a .ct-bar {
+  stroke: $success;
+}
+
+.ct-series-b .ct-line,
+.ct-series-b .ct-point,
+.ct-series-b .ct-bar {
+  stroke: $info;
+}
+
+.ct-series-c .ct-line,
+.ct-series-c .ct-point,
+.ct-series-c .ct-bar {
+  stroke: $primary;
 }

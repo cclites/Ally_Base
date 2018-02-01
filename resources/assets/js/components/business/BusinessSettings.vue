@@ -150,7 +150,12 @@
 <script>
     export default {
         props: {
-            'business': Object,
+            'business': {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
         },
 
         data() {
