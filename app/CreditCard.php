@@ -156,7 +156,10 @@ class CreditCard extends Model implements ChargeableInterface
      */
     public function mergeWith(ChargeableInterface $newPaymentMethod)
     {
-        $this->fill($newPaymentMethod->getAttributes());
+        // This loop provides support for mutations (encrypted values)
+        foreach(array_keys($newPaymentMethod->getAttributes()) as $key) {
+            $this->$key = $newPaymentMethod->$key;
+        }
         return $this->save();
     }
 
