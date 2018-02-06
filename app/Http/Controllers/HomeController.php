@@ -23,7 +23,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->role_type == 'office_user') return redirect()->route('business.schedule');
+        if (auth()->user()->role_type == 'office_user') return redirect()->route('business.schedule.index');
         if (auth()->user()->role_type == 'client') return redirect()->route('payment-history.index');
         if (auth()->user()->role_type == 'caregiver') {
             $caregiver = auth()->user()->role;

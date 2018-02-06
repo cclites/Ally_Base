@@ -38,6 +38,34 @@
   font-size: 30px;
 }
 
+/* IE Sidebar Fix */
+.sidebar-nav {
+  padding-bottom: 45px;
+}
+
+/* Different headers for mobile and desktop */
+#header-desktop {
+  display: none;
+}
+@media (min-width: 1170px) {
+  #header-desktop {
+    display: block;
+  }
+  #header-mobile {
+    display: none;
+  }
+}
+@media (max-width: 1169px) {
+  .mini-sidebar .top-navbar .navbar-header {
+    width: auto;
+    padding: 0 15px;
+  }
+  .navbar-brand img {
+    max-width: 120px;
+  }
+}
+
+
 /* Smaller device adjustments */
 @media (max-width: 768px) {
   .container-fluid {
@@ -142,4 +170,45 @@ td .fc-event-container {
   .col-sm-1 {
     width: 8.33333333%;
   }
+}
+
+.modal-fit-more {
+  .modal-body {
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+  .custom-control-description {
+    padding-top: 2px;
+  }
+  .form-control {
+    font-size: 14px;
+    min-height: 28px;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+}
+
+/* Chartist */
+.ct-series-a .ct-line,
+.ct-series-a .ct-point,
+.ct-series-a .ct-bar {
+  stroke: $success;
+}
+
+.ct-series-b .ct-line,
+.ct-series-b .ct-point,
+.ct-series-b .ct-bar {
+  stroke: $info;
+}
+
+.ct-series-c .ct-line,
+.ct-series-c .ct-point,
+.ct-series-c .ct-bar {
+  stroke: $primary;
 }

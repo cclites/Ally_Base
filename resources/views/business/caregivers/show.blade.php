@@ -10,7 +10,7 @@
 
 @section('content')
     <!-- Nav tabs -->
-    <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-lg-down profile-tabs" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Profile</a>
         </li>
@@ -44,7 +44,7 @@
             <a class="nav-link" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
+            <a class="nav-link" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
@@ -52,7 +52,7 @@
     </ul>
 
     <!-- Smaller device tabs -->
-    <ul class="nav nav-pills with-padding-bottom hidden-xl-up" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-xl-up profile-tabs" role="tablist">
         <li class="nav-item dropdown">
             <a class="nav-link active dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Change Tab: <span class="tab-name">Profile</span></a>
             <div class="dropdown-menu">
@@ -60,7 +60,9 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
-                <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+                @if($business->scheduling)
+                    <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
+                @endif
                 <a class="dropdown-item" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
@@ -103,9 +105,11 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="schedule" role="tabpanel">
-            <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
-        </div>
+        @if($business->scheduling)
+            <div class="tab-pane" id="schedule" role="tabpanel">
+                <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
+            </div>
+        @endif
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
             <notes-tab :notes="{{ $caregiver->notes }}"></notes-tab>
         </div>
@@ -127,9 +131,7 @@
             <p>This will be where caregivers can set their days and hours of availability.</p>
         </div>
         <div class="tab-pane" id="preferences" role="tabpanel">
-            <!-- Preferences Placeholder -->
-            <h4>Preferences coming soon</h4>
-            <p>This will be where caregivers can set their environment preferences.</p>
+            <business-caregiver-preferences-tab :caregiver="{{ $caregiver }}"></business-caregiver-preferences-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
@@ -143,19 +145,29 @@
 
 @push('scripts')
     <script>
-        // Render Calendar inside Tab
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        // Schedule fixes
+        $('.profile-tabs a[data-toggle="tab"]').click(function () {
+            var $link = $(this);
+
+            //remove active class from other tab-panes
+            $('.tab-content:not(.' + $link.attr('href').replace('#','') + ') .tab-pane').removeClass('active');
+
+            // activate tab-pane for active section
+            $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
+        });
+        $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // Render calendar upon switching tabs
             $('#calendar').fullCalendar('render');
         });
 
         // Javascript to enable link to tab
         var url = document.location.toString();
         if (url.match('#')) {
-            $('.nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
+            $('.profile-tabs .nav-item a[href="#' + url.split('#')[1] + '"]').tab('show');
         }
 
         // Change hash for page-reload
-        $('.nav-item a').on('shown.bs.tab', function (e) {
+        $('.profile-tabs .nav-item a').on('shown.bs.tab', function (e) {
             window.location.hash = e.target.hash;
             window.scrollTo(0,0);
         })

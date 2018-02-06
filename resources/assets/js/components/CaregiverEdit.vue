@@ -38,6 +38,9 @@
                         </b-form-input>
                         <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
+                    <b-form-group label="Social Security Number" label-for="ssn">
+                        <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -112,6 +115,7 @@
                     title: this.caregiver.title,
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
+                    ssn: this.caregiver.masked_ssn
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

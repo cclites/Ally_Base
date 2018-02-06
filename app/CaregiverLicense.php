@@ -28,6 +28,7 @@ class CaregiverLicense extends Model
 {
     protected $table = 'caregiver_licenses';
     protected $guarded = ['id'];
+    public $dates = ['expires_at'];
 
     ///////////////////////////////////////////
     /// Relationship Methods

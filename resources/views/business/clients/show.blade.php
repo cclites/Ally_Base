@@ -15,7 +15,7 @@
     ?>
 
     <!-- Nav tabs -->
-    <ul class="nav nav-pills with-padding-bottom hidden-lg-down" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-lg-down profile-tabs" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#profile" role="tab">Profile</a>
         </li>
@@ -57,7 +57,7 @@
     </ul>
 
     <!-- Smaller device tabs -->
-    <ul class="nav nav-pills with-padding-bottom hidden-xl-up" role="tablist">
+    <ul class="nav nav-pills with-padding-bottom hidden-xl-up profile-tabs" role="tablist">
         <li class="nav-item dropdown">
             <a class="nav-link active dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Change Tab: <span class="tab-name">Profile</span></a>
             <div class="dropdown-menu">
@@ -110,6 +110,7 @@
                                     :method="{{ $client->defaultPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $defaultPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>
@@ -119,6 +120,7 @@
                                     :method="{{ $client->backupPayment OR '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $backupPaymentTypeMessage }}"
+                                    role="{{ auth()->user()->role_type }}"
                                     :business="true">
                     </payment-method>
                 </div>
@@ -127,9 +129,11 @@
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
         </div>
-        <div class="tab-pane" id="schedule" role="schedule">
-            <client-schedule :client="{{ $client }}" :schedules="{{ $schedules }}"></client-schedule>
-        </div>
+        @if($business->scheduling)
+            <div class="tab-pane" id="schedule" role="tabpanel">
+                <business-schedule :client="{{ $client }}"></business-schedule>
+            </div>
+        @endif
         <div class="tab-pane" id="client_notes" role="tabpanel">
             <notes-tab :notes="{{ $client->notes }}"></notes-tab>
         </div>
@@ -151,20 +155,30 @@
 
 @push('scripts')
     <script>
-        // Render Calendar inside Tab
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        // Schedule fixes
+        $('.profile-tabs a[data-toggle="tab"]').click(function () {
+            var $link = $(this);
+
+            //remove active class from other tab-panes
+            $('.tab-content:not(.' + $link.attr('href').replace('#','') + ') .tab-pane').removeClass('active');
+
+            // activate tab-pane for active section
+            $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
+        });
+        $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // Render calendar upon switching tabs
             $('#calendar').fullCalendar('render');
         });
 
         // Javascript to enable link to tab
         var url = document.location.toString();
         if (url.match('#')) {
-            $('.nav-item a[href="#' +
+            $('.profile-tabs .nav-item a[href="#' +
                 url.split('#')[1] + '"]').tab('show');
         }
 
         // Change hash for page-reload
-        $('.nav-item a').on('shown.bs.tab', function (e) {
+        $('.profile-tabs .nav-item a').on('shown.bs.tab', function (e) {
             window.location.hash = e.target.hash;
             window.scrollTo(0,0);
         })

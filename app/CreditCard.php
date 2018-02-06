@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUserId($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
 class CreditCard extends Model implements ChargeableInterface
 {
@@ -113,6 +114,19 @@ class CreditCard extends Model implements ChargeableInterface
         }
 
         return $gateway->chargeCard($this, $amount, $currency);
+    }
+
+    /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        $gateway = app()->make(CreditCardPaymentInterface::class);
+        return $gateway->refund($transaction, $amount);
     }
 
     /**

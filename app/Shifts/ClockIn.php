@@ -27,7 +27,7 @@ class ClockIn extends ClockBase
             'checked_in_latitude' => $this->latitude,
             'checked_in_longitude' => $this->longitude,
             'checked_in_number' => $this->number,
-            'all_day' => $schedule->all_day,
+            'all_day' => false,
             'status' => Shift::CLOCKED_IN,
             'caregiver_rate' => $schedule->getCaregiverRate(),
             'provider_fee' => $schedule->getProviderFee()
@@ -77,11 +77,7 @@ class ClockIn extends ClockBase
         ]);
 
         if ($shift->verified) {
-            if (!is_null($this->latitude)) {
-                $this->verifyGeocode($client);
-            } else {
-                $this->verifyPhoneNumber($client);
-            }
+            $this->verifyEVV($client);
         }
 
         if ($this->caregiver->shifts()->save($shift)) {

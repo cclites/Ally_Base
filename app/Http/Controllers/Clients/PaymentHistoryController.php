@@ -36,11 +36,10 @@ class PaymentHistoryController extends Controller
 
     public function printDetails($id)
     {
-        $payment_details = $this->getPaymentDetails($id);
+        $compactedDetails = $this->getPaymentDetails($id);
+        //return view('clients.print.payment_details', $compactedDetails);
 
-        //return view('clients.print.payment_details', $payment_details);
-
-        $pdf = PDF::loadView('clients.print.payment_details', $payment_details)->setOrientation('landscape');
+        $pdf = PDF::setOption('margin-left', '2mm')->setOption('margin-right', '2mm')->loadView('clients.print.payment_details', $compactedDetails);//->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
     }
 
@@ -66,6 +65,9 @@ class PaymentHistoryController extends Controller
             return $value;
         });
 
-        return compact('payment', 'shifts');
+        $client = Client::find(auth()->id());
+        $timezone = $client->business->timezone ?? 'America/New_York';
+
+        return compact('payment', 'shifts', 'timezone');
     }
 }

@@ -3,6 +3,8 @@
 
 namespace App\Http\Controllers;
 
+use App\BankAccount;
+use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use App\Caregiver;
 use App\Confirmations\Confirmation;
@@ -10,12 +12,11 @@ use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
-use App\Traits\Request\PaymentMethodUpdate;
 use Illuminate\Http\Request;
 
 class CaregiverConfirmationController extends Controller
 {
-    use PaymentMethodUpdate;
+    use BankAccountRequest;
 
     public function show($token)
     {
@@ -66,7 +67,9 @@ class CaregiverConfirmationController extends Controller
         ]);
 
         // Save Bank Account
-        $account = $this->updateBankAccount($request, $caregiver);
+        $account = $this->validateBankAccount($request, null);
+        $account->user_id = $caregiver->id;
+        $account->save();
         $caregiver->update([
             'bank_account_id' => $account->id,
             'onboarded' => Carbon::now()

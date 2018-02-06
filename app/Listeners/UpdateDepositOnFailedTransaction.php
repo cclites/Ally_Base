@@ -28,14 +28,14 @@ class UpdateDepositOnFailedTransaction
     {
         if ($deposit = $event->transaction->deposit) {
             $deposit->update(['success' => 0]);
-        }
 
-        foreach($deposit->shifts as $shift) {
-            if ($deposit->caregiver) {
-                $shift->statusManager()->ackReturnedCaregiverDeposit();
-            }
-            else if ($deposit->business) {
-                $shift->statusManager()->ackReturnedBusinessDeposit();
+            foreach($deposit->shifts as $shift) {
+                if ($deposit->caregiver) {
+                    $shift->statusManager()->ackReturnedCaregiverDeposit();
+                }
+                else if ($deposit->business) {
+                    $shift->statusManager()->ackReturnedBusinessDeposit();
+                }
             }
         }
     }

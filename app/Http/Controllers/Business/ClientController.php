@@ -183,7 +183,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $data = $request->all();
+        $data = $request->validated();
 
         $data['inquiry_date'] = $data['inquiry_date'] ? Carbon::parse($data['inquiry_date']) : null;
         $data['service_start_date'] = $data['service_start_date'] ? Carbon::parse($data['service_start_date']) : null;
@@ -309,7 +309,7 @@ class ClientController extends BaseController
 
         $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
         if ($client->setPaymentMethod($method, $backup)) {
-            return new SuccessResponse('The payment method has been updated.', [], $redirect);
+            return new SuccessResponse('The payment method has been updated.');
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }

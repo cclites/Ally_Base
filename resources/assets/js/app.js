@@ -6,6 +6,7 @@
  */
 
 require('./bootstrap');
+require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
@@ -21,6 +22,9 @@ window.Vue = require('vue');
 import BootstrapVue from 'bootstrap-vue';
 Vue.use(BootstrapVue);
 
+import VueTheMask from 'vue-the-mask';
+Vue.use(VueTheMask);
+
 // import vSelect from "vue-select"
 // Vue.component('v-select', vSelect);
 
@@ -29,6 +33,8 @@ Vue.use(BootstrapVue);
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+
+Vue.component('test-component', require('./components/TestComponent'));
 
 // App Components
 Vue.component('date-picker', require('./components/DatePicker.vue'));
@@ -55,9 +61,13 @@ Vue.component('admin-charges-report', require('./components/admin/AdminChargesRe
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
+Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
+Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
+Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));
 Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
 Vue.component('admin-pending-deposits', require('./components/admin/AdminPendingDeposits.vue'));
 Vue.component('admin-pending-shifts', require('./components/admin/AdminPendingShifts.vue'));
+Vue.component('admin-reconciliation-report', require('./components/admin/AdminReconciliationReport'));
 Vue.component('admin-transaction', require('./components/admin/AdminTransaction.vue'));
 Vue.component('admin-transactions-report', require('./components/admin/AdminTransactionsReport.vue'));
 Vue.component('authorized-payment-checkbox', require('./components/admin/AuthorizePaymentCheckbox.vue'));
@@ -69,11 +79,13 @@ Vue.component('business-office-user-list', require('./components/admin/BusinessO
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
 
 // Office User
+Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
+Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
@@ -88,14 +100,18 @@ Vue.component('business-shift', require('./components/BusinessShift.vue'));
 Vue.component('business-shift-history', require('./components/BusinessShiftHistory.vue'));
 Vue.component('business-shift-report', require('./components/BusinessShiftReport.vue'));
 Vue.component('business-scheduled-payments', require('./components/business/reports/ScheduledPaymentsReport.vue'));
-Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
-Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
-Vue.component('business-schedule', require('./components/BusinessSchedule.vue'));
+// Vue.component('business-scheduled-vs-actual', require('./components/BusinessScheduledVsActual.vue'));
+// Vue.component('business-convert-schedule-modal', require('./components/BusinessConvertScheduleModal.vue'));
+Vue.component('business-schedule', require('./components/business/schedule/BusinessSchedule.vue'));
+Vue.component('business-schedule-modal', require('./components/business/schedule/BusinessScheduleModal'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
 Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
+Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
+Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
+Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
@@ -126,13 +142,9 @@ Vue.component('client-create', require('./components/ClientCreate.vue'));
 Vue.component('client-edit', require('./components/ClientEdit.vue'));
 Vue.component('client-list', require('./components/ClientList.vue'));
 Vue.component('client-profile', require('./components/ClientProfile.vue'));
-Vue.component('client-schedule', require('./components/ClientSchedule.vue'));
 Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
-
-Vue.component('create-schedule-modal', require('./components/CreateScheduleModal.vue'));
-Vue.component('edit-schedule-modal', require('./components/EditScheduleModal.vue'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));

@@ -61,14 +61,11 @@ class TelefonyBase extends TestCase
             'business_id' => $this->business->id,
             'client_id' => $this->client->id,
             'caregiver_id' => $this->caregiver->id,
-            'start_date' => Carbon::now()->format('Y-m-d'),
-            'time' => Carbon::now()->format('h:i:s'),
+            'starts_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'weekday' => Carbon::now()->dayOfWeek,
             'duration' => 60,
         ];
-        $schedule = new Schedule($attributes);
-        $schedule->setSingleEvent($attributes['start_date'], $attributes['time'], $attributes['duration']);
-        $schedule->save();
-        return $schedule;
+        return Schedule::create($attributes);
     }
 
     /**

@@ -1,41 +1,60 @@
 <template>
     <div>
-        <input
-                ref="timepicker"
+        <mask-input
+                v-if="usingIE"
                 :class="cssClass"
-                type="text"
-                :placeholder="placeholder"
-                v-model="value"
-                @change="onChange($event.target.value, $event)"
+                type="time"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
+                v-model="localValue"
         />
-        <b-tooltip :target="$refs.timepicker" title="Invalid time format (Example: 12:00 PM)" placement="top" v-if="invalidTime"></b-tooltip>
+        <input
+                v-else
+                :class="cssClass"
+                type="time"
+                :disabled="disabled"
+                :required="required"
+                :readonly="readonly"
+                v-model="localValue"
+        />
     </div>
 </template>
 
 <script>
+    import InternetExplorer from "../mixins/InternetExplorer";
+
     export default {
+        mixins: [InternetExplorer],
+
         props: {
-            'value': {
-                default() {
-                    return '';
-                }
+            value: {
+                type: String,
+                default: '',
             },
-            'format': {
-                default() {
-                    return 'h:mm A';
-                }
+            disabled: {
+                type: Boolean,
+                default: false
             },
-            'placeholder': {
-                default() {
-                    return '';
-                }
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            required: {
+                type: Boolean,
+                default: false
             }
         },
 
         data() {
             return {
-
+                localValue: this.value,
+                format: 'HH:mm'
             }
+        },
+
+        mounted() {
+
         },
 
         computed: {
@@ -47,14 +66,21 @@
                 return classes;
             },
             invalidTime() {
-                return !moment(this.value, this.format, true).isValid();
+                return (this.required || this.value) && !moment(this.value, this.format, true).isValid();
             }
         },
 
-        methods: {
-            onChange(value, e) {
-                this.$emit('input', value);
+        watch: {
+            value(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.localValue = newVal;
+                }
             },
+            localValue(newVal, oldVal) {
+                if (newVal !== oldVal){
+                    this.$emit('input', newVal);
+                }
+            }
         }
     }
 </script>

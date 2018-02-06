@@ -1,5 +1,7 @@
 <template>
-    <div ref="calendar" id="calendar"></div>
+    <div ref="calendar" id="calendar">
+        <loading-card v-show="loading" style="z-index: 1000;position: absolute;top: 25%;left:  50%;width: 100%;margin-left: -50%;" />
+    </div>
 </template>
 
 <script>
@@ -65,9 +67,15 @@
             },
         },
 
+        data() {
+            return {
+                loading: false,
+            }
+        },
+
         computed: {
             defaultConfig() {
-                const self = this
+                const self = this;
                 return {
                     header: this.header,
                     defaultView: this.defaultView,
@@ -110,6 +118,7 @@
                     dayClick(...args){
                         self.$emit('day-click', ...args)
                     },
+
                     select(start, end, jsEvent, view, resource) {
                         self.$emit('event-created', {
                             start,
@@ -118,6 +127,10 @@
                             view,
                             resource
                         })
+                    },
+
+                    loading(isLoading) {
+                        self.loading = isLoading;
                     }
                 }
             },
