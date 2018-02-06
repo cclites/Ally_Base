@@ -110,6 +110,7 @@ class CaregiverController extends BaseController
             'deposits.shifts' => function ($query) {
                 return $query->orderBy('checked_in_time');
             },
+            'deposits.shifts.activities',
             'phoneNumbers',
             'user.documents',
             'bankAccount',

@@ -10,9 +10,13 @@
                 </b-btn>
             </template>
             <template slot="row-details" scope="row">
-                <b-table :items="row.item.shifts" :fields="shiftFields" foot-clone outlined small>
+                <b-table :items="row.item.shifts" :fields="shiftFields" foot-clone outlined dark>
+                    <template slot="activities" scope="row">
+                        {{ activities(row.item) }}
+                    </template>
                     <template slot="FOOT_checked_in_time" scope="data"></template>
                     <template slot="FOOT_checked_out_time" scope="data"></template>
+                    <template slot="FOOT_activities" scope="data"></template>
                     <template slot="FOOT_duration" scope="data">
                         <!-- A custom formatted footer cell  for field 'name' -->
                         <strong>Total Hours: {{ totalHours(row.item.shifts) }}</strong>
@@ -65,6 +69,9 @@
                         }
                     },
                     {
+                        key: 'activities'
+                    },
+                    {
                         key: 'duration',
                         label: 'Hours'
                     }
@@ -81,6 +88,10 @@
                 return _.sumBy(shifts, shift => {
                     return parseFloat(shift.duration);
                 });
+            },
+
+            activities(shift) {
+                return _.join(_.uniq(_.map(shift.activities, 'name')), ', ');
             }
         },
 
