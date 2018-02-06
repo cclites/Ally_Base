@@ -4,6 +4,7 @@ namespace App\Payments;
 use App\BankAccount;
 use App\Client;
 use App\Contracts\ChargeableInterface;
+use App\Contracts\PaymentAggregatorInterface;
 use App\CreditCard;
 use App\Gateway\ECSPayment;
 use App\Payment;
@@ -12,7 +13,7 @@ use App\Shift;
 use Carbon\Carbon;
 use DB;
 
-class ClientPaymentAggregator
+class ClientPaymentAggregator implements PaymentAggregatorInterface
 {
 
     /**
@@ -46,15 +47,13 @@ class ClientPaymentAggregator
         $this->method = $client->getPaymentMethod();
         $this->startDate = $startDate->copy()->setTimezone('UTC');
         $this->endDate = $endDate->copy()->setTimezone('UTC');
-
-        $this->shifts = Shift::whereAwaitingCharge()
-            ->whereNull('payment_id')
-            ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
-            ->where('client_id', $this->client->id)
-            ->get();
-
     }
 
+    /**
+     * Get an unsaved version of the aggregated payment model
+     *
+     * @return \App\Payment
+     */
     public function getPayment()
     {
         $payment = new Payment([
@@ -67,7 +66,7 @@ class ClientPaymentAggregator
             'system_allotment' => 0,
         ]);
 
-        foreach($this->shifts as $shift) {
+        foreach($this->getShifts() as $shift) {
             $payment->amount += $shift->costs()->getTotalCost();
             $payment->business_allotment += $shift->costs()->getProviderFee();
             $payment->caregiver_allotment += $shift->costs()->getCaregiverCost();
@@ -79,6 +78,12 @@ class ClientPaymentAggregator
         return $payment;
     }
 
+    /**
+     * Get all pending shifts for a client (waiting for charge OR waiting for auth)
+     *  -> only waiting for charge are used in payment aggregation
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
     public function getAllPendingShifts()
     {
         return Shift::whereIn('status', [Shift::WAITING_FOR_CHARGE, Shift::WAITING_FOR_AUTHORIZATION])
@@ -88,17 +93,37 @@ class ClientPaymentAggregator
             ->get();
     }
 
+    /**
+     * Get all the shift models related to this payment
+     *
+     * @return \App\Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
     public function getShifts()
     {
+        if (!$this->shifts) {
+            $this->shifts = Shift::whereAwaitingCharge()
+                                 ->whereNull('payment_id')
+                                 ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
+                                 ->where('client_id', $this->client->id)
+                                 ->get();
+        }
+
         return $this->shifts;
     }
 
+    /**
+     * Get all the shift IDs related to this payment
+     *
+     * @return array
+     */
     public function getShiftIds()
     {
         return $this->getShifts()->pluck('id')->toArray();
     }
 
     /**
+     * Charge and persist the payment
+     *
      * @return \App\GatewayTransaction|false
      */
     public function charge()

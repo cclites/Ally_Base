@@ -51,7 +51,7 @@ class ChargesController extends Controller
         $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
         $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
-        $processor = new PaymentProcessor($business, $startDate, $endDate, logger());
+        $processor = new PaymentProcessor($business, $startDate, $endDate);
         return $processor->getPaymentModels();
     }
 
@@ -60,7 +60,7 @@ class ChargesController extends Controller
         $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
         $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
-        $processor = new PaymentProcessor($business, $startDate, $endDate, logger());
+        $processor = new PaymentProcessor($business, $startDate, $endDate);
         return $processor->getPaymentDataPerClient();
     }
 
@@ -69,7 +69,7 @@ class ChargesController extends Controller
         $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
         $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
-        $processor = new PaymentProcessor($business, $startDate, $endDate, logger());
+        $processor = new PaymentProcessor($business, $startDate, $endDate);
         $count = $processor->process();
         return new SuccessResponse('There were ' . $count . ' successful transactions.');
     }

@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Contracts\ChargeableInterface;
+use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
@@ -76,8 +77,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ask_on_confirm
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
-class Business extends Model implements ChargeableInterface, ReconcilableInterface
+class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold
 {
+    use \App\Traits\HasPaymentHold;
+
     protected $table = 'businesses';
     protected $guarded = ['id'];
 
@@ -116,6 +119,9 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->morphMany(Client::class, 'default_payment');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function caregivers()
     {
         return $this->belongsToMany(Caregiver::class, 'business_caregivers')
@@ -138,6 +144,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function paymentHold()
+    {
+        return $this->hasOne(PaymentHold::class, 'business_id');
     }
 
     public function upcomingPayments()

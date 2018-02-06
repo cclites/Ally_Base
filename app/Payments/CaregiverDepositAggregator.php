@@ -23,13 +23,13 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
         $this->startDate = $startDate->setTimezone('UTC');
         $this->endDate = $endDate->setTimezone('UTC');
         $this->caregiver = $caregiver;
-
-        $this->shifts = Shift::whereAwaitingCaregiverDeposit()
-                ->whereBetween('checked_in_time', [$startDate, $endDate])
-                ->where('caregiver_id', $this->caregiver->id)
-                ->get();
     }
 
+    /**
+     * Get the unsaved version of this aggregated deposit
+     *
+     * @return \App\Deposit
+     */
     public function getDeposit()
     {
         $deposit = new Deposit([
@@ -38,7 +38,7 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
             'amount' => 0,
         ]);
 
-        foreach($this->shifts as $shift) {
+        foreach($this->getShifts() as $shift) {
             $deposit->amount = bcadd($deposit->amount, $shift->costs()->getCaregiverCost(), 2);
         }
 
@@ -46,16 +46,38 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
         return $deposit;
     }
 
+    /**
+     * Get all the related shift models of this deposit
+     *
+     * @return \App\Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
     public function getShifts()
     {
+        if (!$this->shifts) {
+            $this->shifts = Shift::whereAwaitingCaregiverDeposit()
+                                 ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
+                                 ->where('caregiver_id', $this->caregiver->id)
+                                 ->get();
+        }
+
         return $this->shifts;
     }
 
+    /**
+     * Get all the related shift IDs of this deposit
+     *
+     * @return array
+     */
     public function getShiftIds()
     {
         return $this->getShifts()->pluck('id')->toArray();
     }
 
+    /**
+     * Process and persist this deposit
+     *
+     * @return \App\GatewayTransaction|bool|false
+     */
     public function deposit()
     {
         $deposit = $this->getDeposit();

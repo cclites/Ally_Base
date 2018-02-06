@@ -50,9 +50,9 @@ class PaymentProcessor
     public $logger;
 
 
-    public function __construct(Business $business, Carbon $startDate, Carbon $endDate, LoggerInterface $logger)
+    public function __construct(Business $business, Carbon $startDate, Carbon $endDate, LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
+        $this->logger = $logger ?: logger();
         $this->business = $business;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -65,40 +65,27 @@ class PaymentProcessor
      */
     public function process()
     {
-        // Initialize Business Payment Class
-        $businessPayment = new BusinessPaymentAggregator($this->business, $this->startDate, $this->endDate);
+        $aggregators = $this->getAggregators();
 
-        // Separate Provider Clients
-        $clientsUsingProviderPayment = $businessPayment->getClientsUsingProviderPayment();
-        $clientsUsingProviderPaymentIds = $clientsUsingProviderPayment->pluck('id')->toArray();
-        $clientsNotUsingProviderPayment = $this->business->clients()
-            ->whereNotIn('id', $clientsUsingProviderPaymentIds)
-            ->get();
-
-        // Process Payments for Clients Not Using Provider Payment Method
         $count = 0;
-        foreach($clientsNotUsingProviderPayment as $client) {
-            $clientPayment = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
+        foreach($aggregators as $aggregator) {
             try {
-                $transaction = $clientPayment->charge();
+                $transaction = $aggregator->charge();
                 if (!$transaction) throw new PaymentMethodError("Unknown");
                 $count++;
             }
             catch (\Exception $e) {
-                $payment = $clientPayment->getPayment();
-                $this->logger->warning('Failed charging ' . $payment->amount . ' to client ' . $client->name() . '(' . $client->id . ')');
+                $payment = $aggregator->getPayment();
+                if ($payment->client) {
+                    $type = 'client';
+                    $name = $payment->client->name();
+                }
+                else {
+                    $type = 'business';
+                    $name = $payment->business->name;
+                }
+                $this->logger->warning('Failed charging ' . $payment->amount . ' to ' . $type . ' ' . $name);
             }
-        }
-
-        // Process Business Payment
-        try {
-            $transaction = $businessPayment->charge();
-            if (!$transaction) throw new PaymentMethodError("Unknown");
-            $count++;
-        }
-        catch (\Exception $e) {
-            $payment = $businessPayment->getPayment();
-            $this->logger->warning('Failed charging ' . $payment->amount . ' to business payment method for ' . $this->business->name . '(' . $this->business->id . ')');
         }
 
         return $count;
@@ -109,35 +96,49 @@ class PaymentProcessor
      */
     public function getPaymentModels()
     {
-        // Initialize Business Payment Class
-        $businessPayment = new BusinessPaymentAggregator($this->business, $this->startDate, $this->endDate);
+        $aggregators = $this->getAggregators();
 
-        // Separate Provider Clients
-        $clientsNotUsingProviderPayment = $this->business->clients()
-            ->whereNotIn('id', $businessPayment->getClientIdsUsingProviderPayment())
-            ->get();
-
-        $payments = [];
-
-        $payment = $businessPayment->getPayment();
-        if ($payment->amount) {
-            $payments[] = $payment;
-        }
-
-        // Process Payments for Clients Not Using Provider Payment Method
-        foreach($clientsNotUsingProviderPayment as $client) {
-            $clientPayment = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
-            $payment = $clientPayment->getPayment();
-            if ($payment->amount) {
-                $payments[] = $payment;
-            }
-        }
-
-        return $payments;
+        return array_map(function($aggregator) {
+            return $aggregator->getPayment();
+        }, $aggregators);
     }
 
     /**
-     * Return an array of Payment models per client for reference
+     * Prepare the aggregator instances for the business and clients
+     *
+     * @return \App\Contracts\PaymentAggregatorInterface[]
+     */
+    protected function getAggregators()
+    {
+        // Initialize Business Payment Class
+        $businessPayment = new BusinessPaymentAggregator($this->business, $this->startDate, $this->endDate);
+
+        // Get Clients NOT using provider pay
+        $clientsNotUsingProviderPayment = $businessPayment->getClientsNotUsingProviderPayment();
+
+        // Initialize aggregators array (used for return)
+        $aggregators = [];
+
+        // Add business aggregator as long as business is not on hold
+        if (!$this->business->isOnHold()) {
+            dd($this->business->isOnHold(), $this->business->paymentHold);
+            $aggregators[] = $businessPayment;
+        }
+
+        foreach($clientsNotUsingProviderPayment as $client) {
+             $aggregators[] = new ClientPaymentAggregator($client, $this->startDate, $this->endDate);
+        }
+
+        return array_filter($aggregators, function($aggregator) {
+            if ($payment = $aggregator->getPayment()) {
+                return $payment->amount > 0;
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Return an array of Payment models per client (for reference only)
      *
      * @return array
      */
