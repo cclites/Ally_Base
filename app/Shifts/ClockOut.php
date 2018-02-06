@@ -50,6 +50,9 @@ class ClockOut extends ClockBase
         }
 
         $verified = ($shift->verified && !$this->manual) ? true : false;
+        if ($verified) {
+            $this->verifyEVV($shift->client);
+        }
 
         $update = $shift->update([
             'checked_out_time' => Carbon::now(),

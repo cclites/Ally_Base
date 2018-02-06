@@ -16,7 +16,7 @@
                 :disabled="disabled"
                 :required="required"
                 :readonly="readonly"
-                v-model="value"
+                v-model="localValue"
         />
     </div>
 </template>

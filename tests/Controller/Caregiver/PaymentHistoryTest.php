@@ -28,7 +28,7 @@ class PaymentHistoryTest extends TestCase
         $response = $this->get('/reports/payment-history/print/'.Carbon::now()->year);
 
         $response->assertStatus(200);
-        $response->assertSeeText($caregiver->firstname);
-        $response->assertSeeText($caregiver->lastname);
+        $response->assertSeeText(htmlentities($caregiver->firstname));
+        $response->assertSeeText(htmlentities($caregiver->lastname));
     }
 }

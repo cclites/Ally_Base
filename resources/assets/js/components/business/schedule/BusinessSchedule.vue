@@ -34,11 +34,15 @@
         />
 
         <bulk-edit-schedule-modal v-model="bulkUpdateModal"
+                                  :caregiver-id="filterCaregiverId"
+                                  :client-id="filterClientId"
                                   @refresh-events="refreshEvents()"
         />
 
         <bulk-delete-schedule-modal v-model="bulkDeleteModal"
-                                  @refresh-events="refreshEvents()"
+                                    :caregiver-id="filterCaregiverId"
+                                    :client-id="filterClientId"
+                                    @refresh-events="refreshEvents()"
         />
     </b-card>
 </template>
@@ -96,8 +100,8 @@
             },
             initialCreateValues() {
                 return {
-                    'client_id': this.filterClientId,
-                    'caregiver_id': this.filterCaregiverId,
+                    'client_id': (this.filterClientId > 0) ? this.filterClientId : "",
+                    'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : "",
                 }
             }
         },

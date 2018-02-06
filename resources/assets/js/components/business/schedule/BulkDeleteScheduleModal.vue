@@ -61,8 +61,10 @@
                                 <b-form-group label="Client" label-for="client_id">
                                     <b-form-select id="client_id" 
                                                    v-model="form.client_id"
+                                                   :disabled="disabled.client_id"
                                     >
-                                        <option value="">--All Clients--</option>
+                                        <option value="-">--Please Select--</option>
+                                        <option value="">All Clients</option>
                                         <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text=""/>
@@ -72,8 +74,10 @@
                                 <b-form-group label="Caregiver" label-for="caregiver_id">
                                     <b-form-select id="caregiver_id"
                                                    v-model="form.caregiver_id"
+                                                   :disabled="disabled.caregiver_id"
                                     >
-                                        <option value="">--All Caregivers--</option>
+                                        <option value="-">--Please Select--</option>
+                                        <option value="">All Caregivers</option>
                                         <option value="0">Unassigned</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
@@ -119,9 +123,11 @@
         mixins: [FormatsNumbers],
 
         props: {
-            value: {},
-            selectedItem: {},
-            items: {},
+            'value': Boolean,
+            'selectedItem': Object,
+            'items': Object,
+            'caregiverId': {},
+            'clientId': {},
         },
 
         data() {
@@ -139,26 +145,12 @@
                 lockProviderFee: true,
                 clients: [],
                 caregivers: [],
-                form: new Form({
-                    'start_date': moment().format('MM/DD/YYYY'),
-                    'end_date': moment().format('MM/DD/YYYY'),
-                    'start_time': '09:00 AM',
-                    'hours_type': '',
-                    'client_id': '',
-                    'caregiver_id': '',
-                    'bydays': [],
-                    //
-                    // 'new_start_time': '',
-                    // 'new_duration': null,
-                    // 'new_hours_type': '',
-                    // 'new_overtime_duration': '',
-                    // 'new_caregiver_id': '',
-                    // 'new_caregiver_rate': '',
-                    // 'new_provider_fee': '',
-                    // 'new_note_method': '',
-                    // 'new_note_text': '',
-                }),
                 submitting: false,
+                form: new Form(),
+                disabled: {
+                    caregiver_id: (this.caregiverId > 0),
+                    client_id: (this.clientId > 0),
+                },
             }
         },
 
@@ -185,6 +177,41 @@
         },
 
         methods: {
+            makeForm() {
+                // Reset all data values back to defaults
+                this.new_end_time = '';
+                this.allFutureDates = false;
+                this.selectAllDays = false;
+                this.anyStartTime = false;
+                this.lockTiming = true;
+                this.lockHoursType = true;
+                this.entireShiftOvertime = false;
+                this.lockOvertimeHours = true;
+                this.lockCaregiverRate = true;
+                this.lockProviderFee = true;
+
+                // Recreate default form
+                this.form = new Form({
+                    'start_date': moment().format('MM/DD/YYYY'),
+                    'end_date': moment().format('MM/DD/YYYY'),
+                    'start_time': '09:00 AM',
+                    'hours_type': '',
+                    'client_id': (this.clientId > 0) ? this.clientId : '-',
+                    'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
+                    'bydays': [],
+                    //
+                    // 'new_start_time': '',
+                    // 'new_duration': null,
+                    // 'new_hours_type': '',
+                    // 'new_overtime_duration': '',
+                    // 'new_caregiver_id': '',
+                    // 'new_caregiver_rate': '',
+                    // 'new_provider_fee': '',
+                    // 'new_note_method': '',
+                    // 'new_note_text': '',
+                });
+            },
+
             unlockAndFocus(lock, event) {
                 console.log(lock, event);
                 this[lock] = false;
@@ -260,12 +287,26 @@
         },
 
         watch: {
+            value(val) {
+                if (val) this.makeForm();
+            },
+
             allFutureDates(val) {
                 this.form.end_date = (val) ? '01/01/2100' : moment().format('MM/DD/YYYY');
             },
 
             anyStartTime(val) {
                 this.form.start_time = null;
+            },
+
+            caregiverId(val) {
+                this.disabled.caregiver_id = (val > 0);
+                this.form.caregiver_id = (val > 0) ? val : '-';
+            },
+
+            clientId(val) {
+                this.disabled.client_id = (val > 0);
+                this.form.client_id = (val > 0) ? val : '-';
             },
 
             entireShiftOvertime(val) {

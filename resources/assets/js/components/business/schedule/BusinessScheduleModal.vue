@@ -187,12 +187,14 @@
             </b-card>
 
             <div slot="modal-footer">
-                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto">Copy</b-btn>
-                <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    <i class="fa fa-save" v-show="!submitting"></i>
                     {{ submitText }}
                 </b-btn>
+                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
+                <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
         </b-modal>
         <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="scheduleModal" v-else-if="maxHoursWarning">
@@ -213,12 +215,6 @@
 <script>
     export default {
         props: {
-            client: {
-                type: Object,
-                default() {
-                    return {};
-                }
-            },
             model: Boolean,
             initialValues: {
                 type: Object,
@@ -356,7 +352,7 @@
                     'starts_at':  "",
                     'duration': 0,
                     'caregiver_id': "",
-                    'client_id': (this.client.id) ? this.client.id : "",
+                    'client_id': "",
                     'caregiver_rate': "",
                     'provider_fee': "",
                     'notes': "",
@@ -446,6 +442,16 @@
                 }
             },
 
+            deleteSchedule() {
+                if (this.selectedSchedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                    let form = new Form();
+                    form.submit('delete', '/business/schedule/' + this.selectedSchedule.id)
+                        .then(response => {
+                            this.refreshEvents();
+                        });
+                }
+            },
+
             dayOfMonth(date) {
                 return moment(date).format('Do');
             },
@@ -468,7 +474,7 @@
             },
 
             loadClientData() {
-                if (!this.client.id) {
+                if (!this.client_id) {
                     let component = this;
                     axios.get('/business/clients/list')
                         .then(response => {
@@ -479,7 +485,7 @@
                 else {
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers();
-                    this.loadAllyPctFromClient(this.client.id);
+                    this.loadAllyPctFromClient(this.client_id);
                 }
             },
 

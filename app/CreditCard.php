@@ -117,6 +117,19 @@ class CreditCard extends Model implements ChargeableInterface
     }
 
     /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        $gateway = app()->make(CreditCardPaymentInterface::class);
+        return $gateway->refund($transaction, $amount);
+    }
+
+    /**
      * Determine if a new database record needs to be created
      * This is used for the preservation of payment method on transaction history records
      *

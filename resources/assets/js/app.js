@@ -6,6 +6,7 @@
  */
 
 require('./bootstrap');
+require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
@@ -61,9 +62,12 @@ Vue.component('admin-deposit-report', require('./components/admin/AdminDepositRe
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
+Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
+Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));
 Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
 Vue.component('admin-pending-deposits', require('./components/admin/AdminPendingDeposits.vue'));
 Vue.component('admin-pending-shifts', require('./components/admin/AdminPendingShifts.vue'));
+Vue.component('admin-reconciliation-report', require('./components/admin/AdminReconciliationReport'));
 Vue.component('admin-transaction', require('./components/admin/AdminTransaction.vue'));
 Vue.component('admin-transactions-report', require('./components/admin/AdminTransactionsReport.vue'));
 Vue.component('authorized-payment-checkbox', require('./components/admin/AuthorizePaymentCheckbox.vue'));

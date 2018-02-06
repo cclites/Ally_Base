@@ -15,6 +15,10 @@ class AxiosResponseHandler {
     handleError(error, alert = true) {
         this.error = error;
         this.response = error.response;
+        if (this.response.status === 503) {
+            this.handleAlert('error', 'The application is updating. Please try again in 1 minute.');
+            return
+        }
         if (this.response.data.errors) {
             this.formErrors = this.response.data.errors;
         }

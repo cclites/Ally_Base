@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
@@ -115,15 +116,24 @@ class ScheduleController extends BaseController
             $creator->interval($request->interval_type, $endDate, $request->bydays ?? []);
         }
 
-        $created = $creator->create();
-        if ($count = $created->count()) {
-            if ($count > 1) {
-                return new CreatedResponse('The scheduled shifts have been created.');
-            }
-            return new CreatedResponse('The scheduled shift has been created.');
+        if ($request->override_max_hours) {
+            $creator->overrideMaxHours();
         }
 
-        return new ErrorResponse(500, 'Unknown error');
+        try {
+            $created = $creator->create();
+            if ($count = $created->count()) {
+                if ($count > 1) {
+                    return new CreatedResponse('The scheduled shifts have been created.');
+                }
+                return new CreatedResponse('The scheduled shift has been created.');
+            }
+        }
+        catch (MaximumWeeklyHoursExceeded $e) {
+            return new ErrorResponse($e->getStatusCode(), $e->getMessage());
+        }
+
+        return new ErrorResponse(500, 'Unknown error creating the schedules.');
     }
 
     /**

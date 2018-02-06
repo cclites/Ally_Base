@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Contracts\ChargeableInterface;
+use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
 use Illuminate\Database\Eloquent\Model;
@@ -75,7 +76,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ask_on_confirm
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
-class Business extends Model implements ChargeableInterface
+class Business extends Model implements ChargeableInterface, ReconcilableInterface
 {
     protected $table = 'businesses';
     protected $guarded = ['id'];
@@ -182,7 +183,7 @@ class Business extends Model implements ChargeableInterface
     public function findActivity($code)
     {
         $activity = Activity::where(function ($q) {
-            $q->where('business_id', $this->business_id)
+            $q->where('business_id', $this->id)
                 ->orWhereNull('business_id');
         })
             ->where('code', $code)
@@ -238,6 +239,22 @@ class Business extends Model implements ChargeableInterface
         return false;
     }
 
+
+    /**
+     * Refund a previously charged transaction
+     *
+     * @param \App\GatewayTransaction $transaction
+     * @param $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        if ($this->paymentAccount) {
+            return $this->paymentAccount->refund($transaction, $amount);
+        }
+        return false;
+    }
+
     /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
@@ -266,5 +283,37 @@ class Business extends Model implements ChargeableInterface
     {
         // Businesses should already be persisted
         return ($this->id > 0);
+    }
+
+    /**
+     * Prepare a query for all gateway transactions that relate to this model
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function allTransactionsQuery()
+    {
+        return GatewayTransaction::select('gateway_transactions.*')
+                                 ->with('lastHistory')
+                                 ->leftJoin('bank_accounts', function($q) {
+                                     $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
+                                       ->where('gateway_transactions.method_type', BankAccount::class);
+                                 })
+                                 ->whereHas('deposit', function ($q) {
+                                     $q->where('business_id', $this->id)
+                                       ->whereNull('caregiver_id');
+                                 })
+                                 ->orWhere('bank_accounts.business_id', $this->id);
+    }
+
+    /**
+     * Get all gateway transactions that relate to this client
+     *
+     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     */
+    public function getAllTransactions()
+    {
+        return $this->allTransactionsQuery()
+                    ->orderBy('created_at')
+                    ->get();
     }
 }

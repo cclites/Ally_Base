@@ -9,7 +9,7 @@ use App\Exceptions\PaymentMethodError;
 use App\GatewayTransaction;
 use App\PhoneNumber;
 
-class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCardPaymentInterface {
+class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCardPaymentInterface, RefundInterface {
 
     const APPROVED = 1;
     const DECLINED = 2;
@@ -412,5 +412,18 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     {
         $this->billing['phone'] = $phone->national_number;
         return $this;
+    }
+
+    /**
+     * @param \App\GatewayTransaction $transaction
+     * @param float $amount
+     * @return \App\GatewayTransaction|false
+     */
+    public function refund(GatewayTransaction $transaction, $amount)
+    {
+        $this->params['transactionid'] = $transaction->transaction_id;
+        $this->params['amount'] = $amount;
+        $this->params['type'] = 'refund';
+        return $this->post($transaction->method);
     }
 }

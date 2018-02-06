@@ -77,11 +77,7 @@ class ClockIn extends ClockBase
         ]);
 
         if ($shift->verified) {
-            if (!is_null($this->latitude)) {
-                $this->verifyGeocode($client);
-            } else {
-                $this->verifyPhoneNumber($client);
-            }
+            $this->verifyEVV($client);
         }
 
         if ($this->caregiver->shifts()->save($shift)) {
