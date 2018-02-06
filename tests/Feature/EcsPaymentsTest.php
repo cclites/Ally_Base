@@ -76,18 +76,12 @@ class EcsPaymentsTest extends TestCase
         $this->assertEquals(25.00, $transaction->amount);
     }
 
-    public function testCCDeclinedThrowsException()
+    public function testCCDeclinedStillCreatesTransaction()
     {
         $ecs = new ECSPayment();
-        $this->expectException(PaymentMethodDeclined::class);
         $transaction = $ecs->chargeCard($this->card, 0.50);
-    }
-
-    public function testACHDeclinedThrowsException()
-    {
-        $ecs = new ECSPayment();
-        $this->expectException(PaymentMethodDeclined::class);
-        $transaction = $ecs->chargeAccount($this->account, 0.50);
+        $this->assertEquals(true, $transaction->declined);
+        $this->assertEquals(false, $transaction->success);
     }
 
     public function testInvalidCCThrowsException()

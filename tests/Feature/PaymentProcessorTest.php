@@ -4,7 +4,11 @@ namespace Tests\Feature;
 
 use App\Business;
 use App\Client;
+use App\Contracts\ChargeableInterface;
 use App\CreditCard;
+use App\Gateway\CreditCardPaymentInterface;
+use App\GatewayTransaction;
+use App\Payments\ClientPaymentAggregator;
 use App\Payments\PaymentProcessor;
 use App\Shift;
 use Carbon\Carbon;
@@ -35,8 +39,8 @@ class PaymentProcessorTest extends TestCase
         parent::setUp();
 
         $this->business = factory(Business::class)->create();
-        $this->clients = factory(Client::class, 3)->create(['business_id' => $this->business->id, 'fee_override' => 0]);
-        foreach($this->clients as $client) {
+        $clients = factory(Client::class, 3)->create(['business_id' => $this->business->id, 'fee_override' => 0]);
+        foreach($clients as $client) {
             // Create shift for client
             factory(Shift::class)->create([
                 'checked_in_time' => '2018-01-30 12:00:00',
@@ -52,6 +56,9 @@ class PaymentProcessorTest extends TestCase
             // Create cc for client
             $client->setPaymentMethod(factory(CreditCard::class)->make());
         }
+
+        // Work-around for Laravel Bug #23048 (refetch clients after saving payment method)
+        $this->clients = Client::all();
 
         $this->processor = new PaymentProcessor($this->business, new Carbon('2018-01-01'), new Carbon('2018-02-01'));
     }
@@ -99,4 +106,37 @@ class PaymentProcessorTest extends TestCase
         $payments = $this->processor->getPaymentModels();
         $this->assertCount(1, $payments);
     }
+
+    /**
+     * Used to test instant failures (like CC declines)
+     */
+    public function test_payment_failure_puts_client_on_hold()
+    {
+        $client = $this->clients[0];
+
+        // Mock Gateway Adapter
+        $mockedTransaction = GatewayTransaction::create([
+            'gateway_id' => 'test',
+            'transaction_type' => 'sale',
+            'transaction_id' => '12345',
+            'amount' => '15.00',
+            'declined' => true,
+            'success' => false,
+        ]);
+        $mock = \Mockery::mock(ChargeableInterface::class);
+        $mock->shouldReceive('charge')
+             ->with('15.00')
+             ->once()
+             ->andReturn($mockedTransaction);
+        $client->setRelation('defaultPayment', $mock);
+
+        // Charge Client
+        $aggregator = new ClientPaymentAggregator($client, new Carbon('2018-01-01'), new Carbon('2018-02-01'));
+        $transaction = $aggregator->charge();
+
+        $this->assertEquals(false, $transaction->payment->success);
+        $this->assertTrue($client->isOnHold());
+        $this->assertEquals(Shift::WAITING_FOR_CHARGE, $client->shifts()->first()->status);
+    }
+
 }

@@ -7,6 +7,7 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Events\UnverifiedShiftCreated;
+use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
@@ -42,6 +43,7 @@ class EventServiceProvider extends ServiceProvider
             PostToSlackOnFailedTransaction::class,
             UpdateDepositOnFailedTransaction::class,
             UpdatePaymentOnFailedTransaction::class,
+            AddPaymentHoldsOnFailedTransaction::class,
         ]
     ];
 
