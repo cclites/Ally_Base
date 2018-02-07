@@ -116,7 +116,7 @@
     </b-card>
 </template>
 
-<script lang=babel>
+<script>
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     import FormatsDates from '../../mixins/FormatsDates';
 
@@ -216,6 +216,7 @@
                 ]
             }
         },
+
         beforeMount() {
             if (! moment(this.start_date).isValid() ) {
                 this.start_date = moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY')
@@ -224,6 +225,7 @@
                 this.end_date = moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY')
             }
         },
+
         mounted() {
             this.loadItems();
             this.loadFilters();
@@ -274,7 +276,7 @@
                 });
             },
             
-            loadUnsettledItems() {
+            loadItems() {
                 let params = {
                     start_date: this.start_date,
                     end_date: this.end_date,
@@ -287,15 +289,9 @@
                 
                 axios.get('/admin/reports/unsettled/data', {params})
                     .then(response => {
-                        this.items = response.data.map(item => {
-                            return item;
-                        });
-                        this.totalRows = this.items.length;
+                        this.items = response.data;
+                        this.totalRows = response.data.length;
                     });
-            },
-
-            loadItems() {
-                return this.loadUnsettledItems();
             },
 
             dayFormat(date) {
