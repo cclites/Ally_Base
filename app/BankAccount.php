@@ -66,7 +66,7 @@ class BankAccount extends Model implements ChargeableInterface
         return $this->belongsTo(Business::class);
     }
 
-    public function transactions()
+    public function chargedTransactions()
     {
         return $this->morphMany(GatewayTransaction::class, 'method');
     }

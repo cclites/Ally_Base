@@ -47,4 +47,11 @@ interface ChargeableInterface
      * Save a new Chargeable instance to the database
      */
     public function persistChargeable();
+
+    /**
+     * Relationship to Gateway Transactions (method)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function chargedTransactions();
 }

@@ -181,6 +181,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(CaregiverApplication::class);
     }
 
+    public function chargedTransactions()
+    {
+        return $this->morphMany(GatewayTransaction::class, 'method');
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
