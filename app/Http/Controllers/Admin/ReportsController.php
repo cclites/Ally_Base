@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Payment;
 use App\Reports\ShiftsReport;
 use App\Reports\UnsettledReport;
 use App\Shift;
@@ -39,5 +40,74 @@ class ReportsController extends Controller
             });
         
         return $report->rows();
+    }
+
+    public function finances()
+    {
+        return view('admin.reports.finances');
+    }
+
+    public function financesData()
+    {
+        $payments = Payment::all();
+        $stats = collect([]);
+        $types = $payments->groupBy('payment_type');
+        foreach ($types as $key => $value) {
+            $stats->push([
+                'name' => $key,
+                'total' => $value->sum('amount'),
+                'caregiver' => $value->sum('caregiver_allotment'),
+                'business' => $value->sum('business_allotment'),
+                'system' => $value->sum('system_allotment')
+            ]);
+        }
+
+        $total = $payments->sum('amount');
+        $breakdown = collect([
+            [
+                'name' => 'ach',
+                'label' => 'ACH/ACH-P/Offline',
+                'total' => $payments->reduce(function ($carry, $item) {
+                    switch (strtolower($item->payment_type)) {
+                        case 'ach':
+                        case 'ach-p':
+                        case 'manual':
+                            return $carry + $item->amount;
+                        default:
+                            return $carry;
+                    }
+                })
+            ],
+            [
+                'name' => 'cc',
+                'label' => 'CC/AMEX',
+                'total' => $payments->reduce(function ($carry, $item) {
+                    switch (strtolower($item->payment_type)) {
+                        case 'amex':
+                        case 'cc':
+                            return $carry + $item->amount;
+                        default:
+                            return $carry;
+                    }
+                })
+            ],
+            [
+                'name' => 'medicaid',
+                'label' => 'MedicAid',
+                'total' => $payments->reduce(function ($carry, $item) {
+                    switch (strtolower($item->payment_type)) {
+                        case 'medicaid':
+                            return $carry + $item->amount;
+                        default:
+                            return $carry;
+                    }
+                })
+            ]
+        ])
+        ->map(function ($item) use ($total) {
+            $item['percentage'] = $item['total'] / $total;
+            return $item;
+        });
+        return response()->json(compact('stats', 'breakdown'));
     }
 }

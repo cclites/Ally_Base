@@ -245,6 +245,8 @@ Route::group([
     Route::get('reports/reconciliation/client/{client}', 'Admin\ReconciliationController@client')->name('reports.reconciliation.client');
     Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
     Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
+    Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
+    Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

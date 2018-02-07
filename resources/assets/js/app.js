@@ -77,6 +77,7 @@ Vue.component('business-edit', require('./components/BusinessEdit.vue'));
 Vue.component('business-list', require('./components/BusinessList.vue'));
 Vue.component('business-office-user-list', require('./components/admin/BusinessOfficeUserList'));
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
+Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 
 // Office User
 Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
