@@ -95,27 +95,22 @@ class ClientCaregiverController extends BaseController
         $caregiver = Caregiver::find(request('caregiver_id'));
 
         if ($caregiver->isClockedIn($client->id)) {
-            return new ErrorResponse(500, $caregiver->name() . ' is clocked in for this client.');
+            return new ErrorResponse(400, $caregiver->name() . ' is clocked in for this client.');
         }
 
         // check for scheduled shifts and or clockin
         $check = $caregiver->schedules()
             ->where('client_id', $client->id)
-            ->where('end_date', '>', Carbon::now())
-            ->orWhere(function ($query) {
-                $query->where('end_date', Carbon::now())
-                    ->where('time', '>=', Carbon::now());
-            })
-            ->get()
-            ->toArray();
+            ->where('starts_at', '>=', Carbon::now($this->business()->timezone)->subHour())
+            ->exists();
 
         if ($check) {
-            $msg = $caregiver->name() . ' has future items on the schedule for ' . $client->name() . ' and can\'t be removed';
-            return new ErrorResponse(500, $msg);
+            $msg = $caregiver->name() . ' has future scheduled shifts for ' . $client->name() . ' and cannot be removed.';
+            return new ErrorResponse(400, $msg);
         }
 
         $client->caregivers()->detach($caregiver->id);
 
-        return new SuccessResponse($caregiver->name() . ' detached from ' . $client->name());
+        return new SuccessResponse($caregiver->name() . ' removed from ' . $client->name());
     }
 }
