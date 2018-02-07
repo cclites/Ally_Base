@@ -183,6 +183,9 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
 
     public function chargedTransactions()
     {
+        if ($this->paymentAccount) {
+            return $this->paymentAccount->chargedTransactions();
+        }
         return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
