@@ -57,6 +57,7 @@ class OnHoldReport extends BaseReport
                                'id'                  => $business->id,
                                'name'                => $business->name,
                                'business'            => $business->name,
+                               'business_id'         => $business->id,
                                'payment_outstanding' => $payment->amount ?? 0.00,
                                'deposit_outstanding' => $deposit->amount ?? 0.00,
                                'last_transaction_id' => $business->allTransactionsQuery()
@@ -83,6 +84,7 @@ class OnHoldReport extends BaseReport
                                 'id'                  => $caregiver->id,
                                 'name'                => $caregiver->nameLastFirst(),
                                 'business'            => $business->name,
+                                'business_id'         => $business->id,
                                 'payment_outstanding' => 0.00,
                                 'deposit_outstanding' => $deposit->amount ?? 0.00,
                                 'last_transaction_id' => $caregiver->allTransactionsQuery()
@@ -109,6 +111,7 @@ class OnHoldReport extends BaseReport
                              'id'                  => $client->id,
                              'name'                => $client->nameLastFirst(),
                              'business'            => $business->name,
+                             'business_id'         => $business->id,
                              'payment_outstanding' => $payment->amount ?? 0.00,
                              'deposit_outstanding' => 0.00,
                              'last_transaction_id' => $client->allTransactionsQuery()

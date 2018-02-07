@@ -2,7 +2,13 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="6">
-
+                <b-form-select
+                        v-model="businessId"
+                        required
+                >
+                    <option value="">--Filter by Provider--</option>
+                    <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                </b-form-select>
             </b-col>
             <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -76,21 +82,28 @@
                         sortable: true,
                     },
                     'actions'
-                ]
+                ],
+                businesses: [],
+                businessId: "",
             }
         },
 
         mounted() {
+            this.loadBusinesses();
             this.loadData();
         },
 
         methods: {
 
             loadData() {
-                axios.get('/admin/reports/on_hold?json=1')
+                axios.get('/admin/reports/on_hold?json=1&business_id=' + this.businessId)
                     .then(response => {
                         this.items = response.data;
                     });
+            },
+
+            loadBusinesses() {
+                axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
 
             removeHold(item) {
@@ -105,5 +118,11 @@
                     });
             },
         },
+
+        watch: {
+            businessId() {
+                this.loadData();
+            }
+        }
     }
 </script>
