@@ -494,12 +494,12 @@
                     if (this.startTime === this.endTime) {
                         return 1440; // have 12:00am to 12:00am = 24 hours
                     }
-                    let start = moment('2017-01-01 ' + this.startTime, 'YYYY-MM-DD HH:mm');
-                    let end = moment('2017-01-01 ' + this.endTime, 'YYYY-MM-DD HH:mm');
+                    let start = moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm');
+                    let end = moment(this.startDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
                     console.log(start, end);
                     if (start && end) {
                         if (end.isBefore(start)) {
-                            end = moment('2017-01-02 ' + this.endTime, 'YYYY-MM-DD HH:mm');
+                            end = end.add(1, 'days');
                         }
                         let diff = end.diff(start, 'minutes');
                         if (diff) {
