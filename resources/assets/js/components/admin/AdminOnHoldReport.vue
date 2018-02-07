@@ -18,7 +18,8 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <b-btn :href="'/admin/transactions/' + row.item.last_transaction_id" v-if="row.item.last_transaction_id">View Last Transaction</b-btn>
+                    <b-btn size="sm" @click="removeHold(row.item)" variant="primary">Remove Hold</b-btn>
+                    <b-btn size="sm" :href="'/admin/transactions/' + row.item.last_transaction_id" v-if="row.item.last_transaction_id">View Last Transaction</b-btn>
                 </template>
             </b-table>
         </div>
@@ -54,15 +55,18 @@
                     },
                     {
                         key: 'business',
+                        label: 'Registry',
                         sortable: true,
                     },
                     {
                         key: 'payment_outstanding',
+                        label: 'Charges Outstanding',
                         sortable: true,
                         formatter: this.numberFormat
                     },
                     {
                         key: 'deposit_outstanding',
+                        label: 'Deposits Outstanding',
                         sortable: true,
                         formatter: this.numberFormat
                     },
@@ -86,6 +90,18 @@
                 axios.get('/admin/reports/on_hold?json=1')
                     .then(response => {
                         this.items = response.data;
+                    });
+            },
+
+            removeHold(item) {
+                let form = new Form();
+                let url = '/admin/users/' + item.id + '/hold';
+                if (item.type === 'business') {
+                    url = '/admin/businesses/' + item.id + '/hold'
+                }
+                form.submit('delete', url)
+                    .then(response => {
+                        this.items = this.items.filter(current => current.id !== item.id);
                     });
             },
         },
