@@ -211,10 +211,15 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::post('users/{user}/hold', 'Admin\UserController@addHold');
+    Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');
+    Route::post('businesses/{business}/hold', 'Admin\BusinessController@addHold');
+    Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
+
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');

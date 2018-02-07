@@ -21,6 +21,8 @@
                      @filtered="onFiltered"
             >
                 <template slot="actions" scope="row">
+                    <b-btn size="sm" @click="addHold(row.item)" variant="danger" v-if="!row.item.payment_hold">Add Hold</b-btn>
+                    <b-btn size="sm" @click="removeHold(row.item)" variant="primary" v-else>Remove Hold</b-btn>
                     <b-btn size="sm" :href="'/admin/businesses/' + row.item.id">Edit</b-btn>
                 </template>
             </b-table>
@@ -94,7 +96,21 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
+            },
+            addHold(business) {
+                let form = new Form();
+                form.submit('post', '/admin/businesses/' + business.id + '/hold')
+                    .then(response => {
+                        business.payment_hold = true;
+                    });
+            },
+            removeHold(business) {
+                let form = new Form();
+                form.submit('delete', '/admin/businesses/' + business.id + '/hold')
+                    .then(response => {
+                        business.payment_hold = false;
+                    });
+            },
         }
     }
 </script>

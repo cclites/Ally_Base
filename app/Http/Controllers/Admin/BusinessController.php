@@ -20,7 +20,7 @@ class BusinessController extends Controller
      */
     public function index(Request $request)
     {
-        $businesses = Business::orderBy('name')->get();
+        $businesses = Business::with('paymentHold')->orderBy('name')->get();
 
         if ($request->expectsJson()) {
             return $businesses;
@@ -133,5 +133,17 @@ class BusinessController extends Controller
     public function destroy(Business $business)
     {
         //
+    }
+
+    public function addHold(Business $business)
+    {
+        $business->addHold();
+        return new SuccessResponse('A payment hold has been placed on ' . $business->name);
+    }
+
+    public function removeHold(Business $business)
+    {
+        $business->removeHold();
+        return new SuccessResponse('The payment hold has been removed from ' . $business->name);
     }
 }

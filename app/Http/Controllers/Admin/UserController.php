@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Responses\SuccessResponse;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -16,7 +17,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $users = User::with([])
+            $users = User::with(['paymentHold'])
                 ->leftJoin($sql = \DB::raw("
                     (
                         SELECT 
@@ -107,5 +108,17 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+    }
+
+    public function addHold(User $user)
+    {
+        $user->addHold();
+        return new SuccessResponse('A payment hold has been placed on ' . $user->name());
+    }
+
+    public function removeHold(User $user)
+    {
+        $user->removeHold();
+        return new SuccessResponse('The payment hold has been removed from ' . $user->name());
     }
 }

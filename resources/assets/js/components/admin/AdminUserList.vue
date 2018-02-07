@@ -23,6 +23,10 @@
                     {{ data.value | date }}
                 </template>
                 <template slot="actions" scope="row">
+                    <span v-if="row.item.role_type == 'caregiver' || row.item.role_type == 'client'">
+                         <b-btn size="sm" @click="addHold(row.item)" variant="danger" v-if="!row.item.payment_hold">Add Hold</b-btn>
+                        <b-btn size="sm" @click="removeHold(row.item)" variant="primary" v-else>Remove Hold</b-btn>
+                    </span>
                     <b-btn size="sm" :href="'/admin/impersonate/' + row.item.id">Impersonate</b-btn>
                 </template>
             </b-table>
@@ -126,7 +130,21 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
+            },
+            addHold(user) {
+                let form = new Form();
+                form.submit('post', '/admin/users/' + user.id + '/hold')
+                    .then(response => {
+                        user.payment_hold = true;
+                    });
+            },
+            removeHold(user) {
+                let form = new Form();
+                form.submit('delete', '/admin/users/' + user.id + '/hold')
+                    .then(response => {
+                        user.payment_hold = false;
+                    });
+            },
         }
     }
 </script>

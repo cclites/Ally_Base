@@ -37,7 +37,7 @@ class OnHoldReport extends BaseReport
             $this->getClients()->toArray()
         ));
 
-        return $collection->sortBy('name');
+        return $collection->sortBy('name')->values();
     }
 
     protected function getBusinesses()
