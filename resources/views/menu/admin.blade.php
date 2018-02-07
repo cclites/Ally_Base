@@ -34,6 +34,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
         <li><a href="{{ route('admin.reports.reconciliation') }}">Reconciliation Report</a></li>
+        <li><a href="{{ route('admin.reports.on_hold') }}">On Hold Report</a></li>
     </ul>
 </li>
 
