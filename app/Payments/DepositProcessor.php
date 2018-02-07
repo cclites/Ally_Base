@@ -3,7 +3,6 @@ namespace App\Payments;
 
 use App\Business;
 use App\Caregiver;
-use App\Shift;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
 
@@ -34,9 +33,9 @@ class DepositProcessor
      */
     public $logger;
 
-    public function __construct(Business $business, Carbon $startDate, Carbon $endDate, LoggerInterface $logger)
+    public function __construct(Business $business, Carbon $startDate, Carbon $endDate, LoggerInterface $logger = null)
     {
-        $this->logger = $logger;
+        $this->logger = $logger ?: logger();
         $this->business = $business;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -49,11 +48,23 @@ class DepositProcessor
      */
     public function process()
     {
-        foreach($this->business->caregivers as $caregiver) {
+        foreach($this->getCaregivers() as $caregiver) {
             $this->processCaregiver($caregiver);
         }
         $this->processBusiness();
         return $this->countSuccess();
+    }
+
+    /**
+     * Return a collection of all caregiver models eligible for payment under this business
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|Caregiver[]
+     */
+    public function getCaregivers()
+    {
+        return $this->business->caregivers()
+                              ->doesntHave('paymentHold')
+                              ->get();
     }
 
     /**
@@ -63,8 +74,11 @@ class DepositProcessor
      */
     public function getDepositData()
     {
-        $caregivers = $this->business->caregivers->sortBy('nameLastFirst');
-        $data = [$this->getBusinessDeposit($this->business)];
+        $caregivers = $this->getCaregivers()->sortBy('nameLastFirst');
+        $data = [];
+        if ($businessDeposit = $this->getBusinessDeposit($this->business)) {
+            if ($businessDeposit->amount > 0) $data[] = $businessDeposit;
+        }
         foreach($caregivers as $caregiver) {
             $deposit = $this->getCaregiverDeposit($caregiver);
             if ($deposit->amount > 0) $data[] = $deposit;
@@ -109,7 +123,12 @@ class DepositProcessor
 
     public function getBusinessDeposit(Business $business, $aggregator = null)
     {
-        if (!$aggregator) $aggregator = $this->getBusinessAggregator($business);
+        if ($this->business->isOnHold()) {
+            return null;
+        }
+        if (!$aggregator) {
+            $aggregator = $this->getBusinessAggregator($business);
+        }
         $deposit = $aggregator->getDeposit();
         return $deposit;
     }
@@ -124,21 +143,23 @@ class DepositProcessor
     {
         $aggregator = $this->getBusinessAggregator($this->business);
         $deposit = $this->getBusinessDeposit($this->business, $aggregator);
-        if ($deposit->amount > 0) {
-            $transaction = false;
-            try {
-                $transaction = $aggregator->deposit();
-                $this->logger->info("Deposited " . $deposit->amount . " to business " . $this->business->name);
-            }
-            catch (\Exception $e) {
-                $this->logger->error('processBusiness Error: ' . $e->getMessage());
-            }
-            if (!$transaction) {
-                $this->logger->warning('processBusiness Warning: Transaction not found for ' . $this->business->name);
-            }
-            else {
-                $this->success++;
-            }
+        if (!$deposit || $deposit->amount <= 0) {
+            return false;
+        }
+
+        $transaction = false;
+        try {
+            $transaction = $aggregator->deposit();
+            $this->logger->info("Deposited " . $deposit->amount . " to business " . $this->business->name);
+        }
+        catch (\Exception $e) {
+            $this->logger->error('processBusiness Error: ' . $e->getMessage());
+        }
+        if (!$transaction) {
+            $this->logger->warning('processBusiness Warning: Transaction not found for ' . $this->business->name);
+        }
+        else {
+            $this->success++;
         }
     }
 

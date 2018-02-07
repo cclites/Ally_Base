@@ -195,6 +195,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
             'transaction_type' => $this->params['type'],
             'amount' => $this->params['amount'] ?? 0,
             'success' => ($response == ECSPayment::APPROVED),
+            'declined' => ($response == ECSPayment::DECLINED),
             'cvv_pass' => (!empty($data['cvvresponse']) && in_array($data['cvvresponse'], $this->cvvValidResponses)),
             'avs_pass' => (!empty($data['avsresponse']) && in_array($data['avsresponse'], $this->avsValidResponses)),
             'response_text' => $data['responsetext'] ?? null,
@@ -205,11 +206,8 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
 
         $transaction->save();
 
-        if ($response == ECSPayment::DECLINED) {
-            throw new PaymentMethodDeclined('Payment method declined: ' . $text);
-        }
-        else if ($response == ECSPayment::ERROR) {
-            throw new PaymentMethodError('Payment method error: ' . $text);
+        if ($response == ECSPayment::ERROR) {
+            echo 'Payment method error: ' . $text . "\n";
         }
 
         return $transaction;

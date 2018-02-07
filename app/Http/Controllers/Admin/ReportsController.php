@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Reports\OnHoldReport;
 use App\Reports\ShiftsReport;
 use App\Reports\UnsettledReport;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 
 class ReportsController extends Controller
@@ -39,5 +41,14 @@ class ReportsController extends Controller
             });
         
         return $report->rows();
+    }
+
+    public function onHold(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new OnHoldReport();
+            return $report->rows();
+        }
+        return view('admin.reports.on_hold');
     }
 }

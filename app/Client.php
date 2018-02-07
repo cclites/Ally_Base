@@ -5,6 +5,7 @@ namespace App;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;
+use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Shifts\AllyFeeCalculator;
@@ -96,9 +97,10 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface
+class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
 {
     use IsUserRole, Notifiable;
+    use \App\Traits\HasPaymentHold;
 
     public $timestamps = false;
     public $hidden = ['ssn'];

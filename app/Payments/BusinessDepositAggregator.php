@@ -23,13 +23,13 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
         $this->startDate = $startDate->setTimezone('UTC');
         $this->endDate = $endDate->setTimezone('UTC');
         $this->business = $business;
-
-        $this->shifts = Shift::whereAwaitingBusinessDeposit()
-                ->whereBetween('checked_in_time', [$startDate, $endDate])
-                ->where('business_id', $this->business->id)
-                ->get();
     }
 
+    /**
+     * Get the unsaved version of this aggregated deposit
+     *
+     * @return \App\Deposit
+     */
     public function getDeposit()
     {
         $deposit = new Deposit([
@@ -38,7 +38,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
             'amount' => 0,
         ]);
 
-        foreach($this->shifts as $shift) {
+        foreach($this->getShifts() as $shift) {
             $deposit->amount = bcadd($deposit->amount, $shift->costs()->getProviderFee(), 2);
         }
 
@@ -46,16 +46,38 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
         return $deposit;
     }
 
+    /**
+     * Get all the related shift models for this deposit
+     *
+     * @return \App\Shift[]|\Illuminate\Database\Eloquent\Collection
+     */
     public function getShifts()
     {
+        if (!$this->shifts) {
+            $this->shifts = Shift::whereAwaitingBusinessDeposit()
+                                 ->whereBetween('checked_in_time', [$this->startDate, $this->endDate])
+                                 ->where('business_id', $this->business->id)
+                                 ->get();
+        }
+
         return $this->shifts;
     }
 
+    /**
+     * Get all the related shift IDs for this deposit
+     *
+     * @return array
+     */
     public function getShiftIds()
     {
         return $this->getShifts()->pluck('id')->toArray();
     }
 
+    /**
+     * Process and persist the deposit
+     *
+     * @return \App\GatewayTransaction|bool|false
+     */
     public function deposit()
     {
         $deposit = $this->getDeposit();

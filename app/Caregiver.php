@@ -4,6 +4,7 @@ namespace App;
 
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
+use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
@@ -60,9 +61,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
 {
     use IsUserRole;
+    use \App\Traits\HasPaymentHold;
 
     protected $table = 'caregivers';
     public $timestamps = false;
