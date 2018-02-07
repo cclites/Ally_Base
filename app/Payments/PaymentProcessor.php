@@ -121,7 +121,6 @@ class PaymentProcessor
 
         // Add business aggregator as long as business is not on hold
         if (!$this->business->isOnHold()) {
-            dd($this->business->isOnHold(), $this->business->paymentHold);
             $aggregators[] = $businessPayment;
         }
 
