@@ -22,6 +22,10 @@
                         {{ formatDate(row.item.start) }} - {{ formatDate(row.item.end) }}
                     </span>
                 </template>
+                <template slot="success" scope="data">
+                    <span style="color: green;" v-if="data.value">Complete</span>
+                    <span style="color: darkred;" v-else>Failed</span>
+                </template>
                 <template slot="actions" scope="data">
                     <b-btn :href="'/reports/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">View Details</b-btn>
                     <b-btn :href="'/reports/payment-history/' + data.item.id + '/print?type=pdf'" class="btn btn-secondary">Download</b-btn>
@@ -31,6 +35,9 @@
                 </template>
                 <template slot="FOOT_week" scope="data">
                     {{ selectedYear }}
+                </template>
+                <template slot="FOOT_success" scope="data">
+                    -
                 </template>
                 <template slot="FOOT_amount" scope="data">
                     {{ total }}
@@ -63,6 +70,7 @@
                 fields: [
                     { key: 'created_at', label: 'Paid' },
                     { key: 'week', label: 'Shifts Added'},
+                    { key: 'success', label: 'Deposit Status' },
                     {
                         key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value); }
@@ -89,7 +97,8 @@
             },
 
             total() {
-                return this.moneyFormat(_.sumBy(this.items, 'amount'));
+                let items = this.items.filter(item => item.success === 1);
+                return this.moneyFormat(_.sumBy(items, 'amount'));
             },
 
             years() {

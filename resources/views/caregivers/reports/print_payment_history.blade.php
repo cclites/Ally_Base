@@ -32,6 +32,7 @@
             <tr>
                 <th>Paid</th>
                 <th>Shifts Added</th>
+                <th>Deposit Status</th>
                 <th>Amount</th>
             </tr>
             </thead>
@@ -46,6 +47,13 @@
                             {{ \Carbon\Carbon::parse($deposit->start)->format('m/d/Y') }} - {{ \Carbon\Carbon::parse($deposit->end)->format('m/d/Y') }}
                         @endif
                     </td>
+                    <td>
+                        @if ($deposit->success)
+                            <span style="color: green">Completed</span>
+                        @else
+                            <span style="color: darkred">Failed/Returned</span>
+                        @endif
+                    </td>
                     <td>&dollar;{{ number_format($deposit->amount, 2) }}</td>
                 </tr>
             @endforeach
@@ -54,7 +62,8 @@
             <tr>
                 <th>Total YTD</th>
                 <th>{{ request()->year }}</th>
-                <th>Total: &dollar;{{ number_format($deposits->sum('amount'), 2) }}</th>
+                <th></th>
+                <th>Total: &dollar;{{ number_format($deposits->where('success', 1)->sum('amount'), 2) }}</th>
             </tr>
             </tfoot>
         </table>
