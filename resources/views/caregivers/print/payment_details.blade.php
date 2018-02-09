@@ -61,6 +61,16 @@
                         <td>Deposit Date</td>
                         <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
                     </tr>
+                    <tr>
+                        <td><strong>Deposit Status: </strong></td>
+                        <td>
+                            @if ($deposit->success)
+                                <span style="color: green">Completed</span>
+                            @else
+                                <span style="color: darkred">Failed/Returned</span>
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>

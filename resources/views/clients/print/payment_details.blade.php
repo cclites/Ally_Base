@@ -102,6 +102,16 @@
                             </td>
                         </tr>
                     @endif
+                    <tr>
+                        <td><strong>Payment Status: </strong></td>
+                        <td>
+                            @if ($payment->success)
+                                <span style="color: green">Completed</span>
+                            @else
+                                <span style="color: darkred">Failed</span>
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
