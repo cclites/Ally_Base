@@ -231,6 +231,9 @@ Route::group([
     Route::view('charges/manual', 'admin.charges.manual')->name('charges.manual');
     Route::post('charges/manual', 'Admin\ChargesController@manualCharge');
     Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
+    Route::get('deposits/failed', 'Admin\DepositsController@failed')->name('deposits.failed');
+    Route::post('deposits/successful/{deposit}', 'Admin\DepositsController@markSuccessful')->name('deposits.mark_successful');
+    Route::post('deposits/failed/{deposit}', 'Admin\DepositsController@markFailed')->name('deposits.mark_failed');
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');

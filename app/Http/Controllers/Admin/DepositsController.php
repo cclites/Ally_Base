@@ -107,4 +107,31 @@ class DepositsController extends Controller
         return new ErrorResponse(400, 'Transaction failure');
     }
 
+    public function failed(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $deposits = Deposit::where('success', 0)->with(['transaction', 'transaction.lastHistory', 'caregiver', 'business'])->orderBy('id', 'DESC')->get();
+            return $deposits;
+        }
+
+        return view('admin.reports.failed_deposits');
+    }
+
+    public function markSuccessful(Deposit $deposit)
+    {
+        if ($deposit->transaction) {
+            $deposit->transaction->update(['success' => true]);
+        }
+        $deposit->update(['success' => true]);
+        return new SuccessResponse('Deposit marked as successful.');
+    }
+
+    public function markFailed(Deposit $deposit)
+    {
+        if ($deposit->transaction) {
+            $deposit->transaction->update(['success' => false]);
+        }
+        $deposit->update(['success' => false]);
+        return new SuccessResponse('Deposit marked as failed.');
+    }
 }
