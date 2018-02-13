@@ -37,7 +37,6 @@ class ShiftController extends BaseController
             'other_expenses_desc' => 'nullable',
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
-            'verified' => 'boolean',
             'caregiver_rate' => 'required|numeric|max:1000|min:0',
             'provider_fee' => 'required|numeric|max:1000|min:0',
             'hours_type' => 'required|in:default,overtime,holiday',
@@ -49,6 +48,7 @@ class ShiftController extends BaseController
         $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
+        $data['verified'] = false;
 
         if ($shift = Shift::create($data)) {
             $shift->activities()->sync($request->input('activities', []));
@@ -126,7 +126,6 @@ class ShiftController extends BaseController
             'other_expenses_desc' => 'nullable',
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date',
-            'verified' => 'boolean',
             'caregiver_rate' => 'required|numeric|max:1000|min:0',
             'provider_fee' => 'required|numeric|max:1000|min:0',
             'hours_type' => 'required|in:default,overtime,holiday',
@@ -136,10 +135,6 @@ class ShiftController extends BaseController
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
-
-        if (!empty($data['verified']) && $data['verified'] != $shift->verified) {
-            event(new UnverifiedShiftConfirmed($shift));
-        }
 
         if ($shift->update($data)) {
             if (isset($adminOverride)) {
