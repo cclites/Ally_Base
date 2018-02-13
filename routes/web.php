@@ -42,7 +42,6 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/phone', 'PhoneController@store');
     Route::put('/profile/phone/{id}', 'PhoneController@update');
     Route::delete('/profile/phone/{id}', 'PhoneController@destroy');
-    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -54,12 +53,13 @@ Route::group(['middleware' => 'auth'], function() {
 Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
-    'namespace' => 'Clients'
 ], function () {
-    Route::post('shift-history/approve', 'ShiftController@approveWeek');
-    Route::get('shift-history/{week?}', 'ShiftController@index');
-    Route::get('payment-history/{id}/print', 'PaymentHistoryController@printDetails');
-    Route::resource('payment-history', 'PaymentHistoryController');
+    Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
+    Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
+    Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
+    Route::resource('payment-history', 'Clients\PaymentHistoryController');
+    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
+    Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
 });
 
 Route::group([
@@ -138,6 +138,7 @@ Route::group([
     Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
     Route::post('clients/{client}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
+    Route::delete('clients/{client}/payment/{type}', 'Business\ClientController@destroyPaymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
