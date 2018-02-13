@@ -76,7 +76,8 @@
         </b-row>
 
 
-        <b-row>
+        <loading-card v-show="loading"></loading-card>
+        <b-row v-show="!loading">
             <b-col lg="12">
                 <b-card
                         header="Related Shifts"
@@ -200,7 +201,8 @@
                         key: 'actions',
                         class: 'hidden-print'
                     }
-                ]
+                ],
+                'loading': false,
             }
         },
 
@@ -219,6 +221,7 @@
 
         methods: {            
             loadData() {
+                this.loading = true;
                 axios.get('/admin/shifts/data?transaction_id=' + this.transaction.id)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -230,6 +233,7 @@
                         else {
                             this.shifts = [];
                         }
+                        this.loading = false;
                     });
             },
 
