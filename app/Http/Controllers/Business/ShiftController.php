@@ -28,19 +28,24 @@ class ShiftController extends BaseController
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'caregiver_id' => 'required|exists:caregivers,id',
-            'caregiver_comments' => 'nullable',
-            'mileage' => 'nullable|numeric|max:1000|min:0',
-            'other_expenses' => 'nullable|numeric|max:1000|min:0',
-            'other_expenses_desc' => 'nullable',
-            'checked_in_time' => 'required|date',
-            'checked_out_time' => 'required|date',
-            'caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'provider_fee' => 'required|numeric|max:1000|min:0',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ]);
+        $data = $request->validate(
+            [
+                'client_id' => 'required|exists:clients,id',
+                'caregiver_id' => 'required|exists:caregivers,id',
+                'caregiver_comments' => 'nullable',
+                'mileage' => 'nullable|numeric|max:1000|min:0',
+                'other_expenses' => 'nullable|numeric|max:1000|min:0',
+                'other_expenses_desc' => 'nullable',
+                'checked_in_time' => 'required|date',
+                'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
+                'caregiver_rate' => 'required|numeric|max:1000|min:0',
+                'provider_fee' => 'required|numeric|max:1000|min:0',
+                'hours_type' => 'required|in:default,overtime,holiday',
+            ],
+            [
+                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
+            ]
+        );
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
@@ -117,19 +122,24 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'caregiver_id' => 'required|exists:caregivers,id',
-            'caregiver_comments' => 'nullable',
-            'mileage' => 'nullable|numeric|max:1000|min:0',
-            'other_expenses' => 'nullable|numeric|max:1000|min:0',
-            'other_expenses_desc' => 'nullable',
-            'checked_in_time' => 'required|date',
-            'checked_out_time' => 'required|date',
-            'caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'provider_fee' => 'required|numeric|max:1000|min:0',
-            'hours_type' => 'required|in:default,overtime,holiday',
-        ]);
+        $data = $request->validate(
+            [
+                'client_id' => 'required|exists:clients,id',
+                'caregiver_id' => 'required|exists:caregivers,id',
+                'caregiver_comments' => 'nullable',
+                'mileage' => 'nullable|numeric|max:1000|min:0',
+                'other_expenses' => 'nullable|numeric|max:1000|min:0',
+                'other_expenses_desc' => 'nullable',
+                'checked_in_time' => 'required|date',
+                'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
+                'caregiver_rate' => 'required|numeric|max:1000|min:0',
+                'provider_fee' => 'required|numeric|max:1000|min:0',
+                'hours_type' => 'required|in:default,overtime,holiday',
+            ],
+            [
+                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
+            ]
+        );
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
