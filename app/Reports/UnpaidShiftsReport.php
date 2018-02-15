@@ -7,7 +7,6 @@ use App\Shift;
 class UnpaidShiftsReport extends BaseReport
 {
 
-
     /**
      * Return the instance of the query builder for additional manipulation
      *
@@ -15,14 +14,17 @@ class UnpaidShiftsReport extends BaseReport
      */
     public function query()
     {
-        return Shift::with(['client', 'caregiver', 'business'])
-                    ->whereIn('status', [
-                        Shift::PAID_BUSINESS_ONLY,
-                        Shift::PAID_CAREGIVER_ONLY,
-                        Shift::PAID_NOT_CHARGED,
-                        Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
-                        Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
-                    ]);
+        if (!$this->query) {
+            $this->query = Shift::with(['client', 'caregiver', 'business'])
+                                ->whereIn('status', [
+                                    Shift::PAID_BUSINESS_ONLY,
+                                    Shift::PAID_CAREGIVER_ONLY,
+                                    Shift::PAID_NOT_CHARGED,
+                                    Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
+                                    Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
+                                ]);
+        }
+        return $this->query;
     }
 
     /**
