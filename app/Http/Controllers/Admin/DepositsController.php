@@ -123,6 +123,14 @@ class DepositsController extends Controller
             $deposit->transaction->update(['success' => true]);
         }
         $deposit->update(['success' => true]);
+        foreach($deposit->shifts as $shift) {
+            if ($deposit->caregiver) {
+                $shift->statusManager()->ackCaregiverDeposit();
+            }
+            else if ($deposit->business) {
+                $shift->statusManager()->ackBusinessDeposit();
+            }
+        }
         return new SuccessResponse('Deposit marked as successful.');
     }
 
