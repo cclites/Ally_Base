@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Reports\OnHoldReport;
 use App\Reports\ShiftsReport;
+use App\Reports\UnpaidShiftsReport;
 use App\Reports\UnsettledReport;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
@@ -54,5 +55,22 @@ class ReportsController extends Controller
             return $rows;
         }
         return view('admin.reports.on_hold');
+    }
+
+    public function unpaidShifts(Request $request) {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new UnpaidShiftsReport();
+            if ($business_id = $request->input('business_id')) {
+                $report->where('business_id', $business_id);
+            }
+            if ($caregiver_id = $request->input('caregiver_id')) {
+                $report->where('caregiver_id', $caregiver_id);
+            }
+            if ($client_id = $request->input('client_id')) {
+                $report->where('client_id', $client_id);
+            }
+            return $report->rows();
+        }
+        return view('admin.reports.unpaid_shifts');
     }
 }
