@@ -28,7 +28,7 @@ class ChargesController extends Controller
             $startDate->setTimezone('UTC');
             $endDate->setTimezone('UTC');
 
-            $query = Payment::with(['transaction', 'client', 'business'])
+            $query = Payment::with(['transaction', 'client', 'business', 'transaction.lastHistory'])
                             ->whereBetween('created_at', [$startDate, $endDate])
                             ->orderBy('created_at', 'DESC');
 
@@ -99,5 +99,29 @@ class ChargesController extends Controller
             return new SuccessResponse('Transaction processed for $' . $request->amount);
         }
         return new ErrorResponse(400, 'Transaction failure');
+    }
+
+    public function markSuccessful(Payment $payment)
+    {
+        if ($payment->transaction) {
+            $payment->transaction->update(['success' => true]);
+        }
+        $payment->update(['success' => true]);
+        foreach($payment->shifts as $shift) {
+            $shift->statusManager()->ackPayment($payment->id);
+        }
+        return new SuccessResponse('Payment marked as successful.');
+    }
+
+    public function markFailed(Payment $payment)
+    {
+        if ($payment->transaction) {
+            $payment->transaction->update(['success' => false]);
+        }
+        $payment->update(['success' => false]);
+        foreach($payment->shifts as $shift) {
+            $shift->statusManager()->ackReturnedPayment();
+        }
+        return new SuccessResponse('Payment marked as failed.');
     }
 }

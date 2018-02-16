@@ -24,7 +24,7 @@ class DepositsController extends Controller
             $startDate->setTimezone('UTC');
             $endDate->setTimezone('UTC');
 
-            $query = Deposit::with(['transaction', 'caregiver', 'business'])
+            $query = Deposit::with(['transaction', 'caregiver', 'business', 'transaction.lastHistory'])
                                ->whereBetween('created_at', [$startDate, $endDate])
                                ->orderBy('created_at', 'DESC');
 
@@ -140,6 +140,14 @@ class DepositsController extends Controller
             $deposit->transaction->update(['success' => false]);
         }
         $deposit->update(['success' => false]);
+        foreach($deposit->shifts as $shift) {
+            if ($deposit->caregiver) {
+                $shift->statusManager()->ackReturnedCaregiverDeposit();
+            }
+            else if ($deposit->business) {
+                $shift->statusManager()->ackReturnedBusinessDeposit();
+            }
+        }
         return new SuccessResponse('Deposit marked as failed.');
     }
 }

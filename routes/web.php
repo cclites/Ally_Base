@@ -223,6 +223,8 @@ Route::group([
 
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
+    Route::post('charges/successful/{payment}', 'Admin\ChargesController@markSuccessful')->name('charges.mark_successful');
+    Route::post('charges/failed/{payment}', 'Admin\ChargesController@markFailed')->name('charges.mark_failed');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
     Route::get('charges/pending/{business}', 'Admin\ChargesController@pendingData')->name('charges.pending.data');
     Route::get('charges/pending/{business}/per-client', 'Admin\ChargesController@pendingDataPerClient')->name('charges.pending.data_per_client');
