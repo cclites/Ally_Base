@@ -112,10 +112,10 @@ class ChargesController extends Controller
         }
         $msg = 'Payment marked as successful.';
         if ($payment->client && $payment->client->isOnHold()) {
-            $msg .= 'This client is still on hold.';
+            $msg .= ' This client is still on hold.';
         }
         else if ($payment->business && $payment->business->isOnHold()) {
-            $msg .= 'This business is still on hold.';
+            $msg .= ' This business is still on hold.';
         }
         return new SuccessResponse($msg);
     }

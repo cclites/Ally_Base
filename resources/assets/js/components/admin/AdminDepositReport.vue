@@ -1,7 +1,7 @@
 <template>
     <b-card>
         <b-row>
-            <b-col lg="8">
+            <b-col lg="12">
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
@@ -149,6 +149,9 @@
                     });
             },
             markSuccessful(deposit) {
+                if (!confirm('Are you sure you wish to mark the deposit of ' + deposit.amount + ' for ' + deposit.name + ' as SUCCESSFUL?')) {
+                    return;
+                }
                 let form = new Form();
                 form.post('/admin/deposits/successful/' + deposit.id)
                     .then(response => {
@@ -156,6 +159,9 @@
                     });
             },
             markFailed(deposit) {
+                if (!confirm('Are you sure you wish to mark the deposit of ' + deposit.amount + ' for ' + deposit.name + ' as FAILED?  Note: This will also place this entity on hold.')) {
+                    return;
+                }
                 let form = new Form();
                 form.post('/admin/deposits/failed/' + deposit.id)
                     .then(response => {

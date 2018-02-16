@@ -133,10 +133,10 @@ class DepositsController extends Controller
         }
         $msg = 'Deposit marked as successful.';
         if ($deposit->caregiver && $deposit->caregiver->isOnHold()) {
-            $msg .= 'This caregiver is still on hold.';
+            $msg .= ' This caregiver is still on hold.';
         }
         else if ($deposit->business && $deposit->business->isOnHold()) {
-            $msg .= 'This business is still on hold.';
+            $msg .= ' This business is still on hold.';
         }
         return new SuccessResponse($msg);
     }
@@ -163,6 +163,6 @@ class DepositsController extends Controller
             $entity = 'registry';
             $deposit->business->addHold();
         }
-        return new SuccessResponse('Deposit marked as failed.  This ' . $entity . ' has been put on hold.');
+        return new SuccessResponse('Deposit marked as failed.  This ' . $entity . ' has been put on hold. ' . "\n" . 'Once the hold is removed, the related shifts will be eligible for re-deposit.');
     }
 }

@@ -150,6 +150,9 @@
                     });
             },
             markSuccessful(charge) {
+                if (!confirm('Are you sure you wish to mark the charge of ' + charge.amount + ' for ' + charge.name + ' as SUCCESSFUL?')) {
+                    return;
+                }
                 let form = new Form();
                 form.post('/admin/charges/successful/' + charge.id)
                     .then(response => {
@@ -157,6 +160,9 @@
                     });
             },
             markFailed(charge) {
+                if (!confirm('Are you sure you wish to mark the charge of ' + charge.amount + ' for ' + charge.name + ' as FAILED?  Note: This will also place this entity on hold.')) {
+                    return;
+                }
                 let form = new Form();
                 form.post('/admin/charges/failed/' + charge.id)
                     .then(response => {
