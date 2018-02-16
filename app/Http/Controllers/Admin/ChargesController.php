@@ -110,7 +110,14 @@ class ChargesController extends Controller
         foreach($payment->shifts as $shift) {
             $shift->statusManager()->ackPayment($payment->id);
         }
-        return new SuccessResponse('Payment marked as successful.');
+        $msg = 'Payment marked as successful.';
+        if ($payment->client && $payment->client->isOnHold()) {
+            $msg .= 'This client is still on hold.';
+        }
+        else if ($payment->business && $payment->business->isOnHold()) {
+            $msg .= 'This business is still on hold.';
+        }
+        return new SuccessResponse($msg);
     }
 
     public function markFailed(Payment $payment)
@@ -122,6 +129,14 @@ class ChargesController extends Controller
         foreach($payment->shifts as $shift) {
             $shift->statusManager()->ackReturnedPayment();
         }
-        return new SuccessResponse('Payment marked as failed.');
+        if ($payment->client) {
+            $payment->client->addHold();
+            $entity = 'client';
+        }
+        else if ($payment->business) {
+            $payment->business->addHold();
+            $entity = 'registry';
+        }
+        return new SuccessResponse('Payment marked as failed.  This ' . $entity . ' has been placed on hold.');
     }
 }

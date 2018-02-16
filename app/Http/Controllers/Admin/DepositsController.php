@@ -131,7 +131,14 @@ class DepositsController extends Controller
                 $shift->statusManager()->ackBusinessDeposit();
             }
         }
-        return new SuccessResponse('Deposit marked as successful.');
+        $msg = 'Deposit marked as successful.';
+        if ($deposit->caregiver && $deposit->caregiver->isOnHold()) {
+            $msg .= 'This caregiver is still on hold.';
+        }
+        else if ($deposit->business && $deposit->business->isOnHold()) {
+            $msg .= 'This business is still on hold.';
+        }
+        return new SuccessResponse($msg);
     }
 
     public function markFailed(Deposit $deposit)
@@ -148,6 +155,14 @@ class DepositsController extends Controller
                 $shift->statusManager()->ackReturnedBusinessDeposit();
             }
         }
-        return new SuccessResponse('Deposit marked as failed.');
+        if ($deposit->caregiver) {
+            $entity = 'caregiver';
+            $deposit->caregiver->addHold();
+        }
+        else if ($deposit->business) {
+            $entity = 'registry';
+            $deposit->business->addHold();
+        }
+        return new SuccessResponse('Deposit marked as failed.  This ' . $entity . ' has been put on hold.');
     }
 }
