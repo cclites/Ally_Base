@@ -56,6 +56,7 @@ class ReportsController extends Controller
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
+        $business = $caregiver->businesses->first();
 
         return view('caregivers.reports.payment_history', compact('caregiver', 'deposits', 'business'));
     }
@@ -76,7 +77,8 @@ class ReportsController extends Controller
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
-        return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits'));
+        $business = $caregiver->businesses->first();
+        return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
     }
 
     public function paymentDetails($id)

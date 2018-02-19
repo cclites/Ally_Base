@@ -97,7 +97,7 @@
                     @if($deposit->adjustment)
                         <tr>
                             <td>
-                                {{ $deposit->created_at->format('m/d/Y') }}
+                                {{ $deposit->created_at->setTimezone($business->timezone)->format('m/d/Y') }}
                             </td>
                             <td colspan="7">
                                 {{ $deposit->notes }}
@@ -110,10 +110,10 @@
                     @foreach($shifts as $shift)
                         <tr >
                             <td>
-                                {{ $shift->checked_in_time->format('m/d/Y') }}
+                                {{ $shift->checked_in_time->setTimezone($business->timezone)->format('m/d/Y') }}
                             </td>
                             <td>
-                                {{ $shift->checked_in_time->format('g:i a') }} - {{ $shift->checked_out_time->format('g:i a') }}
+                                {{ $shift->checked_in_time->setTimezone($business->timezone)->format('g:i a') }} - {{ $shift->checked_out_time->setTimezone($business->timezone)->format('g:i a') }}
                             </td>
                             <td>
                                 @foreach($shift->activities as $activity)
