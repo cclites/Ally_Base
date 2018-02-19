@@ -320,10 +320,9 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
 
     public function clearFutureSchedules()
     {
-        $yesterday = (new Carbon('yesterday'))->format('Y-m-d');
         $this->schedules()
-             ->where('end_date', '>', $yesterday)
-             ->update(['end_date' => $yesterday]);
+             ->where('starts_at', '>', Carbon::now())
+             ->delete();
     }
 
     public function schedules()
