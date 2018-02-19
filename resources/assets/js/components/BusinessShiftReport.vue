@@ -178,8 +178,8 @@
                                 <span v-if="data.value" style="color: green">
                                     <i class="fa fa-check-square-o"></i>
                                 </span>
-                                    <span v-else-if="data.value === undefined"></span>
-                                    <span v-else style="color: darkred">
+                                <span v-else-if="data.value === undefined"></span>
+                                <span v-else style="color: darkred">
                                     <i class="fa fa-times-rectangle-o"></i>
                                 </span>
                             </template>
@@ -507,7 +507,14 @@
                 items.push({
                     '_rowVariant': 'info',
                     'Day': 'Total',
+                    'Time': '',
                     'Hours': this.shiftTotals.hours,
+                    'Client': '',
+                    'Caregiver': '',
+                    'CG Rate': '',
+                    'Reg Rate': '',
+                    'Ally Fee': '',
+                    'Total Hourly': '',
                     'Mileage': this.shiftTotals.mileage,
                     'CG Total': this.shiftTotals.caregiver_total,
                     'Reg Total': this.shiftTotals.provider_total,
@@ -515,7 +522,9 @@
                     'Mileage Costs': this.shiftTotals.mileage_costs,
                     'Other Expenses': this.shiftTotals.other_expenses,
                     'Shift Total': this.shiftTotals.shift_total,
-                })
+                    'Type': '',
+                    // Skip EVV and Confirmed since the template scope ignores undefined
+                });
                 return items;
             },
             clientTotals() {
