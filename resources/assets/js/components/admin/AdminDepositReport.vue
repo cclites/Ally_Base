@@ -1,12 +1,12 @@
 <template>
     <b-card>
         <b-row>
-            <b-col lg="12">
+            <b-col lg="9">
                 <b-card header="Select Date Range"
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <b-form inline @submit.prevent="loadItems()">
+                    <b-form inline @submit.prevent="loadItemsWithoutShift()">
                         <date-picker
                                 v-model="start_date"
                                 placeholder="Start Date"
@@ -28,6 +28,28 @@
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
+            </b-col>
+            <b-col lg="3">
+                <b-card header="Shift Search"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <b-form inline @submit.prevent="loadItems()">
+                        <b-form-group label="Shift ID: " label-for="shiftId">
+                            <b-form-input type="text"
+                                          id="shiftId"
+                                          v-model="shiftId"
+                            />
+                            <b-btn type="submit" variant="info">Get Related Deposits</b-btn>
+                        </b-form-group>
+                    </b-form>
+                </b-card>
+            </b-col>
+
+        </b-row>
+        <b-row v-if="shiftMsg">
+            <b-col>
+                <h4>{{ this.shiftMsg }}</h4>
             </b-col>
         </b-row>
         <b-row>
@@ -64,7 +86,9 @@
 <script>
     export default {
 
-        props: {},
+        props: {
+            'initialShiftId': String,
+        },
 
         data() {
             return {
@@ -75,6 +99,8 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
+                shiftId: this.initialShiftId,
+                shiftMsg: "",
                 items: [],
                 fields: [
                     {
@@ -137,16 +163,25 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
-                axios.get('/admin/deposits?json=1&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
+                let shiftId = this.shiftId;
+                axios.get('/admin/deposits?json=1&shift_id=' + shiftId + '&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
-                        this.items = response.data.map(function(item) {
+                        this.items = response.data.map(item => {
                             item.name = (item.deposit_type == 'business') ? item.business.name : item.caregiver.nameLastFirst;
                             item.transaction_response = (item.transaction) ? item.transaction.response_text : '';
                             item.gateway_id = (item.transaction) ? item.transaction.transaction_id : '';
                             item.status = (item.transaction && item.transaction.last_history) ? item.transaction.last_history.status : '';
                             return item;
                         });
+                        this.shiftMsg = "";
+                        if (shiftId) {
+                            this.shiftMsg = "Below are deposits relating ONLY to shift ID " + shiftId;
+                        }
                     });
+            },
+            loadItemsWithoutShift() {
+                this.shiftId = "";
+                return this.loadItems();
             },
             markSuccessful(deposit) {
                 if (!confirm('Are you sure you wish to mark the deposit of ' + deposit.amount + ' for ' + deposit.name + ' as SUCCESSFUL?')) {

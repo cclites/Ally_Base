@@ -9,6 +9,7 @@ use App\Payments\DepositProcessor;
 use App\Payments\SingleDepositProcessor;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -24,11 +25,22 @@ class DepositsController extends Controller
             $startDate->setTimezone('UTC');
             $endDate->setTimezone('UTC');
 
+            // For a shift search, do not constrain times
+            if ($shift_id = $request->input('shift_id')) {
+                $startDate = new Carbon('2017-01-01');
+                $endDate = Carbon::now();
+            }
+
             $query = Deposit::with(['transaction', 'caregiver', 'business', 'transaction.lastHistory'])
                                ->whereBetween('created_at', [$startDate, $endDate])
                                ->orderBy('created_at', 'DESC');
 
-            if ($business = Business::find($request->input('business_id'))) {
+            if ($shift_id) {
+                $query->whereHas('shifts', function($q) use ($shift_id) {
+                    $q->where('shifts.id', '=', $shift_id);
+                });
+            }
+            else if ($business = Business::find($request->input('business_id'))) {
                 $query->where(function($q) use ($business) {
                     $q->where('business_id', $business->id)
                       ->orWhereIn('caregiver_id', $business->caregivers->pluck('id')->toArray());

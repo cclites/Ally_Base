@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Reports\DuplicateDepositReport;
 use App\Reports\OnHoldReport;
 use App\Reports\ShiftsReport;
 use App\Reports\UnpaidShiftsReport;
@@ -72,5 +73,19 @@ class ReportsController extends Controller
             return $report->rows();
         }
         return view('admin.reports.unpaid_shifts');
+    }
+
+    public function sharedShifts(Request $request) {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new DuplicateDepositReport();
+            if ($business_id = $request->input('business_id')) {
+                $report->where('business_id', $business_id);
+            }
+            if ($caregiver_id = $request->input('caregiver_id')) {
+                $report->where('caregiver_id', $caregiver_id);
+            }
+            return $report->rows();
+        }
+        return view('admin.reports.shared_shifts');
     }
 }
