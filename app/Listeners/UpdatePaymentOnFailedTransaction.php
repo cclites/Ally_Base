@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionRecorded;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -21,10 +21,10 @@ class UpdatePaymentOnFailedTransaction
     /**
      * Handle the event.
      *
-     * @param  FailedTransaction  $event
+     * @param  \App\Events\FailedTransactionRecorded  $event
      * @return void
      */
-    public function handle(FailedTransaction $event)
+    public function handle(FailedTransactionRecorded $event)
     {
         if ($payment = $event->transaction->payment) {
             $payment->update(['success' => 0]);

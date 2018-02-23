@@ -4,7 +4,7 @@ namespace App\Payments;
 use App\Business;
 use App\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionFound;
 use App\Payment;
 use App\Shift;
 use Carbon\Carbon;
@@ -199,7 +199,7 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
 
             // Acknowledge failed payments (usually CC declines)
             if (!$transaction->success) {
-                event(new FailedTransaction($transaction));
+                event(new FailedTransactionFound($transaction));
             }
 
             return $transaction;

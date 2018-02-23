@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Deposit;
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionRecorded;
 use App\Payment;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,10 +23,10 @@ class AddPaymentHoldsOnFailedTransaction
     /**
      * Handle the event.
      *
-     * @param  FailedTransaction  $event
+     * @param  \App\Events\FailedTransactionRecorded  $event
      * @return void
      */
-    public function handle(FailedTransaction $event)
+    public function handle(FailedTransactionRecorded $event)
     {
         if ($event->transaction->payment) {
             $this->handlePayment($event->transaction->payment);

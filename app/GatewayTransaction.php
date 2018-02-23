@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Events\FailedTransactionFound;
+use App\Events\FailedTransactionRecorded;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -74,6 +76,11 @@ class GatewayTransaction extends Model
             ->orderBy('created_at', 'DESC');
     }
 
+    public function failedTransaction()
+    {
+        return $this->hasOne(FailedTransaction::class, 'id');
+    }
+
     public function method()
     {
         return $this->morphTo();
@@ -82,5 +89,64 @@ class GatewayTransaction extends Model
     ////////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Add a failed_transactions record for a potential failure that needs acknowledgement
+     *
+     * @return bool
+     */
+    public function foundFailure()
+    {
+        if ($this->failedTransaction) {
+            return true;
+        }
+
+        if ($failedTransaction = $this->failedTransaction()->withTrashed()->first()) {
+            $failedTransaction->restore();
+            $failedTransaction->touch();
+            return true;
+        }
+
+        $failure = FailedTransaction::create(['id' => $this->id]);
+        event(new FailedTransactionFound($this));
+        return $failure;
+    }
+
+    /**
+     * Record a true failure (found failure was acknowledged and not discarded)
+     *
+     * @return bool
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function recordFailure()
+    {
+        $return = \DB::transaction(function() {
+            if (!$this->update(['success' => 0])) {
+                throw new \Exception();
+            }
+            if ($this->failedTransaction) {
+                $this->failedTransaction->delete();
+            }
+            return true;
+        });
+
+        if ($return) {
+            event(new FailedTransactionRecorded($this));
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Discard a found failure (not a true failure)
+     *
+     * @return mixed
+     */
+    function discardFailure() {
+        // Just delete the record without doing anything else
+        return $this->failedTransaction->delete();
+    }
 
 }

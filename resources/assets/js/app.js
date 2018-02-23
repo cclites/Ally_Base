@@ -60,6 +60,7 @@ Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/pr
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
+Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));

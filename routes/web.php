@@ -220,6 +220,7 @@ Route::group([
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
+    Route::resource('failed_transactions', 'Admin\FailedTransactionController');
 
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
