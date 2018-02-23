@@ -36,6 +36,9 @@ abstract class BaseTelefonyController extends Controller
         $this->telefony = $telefony;
 
         if (!$request->input('From')) {
+            if (\App::runningInConsole()) {
+                return;
+            }
             abort(403);
         }
 
