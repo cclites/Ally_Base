@@ -79,6 +79,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'misc',
         'preferences',
         'import_identifier',
+        'preferences',
         'w9_name',
         'w9_business_name',
         'w9_tax_classification',
