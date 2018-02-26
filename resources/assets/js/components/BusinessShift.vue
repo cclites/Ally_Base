@@ -293,7 +293,7 @@
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="12" v-if="!shift.readOnly">
+                    <b-col lg="6" v-if="!shift.readOnly">
                         <span v-if="!deleted">
                             <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'WAITING_FOR_CONFIRMATION'">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
@@ -303,11 +303,17 @@
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
-                    <b-col lg="12" v-else>
+                    <b-col lg="6" v-else>
                         <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
                         <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
+                    </b-col>
+                    <b-col lg="6" v-if="admin">
+                        <strong>[ADMIN]</strong>
+                        <span><strong>Added:</strong> {{ formatDateTimeFromUTC(shift.created_at) }}</span>
+                        <span v-if="shift.confirmed_at"><strong>Confirmed:</strong> {{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
+                        <span v-if="shift.charged_at"><strong>Charged:</strong> {{ formatDateTimeFromUTC(shift.charged_at) }}</span>
                     </b-col>
                 </b-row>
             </form>
