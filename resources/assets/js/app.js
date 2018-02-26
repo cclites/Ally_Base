@@ -66,6 +66,7 @@ Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue')
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
 Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
 Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));
+Vue.component('admin-pending-transactions-report', require('./components/admin/AdminPendingTransactionsReport'));
 Vue.component('admin-on-hold-report', require('./components/admin/AdminOnHoldReport'));
 Vue.component('admin-shared-shifts-report', require('./components/admin/AdminSharedShiftsReport'));
 Vue.component('admin-unpaid-shifts-report', require('./components/admin/AdminUnpaidShiftsReport'));

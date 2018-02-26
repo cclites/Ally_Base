@@ -36,6 +36,7 @@
         <li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>
         <li><a href="{{ route('admin.reports.reconciliation') }}">Reconciliation Report</a></li>
         <li><a href="{{ route('admin.reports.on_hold') }}">On Hold Report</a></li>
+        <li><a href="{{ route('admin.reports.pending_transactions') }}">Pending Transactions</a></li>
         <li><a href="{{ route('admin.deposits.failed') }}">Failed Deposits</a></li>
         <li><a href="{{ route('admin.reports.shared_shifts') }}">Shared Shifts</a></li>
         <li><a href="{{ route('admin.reports.unpaid_shifts') }}">Unpaid Shifts</a></li>
