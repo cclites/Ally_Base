@@ -7,6 +7,7 @@ use App\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
 use App\CreditCard;
 use App\Events\FailedTransactionFound;
+use App\Events\FailedTransactionRecorded;
 use App\Gateway\ECSPayment;
 use App\Payment;
 use App\Shifts\AllyFeeCalculator;
@@ -173,7 +174,7 @@ class ClientPaymentAggregator implements PaymentAggregatorInterface
 
             // Acknowledge failed payments (usually CC declines)
             if (!$transaction->success) {
-                event(new FailedTransactionFound($transaction));
+                event(new FailedTransactionRecorded($transaction));
             }
 
             return $transaction;
