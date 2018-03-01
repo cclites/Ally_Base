@@ -23,10 +23,10 @@ class AddPaymentHoldsOnFailedTransaction
     /**
      * Handle the event.
      *
-     * @param  \App\Events\FailedTransactionRecorded  $event
+     * @param  \App\Events\FailedTransactionRecorded|\App\Events\FailedTransactionFound  $event
      * @return void
      */
-    public function handle(FailedTransactionRecorded $event)
+    public function handle($event)
     {
         if ($event->transaction->payment) {
             $this->handlePayment($event->transaction->payment);

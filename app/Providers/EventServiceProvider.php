@@ -42,6 +42,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         FailedTransactionFound::class   => [
             PostToSlackOnFailedTransaction::class,
+            AddPaymentHoldsOnFailedTransaction::class,
         ],
         FailedTransactionRecorded::class => [
             UpdateDepositOnFailedTransaction::class,
