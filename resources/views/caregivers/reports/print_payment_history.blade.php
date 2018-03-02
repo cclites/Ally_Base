@@ -44,7 +44,7 @@
                         @if($deposit->adjustment)
                             Manual Adjustment
                         @else
-                            {{ \Carbon\Carbon::parse($deposit->start)->setTimezone($business->timezone)->format('m/d/Y') }} - {{ \Carbon\Carbon::parse($deposit->end)->setTimezone($business->timezone)->format('m/d/Y') }}
+                            {{ \Carbon\Carbon::parse($deposit->start)->format('m/d/Y') }} - {{ \Carbon\Carbon::parse($deposit->end)->format('m/d/Y') }}
                         @endif
                     </td>
                     <td>
