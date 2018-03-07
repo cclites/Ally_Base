@@ -107,9 +107,9 @@ class ShiftStatusManager
     {
         return [
             Shift::WAITING_FOR_CHARGE,
-//            Shift::PAID_NOT_CHARGED,
-//            Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
-//            Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
+            Shift::PAID_NOT_CHARGED,
+            Shift::PAID_BUSINESS_ONLY_NOT_CHARGED,
+            Shift::PAID_CAREGIVER_ONLY_NOT_CHARGED,
         ];
     }
 
