@@ -50,6 +50,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'business_name',
+                        label: 'Registry',
+                        sortable: true,
+                    },
+                    {
                         key: 'ally_type',
                         label: 'Ally Type',
                         sortable: true,
@@ -110,17 +115,21 @@
                                 item.related = {};
                             }
 
+                            item.name = '';
+                            item.business_name = '';
                             if (item.related.client) {
                                 item.name = item.related.client.name;
+                                item.business_name = (item.related.client.business) ? item.related.client.business.name : '';
                             }
                             else if (item.related.caregiver) {
                                 item.name = item.related.caregiver.name;
+                                if (item.related.caregiver.businesses) {
+                                    item.business_name = item.related.caregiver.businesses[0].name;
+                                }
                             }
                             else if (item.related.business) {
                                 item.name = item.related.business.name;
-                            }
-                            else {
-                                item.name = '';
+                                item.business_name = item.related.business.name;
                             }
 
                             item.last_history_date = (item.last_history) ? item.last_history.created_at : '';
@@ -133,6 +142,10 @@
                 return this.markFailed(transaction, 0);
             },
             markFailed(transaction, failed = 1) {
+                let failedTxt = (failed) ? 'failed' : 'successful';
+                if (!confirm('Are you sure you want to mark ' + transaction.name + '\'s transaction as ' + failedTxt + '?')) {
+                    return;
+                }
                 let form = new Form({ failed });
                 form.patch('/admin/failed_transactions/' + transaction.id)
                     .then(response => {

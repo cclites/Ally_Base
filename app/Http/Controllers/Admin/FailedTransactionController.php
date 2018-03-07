@@ -22,8 +22,10 @@ class FailedTransactionController extends Controller
                 'deposit',
                 'payment',
                 'deposit.caregiver',
+                'deposit.caregiver.businesses',
                 'deposit.business',
                 'payment.client',
+                'payment.client.business',
                 'payment.business',
                 'lastHistory'
             ]);
