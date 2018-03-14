@@ -78,7 +78,8 @@ class ReportsController extends Controller
                 return $deposit;
             });
         $business = $caregiver->businesses->first();
-        return view('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
+        $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
+        return $pdf->download($year . '_year_summary.pdf');
     }
 
     public function paymentDetails($id)
