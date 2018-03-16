@@ -40,13 +40,21 @@
         <!-- Modal Component -->
         <b-modal id="modal1"
                  :title="'Shift Approval (' + formatDate(startDate) + ' - ' + formatDate(endDate) + ')'"
-                 :ok-disabled="!approved"
+                 :ok-disabled="!form.approved || form.name.length < 2"
                  @ok="signShifts">
+            <b-form-group label="Enter Your Full Name" label-for="name">
+                <b-form-input type="text"
+                              id="name"
+                              v-model="form.name"
+                />
+                <input-help :form="form" field="name" text="" />
+            </b-form-group>
             <b-form-checkbox id="checkbox1"
-                             v-model="approved"
+                             v-model="form.approved"
                              :value="true"
                              :unchecked-value="false">
                 I acknowledge that these shifts are correct.
+                <input-help :form="form" field="approved" text="" />
             </b-form-checkbox>
             <div slot="modal-ok">
                 Sign and Approve These Shifts
@@ -145,7 +153,11 @@
                 currentItem: {
                     caregiver: {}
                 },
-                approved: false,
+                form: new Form({
+                  approved: false,
+                  name: "",
+                  week: null,
+                }),
                 items: this.shifts,
                 weekOfYear: moment(this.weekStartDate).week(),
                 startDate: this.weekStartDate,
@@ -208,15 +220,18 @@
                 this.shiftsVerified = response.data.shifts_verified;
             },
 
-            signShifts() {
-                let form = new Form({
-                    week: this.weekOfYear
-                });
+            async signShifts() {
+                this.form.week = this.weekOfYear;
 
-                form.post('/shift-history/approve').then(response => {
-                    this.getWeek(this.weekOfYear);
-                    this.approved = false;
-                });
+                try {
+                  await this.form.post('/shift-history/approve');
+                  this.getWeek(this.weekOfYear);
+                  this.form.approved = false;
+                  return true;
+                }
+                catch (err) {
+                  return false;
+                }
             },
 
             shiftDetails(item) {
