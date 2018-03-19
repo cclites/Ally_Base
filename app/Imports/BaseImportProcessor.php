@@ -160,6 +160,7 @@ abstract class BaseImportProcessor implements ImportProcessor
         $checkOut = $checkIn->copy()->addSeconds(round($hours * 3600));
 
         $shift = new Shift([
+            'business_id' => $this->business->id,
             'caregiver_id' => ($caregiver = $this->findCaregiver($caregiverName)) ? $caregiver->id : null,
             'client_id' => ($client = $this->findClient($clientName)) ? $client->id : null,
             'checked_in_time' => $checkIn->toDateTimeString(),
@@ -167,7 +168,8 @@ abstract class BaseImportProcessor implements ImportProcessor
             'caregiver_rate' => $this->getCaregiverRate($rowNo, $overtime),
             'provider_fee' => $this->getProviderFee($rowNo, $overtime),
             'mileage' => $this->getMileage($rowNo),
-            'other_expenses' => $this->getOtherExpenses($rowNo)
+            'other_expenses' => $this->getOtherExpenses($rowNo),
+            'hours_type' => ($overtime) ? 'overtime' : 'default',
         ]);
 
         $array = [

@@ -261,6 +261,10 @@ Route::group([
     Route::get('reports/pending_transactions', 'Admin\ReportsController@pendingTransactions')->name('reports.pending_transactions');
     Route::get('reports/shared_shifts', 'Admin\ReportsController@sharedShifts')->name('reports.shared_shifts');
     Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
+
+    Route::get('import', 'Admin\ShiftImportController@index')->name('import');
+    Route::post('import', 'Admin\ShiftImportController@process');
+    Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
