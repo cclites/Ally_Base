@@ -52,6 +52,15 @@
         <td><input type="number" step="any" class="form-control short" v-model="model.provider_fee" /></td>
         <td><input type="number" step="any" class="form-control short" v-model="model.mileage" /></td>
         <td><input type="number" step="any" class="form-control short" v-model="model.other_expenses" /></td>
+        <td>
+            <div class="form-check">
+                <label class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" v-model="model.hours_type" true-value="overtime" false-value="default">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description"></span>
+                </label>
+            </div>
+        </td>
     </tr>
 </template>
 
@@ -126,7 +135,7 @@
         computed: {
             duration() {
                 return this.numberFormat(moment(this.clockOutLocal).diff(this.clockInLocal, 'minute') / 60);
-            }
+            },
         },
 
         watch: {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Import;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -116,13 +117,15 @@ class ShiftImportController extends Controller
 
         }
 
-        // Save shifts
-        $count = 0;
+        // Save shifts and create import record
+        \DB::beginTransaction();
+        $import = Import::create(['user_id' => \Auth::id()]);
         foreach($shifts as $shift) {
-            if ($shift->save()) $count++;
+            $import->shifts()->save($shift);
         }
+        \DB::commit();
 
-        return new CreatedResponse("$count shifts created for {$business->name}.");
+        return new CreatedResponse("{$import->shifts()->count()} shifts created for {$business->name}.");
     }
 
     public function storeClientMapping(Request $request)

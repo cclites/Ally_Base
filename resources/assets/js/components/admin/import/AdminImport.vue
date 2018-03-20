@@ -18,7 +18,8 @@
                         <th>CG Rate</th>
                         <th>Reg. Fee</th>
                         <th>Mileage</th>
-                        <th>Other Expenses</th>
+                        <th>Other Exp.</th>
+                        <th>OT</th>
                     </tr>
                     </thead>
                     <tbody>

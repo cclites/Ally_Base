@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use Carbon\Carbon;
 
-class AcornImportProcessor extends BaseImportProcessor
+class SarasotaImportProcessor extends BaseImportProcessor
 {
 
     /**
@@ -15,7 +15,8 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getCaregiverName($rowNo)
     {
-        return $this->worksheet->getValue('Caregiver Name', $rowNo);
+        return $this->worksheet->getValue('CaregiverLastName', $rowNo) . ', '
+            . $this->worksheet->getValue('CaregiverFirstName', $rowNo);
     }
 
     /**
@@ -26,7 +27,8 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getClientName($rowNo)
     {
-        return $this->worksheet->getValue('Client Name', $rowNo);
+        return $this->worksheet->getValue('ClientLastName', $rowNo) . ', '
+            . $this->worksheet->getValue('ClientFirstName', $rowNo);
     }
 
     /**
@@ -37,7 +39,9 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getStartTime($rowNo, int $offset = 0)
     {
-        $carbon = new Carbon($this->worksheet->getValue('Actual Clock In', $rowNo), $this->business->timezone);
+        $carbon = new Carbon($this->worksheet->getValue('Date', $rowNo), $this->business->timezone);
+        $time = $this->worksheet->getValue('StartTime', $rowNo);
+        $offset = $offset + (strtotime($time) - strtotime('00:00:00'));
         return $carbon->addSeconds($offset);
     }
 
@@ -49,7 +53,10 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getRegularHours($rowNo)
     {
-        return (float) $this->worksheet->getValue('Pay Regular Hours', $rowNo);
+        if ($this->worksheet->getValue('ModifierType', $rowNo) === 'REG') {
+            return (float) $this->worksheet->getValue('Hours', $rowNo);
+        }
+        return 0.0;
     }
 
     /**
@@ -60,7 +67,10 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getOvertimeHours($rowNo)
     {
-        return (float) $this->worksheet->getValue('Pay OT Hours', $rowNo);
+        if ($this->worksheet->getValue('ModifierType', $rowNo) !== 'REG') {
+            return (float) $this->worksheet->getValue('Hours', $rowNo);
+        }
+        return 0.0;
     }
 
     /**
@@ -72,7 +82,7 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getCaregiverRate($rowNo, $overtime = false)
     {
-        $rate = (float) $this->worksheet->getValue('Payroll Rate', $rowNo);
+        $rate = (float) $this->worksheet->getValue('RateOfPay', $rowNo);
         if ($overtime) {
             return bcmul($rate, $this->overTimeMultiplier, 2);
         }
@@ -88,9 +98,7 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo);
-        // Divide bill total by total hours to get provider hourly rate
-        return round($billTotal / ($this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo)), 2);
+        return (float) $this->worksheet->getValue('CostPerUnit', $rowNo);
     }
 
     /**
