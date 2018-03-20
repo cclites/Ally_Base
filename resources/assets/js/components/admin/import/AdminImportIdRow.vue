@@ -19,7 +19,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <b-button variant="info">Save Mapping</b-button>
+                    <b-button variant="info" @click="saveMapping('client')">Save Mapping</b-button>
                     <b-button variant="default" @click="clientPopover = false">Close</b-button>
                 </div>
             </b-popover>
@@ -29,24 +29,24 @@
         </td>
         <td :id="`cgIdentifier${index}`">{{ identifiers.caregiver_name }}</td>
         <td>
-            <b-popover :show.sync="cgPopover"
+            <b-popover :show.sync="caregiverPopover"
                        :target="`cgIdentifier${index}`"
                        placement="top"
                        title="Caregiver Mapping"
             >
-                <div class="form-group" v-if="cgPopover">
+                <div class="form-group" v-if="caregiverPopover">
                     <select class="form-control" v-model="model.caregiver_id" ref="caregiver">
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <b-button variant="info">Save Mapping</b-button>
-                    <b-button variant="default" @click="cgPopover = false">Close</b-button>
+                    <b-button variant="info" @click="saveMapping('caregiver')">Save Mapping</b-button>
+                    <b-button variant="default" @click="caregiverPopover = false">Close</b-button>
                 </div>
             </b-popover>
             <span class="red bold" v-if="!model.caregiver_id">Unmapped</span>
             <span v-else>{{ mappedCaregiverName }}</span>
-            <b-btn @click="cgPopover = !cgPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
+            <b-btn @click="caregiverPopover = !caregiverPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
         </td>
         <td><input type="number" step="any" class="form-control short" v-model="model.caregiver_rate" /></td>
         <td><input type="number" step="any" class="form-control short" v-model="model.provider_fee" /></td>
@@ -76,7 +76,7 @@
                 'clockInLocal': this.dateToLocal(this.shift.checked_in_time),
                 'clockOutLocal': this.dateToLocal(this.shift.checked_out_time),
                 'clientPopover': false,
-                'cgPopover': false,
+                'caregiverPopover': false,
                 'mappedClientName': this.getNameById(this.clients, this.shift.client_id),
                 'mappedCaregiverName': this.getNameById(this.caregivers, this.shift.caregiver_id),
             }
@@ -85,6 +85,7 @@
         mounted() {
             // $(this.$refs.client).select2({ width: '200px' });
             // $(this.$refs.caregiver).select2({ width: '200px' });
+            this.$parent.$on('mappedIdentifier', this.receiveMapping);
         },
 
         methods: {
@@ -99,6 +100,26 @@
                 if (index <= 0) return "";
                 console.log('ID: ' + id);
                 return array[index].nameLastFirst;
+            },
+            async saveMapping(type) {
+                let id = this.model[`${type}_id`];
+                let name = this.identifiers[`${type}_name`];
+
+                // POST to REST endpoint @todo
+                const form = new Form({ id, name });
+                const response = await form.post('/admin/import/map/' + type);
+
+                this.$parent.$emit('mappedIdentifier', type, name, id);
+
+                // Close popover
+                if (this[`${type}Popover`]) {
+                    this[`${type}Popover`] = false;
+                }
+            },
+            receiveMapping(type, name, id) {
+                if (this.identifiers[`${type}_name`] === name) {
+                    this.model[`${type}_id`] = id;
+                }
             }
         },
 
@@ -110,10 +131,10 @@
 
         watch: {
             clockOutLocal(val) {
-                this.shift.checked_out_time = this.dateFromLocal(val);
+                this.model.checked_out_time = this.dateFromLocal(val);
             },
             clockInLocal(val) {
-                this.shift.checked_in_time = this.dateFromLocal(val);
+                this.model.checked_in_time = this.dateFromLocal(val);
             },
             'model.client_id': function(val) {
                 this.mappedClientName = this.getNameById(this.clients, val);

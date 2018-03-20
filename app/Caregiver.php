@@ -77,7 +77,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'gender',
         'onboarded',
         'misc',
-        'preferences'
+        'preferences',
+        'import_identifier'
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];

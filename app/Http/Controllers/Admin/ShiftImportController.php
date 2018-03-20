@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Business;
+use App\Caregiver;
+use App\Client;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
+use App\Responses\SuccessResponse;
 use App\Shift;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -39,10 +42,11 @@ class ShiftImportController extends Controller
             'shifts.*.client_id' => 'required|exists:clients,id',
             'shifts.*.checked_in_time' => 'required|date',
             'shifts.*.checked_out_time' => 'required|date',
-            'shifts.*.caregiver_rate' => 'numeric',
-            'shifts.*.provider_fee' => 'numeric',
-            'shifts.*.mileage' => 'numeric',
-            'shifts.*.other_expenses' => 'numeric'
+            'shifts.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
+            'shifts.*.provider_fee' => 'required|numeric|max:1000|min:0',
+            'shifts.*.mileage' => 'required|numeric|max:1000|min:0',
+            'shifts.*.other_expenses' => 'required|numeric|max:1000|min:0',
+            'shifts.*.hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
         $shifts = collect();
@@ -55,5 +59,44 @@ class ShiftImportController extends Controller
         }
 
         return new CreatedResponse("{$shifts->count()} shifts created.");
+    }
+
+    public function storeClientMapping(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:clients,id',
+            'name' => 'required|string'
+        ]);
+
+        $client = Client::find($request->id);
+
+        // Clear existing mappings for name and business
+        Client::where('business_id', $client->business_id)
+            ->where('import_identifier', $request->name)
+            ->update(['import_identifier' => null]);
+
+        // Add mapping
+        $client->update(['import_identifier' => $request->name]);
+        return new SuccessResponse('Client ' . $client->id . ' has been mapped to ' . $request->name);
+    }
+
+    public function storeCaregiverMapping(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:caregivers,id',
+            'name' => 'required|string'
+        ]);
+
+        $caregiver = Caregiver::find($request->id);
+        $business = $caregiver->businesses->first();
+
+        // Clear existing mappings for name and business
+        $business->caregivers()
+                 ->where('import_identifier', $request->name)
+                 ->update(['import_identifier' => null]);
+
+        // Add mapping
+        $caregiver->update(['import_identifier' => $request->name]);
+        return new SuccessResponse('Caregiver ' . $caregiver->id . ' has been mapped to ' . $request->name);
     }
 }
