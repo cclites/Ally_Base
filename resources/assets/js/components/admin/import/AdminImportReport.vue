@@ -51,8 +51,6 @@
             FormatsNumbers
         ],
 
-        components: {ShiftHistoryTable},
-
         props: {
 
         },
