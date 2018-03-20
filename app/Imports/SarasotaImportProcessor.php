@@ -82,7 +82,7 @@ class SarasotaImportProcessor extends BaseImportProcessor
      */
     function getCaregiverRate($rowNo, $overtime = false)
     {
-        $rate = (float) $this->worksheet->getValue('RateOfPay', $rowNo);
+        $rate = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('RateOfPay', $rowNo));
         if ($overtime) {
             return bcmul($rate, $this->overTimeMultiplier, 2);
         }
@@ -98,7 +98,7 @@ class SarasotaImportProcessor extends BaseImportProcessor
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        return (float) $this->worksheet->getValue('CostPerUnit', $rowNo);
+        return (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('CostPerUnit', $rowNo));
     }
 
     /**
