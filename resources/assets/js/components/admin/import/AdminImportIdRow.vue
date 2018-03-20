@@ -6,17 +6,47 @@
             <span class="bold" v-if="duration > 0 && duration <= 24">{{ duration }}</span>
             <span class="red bold" v-else>{{ duration }}</span>
         </td>
-        <td>{{ identifiers.client_name }}</td>
+        <td :id="`clientIdentifier${index}`">{{ identifiers.client_name }}</td>
         <td>
-            <select class="form-control" v-model="model.client_id" ref="client">
-                <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
-            </select>
+            <b-popover :show.sync="clientPopover"
+                       :target="`clientIdentifier${index}`"
+                       placement="top"
+                       title="Caregiver Mapping"
+            >
+                <div class="form-group" v-if="clientPopover">
+                    <select class="form-control" v-model="model.client_id" ref="client">
+                        <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <b-button variant="info">Save Mapping</b-button>
+                    <b-button variant="default" @click="clientPopover = false">Close</b-button>
+                </div>
+            </b-popover>
+            <span class="red bold" v-if="!model.client_id">Unmapped</span>
+            <span v-else>{{ mappedClientName }}</span>
+            <b-btn @click="clientPopover = !clientPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
         </td>
-        <td>{{ identifiers.caregiver_name }}</td>
+        <td :id="`cgIdentifier${index}`">{{ identifiers.caregiver_name }}</td>
         <td>
-            <select class="form-control" v-model="model.caregiver_id" ref="caregiver">
-                <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-            </select>
+            <b-popover :show.sync="cgPopover"
+                       :target="`cgIdentifier${index}`"
+                       placement="top"
+                       title="Caregiver Mapping"
+            >
+                <div class="form-group" v-if="cgPopover">
+                    <select class="form-control" v-model="model.caregiver_id" ref="caregiver">
+                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <b-button variant="info">Save Mapping</b-button>
+                    <b-button variant="default" @click="cgPopover = false">Close</b-button>
+                </div>
+            </b-popover>
+            <span class="red bold" v-if="!model.caregiver_id">Unmapped</span>
+            <span v-else>{{ mappedCaregiverName }}</span>
+            <b-btn @click="cgPopover = !cgPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
         </td>
         <td><input type="number" step="any" class="form-control short" v-model="model.caregiver_rate" /></td>
         <td><input type="number" step="any" class="form-control short" v-model="model.provider_fee" /></td>
@@ -33,6 +63,7 @@
         mixins: [FormatsNumbers],
 
         props: {
+            index: Number,
             shift: Object,
             identifiers: Object,
             clients: Array,
@@ -44,12 +75,16 @@
                 'model': this.shift,
                 'clockInLocal': this.dateToLocal(this.shift.checked_in_time),
                 'clockOutLocal': this.dateToLocal(this.shift.checked_out_time),
+                'clientPopover': false,
+                'cgPopover': false,
+                'mappedClientName': this.getNameById(this.clients, this.shift.client_id),
+                'mappedCaregiverName': this.getNameById(this.caregivers, this.shift.caregiver_id),
             }
         },
 
         mounted() {
-            $(this.$refs.client).select2({ width: 'element' });
-            $(this.$refs.caregiver).select2({ width: 'element' });
+            // $(this.$refs.client).select2({ width: '200px' });
+            // $(this.$refs.caregiver).select2({ width: '200px' });
         },
 
         methods: {
@@ -58,6 +93,12 @@
             },
             dateFromLocal(val) {
                 return moment(val, moment.HTML5_FMT.DATETIME_LOCAL).utc().format('YYYY-MM-DD HH:mm:ss');
+            },
+            getNameById(array, id) {
+                let index = array.findIndex(item => item.id === id);
+                if (index <= 0) return "";
+                console.log('ID: ' + id);
+                return array[index].nameLastFirst;
             }
         },
 
@@ -73,12 +114,27 @@
             },
             clockInLocal(val) {
                 this.shift.checked_in_time = this.dateFromLocal(val);
+            },
+            'model.client_id': function(val) {
+                this.mappedClientName = this.getNameById(this.clients, val);
+            },
+            'model.caregiver_id': function(val) {
+                this.mappedCaregiverName = this.getNameById(this.caregivers, val);
+            },
+            caregivers() {
+                this.mappedCaregiverName = this.getNameById(this.caregivers, this.model.caregiver_id);
+            },
+            clients() {
+                this.mappedClientName = this.getNameById(this.clients, this.model.client_id);
             }
         }
     }
 </script>
 
-<style scoped>
+<style>
+    .select2-dropdown {
+        z-index: 9999;
+    }
     .form-control.short {
         max-width: 75px;
         padding-right: 3px;

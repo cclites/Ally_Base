@@ -21,11 +21,13 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <admin-import-id-row v-for="row in imported"
+                    <admin-import-id-row v-for="(row, index) in imported"
                                          :clients="clients"
                                          :caregivers="caregivers"
                                          :shift.sync="row.shift"
                                          :identifiers="row.identifiers"
+                                         :key="index"
+                                         :index="index"
                     ></admin-import-id-row>
                 </tbody>
             </table>
@@ -54,10 +56,12 @@
             }
         },
 
-        mounted() {
+        async mounted() {
             this.loadBusinesses();
             this.loadCaregivers();
             this.loadClients();
+            // DEBUG OPTION
+            this.imported = JSON.parse(localStorage.getItem('debug_admin_import'));
         },
 
         methods: {
@@ -74,6 +78,8 @@
             },
 
             loadImportedData(data) {
+                // DEBUG OPTION
+                localStorage.setItem('debug_admin_import', JSON.stringify(data));
                 this.imported = data;
             }
         },
