@@ -88,7 +88,9 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        return (float) $this->worksheet->getValue('Bill Rate Amount', $rowNo);
+        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo);
+        // Divide bill total by total hours to get provider hourly rate
+        return round($billTotal / ($this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo)), 2);
     }
 
     /**
