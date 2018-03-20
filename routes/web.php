@@ -267,6 +267,9 @@ Route::group([
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
     Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
     Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+
+    Route::resource('businesses.clients', 'Admin\BusinessClientController');
+    Route::resource('businesses.caregivers', 'Admin\BusinessCaregiverController');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

@@ -7,6 +7,7 @@ use App\Caregiver;
 use App\Client;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shift;
 use Illuminate\Http\Request;
@@ -42,23 +43,86 @@ class ShiftImportController extends Controller
             'shifts.*.client_id' => 'required|exists:clients,id',
             'shifts.*.checked_in_time' => 'required|date',
             'shifts.*.checked_out_time' => 'required|date',
-            'shifts.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'shifts.*.provider_fee' => 'required|numeric|max:1000|min:0',
+            'shifts.*.caregiver_rate' => 'required|numeric|max:100|min:0',
+            'shifts.*.provider_fee' => 'required|numeric|max:100|min:0',
             'shifts.*.mileage' => 'required|numeric|max:1000|min:0',
             'shifts.*.other_expenses' => 'required|numeric|max:1000|min:0',
             'shifts.*.hours_type' => 'required|in:default,overtime,holiday',
         ]);
 
+        /** @var Shift[]|\Illuminate\Support\Collection $shifts */
         $shifts = collect();
         foreach($request->shifts as $data) {
+            $data = array_only($data, [
+               'business_id',
+               'client_id',
+               'caregiver_id',
+               'checked_in_time',
+               'checked_out_time',
+               'caregiver_rate',
+               'provider_fee',
+               'mileage',
+               'other_expenses',
+               'hours_type',
+            ]);
             $shift = new Shift($data);
             $shift->status = Shift::WAITING_FOR_AUTHORIZATION;
-            if ($shift->save()) {
-                $shifts->push($shift);
-            }
+            $shifts->push($shift);
         }
 
-        return new CreatedResponse("{$shifts->count()} shifts created.");
+        // Set expectations
+        $business = $shifts->first()->business;
+        $caregivers = $business->caregivers;
+        $clients = $business->clients;
+
+        // Additional validations
+        foreach($shifts as $index => $shift) {
+
+            $shiftName = 'for' . $shift->client->name . ' at ' . $shift->checked_in_time . ' UTC';
+
+            if ($shift->checked_in_time > $shift->checked_out_time) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a greater checked_in_time than checked_out_time');
+            }
+
+            if ($shift->business_id != $business->id) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' does not belong to the same business.');
+            }
+
+            if (!$clients->where('id', $shift->client_id)->count()) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a client that does not belong to the business.');
+            }
+
+            if (!$caregivers->where('id', $shift->caregiver_id)->count()) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a caregiver that does not belong to the business.');
+            }
+
+            if ($shift->duration() > 24) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a duration greater than 24 hours.');
+            }
+
+            if ($shift->hasDuplicate()) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' exists in the database.');
+            }
+
+            // Check for duplicates in current import
+            $filter = $shifts->filter(function($item) use ($shift) {
+                 return $item->checked_in_time == $shift->checked_in_time
+                     && $item->client_id == $shift->client_id
+                     && $item->caregiver_id == $shift->caregiver_id;
+            });
+            if ($filter->count() > 1) {
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a duplicate in the import.');
+            }
+
+        }
+
+        // Save shifts
+        $count = 0;
+        foreach($shifts as $shift) {
+            if ($shift->save()) $count++;
+        }
+
+        return new CreatedResponse("$count shifts created for {$business->name}.");
     }
 
     public function storeClientMapping(Request $request)

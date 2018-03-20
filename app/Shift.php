@@ -305,6 +305,18 @@ class Shift extends Model
         return $this->statusManager()->isReadOnly();
     }
 
+    public function hasDuplicate()
+    {
+        $query = self::where('checked_in_time', $this->checked_in_time)
+                     ->where('client_id', $this->client_id)
+                     ->where('caregiver_id', $this->caregiver_id);
+        if ($this->id) {
+            $query->where('id', '!=', $this->id);
+        }
+
+        return $query->exists();
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////
