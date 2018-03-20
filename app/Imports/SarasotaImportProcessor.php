@@ -39,9 +39,9 @@ class SarasotaImportProcessor extends BaseImportProcessor
      */
     function getStartTime($rowNo, int $offset = 0)
     {
-        $datetime = $this->worksheet->getValue('Date', $rowNo) . ' '
-            . $this->worksheet->getValue('StartTime', $rowNo);
-        $carbon = new Carbon($datetime, $this->business->timezone);
+        $carbon = new Carbon($this->worksheet->getValue('Date', $rowNo), $this->business->timezone);
+        $time = $this->worksheet->getValue('StartTime', $rowNo);
+        $offset = $offset + (strtotime($time) - strtotime('00:00:00'));
         return $carbon->addSeconds($offset);
     }
 
