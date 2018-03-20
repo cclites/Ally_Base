@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\GatewayTransaction;
 use App\Import;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;
@@ -16,7 +17,7 @@ use App\Http\Controllers\Controller;
 
 class ShiftImportController extends Controller
 {
-    public function index()
+    public function view()
     {
         return view('admin.import.shifts');
     }
@@ -166,4 +167,24 @@ class ShiftImportController extends Controller
         $caregiver->update(['import_identifier' => $request->name]);
         return new SuccessResponse('Caregiver ' . $caregiver->id . ' has been mapped to ' . $request->name);
     }
+
+    public function index(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            return Import::orderBy('id', 'DESC')->get();
+        }
+        return view('admin.import.report');
+    }
+
+    public function show(Import $import)
+    {
+        return $import->load('shifts');
+    }
+
+    public function delete(Import $import)
+    {
+        $import->delete();
+        return new SuccessResponse('Import has been rolled back.');
+    }
+
 }

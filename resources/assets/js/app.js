@@ -55,6 +55,7 @@ Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/pr
 
 // Admin
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
+Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));

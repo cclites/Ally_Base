@@ -44,7 +44,11 @@
     </ul>
 </li>
 <li>
-    <a class="has-arrow" href="{{ route('admin.import') }}"><i class="fa fa-upload"></i><span class="hide-menu">Shift Importer</span></a>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-upload"></i><span class="hide-menu">Shift Imports</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.import') }}">Shift Importer</a></li>
+        <li><a href="{{ route('admin.imports.index') }}">Import History</a></li>
+    </ul>
 </li>
 
 

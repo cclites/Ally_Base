@@ -262,11 +262,12 @@ Route::group([
     Route::get('reports/shared_shifts', 'Admin\ReportsController@sharedShifts')->name('reports.shared_shifts');
     Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
 
-    Route::get('import', 'Admin\ShiftImportController@index')->name('import');
+    Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
     Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
     Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+    Route::resource('imports', 'Admin\ShiftImportController');
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');
     Route::resource('businesses.caregivers', 'Admin\BusinessCaregiverController');
