@@ -11,7 +11,7 @@
             <b-popover :show.sync="clientPopover"
                        :target="`clientIdentifier${index}`"
                        placement="top"
-                       title="Caregiver Mapping"
+                       title="Client Mapping"
             >
                 <div class="form-group" v-if="clientPopover">
                     <select class="form-control" v-model="model.client_id" ref="client">
@@ -157,7 +157,7 @@
         z-index: 9999;
     }
     .form-control.short {
-        max-width: 75px;
+        width: 75px;
         padding-right: 3px;
     }
     .red { color: red }

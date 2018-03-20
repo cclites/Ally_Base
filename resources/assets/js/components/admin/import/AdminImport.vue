@@ -6,21 +6,22 @@
                                v-show="imported.length === 0"
             ></admin-import-form>
 
-            <table v-if="imported.length > 0" class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Clock In</th>
-                    <th>Clock Out</th>
-                    <th>Duration</th>
-                    <th colspan="2">Client</th>
-                    <th colspan="2">Caregiver</th>
-                    <th>CG Rate</th>
-                    <th>Reg. Fee</th>
-                    <th>Mileage</th>
-                    <th>Other Expenses</th>
-                </tr>
-                </thead>
-                <tbody>
+            <div class="table-responsive">
+                <table v-if="imported.length > 0" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Duration</th>
+                        <th colspan="2">Client</th>
+                        <th colspan="2">Caregiver</th>
+                        <th>CG Rate</th>
+                        <th>Reg. Fee</th>
+                        <th>Mileage</th>
+                        <th>Other Expenses</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     <admin-import-id-row v-for="(row, index) in imported"
                                          :clients="clients"
                                          :caregivers="caregivers"
@@ -29,8 +30,9 @@
                                          :key="index"
                                          :index="index"
                     ></admin-import-id-row>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="pull-right" v-if="imported.length > 0">
                 <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>

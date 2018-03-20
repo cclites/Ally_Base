@@ -43,5 +43,8 @@
         <li><a href="{{ route('admin.reports.unpaid_shifts') }}">Unpaid Shifts</a></li>
     </ul>
 </li>
+<li>
+    <a class="has-arrow" href="{{ route('admin.import') }}"><i class="fa fa-upload"></i><span class="hide-menu">Shift Importer</span></a>
+</li>
 
 
