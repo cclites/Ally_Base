@@ -21,6 +21,9 @@
 {{--<!--This page css - Morris CSS -->--}}
 {{--<link href="../assets/plugins/c3-master/c3.min.css" rel="stylesheet">--}}
 
+<!-- Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+
 <!-- App CSS -->
 <link href="{{ asset(mix('css/style.css')) }}" rel="stylesheet" />
 

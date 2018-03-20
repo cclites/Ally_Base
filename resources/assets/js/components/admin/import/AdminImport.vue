@@ -12,8 +12,8 @@
                     <th>Clock In</th>
                     <th>Clock Out</th>
                     <th>Duration</th>
-                    <th>Client</th>
-                    <th>Caregiver</th>
+                    <th colspan="2">Client</th>
+                    <th colspan="2">Caregiver</th>
                     <th>CG Rate</th>
                     <th>Reg. Fee</th>
                     <th>Mileage</th>
