@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Clients;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
 use App\Shift;
+use App\Signature;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ShiftController extends Controller
 {
@@ -46,9 +48,16 @@ class ShiftController extends Controller
         return view('clients.shift_history', compact('shifts', 'week_start_date', 'week_end_date', 'shifts_verified'));
     }
 
-    public function approveWeek()
+    public function approveWeek(Request $request)
     {
-        $week = request()->week;
+        $request->validate([
+            'week' => 'required|integer',
+            'name' => 'required|string|min:2',
+        ]);
+
+        $week = $request->week;
+        $name = $request->name;
+
         $week_start_date = Carbon::now();
         $week_end_date = Carbon::now();
         $week_start_date->setISODate($week_start_date->year, $week);
@@ -56,9 +65,16 @@ class ShiftController extends Controller
         $week_start_date = $week_start_date->format('Y-m-d');
         $week_end_date = $week_end_date->format('Y-m-d');
 
-        Shift::where('client_id', auth()->id())
+        $shifts = Shift::where('client_id', auth()->id())
             ->whereBetween('checked_in_time', [$week_start_date, $week_end_date])
-            ->update(['signature' => Carbon::now()]);
+            ->get();
+
+        foreach($shifts as $shift) {
+            if (!$shift->signature) {
+                $shift->signature()->save(new Signature(['content' => $name]));
+            }
+        }
+
         return new SuccessResponse('Shifts approved.');
     }
 }
