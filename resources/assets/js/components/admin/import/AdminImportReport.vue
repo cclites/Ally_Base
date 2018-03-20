@@ -42,7 +42,6 @@
 </template>
 
 <script>
-    import ShiftHistoryTable from "../../shifts/ShiftHistoryTable";
     import FormatsDates from '../../../mixins/FormatsDates'
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
 
