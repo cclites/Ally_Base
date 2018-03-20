@@ -5,7 +5,8 @@ namespace App\Imports;
 class ImportManager
 {
     protected static $providers = [
-        'acorn' => AcornImportProcessor::class,
+        'acorn'    => AcornImportProcessor::class,
+        'sarasota' => SarasotaImportProcessor::class,
     ];
 
     /**
