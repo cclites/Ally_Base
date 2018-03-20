@@ -32,6 +32,10 @@
                             <option value="bank_account">Bank Account</option>
                             <option value="business">Provider Payment</option>
                         </b-form-select>
+                        <b-form-select v-if="admin" v-model="import_id" class="mb-1">
+                            <option value="">--Filter by Import--</option>
+                            <option v-for="item in imports" :value="item.id">{{ item.created_at }} ({{ item.id }})</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -400,7 +404,10 @@
     export default {
         mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
 
-        props: {},
+        props: {
+            admin: Number,
+            imports: Array
+        },
 
         data() {
             return {
@@ -413,6 +420,7 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 caregiver_id: "",
                 client_id: "",
+                import_id: "",
                 payment_method: "",
                 clients: [],
                 caregivers: [],
@@ -567,7 +575,9 @@
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
             queryString() {
-                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method;
+                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
+                        + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method
+                        + '&import_id=' + this.import_id;
             }
         },
 

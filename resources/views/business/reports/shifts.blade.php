@@ -7,6 +7,7 @@
 @endsection
 
 @section('content')
-    <business-shift-report></business-shift-report>
+    <?php $imports = is_admin() ? \App\Import::orderBy('id', 'DESC')->get()->toArray() : [] ?>
+    <business-shift-report :admin="{{ (int) is_admin() }}" :imports="{{ json_encode($imports) }}"></business-shift-report>
     {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}
 @endsection
