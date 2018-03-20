@@ -415,11 +415,11 @@ class ReportsController extends BaseController
             $report->between($startDate, $endDate);
         }
 
-        if ($request->has('import_id')) {
+        if ($request->input('import_id')) {
             $report->where('import_id', $request->import_id);
         }
 
-        if ($request->has('transaction_id')) {
+        if ($request->input('transaction_id')) {
             $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
         }
 
