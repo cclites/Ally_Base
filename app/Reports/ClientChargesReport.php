@@ -56,7 +56,7 @@ class ClientChargesReport extends ScheduledPaymentsReport
             ];
             foreach ($client_shifts as $shift) {
                 /** @var \App\Shift $shift */
-                $row['hours'] += $shift->duration();
+                $row['hours'] += floatval($shift->duration());
                 $row['caregiver_total'] += $shift->costs()->getCaregiverCost();
                 $row['provider_total'] += $shift->costs()->getProviderFee();
                 $row['ally_total'] += $shift->costs()->getAllyFee();
