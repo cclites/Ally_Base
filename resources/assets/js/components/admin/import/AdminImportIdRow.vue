@@ -107,7 +107,6 @@
             getNameById(array, id) {
                 let index = array.findIndex(item => item.id === id);
                 if (index < 0) return "";
-                console.log('ID: ' + id);
                 return array[index].nameLastFirst;
             },
             async saveMapping(type) {

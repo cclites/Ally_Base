@@ -7,43 +7,64 @@
                                v-show="imported.length === 0"
             ></admin-import-form>
 
-            <div class="table-responsive">
-                <table v-if="imported.length > 0" class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Clock In</th>
-                        <th>Clock Out</th>
-                        <th>Duration</th>
-                        <th colspan="2">Client</th>
-                        <th colspan="2">Caregiver</th>
-                        <th>CG Rate</th>
-                        <th>Reg. Fee</th>
-                        <th>Mileage</th>
-                        <th>Other Exp.</th>
-                        <th>OT</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <admin-import-id-row v-for="(row, index) in imported"
-                                         :clients="clients"
-                                         :caregivers="caregivers"
-                                         :shift.sync="row.shift"
-                                         :identifiers="row.identifiers"
-                                         :key="index"
-                                         :index="index"
-                    ></admin-import-id-row>
-                    </tbody>
-                </table>
+            <div v-if="imported.length > 0">
+                <div class="row">
+                    <div class="col form-inline">
+                        <select v-model="filterByMatch" class="form-control">
+                            <option value="">--Show All (Match)--</option>
+                            <option value="unmatched">Show Only Unmatched</option>
+                            <option value="matched">Show Only Matched</option>
+                        </select>
+
+                        <select v-model="filterByType" class="form-control">
+                            <option value="">--Show All (Type)--</option>
+                            <option value="default">Show Only Regular</option>
+                            <option value="overtime">Show Only Overtime</option>
+                        </select>
+
+                        <input v-model="filterByName" class="form-control" placeholder="Filter by Name" />
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Duration</th>
+                            <th colspan="2">Client</th>
+                            <th colspan="2">Caregiver</th>
+                            <th>CG Rate</th>
+                            <th>Reg. Fee</th>
+                            <th>Mileage</th>
+                            <th>Other Exp.</th>
+                            <th>OT</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <admin-import-id-row v-for="row in filtered"
+                                             :clients="clients"
+                                             :caregivers="caregivers"
+                                             :shift.sync="row.shift"
+                                             :identifiers="row.identifiers"
+                                             :key="row.index"
+                                             :index="row.index"
+                        ></admin-import-id-row>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pull-right">
+                    <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
+                    <b-btn @click="saveShifts()" variant="info" :disabled="submitting">
+                        <i class="fa fa-spin fa-spinner" v-if="submitting"></i>
+                        <i class="fa fa-upload" v-else></i> Save Shifts
+                    </b-btn>
+                    <b-btn @click="deleteDraft()" variant="danger"><i class="fa fa-times"></i> Delete &amp; Cancel</b-btn>
+                </div>
             </div>
 
-            <div class="pull-right" v-if="imported.length > 0">
-                <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
-                <b-btn @click="saveShifts()" variant="info" :disabled="submitting">
-                    <i class="fa fa-spin fa-spinner" v-if="submitting"></i>
-                    <i class="fa fa-upload" v-else></i> Save Shifts
-                </b-btn>
-                <b-btn @click="deleteDraft()" variant="danger"><i class="fa fa-times"></i> Delete &amp; Cancel</b-btn>
-            </div>
         </b-card>
     </div>
 </template>
@@ -67,6 +88,53 @@
                 'imported': [],
                 'draft': false,
                 'submitting': false,
+                'filterByName': '',
+                'filterByMatch': '',
+                'filterByType': '',
+            }
+        },
+
+        computed: {
+            filtered() {
+
+                // Performance optimization: If no filters, return imported directly
+                if (!this.filterByMatch && !this.filterByName && !this.filterByType) {
+                    return this.imported;
+                }
+
+                let filtered = this.imported.slice(0);
+
+                filtered = this.imported.map((item, index) => {
+                    item.index = index;
+                    return item;
+                })
+
+                if (this.filterByType) {
+                    filtered = filtered.filter(item => {
+                        return item.shift.hours_type === this.filterByType;
+                    })
+                }
+
+                if (this.filterByMatch) {
+                    filtered = filtered.filter(item => {
+                        if (this.filterByMatch === 'unmatched') {
+                            return !item.shift.client_id || !item.shift.caregiver_id;
+                        }
+                        else if (this.filterByMatch === 'matched') {
+                            return item.shift.client_id && item.shift.caregiver_id;
+                        }
+                    })
+                }
+
+                if (this.filterByName) {
+                    const pattern = new RegExp(this.filterByName, 'i');
+                    filtered = filtered.filter(item => {
+                        return item.identifiers.caregiver_name.search(pattern) > -1
+                            || item.identifiers.client_name.search(pattern) > -1;
+                    });
+                }
+
+                return filtered;
             }
         },
 
