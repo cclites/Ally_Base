@@ -8,6 +8,7 @@ class Import extends Model
 {
     protected $table = 'imports';
     protected $fillable = [
+        'name',
         'user_id',
     ];
 

@@ -2,6 +2,7 @@
     <div>
         <b-card>
             <admin-import-form :businesses="businesses"
+                               :name.sync="name"
                                @imported="loadImportedData"
                                v-show="imported.length === 0"
             ></admin-import-form>
@@ -59,6 +60,7 @@
 
         data() {
             return {
+                'name': '',
                 'businesses': [],
                 'caregivers': [],
                 'clients': [],
@@ -114,6 +116,7 @@
             async saveShifts() {
                 this.submitting = true;
                 const form = new Form({
+                    name: this.name,
                     shifts: this.imported.map(item => item.shift)
                 });
                 try {

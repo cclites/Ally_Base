@@ -40,6 +40,7 @@ class ShiftImportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'name' => 'required|string|max:16',
             'shifts.*.business_id' => 'required|exists:businesses,id',
             'shifts.*.caregiver_id' => 'required|exists:caregivers,id',
             'shifts.*.client_id' => 'required|exists:clients,id',
@@ -120,7 +121,10 @@ class ShiftImportController extends Controller
 
         // Save shifts and create import record
         \DB::beginTransaction();
-        $import = Import::create(['user_id' => \Auth::id()]);
+        $import = Import::create([
+            'name' => $request->name,
+            'user_id' => \Auth::id()
+        ]);
         foreach($shifts as $shift) {
             $import->shifts()->save($shift);
         }
