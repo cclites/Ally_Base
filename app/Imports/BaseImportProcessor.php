@@ -46,7 +46,7 @@ abstract class BaseImportProcessor implements ImportProcessor
     {
         $collection = collect();
 
-        for($i=2, $n=$this->worksheet->getRowCount(); $i<$n; $i++) {
+        for($i=2, $n=$this->worksheet->getRowCount(); $i<=$n; $i++) {
             $shift = null;
             if ($this->getRegularHours($i) > 0) {
                 $shift = $this->addRegularShift($collection, $i);
