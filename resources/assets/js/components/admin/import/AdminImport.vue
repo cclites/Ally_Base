@@ -43,7 +43,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <admin-import-id-row v-for="row in filtered"
+                        <admin-import-id-row v-for="row in paginated"
                                              :clients="clients"
                                              :caregivers="caregivers"
                                              :shift.sync="row.shift"
@@ -165,15 +165,22 @@
                     });
                 }
 
+                // Reset the page when filters are changed
+                setTimeout(() => this.page = 1, 50);
+
+                return filtered;
+            },
+
+            paginated() {
                 let start = (this.itemsPerPage * this.page) - this.itemsPerPage;
                 let end = start + this.itemsPerPage;
 
-                return filtered.slice(start, end);
+                return this.filtered.slice(start, end);
             },
 
             lastPage() {
-                if (!this.imported.length) return 1;
-                return Math.ceil(this.imported.length / this.itemsPerPage);
+                if (!this.filtered.length) return 1;
+                return Math.ceil(this.filtered.length / this.itemsPerPage);
             }
         },
 
