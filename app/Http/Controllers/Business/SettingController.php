@@ -11,6 +11,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Traits\Request\BankAccountRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SettingController extends BaseController
 {
@@ -75,6 +76,8 @@ class SettingController extends BaseController
     {
         $business = Business::find($id);
         $business->update($request->validated());
+        Cache::put($business->id . '_timezone', $request->timezone, 3600);
+
         return new SuccessResponse('Business settings updated.');
     }
 
