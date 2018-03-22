@@ -34,7 +34,7 @@
                         </b-form-select>
                         <b-form-select v-if="admin" v-model="import_id" class="mb-1">
                             <option value="">--Filter by Import--</option>
-                            <option v-for="item in imports" :value="item.id">{{ item.created_at }} ({{ item.id }})</option>
+                            <option v-for="item in imports" :value="item.id">{{ item.name }} ({{ item.created_at }})</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>

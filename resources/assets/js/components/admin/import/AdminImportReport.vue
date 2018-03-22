@@ -59,7 +59,7 @@
             return {
                 imports: [],
                 importFields: [
-                        'id',
+                        'name',
                         'created_at',
                         'actions'
                 ],
