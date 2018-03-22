@@ -2,47 +2,104 @@
     <div>
         <b-card>
             <admin-import-form :businesses="businesses"
+                               :name.sync="name"
                                @imported="loadImportedData"
                                v-show="imported.length === 0"
             ></admin-import-form>
 
-            <div class="table-responsive">
-                <table v-if="imported.length > 0" class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Clock In</th>
-                        <th>Clock Out</th>
-                        <th>Duration</th>
-                        <th colspan="2">Client</th>
-                        <th colspan="2">Caregiver</th>
-                        <th>CG Rate</th>
-                        <th>Reg. Fee</th>
-                        <th>Mileage</th>
-                        <th>Other Exp.</th>
-                        <th>OT</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <admin-import-id-row v-for="(row, index) in imported"
-                                         :clients="clients"
-                                         :caregivers="caregivers"
-                                         :shift.sync="row.shift"
-                                         :identifiers="row.identifiers"
-                                         :key="index"
-                                         :index="index"
-                    ></admin-import-id-row>
-                    </tbody>
-                </table>
+            <div v-if="imported.length > 0">
+                <div class="row">
+                    <div class="col form-inline">
+                        <select v-model="filterByMatch" class="form-control">
+                            <option value="">--Show All (Match)--</option>
+                            <option value="unmatched">Show Only Unmatched</option>
+                            <option value="matched">Show Only Matched</option>
+                        </select>
+
+                        <select v-model="filterByType" class="form-control">
+                            <option value="">--Show All (Type)--</option>
+                            <option value="default">Show Only Regular</option>
+                            <option value="overtime">Show Only Overtime</option>
+                        </select>
+
+                        <input v-model="filterByName" class="form-control" placeholder="Filter by Name" />
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Duration</th>
+                            <th colspan="2">Client</th>
+                            <th colspan="2">Caregiver</th>
+                            <th>CG Rate</th>
+                            <th>Reg. Fee</th>
+                            <th>Mileage</th>
+                            <th>Other Exp.</th>
+                            <th>OT</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <admin-import-id-row v-for="row in filtered"
+                                             :clients="clients"
+                                             :caregivers="caregivers"
+                                             :shift.sync="row.shift"
+                                             :identifiers="row.identifiers"
+                                             :key="row.index"
+                                             :index="row.index"
+                        ></admin-import-id-row>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <nav aria-label="..." class="pull-left">
+                            <ul class="pagination">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" @click="page=1">First</a>
+                                </li>
+                                <li class="page-item" v-if="page > 2">
+                                    <a class="page-link" href="#" @click="page-=2">{{ page-2 }}</a>
+                                </li>
+                                <li class="page-item" v-if="page > 1">
+                                    <a class="page-link" href="#" @click="page-=1">{{ page-1 }}</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">{{ page }} <span class="sr-only">(current)</span></a>
+                                </li>
+                                <li class="page-item" v-if="page+1 <= lastPage">
+                                    <a class="page-link" href="#" @click="page+=1">{{ page+1 }}</a>
+                                </li>
+                                <li class="page-item" v-if="page+2 <= lastPage">
+                                    <a class="page-link" href="#" @click="page+=2">{{ page+2 }}</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" @click="page=lastPage">Last</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <select v-model="itemsPerPage" class="form-control pull-left" style="max-width: 150px;">
+                            <option value="25">25 Per Page</option>
+                            <option value="50">50 Per Page</option>
+                            <option value="100">100 Per Page</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pull-right">
+                    <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
+                    <b-btn @click="saveShifts()" variant="info" :disabled="submitting">
+                        <i class="fa fa-spin fa-spinner" v-if="submitting"></i>
+                        <i class="fa fa-upload" v-else></i> Save Shifts
+                    </b-btn>
+                    <b-btn @click="deleteDraft()" variant="danger"><i class="fa fa-times"></i> Delete &amp; Cancel</b-btn>
+                </div>
             </div>
 
-            <div class="pull-right" v-if="imported.length > 0">
-                <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
-                <b-btn @click="saveShifts()" variant="info" :disabled="submitting">
-                    <i class="fa fa-spin fa-spinner" v-if="submitting"></i>
-                    <i class="fa fa-upload" v-else></i> Save Shifts
-                </b-btn>
-                <b-btn @click="deleteDraft()" variant="danger"><i class="fa fa-times"></i> Delete &amp; Cancel</b-btn>
-            </div>
         </b-card>
     </div>
 </template>
@@ -59,12 +116,64 @@
 
         data() {
             return {
+                'name': '',
                 'businesses': [],
                 'caregivers': [],
                 'clients': [],
                 'imported': [],
                 'draft': false,
                 'submitting': false,
+                'filterByName': '',
+                'filterByMatch': '',
+                'filterByType': '',
+                'page': 1,
+                'itemsPerPage': 50,
+            }
+        },
+
+        computed: {
+            filtered() {
+                let filtered = this.imported.slice(0);
+
+                filtered = this.imported.map((item, index) => {
+                    item.index = index;
+                    return item;
+                });
+
+                if (this.filterByType) {
+                    filtered = filtered.filter(item => {
+                        return item.shift.hours_type === this.filterByType;
+                    })
+                }
+
+                if (this.filterByMatch) {
+                    filtered = filtered.filter(item => {
+                        if (this.filterByMatch === 'unmatched') {
+                            return !item.shift.client_id || !item.shift.caregiver_id;
+                        }
+                        else if (this.filterByMatch === 'matched') {
+                            return item.shift.client_id && item.shift.caregiver_id;
+                        }
+                    })
+                }
+
+                if (this.filterByName) {
+                    const pattern = new RegExp(this.filterByName, 'i');
+                    filtered = filtered.filter(item => {
+                        return item.identifiers.caregiver_name.search(pattern) > -1
+                            || item.identifiers.client_name.search(pattern) > -1;
+                    });
+                }
+
+                let start = (this.itemsPerPage * this.page) - this.itemsPerPage;
+                let end = start + this.itemsPerPage;
+
+                return filtered.slice(start, end);
+            },
+
+            lastPage() {
+                if (!this.imported.length) return 1;
+                return Math.ceil(this.imported.length / this.itemsPerPage);
             }
         },
 
@@ -114,6 +223,7 @@
             async saveShifts() {
                 this.submitting = true;
                 const form = new Form({
+                    name: this.name,
                     shifts: this.imported.map(item => item.shift)
                 });
                 try {

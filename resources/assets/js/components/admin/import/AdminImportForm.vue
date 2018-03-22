@@ -1,7 +1,13 @@
 <template>
-    <form @submit.prevent="startImport()" enctype="multipart/form-data" class="form-inline">
+    <form @submit.prevent="startImport()" enctype="multipart/form-data">
         <div class="form-group">
-            <input type="file" name="document" @change="file = $event.target.files[0]">
+            <label for="name">Import Name: </label>
+            <input id="name" v-model="localName" class="form-control" maxlength="16" required />
+        </div>
+
+        <div class="form-group">
+            <label for="file">Import File: </label>
+            <input type="file" id="file" @change="file = $event.target.files[0]">
         </div>
 
         <div class="form-group">
@@ -31,10 +37,12 @@
     export default {
         props: {
             'businesses': Array,
+            'name': String,
         },
 
         data() {
             return {
+                localName: this.name,
                 businessId: "",
                 file: null,
                 provider: "",
@@ -69,5 +77,15 @@
                 this.submitting = false;
             }
         },
+
+        watch: {
+            name(val) {
+                this.localName = val;
+            },
+
+            localName(val) {
+                this.$emit('update:name', val);
+            }
+        }
     }
 </script>
