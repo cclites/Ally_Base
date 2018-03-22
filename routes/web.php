@@ -276,6 +276,9 @@ Route::group([
 
     Route::get('reports/caregivers/deposits-missing-bank-account', 'Admin\ReportsController@caregiversDepositsWithoutBankAccount')
         ->name('reports.caregivers.deposits_missing_bank_account');
+
+    Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
+    Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

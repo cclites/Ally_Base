@@ -84,6 +84,7 @@ Vue.component('business-office-user-list', require('./components/admin/BusinessO
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
 Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
+Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 
 // Office User
 Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
