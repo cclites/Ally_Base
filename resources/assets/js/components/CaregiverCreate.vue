@@ -1,52 +1,55 @@
 <template>
     <b-card header="New Caregiver"
-        header-bg-variant="info"
-        header-text-variant="white"
-        >
+            header-bg-variant="info"
+            header-text-variant="white"
+    >
         <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="First Name" label-for="firstname">
                         <b-form-input
-                            id="firstname"
-                            name="firstname"
-                            type="text"
-                            v-model="form.firstname"
-                            required
+                                id="firstname"
+                                name="firstname"
+                                type="text"
+                                v-model="form.firstname"
+                                required
                         >
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Enter their first name."></input-help>
                     </b-form-group>
                     <b-form-group label="Last Name" label-for="lastname">
                         <b-form-input
-                            id="lastname"
-                            name="lastname"
-                            type="text"
-                            v-model="form.lastname"
-                            required
-                            >
+                                id="lastname"
+                                name="lastname"
+                                type="text"
+                                v-model="form.lastname"
+                                required
+                        >
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
                     <b-form-group label="Date of Birth" label-for="date_of_birth">
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
+                        <input-help :form="form" field="date_of_birth"
+                                    text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input id="ssn" name="ssn" v-model="form.ssn" type="ssn"></mask-input>
-                        <input-help :form="form" field="ssn" text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
+                        <input-help :form="form" field="ssn"
+                                    text="Enter their social security number or ein. Ex: 123-45-6789"></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Title" label-for="title">
                         <b-form-input
-                            id="title"
-                            name="title"
-                            type="text"
-                            v-model="form.title"
-                            >
+                                id="title"
+                                name="title"
+                                type="text"
+                                v-model="form.title"
+                        >
                         </b-form-input>
-                        <input-help :form="form" field="title" text="Enter the caregiver's title (example: CNA)"></input-help>
+                        <input-help :form="form" field="title"
+                                    text="Enter the caregiver's title (example: CNA)"></input-help>
                     </b-form-group>
                     <b-form-group label="Email Address" label-for="email">
                         <b-row>
@@ -64,14 +67,16 @@
                             <b-col cols="4">
                                 <div class="form-check">
                                     <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="no_email" v-model="form.no_email" value="1">
+                                        <input type="checkbox" class="custom-control-input" name="no_email"
+                                               v-model="form.no_email" value="1">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">No Email</span>
                                     </label>
                                 </div>
                             </b-col>
                         </b-row>
-                        <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
+                        <input-help :form="form" field="email"
+                                    text="Enter their email address or check the box if caregiver does not have an email."></input-help>
                     </b-form-group>
                     <b-form-group label="Username" label-for="username">
                         <b-form-input
@@ -81,7 +86,8 @@
                                 v-model="form.username"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
+                        <input-help :form="form" field="username"
+                                    text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
                     <b-form-group label="Password" label-for="password">
                         <b-form-input
@@ -91,7 +97,8 @@
                                 v-model="form.password"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="password" text="Enter the password they will use to login for the first time."></input-help>
+                        <input-help :form="form" field="password"
+                                    text="Enter the password they will use to login for the first time."></input-help>
                     </b-form-group>
                     <b-form-group label="Confirm Password" label-for="password_confirmation">
                         <b-form-input
@@ -101,7 +108,8 @@
                                 v-model="form.password_confirmation"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="password_confirmation" text="Re-enter the above password."></input-help>
+                        <input-help :form="form" field="password_confirmation"
+                                    text="Re-enter the above password."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -116,7 +124,14 @@
 
 <script>
     export default {
-        props: {},
+        props: {
+            app: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            }
+        },
 
         data() {
             return {
@@ -135,7 +150,15 @@
             }
         },
 
-        mounted() {
+        created() {
+            if (!_.isEmpty(this.app)) {
+                this.form.firstname = this.app.first_name;
+                this.form.lastname = this.app.last_name;
+                this.form.email = this.app.email;
+                this.form.date_of_birth = this.app.date_of_birth;
+                this.form.ssn = this.app.ssn;
+                this.form.username = this.app.email;
+            }
         },
 
         methods: {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
+use App\CaregiverApplication;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
@@ -51,7 +52,12 @@ class CaregiverController extends BaseController
      */
     public function create()
     {
-        return view('business.caregivers.create');
+        $application = null;
+        //todo check for application and fill values if set
+        if (request()->filled('app_id')) {
+            $application = CaregiverApplication::find(request('app_id'));
+        }
+        return view('business.caregivers.create', compact('application'));
     }
 
     /**
@@ -182,11 +188,8 @@ class CaregiverController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  \App\Caregiver $caregiver
-<<<<<<< HEAD
-=======
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
->>>>>>> e00e9ee48668173c581006e17570a0babb346832
      */
     public function destroy(ScheduleAggregator $aggregator, Caregiver $caregiver)
     {

@@ -82,6 +82,7 @@
                 </template>
                 <template slot="action" scope="data">
                     <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
+                    <a :href="'/business/caregivers/create?app_id=' + data.item.id" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</a>
                 </template>
             </b-table>
         </div>
