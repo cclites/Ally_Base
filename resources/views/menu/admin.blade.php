@@ -1,3 +1,5 @@
+
+
 <li>
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li>
@@ -41,6 +43,8 @@
         <li><a href="{{ route('admin.deposits.failed') }}">Failed Deposits</a></li>
         <li><a href="{{ route('admin.reports.shared_shifts') }}">Shared Shifts</a></li>
         <li><a href="{{ route('admin.reports.unpaid_shifts') }}">Unpaid Shifts</a></li>
+        <li><a href="{{ route('admin.reports.caregivers.deposits_missing_bank_account') }}">Missing Deposit Accounts</a></li>
+        <li><a href="{{ route('admin.reports.finances') }}">Financial Summary</a></li>
     </ul>
 </li>
 <li>

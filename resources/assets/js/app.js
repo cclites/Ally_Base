@@ -31,8 +31,6 @@ Vue.use(VueTheMask);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('test-component', require('./components/TestComponent'));
-
 // App Components
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
@@ -40,6 +38,7 @@ Vue.component('activity-list', require('./components/ActivityList.vue'));
 Vue.component('emergency-contacts-tab', require('./components/users/EmergencyContactsTab'));
 Vue.component('loading-card', require('./components/LoadingCard.vue'));
 Vue.component('signature-pad', require('./components/SignaturePad'));
+Vue.component('select2', require('./components/Select2'));
 
 
 // Client
@@ -82,6 +81,9 @@ Vue.component('business-edit', require('./components/BusinessEdit.vue'));
 Vue.component('business-list', require('./components/BusinessList.vue'));
 Vue.component('business-office-user-list', require('./components/admin/BusinessOfficeUserList'));
 Vue.component('business-office-user-modal', require('./components/admin/BusinessOfficeUserModal'));
+Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
+Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
+Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
 
 // Office User
 Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
@@ -117,6 +119,7 @@ Vue.component('business-caregiver-misc-tab', require('./components/business/care
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
+Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 

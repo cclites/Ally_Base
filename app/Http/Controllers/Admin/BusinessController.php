@@ -124,6 +124,19 @@ class BusinessController extends Controller
         }
     }
 
+    public function updateContactInfo(Request $request, Business $business)
+    {
+        $data = $request->validate([
+            'contact_name' => 'nullable|string',
+            'contact_email' => 'nullable|email',
+            'contact_phone' => 'nullable|string'
+        ]);
+
+        $business->update($data);
+
+        return new SuccessResponse('Business contact info updated');
+    }
+
     /**
      * Remove the specified resource from storage.
      *

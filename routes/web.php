@@ -153,6 +153,7 @@ Route::group([
     Route::get('reports/deposits', 'Business\ReportsController@deposits')->name('reports.deposits');
     Route::get('reports/payments', 'Business\ReportsController@payments')->name('reports.payments');
     Route::get('reports/overtime', 'Business\ReportsController@overtime')->name('reports.overtime');
+    Route::post('reports/overtime', 'Business\ReportsController@overtimeData')->name('reports.overtime_data');
     Route::get('reports/scheduled_payments', 'Business\ReportsController@scheduled')->name('reports.scheduled');
     Route::get('reports/shifts', 'Business\ReportsController@shiftsReport')->name('reports.shifts');
     Route::get('reports/medicaid', 'Business\ReportsController@medicaidReport')->name('reports.medicaid');
@@ -218,6 +219,7 @@ Route::group([
     Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
+    Route::put('businesses/{business}/contact-info', 'Admin\BusinessController@updateContactInfo');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');
@@ -271,6 +273,12 @@ Route::group([
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');
     Route::resource('businesses.caregivers', 'Admin\BusinessCaregiverController');
+
+    Route::get('reports/caregivers/deposits-missing-bank-account', 'Admin\ReportsController@caregiversDepositsWithoutBankAccount')
+        ->name('reports.caregivers.deposits_missing_bank_account');
+
+    Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
+    Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

@@ -149,9 +149,6 @@
             saveProfile() {
                 this.form.post('/business/caregivers');
             }
-
         }
-
-
     }
 </script>

@@ -49,6 +49,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -70,6 +73,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>
             </div>
         </li>
     </ul>
@@ -139,6 +143,9 @@
         </div>
         <div class="tab-pane" id="misc" role="tabpanel">
             <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
+        </div>
+        <div class="tab-pane" id="payment_history" role="tabpanel">
+            <business-caregiver-payment-history :caregiver="{{ $caregiver }}"></business-caregiver-payment-history>
         </div>
     </div>
 @endsection

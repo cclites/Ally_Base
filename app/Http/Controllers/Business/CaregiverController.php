@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
+use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
@@ -103,6 +104,13 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->load([
+            'deposits' => function ($query) {
+                return $query->orderBy('created_at');
+            },
+            'deposits.shifts' => function ($query) {
+                return $query->orderBy('checked_in_time');
+            },
+            'deposits.shifts.activities',
             'phoneNumbers',
             'user.documents',
             'bankAccount',
@@ -182,11 +190,8 @@ class CaregiverController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  \App\Caregiver $caregiver
-<<<<<<< HEAD
-=======
      * @return ErrorResponse|SuccessResponse
      * @throws \Exception
->>>>>>> e00e9ee48668173c581006e17570a0babb346832
      */
     public function destroy(ScheduleAggregator $aggregator, Caregiver $caregiver)
     {
@@ -306,6 +311,4 @@ class CaregiverController extends BaseController
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }
-
-
 }
