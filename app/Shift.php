@@ -2,12 +2,14 @@
 
 namespace App;
 
+use App\Businesses\Timezone;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * App\Shift
@@ -204,6 +206,11 @@ class Shift extends Model
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+    public function getTimezoneAttribute()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
 
     public function getDurationAttribute()
     {

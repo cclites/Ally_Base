@@ -320,6 +320,12 @@
                         <span v-else>No</span>
                     </b-col>
                 </b-row>
+                <strong>EVV Method</strong>
+                <b-row class="with-padding-bottom">
+                    <b-col sm="6">
+                        {{ evvMethod(selectedItem) }}
+                    </b-col>
+                </b-row>
                 <b-row>
                     <b-col sm="6">
                         <table class="table table-sm">
@@ -794,6 +800,15 @@
 
             showHideSummary() {
                 this.showSummary = !this.showSummary;
+            },
+
+            evvMethod(shift) {
+                if (!_.isEmpty(shift.checked_in_number) && !_.isEmpty(shift.checked_out_number)) {
+                    return 'Telephony';
+                } else if (!_.isEmpty(shift.checked_in_latitude) && !_.isEmpty(shift.checked_in_longitude) && !_.isEmpty(shift.checked_out_latitude) && !_.isEmpty(shift.checked_out_longitude)) {
+                    return 'Mobile App';
+                }
+                return 'None';
             }
         },
 
