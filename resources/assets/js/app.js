@@ -31,8 +31,6 @@ Vue.use(VueTheMask);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('test-component', require('./components/TestComponent'));
-
 // App Components
 Vue.component('date-picker', require('./components/DatePicker.vue'));
 Vue.component('time-picker', require('./components/TimePicker.vue'));
@@ -40,6 +38,7 @@ Vue.component('activity-list', require('./components/ActivityList.vue'));
 Vue.component('emergency-contacts-tab', require('./components/users/EmergencyContactsTab'));
 Vue.component('loading-card', require('./components/LoadingCard.vue'));
 Vue.component('signature-pad', require('./components/SignaturePad'));
+Vue.component('select2', require('./components/Select2'));
 
 
 // Client
