@@ -108,4 +108,19 @@ class ProfileController extends Controller
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
+
+    public function destroyPaymentMethod($type) {
+        /**
+         * @var Client $client
+         */
+        $client = \Auth::user()->role;
+        if ($type == 'backup') {
+            $client->backupPayment()->dissociate();
+        }
+        else {
+            $client->defaultPayment()->dissociate();
+        }
+        $client->save();
+        return new SuccessResponse('The payment method has been deleted.');
+    }
 }

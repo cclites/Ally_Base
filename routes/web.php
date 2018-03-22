@@ -42,7 +42,6 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/phone', 'PhoneController@store');
     Route::put('/profile/phone/{id}', 'PhoneController@update');
     Route::delete('/profile/phone/{id}', 'PhoneController@destroy');
-    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -54,12 +53,13 @@ Route::group(['middleware' => 'auth'], function() {
 Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
-    'namespace' => 'Clients'
 ], function () {
-    Route::post('shift-history/approve', 'ShiftController@approveWeek');
-    Route::get('shift-history/{week?}', 'ShiftController@index');
-    Route::get('payment-history/{id}/print', 'PaymentHistoryController@printDetails');
-    Route::resource('payment-history', 'PaymentHistoryController');
+    Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
+    Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
+    Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
+    Route::resource('payment-history', 'Clients\PaymentHistoryController');
+    Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
+    Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
 });
 
 Route::group([
@@ -138,6 +138,7 @@ Route::group([
     Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
     Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
     Route::post('clients/{client}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
+    Route::delete('clients/{client}/payment/{type}', 'Business\ClientController@destroyPaymentMethod');
     Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
@@ -219,9 +220,12 @@ Route::group([
     Route::resource('businesses', 'Admin\BusinessController');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
+    Route::resource('failed_transactions', 'Admin\FailedTransactionController');
 
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
+    Route::post('charges/successful/{payment}', 'Admin\ChargesController@markSuccessful')->name('charges.mark_successful');
+    Route::post('charges/failed/{payment}', 'Admin\ChargesController@markFailed')->name('charges.mark_failed');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
     Route::get('charges/pending/{business}', 'Admin\ChargesController@pendingData')->name('charges.pending.data');
     Route::get('charges/pending/{business}/per-client', 'Admin\ChargesController@pendingDataPerClient')->name('charges.pending.data_per_client');
@@ -254,6 +258,19 @@ Route::group([
     Route::view('reports/unsettled', 'admin.reports.unsettled')->name('reports.unsettled');
     Route::get('reports/unsettled/{data}', 'Admin\ReportsController@unsettled')->name('reports.unsettled.data');
     Route::get('reports/on_hold', 'Admin\ReportsController@onHold')->name('reports.on_hold');
+    Route::get('reports/pending_transactions', 'Admin\ReportsController@pendingTransactions')->name('reports.pending_transactions');
+    Route::get('reports/shared_shifts', 'Admin\ReportsController@sharedShifts')->name('reports.shared_shifts');
+    Route::get('reports/unpaid_shifts', 'Admin\ReportsController@unpaidShifts')->name('reports.unpaid_shifts');
+
+    Route::get('import', 'Admin\ShiftImportController@view')->name('import');
+    Route::post('import', 'Admin\ShiftImportController@process');
+    Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
+    Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
+    Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+    Route::resource('imports', 'Admin\ShiftImportController');
+
+    Route::resource('businesses.clients', 'Admin\BusinessClientController');
+    Route::resource('businesses.caregivers', 'Admin\BusinessCaregiverController');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

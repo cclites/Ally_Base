@@ -16,12 +16,12 @@
                 {{ optional($caregiver->user->addresses->first())->city }}, {{ optional($caregiver->user->addresses->first())->state }} {{ optional($caregiver->user->addresses->first())->zip }}
             </div>
             <div class="col-sm-4">
-                {{ $caregiver->businesses->first()->name }}<br>
-                {{ $caregiver->businesses->first()->address1 }}<br>
-                @if($caregiver->businesses->first()->address2)
-                    {{ $caregiver->businesses->first()->address2 }}<br>
+                {{ $business->name }}<br>
+                {{ $business->address1 }}<br>
+                @if($business->address2)
+                    {{ $business->address2 }}<br>
                 @endif
-                {{ $caregiver->businesses->first()->city }}, {{ $caregiver->businesses->first()->state }} {{ $caregiver->businesses->first()->zip }}
+                {{ $business->city }}, {{ $business->state }} {{ $business->zip }}
             </div>
             <div class="col-sm-4">
                 <img src="{{ asset('images/AllyLogo-small.png') }}" alt="" style="width: 100px;">
@@ -39,7 +39,7 @@
             <tbody>
             @foreach($deposits as $deposit)
                 <tr>
-                    <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
+                    <td>{{ $deposit->created_at->setTimezone($business->timezone)->format('m/d/Y') }}</td>
                     <td>
                         @if($deposit->adjustment)
                             Manual Adjustment

@@ -180,7 +180,10 @@ abstract class BaseReport implements Report
 
             $excel->sheet('Sheet1', function($sheet) {
 
-                $sheet->fromArray($this->setHeadersFormat()->toArray());
+                $data = $this->setHeadersFormat()
+                             ->setNumericToFloatFormat()
+                             ->toArray();
+                $sheet->fromArray($data, null, 'A1', true);
 
             });
 
@@ -237,11 +240,31 @@ abstract class BaseReport implements Report
         return $this;
     }
 
+    /**
+     * Convert all booleans to integers (false => 0, true => 1)
+     *
+     * @return $this
+     */
     public function setBoolToIntFormat()
     {
         $this->formatters['bool_to_int'] = function($row) {
             return array_map(function($value) {
                 return (is_bool($value)) ? (int) $value : $value;
+            }, $row);
+        };
+        return $this;
+    }
+
+    /**
+     * Convert all numeric non-integer values to floats
+     *
+     * @return $this
+     */
+    public function setNumericToFloatFormat()
+    {
+        $this->formatters['float_typing'] = function($row) {
+            return array_map(function($value) {
+                return (!is_int($value) && is_numeric($value)) ? (float) $value : $value;
             }, $row);
         };
         return $this;

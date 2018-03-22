@@ -414,9 +414,15 @@ class ReportsController extends BaseController
             $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
             $report->between($startDate, $endDate);
         }
-        if ($request->has('transaction_id')) {
+
+        if ($request->input('import_id')) {
+            $report->where('import_id', $request->import_id);
+        }
+
+        if ($request->input('transaction_id')) {
             $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
         }
+
         if ($request->has('payment_method')) {
             $method = null;
             switch($request->input('payment_method')) {

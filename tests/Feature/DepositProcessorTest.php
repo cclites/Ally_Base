@@ -94,31 +94,31 @@ class DepositProcessorTest extends TestCase
         $this->assertCount(0, $deposits);
     }
 
-    public function test_deposits_arent_processed_for_business_when_paid_business_only()
-    {
-        foreach($this->shifts as $shift) {
-            $shift->update(['status' => 'PAID_BUSINESS_ONLY']);
-        }
-
-        $deposits = $this->processor->getDepositData();
-        $this->assertCount(3, $deposits);
-        foreach($deposits as $deposit) {
-            $this->assertNull($deposit->business_id);
-        }
-    }
-
-    public function test_deposits_arent_processed_for_caregiver_when_paid_caregiver_only()
-    {
-        foreach($this->shifts as $shift) {
-            $shift->update(['status' => 'PAID_CAREGIVER_ONLY']);
-        }
-
-        $deposits = $this->processor->getDepositData();
-        $this->assertCount(1, $deposits);
-        foreach($deposits as $deposit) {
-            $this->assertNotNull($deposit->business_id);
-        }
-    }
+//    public function test_deposits_are_processed_for_business_when_paid_business_only()
+//    {
+//        foreach($this->shifts as $shift) {
+//            $shift->update(['status' => 'PAID_BUSINESS_ONLY']);
+//        }
+//
+//        $deposits = $this->processor->getDepositData();
+//        $this->assertCount(3, $deposits);
+//        foreach($deposits as $deposit) {
+//            $this->assertNull($deposit->business_id);
+//        }
+//    }
+//
+//    public function test_deposits_are_processed_for_caregiver_when_paid_caregiver_only()
+//    {
+//        foreach($this->shifts as $shift) {
+//            $shift->update(['status' => 'PAID_CAREGIVER_ONLY']);
+//        }
+//
+//        $deposits = $this->processor->getDepositData();
+//        $this->assertCount(1, $deposits);
+//        foreach($deposits as $deposit) {
+//            $this->assertNotNull($deposit->business_id);
+//        }
+//    }
 
     public function test_caregivers_are_excluded_when_on_hold()
     {

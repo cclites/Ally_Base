@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <admin-deposit-report></admin-deposit-report>
+    <admin-deposit-report initial-shift-id="{{ request('shift_id', '') }}"></admin-deposit-report>
 @endsection

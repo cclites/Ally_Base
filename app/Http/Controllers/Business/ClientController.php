@@ -314,6 +314,17 @@ class ClientController extends BaseController
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
 
+    public function destroyPaymentMethod(Client $client, string $type) {
+        if ($type == 'backup') {
+            $client->backupPayment()->dissociate();
+        }
+        else {
+            $client->defaultPayment()->dissociate();
+        }
+        $client->save();
+        return new SuccessResponse('The payment method has been deleted.');
+    }
+
     public function sendConfirmationEmail($client_id)
     {
         $client = Client::findOrFail($client_id);

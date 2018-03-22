@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use App\Contracts\ChatServiceInterface;
 use App\CreditCard;
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionFound;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -25,10 +25,10 @@ class PostToSlackOnFailedTransaction
     /**
      * Handle the event.
      *
-     * @param  FailedTransaction  $event
+     * @param  FailedTransactionFound  $event
      * @return void
      */
-    public function handle(FailedTransaction $event)
+    public function handle(FailedTransactionFound $event)
     {
         if (!$lastHistory = $event->transaction->lastHistory) {
             return;

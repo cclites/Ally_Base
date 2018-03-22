@@ -25,9 +25,6 @@ Vue.use(BootstrapVue);
 import VueTheMask from 'vue-the-mask';
 Vue.use(VueTheMask);
 
-// import vSelect from "vue-select"
-// Vue.component('v-select', vSelect);
-
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -57,15 +54,21 @@ Vue.component('client-phone-numbers-tab', require('./components/clients/profile/
 Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/profile/CaregiverPhoneNumbersTab'));
 
 // Admin
+Vue.component('admin-import', require('./components/admin/import/AdminImport'));
+Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
+Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
 Vue.component('admin-user-list', require('./components/admin/AdminUserList.vue'));
 Vue.component('admin-manual-deposit', require('./components/admin/AdminManualDeposit'));
 Vue.component('admin-manual-charge', require('./components/admin/AdminManualCharge'));
 Vue.component('admin-missing-transactions', require('./components/admin/AdminMissingTransactions'));
+Vue.component('admin-pending-transactions-report', require('./components/admin/AdminPendingTransactionsReport'));
 Vue.component('admin-on-hold-report', require('./components/admin/AdminOnHoldReport'));
+Vue.component('admin-shared-shifts-report', require('./components/admin/AdminSharedShiftsReport'));
+Vue.component('admin-unpaid-shifts-report', require('./components/admin/AdminUnpaidShiftsReport'));
 Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
 Vue.component('admin-pending-deposits', require('./components/admin/AdminPendingDeposits.vue'));
 Vue.component('admin-pending-shifts', require('./components/admin/AdminPendingShifts.vue'));

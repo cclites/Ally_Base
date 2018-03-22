@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionFound;
 use App\Gateway\ECSQuery;
 use App\GatewayTransaction;
 use App\GatewayTransactionHistory;
@@ -103,8 +103,7 @@ class CronUpdateTransactionLog extends Command
             }
 
             if ($changes > 0 && $status == 'failed') {
-                $transaction->update(['success' => 0]);
-                event(new FailedTransaction($transaction));
+                $transaction->foundFailure();
             }
         }
     }

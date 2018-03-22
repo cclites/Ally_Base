@@ -126,7 +126,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'poa_first_name',
         'poa_last_name',
         'poa_phone',
-        'poa_relationship'
+        'poa_relationship',
+        'import_identifier'
     ];
     protected $table = 'clients';
 
@@ -320,10 +321,9 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
 
     public function clearFutureSchedules()
     {
-        $yesterday = (new Carbon('yesterday'))->format('Y-m-d');
         $this->schedules()
-             ->where('end_date', '>', $yesterday)
-             ->update(['end_date' => $yesterday]);
+             ->where('starts_at', '>', Carbon::now())
+             ->delete();
     }
 
     public function schedules()

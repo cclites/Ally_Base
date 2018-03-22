@@ -134,7 +134,7 @@ class PaymentProcessorTest extends TestCase
         $aggregator = new ClientPaymentAggregator($client, new Carbon('2018-01-01'), new Carbon('2018-02-01'));
         $transaction = $aggregator->charge();
 
-        $this->assertEquals(false, $transaction->payment->success);
+        $this->assertEquals(0, $transaction->payment->success);
         $this->assertTrue($client->isOnHold());
         $this->assertEquals(Shift::WAITING_FOR_CHARGE, $client->shifts()->first()->status);
     }

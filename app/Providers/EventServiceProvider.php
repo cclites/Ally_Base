@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Events\FailedTransaction;
+use App\Events\FailedTransactionFound;
+use App\Events\FailedTransactionRecorded;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
@@ -39,8 +40,11 @@ class EventServiceProvider extends ServiceProvider
             ShiftStatusUpdate::class,
             CheckForClockOut::class,
         ],
-        FailedTransaction::class        => [
+        FailedTransactionFound::class   => [
             PostToSlackOnFailedTransaction::class,
+            AddPaymentHoldsOnFailedTransaction::class,
+        ],
+        FailedTransactionRecorded::class => [
             UpdateDepositOnFailedTransaction::class,
             UpdatePaymentOnFailedTransaction::class,
             AddPaymentHoldsOnFailedTransaction::class,

@@ -9,6 +9,7 @@ use App\Payments\DepositProcessor;
 use App\Payments\SingleDepositProcessor;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -24,11 +25,22 @@ class DepositsController extends Controller
             $startDate->setTimezone('UTC');
             $endDate->setTimezone('UTC');
 
-            $query = Deposit::with(['transaction', 'caregiver', 'business'])
+            // For a shift search, do not constrain times
+            if ($shift_id = $request->input('shift_id')) {
+                $startDate = new Carbon('2017-01-01');
+                $endDate = Carbon::now();
+            }
+
+            $query = Deposit::with(['transaction', 'caregiver', 'business', 'transaction.lastHistory'])
                                ->whereBetween('created_at', [$startDate, $endDate])
                                ->orderBy('created_at', 'DESC');
 
-            if ($business = Business::find($request->input('business_id'))) {
+            if ($shift_id) {
+                $query->whereHas('shifts', function($q) use ($shift_id) {
+                    $q->where('shifts.id', '=', $shift_id);
+                });
+            }
+            else if ($business = Business::find($request->input('business_id'))) {
                 $query->where(function($q) use ($business) {
                     $q->where('business_id', $business->id)
                       ->orWhereIn('caregiver_id', $business->caregivers->pluck('id')->toArray());
@@ -123,7 +135,22 @@ class DepositsController extends Controller
             $deposit->transaction->update(['success' => true]);
         }
         $deposit->update(['success' => true]);
-        return new SuccessResponse('Deposit marked as successful.');
+        foreach($deposit->shifts as $shift) {
+            if ($deposit->caregiver) {
+                $shift->statusManager()->ackCaregiverDeposit();
+            }
+            else if ($deposit->business) {
+                $shift->statusManager()->ackBusinessDeposit();
+            }
+        }
+        $msg = 'Deposit marked as successful.';
+        if ($deposit->caregiver && $deposit->caregiver->isOnHold()) {
+            $msg .= ' This caregiver is still on hold.';
+        }
+        else if ($deposit->business && $deposit->business->isOnHold()) {
+            $msg .= ' This business is still on hold.';
+        }
+        return new SuccessResponse($msg);
     }
 
     public function markFailed(Deposit $deposit)
@@ -132,6 +159,22 @@ class DepositsController extends Controller
             $deposit->transaction->update(['success' => false]);
         }
         $deposit->update(['success' => false]);
-        return new SuccessResponse('Deposit marked as failed.');
+        foreach($deposit->shifts as $shift) {
+            if ($deposit->caregiver) {
+                $shift->statusManager()->ackReturnedCaregiverDeposit();
+            }
+            else if ($deposit->business) {
+                $shift->statusManager()->ackReturnedBusinessDeposit();
+            }
+        }
+        if ($deposit->caregiver) {
+            $entity = 'caregiver';
+            $deposit->caregiver->addHold();
+        }
+        else if ($deposit->business) {
+            $entity = 'registry';
+            $deposit->business->addHold();
+        }
+        return new SuccessResponse('Deposit marked as failed.  This ' . $entity . ' has been put on hold. ' . "\n" . 'Once the hold is removed, the related shifts will be eligible for re-deposit.');
     }
 }

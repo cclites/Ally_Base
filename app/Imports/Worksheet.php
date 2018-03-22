@@ -93,15 +93,15 @@ class Worksheet
         $value = $cell->getValue();
 
         if(\PHPExcel_Shared_Date::isDateTime($cell)) {
-            //return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
-            return date('Y-m-d H:i:s', strtotime($value));
+            return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+//            return date('Y-m-d H:i:s', strtotime($value));
         }
 
         if (!$this->allowEmptyStrings && is_string($value) && trim($value) === '') {
             return null;
         }
 
-        return $value;
+        return trim($value);
     }
 
     public function findColumn($header)
@@ -116,7 +116,7 @@ class Worksheet
 
         foreach($range as $column) {
             $value = $this->sheet->getCell($column . '1')->getValue();
-            if ($value == $header) {
+            if (trim($value) == trim($header)) {
                 return $column;
             }
         }

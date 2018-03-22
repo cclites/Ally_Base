@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Reports\DuplicateDepositReport;
 use App\Reports\OnHoldReport;
+use App\Reports\PendingTransactionsReport;
 use App\Reports\ShiftsReport;
+use App\Reports\UnpaidShiftsReport;
 use App\Reports\UnsettledReport;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
@@ -54,5 +57,49 @@ class ReportsController extends Controller
             return $rows;
         }
         return view('admin.reports.on_hold');
+    }
+
+    public function pendingTransactions(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new PendingTransactionsReport();
+            $rows = $report->rows();
+            if ($business_id = $request->input('business_id')) {
+                return $rows->where('business_id', $business_id)->values();
+            }
+            return $rows;
+        }
+        return view('admin.reports.pending_transactions');
+    }
+
+    public function unpaidShifts(Request $request) {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new UnpaidShiftsReport();
+            if ($business_id = $request->input('business_id')) {
+                $report->where('business_id', $business_id);
+            }
+            if ($caregiver_id = $request->input('caregiver_id')) {
+                $report->where('caregiver_id', $caregiver_id);
+            }
+            if ($client_id = $request->input('client_id')) {
+                $report->where('client_id', $client_id);
+            }
+            return $report->rows();
+        }
+        return view('admin.reports.unpaid_shifts');
+    }
+
+    public function sharedShifts(Request $request) {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new DuplicateDepositReport();
+            if ($business_id = $request->input('business_id')) {
+                $report->where('business_id', $business_id);
+            }
+            if ($caregiver_id = $request->input('caregiver_id')) {
+                $report->where('caregiver_id', $caregiver_id);
+            }
+            return $report->rows();
+        }
+        return view('admin.reports.shared_shifts');
     }
 }
