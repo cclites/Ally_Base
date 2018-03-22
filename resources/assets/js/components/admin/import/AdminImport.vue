@@ -55,6 +55,41 @@
                     </table>
                 </div>
 
+                <div class="row">
+                    <div class="col">
+                        <nav aria-label="..." class="pull-left">
+                            <ul class="pagination">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" @click="page=1">First</a>
+                                </li>
+                                <li class="page-item" v-if="page > 2">
+                                    <a class="page-link" href="#" @click="page-=2">{{ page-2 }}</a>
+                                </li>
+                                <li class="page-item" v-if="page > 1">
+                                    <a class="page-link" href="#" @click="page-=1">{{ page-1 }}</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">{{ page }} <span class="sr-only">(current)</span></a>
+                                </li>
+                                <li class="page-item" v-if="page+1 <= lastPage">
+                                    <a class="page-link" href="#" @click="page+=1">{{ page+1 }}</a>
+                                </li>
+                                <li class="page-item" v-if="page+2 <= lastPage">
+                                    <a class="page-link" href="#" @click="page+=2">{{ page+2 }}</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" @click="page=lastPage">Last</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <select v-model="itemsPerPage" class="form-control pull-left" style="max-width: 150px;">
+                            <option value="25">25 Per Page</option>
+                            <option value="50">50 Per Page</option>
+                            <option value="100">100 Per Page</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="pull-right">
                     <b-btn @click="saveDraft()" variant="primary"><i class="fa fa-save"></i> Save Draft</b-btn>
                     <b-btn @click="saveShifts()" variant="info" :disabled="submitting">
@@ -91,23 +126,19 @@
                 'filterByName': '',
                 'filterByMatch': '',
                 'filterByType': '',
+                'page': 1,
+                'itemsPerPage': 50,
             }
         },
 
         computed: {
             filtered() {
-
-                // Performance optimization: If no filters, return imported directly
-                if (!this.filterByMatch && !this.filterByName && !this.filterByType) {
-                    return this.imported;
-                }
-
                 let filtered = this.imported.slice(0);
 
                 filtered = this.imported.map((item, index) => {
                     item.index = index;
                     return item;
-                })
+                });
 
                 if (this.filterByType) {
                     filtered = filtered.filter(item => {
@@ -134,7 +165,15 @@
                     });
                 }
 
-                return filtered;
+                let start = (this.itemsPerPage * this.page) - this.itemsPerPage;
+                let end = start + this.itemsPerPage;
+
+                return filtered.slice(start, end);
+            },
+
+            lastPage() {
+                if (!this.imported.length) return 1;
+                return Math.ceil(this.imported.length / this.itemsPerPage);
             }
         },
 
