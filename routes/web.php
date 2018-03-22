@@ -273,6 +273,9 @@ Route::group([
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');
     Route::resource('businesses.caregivers', 'Admin\BusinessCaregiverController');
+
+    Route::get('reports/caregivers/deposits-missing-bank-account', 'Admin\ReportsController@caregiversDepositsWithoutBankAccount')
+        ->name('reports.caregivers.deposits_missing_bank_account');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
