@@ -64,13 +64,19 @@ class ReportsController extends Controller
 
     public function pendingTransactions(Request $request)
     {
+        set_time_limit(0);
         if ($request->expectsJson() && $request->input('json')) {
             $report = new PendingTransactionsReport();
             $rows = $report->rows();
             if ($business_id = $request->input('business_id')) {
                 return $rows->where('business_id', $business_id)->values();
             }
-            return $rows;
+            return $rows
+                ->map(function ($item) {
+                    $item['deposit_outstanding'] = (int) $item['deposit_outstanding'];
+                    $item['payment_outstanding'] = (int) $item['payment_outstanding'];
+                    return $item;
+                });
         }
         return view('admin.reports.pending_transactions');
     }
