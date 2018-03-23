@@ -120,6 +120,7 @@ Vue.component('business-export-timesheets', require('./components/business/repor
 Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
+Vue.component('business-client-caregiver-visits-report', require('./components/business/reports/ClientCaregiverVisitsReport'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
