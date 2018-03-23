@@ -161,244 +161,39 @@
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
-                    <div class="table-responsive">
-                        <b-table bordered striped hover show-empty
-                                 :fields="fields"
-                                 :items="shiftHistoryItems"
-                                 :sort-by.sync="sortBy"
-                                 :sort-desc.sync="sortDesc"
-                                 class="shift-table"
-                        >
-                            <template slot="Day" scope="data">
-                                {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
-                            </template>
-                            <template slot="Client" scope="row">
-                                <a :href="'/business/clients/' + row.item.client_id">{{ row.item.Client }}</a>
-                            </template>
-                            <template slot="Caregiver" scope="row">
-                                <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.Caregiver }}</a>
-                            </template>
-                            <template slot="EVV" scope="data">
-                                <span v-if="data.value" style="color: green">
-                                    <i class="fa fa-check-square-o"></i>
-                                </span>
-                                <span v-else-if="data.value === undefined"></span>
-                                <span v-else style="color: darkred">
-                                    <i class="fa fa-times-rectangle-o"></i>
-                                </span>
-                            </template>
-                            <template slot="Confirmed" scope="data">
-                                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
-                            </template>
-                            <template slot="actions" scope="row">
-                            <span v-if="row.item.id">
-                                <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                                <span>
-                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else><i class="fa fa-calendar-check-o"></i></b-btn>
-                                </span>
-                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                    <shift-history-table :fields="fields" :items="shiftHistoryItems">
+                        <template slot="actions" scope="row">
+                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                            <span>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else><i class="fa fa-calendar-check-o"></i></b-btn>
                             </span>
-                            </template>
-                        </b-table>
-                    </div>
+                            <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                        </template>
+                    </shift-history-table>
                 </b-card>
             </b-col>
         </b-row>
 
         <!-- Filter columns modal -->
-        <b-modal id="filterColumnsModal" title="Show or Hide Columns" v-model="columnsModal">
-            <b-container fluid>
-                <b-row>
-                    <div class="form-check row">
-                        <div class="col-sm-auto" v-for="field in availableFields">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" v-model="filteredFields" :value="field">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ field }}</span>
-                            </label>
-                        </div>
-                    </div>
-               </b-row>
-            </b-container>
-            <div slot="modal-footer">
-               <b-btn variant="default" @click="columnsModal=false">Close</b-btn>
-            </div>
-        </b-modal>
+        <filter-columns-modal v-model="columnsModal"
+                              :available-fields="availableFields"
+                              :fields.sync="filteredFields"
+        />
 
         <!-- Details modal -->
-        <b-modal id="detailsModal" title="Shift Details" v-model="detailsModal" size="lg">
-            <b-container fluid>
-                <b-row class="with-padding-bottom">
-                    <b-col sm="6">
-                        <strong>Client</strong>
-                        <br />
-                        {{ selectedItem.client_name }}
-                    </b-col>
-                    <b-col sm="6">
-                        <strong>Caregiver</strong><br />
-                        {{ selectedItem.caregiver_name }}
-                    </b-col>
-                </b-row>
-                <b-row class="with-padding-bottom">
-                    <b-col sm="6">
-                        <strong>Clocked In Time</strong><br />
-                        {{ selectedItem.checked_in_time }}
-                    </b-col>
-                    <b-col sm="6">
-                        <strong>Clocked Out Time</strong><br />
-                        {{ selectedItem.checked_out_time }}<br />
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col sm="6" class="with-padding-bottom">
-                        <strong>Shift Type</strong><br>
-                        {{ hoursType(selectedItem)}}
-                    </b-col>
-                </b-row>
-                <b-row class="with-padding-bottom" v-if="selectedItem.schedule && selectedItem.schedule.notes">
-                    <b-col sm="12">
-                        <strong>Schedule Notes</strong><br />
-                        {{ selectedItem.schedule.notes }}
-                    </b-col>
-                </b-row>
-                <b-row class="with-padding-bottom">
-                    <b-col sm="12">
-                        <strong>Caregiver Comments</strong><br />
-                        {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
-                    </b-col>
-                </b-row>
-                
-                <strong>Issues on Shift</strong>
-                <b-row>
-                    <b-col sm="12">
-                        <p v-if="!selectedItem.issues || !selectedItem.issues.length">
-                            No issues reported
-                        </p>
-                        <p else v-for="issue in selectedItem.issues">
-                            <strong v-if="issue.caregiver_injury">The caregiver reported an injury to themselves.<br /></strong>
-                            {{ issue.comments }}
-                        </p>
-                    </b-col>
-                </b-row>
-                
-                <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
-                    <b-col>
-                        <strong>Client Signature</strong>
-                        <div v-html="selectedItem.signature.content" class="signature"></div>
-                    </b-col>
-                </b-row>
-                
-                <strong>Activities Performed</strong>
-                <b-row>
-                    <b-col sm="12">
-                        <p v-if="!selectedItem.activities || !selectedItem.activities.length">
-                            No activities recorded
-                        </p>
-                        <table class="table table-sm" v-else>
-                            <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="activity in selectedItem.activities">
-                                <td>{{ activity.code }}</td>
-                                <td>{{ activity.name }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </b-col>
-                </b-row>
-                
-                <strong>Was this Shift Electronically Verified?</strong>
-                <b-row class="with-padding-bottom">
-                    <b-col sm="6">
-                        <span v-if="selectedItem.verified">Yes</span>
-                        <span v-else>No</span>
-                    </b-col>
-                </b-row>
-                <strong>EVV Method</strong>
-                <b-row class="with-padding-bottom">
-                    <b-col sm="6">
-                        {{ evvMethod(selectedItem) }}
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col sm="6">
-                        <table class="table table-sm">
-                            <thead>
-                            <tr>
-                                <th colspan="2">Clock In</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
-                                <tr>
-                                    <th>Geocode</th>
-                                    <td>{{ selectedItem.checked_in_latitude.slice(0,8) }}, {{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Distance</th>
-                                    <td>{{ selectedItem.checked_in_distance }}m</td>
-                                </tr>
-                            </tbody>
-                            <tbody v-else-if="selectedItem.checked_in_number">
-                            <tr>
-                                <th>Phone Number</th>
-                                <td>{{ selectedItem.checked_in_number }}</td>
-                            </tr>
-                            </tbody>
-                            <tbody v-else>
-                            <tr>
-                                <td colspan="2">No EVV data</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </b-col>
-                    <b-col sm="6">
-                        <table class="table table-sm">
-                            <thead>
-                            <tr>
-                                <th colspan="2">Clock Out</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
-                                <tr>
-                                    <th>Geocode</th>
-                                    <td>{{ selectedItem.checked_out_latitude.slice(0,8) }}, {{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
-                                </tr> 
-                                
-                                <tr>
-                                    <th>Distance</th>
-                                    <td>{{ selectedItem.checked_out_distance }}m</td>
-                                </tr>
-                            </tbody>
-                            <tbody v-else-if="selectedItem.checked_out_number">
-                                <tr>
-                                    <th>Phone Number</th>
-                                    <td>{{ selectedItem.checked_out_number }}</td>
-                                </tr>
-                            </tbody>
-                            <tbody v-else>
-                                <tr>
-                                    <td colspan="2">No EVV data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
+        <shift-details-modal v-model="detailsModal" :selected-item="selectedItem">
+            <template slot="buttons" scope="row">
                 <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
-                <b-btn variant="info" @click="confirmSelected()" v-if="selectedItem.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
+                <b-btn variant="info" @click="confirmSelected()" v-if="row.item.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
                 <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
-                <b-btn variant="primary" :href="'/business/shifts/' + selectedItem.id + '/duplicate'">Duplicate</b-btn>
+                <b-btn variant="primary" :href="'/business/shifts/' + row.item.id + '/duplicate'">Duplicate</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
-            </div>
-        </b-modal>
+            </template>
+        </shift-details-modal>
+
     </div>
 </template>
 
@@ -406,8 +201,15 @@
     import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
     import BusinessSettings from "../mixins/BusinessSettings";
+    import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
+    import FilterColumnsModal from "./modals/FilterColumnsModal";
+    import ShiftDetailsModal from "./modals/ShiftDetailsModal";
 
     export default {
+        components: {
+            ShiftDetailsModal,
+            FilterColumnsModal,
+            ShiftHistoryTable},
         mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
 
         props: {
@@ -653,10 +455,6 @@
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
             },
 
-            dayFormat(date) {
-                return moment.utc(date).local().format('ddd MMM D');
-            },
-
             details(item) {
                 let component = this;
                 axios.get('/business/shifts/' + item.id)
@@ -787,29 +585,9 @@
                 this.filteredFields = this.availableFields.slice();
             },
 
-            hoursType(item) {
-                switch (item.hours_type) {
-                    case 'default':
-                        return 'Regular';
-                    case 'overtime':
-                        return 'OT';
-                    case 'holiday':
-                        return 'HOL';
-                }
-            },
-
             showHideSummary() {
                 this.showSummary = !this.showSummary;
             },
-
-            evvMethod(shift) {
-                if (!_.isEmpty(shift.checked_in_number) && !_.isEmpty(shift.checked_out_number)) {
-                    return 'Telephony';
-                } else if (!_.isEmpty(shift.checked_in_latitude) && !_.isEmpty(shift.checked_in_longitude) && !_.isEmpty(shift.checked_out_latitude) && !_.isEmpty(shift.checked_out_longitude)) {
-                    return 'Mobile App';
-                }
-                return 'None';
-            }
         },
 
         watch: {
@@ -855,7 +633,7 @@
         font-size: 13px;
         background-color: #ecf7f9;
     }
-    .table-sm td, 
+    .table-sm td,
     .table-sm th {
         padding: 0.2rem 0;
     }
