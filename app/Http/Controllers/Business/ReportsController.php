@@ -536,17 +536,24 @@ class ReportsController extends BaseController
         return view('business.reports.client_caregiver_visits', compact('clients','caregivers'));
     }
 
-    public function clientCaregiverVisitsData()
+    public function clientCaregiverVisitsData(Request $request)
     {
-        logger(request()->all());
-        $range = [now()->subWeeks(4), now()];
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $range = [Carbon::parse($request->startDate), Carbon::parse($request->endDate)];
+        } else {
+            $range = [now()->subWeeks(4), now()];
+        }
         $clients = $this->business()
             ->clients()
-            ->withCount('shifts')
-            ->whereHas('shifts', function ($query) use ($range) {
+            ->withCount(['shifts' => function ($query) use ($range) {
                 $query->whereBetween('checked_in_time', $range);
+            }])
+            ->get()
+            ->filter(function ($item) {
+                return $item->shifts_count > 0;
             })
-            ->get();
+            ->values();
+
         $range = [$range[0]->format('m/d/Y'), $range[1]->format('m/d/Y')];
 
         return response()->json(compact('range', 'clients'));
