@@ -5,6 +5,11 @@ namespace App\Responses;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Class SuccessResponse
+ * @package App\Responses
+ * @mixin \Illuminate\Http\Response
+ */
 class SuccessResponse implements Responsable
 {
     protected $statusCode = 200;
