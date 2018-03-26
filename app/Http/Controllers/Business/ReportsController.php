@@ -20,6 +20,7 @@ use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
+use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -514,6 +515,83 @@ class ReportsController extends BaseController
             default:
                 return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
         }
+    }
+
+    public function printPaymentHistory($caregiver_id, $year)
+    {
+        Carbon::setWeekStartsAt(Carbon::MONDAY);
+
+        $caregiver = Caregiver::find($caregiver_id);
+        $deposits = Deposit::with('shifts')
+            ->where('caregiver_id', $caregiver->id)
+            ->whereYear('created_at', request()->year)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->map(function ($deposit) {
+                $deposit->amount = floatval($deposit->amount);
+                $deposit->start = Carbon::instance($deposit->created_at)->subWeek()->startOfWeek()->toDateString();
+                $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
+                return $deposit;
+            });
+        $business = $this->business();
+        $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
+        return $pdf->download($year . '_year_summary.pdf');
+    }
+
+    public function printPaymentDetails($id, $caregiver_id)
+    {
+        $deposit = Deposit::find($id);
+        $shifts = $this->getPaymentShifts($id, $caregiver_id);
+        $business = $this->business();
+
+        if (strtolower(request()->type) == 'pdf') {
+            $pdf = PDF::loadView('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'))->setOrientation('landscape');
+            return $pdf->download('deposit_details.pdf');
+        }
+
+        return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'));
+    }
+
+    /**
+     * @param $id
+     * @param $caregiverId
+     * @return mixed
+     */
+    protected function getPaymentShifts($id, $caregiver_id)
+    {
+        $shifts = Shift::with('deposits', 'activities')
+            ->whereHas('deposits', function ($query) use ($id) {
+                $query->where('deposits.id', $id);
+            })
+            ->where('caregiver_id', $caregiver_id)
+            ->orderBy('checked_in_time')
+            ->get()
+            ->map(function ($shift) {
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+                $row = (object) collect($shift->toArray())
+                    ->merge([
+                        'hours' => $shift->duration(),
+                        'ally_fee' => number_format($allyFee, 2),
+                        'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
+                        'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
+                        'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                        'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
+                        'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
+                        'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
+                        'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
+                        'confirmed' => $shift->statusManager()->isConfirmed(),
+                        'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
+                        'EVV' => $shift->verified,
+                    ])->toArray();
+
+                $row->checked_in_time = Carbon::parse($row->checked_in_time);
+                $row->checked_out_time = Carbon::parse($row->checked_out_time);
+                $row->activities = collect($row->activities)->sortBy('name');
+
+                return $row;
+            });
+
+        return $shifts;
     }
 }
 
