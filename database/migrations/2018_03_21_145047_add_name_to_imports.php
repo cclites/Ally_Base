@@ -14,7 +14,7 @@ class AddNameToImports extends Migration
     public function up()
     {
         Schema::table('imports', function (Blueprint $table) {
-            $table->string('name', 16)->after('id');
+            $table->string('name', 16)->after('id')->nullable();
         });
     }
 
