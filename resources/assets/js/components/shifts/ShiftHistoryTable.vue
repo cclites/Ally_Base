@@ -29,7 +29,7 @@
                 {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
             </template>
             <template slot="actions" scope="row">
-                <slot name="actions" :row="row"></slot>
+                <slot name="actions" :item="row.item"></slot>
             </template>
         </b-table>
     </div>
@@ -53,6 +53,10 @@
 
         },
 
-        methods: {},
+        methods: {
+            dayFormat(date) {
+                return moment.utc(date).local().format('ddd MMM D');
+            },
+        },
     }
 </script>

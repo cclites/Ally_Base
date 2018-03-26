@@ -18,7 +18,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function index(Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -33,7 +33,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function store(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -61,7 +61,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -87,7 +87,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function destroy(Caregiver $caregiver, CaregiverLicense $license)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 

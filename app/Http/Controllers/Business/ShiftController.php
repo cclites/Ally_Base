@@ -73,10 +73,12 @@ class ShiftController extends BaseController
 
     public function show(Request $request, Shift $shift)
     {
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature']);
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
+
+        // Load needed relationships
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
@@ -119,7 +121,7 @@ class ShiftController extends BaseController
 
     public function update(Request $request, Shift $shift)
     {
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -167,7 +169,7 @@ class ShiftController extends BaseController
 
     public function destroy(Shift $shift)
     {
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
         if ($shift->isReadOnly()) {
@@ -181,7 +183,7 @@ class ShiftController extends BaseController
 
     public function confirm(Shift $shift)
     {
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -200,7 +202,7 @@ class ShiftController extends BaseController
 
     public function unconfirm(Shift $shift)
     {
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -217,6 +219,11 @@ class ShiftController extends BaseController
 
     public function printPage(Shift $shift)
     {
+        if (!$this->businessHasShift($shift)) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        // Load needed relationships
         $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
 
         // Calculate distances
@@ -244,10 +251,12 @@ class ShiftController extends BaseController
 
     public function storeIssue(Request $request, Shift $shift)
     {
-        $shift->load(['activities', 'issues']);
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
+
+        // Load needed relationships
+        $shift->load(['activities', 'issues']);
 
         $data = $request->validate([
             'caregiver_injury' => 'boolean',
@@ -264,7 +273,7 @@ class ShiftController extends BaseController
 
     public function updateIssue(Request $request, Shift $shift, $issue_id)
     {
-        if ($this->business()->id != $shift->business_id) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -319,6 +328,10 @@ class ShiftController extends BaseController
 
     public function duplicate(Shift $shift)
     {
+        if (!$this->businessHasShift($shift)) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
         // Duplicate an existing shift and advance one day
         $shift = $shift->replicate();
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
@@ -331,10 +344,5 @@ class ShiftController extends BaseController
 
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
-    }
-
-    protected function hasAccessTo(Shift $shift)
-    {
-        return ($this->business()->id == $shift->business_id);
     }
 }

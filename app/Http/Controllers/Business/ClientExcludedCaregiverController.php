@@ -17,6 +17,10 @@ class ClientExcludedCaregiverController extends BaseController
      */
     public function index(Client $client)
     {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         return response()->json($client->excludedCaregivers);
     }
 
@@ -38,6 +42,10 @@ class ClientExcludedCaregiverController extends BaseController
      */
     public function store(Request $request, $client)
     {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         $data = $request->validate(['caregiver_id' => 'required|int']);
 
         $caregiver = ClientExcludedCaregiver::create([
@@ -94,7 +102,13 @@ class ClientExcludedCaregiverController extends BaseController
      */
     public function destroy($id)
     {
-        ClientExcludedCaregiver::destroy($id);
+        $excluded = ClientExcludedCaregiver::find($id);
+
+        if (!$this->businessHasClient($excluded->client_id)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $excluded->delete();
         return response()->json([]);
     }
 }

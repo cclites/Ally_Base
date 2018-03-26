@@ -68,7 +68,7 @@ class ScheduleController extends BaseController
      */
     public function show(Schedule $schedule)
     {
-        if ($schedule->business_id != $this->business()->id) {
+        if (!$this->businessHasSchedule($schedule)) {
             return new ErrorResponse(403, 'You do not have access to this schedule.', $schedule);
         }
 
@@ -146,7 +146,7 @@ class ScheduleController extends BaseController
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
-        if ($schedule->business_id != $this->business()->id) {
+        if (!$this->businessHasSchedule($schedule)) {
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
@@ -185,7 +185,7 @@ class ScheduleController extends BaseController
      */
     public function destroy(Schedule $schedule)
     {
-        if ($schedule->business_id != $this->business()->id) {
+        if (!$this->businessHasSchedule($schedule)) {
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 

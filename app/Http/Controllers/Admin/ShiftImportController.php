@@ -185,9 +185,15 @@ class ShiftImportController extends Controller
         return $import->load('shifts');
     }
 
-    public function delete(Import $import)
+    public function destroy(Import $import)
     {
         $import->delete();
+
+        // Protection against deleting old imports.
+        if ($import->created_at->diffInDays() > 1) {
+            return new ErrorResponse(400, 'This import is too old to be rolled back automatically.');
+        }
+
         return new SuccessResponse('Import has been rolled back.');
     }
 
