@@ -169,6 +169,8 @@ Route::group([
     Route::get('reports/printable-schedule', 'Business\ReportsController@printableSchedule')->name('reports.printable_schedule');
     Route::get('reports/export-timesheets', 'Business\ReportsController@exportTimesheets')->name('reports.export_timesheets');
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
+    Route::get('reports/client-caregiver-visits', 'Business\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
+    Route::post('reports/client-caregiver-visits', 'Business\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
