@@ -16,7 +16,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() && $request->input('json')) {
             $users = User::with(['paymentHold'])
                 ->leftJoin($sql = \DB::raw("
                     (

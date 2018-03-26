@@ -26,6 +26,7 @@
                     <span v-if="row.item.role_type == 'caregiver' || row.item.role_type == 'client'">
                          <b-btn size="sm" @click="addHold(row.item)" variant="danger" v-if="!row.item.payment_hold">Add Hold</b-btn>
                         <b-btn size="sm" @click="removeHold(row.item)" variant="primary" v-else>Remove Hold</b-btn>
+                        <b-btn size="sm" :href="`/business/${row.item.role_type}s/${row.item.id}`">Edit</b-btn>
                     </span>
                     <b-btn size="sm" :href="'/admin/impersonate/' + row.item.id">Impersonate</b-btn>
                 </template>
@@ -121,7 +122,7 @@
 
         methods: {
             loadItems() {
-                axios.get('/admin/users')
+                axios.get('/admin/users?json=1')
                     .then(response => {
                         this.items = response.data;
                     });
