@@ -62,7 +62,7 @@ function utc_date($input, $to_format='Y-m-d H:i:s', $from_timezone='America/New_
 }
 
 /**
- * Check if an administrator is logged in or impersonating
+ * Check if an administrator is logged in or impersonating another user
  *
  * @return bool
  */
@@ -70,6 +70,15 @@ function is_admin() {
     if ($impersonator = Auth::user()->impersonator()) {
         return $impersonator->role_type === 'admin';
     }
+    return is_admin_now();
+}
+
+/**
+ * Check if an administrator is logged in and NOT impersonating another user
+ *
+ * @return bool
+ */
+function is_admin_now() {
     return Auth::user()->role_type === 'admin';
 }
 

@@ -26,14 +26,13 @@ class ClientScheduleController extends BaseController
      * Retrieve aggregated list of events generated from all client schedules
      *
      * @param \Illuminate\Http\Request $request
-     * @param $client_id
+     * @param $client
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function index(Request $request, ScheduleAggregator $aggregator, $client_id)
+    public function index(Request $request, ScheduleAggregator $aggregator, Client $client)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -55,19 +54,20 @@ class ClientScheduleController extends BaseController
     /**
      * Retrieve the details of a schedule
      *
-     * @param $client_id
-     * @param $schedule_id
+     * @param $client
+     * @param $schedule
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function show($client_id, $schedule_id)
+    public function show(Client $client, Schedule $schedule)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
-
-        $schedule = Schedule::findOrFail($schedule_id);
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+        
         return new ScheduleResponse($schedule);
     }
 
@@ -75,15 +75,14 @@ class ClientScheduleController extends BaseController
      * Create a new schedule or single event
      *
      * @param \App\Http\Requests\CreateScheduleRequest $request
-     * @param $client_id
+     * @param $client
      *
      * @return \Illuminate\Contracts\Support\Responsable
      * @throws \Exception
      */
-    public function create(CreateScheduleRequest $request, $client_id)
+    public function create(CreateScheduleRequest $request, Client $client)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -116,19 +115,19 @@ class ClientScheduleController extends BaseController
      * Update an entire schedule after a selected_date
      *
      * @param \Illuminate\Http\Request $request
-     * @param $client_id
-     * @param $schedule_id
+     * @param $client
+     * @param $schedule
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function update(Request $request, $client_id, $schedule_id)
+    public function update(Request $request, Client $client, Schedule $schedule)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
-
-        $schedule = Schedule::findOrFail($schedule_id);
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
 
         $data = $this->validateScheduleUpdate($request, $schedule);
         if (!$data['end_date']) {
@@ -172,19 +171,19 @@ class ClientScheduleController extends BaseController
     /**
      * Delete an entire schedule
      *
-     * @param $client_id
-     * @param $schedule_id
+     * @param $client
+     * @param $schedule
      *
      * @return \App\Http\Controllers\Business|\Illuminate\Contracts\Support\Responsable
      */
-    public function destroy(Request $request, $client_id, $schedule_id)
+    public function destroy(Request $request, Client $client, Schedule $schedule)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
-
-        $schedule = Schedule::findOrFail($schedule_id);
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
 
         $data = $request->validate([
             'selected_date' => 'required|date',
@@ -203,12 +202,11 @@ class ClientScheduleController extends BaseController
      * Create a single event
      *
      * @param \Illuminate\Http\Request $request
-     * @param $client_id
+     * @param $client
      */
-    public function createSingle(Request $request, $client_id)
+    public function createSingle(Request $request, Client $client)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -233,20 +231,20 @@ class ClientScheduleController extends BaseController
      * "Update" a single event
      *
      * @param \Illuminate\Http\Request $request
-     * @param $client_id
-     * @param $schedule_id
+     * @param $client
+     * @param $schedule
      * @param $date
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function updateSingle(Request $request, $client_id, $schedule_id)
+    public function updateSingle(Request $request, Client $client, Schedule $schedule)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
-
-        $schedule = Schedule::findOrFail($schedule_id);
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
 
         $data = $this->validateScheduleUpdateSingle($request, $schedule);
         // Correct $data for use in model
@@ -302,20 +300,20 @@ class ClientScheduleController extends BaseController
     /**
      * Create a schedule exception
      *
-     * @param $client_id
+     * @param $client
      * @param $schedule_id
      * @param $date
      *
      * @return \Illuminate\Contracts\Support\Responsable
      */
-    public function destroySingle(Request $request, $client_id, $schedule_id)
+    public function destroySingle(Request $request, Client $client, Schedule $schedule)
     {
-        $client = Client::findOrFail($client_id);
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
-
-        $schedule = Schedule::findOrFail($schedule_id);
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
 
         $data = $request->validate([
             'selected_date' => 'required|date',

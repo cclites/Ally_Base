@@ -99,7 +99,7 @@ class CaregiverController extends BaseController
      */
     public function show(Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -152,7 +152,7 @@ class CaregiverController extends BaseController
      */
     public function update(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -195,7 +195,7 @@ class CaregiverController extends BaseController
      */
     public function destroy(ScheduleAggregator $aggregator, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -214,7 +214,7 @@ class CaregiverController extends BaseController
     {
         $caregiver = Caregiver::findOrFail($caregiver_id);
 
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -225,7 +225,7 @@ class CaregiverController extends BaseController
     {
         $caregiver = Caregiver::findOrFail($caregiver_id);
 
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -236,7 +236,7 @@ class CaregiverController extends BaseController
     {
         $caregiver = Caregiver::findOrFail($caregiver_id);
 
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -264,7 +264,7 @@ class CaregiverController extends BaseController
 
     public function bankAccount(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -278,7 +278,7 @@ class CaregiverController extends BaseController
 
     public function changePassword(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
@@ -294,7 +294,7 @@ class CaregiverController extends BaseController
 
     public function misc(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
         $data = $request->validate(['misc' => 'required|string']);
@@ -304,7 +304,7 @@ class CaregiverController extends BaseController
 
     public function preferences(Request $request, Caregiver $caregiver)
     {
-        if (!$this->hasCaregiver($caregiver->id)) {
+        if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
         $data = $request->validate(['preferences' => 'required|string']);

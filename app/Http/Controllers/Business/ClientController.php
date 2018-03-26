@@ -128,7 +128,7 @@ class ClientController extends BaseController
      */
     public function show(Client $client)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -179,7 +179,7 @@ class ClientController extends BaseController
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -217,7 +217,7 @@ class ClientController extends BaseController
      */
     public function destroy(Client $client)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -234,7 +234,7 @@ class ClientController extends BaseController
 
     public function reactivate(Client $client)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -254,7 +254,7 @@ class ClientController extends BaseController
      */
     public function serviceOrders(Request $request, Client $client)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -268,22 +268,18 @@ class ClientController extends BaseController
         return new ErrorResponse(500, 'Unable to update service orders.');
     }
 
-    public function address(Request $request, $client_id, $type)
+    public function address(Request $request, Client $client, $type)
     {
-        $client = Client::findOrFail($client_id);
-
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
         return (new AddressController())->update($request, $client->user, $type, 'The client\'s address');
     }
 
-    public function phone(Request $request, $client_id, $type)
+    public function phone(Request $request, Client $client, $type)
     {
-        $client = Client::findOrFail($client_id);
-
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -292,7 +288,7 @@ class ClientController extends BaseController
 
     public function paymentMethod(Request $request, Client $client, string $type)
     {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
@@ -314,7 +310,12 @@ class ClientController extends BaseController
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
 
-    public function destroyPaymentMethod(Client $client, string $type) {
+    public function destroyPaymentMethod(Client $client, string $type)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         if ($type == 'backup') {
             $client->backupPayment()->dissociate();
         }
@@ -325,9 +326,12 @@ class ClientController extends BaseController
         return new SuccessResponse('The payment method has been deleted.');
     }
 
-    public function sendConfirmationEmail($client_id)
+    public function sendConfirmationEmail(Client $client)
     {
-        $client = Client::findOrFail($client_id);
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         $client->sendConfirmationEmail();
         return new SuccessResponse('Email Sent to Client');
     }
@@ -341,7 +345,7 @@ class ClientController extends BaseController
     }
 
     public function changePassword(Request $request, Client $client) {
-        if (!$this->business()->clients()->where('id', $client->id)->exists()) {
+        if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 

@@ -86,7 +86,7 @@ Route::group([
     'as' => 'business.',
     'prefix' => 'business',
     'middleware' => ['auth', 'roles'],
-    'roles' => ['office_user']
+    'roles' => ['office_user', 'admin']
 ], function() {
     Route::get('phone-numbers/{user}', 'UserController@phoneNumbers');
 
@@ -105,11 +105,11 @@ Route::group([
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');
-    Route::post('caregivers/{id}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
-    Route::post('caregivers/{id}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
-    Route::get('caregivers/{id}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
+    Route::post('caregivers/{caregiver}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
+    Route::post('caregivers/{caregiver}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
+    Route::get('caregivers/{caregiver}/schedule', 'Business\CaregiverController@schedule')->name('caregivers.schedule');
     Route::post('caregivers/{caregiver}/bank_account', 'Business\CaregiverController@bankAccount')->name('caregivers.bank_account');
-    Route::post('caregivers/{id}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
+    Route::post('caregivers/{caregiver}/send_confirmation_email', 'Business\CaregiverController@sendConfirmationEmail')->name('caregivers.send_confirmation_email');
     Route::patch('caregivers/{caregiver}/password', 'Business\CaregiverController@changePassword')->name('caregivers.reset_password');
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
     Route::put('caregivers/{caregiver}/preferences', 'Business\CaregiverController@preferences')->name("caregivers.update_preferences");
@@ -124,22 +124,22 @@ Route::group([
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
-    Route::post('clients/{id}/address/{type}', 'Business\ClientController@address')->name('clients.address');
-    Route::post('clients/{id}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
-    Route::post('clients/{id}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
-    Route::get('clients/{id}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
+    Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
+    Route::post('clients/{client}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
+    Route::post('clients/{client}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
+    Route::get('clients/{client}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
     Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');
-    Route::get('clients/{id}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
-    Route::post('clients/{id}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
-    Route::post('clients/{id}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');
-    Route::get('clients/{id}/schedule/{schedule_id}', 'Business\ClientScheduleController@show')->name('clients.schedule.show');
-    Route::patch('clients/{id}/schedule/{schedule_id}', 'Business\ClientScheduleController@update')->name('clients.schedule.update');
-    Route::patch('clients/{id}/schedule/{schedule_id}/single', 'Business\ClientScheduleController@updateSingle')->name('clients.schedule.update.single');
-    Route::post('clients/{id}/schedule/{schedule_id}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
-    Route::post('clients/{id}/schedule/{schedule_id}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
+    Route::get('clients/{client}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
+    Route::post('clients/{client}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
+    Route::post('clients/{client}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');
+    Route::get('clients/{client}/schedule/{schedule}', 'Business\ClientScheduleController@show')->name('clients.schedule.show');
+    Route::patch('clients/{client}/schedule/{schedule}', 'Business\ClientScheduleController@update')->name('clients.schedule.update');
+    Route::patch('clients/{client}/schedule/{schedule}/single', 'Business\ClientScheduleController@updateSingle')->name('clients.schedule.update.single');
+    Route::post('clients/{client}/schedule/{schedule}/delete', 'Business\ClientScheduleController@destroy')->name('clients.schedule.destroy');
+    Route::post('clients/{client}/schedule/{schedule}/single/delete', 'Business\ClientScheduleController@destroySingle')->name('clients.schedule.destroy.single');
     Route::post('clients/{client}/payment/{type}', 'Business\ClientController@paymentMethod')->name('clients.paymentMethod');
     Route::delete('clients/{client}/payment/{type}', 'Business\ClientController@destroyPaymentMethod');
-    Route::post('clients/{id}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
+    Route::post('clients/{client}/send_confirmation_email', 'Business\ClientController@sendConfirmationEmail')->name('clients.send_confirmation_email');
     Route::get('clients/{client}/payment_type', 'Business\ClientController@getPaymentType')->name('clients.payment_type');
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
     Route::post('clients/{client}/detach-caregiver', 'Business\ClientCaregiverController@detachCaregiver')->name('clients.detach-caregiver');

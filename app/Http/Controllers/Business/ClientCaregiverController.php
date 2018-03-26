@@ -13,11 +13,10 @@ use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
 {
-    public function store(Request $request, $client_id) {
-        /**
-         * @var \App\Client $client
-         */
-        $client = $this->business()->clients()->where('id', $client_id)->firstOrFail();
+    public function store(Request $request, Client $client) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
         $caregiver_id = $request->input('caregiver_id');
@@ -41,11 +40,10 @@ class ClientCaregiverController extends BaseController
         return new ErrorResponse(500, 'Unable to save caregiver assignment.');
     }
 
-    public function index($client_id) {
-        /**
-         * @var \App\Client $client
-         */
-        $client = $this->business()->clients()->where('id', $client_id)->firstOrFail();
+    public function index(Client $client) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
 
         $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
             return (new ClientCaregiver($client, $caregiver))->toResponse(null);
@@ -53,18 +51,20 @@ class ClientCaregiverController extends BaseController
         return $caregivers->sortBy('name')->values()->all();
     }
 
-    public function show($client_id, $caregiver_id) {
-        /**
-         * @var \App\Client $client
-         */
-        $client = $this->business()->clients()->where('id', $client_id)->firstOrFail();
+    public function show(Client $client, Caregiver $caregiver) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
 
-        $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
         return new ClientCaregiver($client, $caregiver);
     }
 
     public function potentialCaregivers(Client $client)
     {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         $current_caregivers = $client->caregivers()->select('caregivers.id')->pluck('id');
         $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
         $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
@@ -92,6 +92,10 @@ class ClientCaregiverController extends BaseController
      */
     public function detachCaregiver(Client $client)
     {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
         $caregiver = Caregiver::find(request('caregiver_id'));
 
         if ($caregiver->isClockedIn($client->id)) {
