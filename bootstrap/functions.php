@@ -79,7 +79,7 @@ function is_admin() {
  * @return bool
  */
 function is_admin_now() {
-    return Auth::user()->role_type === 'admin';
+    return Auth::check() && Auth::user()->role_type === 'admin';
 }
 
 /**
