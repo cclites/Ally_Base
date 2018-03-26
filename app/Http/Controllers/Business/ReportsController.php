@@ -560,38 +560,91 @@ class ReportsController extends BaseController
     protected function getPaymentShifts($id, $caregiver_id)
     {
         $shifts = Shift::with('deposits', 'activities')
-            ->whereHas('deposits', function ($query) use ($id) {
-                $query->where('deposits.id', $id);
-            })
-            ->where('caregiver_id', $caregiver_id)
-            ->orderBy('checked_in_time')
-            ->get()
-            ->map(function ($shift) {
-                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-                $row = (object) collect($shift->toArray())
-                    ->merge([
-                        'hours' => $shift->duration(),
-                        'ally_fee' => number_format($allyFee, 2),
-                        'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
-                        'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
-                        'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
-                        'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
-                        'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
-                        'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
-                        'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
-                        'confirmed' => $shift->statusManager()->isConfirmed(),
-                        'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
-                        'EVV' => $shift->verified,
-                    ])->toArray();
+                       ->whereHas('deposits', function ($query) use ($id) {
+                           $query->where('deposits.id', $id);
+                       })
+                       ->where('caregiver_id', $caregiver_id)
+                       ->orderBy('checked_in_time')
+                       ->get()
+                       ->map(function ($shift) {
+                           $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate,
+                               $shift->provider_fee);
+                           $row = (object)collect($shift->toArray())
+                               ->merge([
+                                   'hours'           => $shift->duration(),
+                                   'ally_fee'        => number_format($allyFee, 2),
+                                   'hourly_total'    => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee,
+                                       2),
+                                   'mileage_costs'   => number_format($shift->costs()->getMileageCost(), 2),
+                                   'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                                   'provider_total'  => number_format($shift->costs()->getProviderFee(), 2),
+                                   'ally_total'      => number_format($shift->costs()->getAllyFee(), 2),
+                                   'ally_pct'        => AllyFeeCalculator::getPercentage($shift->client, null),
+                                   'shift_total'     => number_format($shift->costs()->getTotalCost(), 2),
+                                   'confirmed'       => $shift->statusManager()->isConfirmed(),
+                                   'status'          => $shift->status ? title_case(preg_replace('/_/', ' ',
+                                       $shift->status)) : '',
+                                   'EVV'             => $shift->verified,
+                               ])->toArray();
 
-                $row->checked_in_time = Carbon::parse($row->checked_in_time);
-                $row->checked_out_time = Carbon::parse($row->checked_out_time);
-                $row->activities = collect($row->activities)->sortBy('name');
+                           $row->checked_in_time = Carbon::parse($row->checked_in_time);
+                           $row->checked_out_time = Carbon::parse($row->checked_out_time);
+                           $row->activities = collect($row->activities)->sortBy('name');
 
-                return $row;
-            });
+                           return $row;
+                       });
 
         return $shifts;
+    }
+
+    /**
+     * Display all clients with the number of visits by caregivers during a given date range
+     */
+    public function clientCaregiverVisits()
+    {
+        $clients = $this->business()->clients->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        $caregivers = $this->business()->caregivers->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        return view('business.reports.client_caregiver_visits', compact('clients','caregivers'));
+    }
+
+    public function clientCaregiverVisitsData(Request $request)
+    {
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $range = [Carbon::parse($request->startDate), Carbon::parse($request->endDate)];
+        } else {
+            $range = [now()->subWeeks(4), now()];
+        }
+
+        $clients = $this->business()
+            ->clients()
+            ->when($request->filled('clientId'), function ($query) use ($request) {
+                $query->where('id', $request->clientId);
+            })
+            ->withCount(['shifts' => function ($query) use ($range, $request) {
+                $query->whereBetween('checked_in_time', $range);
+                $query->when($request->filled('caregiverId'), function ($query) use ($request) {
+                    $query->where('caregiver_id', $request->caregiverId);
+                });
+            }])
+            ->get()
+            ->filter(function ($item) {
+                return $item->shifts_count > 0;
+            })
+            ->values();
+
+        $range = [$range[0]->format('m/d/Y'), $range[1]->format('m/d/Y')];
+
+        return response()->json(compact('range', 'clients'));
     }
 }
 

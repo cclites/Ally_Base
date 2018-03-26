@@ -171,6 +171,8 @@ Route::group([
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
     Route::get('reports/caregivers/payment-history/{id}/print/{caregiver_id}', 'Business\ReportsController@printPaymentDetails')->name('reports.caregivers.print_payment_details');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
+    Route::get('reports/client-caregiver-visits', 'Business\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
+    Route::post('reports/client-caregiver-visits', 'Business\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');

@@ -24,9 +24,6 @@
     <li>
         <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-medkit"></i><span class="hide-menu">Care Plans</span></a>
         <ul aria-expanded="false" class="collapse">
-            <li><a href="{{ route('business.care_plans.index') }}">Care Plans</a></li>
-            <li><a href="{{ route('business.activities.index') }}">Activities</a></li>
-            <li class="divider"></li>
             <li><a href="{{ route('business.care_plans.create') }}">Add a Care Plan</a></li>
         </ul>
     </li>
@@ -56,6 +53,7 @@
         <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule Report</a></li>
         <li><a href="{{ route('business.reports.caregivers_missing_bank_accounts') }}">Caregivers Missing Bank Accounts</a></li>
         <li><a href="{{ route('business.reports.export_timesheets') }}">Export Timesheets</a></li>
+        <li><a href="{{ route('business.reports.client_caregiver_visits') }}">Client Caregiver Visits</a></li>
     </ul>
 </li>
 <li>
@@ -63,5 +61,6 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.settings.index') }}">General</a></li>
         <li><a href="{{ route('business.settings.bank_accounts.index') }}">Bank Accounts</a></li>
+        <li><a href="{{ route('business.activities.index') }}">Activities</a></li>
     </ul>
 </li>
