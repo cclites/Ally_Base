@@ -17,6 +17,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#users" role="tab">Users</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#point_of_contact" role="tab">Main Point of Contact</a>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -32,6 +35,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <business-office-user-list :business="{{ $business OR '{}' }}"></business-office-user-list>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="point_of_contact" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-6">
+                    <business-contact-info-tab :business="{{ $business }}"></business-contact-info-tab>
                 </div>
             </div>
         </div>

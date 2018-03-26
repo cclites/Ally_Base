@@ -86,63 +86,70 @@ class ReportsController extends BaseController
         return compact('totals', 'shifts', 'dates');
     }
 
-    public function overtime(Request $request, ScheduleAggregator $aggregator)
+    public function overtime()
+    {
+        return view('business.reports.overtime');
+    }
+
+    public function overtimeData(Request $request, ScheduleAggregator $aggregator)
     {
         $timezone = $this->business()->timezone;
 
-        if (!$week = $request->input('week')) {
-            $week = Carbon::now($timezone)->weekOfYear;
-        }
-
-        if (!$year = $request->input('year')) {
-            $year = Carbon::now($timezone)->year;
-        }
-
+        $week = Carbon::now($timezone)->weekOfYear;
+        $year = Carbon::now($timezone)->year;
         $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
         $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
-        $caregivers = [];
 
-        foreach ($this->business()->caregivers as $caregiver) {
-
-            $hours = [
-                'user' => $caregiver->user,
-                'worked' => 0,
-                'scheduled' => 0,
-            ];
-
+        if ($request->filled('start') && $request->filled('end')) {
+            $weekStart = Carbon::parse($request->start)->setTime(0, 0, 0);
+            $weekEnd = Carbon::parse($request->end)->setTime(23, 59, 59);
+        }
+        $caregivers = $this->business()
+            ->caregivers()
+            ->with('shifts')
+            ->whereHas('shifts', function ($query) use ($weekStart, $weekEnd) {
+                $query->whereBetween('checked_in_time', [$weekStart, $weekEnd]);
+            })
+            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
+                $query->where('caregiver_id', $request->caregiver_id);
+            })
+            ->get();
+        $results = collect([]);
+        foreach ($caregivers as $caregiver) {
+            $user = $caregiver->user;
             // Calculate total number of hours in finished shifts
-            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
-                ->whereNotNull('checked_out_time')->get()
-                ->each(function ($shift) use ($hours) {
-                    $hours['worked'] += $shift->duration();
+            $worked = $caregiver->shifts->where('checked_out_time', '!=', null)
+                ->reduce(function ($carry, $item) {
+                    return $carry + $item->duration();
                 });
 
-            // Calculate number of hours in current shift
             $lastShiftEnd = new Carbon();
-            $caregiver->shifts()->whereBetween('checked_in_time', [$weekStart, $weekEnd])
-                ->whereNull('checked_out_time')
-                ->get()
-                ->each(function ($shift) use ($hours, $lastShiftEnd) {
-                    $hours['worked'] += $shift->duration();
-                    $hours['scheduled'] += $shift->remaining();
-                    $lastShiftEnd = $shift->scheduledEndTime();
-                });
-
-            // Calculate number of hours in future shifts
-            $schedules = $aggregator->fresh()
-                                    ->where('caregiver_id', $caregiver->id)
-                                    ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
-            foreach ($schedules as $schedule) {
-                $hours['scheduled'] += round($schedule->duration / 60, 2);
+            $scheduled = round($aggregator->fresh()
+                    ->where('caregiver_id', $caregiver->id)
+                    ->getSchedulesBetween($weekStart, $weekEnd)
+                    ->sum('duration') / 60, 2);
+            // Calculate number of hours in current shift
+            foreach ($caregiver->shifts->where('check_out_time', null) as $shift) {
+                $worked += $shift->duration();
+                //$scheduled += $shift->remaining();
+                //$lastShiftEnd = $shift->scheduledEndTime();
             }
 
-            $hours['total'] = $hours['scheduled'] + $hours['worked'];
+            $worked = round($worked / 60, 2);
 
-            // Aggregate
-            $caregivers[] = $hours;
+//            $schedules = $aggregator->fresh()
+//                        ->where('caregiver_id', $caregiver->id)
+//                        ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
+//            foreach ($schedules as $schedule) {
+//                $scheduled += round($schedule->duration / 60, 2);
+//            }
+
+            $results->push(compact('user', 'worked', 'scheduled'));
         }
 
-        return view('business.reports.overtime', compact('caregivers'));
+        $date_range = [$weekStart->toDateString(), $weekEnd->toDateString()];
+
+        return response()->json(compact('results', 'date_range'));
     }
 
     public function reconciliation(Request $request)

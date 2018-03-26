@@ -27,9 +27,11 @@
 </template>
 
 <script>
+    import FormatsNumbers from '../../mixins/FormatsNumbers';
+
     export default {
 
-        props: {},
+        mixins: [FormatsNumbers],
 
         data() {
             return {
@@ -70,8 +72,14 @@
                         sortable: true,
                     },
                     {
+                        key: 'method_type',
+                        label: 'Method Type',
+                        formatter: (value) => { return _.replace(value, "App\\", '') }
+                    },
+                    {
                         key: 'amount',
                         sortable: true,
+                        formatter: (value) => { return this.moneyFormat(value) }
                     },
                     {
                         key: 'created_at',

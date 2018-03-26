@@ -3,5 +3,5 @@
 @section('title', 'Caregiver Overtime Report')
 
 @section('content')
-    <business-overtime-report :caregivers="{{ json_encode($caregivers) }}"></business-overtime-report>
+    <business-overtime-report></business-overtime-report>
 @endsection

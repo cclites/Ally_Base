@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Businesses\Timezone;
 use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
@@ -130,7 +131,7 @@ class Schedule extends Model
 
     public function getStartsAtAttribute()
     {
-        return new Carbon($this->attributes['starts_at'], $this->business->timezone);
+        return new Carbon($this->attributes['starts_at'], Timezone::getTimezone($this->business_id));
     }
 
     public function setStartsAtAttribute($value) {
@@ -273,8 +274,8 @@ class Schedule extends Model
 
     public function getTimezone()
     {
-        if (!$this->business->timezone) throw new MissingTimezoneException;
-        return $this->business->timezone;
+        if (!Timezone::getTimezone($this->business_id)) throw new MissingTimezoneException;
+        return Timezone::getTimezone($this->business_id);
     }
 
     /**

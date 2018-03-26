@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\CaregiverApplication;
+use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Responses\CreatedResponse;
@@ -109,6 +110,13 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->load([
+            'deposits' => function ($query) {
+                return $query->orderBy('created_at');
+            },
+            'deposits.shifts' => function ($query) {
+                return $query->orderBy('checked_in_time');
+            },
+            'deposits.shifts.activities',
             'phoneNumbers',
             'user.documents',
             'bankAccount',
@@ -309,6 +317,4 @@ class CaregiverController extends BaseController
         $caregiver->update($data);
         return new SuccessResponse('Caregiver updated');
     }
-
-
 }

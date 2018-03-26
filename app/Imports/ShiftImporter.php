@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Business;
+use App\Businesses\Timezone;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
@@ -94,7 +95,7 @@ class ShiftImporter
 
         // Calculate timing
         $checkIn = $this->sheet->getValue('checked_in_time', $row);
-        $timezone = Business::find($data['business_id'])->timezone;
+        $timezone = Timezone::getTimezone($data['business_id']);
         $duration = floatval($this->sheet->getValue('duration', $row));
         $data['checked_in_time'] = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
         $data['checked_out_time'] = $data['checked_in_time']->copy()->addMinutes(round($duration * 60));

@@ -14,9 +14,9 @@
                        title="Client Mapping"
             >
                 <div class="form-group" v-if="clientPopover">
-                    <select class="form-control" v-model="model.client_id" ref="client">
+                    <select2 class="form-control" v-model="model.client_id" ref="client">
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
-                    </select>
+                    </select2>
                 </div>
                 <div class="form-group">
                     <b-button variant="info" @click="saveMapping('client')">Save Mapping</b-button>
@@ -35,9 +35,9 @@
                        title="Caregiver Mapping"
             >
                 <div class="form-group" v-if="caregiverPopover">
-                    <select class="form-control" v-model="model.caregiver_id" ref="caregiver">
+                    <select2 class="form-control" v-model="model.caregiver_id" ref="caregiver">
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </select>
+                    </select2>
                 </div>
                 <div class="form-group">
                     <b-button variant="info" @click="saveMapping('caregiver')">Save Mapping</b-button>
@@ -105,9 +105,8 @@
                 return moment(val, moment.HTML5_FMT.DATETIME_LOCAL).utc().format('YYYY-MM-DD HH:mm:ss');
             },
             getNameById(array, id) {
-                let index = array.findIndex(item => item.id === id);
+                let index = array.findIndex(item => item.id == id);
                 if (index < 0) return "";
-                console.log('ID: ' + id);
                 return array[index].nameLastFirst;
             },
             async saveMapping(type) {

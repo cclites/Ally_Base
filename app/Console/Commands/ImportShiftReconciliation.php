@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Business;
+use App\Businesses\Timezone;
 use App\Caregiver;
 use App\Client;
 use App\Deposit;
@@ -106,7 +107,7 @@ class ImportShiftReconciliation extends Command
                 continue;
             }
 
-            $clockIn = Carbon::createFromFormat('Y-m-d H:i:s', $clockIn, $business->timezone)->setTimezone('UTC');
+            $clockIn = Carbon::createFromFormat('Y-m-d H:i:s', $clockIn, Timezone::getTimezone($data['business_id']))->setTimezone('UTC');
             $data['checked_in_time'] = $clockIn->format('Y-m-d H:i:s');
             $data['checked_out_time'] = $clockIn->copy()->addMinutes(round($hours * 60))->format('Y-m-d H:i:s');
 
