@@ -543,10 +543,17 @@ class ReportsController extends BaseController
         } else {
             $range = [now()->subWeeks(4), now()];
         }
+
         $clients = $this->business()
             ->clients()
-            ->withCount(['shifts' => function ($query) use ($range) {
+            ->when($request->filled('clientId'), function ($query) use ($request) {
+                $query->where('id', $request->clientId);
+            })
+            ->withCount(['shifts' => function ($query) use ($range, $request) {
                 $query->whereBetween('checked_in_time', $range);
+                $query->when($request->filled('caregiverId'), function ($query) use ($request) {
+                    $query->where('caregiver_id', $request->caregiverId);
+                });
             }])
             ->get()
             ->filter(function ($item) {
