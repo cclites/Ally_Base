@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\BankAccount;
 use App\Business;
 use App\Caregiver;
+use App\CreditCard;
+use App\GatewayTransaction;
 use App\Http\Controllers\Controller;
+use App\Reports\CaregiverPaymentsReport;
+use App\Reports\ClientChargesReport;
 use App\Reports\DuplicateDepositReport;
 use App\Reports\OnHoldReport;
 use App\Reports\PendingTransactionsReport;
@@ -196,4 +201,77 @@ class ReportsController extends Controller
         });
         return response()->json(compact('stats', 'breakdown'));
     }
+
+    public function shifts(Request $request)
+    {
+        $report = new ShiftsReport();
+        $report->orderBy('checked_in_time');
+
+        $this->addShiftReportFilters($report, $request);
+
+        if ($request->input('export')) {
+            return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
+                          ->download();
+        }
+
+        return $report->rows();
+    }
+
+    public function caregiverPayments(Request $request)
+    {
+        $report = new CaregiverPaymentsReport();
+
+        $this->addShiftReportFilters($report, $request);
+
+        return $report->rows();
+    }
+
+    public function clientCharges(Request $request)
+    {
+        $report = new ClientChargesReport();
+
+        $this->addShiftReportFilters($report, $request);
+
+        return $report->rows();
+    }
+
+    protected function addShiftReportFilters($report, Request $request)
+    {
+        if ($request->has('start_date') || $request->has('end_date')) {
+            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+            $report->between($startDate, $endDate);
+        }
+
+        if ($request->input('import_id')) {
+            $report->where('import_id', $request->import_id);
+        }
+
+        if ($request->input('transaction_id')) {
+            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+        }
+
+        if ($request->has('payment_method')) {
+            $method = null;
+            switch($request->input('payment_method')) {
+                case 'credit_card':
+                    $method = CreditCard::class;
+                    break;
+                case 'bank_account':
+                    $method = BankAccount::class;
+                    break;
+                case 'business':
+                    $method = Business::class;
+                    break;
+            }
+            if ($method) $report->forPaymentMethod($method);
+        }
+        if ($caregiver_id = $request->input('caregiver_id')) {
+            $report->where('caregiver_id', $caregiver_id);
+        }
+        if ($client_id = $request->input('client_id')) {
+            $report->where('client_id', $client_id);
+        }
+    }
+
 }

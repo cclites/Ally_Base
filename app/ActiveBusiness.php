@@ -1,6 +1,9 @@
 <?php
 namespace App;
 
+use Auth;
+use Session;
+
 class ActiveBusiness
 {
     protected $business = null;
@@ -8,15 +11,21 @@ class ActiveBusiness
     public function set(Business $business)
     {
         $this->business = $business;
+        Session::put('active_business_id', $business->id);
     }
 
     public function get()
     {
-        if (auth()->check() && auth()->user()->role_type === 'office_user') {
-            if (!$this->business && !$this->business = auth()->user()->role->businesses->first()) {
-                return null;
-            }
+        if ($this->business) {
+            return $this->business;
         }
-        return $this->business;
+        if (Auth::check() && Auth::user()->role_type === 'office_user') {
+            return Auth::user()->role->businesses->first();
+        }
+        // For administrators only: get the last used business_id
+        // This can be extended to office users once we allow for business switching.
+        if ($business_id = Session::get('active_business_id')) {
+            return Business::find($business_id);
+        }
     }
 }

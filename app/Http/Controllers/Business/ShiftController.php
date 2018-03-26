@@ -73,7 +73,7 @@ class ShiftController extends BaseController
 
     public function show(Request $request, Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -121,7 +121,7 @@ class ShiftController extends BaseController
 
     public function update(Request $request, Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -169,7 +169,7 @@ class ShiftController extends BaseController
 
     public function destroy(Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
         if ($shift->isReadOnly()) {
@@ -183,7 +183,7 @@ class ShiftController extends BaseController
 
     public function confirm(Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -202,7 +202,7 @@ class ShiftController extends BaseController
 
     public function unconfirm(Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -219,7 +219,7 @@ class ShiftController extends BaseController
 
     public function printPage(Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -251,7 +251,7 @@ class ShiftController extends BaseController
 
     public function storeIssue(Request $request, Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -273,7 +273,7 @@ class ShiftController extends BaseController
 
     public function updateIssue(Request $request, Shift $shift, $issue_id)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
@@ -328,7 +328,7 @@ class ShiftController extends BaseController
 
     public function duplicate(Shift $shift)
     {
-        if ($this->businessHasShift($shift)) {
+        if (!$this->businessHasShift($shift)) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 

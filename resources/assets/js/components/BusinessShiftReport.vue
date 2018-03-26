@@ -45,104 +45,11 @@
 
         <loading-card v-show="loading < 2"></loading-card>
 
-        <b-row v-show="showSummary && loading >= 2">
-            <b-col lg="6">
-                <b-card
-                        header="Client Charges for Date Range &amp; Filters"
-                        header-text-variant="white"
-                        header-bg-variant="info"
-                >
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>Client</th>
-                            <th>Hours</th>
-                            <th>Total</th>
-                            <!--<th>Caregiver</th>-->
-                            <!--<th>Registry</th>-->
-                            <!--<th>Ally</th>-->
-                            <th>Type</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="item in items.clientCharges">
-                            <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
-                            <td>{{ item.hours }}</td>
-                            <td>{{ moneyFormat(item.total) }}</td>
-                            <!--<td>{{ item.caregiver_total }}</td>-->
-                            <!--<td>{{ item.provider_total }}</td>-->
-                            <!--<td>{{ item.ally_total }}</td>-->
-                            <td>{{ item.payment_type }}</td>
-                        </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td><strong>Total for Confirmed Shifts</strong></td>
-                                <td>{{ clientTotals.hours }}</td>
-                                <td>{{ moneyFormat(clientTotals.total) }}</td>
-                                <td></td>
-                                <!--<td>{{ clientTotals.caregiver_total }}</td>-->
-                                <!--<td>{{ clientTotals.provider_total }}</td>-->
-                                <!--<td>{{ clientTotals.ally_total }}</td>-->
-                            </tr>
-                        </tfoot>
-                    </table>
-                </b-card>
-            </b-col>
-            <b-col lg="6">
-                <b-card
-                        header="Caregiver Payments for Date Range &amp; Filters"
-                        header-text-variant="white"
-                        header-bg-variant="info"
-                >
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>Caregiver</th>
-                            <th>Hours</th>
-                            <th>Total</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="item in items.caregiverPayments">
-                            <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
-                            <td>{{ item.hours }}</td>
-                            <td>{{ moneyFormat(item.amount) }}</td>
-                        </tr>
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td><strong>Total for Confirmed Shifts</strong></td>
-                            <td>{{ caregiverTotals.hours }}</td>
-                            <td>{{ moneyFormat(caregiverTotals.amount) }}</td>
-                        </tr>
-                        </tfoot>
-                    </table>
-                </b-card>
-            </b-col>
-        </b-row>
-        <b-row v-show="showSummary && loading >= 2">
-            <b-col lg="6">
-                <b-card>
-                    <table class="table table-bordered">
-                        <tr>
-                            <td><strong>Provider Payment For Date Range &amp; Filters:</strong></td>
-                            <td>{{ moneyFormat(clientTotals.provider_total) }}</td>
-                        </tr>
-                    </table>
-                </b-card>
-            </b-col>
-            <b-col lg="6">
-                <b-card>
-                    <table class="table table-bordered">
-                        <tr>
-                            <td><strong>Processing Fee For Date Range &amp; Filters:</strong></td>
-                            <td>{{ moneyFormat(clientTotals.ally_total) }}</td>
-                        </tr>
-                    </table>
-                </b-card>
-            </b-col>
-        </b-row>
+        <shift-history-summaries v-show="showSummary && loading >= 2"
+                                 :client-charges="items.clientCharges"
+                                 :caregiver-payments="items.caregiverPayments"
+        />
+
         <b-row v-show="loading >= 2">
             <b-col lg="12">
                 <b-card
@@ -204,12 +111,16 @@
     import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
+    import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
 
     export default {
         components: {
+            ShiftHistorySummaries,
             ShiftDetailsModal,
             FilterColumnsModal,
-            ShiftHistoryTable},
+            ShiftHistoryTable
+        },
+
         mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
 
         props: {
@@ -342,27 +253,6 @@
                     // Skip EVV and Confirmed since the template scope ignores undefined
                 });
                 return items;
-            },
-            clientTotals() {
-                if (this.items.clientCharges.length === 0) return {};
-                return this.items.clientCharges.reduce((totals, item) => {
-                    return {
-                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
-                        total: (this.parseFloat(totals.total) + this.parseFloat(item.total)).toFixed(2),
-                        caregiver_total: (this.parseFloat(totals.caregiver_total) + this.parseFloat(item.caregiver_total)).toFixed(2),
-                        provider_total: (this.parseFloat(totals.provider_total) + this.parseFloat(item.provider_total)).toFixed(2),
-                        ally_total: (this.parseFloat(totals.ally_total) + this.parseFloat(item.ally_total)).toFixed(2),
-                    }
-                })
-            },
-            caregiverTotals() {
-                if (this.items.caregiverPayments.length === 0) return {};
-                return this.items.caregiverPayments.reduce((totals, item) => {
-                    return {
-                        amount: (this.parseFloat(totals.amount) + this.parseFloat(item.amount)).toFixed(2),
-                        hours: (this.parseFloat(totals.hours) + this.parseFloat(item.hours)).toFixed(2),
-                    }
-                })
             },
             shiftTotals() {
                 if (this.items.shifts.length === 0) return {};
