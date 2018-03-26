@@ -27,5 +27,7 @@ class ActiveBusiness
         if ($business_id = Session::get('active_business_id')) {
             return Business::find($business_id);
         }
+        // For administrators only: return a blank business to prevent exceptions
+        if (is_admin_now()) return new Business();
     }
 }
