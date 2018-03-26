@@ -8,5 +8,10 @@
 @endsection
 
 @section('content')
-    <caregiver-list :caregivers="{{ $caregivers }}"></caregiver-list>
+    @if(is_admin_now())
+        <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
+    @endif
+    @if($active_business)
+        <caregiver-list :caregivers="{{ $caregivers }}"></caregiver-list>
+    @endif
 @endsection

@@ -7,6 +7,11 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('admin.businesses.index') }}">Provider List</a></li>
         <li><a href="{{ route('admin.businesses.create') }}">Add Provider</a></li>
+        <li class="divider"><hr style="margin:0;"/></li>
+        <li><a href="{{ route('business.caregivers.index') }}">Caregiver List</a></li>
+        <li><a href="{{ route('business.clients.index') }}">Client List</a></li>
+        <li class="divider"><hr style="margin:0;"/></li>
+        <li><a href="{{ route('business.reports.shifts') }}">Shift History Report</a></li>
     </ul>
 </li>
 <li> <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Users</span></a>

@@ -219,6 +219,7 @@ Route::group([
 ], function() {
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
     Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');
+    Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
     Route::post('businesses/{business}/hold', 'Admin\BusinessController@addHold');
     Route::delete('businesses/{business}/hold', 'Admin\BusinessController@removeHold');
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');

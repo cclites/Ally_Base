@@ -8,5 +8,10 @@
 @endsection
 
 @section('content')
-    <client-list :clients="{{ $clients }}"></client-list>
+    @if(is_admin_now())
+        <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
+    @endif
+    @if($active_business)
+        <client-list :clients="{{ $clients }}"></client-list>
+    @endif
 @endsection

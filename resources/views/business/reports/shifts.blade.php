@@ -7,7 +7,12 @@
 @endsection
 
 @section('content')
-    <?php $imports = is_admin() ? \App\Import::orderBy('id', 'DESC')->get()->toArray() : [] ?>
-    <business-shift-report :admin="{{ (int) is_admin() }}" :imports="{{ json_encode($imports) }}"></business-shift-report>
-    {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}
+    @if(is_admin_now())
+        <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
+    @endif
+    @if($active_business)
+        <?php $imports = is_admin() ? \App\Import::orderBy('id', 'DESC')->get()->toArray() : [] ?>
+        <business-shift-report :admin="{{ (int) is_admin() }}" :imports="{{ json_encode($imports) }}"></business-shift-report>
+        {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}
+    @endif
 @endsection

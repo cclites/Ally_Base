@@ -159,4 +159,21 @@ class BusinessController extends Controller
         $business->removeHold();
         return new SuccessResponse('The payment hold has been removed from ' . $business->name);
     }
+
+    /**
+     * Allow an administrator to manually switch the active business they are manipulating
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Responses\SuccessResponse
+     */
+    public function setActiveBusiness(Request $request)
+    {
+        $request->validate([
+            'business_id' => 'required|exists:businesses,id',
+        ]);
+
+        $activeBusiness = app()->make(\App\ActiveBusiness::class);
+        $activeBusiness->set(Business::find($request->business_id));
+        return new SuccessResponse('The active business has been switched.');
+    }
 }
