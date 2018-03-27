@@ -1,5 +1,5 @@
 <template>
-    <b-card title="Payments History Statement">
+    <b-card title="Client Payment Statements">
         <b-table :items="items" :fields="fields">
             <template slot="for_care_week" scope="data">
                 {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
