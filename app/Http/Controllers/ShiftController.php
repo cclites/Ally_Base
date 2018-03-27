@@ -215,4 +215,9 @@ class ShiftController extends Controller
         $events = new ScheduleEventsResponse($schedules);
         return $events;
     }
+
+    public function createManualShift()
+    {
+        return view('caregivers.manual_timesheets');
+    }
 }
