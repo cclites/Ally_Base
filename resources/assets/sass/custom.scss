@@ -70,6 +70,7 @@
 @media (max-width: 768px) {
   .container-fluid {
     padding: 0 15px;
+    overflow-x: hidden;
   }
   .fc-scroller {
     min-height: 320px;
