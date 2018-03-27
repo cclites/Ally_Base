@@ -78,15 +78,16 @@ class ReportsController extends Controller
             }
             return $rows
                 ->map(function ($item) {
-                    $item['deposit_outstanding'] = (int) $item['deposit_outstanding'];
-                    $item['payment_outstanding'] = (int) $item['payment_outstanding'];
+                    $item['deposit_outstanding'] = (int)$item['deposit_outstanding'];
+                    $item['payment_outstanding'] = (int)$item['payment_outstanding'];
                     return $item;
                 });
         }
         return view('admin.reports.pending_transactions');
     }
 
-    public function unpaidShifts(Request $request) {
+    public function unpaidShifts(Request $request)
+    {
         if ($request->expectsJson() && $request->input('json')) {
             $report = new UnpaidShiftsReport();
             if ($business_id = $request->input('business_id')) {
@@ -125,28 +126,44 @@ class ReportsController extends Controller
                 $query->whereHas('shifts', function ($query) {
                     $query->where('status', 'WAITING_FOR_PAYOUT');
                 })
-                      ->doesntHave('bankAccount');
+                    ->doesntHave('bankAccount');
             }
         ])
-                              ->whereHas('caregivers', function ($query) {
-                                  $query->whereHas('shifts', function ($query) {
-                                      $query->where('status', 'WAITING_FOR_PAYOUT');
-                                  })
-                                        ->doesntHave('bankAccount');
-                              })
-                              ->get();
+            ->whereHas('caregivers', function ($query) {
+                $query->whereHas('shifts', function ($query) {
+                    $query->where('status', 'WAITING_FOR_PAYOUT');
+                })
+                    ->doesntHave('bankAccount');
+            })
+            ->get();
 
         return view('admin.reports.caregivers.deposits_without_bank_account', compact('businesses'));
     }
 
     public function finances()
     {
-        return view('admin.reports.finances');
+        $businesses = Business::all()->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'id' => $item->id
+            ];
+        });
+
+        return view('admin.reports.finances', compact('businesses'));
     }
 
-    public function financesData()
+    public function financesData(Request $request)
     {
-        $payments = Payment::all();
+        $payments = Payment::when($request->filled('provider'), function ($query) use ($request) {
+                $query->where('business_id', $request->provider);
+            })
+            ->when($request->filled('start_date'), function ($query) use ($request) {
+                $query->where('created_at', '>=', Carbon::parse($request->start_date));
+            })
+            ->when($request->filled('end_date'), function ($query) use ($request) {
+                $query->where('created_at', '<=', Carbon::parse($request->end_date));
+            })
+            ->get();
         $stats = collect([]);
         $types = $payments->groupBy('payment_type');
         foreach ($types as $key => $value) {
@@ -201,10 +218,13 @@ class ReportsController extends Controller
                 })
             ]
         ])
-        ->map(function ($item) use ($total) {
-            $item['percentage'] = $item['total'] / $total;
-            return $item;
-        });
+            ->map(function ($item) use ($total) {
+                $item['percentage'] = 0;
+                if ($total != 0) {
+                    $item['percentage'] = $item['total'] / $total;
+                }
+                return $item;
+            });
         return response()->json(compact('stats', 'breakdown'));
     }
 
@@ -217,7 +237,7 @@ class ReportsController extends Controller
 
         if ($request->input('export')) {
             return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
-                          ->download();
+                ->download();
         }
 
         return $report->rows();
@@ -259,7 +279,7 @@ class ReportsController extends Controller
 
         if ($request->has('payment_method')) {
             $method = null;
-            switch($request->input('payment_method')) {
+            switch ($request->input('payment_method')) {
                 case 'credit_card':
                     $method = CreditCard::class;
                     break;
