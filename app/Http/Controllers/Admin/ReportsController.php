@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
+use App\Client;
 use App\CreditCard;
 use App\GatewayTransaction;
 use App\Http\Controllers\Controller;
@@ -278,6 +279,64 @@ class ReportsController extends Controller
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
         }
+    }
+
+    /**
+     * Display all clients with the number of visits by caregivers during a given date range
+     */
+    public function clientCaregiverVisits()
+    {
+        $clients = Client::all()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        $caregivers = Caregiver::all()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        return view('business.reports.client_caregiver_visits', compact('clients','caregivers'));
+    }
+
+    public function clientCaregiverVisitsData(Request $request)
+    {
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $range = [Carbon::parse($request->startDate), Carbon::parse($request->endDate)];
+        } else {
+            $range = [now()->subWeeks(4), now()];
+        }
+
+        $clients = Client::when($request->filled('clientId'), function ($query) use ($request) {
+                $query->where('id', $request->clientId);
+            })
+            ->with(['shifts' => function ($query) use ($range, $request) {
+                $query->whereBetween('checked_in_time', $range);
+                $query->when($request->filled('caregiverId'), function ($query) use ($request) {
+                    $query->where('caregiver_id', $request->caregiverId);
+                });
+            }, 'shifts.caregiver'])
+            ->get()
+            ->map(function ($item) {
+                $item->caregiver_shifts = $item->shifts->groupBy('caregiver.name');
+                return $item;
+            });
+
+        $table_data = [];
+        foreach ($clients as $client) {
+            foreach ($client->caregiver_shifts as $key => $value) {
+                $table_data[] = [
+                    'client' => $client->name,
+                    'caregiver' => $key,
+                    'shift_count' => count($value)
+                ];
+            }
+        }
+
+        $range = [$range[0]->format('m/d/Y'), $range[1]->format('m/d/Y')];
+        return response()->json(compact('range', 'table_data'));
     }
 
 }
