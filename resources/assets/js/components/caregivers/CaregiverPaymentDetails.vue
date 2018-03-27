@@ -13,19 +13,21 @@
                 </b-col>
             </b-row>
         </div>
-        <b-table hover
-                 :items="items"
-                 :fields="fields">
-            <template slot="checked_in_time" scope="data">
-                {{ formatDateFromUTC(data.item.checked_in_time) }}
-            </template>
-            <template slot="care_time" scope="data">
-                {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
-            </template>
-            <template slot="caregiver_total" scope="data">
-                {{ moneyFormat(parseFloat(data.item.caregiver_total)) }}
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table hover
+                     :items="items"
+                     :fields="fields">
+                <template slot="checked_in_time" scope="data">
+                    {{ formatDateFromUTC(data.item.checked_in_time) }}
+                </template>
+                <template slot="care_time" scope="data">
+                    {{ formatTimeFromUTC(data.item.checked_in_time) }} - {{ formatTimeFromUTC(data.item.checked_out_time) }}
+                </template>
+                <template slot="caregiver_total" scope="data">
+                    {{ moneyFormat(parseFloat(data.item.caregiver_total)) }}
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

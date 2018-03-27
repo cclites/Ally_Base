@@ -14,9 +14,11 @@
                                 </b-button-toolbar>
                             </b-col>
                         </b-row>
-                        <b-table :items="cards"
-                                 :fields="fields">
-                        </b-table>
+                        <div class="table-responsive">
+                            <b-table :items="cards"
+                                     :fields="fields">
+                            </b-table>
+                        </div>
                         <div class="ml-2" v-if="cards.length == 0">No results.</div>
                     </b-col>
                 </b-row>

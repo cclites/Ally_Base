@@ -1,28 +1,30 @@
 <template>
     <b-card title="Payment History">
-        <b-table hover
-                 sort-by="created_at"
-                :items="items"
-                :fields="fields">
-            <template slot="created_at" scope="data">
-                {{ formatDate(data.item.created_at) }}
-            </template>
-            <template slot="week" scope="data">
-                {{ start_end(data) }}
-            </template>
-            <template slot="success" scope="data">
-                <span style="color: green;" v-if="data.value">Complete</span>
-                <span style="color: darkred;" v-else>Failed</span>
-            </template>
-            <template slot="actions" scope="data">
-                <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
-                    View Statement
-                </a>
-                <a :href="'/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">
-                    Download Statement
-                </a>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table hover
+                     sort-by="created_at"
+                    :items="items"
+                    :fields="fields">
+                <template slot="created_at" scope="data">
+                    {{ formatDate(data.item.created_at) }}
+                </template>
+                <template slot="week" scope="data">
+                    {{ start_end(data) }}
+                </template>
+                <template slot="success" scope="data">
+                    <span style="color: green;" v-if="data.value">Complete</span>
+                    <span style="color: darkred;" v-else>Failed</span>
+                </template>
+                <template slot="actions" scope="data">
+                    <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
+                        View Statement
+                    </a>
+                    <a :href="'/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">
+                        Download Statement
+                    </a>
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

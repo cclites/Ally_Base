@@ -50,26 +50,28 @@
                             </b-row>
                         </b-col>
                     </b-row>
-                    <b-table bordered striped hover show-empty
-                             :fields="fields"
-                             :items="filteredItems"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                             class="shift-table"
-                    >
-                        <template slot="Day" scope="data">
-                            {{ dayFormat(data.value) }}
-                        </template>
-                        <template slot="actions" scope="row">
-                            <div v-if="!row.item.converted">
-                                <b-btn @click="convertToShift(row.item)" >Convert</b-btn>
-                            </div>
-                            <div v-else>
-                                <b-btn disabled>Converted</b-btn>
-                                <b-btn :href="'/business/shifts/' + row.item.shift_id">Edit</b-btn>
-                            </div>
-                        </template>
-                    </b-table>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="fields"
+                                 :items="filteredItems"
+                                 :sort-by.sync="sortBy"
+                                 :sort-desc.sync="sortDesc"
+                                 class="shift-table"
+                        >
+                            <template slot="Day" scope="data">
+                                {{ dayFormat(data.value) }}
+                            </template>
+                            <template slot="actions" scope="row">
+                                <div v-if="!row.item.converted">
+                                    <b-btn @click="convertToShift(row.item)" >Convert</b-btn>
+                                </div>
+                                <div v-else>
+                                    <b-btn disabled>Converted</b-btn>
+                                    <b-btn :href="'/business/shifts/' + row.item.shift_id">Edit</b-btn>
+                                </div>
+                            </template>
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>

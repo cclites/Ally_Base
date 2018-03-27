@@ -8,26 +8,28 @@
             <b-btn href="/business/reports/reconciliation?export=1" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
         </div>
-        <b-table bordered striped hover show-empty
-                 :fields="fields"
-                 :items="items"
-                 :sort-by.sync="sortBy"
-                 :sort-desc.sync="sortDesc"
-                 class="shift-table"
-        >
-            <template slot="created_at" scope="data">
-                {{ formatDate(data.value) }}
-            </template>
-            <template slot="amount_deposited" scope="data">
-                {{ numberFormat(data.value) }}
-            </template>
-            <template slot="amount_withdrawn" scope="data">
-                {{ numberFormat(data.value) }}
-            </template>
-            <template slot="actions" scope="row">
-                <b-btn size="sm" :href="'/business/transactions/' + row.item.id">View Transaction Details</b-btn>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :fields="fields"
+                     :items="items"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     class="shift-table"
+            >
+                <template slot="created_at" scope="data">
+                    {{ formatDate(data.value) }}
+                </template>
+                <template slot="amount_deposited" scope="data">
+                    {{ numberFormat(data.value) }}
+                </template>
+                <template slot="amount_withdrawn" scope="data">
+                    {{ numberFormat(data.value) }}
+                </template>
+                <template slot="actions" scope="row">
+                    <b-btn size="sm" :href="'/business/transactions/' + row.item.id">View Transaction Details</b-btn>
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

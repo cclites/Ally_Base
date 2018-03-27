@@ -21,15 +21,17 @@
                     <div v-else class="ml-2"><em>Shifts for this week have been approved.</em></div>
                 </b-col>
             </b-row>
-            <b-table show-empty :items="items"
-                     :fields="fields">
-                <template scope="data" slot="caregiver">
-                    {{ data.item.caregiver.name }}
-                </template>
-                <template scope="data" slot="actions">
-                    <b-button @click="shiftDetails(data.item)">View</b-button>
-                </template>
-            </b-table>
+            <div class="table-responsive">
+                <b-table show-empty :items="items"
+                         :fields="fields">
+                    <template scope="data" slot="caregiver">
+                        {{ data.item.caregiver.name }}
+                    </template>
+                    <template scope="data" slot="actions">
+                        <b-button @click="shiftDetails(data.item)">View</b-button>
+                    </template>
+                </b-table>
+            </div>
             <b-row v-if="items.length">
                 <b-col>
                     <b-button v-b-modal.modal1 v-if="!shiftsVerified">Sign and Approve These Shifts</b-button>

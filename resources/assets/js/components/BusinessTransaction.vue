@@ -37,20 +37,24 @@
                 <b-card header="Client Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
-                    <b-table bordered striped hover show-empty
-                             :fields="clientSummaryFields"
-                             :items="clientSummary">
-                    </b-table>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="clientSummaryFields"
+                                 :items="clientSummary">
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
             <b-col lg="6" v-show="showSummary">
                 <b-card header="Caregiver Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
-                    <b-table bordered striped hover show-empty
-                             :fields="caregiverSummaryFields"
-                             :items="caregiverSummary">
-                    </b-table>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="caregiverSummaryFields"
+                                 :items="caregiverSummary">
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
@@ -67,23 +71,25 @@
                         <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                         <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                     </div>
-                    <b-table bordered striped hover show-empty
-                             :fields="shiftFields"
-                             :items="shifts"
-                             :sort-by.sync="sortBy"
-                             :sort-desc.sync="sortDesc"
-                             class="shift-table"
-                    >
-                        <template slot="client_name" scope="row">
-                            <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client_name }}</a>
-                        </template>
-                        <template slot="caregiver_name" scope="row">
-                            <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver_name }}</a>
-                        </template>
-                        <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                        </template>
-                    </b-table>
+                    <div class="table-responsive">
+                        <b-table bordered striped hover show-empty
+                                 :fields="shiftFields"
+                                 :items="shifts"
+                                 :sort-by.sync="sortBy"
+                                 :sort-desc.sync="sortDesc"
+                                 class="shift-table"
+                        >
+                            <template slot="client_name" scope="row">
+                                <a :href="'/business/clients/' + row.item.client_id">{{ row.item.client_name }}</a>
+                            </template>
+                            <template slot="caregiver_name" scope="row">
+                                <a :href="'/business/caregivers/' + row.item.caregiver_id">{{ row.item.caregiver_name }}</a>
+                            </template>
+                            <template slot="actions" scope="row">
+                                <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                            </template>
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>

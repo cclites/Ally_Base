@@ -2,28 +2,32 @@
     <b-card header="Payment History"
             header-text-variant="white"
             header-bg-variant="info">
-        <b-table :items="items" :fields="fields">
-            <template slot="action" scope="row">
-                <b-btn @click="toggleDetails(row.item)" :pressed="row.item._showDetails"
-                       :class="{ 'text-white': row.item._showDetails }">
-                    Details
-                </b-btn>
-            </template>
-            <template slot="row-details" scope="row">
-                <b-table :items="row.item.shifts" :fields="shiftFields" foot-clone outlined dark>
-                    <template slot="activities" scope="row">
-                        {{ activities(row.item) }}
-                    </template>
-                    <template slot="FOOT_checked_in_time" scope="data"></template>
-                    <template slot="FOOT_checked_out_time" scope="data"></template>
-                    <template slot="FOOT_activities" scope="data"></template>
-                    <template slot="FOOT_duration" scope="data">
-                        <!-- A custom formatted footer cell  for field 'name' -->
-                        <strong>Total Hours: {{ totalHours(row.item.shifts) }}</strong>
-                    </template>
-                </b-table>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table :items="items" :fields="fields">
+                <template slot="action" scope="row">
+                    <b-btn @click="toggleDetails(row.item)" :pressed="row.item._showDetails"
+                           :class="{ 'text-white': row.item._showDetails }">
+                        Details
+                    </b-btn>
+                </template>
+                <template slot="row-details" scope="row">
+                    <div class="table-responsive">
+                        <b-table :items="row.item.shifts" :fields="shiftFields" foot-clone outlined dark>
+                            <template slot="activities" scope="row">
+                                {{ activities(row.item) }}
+                            </template>
+                            <template slot="FOOT_checked_in_time" scope="data"></template>
+                            <template slot="FOOT_checked_out_time" scope="data"></template>
+                            <template slot="FOOT_activities" scope="data"></template>
+                            <template slot="FOOT_duration" scope="data">
+                                <!-- A custom formatted footer cell  for field 'name' -->
+                                <strong>Total Hours: {{ totalHours(row.item.shifts) }}</strong>
+                            </template>
+                        </b-table>
+                    </div>
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

@@ -22,22 +22,24 @@
                 </b-row>
             </b-col>
         </b-row>
-        <b-table bordered striped hover show-empty
-                 :fields="fields"
-                 :items="filteredItems"
-                 :sort-by.sync="sortBy"
-                 :sort-desc.sync="sortDesc"
-                 class="shift-table"
-        >
-            <template slot="caregiver_rate" scope="data">{{ numberFormat(data.value) }}</template>
-            <template slot="provider_fee" scope="data">{{ numberFormat(data.value) }}</template>
-            <template slot="ally_fee" scope="data">{{ numberFormat(data.value) }}</template>
-            <template slot="total_hourly" scope="data">{{ numberFormat(data.value) }}</template>
-            <template slot="payment_fee" scope="data">{{ percentageFormat(data.value) }}</template>
-            <template slot="actions" scope="row">
-                <b-btn :href="'/business/clients/' + row.item.client_id + '#caregivers'">View Client Tab</b-btn>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :fields="fields"
+                     :items="filteredItems"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     class="shift-table"
+            >
+                <template slot="caregiver_rate" scope="data">{{ numberFormat(data.value) }}</template>
+                <template slot="provider_fee" scope="data">{{ numberFormat(data.value) }}</template>
+                <template slot="ally_fee" scope="data">{{ numberFormat(data.value) }}</template>
+                <template slot="total_hourly" scope="data">{{ numberFormat(data.value) }}</template>
+                <template slot="payment_fee" scope="data">{{ percentageFormat(data.value) }}</template>
+                <template slot="actions" scope="row">
+                    <b-btn :href="'/business/clients/' + row.item.client_id + '#caregivers'">View Client Tab</b-btn>
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

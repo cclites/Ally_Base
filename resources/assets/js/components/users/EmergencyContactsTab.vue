@@ -26,14 +26,16 @@
                 </b-form-group>
             </b-col>
         </b-row>
-        <b-table :items="contacts"
-                 :fields="fields">
-            <template slot="actions" scope="data">
-                <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)">
-                    <i class="fa fa-times"></i>
-                </b-btn>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table :items="contacts"
+                     :fields="fields">
+                <template slot="actions" scope="data">
+                    <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)">
+                        <i class="fa fa-times"></i>
+                    </b-btn>
+                </template>
+            </b-table>
+        </div>
     </b-card>
 </template>
 

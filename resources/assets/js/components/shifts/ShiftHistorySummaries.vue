@@ -7,41 +7,43 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>Client</th>
-                            <th>Hours</th>
-                            <th>Total</th>
-                            <!--<th>Caregiver</th>-->
-                            <!--<th>Registry</th>-->
-                            <!--<th>Ally</th>-->
-                            <th>Type</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="item in clientCharges">
-                            <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
-                            <td>{{ item.hours }}</td>
-                            <td>{{ moneyFormat(item.total) }}</td>
-                            <!--<td>{{ item.caregiver_total }}</td>-->
-                            <!--<td>{{ item.provider_total }}</td>-->
-                            <!--<td>{{ item.ally_total }}</td>-->
-                            <td>{{ item.payment_type }}</td>
-                        </tr>
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td><strong>Total for Confirmed Shifts</strong></td>
-                            <td>{{ clientTotals.hours }}</td>
-                            <td>{{ moneyFormat(clientTotals.total) }}</td>
-                            <td></td>
-                            <!--<td>{{ clientTotals.caregiver_total }}</td>-->
-                            <!--<td>{{ clientTotals.provider_total }}</td>-->
-                            <!--<td>{{ clientTotals.ally_total }}</td>-->
-                        </tr>
-                        </tfoot>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Hours</th>
+                                <th>Total</th>
+                                <!--<th>Caregiver</th>-->
+                                <!--<th>Registry</th>-->
+                                <!--<th>Ally</th>-->
+                                <th>Type</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in clientCharges">
+                                <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
+                                <td>{{ item.hours }}</td>
+                                <td>{{ moneyFormat(item.total) }}</td>
+                                <!--<td>{{ item.caregiver_total }}</td>-->
+                                <!--<td>{{ item.provider_total }}</td>-->
+                                <!--<td>{{ item.ally_total }}</td>-->
+                                <td>{{ item.payment_type }}</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td><strong>Total for Confirmed Shifts</strong></td>
+                                <td>{{ clientTotals.hours }}</td>
+                                <td>{{ moneyFormat(clientTotals.total) }}</td>
+                                <td></td>
+                                <!--<td>{{ clientTotals.caregiver_total }}</td>-->
+                                <!--<td>{{ clientTotals.provider_total }}</td>-->
+                                <!--<td>{{ clientTotals.ally_total }}</td>-->
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </b-card>
             </b-col>
             <b-col lg="6">
@@ -50,29 +52,31 @@
                         header-text-variant="white"
                         header-bg-variant="info"
                 >
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>Caregiver</th>
-                            <th>Hours</th>
-                            <th>Total</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="item in caregiverPayments">
-                            <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
-                            <td>{{ item.hours }}</td>
-                            <td>{{ moneyFormat(item.amount) }}</td>
-                        </tr>
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td><strong>Total for Confirmed Shifts</strong></td>
-                            <td>{{ caregiverTotals.hours }}</td>
-                            <td>{{ moneyFormat(caregiverTotals.amount) }}</td>
-                        </tr>
-                        </tfoot>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>Caregiver</th>
+                                <th>Hours</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in caregiverPayments">
+                                <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
+                                <td>{{ item.hours }}</td>
+                                <td>{{ moneyFormat(item.amount) }}</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td><strong>Total for Confirmed Shifts</strong></td>
+                                <td>{{ caregiverTotals.hours }}</td>
+                                <td>{{ moneyFormat(caregiverTotals.amount) }}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>

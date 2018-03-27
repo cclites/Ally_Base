@@ -2,13 +2,15 @@
     <b-row>
         <b-col>
             <b-card title="Caregiver Onboarded Status">
-                <b-table :items="clients"
-                         :fields="fields">
-                    <template slot="emailSentAt" scope="data">
-                        <span v-if="data.item.user.email_sent_at">{{ formatDateTime(data.item.user.email_sent_at) }}</span>
-                        <span v-else>Not Sent</span>
-                    </template>
-                </b-table>
+                <div class="table-responsive">
+                    <b-table :items="clients"
+                             :fields="fields">
+                        <template slot="emailSentAt" scope="data">
+                            <span v-if="data.item.user.email_sent_at">{{ formatDateTime(data.item.user.email_sent_at) }}</span>
+                            <span v-else>Not Sent</span>
+                        </template>
+                    </b-table>
+                </div>
             </b-card>
         </b-col>
     </b-row>

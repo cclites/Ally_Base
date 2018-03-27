@@ -1,8 +1,10 @@
 <template>
     <b-card>
-        <b-table :items="items"
-                 :fields="fields">
-        </b-table>
+        <div class="table-responsive">
+            <b-table :items="items"
+                     :fields="fields">
+            </b-table>
+        </div>
     </b-card>
 </template>
 
