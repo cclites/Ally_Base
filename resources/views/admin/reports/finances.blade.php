@@ -4,5 +4,5 @@
 
 
 @section('content')
-    <admin-financial-summary></admin-financial-summary>
+    <admin-financial-summary :providers="{{ json_encode($businesses) }}"></admin-financial-summary>
 @endsection

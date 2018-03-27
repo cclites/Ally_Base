@@ -122,7 +122,7 @@ Vue.component('bulk-edit-schedule-modal', require('./components/business/schedul
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
-Vue.component('business-client-caregiver-visits-report', require('./components/business/reports/ClientCaregiverVisitsReport'));
+Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 

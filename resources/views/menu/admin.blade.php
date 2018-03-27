@@ -50,6 +50,8 @@
         <li><a href="{{ route('admin.reports.unpaid_shifts') }}">Unpaid Shifts</a></li>
         <li><a href="{{ route('admin.reports.caregivers.deposits_missing_bank_account') }}">Missing Deposit Accounts</a></li>
         <li><a href="{{ route('admin.reports.finances') }}">Financial Summary</a></li>
+        <li><a href="{{ route('admin.reports.client_caregiver_visits') }}">Client Caregiver Visits</a></li>
+
     </ul>
 </li>
 <li>

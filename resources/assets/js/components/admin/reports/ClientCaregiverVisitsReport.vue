@@ -60,12 +60,17 @@
                 fields: [
                     {
                         label: 'Client',
-                        key: 'name',
+                        key: 'client',
+                        sortable: true
+                    },
+                    {
+                        label: 'Caregiver',
+                        key: 'caregiver',
                         sortable: true
                     },
                     {
                         label: 'Visits',
-                        key: 'shifts_count',
+                        key: 'shift_count',
                         sortable: true
                     }
                 ]
@@ -78,9 +83,9 @@
 
         methods: {
             fetchData() {
-                axios.post('/business/reports/client-caregiver-visits', this.filter)
+                axios.post('/admin/reports/client-caregiver-visits', this.filter)
                     .then(response => {
-                        this.items = response.data.clients;
+                        this.items = response.data.table_data;
                         this.filter.startDate = response.data.range[0];
                         this.filter.endDate = response.data.range[1];
                     }).catch(error => {

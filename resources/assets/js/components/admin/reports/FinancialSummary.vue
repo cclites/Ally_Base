@@ -1,7 +1,32 @@
 <template>
-
     <b-row>
         <b-col>
+            <b-card title="Filter">
+                <b-button-toolbar aria-label="Toolbar with button groups and input groups">
+                    <date-picker
+                            class="mb-1"
+                            v-model="filters.start_date"
+                            placeholder="Start Date">
+                    </date-picker> &nbsp;to&nbsp;
+                    <date-picker
+                            class="mb-1"
+                            v-model="filters.end_date"
+                            placeholder="End Date">
+                    </date-picker>
+                    <b-input-group class="mx-1">
+                        <b-form-select v-model="filters.provider">
+                            <option value="">All Providers</option>
+                            <option v-for="provider in providers" :value="provider.id">{{ provider.name }}</option>
+                        </b-form-select>
+                    </b-input-group>
+                    <div>
+                        <b-btn @click="fetchData()" variant="info" :disabled="fetchingData">
+                            Search
+                            <i class="fa fa-spin fa-spinner" v-show="fetchingData"></i>
+                        </b-btn>
+                    </div>
+                </b-button-toolbar>
+            </b-card>
             <b-card title="Breakdown">
                 <b-table :items="breakdown" :fields="breakdownFields"></b-table>
             </b-card>
@@ -30,13 +55,18 @@
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
 
     export default {
+        props: ['providers'],
+
         mixins: [FormatsNumbers],
         
         data() {
             return{
-                search: {
-
+                filters: {
+                    provider: '',
+                    start_date: '',
+                    end_date: ''
                 },
+                fetchingData: false,
                 breakdown: [],
                 breakdownFields: [
                     'label',
@@ -89,10 +119,12 @@
         
         methods: {
             fetchData() {
-                axios.post('/admin/reports/finances', this.search)
+                this.fetchingData = true;
+                axios.post('/admin/reports/finances', this.filters)
                     .then(response => {
                         this.items = response.data.stats;
                         this.breakdown = response.data.breakdown;
+                        this.fetchingData = false;
                     })
             }
         },

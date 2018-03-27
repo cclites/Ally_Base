@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
+use App\Client;
 use App\CreditCard;
 use App\GatewayTransaction;
 use App\Http\Controllers\Controller;
@@ -78,15 +79,16 @@ class ReportsController extends Controller
             }
             return $rows
                 ->map(function ($item) {
-                    $item['deposit_outstanding'] = (int) $item['deposit_outstanding'];
-                    $item['payment_outstanding'] = (int) $item['payment_outstanding'];
+                    $item['deposit_outstanding'] = (int)$item['deposit_outstanding'];
+                    $item['payment_outstanding'] = (int)$item['payment_outstanding'];
                     return $item;
                 });
         }
         return view('admin.reports.pending_transactions');
     }
 
-    public function unpaidShifts(Request $request) {
+    public function unpaidShifts(Request $request)
+    {
         if ($request->expectsJson() && $request->input('json')) {
             $report = new UnpaidShiftsReport();
             if ($business_id = $request->input('business_id')) {
@@ -125,28 +127,44 @@ class ReportsController extends Controller
                 $query->whereHas('shifts', function ($query) {
                     $query->where('status', 'WAITING_FOR_PAYOUT');
                 })
-                      ->doesntHave('bankAccount');
+                    ->doesntHave('bankAccount');
             }
         ])
-                              ->whereHas('caregivers', function ($query) {
-                                  $query->whereHas('shifts', function ($query) {
-                                      $query->where('status', 'WAITING_FOR_PAYOUT');
-                                  })
-                                        ->doesntHave('bankAccount');
-                              })
-                              ->get();
+            ->whereHas('caregivers', function ($query) {
+                $query->whereHas('shifts', function ($query) {
+                    $query->where('status', 'WAITING_FOR_PAYOUT');
+                })
+                    ->doesntHave('bankAccount');
+            })
+            ->get();
 
         return view('admin.reports.caregivers.deposits_without_bank_account', compact('businesses'));
     }
 
     public function finances()
     {
-        return view('admin.reports.finances');
+        $businesses = Business::all()->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'id' => $item->id
+            ];
+        });
+
+        return view('admin.reports.finances', compact('businesses'));
     }
 
-    public function financesData()
+    public function financesData(Request $request)
     {
-        $payments = Payment::all();
+        $payments = Payment::when($request->filled('provider'), function ($query) use ($request) {
+                $query->where('business_id', $request->provider);
+            })
+            ->when($request->filled('start_date'), function ($query) use ($request) {
+                $query->where('created_at', '>=', Carbon::parse($request->start_date));
+            })
+            ->when($request->filled('end_date'), function ($query) use ($request) {
+                $query->where('created_at', '<=', Carbon::parse($request->end_date));
+            })
+            ->get();
         $stats = collect([]);
         $types = $payments->groupBy('payment_type');
         foreach ($types as $key => $value) {
@@ -201,10 +219,13 @@ class ReportsController extends Controller
                 })
             ]
         ])
-        ->map(function ($item) use ($total) {
-            $item['percentage'] = $item['total'] / $total;
-            return $item;
-        });
+            ->map(function ($item) use ($total) {
+                $item['percentage'] = 0;
+                if ($total != 0) {
+                    $item['percentage'] = $item['total'] / $total;
+                }
+                return $item;
+            });
         return response()->json(compact('stats', 'breakdown'));
     }
 
@@ -217,7 +238,7 @@ class ReportsController extends Controller
 
         if ($request->input('export')) {
             return $report->setDateFormat('m/d/Y g:i A', 'America/New_York')
-                          ->download();
+                ->download();
         }
 
         return $report->rows();
@@ -259,7 +280,7 @@ class ReportsController extends Controller
 
         if ($request->has('payment_method')) {
             $method = null;
-            switch($request->input('payment_method')) {
+            switch ($request->input('payment_method')) {
                 case 'credit_card':
                     $method = CreditCard::class;
                     break;
@@ -278,6 +299,64 @@ class ReportsController extends Controller
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
         }
+    }
+
+    /**
+     * Display all clients with the number of visits by caregivers during a given date range
+     */
+    public function clientCaregiverVisits()
+    {
+        $clients = Client::all()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        $caregivers = Caregiver::all()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->nameLastFirst
+            ];
+        });
+        return view('business.reports.client_caregiver_visits', compact('clients','caregivers'));
+    }
+
+    public function clientCaregiverVisitsData(Request $request)
+    {
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $range = [Carbon::parse($request->startDate), Carbon::parse($request->endDate)];
+        } else {
+            $range = [now()->subWeeks(4), now()];
+        }
+
+        $clients = Client::when($request->filled('clientId'), function ($query) use ($request) {
+                $query->where('id', $request->clientId);
+            })
+            ->with(['shifts' => function ($query) use ($range, $request) {
+                $query->whereBetween('checked_in_time', $range);
+                $query->when($request->filled('caregiverId'), function ($query) use ($request) {
+                    $query->where('caregiver_id', $request->caregiverId);
+                });
+            }, 'shifts.caregiver'])
+            ->get()
+            ->map(function ($item) {
+                $item->caregiver_shifts = $item->shifts->groupBy('caregiver.name');
+                return $item;
+            });
+
+        $table_data = [];
+        foreach ($clients as $client) {
+            foreach ($client->caregiver_shifts as $key => $value) {
+                $table_data[] = [
+                    'client' => $client->name,
+                    'caregiver' => $key,
+                    'shift_count' => count($value)
+                ];
+            }
+        }
+
+        $range = [$range[0]->format('m/d/Y'), $range[1]->format('m/d/Y')];
+        return response()->json(compact('range', 'table_data'));
     }
 
 }
