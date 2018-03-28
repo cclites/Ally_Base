@@ -44,7 +44,11 @@ class UpdateClientRequest extends FormRequest
             'poa_first_name' => 'nullable|string',
             'poa_last_name' => 'nullable|string',
             'poa_phone' => 'nullable|string',
-            'poa_relationship' => 'nullable|string'
+            'poa_relationship' => 'nullable|string',
+            'dr_first_name' => 'nullable|string',
+            'dr_last_name' => 'nullable|string',
+            'dr_phone' => 'nullable|string',
+            'dr_fax' => 'nullable|string'
         ];
     }
 }
