@@ -108,12 +108,8 @@ class ShiftController extends BaseController
         }
 
         // Map additional data
-        if ($confirmedAction = $shift->statusHistory()->where('new_status', 'WAITING_FOR_AUTHORIZATION')->latest()->first()) {
-            $shift->confirmed_at = $confirmedAction->created_at->toDateTimeString();
-        }
-        if ($chargedAction = $shift->statusHistory()->where('new_status', 'WAITING_FOR_PAYOUT')->latest()->first()) {
-            $shift->charged_at = $chargedAction->created_at->toDateTimeString();
-        }
+        $shift->confirmed_at = optional($shift->statusManager()->confirmedAt())->toDateTimeString();
+        $shift->charged_at = optional($shift->statusManager()->chargedAt())->toDateTimeString();
 
         $activities = $shift->business->allActivities();
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
