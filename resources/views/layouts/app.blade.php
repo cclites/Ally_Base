@@ -4,10 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="viewport" content="viewport-fit=cover, initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'Ally Management System') }}</title>
     @include('layouts.partials.head')
     @stack('head')
