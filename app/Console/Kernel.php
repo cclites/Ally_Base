@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('cron:transaction_log')
-            ->dailyAt('14:00'); // 9AM EST / 10AM EDT
+            ->dailyAt('12:00'); // 7am EST / 8am EDT
         $schedule->command('cron:schedule_converter')
             ->hourly();
     }
