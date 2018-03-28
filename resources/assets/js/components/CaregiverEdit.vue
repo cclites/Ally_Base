@@ -88,7 +88,7 @@
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
-                    <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Delete Caregiver</b-button>
+                    <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
                 </b-col>
             </b-row>
         </form>
