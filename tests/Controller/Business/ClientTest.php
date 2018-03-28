@@ -4,7 +4,6 @@
 namespace Tests\Controller\Business;
 
 use App\Business;
-use App\Caregiver;
 use App\Client;
 use App\OfficeUser;
 use Tests\TestCase;
