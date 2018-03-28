@@ -143,14 +143,14 @@
                 <b-col lg="6">
                     <b-row>
                         <b-col xlg="8" lg="6" sm="12">
-                            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
+                            <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
                                 <b-form-select
                                         id="onboard_status"
                                         name="onboard_status"
                                         v-model="form.onboard_status"
                                         :disabled="(form.onboard_status == 'reconfirmed_checkbox' || form.onboard_status == 'agreement_checkbox')"
                                 >
-                                    <option value="">--Select--</option>
+                                    <option value="">--Please Select--</option>
                                     <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
                                     <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
                                 </b-form-select>
@@ -158,11 +158,11 @@
                             </b-form-group>
                         </b-col>
                         <b-col xlg="4" lg="6" sm="12">
-                            <b-form-group v-if="client.onboard_status=='needs_agreement'">
+                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
                                 <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
                                 <b-button  variant="info" @click="sendConfirmation()">Send Client Agreement via Email</b-button>
                             </b-form-group>
-                            <b-form-group v-if="client.onboard_status=='emailed_reconfirmation'">
+                            <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
                                 <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
                                 <b-button  variant="info" @click="sendConfirmation()">Resend Client Agreement via Email</b-button>
                             </b-form-group>
@@ -296,12 +296,21 @@
         },
 
         computed: {
+            lastStatusUpdated() {
+                return moment.utc(this.lastStatusDate).local().format('L') + ' at ' + moment.utc(this.lastStatusDate).local().format('LT');
+            },
+
             onboardStatusText() {
                 if (this.lastStatusDate) {
-                    if (this.form.onboard_status === 'emailed_reconfirmation') {
-                        return 'The confirmation email was sent at ' + moment.utc(this.lastStatusDate).local().format('L LT');
+                    switch (this.form.onboard_status) {
+                        case 'emailed_reconfirmation':
+                            return 'The confirmation email was sent ' + this.lastStatusUpdated;
+                        case 'agreement_signed': // paper signature
+                            return 'Signed: ' + this.lastStatusUpdated;
+                        case 'reconfirmed_checkbox': // electronic signature
+                            return 'Signed Electronically: ' + this.lastStatusUpdated;
                     }
-                    return 'The status was last updated at ' + moment.utc(this.lastStatusDate).local().format('L LT');
+                    return 'The status was last updated ' + this.lastStatusUpdated;
                 }
                 return 'Select the Ally Agreement status of the client.';
             }
