@@ -20,14 +20,6 @@
         <li><a href="{{ route('business.caregivers.applications') }}">Applications</a></li>
     </ul>
 </li>
-@if($active_business->scheduling)
-    <li>
-        <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-medkit"></i><span class="hide-menu">Care Plans</span></a>
-        <ul aria-expanded="false" class="collapse">
-            <li><a href="{{ route('business.care_plans.create') }}">Add a Care Plan</a></li>
-        </ul>
-    </li>
-@endif
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
     <ul aria-expanded="false" class="collapse">
