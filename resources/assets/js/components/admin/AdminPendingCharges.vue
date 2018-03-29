@@ -62,7 +62,7 @@
             return {
                 sortBy: null,
                 sortDesc: false,
-                start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
+                start_date: '08/01/2017',
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
