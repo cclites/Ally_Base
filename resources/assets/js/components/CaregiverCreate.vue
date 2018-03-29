@@ -155,7 +155,7 @@
                 this.form.firstname = this.app.first_name;
                 this.form.lastname = this.app.last_name;
                 this.form.email = this.app.email;
-                this.form.date_of_birth = this.app.date_of_birth;
+                this.form.date_of_birth = moment(this.app.date_of_birth).format('MM/DD/YYYY');
                 this.form.ssn = this.app.ssn;
                 this.form.username = this.app.email;
             }
