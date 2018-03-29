@@ -68,6 +68,11 @@ class Address extends Model
     {
         if ($forceUpdate || (!$this->latitude && !$this->longitude)) {
             $fullAddress = $this->address1 . ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+
+            // Skip if it was already read as an invalid address today
+            $invalidAddressKey = 'invalid_address_' . md5($fullAddress);
+            if (\Cache::has($invalidAddressKey)) return false;
+
             try {
                 $geocode = Geocode::getCoordinates($fullAddress);
                 $this->update([
@@ -76,6 +81,9 @@ class Address extends Model
                 ]);
             }
             catch (\Exception $e) {
+                // Save invalid address to cache
+                \Cache::put($invalidAddressKey, 1, 1440);
+
                 return false;
             }
         }
@@ -96,6 +104,7 @@ class Address extends Model
     public function distanceTo($latitude, $longitude, $units = 'm')
     {
         $geocode = $this->getGeocode();
+        if (!$geocode) return false;
         return $geocode->distanceTo($latitude, $longitude, $units);
     }
 
