@@ -97,7 +97,7 @@
                 totalRows: 0,
                 perPage: 30,
                 currentPage: 1,
-                sortBy: null,
+                sortBy: 'distance',
                 sortDesc: false,
                 filter: null,
                 loading: false,
