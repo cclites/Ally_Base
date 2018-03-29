@@ -24,6 +24,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use App\Reports\ActiveClientsReport;
 
 class ReportsController extends Controller
 {
@@ -359,4 +360,40 @@ class ReportsController extends Controller
         return response()->json(compact('range', 'table_data'));
     }
 
+    /**
+     * Compare active clients activity over the span of a given date range
+     *
+     * @return \Illuminate\View\View
+     */
+    public function activeClients() 
+    {
+        return view('admin.reports.active_clients');
+    }
+
+    /**
+     * Returns the data for the active clients report
+     *
+     * @param Request $request
+     * @return Illumiate\Http\Response
+     */
+    public function activeClientsData(Request $request) 
+    {
+        $report = new ActiveClientsReport();
+        
+        // if ($request->has('start_date') || $request->has('end_date')) {
+        //     $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+        //     $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+        //     $report->between($startDate, $endDate);
+        // }
+
+        $business_id = $request->input('business_id');
+
+        if (empty($business_id)) {
+            return response()->json([]);
+        }
+
+        $report->where('business_id', $business_id);
+        
+        return response()->json($report->rows());
+    }
 }
