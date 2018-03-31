@@ -393,35 +393,25 @@ class ReportsController extends Controller
             $range = [now()->subWeeks(4), now()];
         }
 
-        $shifts = Shift::whereBetween('checked_in_time', $range);
+        $shifts = Shift::where('business_id', request('business_id'))
+            ->whereBetween('checked_in_time', $range);
+        
+        $payments = \App\Payment::whereIn('id', $shifts->pluck('payment_id')) 
+            ->sum('amount');
 
         $hours = $shifts->select(\DB::raw('SUM(TIMESTAMPDIFF(hour, checked_in_time, checked_out_time)) as total_hours'))->get();
 
         $data = [
-            'clients' => $shifts->select('client_id')->distinct()->get()->count(),
-            'caregivers' => $shifts->select('caregiver_id')->distinct()->get()->count(),
-            'total_shifts' => $shifts->count(),
-            'total_hours' => $hours[0]['total_hours'],
+            'active_clients' => number_format($shifts->select('client_id')->distinct()->get()->count()),
+            'active_caregivers' => number_format($shifts->select('caregiver_id')->distinct()->get()->count()),
+            'total_shifts' => number_format($shifts->count()),
+            'total_hours_billed' => number_format($hours[0]['total_hours']),
+            'total_charges' => number_format($payments, 2),
+            'confirmed_shifts' => number_format($shifts->whereConfirmed()->count()),
+            'telephony' => 0,
+            'mobile_app' => 0,
         ];
 
-        dd($data);
-
-        // $report = new ActiveClientsReport();
-        
-        // // if ($request->has('start_date') || $request->has('end_date')) {
-        // //     $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        // //     $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-        // //     $report->between($startDate, $endDate);
-        // // }
-
-        // $business_id = $request->input('business_id');
-
-        // if (empty($business_id)) {
-        //     return response()->json([]);
-        // }
-
-        // $report->where('business_id', $business_id);
-        
-        // return response()->json($report->rows());
+        return response()->json($data);
     }
 }

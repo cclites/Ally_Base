@@ -39,9 +39,6 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
             >
-                <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/admin/transactions/' + row.item.id">View Transaction Details</b-btn>
-                </template>
             </b-table>
         </div>
     </b-card>
@@ -60,40 +57,17 @@
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
-                // items: [],
-                // fields: [
-                //     {
-                //         key: 'id',
-                //         label: 'Internal ID',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'transaction_id',
-                //         label: 'Gateway ID',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'transaction_type',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'amount',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'created_at',
-                //         label: 'Date',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'response_text',
-                //         sortable: true,
-                //     },
-                //     {
-                //         key: 'actions',
-                //         class: 'hidden-print'
-                //     }
-                // ]
+                items: [],
+                fields: [
+                    { key: 'active_clients' },
+                    { key: 'active_caregivers' },
+                    { key: 'total_hours_billed' },
+                    { key: 'total_charges', formatter: val => { return '$' + val } },
+                    { key: 'total_shifts' },
+                    { key: 'confirmed_shifts', label: '% of Shifts Verified' },
+                    { key: 'telephony' },
+                    { key: 'mobile_app' },
+                ]
             }
         },
 
@@ -110,7 +84,8 @@
             loadItems() {
                 axios.post(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&business_id=${this.business_id}`)
                     .then(response => {
-                        this.items = response.data;
+                        console.log(response.data);
+                        this.items = [response.data];
                     });
             },
         }
