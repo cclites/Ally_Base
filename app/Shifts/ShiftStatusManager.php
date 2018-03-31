@@ -113,6 +113,19 @@ class ShiftStatusManager
         ];
     }
 
+    public static function getChargedStatuses()
+    {
+        return array_diff(self::$statuses, self::getReadOnlyStatuses());
+        return [
+            Shift::PAID,
+        ];
+    }
+
+    public static function getUnChargedStatuses()
+    {
+        return array_diff(self::$statuses, self::getChargedStatuses());
+    }
+
     public static function getAwaitingBusinessDepositStatuses()
     {
         return [

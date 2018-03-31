@@ -362,4 +362,15 @@ class Shift extends Model
     {
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
+
+    public function scopeWhereCharged($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getChargedStatuses());
+    }
+
+    public function scopeWhereUnCharged($query)
+    {
+        return $query->whereIn('status', ShiftStatusManager::getUnChargedStatuses());
+    }
+
 }
