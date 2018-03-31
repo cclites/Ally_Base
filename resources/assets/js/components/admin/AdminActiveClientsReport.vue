@@ -106,6 +106,7 @@
             loadFiltersData() {
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
+            
             loadItems() {
                 axios.post(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&business_id=${this.business_id}`)
                     .then(response => {

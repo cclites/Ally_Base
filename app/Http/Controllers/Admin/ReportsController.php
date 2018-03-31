@@ -378,22 +378,50 @@ class ReportsController extends Controller
      */
     public function activeClientsData(Request $request) 
     {
-        $report = new ActiveClientsReport();
-        
-        // if ($request->has('start_date') || $request->has('end_date')) {
-        //     $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        //     $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-        //     $report->between($startDate, $endDate);
-        // }
+        // active clients
+        // active caregivers
+        // total hours
+        // total charges
+        // total shifts
+        // % of shifts verified
+        // telephony ?
+        // mobile app ?
 
-        $business_id = $request->input('business_id');
-
-        if (empty($business_id)) {
-            return response()->json([]);
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $range = [Carbon::parse($request->startDate), Carbon::parse($request->endDate)];
+        } else {
+            $range = [now()->subWeeks(4), now()];
         }
 
-        $report->where('business_id', $business_id);
+        $shifts = Shift::whereBetween('checked_in_time', $range);
+
+        $hours = $shifts->select(\DB::raw('SUM(TIMESTAMPDIFF(hour, checked_in_time, checked_out_time)) as total_hours'))->get();
+
+        $data = [
+            'clients' => $shifts->select('client_id')->distinct()->get()->count(),
+            'caregivers' => $shifts->select('caregiver_id')->distinct()->get()->count(),
+            'total_shifts' => $shifts->count(),
+            'total_hours' => $hours[0]['total_hours'],
+        ];
+
+        dd($data);
+
+        // $report = new ActiveClientsReport();
         
-        return response()->json($report->rows());
+        // // if ($request->has('start_date') || $request->has('end_date')) {
+        // //     $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
+        // //     $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+        // //     $report->between($startDate, $endDate);
+        // // }
+
+        // $business_id = $request->input('business_id');
+
+        // if (empty($business_id)) {
+        //     return response()->json([]);
+        // }
+
+        // $report->where('business_id', $business_id);
+        
+        // return response()->json($report->rows());
     }
 }
