@@ -36,9 +36,91 @@
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
             >
+            </b-table>
+        </div>
+        <b-row>
+            <b-col lg="12">
+                <b-card header="Select a Date Range to Compare"
+                        header-text-variant="white"
+                        header-bg-variant="info"
+                >
+                    <b-form inline>
+                        <date-picker
+                                v-model="start_date2"
+                                placeholder="Start Date"
+                        >
+                        </date-picker> &nbsp;to&nbsp;
+                        <date-picker
+                                v-model="end_date2"
+                                placeholder="End Date"
+                        >
+                        </date-picker>
+                    </b-form>
+                </b-card>
+            </b-col>
+        </b-row>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="compareItems"
+                     :fields="fields"
+            >
+                <template slot="active_clients" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.active_clients_diff)">{{ differences.active_clients_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.active_clients_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.active_clients_percent)">{{ differences.active_clients_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.active_clients_percent }}%</span>)
+                </template>
+                <template slot="active_caregivers" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.active_caregivers_diff)">{{ differences.active_caregivers_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.active_caregivers_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.active_caregivers_percent)">{{ differences.active_caregivers_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.active_caregivers_percent }}%</span>)
+                </template>
+                <template slot="total_hours_billed" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.total_hours_billed_diff)">{{ differences.total_hours_billed_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.total_hours_billed_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.total_hours_billed_percent)">{{ differences.total_hours_billed_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.total_hours_billed_percent }}%</span>)
+                </template>
+                <template slot="total_charges" scope="data">
+                    <!-- ${{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.total_charges_diff)">{{ differences.total_charges_diff }}</span>
+                    <span style="color: green" v-else>+ ${{ differences.total_charges_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.total_charges_percent)">{{ differences.total_charges_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.total_charges_percent }}%</span>)
+                </template>
+                <template slot="total_shifts" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.total_shifts_diff)">{{ differences.total_shifts_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.total_shifts_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.total_shifts_percent)">{{ differences.total_shifts_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.total_shifts_percent }}%</span>)
+                </template>
+                <template slot="confirmed_shifts" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.confirmed_shifts_diff)">{{ differences.confirmed_shifts_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.confirmed_shifts_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.confirmed_shifts_percent)">{{ differences.confirmed_shifts_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.confirmed_shifts_percent }}%</span>)
+                </template>
+                <template slot="telephony" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.telephony_diff)">{{ differences.telephony_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.telephony_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.telephony_percent)">{{ differences.telephony_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.telephony_percent }}%</span>)
+                </template>
+                <template slot="mobile_app" scope="data">
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.mobile_app_diff)">{{ differences.mobile_app_diff }}</span>
+                    <span style="color: green" v-else>+ {{ differences.mobile_app_diff }}</span>
+                    (<span style="color: red" v-if="isNegative(differences.mobile_app_percent)">{{ differences.mobile_app_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.mobile_app_percent }}%</span>)
+                </template>
             </b-table>
         </div>
     </b-card>
@@ -51,13 +133,15 @@
 
         data() {
             return {
-                sortBy: null,
-                sortDesc: false,
                 start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                start_date2: moment().startOf('isoweek').add(-7, 'days').format('MM/DD/YYYY'),
+                end_date2: moment().startOf('isoweek').add(-1, 'days').format('MM/DD/YYYY'),
                 business_id: "",
                 businesses: [],
                 items: [],
+                compareItems: [],
+                differences: {},
                 fields: [
                     { key: 'active_clients' },
                     { key: 'active_caregivers' },
@@ -80,13 +164,21 @@
             loadFiltersData() {
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
-            
+
             loadItems() {
-                axios.post(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&business_id=${this.business_id}`)
+                axios.post(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&start_date2=${this.start_date2}&end_date2=${this.end_date2}&business_id=${this.business_id}`)
                     .then(response => {
-                        console.log(response.data);
-                        this.items = [response.data];
+                        this.items = [response.data.report1];
+                        this.compareItems = [response.data.report2];
+                        this.differences = response.data.report3;
                     });
+            },
+
+            isNegative(str) {
+                if (! str) {
+                    return false;
+                }
+                return String(str).startsWith('-');
             },
         }
     }
