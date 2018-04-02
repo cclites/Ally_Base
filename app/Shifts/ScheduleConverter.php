@@ -117,7 +117,7 @@ class ScheduleConverter
      */
     public function hasBeenConverted(Schedule $schedule)
     {
-        return !is_null($schedule->converted_at);
+        return !is_null($schedule->converted_at) || $schedule->shifts()->exists();
     }
 
     /**
