@@ -361,89 +361,30 @@ class ReportsController extends Controller
     }
 
     /**
-     * Compare active clients activity over the span of a given date range
+     * Compare active clients activity over the span of a given date range.
      *
      * @return \Illuminate\View\View
      */
     public function activeClients() 
     {
-        return view('admin.reports.active_clients');
-    }
-
-    /**
-     * Returns the data for the active clients report
-     *
-     * @param Request $request
-     * @return Illumiate\Http\Response
-     */
-    public function activeClientsData(Request $request) 
-    {
-        // active clients
-        // active caregivers
-        // total hours
-        // total charges
-        // total shifts
-        // % of shifts verified
-        // telephony ?
-        // mobile app ?
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $range = [Carbon::parse($request->start_date), Carbon::parse($request->end_date)];
-        } else {
+        if (request()->wantsJson()) {
+            // set defaults
             $range = [now()->subWeeks(4), now()];
-        }
-
-        if ($request->filled('start_date2') && $request->filled('end_date2')) {
-            $compareRange = [Carbon::parse($request->start_date2), Carbon::parse($request->end_date2)];
-        } else {
             $compareRange = [now()->subWeeks(4), now()];
+
+            if (request()->filled('start_date') && request()->filled('end_date')) {
+                $range = [Carbon::parse(request()->start_date), Carbon::parse(request()->end_date)];
+            }
+
+            if (request()->filled('start_date2') && request()->filled('end_date2')) {
+                $compareRange = [Carbon::parse(request()->start_date2), Carbon::parse(request()->end_date2)];
+            }
+
+            $report = new ActiveClientsReport(request()->business_id, $range, $compareRange);
+
+            return response()->json($report->rows());
         }
 
-        $report1 = $this->getClientReportForRange($range);
-        $report2 = $this->getClientReportForRange($compareRange);
-        $report3 = $this->compareClientReports($report1, $report2);
-        return response()->json(compact(['report1', 'report2', 'report3']));
-    }
-
-    public function compareClientReports($report1, $report2) 
-    {
-        $data = [];
-
-        foreach($report1 as $key => $val) {
-            $data["{$key}_diff"] = $report2[$key] - $report1[$key];
-            $data["{$key}_percent"] = number_format($this->percent($data["{$key}_diff"], $report1[$key]), 0);
-        }
-
-        $data['total_charges_diff'] = number_format($data['total_charges_diff'], 2);
-        
-        return $data;
-    }
-
-    public function percent($part, $whole) {
-        if ($whole === 0 || $part === 0) return 0;
-
-        return ($part / $whole) * 100;
-    }
-
-    public function getClientReportForRange($range) 
-    {
-        $shifts = Shift::where('business_id', request('business_id'))
-            ->whereBetween('checked_in_time', $range);
-        
-        $payments = \App\Payment::whereIn('id', $shifts->pluck('payment_id')) 
-            ->sum('amount');
-
-        $hours = $shifts->select(\DB::raw('SUM(TIMESTAMPDIFF(hour, checked_in_time, checked_out_time)) as total_hours'))->get();
-
-        return [
-            'active_clients' => $shifts->select('client_id')->distinct()->get()->count(),
-            'active_caregivers' => $shifts->select('caregiver_id')->distinct()->get()->count(),
-            'total_shifts' => $shifts->count(),
-            'total_hours_billed' => $hours[0]['total_hours'],
-            'total_charges' => $payments, 2,
-            'confirmed_shifts' => $shifts->whereConfirmed()->count(),
-            'telephony' => 0,
-            'mobile_app' => 0,
-        ];
+        return view('admin.reports.active_clients');
     }
 }

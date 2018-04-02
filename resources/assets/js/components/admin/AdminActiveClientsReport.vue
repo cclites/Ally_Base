@@ -87,8 +87,8 @@
                     <span style="color: green" v-else>{{ differences.total_hours_billed_percent }}%</span>)
                 </template>
                 <template slot="total_charges" scope="data">
-                    <!-- ${{ data.value }} -->
-                    <span style="color: red" v-if="isNegative(differences.total_charges_diff)">{{ differences.total_charges_diff }}</span>
+                    <!-- {{ data.value }} -->
+                    <span style="color: red" v-if="isNegative(differences.total_charges_diff)">${{ differences.total_charges_diff }}</span>
                     <span style="color: green" v-else>+ ${{ differences.total_charges_diff }}</span>
                     (<span style="color: red" v-if="isNegative(differences.total_charges_percent)">{{ differences.total_charges_percent }}%</span>
                     <span style="color: green" v-else>{{ differences.total_charges_percent }}%</span>)
@@ -100,24 +100,24 @@
                     (<span style="color: red" v-if="isNegative(differences.total_shifts_percent)">{{ differences.total_shifts_percent }}%</span>
                     <span style="color: green" v-else>{{ differences.total_shifts_percent }}%</span>)
                 </template>
-                <template slot="confirmed_shifts" scope="data">
+                <template slot="verified_shifts" scope="data">
                     <!-- {{ data.value }} -->
-                    <span style="color: red" v-if="isNegative(differences.confirmed_shifts_diff)">{{ differences.confirmed_shifts_diff }}</span>
-                    <span style="color: green" v-else>+ {{ differences.confirmed_shifts_diff }}</span>
-                    (<span style="color: red" v-if="isNegative(differences.confirmed_shifts_percent)">{{ differences.confirmed_shifts_percent }}%</span>
-                    <span style="color: green" v-else>{{ differences.confirmed_shifts_percent }}%</span>)
+                    <span style="color: red" v-if="isNegative(differences.verified_shifts_diff)">{{ differences.verified_shifts_diff }}%</span>
+                    <span style="color: green" v-else>+ {{ differences.verified_shifts_diff }}%</span>
+                    (<span style="color: red" v-if="isNegative(differences.verified_shifts_percent)">{{ differences.verified_shifts_percent }}%</span>
+                    <span style="color: green" v-else>{{ differences.verified_shifts_percent }}%</span>)
                 </template>
                 <template slot="telephony" scope="data">
                     <!-- {{ data.value }} -->
-                    <span style="color: red" v-if="isNegative(differences.telephony_diff)">{{ differences.telephony_diff }}</span>
-                    <span style="color: green" v-else>+ {{ differences.telephony_diff }}</span>
+                    <span style="color: red" v-if="isNegative(differences.telephony_diff)">{{ differences.telephony_diff }}%</span>
+                    <span style="color: green" v-else>+ {{ differences.telephony_diff }}%</span>
                     (<span style="color: red" v-if="isNegative(differences.telephony_percent)">{{ differences.telephony_percent }}%</span>
                     <span style="color: green" v-else>{{ differences.telephony_percent }}%</span>)
                 </template>
                 <template slot="mobile_app" scope="data">
                     <!-- {{ data.value }} -->
-                    <span style="color: red" v-if="isNegative(differences.mobile_app_diff)">{{ differences.mobile_app_diff }}</span>
-                    <span style="color: green" v-else>+ {{ differences.mobile_app_diff }}</span>
+                    <span style="color: red" v-if="isNegative(differences.mobile_app_diff)">{{ differences.mobile_app_diff }}%</span>
+                    <span style="color: green" v-else>+ {{ differences.mobile_app_diff }}%</span>
                     (<span style="color: red" v-if="isNegative(differences.mobile_app_percent)">{{ differences.mobile_app_percent }}%</span>
                     <span style="color: green" v-else>{{ differences.mobile_app_percent }}%</span>)
                 </template>
@@ -148,9 +148,9 @@
                     { key: 'total_hours_billed' },
                     { key: 'total_charges', formatter: val => { return '$' + val } },
                     { key: 'total_shifts' },
-                    { key: 'confirmed_shifts', label: '% of Shifts Verified' },
-                    { key: 'telephony' },
-                    { key: 'mobile_app' },
+                    { key: 'verified_shifts', label: '% of Shifts Verified', formatter: val => { return val + '%' } },
+                    { key: 'telephony', formatter: val => { return val + '%' } },
+                    { key: 'mobile_app', formatter: val => { return val + '%' } },
                 ]
             }
         },
@@ -166,7 +166,7 @@
             },
 
             loadItems() {
-                axios.post(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&start_date2=${this.start_date2}&end_date2=${this.end_date2}&business_id=${this.business_id}`)
+                axios.get(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&start_date2=${this.start_date2}&end_date2=${this.end_date2}&business_id=${this.business_id}`)
                     .then(response => {
                         this.items = [response.data.report1];
                         this.compareItems = [response.data.report2];
