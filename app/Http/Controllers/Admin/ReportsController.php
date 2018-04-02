@@ -363,7 +363,7 @@ class ReportsController extends Controller
     /**
      * Compare active clients activity over the span of a given date range.
      *
-     * @return \Illuminate\View\View
+     * @return mixed
      */
     public function activeClients() 
     {
