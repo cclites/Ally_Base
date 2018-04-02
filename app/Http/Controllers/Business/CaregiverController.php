@@ -214,10 +214,28 @@ class CaregiverController extends BaseController
             return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $schedules->first()->client->name() . '.');
         }
 
-        if ($caregiver->delete()) {
+        if ($caregiver->update(['active' => false])) {
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
         return new ErrorResponse(500, 'Error archiving this caregiver.');
+    }
+
+    /**
+     * Re-activate an archived (inactive) caregiver.  This reverses the destroy action above.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
+    public function reactivate(Caregiver $caregiver)
+    {
+        if (!$this->businessHasCaregiver($caregiver)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        if ($caregiver->update(['active' => true])) {
+            return new SuccessResponse('The caregiver has been re-activated.');
+        }
+        return new ErrorResponse('Could not re-activate the selected caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)
