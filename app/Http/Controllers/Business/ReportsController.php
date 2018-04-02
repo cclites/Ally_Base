@@ -597,5 +597,44 @@ class ReportsController extends BaseController
         return $shifts;
     }
 
+    public function ltciClaims()
+    {
+        $caregivers = $this->business()->caregivers;
+        $clients = $this->business()->clients;
+        return view('business.reports.ltci_claims', compact('caregivers', 'clients'));
+    }
+
+    public function ltciClaimsData(Request $request)
+    {
+        $request->validate([
+            'client_id' => 'required|int',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'caregiver_id' => 'nullable|int',
+            'export_type' => 'required|string'
+        ]);
+
+        $client = Client::with([
+                'addresses',
+                'shifts' => function ($query) use ($request) {
+                    $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)]);
+                }
+            ])
+            ->find($request->client_id);
+
+        $summary = [];
+        foreach ($client->shifts as $shift) {
+            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+            $summary[] = [
+                'date' => $shift->checked_in_time->format('Y-m-d'),
+                'total' => (float) $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2),
+                'hours' => $shift->duration,
+                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
+            ];
+        }
+
+        return response()->json(compact('client', 'summary'));
+    }
+
 }
 
