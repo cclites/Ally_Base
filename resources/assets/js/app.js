@@ -117,7 +117,6 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
 Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
-Vue.component('business-active-clients-report', require('./components/business/reports/ActiveClientsReport.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));

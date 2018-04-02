@@ -597,33 +597,5 @@ class ReportsController extends BaseController
 
         return $shifts;
     }
-
-    /**
-     * Compare active clients activity over the span of a given date range.
-     *
-     * @return mixed
-     */
-    public function activeClients() 
-    {
-        if (request()->wantsJson()) {
-            // set defaults
-            $range = [now()->subWeeks(4), now()];
-            $compareRange = [now()->subWeeks(4), now()];
-
-            if (request()->filled('start_date') && request()->filled('end_date')) {
-                $range = [Carbon::parse(request()->start_date), Carbon::parse(request()->end_date)];
-            }
-
-            if (request()->filled('start_date2') && request()->filled('end_date2')) {
-                $compareRange = [Carbon::parse(request()->start_date2), Carbon::parse(request()->end_date2)];
-            }
-
-            $report = new ActiveClientsReport($this->business()->id, $range, $compareRange);
-
-            return response()->json($report->rows());
-        }
-
-        return view('business.reports.active_clients');
-    }
 }
 
