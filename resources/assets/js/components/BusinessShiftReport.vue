@@ -20,11 +20,11 @@
                         </date-picker>
                         <b-form-select v-model="caregiver_id" class="mx-1 mb-1">
                             <option value="">All Caregivers</option>
-                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                         <b-form-select v-model="client_id" class="mr-1 mb-1">
                             <option value="">All Clients</option>
-                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                         <b-form-select v-model="payment_method" class="mb-1">
                             <option value="">All Payment Methods</option>
@@ -34,7 +34,12 @@
                         </b-form-select>
                         <b-form-select v-if="admin" v-model="import_id" class="mb-1">
                             <option value="">--Filter by Import--</option>
-                            <option v-for="item in imports" :value="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                            <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                        </b-form-select>
+                        <b-form-select v-model="charge_status" class="mb-1">
+                            <option value="">All Statuses</option>
+                            <option value="charged">Charged</option>
+                            <option value="uncharged">Un-Charged</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
@@ -171,10 +176,12 @@
                     'Shift Total',
                     'Type',
                     'Confirmed',
+                    'Charged',
                 ],
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
                 loading: 0,
+                charge_status: '',
             }
         },
 
@@ -228,6 +235,7 @@
                         'Shift Total': this.moneyFormat(item.shift_total),
                         'Type': item.hours_type,
                         'Confirmed': item.confirmed,
+                        'Charged': item.charged,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
@@ -275,7 +283,7 @@
             queryString() {
                 return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
                         + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method
-                        + '&import_id=' + this.import_id;
+                        + '&import_id=' + this.import_id + '&status=' + this.charge_status;
             }
         },
 
@@ -467,6 +475,9 @@
                         // Temporarily Force 'Confirmed'
                         if (fields.indexOf('Confirmed') === -1) {
                             fields.push('Confirmed');
+                        }
+                        if (fields.indexOf('Charged') === -1) {
+                            fields.push('Charged');
                         }
                         this.filteredFields = fields;
                         return;

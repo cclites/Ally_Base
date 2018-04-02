@@ -452,6 +452,14 @@ class ReportsController extends BaseController
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
         }
+
+        if ($status = $request->input('status')) {
+            if ($status === 'charged') {
+                $report->query()->whereReadOnly();
+            } elseif ($status === 'uncharged') {
+                $report->query()->wherePending();
+            }
+        }
     }
 
     public function exportTimesheets()
