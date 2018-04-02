@@ -596,6 +596,6 @@ class ReportsController extends BaseController
 
         return $shifts;
     }
-    
+
 }
 
