@@ -362,4 +362,16 @@ class Shift extends Model
     {
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
+
+    public function scopeWhereTelephonyVerified($query) 
+    {
+        return $query->where('verified', 1)
+            ->whereNotNull('checked_in_number');
+    }
+
+    public function scopeWhereMobileVerified($query) 
+    {
+        return $query->where('verified', 1)
+            ->whereNotNull('checked_in_latitude');
+    }
 }
