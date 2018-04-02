@@ -2,8 +2,8 @@ export default {
     data() {
         return {
             onboardStatuses: {
-                'needs_agreement': 'Needs Agreement',
-                'agreement_signed': 'Signed Client Agreement'
+                'needs_agreement': 'Needs Agreement/Send Electronically',
+                'agreement_signed': 'Signed Paper Agreement'
             },
             hiddenOnboardStatuses: {
                 'emailed_reconfirmation': 'Emailed Reconfirmation',

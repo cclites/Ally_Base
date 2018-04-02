@@ -127,7 +127,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'poa_last_name',
         'poa_phone',
         'poa_relationship',
-        'import_identifier'
+        'import_identifier',
+        'dr_first_name',
+        'dr_last_name',
+        'dr_phone',
+        'dr_fax'
     ];
     protected $table = 'clients';
 
@@ -288,6 +292,28 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Retrieve the fake email address for a caregiver that does not have an email address.
+     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
+     *
+     * @return string
+     */
+    public function getAutoEmail()
+    {
+        return $this->id . '@noemail.allyms.com';
+    }
+
+    /**
+     * Set the generated fake email address for a client that does not have an email address.
+     *
+     * @return $this
+     */
+    public function setAutoEmail()
+    {
+        $this->email = $this->getAutoEmail();
+        return $this;
+    }
 
     /**
      * Aggregate schedules for this client and return an array of events
