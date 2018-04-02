@@ -135,6 +135,34 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <b-row>
+                <b-col>
+                    <p class="h6">Physician</p>
+                    <hr>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name">
+                        <b-form-input id="dr_first_name"
+                                      v-model="form.dr_first_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Phone">
+                        <b-form-input id="dr_phone"
+                                      v-model="form.dr_phone"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name">
+                        <b-form-input id="dr_last_name"
+                                      v-model="form.dr_last_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Fax">
+                        <b-form-input id="dr_fax"
+                                      v-model="form.dr_fax"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
 
             <b-row>
                 <b-col lg="12">
@@ -228,7 +256,11 @@
                     poa_first_name: this.client.poa_first_name,
                     poa_last_name: this.client.poa_last_name,
                     poa_phone: this.client.poa_phone,
-                    poa_relationship: this.client.poa_relationship
+                    poa_relationship: this.client.poa_relationship,
+                    dr_first_name: this.client.dr_first_name,
+                    dr_last_name: this.client.dr_last_name,
+                    dr_phone: this.client.dr_phone,
+                    dr_fax: this.client.dr_fax
                 }),
                 passwordModal: false,
                 active: this.client.active,

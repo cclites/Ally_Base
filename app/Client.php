@@ -127,7 +127,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'poa_last_name',
         'poa_phone',
         'poa_relationship',
-        'import_identifier'
+        'import_identifier',
+        'dr_first_name',
+        'dr_last_name',
+        'dr_phone',
+        'dr_fax'
     ];
     protected $table = 'clients';
 

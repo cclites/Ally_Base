@@ -80,6 +80,10 @@ $factory->define(\App\Client::class, function(Faker $faker) {
         'business_id' => \App\Business::inRandomOrder()->value('id'),
         'client_type' => $faker->randomElement(['private_pay', 'medicaid', 'LTCI']),
         'onboard_status' => $faker->randomElement([null, 'needs_agreement', 'reconfirmed_checkbox']),
+        'dr_first_name' => $faker->firstName,
+        'dr_last_name' => $faker->lastName,
+        'dr_phone' => $faker->phoneNumber,
+        'dr_fax' => $faker->phoneNumber
     ]);
 });
 
