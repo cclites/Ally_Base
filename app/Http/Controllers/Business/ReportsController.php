@@ -455,9 +455,9 @@ class ReportsController extends BaseController
 
         if ($status = $request->input('status')) {
             if ($status === 'charged') {
-                $report->query()->whereCharged();
+                $report->query()->whereReadOnly();
             } elseif ($status === 'uncharged') {
-                $report->query()->whereUnCharged();
+                $report->query()->wherePending();
             }
         }
     }

@@ -28,6 +28,9 @@
             <template slot="Confirmed" scope="data">
                 {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
             </template>
+            <template slot="Charged" scope="data">
+                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
+            </template>
             <template slot="actions" scope="row">
                 <slot name="actions" :item="row.item"></slot>
             </template>
