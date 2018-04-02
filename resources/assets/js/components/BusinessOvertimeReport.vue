@@ -18,14 +18,15 @@
                     </b-input-group>
 
                     <b-button-group size="sm">
-                        <b-btn variant="info" @click="fetchData()">Search</b-btn>
+                        <b-btn variant="info" @click="fetchData()" :disabled="loading">Search</b-btn>
                         <b-btn @click="reset()">Reset</b-btn>
                     </b-button-group>
                 </b-button-toolbar>
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-if="loading" />
+        <div class="table-responsive" v-else>
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -107,7 +108,8 @@
                     start: '',
                     end: '',
                     caregiver_id: ''
-                }
+                },
+                loading: false,
             }
         },
 
@@ -119,6 +121,7 @@
             },
 
             fetchData() {
+                this.loading = true;
                 axios.post('/business/reports/overtime', this.search)
                     .then(response => {
                         this.items = response.data.results.map(function(item) {
@@ -128,8 +131,10 @@
                         this.totalRows = this.items.length;
                         this.search.start = moment(response.data.date_range[0]).format('L');
                         this.search.end = moment(response.data.date_range[1]).format('L');
+                        this.loading = false;
                     }).catch(error => {
                         console.error(error.response);
+                        this.loading = false;
                     });
             },
 
