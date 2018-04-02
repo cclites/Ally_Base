@@ -220,6 +220,12 @@ class CaregiverController extends BaseController
         return new ErrorResponse(500, 'Error archiving this caregiver.');
     }
 
+    /**
+     * Re-activate an archived (inactive) caregiver.  This reverses the destroy action above.
+     *
+     * @param \App\Caregiver $caregiver
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
     public function reactivate(Caregiver $caregiver)
     {
         if (!$this->businessHasCaregiver($caregiver)) {

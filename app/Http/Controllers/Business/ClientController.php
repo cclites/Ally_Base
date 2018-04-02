@@ -235,6 +235,12 @@ class ClientController extends BaseController
         return new ErrorResponse('Could not archive the selected client.');
     }
 
+    /**
+     * Re-activate an archived (inactive) client.  This reverses the destroy action above.
+     *
+     * @param \App\Client $client
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
     public function reactivate(Client $client)
     {
         if (!$this->businessHasClient($client)) {
