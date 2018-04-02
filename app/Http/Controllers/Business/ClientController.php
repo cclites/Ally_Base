@@ -94,7 +94,7 @@ class ClientController extends BaseController
             [
                 'firstname' => 'required',
                 'lastname' => 'required',
-                'email' => 'required|email|',
+                'email' => 'required_unless:no_email,1|nullable|email',
                 'username' => 'required|unique:users',
                 'date_of_birth' => 'nullable',
                 'business_fee' => 'nullable|numeric',
@@ -109,6 +109,9 @@ class ClientController extends BaseController
         $data['password'] = bcrypt(random_bytes(32));
 
         $client = new Client($data);
+        if ($request->input('no_email')) {
+            $client->setAutoEmail();
+        }
         if ($this->business()->clients()->save($client)) {
             $history = new OnboardStatusHistory([
                 'status' => $data['onboard_status']
