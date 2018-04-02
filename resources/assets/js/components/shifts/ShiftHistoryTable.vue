@@ -25,8 +25,9 @@
                     <i class="fa fa-times-rectangle-o"></i>
                 </span>
             </template>
-            <template slot="Confirmed" scope="data">
-                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
+            <template slot="Confirmed" scope="row">
+                <span v-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Yes</span>
+                <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
             </template>
             <template slot="actions" scope="row">
                 <slot name="actions" :item="row.item"></slot>
@@ -36,7 +37,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {
             items: Array,
             fields: Array,
