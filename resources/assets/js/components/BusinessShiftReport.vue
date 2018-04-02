@@ -176,6 +176,7 @@
                     'Shift Total',
                     'Type',
                     'Confirmed',
+                    'Charged',
                 ],
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
@@ -234,6 +235,7 @@
                         'Shift Total': this.moneyFormat(item.shift_total),
                         'Type': item.hours_type,
                         'Confirmed': item.confirmed,
+                        'Charged': item.charged,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
@@ -473,6 +475,9 @@
                         // Temporarily Force 'Confirmed'
                         if (fields.indexOf('Confirmed') === -1) {
                             fields.push('Confirmed');
+                        }
+                        if (fields.indexOf('Charged') === -1) {
+                            fields.push('Charged');
                         }
                         this.filteredFields = fields;
                         return;
