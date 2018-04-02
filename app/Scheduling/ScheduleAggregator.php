@@ -106,6 +106,20 @@ class ScheduleAggregator
         return $this->query->whereRaw('(starts_at >= ? AND ' . $endFormat . ' <= ?)', [$startUtc, $endUtc])->get();
     }
 
+
+    /**
+     * Get all schedule models occurring in the future that have not been clocked in to
+     *
+     * @param \Carbon\Carbon $until
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getFutureShifts(Carbon $until = null)
+    {
+        if (!$until) $until = Carbon::parse('+3 years');
+        return $this->query()->whereBetween('starts_at', [Carbon::now(), $until])->doesntHave('shifts')->get();
+    }
+
+
     /**
      * Return an array format optimized for Event APIs
      *

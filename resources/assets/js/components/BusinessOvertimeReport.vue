@@ -12,7 +12,7 @@
                         <b-form-select v-model="search.caregiver_id">
                             <option value="">All Caregivers</option>
                             <option v-for="caregiver in caregivers" :value="caregiver.id">
-                                {{ caregiver.name }}
+                                {{ caregiver.nameLastFirst }}
                             </option>
                         </b-form-select>
                     </b-input-group>
@@ -61,6 +61,7 @@
         mixins: [FormatsDates],
 
         created() {
+            this.loadCaregivers();
             this.fetchData();
         },
 
@@ -94,8 +95,14 @@
                         label: 'Scheduled Hours',
                         sortable: true,
                     },
+                    {
+                        key: 'total',
+                        label: 'Total Expected Hours',
+                        sortable: true,
+                    },
                 ],
                 items: [],
+                caregivers: [],
                 search: {
                     start: '',
                     end: '',
@@ -106,19 +113,17 @@
 
         methods: {
 
+            async loadCaregivers() {
+                const response = await axios.get('/business/caregivers?json=1');
+                this.caregivers = response.data;
+            },
+
             fetchData() {
                 axios.post('/business/reports/overtime', this.search)
                     .then(response => {
-                        this.items = response.data.results.map(function(caregiver) {
-                            return {
-                                _rowVariant: (caregiver.total >= 36) ? (caregiver.total > 40 ? 'danger' : 'warning') : '',
-                                id: caregiver.user.id,
-                                firstname: caregiver.user.firstname,
-                                lastname: caregiver.user.lastname,
-                                worked: caregiver.worked,
-                                scheduled: caregiver.scheduled,
-                                total: caregiver.total,
-                            }
+                        this.items = response.data.results.map(function(item) {
+                            item['_rowVariant'] = (item.total >= 36) ? (item.total > 40 ? 'danger' : 'warning') : '';
+                            return item;
                         });
                         this.totalRows = this.items.length;
                         this.search.start = moment(response.data.date_range[0]).format('L');
@@ -141,17 +146,6 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
-        },
-
-        computed: {
-            caregivers() {
-                return _.map(this.items, function (item) {
-                    return {
-                        name: item.firstname + ' ' + item.lastname,
-                        id: item.id
-                    }
-                });
             }
         }
     }

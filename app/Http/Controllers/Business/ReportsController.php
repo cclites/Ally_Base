@@ -96,60 +96,138 @@ class ReportsController extends BaseController
     {
         $timezone = $this->business()->timezone;
 
-        $week = Carbon::now($timezone)->weekOfYear;
-        $year = Carbon::now($timezone)->year;
+        if (!$week = $request->input('week')) {
+            $week = Carbon::now($timezone)->weekOfYear;
+        }
+
+        if (!$year = $request->input('year')) {
+            $year = Carbon::now($timezone)->year;
+        }
+
+        // Define the date range for results
         $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
         $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
-
         if ($request->filled('start') && $request->filled('end')) {
-            $weekStart = Carbon::parse($request->start)->setTime(0, 0, 0);
-            $weekEnd = Carbon::parse($request->end)->setTime(23, 59, 59);
+            $weekStart = Carbon::parse($request->start, $timezone)->setTime(0, 0, 0);
+            $weekEnd = Carbon::parse($request->end, $timezone)->setTime(23, 59, 59);
         }
-        $caregivers = $this->business()
-            ->caregivers()
-            ->with('shifts')
-            ->whereHas('shifts', function ($query) use ($weekStart, $weekEnd) {
-                $query->whereBetween('checked_in_time', [$weekStart, $weekEnd]);
-            })
-            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
-                $query->where('caregiver_id', $request->caregiver_id);
-            })
-            ->get();
-        $results = collect([]);
-        foreach ($caregivers as $caregiver) {
-            $user = $caregiver->user;
-            // Calculate total number of hours in finished shifts
-            $worked = $caregiver->shifts->where('checked_out_time', '!=', null)
-                ->reduce(function ($carry, $item) {
-                    return $carry + $item->duration();
-                });
 
-            $lastShiftEnd = new Carbon();
-            $scheduled = round($aggregator->fresh()
-                    ->where('caregiver_id', $caregiver->id)
-                    ->getSchedulesBetween($weekStart, $weekEnd)
-                    ->sum('duration') / 60, 2);
-            // Calculate number of hours in current shift
-            foreach ($caregiver->shifts->where('check_out_time', null) as $shift) {
-                $worked += $shift->duration();
-                //$scheduled += $shift->remaining();
-                //$lastShiftEnd = $shift->scheduledEndTime();
+        // Set date range to UTC for database interaction
+        $weekStartUTC = $weekStart->copy()->setTimezone('UTC');
+        $weekEndUTC = $weekEnd->copy()->setTimezone('UTC');
+
+        // Pull the list of relevant caregivers to loop through
+        $query = $this->business()->caregivers();
+        $query->whereHas('shifts', function ($query) use ($weekStartUTC, $weekEndUTC) {
+            $query->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC]);
+        });
+        $query->when($request->filled('caregiver_id'), function ($query) use ($request) {
+            $query->where('caregiver_id', $request->caregiver_id);
+        });
+        $caregivers = $query->get();
+
+
+        // Loop through caregivers, calculate hours, add to $results
+        $results = [];
+        foreach ($caregivers as $caregiver) {
+
+            // Create a new result template
+            $hours = [
+                'worked' => 0,
+                'scheduled' => 0,
+                'total' => 0
+            ];
+
+            // Calculate total number of hours in finished shifts
+            $shifts = $caregiver->shifts()
+                                ->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC])
+                                ->whereNotNull('checked_out_time')
+                                ->get();
+            foreach($shifts as $shift) {
+                $hours['worked'] += $shift->duration();
             }
 
-            $worked = round($worked / 60, 2);
+            // Calculate number of hours in current shift
+            $shifts = $caregiver->shifts()
+                                ->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC])
+                                ->whereNull('checked_out_time')
+                                ->get();
+            foreach($shifts as $shift) {
+                $hours['worked'] += $shift->duration();
+                $hours['scheduled'] += $shift->remaining();
+            }
 
-//            $schedules = $aggregator->fresh()
-//                        ->where('caregiver_id', $caregiver->id)
-//                        ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
-//            foreach ($schedules as $schedule) {
-//                $scheduled += round($schedule->duration / 60, 2);
-//            }
 
-            $results->push(compact('user', 'worked', 'scheduled'));
+            // Calculate number of hours in future shifts
+            $schedules = $aggregator->fresh()
+                                    ->where('caregiver_id', $caregiver->id)
+                                    ->getFutureShifts($weekEndUTC);
+            foreach ($schedules as $schedule) {
+                $hours['scheduled'] += round($schedule->duration / 60, 2);
+            }
+
+            // Calculate total expected hours (still scheduled + already worked)
+            $hours['total'] = $hours['scheduled'] + $hours['worked'];
+
+            // Aggregate results
+            $results[] = array_merge($caregiver->toArray(), $hours);
         }
 
+//        $timezone = $this->business()->timezone;
+//
+//        $week = Carbon::now($timezone)->weekOfYear;
+//        $year = Carbon::now($timezone)->year;
+//        $weekStart = Carbon::now($timezone)->setISODate($year, $week, 1)->setTime(0, 0, 0);
+//        $weekEnd = Carbon::now($timezone)->setISODate($year, $week, 7)->setTime(23, 59, 59);
+//
+//        if ($request->filled('start') && $request->filled('end')) {
+//            $weekStart = Carbon::parse($request->start)->setTime(0, 0, 0);
+//            $weekEnd = Carbon::parse($request->end)->setTime(23, 59, 59);
+//        }
+//        $caregivers = $this->business()
+//            ->caregivers()
+//            ->with('shifts')
+//            ->whereHas('shifts', function ($query) use ($weekStart, $weekEnd) {
+//                $query->whereBetween('checked_in_time', [$weekStart, $weekEnd]);
+//            })
+//            ->when($request->filled('caregiver_id'), function ($query) use ($request) {
+//                $query->where('caregiver_id', $request->caregiver_id);
+//            })
+//            ->get();
+//        $results = collect([]);
+//        foreach ($caregivers as $caregiver) {
+//            $user = $caregiver->user;
+//            // Calculate total number of hours in finished shifts
+//            $worked = $caregiver->shifts->where('checked_out_time', '!=', null)
+//                ->reduce(function ($carry, $item) {
+//                    return $carry + $item->duration();
+//                });
+//
+//            $lastShiftEnd = new Carbon();
+//            $scheduled = round($aggregator->fresh()
+//                    ->where('caregiver_id', $caregiver->id)
+//                    ->getSchedulesBetween($weekStart, $weekEnd)
+//                    ->sum('duration') / 60, 2);
+//            // Calculate number of hours in current shift
+//            foreach ($caregiver->shifts->where('check_out_time', null) as $shift) {
+//                $worked += $shift->duration();
+//                //$scheduled += $shift->remaining();
+//                //$lastShiftEnd = $shift->scheduledEndTime();
+//            }
+//
+//            $worked = round($worked / 60, 2);
+//
+////            $schedules = $aggregator->fresh()
+////                        ->where('caregiver_id', $caregiver->id)
+////                        ->getSchedulesStartingBetween($lastShiftEnd, $weekEnd);
+////            foreach ($schedules as $schedule) {
+////                $scheduled += round($schedule->duration / 60, 2);
+////            }
+//
+//            $results->push(compact('user', 'worked', 'scheduled'));
+//        }
+//
         $date_range = [$weekStart->toDateString(), $weekEnd->toDateString()];
-
         return response()->json(compact('results', 'date_range'));
     }
 
