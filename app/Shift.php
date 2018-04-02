@@ -362,5 +362,4 @@ class Shift extends Model
     {
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
-
 }
