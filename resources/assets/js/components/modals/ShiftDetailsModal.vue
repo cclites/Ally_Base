@@ -200,10 +200,12 @@
             },
 
             evvMethod(shift) {
-                if (!_.isEmpty(shift.checked_in_number) && !_.isEmpty(shift.checked_out_number)) {
-                    return 'Telephony';
-                } else if (!_.isEmpty(shift.checked_in_latitude) && !_.isEmpty(shift.checked_in_longitude) && !_.isEmpty(shift.checked_out_latitude) && !_.isEmpty(shift.checked_out_longitude)) {
-                    return 'Mobile App';
+                if (!_.isEmpty(shift.verified)) {
+                    if (!_.isEmpty(shift.checked_in_number)) {
+                        return 'Telephony';
+                    } else if (!_.isEmpty(shift.checked_in_latitude)) {
+                        return 'Mobile App';
+                    }
                 }
                 return 'None';
             }

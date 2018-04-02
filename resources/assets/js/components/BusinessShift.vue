@@ -309,11 +309,16 @@
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
                     </b-col>
-                    <b-col lg="6" v-if="admin">
-                        <strong>[ADMIN]</strong>
-                        <span><strong>Added:</strong> {{ formatDateTimeFromUTC(shift.created_at) }}</span>
-                        <span v-if="shift.confirmed_at"><strong>Confirmed:</strong> {{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
-                        <span v-if="shift.charged_at"><strong>Charged:</strong> {{ formatDateTimeFromUTC(shift.charged_at) }}</span>
+                    <b-col lg="6">
+                        <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
+                        <b-row>
+                            <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
+                            <span v-else><strong>Not Confirmed</strong></span>
+                        </b-row>
+                        <b-row>
+                            <span v-if="shift.charged_at"><strong>Charged:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.charged_at) }}</span>
+                            <span v-else><strong>Not Charged</strong></span>
+                        </b-row>
                     </b-col>
                 </b-row>
             </form>

@@ -269,6 +269,7 @@ Route::group([
 
     Route::get('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisits')->name('reports.client_caregiver_visits');
     Route::post('reports/client-caregiver-visits', 'Admin\ReportsController@clientCaregiverVisitsData')->name('reports.client_caregiver_visits_data');
+    Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
 
     Route::get('import', 'Admin\ShiftImportController@view')->name('import');
     Route::post('import', 'Admin\ShiftImportController@process');

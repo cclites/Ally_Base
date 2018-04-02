@@ -22,4 +22,31 @@ class ShiftStatusHistory extends Model
 {
     protected $table = 'shift_status_history';
     protected $guarded = ['id'];
+
+    /**
+     * Returns the date of the most recent occurrence of the given status
+     * for the given shift
+     *
+     * @param [type] $shift
+     * @param [type] $status
+     * @return void
+     */
+    public static function getDateForStatus($shift, $status)
+    {
+        $shift_id = $shift;
+        if (is_object($shift)) {
+            $shift_id = $shift->id;
+        }
+
+        if (!is_array($status)) {
+            $status = [$status];
+        }
+
+        return self::latest()
+            ->where('shift_id', $shift_id)
+            ->where('new_status', $status)
+            ->limit(1)
+            ->pluck('created_at')
+            ->first();
+    }
 }

@@ -56,15 +56,31 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
-                        <b-form-input
-                            id="email"
-                            name="email"
-                            type="email"
-                            v-model="form.email"
-                            @change="copyEmailToUsername()"
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="form.email"
+                                        :disabled="form.no_email"
+                                        @change="copyEmailToUsername()"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_email"
+                                               v-model="form.no_email" value="1">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">No Email</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="email"
+                                    text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
                     <b-form-group label="Username" label-for="username">
                         <b-form-input
@@ -107,6 +123,7 @@
                     firstname: null,
                     lastname: null,
                     email: null,
+                    no_email: null,
                     username: null,
                     date_of_birth: null,
                     client_type: '',

@@ -20,14 +20,6 @@
         <li><a href="{{ route('business.caregivers.applications') }}">Applications</a></li>
     </ul>
 </li>
-@if($active_business->scheduling)
-    <li>
-        <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-medkit"></i><span class="hide-menu">Care Plans</span></a>
-        <ul aria-expanded="false" class="collapse">
-            <li><a href="{{ route('business.care_plans.create') }}">Add a Care Plan</a></li>
-        </ul>
-    </li>
-@endif
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
     <ul aria-expanded="false" class="collapse">
@@ -35,11 +27,14 @@
         <li><a href="/notes/create">Add Notes</a></li>
     </ul>
 </li>
+ <li>
+    <a class="has-arrow" href="{{ route('business.reports.shifts') }}" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
+</li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.reports.payments') }}">Payment History</a></li>
-        <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li>
+        {{-- <li><a href="{{ route('business.reports.shifts') }}">Shift History</a></li> --}}
         {{--<li><a href="{{ route('business.reports.scheduled') }}">Scheduled Payments</a></li>--}}
         <li><a href="{{ route('business.reports.reconciliation') }}">Reconciliation Report</a></li>
         {{--<li><a href="{{ route('business.reports.medicaid') }}">Medicaid Payroll</a></li>--}}
@@ -50,8 +45,8 @@
         <li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>
         <li><a href="{{ route('business.reports.client_onboarded') }}">Client Online Setup</a></li>
         <li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>
-        <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule Report</a></li>
-        <li><a href="{{ route('business.reports.caregivers_missing_bank_accounts') }}">Caregivers Missing Bank Accounts</a></li>
+        <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule</a></li>
+        <li><a href="{{ route('business.reports.caregivers_missing_bank_accounts') }}">Missing Bank Accounts</a></li>
         <li><a href="{{ route('business.reports.export_timesheets') }}">Export Timesheets</a></li>
     </ul>
 </li>

@@ -60,7 +60,7 @@ class CaregiverLocationController extends BaseController
                     'firstname' => $caregiver->firstname,
                     'lastname' => $caregiver->lastname,
                     'name' => $caregiver->nameLastFirst(),
-                    'distance' => $distance,
+                    'distance' => $distance === false ? 'Invalid Address' : $distance,
                     'units' => $data['units'],
                     'address' => $address,
                 ]);
