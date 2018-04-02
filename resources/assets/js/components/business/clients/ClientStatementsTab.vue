@@ -1,5 +1,5 @@
 <template>
-    <b-card title="Payments History Statement">
+    <b-card title="Client Payment Statements">
         <div class="table-responsive">
             <b-table :items="items" :fields="fields">
                 <template slot="for_care_week" scope="data">
