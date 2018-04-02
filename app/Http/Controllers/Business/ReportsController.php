@@ -25,7 +25,6 @@ use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
-use App\Reports\ActiveClientsReport;
 
 class ReportsController extends BaseController
 {
@@ -597,5 +596,6 @@ class ReportsController extends BaseController
 
         return $shifts;
     }
+    
 }
 
