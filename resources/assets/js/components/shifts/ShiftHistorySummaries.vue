@@ -13,6 +13,7 @@
                             <tr>
                                 <th>Client</th>
                                 <th>Hours</th>
+                                <th v-if="admin">Pre-Ally</th>
                                 <th>Total</th>
                                 <!--<th>Caregiver</th>-->
                                 <!--<th>Registry</th>-->
@@ -24,6 +25,7 @@
                             <tr v-for="item in clientCharges">
                                 <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                                 <td>{{ item.hours }}</td>
+                                <td v-if="admin">{{ moneyFormat(preAllyTotal(item)) }}</td>
                                 <td>{{ moneyFormat(item.total) }}</td>
                                 <!--<td>{{ item.caregiver_total }}</td>-->
                                 <!--<td>{{ item.provider_total }}</td>-->
@@ -35,6 +37,7 @@
                             <tr>
                                 <td><strong>Total for Confirmed Shifts</strong></td>
                                 <td>{{ clientTotals.hours }}</td>
+                                <td v-if="admin">{{ moneyFormat(preAllyTotal(clientTotals)) }}</td>
                                 <td>{{ moneyFormat(clientTotals.total) }}</td>
                                 <td></td>
                                 <!--<td>{{ clientTotals.caregiver_total }}</td>-->
@@ -114,6 +117,7 @@
         props: {
             clientCharges: Array,
             caregiverPayments: Array,
+            admin: Number,
         },
 
         computed: {
@@ -147,6 +151,9 @@
                 }
                 return parseFloat(float);
             },
+            preAllyTotal(item) {
+                return this.parseFloat(item.provider_total) + this.parseFloat(item.caregiver_total);
+            }
         }
     }
 </script>

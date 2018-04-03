@@ -42,6 +42,7 @@
             <shift-history-summaries v-show="showSummary && loading >= 2"
                                      :client-charges="items.clientCharges"
                                      :caregiver-payments="items.caregiverPayments"
+                                     :admin="1"
             />
 
             <b-row v-show="loading >= 2">
