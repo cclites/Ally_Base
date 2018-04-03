@@ -7,8 +7,8 @@ export default {
             },
             hiddenOnboardStatuses: {
                 'emailed_reconfirmation': 'Emailed Reconfirmation',
-                'reconfirmed_checkbox': 'Reconfirmed via Checkbox',
-                'agreement_checkbox': 'Client Agreement via Checkbox',
+                'reconfirmed_checkbox': 'Signed',
+                'agreement_checkbox': 'Signed',
             }
         }
     },
