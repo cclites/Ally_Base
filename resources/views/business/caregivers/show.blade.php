@@ -49,9 +49,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>
-        </li>
+        {{--<li class="nav-item">--}}
+            {{--<a class="nav-link" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>--}}
+        {{--</li>--}}
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment_statement" role="tab">Payment Statements</a>
         </li>
@@ -76,7 +76,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
-                <a class="dropdown-item" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>
+                {{--<a class="dropdown-item" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>--}}
                 <a class="dropdown-item" data-toggle="tab" href="#payment_statement" role="tab">Payment Statements</a>
             </div>
         </li>
@@ -148,9 +148,9 @@
         <div class="tab-pane" id="misc" role="tabpanel">
             <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
         </div>
-        <div class="tab-pane" id="payment_history" role="tabpanel">
-            <business-caregiver-payment-history :caregiver="{{ $caregiver }}"></business-caregiver-payment-history>
-        </div>
+        {{--<div class="tab-pane" id="payment_history" role="tabpanel">--}}
+            {{--<business-caregiver-payment-history :caregiver="{{ $caregiver }}"></business-caregiver-payment-history>--}}
+        {{--</div>--}}
         <div class="tab-pane" id="payment_statement" role="tabpanel">
             <business-caregiver-pay-statements :caregiver="{{ $caregiver }}" :deposits="{{ $caregiver->deposits }}"></business-caregiver-pay-statements>
         </div>
