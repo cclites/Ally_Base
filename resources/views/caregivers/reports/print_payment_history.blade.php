@@ -24,7 +24,7 @@
                 {{ $business->city }}, {{ $business->state }} {{ $business->zip }}
             </div>
             <div class="col-sm-4">
-                <img src="{{ asset('images/AllyLogo-small.png') }}" alt="" style="width: 100px;">
+                <h2>Yearly Summary Report</h2>
             </div>
         </div>
         <table class="table" style="margin-top: 2rem;">
