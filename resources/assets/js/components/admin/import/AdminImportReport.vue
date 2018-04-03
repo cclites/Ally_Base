@@ -288,6 +288,7 @@
                 axios.get('/admin/clients?json=1').then(response => this.clients = response.data);
                 axios.get('/admin/caregivers?json=1').then(response => this.caregivers = response.data);
             },
+
             returnToList() {
                 // Unset selected import
                 this.selectedImport = {};
@@ -295,6 +296,7 @@
                 this.caregiver_id = '';
                 this.client_id = '';
             },
+
             details(item) {
                 axios.get('/business/shifts/' + item.id)
                         .then(response => {
@@ -308,6 +310,7 @@
                             alert('Error loading shift details');
                         });
             },
+
             loadData() {
 
                 this.loading = 0;

@@ -50,6 +50,7 @@
                                              :identifiers="row.identifiers"
                                              :key="row.index"
                                              :index="row.index"
+                                             @mappedIdentifier="mapIdentifier"
                         ></admin-import-id-row>
                         </tbody>
                     </table>
@@ -210,6 +211,14 @@
 
             loadImportedData(data) {
                 this.imported = data;
+            },
+
+            mapIdentifier(type, name, id) {
+                this.imported.map(item => {
+                    if (item.identifiers[`${type}_name`] === name) {
+                        item.shift[`${type}_id`] = id;
+                    }
+                })
             },
 
             loadDraft() {

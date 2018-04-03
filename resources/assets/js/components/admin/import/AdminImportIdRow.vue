@@ -92,9 +92,7 @@
         },
 
         mounted() {
-            // $(this.$refs.client).select2({ width: '200px' });
-            // $(this.$refs.caregiver).select2({ width: '200px' });
-            this.$parent.$on('mappedIdentifier', this.receiveMapping);
+
         },
 
         methods: {
@@ -117,16 +115,11 @@
                 const form = new Form({ id, name });
                 const response = await form.post('/admin/import/map/' + type);
 
-                this.$parent.$emit('mappedIdentifier', type, name, id);
+                this.$emit('mappedIdentifier', type, name, id);
 
                 // Close popover
                 if (this[`${type}Popover`]) {
                     this[`${type}Popover`] = false;
-                }
-            },
-            receiveMapping(type, name, id) {
-                if (this.identifiers[`${type}_name`] === name) {
-                    this.model[`${type}_id`] = id;
                 }
             }
         },
