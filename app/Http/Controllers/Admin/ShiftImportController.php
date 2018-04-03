@@ -140,7 +140,7 @@ class ShiftImportController extends Controller
             'name' => 'required|string'
         ]);
 
-        $client = Client::find($request->id);
+        $client = Client::findOrFail($request->id);
 
         // Clear existing mappings for name and business
         Client::where('business_id', $client->business_id)
@@ -148,7 +148,10 @@ class ShiftImportController extends Controller
             ->update(['import_identifier' => null]);
 
         // Add mapping
-        $client->update(['import_identifier' => $request->name]);
+        // We don't use $client->update() here because of the previous update above may leave $client in an outdated state
+        Client::where('id', $client->id)
+              ->update(['import_identifier' => $request->name]);
+
         return new SuccessResponse('Client ' . $client->id . ' has been mapped to ' . $request->name);
     }
 
@@ -159,7 +162,7 @@ class ShiftImportController extends Controller
             'name' => 'required|string'
         ]);
 
-        $caregiver = Caregiver::find($request->id);
+        $caregiver = Caregiver::findOrFail($request->id);
         $business = $caregiver->businesses->first();
 
         // Clear existing mappings for name and business
