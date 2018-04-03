@@ -117,7 +117,7 @@ class ScheduleConverter
      */
     public function hasBeenConverted(Schedule $schedule)
     {
-        return Shift::where('schedule_id', $schedule->id)->exists();
+        return !is_null($schedule->converted_at) || $schedule->shifts()->exists();
     }
 
     /**
@@ -157,6 +157,10 @@ class ScheduleConverter
             'provider_fee'     => $schedule->getProviderFee(),
             'status'           => $status,
         ]);
+
+        if ($shift) {
+            $schedule->update(['converted_at' => Carbon::now()]);
+        }
 
         return $shift;
     }

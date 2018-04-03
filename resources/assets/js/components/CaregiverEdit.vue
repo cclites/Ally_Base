@@ -88,7 +88,8 @@
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
-                    <b-button variant="danger" @click="deleteCaregiver()"><i class="fa fa-times"></i> Delete Caregiver</b-button>
+                    <b-button variant="danger" @click="archiveCaregiver()" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>
+                    <b-button variant="info" @click="reactivateCaregiver()" v-else><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -119,6 +120,7 @@
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,
+                active: this.caregiver.active,
             }
         },
 
@@ -138,10 +140,18 @@
                 }
             },
 
-            deleteCaregiver() {
+            archiveCaregiver() {
                 let form = new Form();
-                if (confirm('Are you sure you wish to delete ' + this.caregiver.name + '?')) {
+                if (confirm('Are you sure you wish to archive ' + this.caregiver.name + '?')) {
                     form.submit('delete', '/business/caregivers/' + this.caregiver.id);
+                }
+            },
+
+            reactivateCaregiver() {
+                let form = new Form();
+                if (confirm('Are you sure you wish to re-activate ' + this.caregiver.name + '?')) {
+                    form.post('/business/caregivers/' + this.caregiver.id + '/reactivate')
+                            .then(response => this.active = 1);
                 }
             },
 

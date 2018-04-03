@@ -46,17 +46,15 @@ class ScheduleConverterTest extends TestCase
         $this->assertEquals($schedule->id, $convertedShifts[0]->schedule_id);
     }
 
-    public function test_hasBeenConverted_returns_true_when_a_shift_has_the_schedule_id()
+    public function test_hasBeenConverted_returns_true_when_converted_at_is_set()
     {
-        $date = Carbon::now();
         $schedule = factory(Schedule::class)->create([
-            'starts_at' => $date,
+            'starts_at' => Carbon::now(),
             'business_id' => $this->business->id,
             'client_id' => 1,
             'caregiver_id' => 1,
+            'converted_at' => Carbon::now()
         ]);
-        factory(Shift::class)->create(['schedule_id' => $schedule->id]);
-
         $result = $this->scheduleConverter->hasBeenConverted($schedule);
         $this->assertTrue($result);
     }
