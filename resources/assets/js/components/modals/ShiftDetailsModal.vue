@@ -200,10 +200,10 @@
             },
 
             evvMethod(shift) {
-                if (!_.isEmpty(shift.verified)) {
-                    if (!_.isEmpty(shift.checked_in_number)) {
+                if (shift.verified) {
+                    if (shift.checked_in_number) {
                         return 'Telephony';
-                    } else if (!_.isEmpty(shift.checked_in_latitude)) {
+                    } else if (shift.checked_in_latitude) {
                         return 'Mobile App';
                     }
                 }
