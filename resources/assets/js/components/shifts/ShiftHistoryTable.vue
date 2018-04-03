@@ -26,11 +26,12 @@
                 </span>
             </template>
             <template slot="Confirmed" scope="row">
-                <span v-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Yes</span>
+                <span v-if="row.item.Confirmed" v-tooltip:left="formatDateTime(row.item.confirmed_at)">Yes</span>
                 <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
             </template>
-            <template slot="Charged" scope="data">
-                {{ (data.value) ? 'Yes' : (data.value === undefined) ? '' : 'No' }}
+            <template slot="Charged" scope="row">
+                <span v-if="row.item.Charged" v-tooltip:left="formatDateTime(row.item.charged_at)">Yes</span>
+                <span v-else>{{ (row.item.Charged === undefined) ? '' : 'No' }}</span>
             </template>
             <template slot="actions" scope="row">
                 <slot name="actions" :item="row.item"></slot>

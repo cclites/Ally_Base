@@ -226,26 +226,6 @@ class ShiftStatusManager
         );
     }
 
-     /**
-     * Returns the timestamp for when the shift was last confirmed
-     *
-     * @return void
-     */
-    public function confirmedAt()
-    {
-        return ShiftStatusHistory::getDateForStatus($this->shift, 'WAITING_FOR_AUTHORIZATION');
-    }
-
-    /**
-     * Returns the timestamp for when the shift was last charged
-     *
-     * @return void
-     */
-    public function chargedAt()
-    {
-        return ShiftStatusHistory::getDateForStatus($this->shift, 'WAITING_FOR_PAYOUT');
-    }
-
     /**
      * Returns true if a shift has a clocked in status
      * @return bool

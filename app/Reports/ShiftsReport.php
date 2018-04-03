@@ -50,7 +50,7 @@ class ShiftsReport extends BaseReport
      */
     protected function results()
     {
-        $shifts = $this->query->with(['caregiver', 'client'])->get();
+        $shifts = $this->query->with(['caregiver', 'client', 'statusHistory'])->get();
         $rows = $shifts->map(function(Shift $shift) {
             $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
             $row = [
@@ -77,8 +77,9 @@ class ShiftsReport extends BaseReport
                 'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),
+                'confirmed_at' => $shift->confirmed_at,
                 'charged' => !($shift->statusManager()->isPending()),
-                'confirmed_at' => optional($shift->statusManager()->confirmedAt())->format('c'),
+                'charged_at' => $shift->charged_at,
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
                 'EVV' => $shift->verified,
             ];
