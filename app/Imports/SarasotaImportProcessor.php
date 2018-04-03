@@ -6,6 +6,12 @@ use Carbon\Carbon;
 
 class SarasotaImportProcessor extends BaseImportProcessor
 {
+    /**
+     * Do not adjust overtime rates for Sarasota
+     *
+     * @var float
+     */
+    public $overTimeMultiplier = 1.0;
 
     /**
      * Get the caregiver name in a "Last, First" format
@@ -98,7 +104,10 @@ class SarasotaImportProcessor extends BaseImportProcessor
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        return (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('CostPerUnit', $rowNo));
+        $billTotal = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('TotalBillable', $rowNo));
+        $hours = (float) $this->worksheet->getValue('Hours', $rowNo);
+        // Divide bill total by total hours to get provider hourly rate
+        return round($billTotal / $hours, 2);
     }
 
     /**
