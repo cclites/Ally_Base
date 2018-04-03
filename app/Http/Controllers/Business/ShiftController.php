@@ -78,7 +78,7 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
@@ -106,10 +106,9 @@ class ShiftController extends BaseController
 
             return $data;
         }
-
-        // Map additional data
-        $shift->confirmed_at = optional($shift->statusManager()->confirmedAt())->toDateTimeString();
-        $shift->charged_at = optional($shift->statusManager()->chargedAt())->toDateTimeString();
+        
+        // // Map additional data
+        $shift->append(['charged_at', 'confirmed_at']);
 
         $activities = $shift->business->allActivities();
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));

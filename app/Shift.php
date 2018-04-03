@@ -222,6 +222,26 @@ class Shift extends Model
         return $this->isReadOnly();
     }
 
+    public function getConfirmedAtAttribute()
+    {
+        $date = $this->statusHistory
+            ->where('new_status', 'WAITING_FOR_AUTHORIZATION')
+            ->pluck('created_at')
+            ->first();
+    
+        return optional($date)->toDateTimeString();
+    }
+
+    public function getChargedAtAttribute()
+    {
+        $date = $this->statusHistory
+            ->where('new_status', 'WAITING_FOR_PAYOUT')
+            ->pluck('created_at')
+            ->first();
+            
+        return optional($date)->toDateTimeString();
+    }
+
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////

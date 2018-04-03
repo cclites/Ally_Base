@@ -236,7 +236,9 @@
                         'Shift Total': this.moneyFormat(item.shift_total),
                         'Type': item.hours_type,
                         'Confirmed': item.confirmed,
+                        'confirmed_at': item.confirmed_at,
                         'Charged': item.charged,
+                        'charged_at': item.charged_at,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
