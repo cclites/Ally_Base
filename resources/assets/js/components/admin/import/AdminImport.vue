@@ -225,6 +225,7 @@
                 let data = JSON.parse(localStorage.getItem('admin_import_draft'));
                 if (Array.isArray(data)) {
                     this.draft = true;
+                    this.name = localStorage.getItem('admin_import_draft_name');
                     return data;
                 }
                 return [];
@@ -232,6 +233,7 @@
 
             saveDraft() {
                 localStorage.setItem('admin_import_draft', JSON.stringify(this.imported));
+                localStorage.setItem('admin_import_draft_name', this.name);
                 this.draft = true;
                 alerts.addMessage('success', 'This import data has been saved to your browser.');
             },
