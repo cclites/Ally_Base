@@ -194,7 +194,7 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top">
+            <b-row class="with-padding-top" v-if="shift.id">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
@@ -287,7 +287,7 @@
                     </table>
                 </b-col>
             </b-row>
-            <b-row>
+            <b-row  v-if="shift.id">
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
                         <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'WAITING_FOR_CONFIRMATION'">Save &amp; Confirm</b-button>
@@ -349,23 +349,7 @@
         },
         data() {
             return {
-                form: new Form({
-                    client_id: ('client_id' in this.shift) ? this.shift.client_id : null,
-                    caregiver_id: ('caregiver_id' in this.shift) ? this.shift.caregiver_id : null,
-                    caregiver_comments: ('caregiver_comments' in this.shift) ? this.shift.caregiver_comments : null,
-                    checked_in_time: ('checked_in_time' in this.shift) ? this.shift.checked_in_time : null,
-                    checked_out_time: ('checked_out_time' in this.shift) ? this.shift.checked_out_time : null,
-                    mileage: ('mileage' in this.shift) ? this.shift.mileage : 0,
-                    other_expenses: ('other_expenses' in this.shift) ? this.shift.other_expenses : 0,
-                    other_expenses_desc: ('other_expenses_desc' in this.shift) ? this.shift.other_expenses_desc : null,
-                    hours_type: ('hours_type' in this.shift) ? this.shift.hours_type : 'default',
-                    verified: ('verified' in this.shift) ? this.shift.verified : true,
-                    caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
-                    provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
-                    activities: [],
-                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
-                    override: false,
-                }),
+                form: new Form(this.initForm()),
                 status: (this.shift) ? this.shift.status : null,
                 checked_in_time: '',
                 checked_in_date: '',
@@ -427,6 +411,28 @@
             }
         },
         methods: {
+            resetForm() {
+                this.form = new Form(this.initForm());
+            },
+            initForm() {
+                return {
+                    client_id: ('client_id' in this.shift) ? this.shift.client_id : null,
+                    caregiver_id: ('caregiver_id' in this.shift) ? this.shift.caregiver_id : null,
+                    caregiver_comments: ('caregiver_comments' in this.shift) ? this.shift.caregiver_comments : null,
+                    checked_in_time: ('checked_in_time' in this.shift) ? this.shift.checked_in_time : null,
+                    checked_out_time: ('checked_out_time' in this.shift) ? this.shift.checked_out_time : null,
+                    mileage: ('mileage' in this.shift) ? this.shift.mileage : 0,
+                    other_expenses: ('other_expenses' in this.shift) ? this.shift.other_expenses : 0,
+                    other_expenses_desc: ('other_expenses_desc' in this.shift) ? this.shift.other_expenses_desc : null,
+                    hours_type: ('hours_type' in this.shift) ? this.shift.hours_type : 'default',
+                    verified: ('verified' in this.shift) ? this.shift.verified : true,
+                    caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
+                    provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
+                    activities: [],
+                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    override: false,
+                };
+            },
             createIssue() {
                 this.selectedIssue = null;
                 this.issueModal = true;
@@ -575,12 +581,6 @@
                     this.loadCaregiverRates();
                 }
             },
-            caregiver(val, old) {
-                if (val) this.form.caregiver_id = val;
-            },
-            client(val, old) {
-                if (val) this.form.client_id = val;
-            }
         },
     }
 </script>

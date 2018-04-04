@@ -5,6 +5,7 @@
                 :activities="activities"
                 :caregiver="caregiver"
                 :client="client"
+                ref="businessShift"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
@@ -23,7 +24,6 @@
 
         props: {
             value: {},
-            items: Array,
             caregiver: {},
             client: {},
         },
@@ -34,6 +34,9 @@
                     return this.value;
                 },
                 set(value) {
+                    this.$refs.businessShift.resetForm();
+                    this.$refs.businessShift.form.caregiver_id = this.caregiver;
+                    this.$refs.businessShift.form.client_id = this.client;
                     this.$emit('input', value);
                 }
             },
