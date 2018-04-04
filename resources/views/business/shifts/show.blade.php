@@ -11,16 +11,22 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <business-shift
-                :shift="{{ $shift }}"
-                :caregiver="{{ $shift->caregiver }}"
-                :client="{{ $shift->client }}"
-                in_distance="{{ $checked_in_distance }}"
-                out_distance="{{ $checked_out_distance }}"
-                :activities="{{ $activities OR '[]' }}"
-                :issues="{{ $shift->issues OR '[]' }}"
-                :admin="{{ (int) is_admin() }}"
-            ></business-shift>
+            <b-card
+                header="Shift Details"
+                header-text-variant="white"
+                header-bg-variant="info"
+            >
+                <business-shift
+                    :shift="{{ $shift }}"
+                    :caregiver="{{ $shift->caregiver }}"
+                    :client="{{ $shift->client }}"
+                    in_distance="{{ $checked_in_distance }}"
+                    out_distance="{{ $checked_out_distance }}"
+                    :activities="{{ $activities OR '[]' }}"
+                    :issues="{{ $shift->issues OR '[]' }}"
+                    :admin="{{ (int) is_admin() }}"
+                ></business-shift>
+            </b-card>
         </div>
     </div>
 @endsection

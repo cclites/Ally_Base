@@ -11,9 +11,15 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <business-shift
-                :activities="{{ $activities OR '[]' }}"
-            ></business-shift>
+            <b-card
+                header="Create a Manual Shift"
+                header-text-variant="white"
+                header-bg-variant="info"
+            >
+                <business-shift
+                    :activities="{{ $activities OR '[]' }}">
+                </business-shift>
+            </b-card>
         </div>
     </div>
 @endsection
