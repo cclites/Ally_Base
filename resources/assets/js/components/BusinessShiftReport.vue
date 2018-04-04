@@ -66,7 +66,7 @@
                 >
                     <b-row class="mb-2">
                         <b-col sm="6">
-                            <b-btn href="/business/shifts/create" variant="info">Add a Shift</b-btn>
+                            <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                         <b-col sm="6" class="text-right">
@@ -107,6 +107,11 @@
             </template>
         </shift-details-modal>
 
+        <add-shift-modal v-model="addShiftModal">
+            <template slot="buttons">
+                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
+            </template>
+        </add-shift-modal>
     </div>
 </template>
 
@@ -117,6 +122,7 @@
     import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
+    import AddShiftModal from "./modals/AddShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
 
     export default {
@@ -124,6 +130,7 @@
             ShiftHistorySummaries,
             ShiftDetailsModal,
             FilterColumnsModal,
+            AddShiftModal,
             ShiftHistoryTable
         },
 
@@ -152,6 +159,7 @@
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
+                addShiftModal: false,
                 detailsModal: false,
                 selectedItem: {
                     client: {}
