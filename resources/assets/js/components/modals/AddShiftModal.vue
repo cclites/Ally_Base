@@ -1,7 +1,11 @@
 <template>
     <b-modal title="Create a Manual Shift" v-model="showModal" size="lg" class="modal-fit-more">
         <b-container fluid>
-            <business-shift :activities="activities"></business-shift>
+            <business-shift 
+                :activities="activities"
+                :caregiver="caregiver"
+                :client="client"
+            ></business-shift>
         </b-container>
         <div slot="modal-footer">
             <slot name="buttons"></slot>
@@ -20,6 +24,8 @@
         props: {
             value: {},
             items: Array,
+            caregiver: {},
+            client: {},
         },
 
         computed: {

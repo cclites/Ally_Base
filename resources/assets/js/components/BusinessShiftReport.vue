@@ -107,9 +107,9 @@
             </template>
         </shift-details-modal>
 
-        <add-shift-modal v-model="addShiftModal">
+        <add-shift-modal v-model="addShiftModal" :caregiver="caregiver_id" :client="client_id">
             <template slot="buttons">
-                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
+                <b-btn variant="default" @click="addShiftModal=false">Close</b-btn>
             </template>
         </add-shift-modal>
     </div>

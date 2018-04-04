@@ -574,6 +574,12 @@
                 if (!this.shift.id) {
                     this.loadCaregiverRates();
                 }
+            },
+            caregiver(val, old) {
+                if (val) this.form.caregiver_id = val;
+            },
+            client(val, old) {
+                if (val) this.form.client_id = val;
             }
         },
     }
