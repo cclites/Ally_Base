@@ -112,6 +112,7 @@
             :caregiver="caregiver_id" 
             :client="client_id"
             :no-close-on-backdrop="true"
+            @shiftCreated="onShiftCreated()"
         ></add-shift-modal>
     </div>
 </template>
@@ -500,6 +501,11 @@
 
             showHideSummary() {
                 this.showSummary = !this.showSummary;
+            },
+
+            onShiftCreated() {
+                this.addShiftModal = false;
+                this.reloadData();
             },
         },
 

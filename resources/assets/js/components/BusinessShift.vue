@@ -378,10 +378,7 @@
                 this.form.activities = this.getShiftActivityList();
             }
             else {
-                this.checked_in_date = moment().format('MM/DD/YYYY');
-                this.checked_out_date = moment().format('MM/DD/YYYY');
-                this.checked_in_time = '09:00 AM';
-                this.checked_out_time = '10:00 AM';
+                this.setDefaultDateTimes();
             }
         },
         computed: {
@@ -413,7 +410,16 @@
         methods: {
             resetForm() {
                 this.form = new Form(this.initForm());
+                this.setDefaultDateTimes();
             },
+
+            setDefaultDateTimes() {
+                this.checked_in_date = moment().format('MM/DD/YYYY');
+                this.checked_out_date = moment().format('MM/DD/YYYY');
+                this.checked_in_time = '09:00';
+                this.checked_out_time = '10:00';
+            },
+
             initForm() {
                 return {
                     client_id: ('client_id' in this.shift) ? this.shift.client_id : null,
@@ -479,7 +485,7 @@
                     this.form.issues = this.issues;
                     this.form.post('/business/shifts')
                         .then(response => {
-                            this.$emit('created', response.data.data.shift);
+                            this.$emit('shiftCreated', response.data.data.shift);
                             this.status = response.data.data.status;
                         });
                 }

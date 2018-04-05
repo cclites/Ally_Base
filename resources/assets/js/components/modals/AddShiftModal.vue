@@ -6,12 +6,12 @@
                 :caregiver="caregiver"
                 :client="client"
                 ref="businessShift"
-                @created="onCreate()"
+                @shiftCreated="$emit('shiftCreated')"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
             <b-button variant="success" type="submit" @click="saveShift()">Save Shift</b-button>
-            <b-btn variant="default" @click="value = false">Close</b-btn>
+            <b-btn variant="default" @click="showModal = false">Close</b-btn>
         </div>
     </b-modal>
 </template>
@@ -65,9 +65,6 @@
                 this.$refs.businessShift.saveShift();
             },
 
-            onCreate() {
-                this.value = false;
-            },
         },
 
         mounted() {
