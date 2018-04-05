@@ -475,9 +475,13 @@
                     this.form.patch('/business/shifts/' + this.shift.id);
                 }
                 else {
-                    // Create a shift
+                    // Create a shift (modal)
                     this.form.issues = this.issues;
-                    this.form.post('/business/shifts');
+                    this.form.post('/business/shifts')
+                        .then(response => {
+                            this.$emit('created', response.data.data.shift);
+                            this.status = response.data.data.status;
+                        });
                 }
             },
             adminOverride() {

@@ -6,10 +6,12 @@
                 :caregiver="caregiver"
                 :client="client"
                 ref="businessShift"
+                @created="onCreate()"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
-            <slot name="buttons"></slot>
+            <b-button variant="success" type="submit" @click="saveShift()">Save Shift</b-button>
+            <b-btn variant="default" @click="value = false">Close</b-btn>
         </div>
     </b-modal>
 </template>
@@ -57,6 +59,14 @@
                         console.log('axios error:');
                         console.log(e);
                     });
+            },
+
+            saveShift() {
+                this.$refs.businessShift.saveShift();
+            },
+
+            onCreate() {
+                this.value = false;
             },
         },
 
