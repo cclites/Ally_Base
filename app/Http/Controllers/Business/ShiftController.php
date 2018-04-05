@@ -65,7 +65,8 @@ class ShiftController extends BaseController
                 ]);
                 $shift->issues()->save($issue);
             }
-            return new SuccessResponse('You have successfully created this shift.', ['id' => $shift->id], route('business.shifts.show', [$shift->id]));
+            return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id]);
+            // return new SuccessResponse('You have successfully created this shift.', ['id' => $shift->id], route('business.shifts.show', [$shift->id]));
         }
 
         return new ErrorResponse(500, 'Error creating the shift.');
