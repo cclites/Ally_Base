@@ -194,7 +194,7 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top" v-if="shift.id">
+            <b-row class="with-padding-top" v-if="!is_modal">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
@@ -287,7 +287,7 @@
                     </table>
                 </b-col>
             </b-row>
-            <b-row  v-if="shift.id">
+            <b-row v-if="!is_modal">
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
                         <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'WAITING_FOR_CONFIRMATION'">Save &amp; Confirm</b-button>
@@ -346,6 +346,7 @@
                 }
             },
             'admin': Number,
+            'is_modal': 0,
         },
         data() {
             return {
@@ -437,6 +438,7 @@
                     activities: [],
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                     override: false,
+                    modal: this.is_modal,
                 };
             },
             createIssue() {

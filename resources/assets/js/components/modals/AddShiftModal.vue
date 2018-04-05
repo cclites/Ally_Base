@@ -7,6 +7,7 @@
                 :client="client"
                 ref="businessShift"
                 @shiftCreated="$emit('shiftCreated')"
+                is_modal="1"
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
