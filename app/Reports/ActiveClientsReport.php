@@ -14,7 +14,11 @@ class ActiveClientsReport extends BaseReport
         $this->range = $range;
         $this->compareRange = $compareRange;
 
-        $this->query = Shift::where('business_id', $business_id); 
+        if (!empty($business_id)) {
+            $this->query = Shift::where('business_id', $business_id);
+        } else {
+            $this->query = Shift::query();
+        }
     }
 
     /**

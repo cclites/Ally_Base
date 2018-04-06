@@ -22,9 +22,8 @@
                                 id="business_id"
                                 name="business_id"
                                 v-model="business_id"
-                                required
                         >
-                            <option value="">--Select a Provider--</option>
+                            <option value="">--All Providers--</option>
                             <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         <b-button type="submit" variant="info" class="ml-2">Generate Report</b-button>
