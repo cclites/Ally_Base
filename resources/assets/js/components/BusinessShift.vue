@@ -295,10 +295,10 @@
                 <b-row>
                     <b-col lg="6" v-if="!shift.readOnly">
                         <span v-if="!deleted">
-                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="status === 'WAITING_FOR_CONFIRMATION'">Save &amp; Confirm</b-button>
+                            <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
                             <b-button variant="success" type="submit" v-else>Save Shift</b-button>
                             <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="status !== 'WAITING_FOR_CONFIRMATION'">Unconfirm</b-button>
+                            <b-button variant="danger" type="button" @click="unconfirm()" v-if="confirmed">Unconfirm</b-button>
                             <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                         </span>
                         <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
@@ -433,6 +433,9 @@
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
                 let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
                 return allyFee.toFixed(2);
+            },
+            confirmed() {
+                return this.status !== 'WAITING_FOR_CONFIRMATION' && this.status !== 'CLOCKED_IN'
             }
         },
         methods: {
@@ -471,16 +474,16 @@
                         .then(response => this.deleted = true);
                 }
             },
-            saveShift() {
+            saveShift(callback) {
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
-                    this.form.patch('/business/shifts/' + this.shift.id);
+                    this.form.patch('/business/shifts/' + this.shift.id).then(callback);
                 }
                 else {
                     // Create a shift
                     this.form.issues = this.issues;
-                    this.form.post('/business/shifts');
+                    this.form.post('/business/shifts').then(callback);
                 }
             },
             adminOverride() {
@@ -488,14 +491,15 @@
                 return this.saveShift();
             },
             saveAndConfirm() {
-                this.saveShift();
-                if (this.shift.id) {
-                    let form = new Form();
-                    form.post('/business/shifts/' + this.shift.id + '/confirm')
-                        .then(response => {
-                            this.status = response.data.data.status;
-                        });
-                }
+                this.saveShift(() => {
+                    if (this.shift.id) {
+                        let form = new Form();
+                        form.post('/business/shifts/' + this.shift.id + '/confirm')
+                            .then(response => {
+                                this.status = response.data.data.status;
+                            });
+                    }
+                });
             },
             unconfirm() {
                 if (this.shift.id) {

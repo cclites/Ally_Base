@@ -132,9 +132,7 @@ class ShiftStatusManager
 
     public static function getUnconfirmedStatuses()
     {
-        return [
-            Shift::WAITING_FOR_CONFIRMATION,
-        ];
+        return [ Shift::WAITING_FOR_CONFIRMATION ] + self::getClockedInStatuses();
     }
 
     public static function getConfirmedStatuses()
