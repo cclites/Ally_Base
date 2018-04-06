@@ -17,7 +17,10 @@
         methods: {
             save() {
                 let form = new Form({'use_business': true});
-                form.post(this.submitUrl);
+                form.post(this.submitUrl)
+                    .then((response) => {
+                        this.$parent.typeMessage = response.data;
+                    });
             }
         },
     }

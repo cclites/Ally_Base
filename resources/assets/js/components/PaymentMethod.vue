@@ -21,13 +21,13 @@
                     </b-form-select>
                 </b-form-group>
                 <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :key="existing_card.id" />
-                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id"/>
+                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id" />
                 <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="submitUrl"/>
                 <span class="hidden-sm-up">
                     <b-btn @click="deleteMethod()">Delete This Payment Method</b-btn>
                 </span>
                 <small class="form-text text-muted">
-                    {{ paymentTypeMessage }}
+                    {{ typeMessage }}
                 </small>
             </b-col>
         </b-row>
@@ -69,7 +69,8 @@
                 },
                 existing_account: {
                     id: 0,
-                }
+                },
+                typeMessage: this.paymentTypeMessage
             }
         },
 

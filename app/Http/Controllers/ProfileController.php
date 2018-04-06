@@ -104,7 +104,8 @@ class ProfileController extends Controller
         }
 
         if ($client->setPaymentMethod($method, $backup)) {
-            return new SuccessResponse('The payment method has been updated.');
+            $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+            return response()->json($paymentTypeMessage);
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
