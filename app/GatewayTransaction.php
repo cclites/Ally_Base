@@ -146,7 +146,7 @@ class GatewayTransaction extends Model
      */
     function discardFailure() {
         // Just delete the record without doing anything else
-        return $this->failedTransaction->delete();
+        return $this->failedTransaction()->delete();
     }
 
     /**
