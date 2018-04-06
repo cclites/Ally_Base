@@ -1,11 +1,5 @@
-CaregiverApplicationCreate.vue<template>
+<template>
     <b-container>
-        <b-row>
-            <b-col class="mt-5">
-                <h2>{{ business.name }}</h2>
-            </b-col>
-        </b-row>
-
         <b-card title="Caregiver Application">
             <b-row>
                 <b-col lg="4">
@@ -146,8 +140,8 @@ CaregiverApplicationCreate.vue<template>
                 <b-col lg="6">
                     <b-form-checkbox id="worked_here_before"
                                      v-model="form.worked_here_before"
-                                     :value="true"
-                                     :unchecked-value="false">
+                                     :value="1"
+                                     :unchecked-value="0">
                         Have you worked for {{ business.name }} before?
                     </b-form-checkbox>
                 </b-col>
@@ -234,24 +228,24 @@ CaregiverApplicationCreate.vue<template>
                 <b-col lg="3">
                     <b-form-group label="DUI within last 3 years?">
                         <b-form-checkbox v-model="form.dui"
-                                         :value="true"
-                                         :unchecked-value="false">
+                            :value="1"
+                            :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Reckless Driving ticket within last 3 years?">
                         <b-form-checkbox v-model="form.reckless_driving"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Moving Violations within last 3 years?">
                         <b-form-checkbox v-model="form.moving_violation"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                     <b-form-group label="How many violations?" v-show="form.moving_violation">
@@ -261,8 +255,8 @@ CaregiverApplicationCreate.vue<template>
                 <b-col lg="3">
                     <b-form-group label="Accidents in last 3 years?">
                         <b-form-checkbox v-model="form.accidents"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                     <b-form-group label="How many accidents?" v-show="form.accidents">
@@ -293,32 +287,32 @@ CaregiverApplicationCreate.vue<template>
                 <b-col lg="3">
                     <b-form-group label="Felony Conviction(s)?">
                         <b-form-checkbox v-model="form.felony_conviction"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Theft related Conviction(s)?">
                         <b-form-checkbox v-model="form.theft_conviction"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Drug related Conviction(s)?">
                         <b-form-checkbox v-model="form.drug_conviction"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Violence related Conviction(s)?">
                         <b-form-checkbox v-model="form.violence_conviction"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
@@ -345,32 +339,32 @@ CaregiverApplicationCreate.vue<template>
                 <b-col lg="3">
                     <b-form-group label="Are you currently injured in any way that would interfere with duties?">
                         <b-form-checkbox v-model="form.currently_injured"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Have you ever been injured on the job?">
                         <b-form-checkbox v-model="form.previously_injured"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Can you stoop bend and lift up to 25lbs?">
                         <b-form-checkbox v-model="form.lift_25_lbs"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
                     <b-form-group label="Have you ever received workman's compensation benefits?">
                         <b-form-checkbox v-model="form.workmans_comp"
-                                         :value="true"
-                                         :unchecked-value="false">
+                                         :value="1"
+                                         :unchecked-value="0">
                         </b-form-checkbox>
                     </b-form-group>
                 </b-col>
@@ -404,62 +398,158 @@ CaregiverApplicationCreate.vue<template>
                 </b-col>
             </b-row>
             <hr>
-            <template v-for="i in 3">
-                <b-row>
-                    <b-col lg="4">
-                        <b-form-group label="Employer Name">
-                            <b-form-input :v-model="'form.employer_'+i+'_name'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Approximate Start Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_start_date_'+i"
-                                    class="datepicker"
-                                    :v-model="'form.employer_'+i+'_approx_start_date'"
-                            >
-                            </b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Job Title">
-                            <b-form-input type="text"
-                                    :v-model="'form.employer_'+i+'_job_title'">
-                            </b-form-input>
-                        </b-form-group>
-                    </b-col>
-                    <b-col lg="4">
-                        <b-form-group label="Employer City">
-                            <b-form-input :v-model="'form.employer_'+i+'_city'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Approximate End Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_end_date_'+i"
-                                    class="datepicker"
-                                    :v-model="'form.employer_'+i+'_approx_end_date'"
-                            >
-                            </b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Supervisor Name">
-                            <b-form-input type="text"
-                                          :v-model="'form.employer_'+i+'_supervisor_name'">
-                            </b-form-input>
-                        </b-form-group>
-                    </b-col>
-                    <b-col lg="4">
-                        <b-form-group label="Employer State">
-                            <b-form-input :v-model="'form.employer_'+i+'_state'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Employer Phone">
-                            <b-form-input :v-model="'form.employer_'+i+'_phone'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Reason for leaving?">
-                            <b-form-input type="text"
-                                          :v-model="'form.employer_'+i+'_reason_for_leaving'">
-                            </b-form-input>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-                <hr v-if="i != 3">
-            </template>
+
+            <b-row>
+                <b-col lg="4">
+                    <b-form-group label="Employer Name">
+                        <b-form-input v-model="form.employer_1_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate Start Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_start_date_1"
+                                class="datepicker"
+                                v-model="form.employer_1_approx_start_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Job Title">
+                        <b-form-input type="text" v-model="form.employer_1_job_title">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer City">
+                        <b-form-input v-model="form.employer_1_city"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate End Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_end_date_1"
+                                class="datepicker"
+                                v-model="form.employer_1_approx_end_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Supervisor Name">
+                        <b-form-input type="text" v-model="form.employer_1_supervisor_name">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer State">
+                        <b-form-input v-model="form.employer_1_state"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Employer Phone">
+                        <b-form-input v-model="form.employer_1_phone"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Reason for leaving?">
+                        <b-form-input type="text" v-model="form.employer_1_reason_for_leaving">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="4">
+                    <b-form-group label="Employer Name">
+                        <b-form-input v-model="form.employer_2_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate Start Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_start_date_2"
+                                class="datepicker"
+                                v-model="form.employer_2_approx_start_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Job Title">
+                        <b-form-input type="text" v-model="form.employer_2_job_title">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer City">
+                        <b-form-input v-model="form.employer_2_city"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate End Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_end_date_2"
+                                class="datepicker"
+                                v-model="form.employer_2_approx_end_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Supervisor Name">
+                        <b-form-input type="text" v-model="form.employer_2_supervisor_name">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer State">
+                        <b-form-input v-model="form.employer_2_state"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Employer Phone">
+                        <b-form-input v-model="form.employer_2_phone"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Reason for leaving?">
+                        <b-form-input type="text" v-model="form.employer_2_reason_for_leaving">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="4">
+                    <b-form-group label="Employer Name">
+                        <b-form-input v-model="form.employer_3_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate Start Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_start_date_3"
+                                class="datepicker"
+                                v-model="form.employer_3_approx_start_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Job Title">
+                        <b-form-input type="text" v-model="form.employer_3_job_title">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer City">
+                        <b-form-input v-model="form.employer_3_city"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Approximate End Date">
+                        <b-form-input
+                                type="text"
+                                id="approx_end_date_3"
+                                class="datepicker"
+                                v-model="form.employer_3_approx_end_date"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Supervisor Name">
+                        <b-form-input type="text" v-model="form.employer_3_supervisor_name">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="4">
+                    <b-form-group label="Employer State">
+                        <b-form-input v-model="form.employer_3_state"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Employer Phone">
+                        <b-form-input v-model="form.employer_3_phone"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Reason for leaving?">
+                        <b-form-input type="text" v-model="form.employer_3_reason_for_leaving">
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <hr>
             <!-- Personal References -->
             <b-row>
                 <b-col>
@@ -537,7 +627,7 @@ CaregiverApplicationCreate.vue<template>
             <hr>
             <b-row>
                 <b-col>
-                    <div class="btn btn-success" @click="saveApp">Submit</div>
+                    <div class="btn btn-success" @click="saveApp">Update</div>
                 </b-col>
             </b-row>
         </b-card>
@@ -549,13 +639,7 @@ CaregiverApplicationCreate.vue<template>
 
 <script>
     export default {
-        props: ['business', 'positions'],
-
-        mixins: [],
-
-        components: {
-
-        },
+        props: ['application', 'business', 'positions'],
 
         data() {
             return{
@@ -564,91 +648,7 @@ CaregiverApplicationCreate.vue<template>
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
-                form: new Form({
-                    business_id: this.business.id,
-                    first_name: '',
-                    middle_initial: '',
-                    last_name: '',
-                    date_of_birth: '',
-                    ssn: '',
-                    address: '',
-                    address_2: '',
-                    city: '',
-                    state: '',
-                    zip: '',
-                    cell_phone: '',
-                    cell_phone_provider: '',
-                    home_phone: '',
-                    email: '',
-                    emergency_contact_name: '',
-                    emergency_contact_phone: '',
-                    worked_here_before: false,
-                    worked_before_location: '',
-                    caregiver_position_id: '',
-                    preferred_start_date: '',
-                    preferred_days: '',
-                    preferred_times: '',
-                    preferred_shift_length: '',
-                    work_weekends: false,
-                    travel_radius: 5,
-                    vehicle: '',
-                    dui: false,
-                    reckless_driving: false,
-                    moving_violation: false,
-                    moving_violation_count: 0,
-                    accidents: false,
-                    accident_count: 0,
-                    driving_violations_desc: '',
-                    felony_conviction: false,
-                    theft_conviction: false,
-                    drug_conviction: false,
-                    violence_conviction: false,
-                    criminal_history_desc: '',
-                    currently_injured: false,
-                    previously_injured: false,
-                    lift_25_lbs: false,
-                    workmans_comp: false,
-                    workmans_comp_dates: '',
-                    injury_status_desc: '',
-                    employer_1_name: '',
-                    employer_1_city: '',
-                    employer_1_state: '',
-                    employer_1_approx_start_date: '',
-                    employer_1_approx_end_date: '',
-                    employer_1_phone: '',
-                    employer_1_job_title: '',
-                    employer_1_supervisor_name: '',
-                    employer_1_reason_for_leaving: '',
-                    employer_2_name: '',
-                    employer_2_city: '',
-                    employer_2_state: '',
-                    employer_2_approx_start_date: '',
-                    employer_2_approx_end_date: '',
-                    employer_2_phone: '',
-                    employer_2_job_title: '',
-                    employer_2_supervisor_name: '',
-                    employer_2_reason_for_leaving: '',
-                    employer_3_name: '',
-                    employer_3_city: '',
-                    employer_3_state: '',
-                    employer_3_approx_start_date: '',
-                    employer_3_approx_end_date: '',
-                    employer_3_phone: '',
-                    employer_3_job_title: '',
-                    employer_3_supervisor_name: '',
-                    employer_3_reason_for_leaving: '',
-                    reference_1_name: '',
-                    reference_1_phone: '',
-                    reference_1_relationship: '',
-                    reference_2_name: '',
-                    reference_2_phone: '',
-                    reference_2_relationship: '',
-                    reference_3_name: '',
-                    reference_3_phone: '',
-                    reference_3_relationship: '',
-                    heard_about: '',
-                    acknowledged_terms: true // todo decide how to acknowledge terms
-                })
+                form: new Form(this.application)
             }
         },
 
@@ -725,7 +725,7 @@ CaregiverApplicationCreate.vue<template>
 
         methods: {
             saveApp() {
-                this.form.post('/'+this.business.id+'/caregiver-application');
+                this.form.put('/business/caregivers/applications/'+this.application.id);
             }
         },
 
