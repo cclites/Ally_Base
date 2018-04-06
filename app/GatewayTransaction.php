@@ -149,4 +149,30 @@ class GatewayTransaction extends Model
         return $this->failedTransaction->delete();
     }
 
+    /**
+     * Remove all holds related to the current transaction.
+     *
+     * @param [type] $event
+     * @return void
+     */
+    public function removeHolds()
+    {
+        if ($this->payment) {
+            if ($this->payment->client) {
+                $this->payment->client->removeHold();
+            }
+            else if ($this->payment->business) {
+                $this->payment->business->removeHold();
+            }
+        }
+
+        elseif ($this->deposit) {
+            if ($this->deposit->caregiver) {
+                $this->deposit->caregiver->removeHold();
+            }
+            else if ($this->deposit->business) {
+                $this->deposit->business->removeHold();
+            }
+        }
+    }
 }
