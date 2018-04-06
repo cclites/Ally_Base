@@ -8,9 +8,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientCaregiver;
 use App\Responses\SuccessResponse;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Schedule;
 
 class ClientCaregiverController extends BaseController
 {
@@ -39,9 +37,9 @@ class ClientCaregiverController extends BaseController
                 ->first();
 
             // Append # of future shifts scheduled for this client/caregiver
-            $caregiver->scheduled_shifts_count = Schedule::where('client_id', $client->id)
-                ->where('caregiver_id', $caregiver->id)
-                ->whereDate('starts_at', '>', Carbon::now())
+            $caregiver->scheduled_shifts_count = $caregiver->schedules()->where('client_id', $client->id)
+                ->forClient($client)
+                ->future($this->business()->timezone)
                 ->count();
 
             $responseData = new ClientCaregiver($client, $caregiver);
@@ -118,8 +116,8 @@ class ClientCaregiverController extends BaseController
 
         // check for scheduled shifts and or clockin
         $check = $caregiver->schedules()
-            ->where('client_id', $client->id)
-            ->where('starts_at', '>=', Carbon::now($this->business()->timezone)->subHour())
+            ->forClient($client)
+            ->future($this->business()->timezone)
             ->exists();
 
         if ($check) {
@@ -130,5 +128,37 @@ class ClientCaregiverController extends BaseController
         $client->caregivers()->detach($caregiver->id);
 
         return new SuccessResponse($caregiver->name() . ' removed from ' . $client->name());
+    }
+
+    /**
+     * Update rate information for future scheduled shifts for client/caregiver.
+     *
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     */
+    public function updateScheduleRates(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
+
+        $caregiver = $client->caregivers
+            ->where('id', $request->caregiver_id)
+            ->first();
+
+        $futureShifts = $caregiver->schedules()
+            ->forClient($client)
+            ->future($this->business()->timezone)
+            ->update([
+                'caregiver_rate' => $caregiver->pivot->caregiver_hourly_rate,
+                'provider_fee' => $caregiver->pivot->provider_hourly_fee,
+            ]);
+
+        $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
+        $caregiver_id = $request->input('caregiver_id');
+
+        return new SuccessResponse($caregiver->name() . "'s rate was applied to all future schedules.");
     }
 }

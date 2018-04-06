@@ -130,6 +130,7 @@ Route::group([
     Route::post('clients/{client}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{client}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
     Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');
+    Route::post('clients/{client}/caregivers/{caregiver}/schedule', 'Business\ClientCaregiverController@updateScheduleRates')->name('clients.caregivers.schedule.update');
     Route::get('clients/{client}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
     Route::post('clients/{client}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
     Route::post('clients/{client}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');

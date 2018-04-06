@@ -365,4 +365,35 @@ class Schedule extends Model
         }
         return 0;
     }
+
+    /**
+     * Get only schedules for the given client.
+     *
+     * @param [type] $query
+     * @param Client|Array|int $client_id
+     * @return void
+     */
+    public function scopeForClient($query, $client)
+    {
+        if (is_object($client)) {
+            $client = $client->id;
+        } elseif (is_array($client)) {
+            $client = $client['id'];
+        }
+
+        return $query->where('client_id', $client);
+    }
+
+    /**
+     * Get only schedules that are after right now.
+     * Adjusts to timezone.
+     *
+     * @param [type] $query
+     * @param [type] $timezone
+     * @return void
+     */
+    public function scopeFuture($query, $timezone)
+    {
+        return $query->where('starts_at', '>=', Carbon::now($timezone)->subHour());
+    }
 }
