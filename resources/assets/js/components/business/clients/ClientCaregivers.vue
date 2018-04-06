@@ -33,7 +33,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in items">
+                <tr v-for="item in items" :key="item.id">
                     <td>{{ item.firstname }} {{ item.lastname }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
@@ -54,7 +54,7 @@
             </table>
             <hr>
             <div class="h6">Excluded Caregivers</div>
-            <b-form-field v-for="exGiver in excludedCaregivers">
+            <b-form-field v-for="exGiver in excludedCaregivers" :key="exGiver.id">
                 <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
             </b-form-field>
         </div>
@@ -73,7 +73,7 @@
                                     name="exclude_caregiver_id"
                                     v-model="excludeForm.caregiver_id"
                             >
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
@@ -91,7 +91,7 @@
                                 name="caregiver_id"
                                 v-model="form.caregiver_id"
                                 >
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
