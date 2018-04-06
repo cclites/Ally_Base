@@ -45,6 +45,7 @@
                     <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                     <td>
                         <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
+                        <b-btn size="sm" @click="confirmUpdateSchedule(item)">Update Schedule</b-btn>
                         <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
                             <!--<i class="fa fa-times"></i>-->
                         <!--</b-btn>-->
@@ -58,6 +59,25 @@
                 <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
             </b-form-field>
         </div>
+
+        <b-modal id="clientCargiverSchedule"
+                 title="Update Caregiver Schedule"
+                 v-model="clientCargiverScheduleModal"
+                 ok-title="OK">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12">
+                        <div>Are you sure you want to update all <strong>{{ this.selectedCaregiver.firstname }} {{ this.selectedCaregiver.lastname }}</strong>'s future scheduled shifts with the new rate information?  This will update <strong>{{ this.selectedCaregiver.scheduled_shifts_count }}</strong> total shifts.</div>
+                    </b-col>
+                    <b-col lg="12" class="text-center">
+                        <b-btn variant="danger" class="mt-4">Yes - Update all future shifts with this new rate</b-btn>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="clientCargiverScheduleModal = false">Cancel</b-btn>
+            </div>
+        </b-modal>
 
         <b-modal id="clientExcludeCargiver"
                  title="Exclude Caregiver"
@@ -194,6 +214,7 @@
                 items: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
+                clientCargiverScheduleModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
                 excludeForm: {},
@@ -233,6 +254,31 @@
                     provider_daily_fee: item.pivot.provider_daily_fee,
                 });
                 this.clientCaregiverModal = true;
+            },
+
+            confirmUpdateSchedule(item) {
+                this.selectedCaregiver = item;
+                this.form = new Form({
+                    caregiver_id: item.id,
+                    caregiver_hourly_rate: item.pivot.caregiver_hourly_rate,
+                    caregiver_daily_rate: item.pivot.caregiver_daily_rate,
+                    provider_hourly_fee: item.pivot.provider_hourly_fee,
+                    provider_daily_fee: item.pivot.provider_daily_fee,
+                });
+                this.clientCargiverScheduleModal = true;
+            },
+
+            updateSchedules() {
+                let component = this;
+                this.form.post('/business/clients/' + component.client_id + '/caregivers')
+                    .then((response) => {
+                        this.fetchCaregivers()
+                        component.items = component.items.filter(caregiver => {
+                            return caregiver.id != response.data.data.id;
+                        });
+                        component.items.unshift(response.data.data);
+                        component.clientCaregiverModal = false;
+                    })
             },
 
             saveCaregiver() {

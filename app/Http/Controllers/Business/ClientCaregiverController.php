@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
 {
-    public function store(Request $request, Client $client) {
+    public function store(Request $request, Client $client)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
@@ -32,7 +33,10 @@ class ClientCaregiverController extends BaseController
         $data = array_map('floatval', $data);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
-            $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
+            $caregiver = $client->caregivers()
+                ->with('scheduledShiftsCount')
+                ->where('id', $caregiver_id)
+                ->first();
             $responseData = new ClientCaregiver($client, $caregiver);
             return new CreatedResponse('The caregiver assignment has been saved.', $responseData->toResponse(null));
         }
@@ -40,18 +44,22 @@ class ClientCaregiverController extends BaseController
         return new ErrorResponse(500, 'Unable to save caregiver assignment.');
     }
 
-    public function index(Client $client) {
+    public function index(Client $client)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
-            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
-        });
+        $caregivers = $client->caregivers()->withCount('scheduledShifts')->get()
+            ->map(function ($caregiver) use ($client) {
+                return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+            });
+
         return $caregivers->sortBy('name')->values()->all();
     }
 
-    public function show(Client $client, Caregiver $caregiver) {
+    public function show(Client $client, Caregiver $caregiver)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }

@@ -13,6 +13,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * App\Caregiver
@@ -156,6 +157,30 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Note::class);
     }
 
+    public function scheduledShifts()
+    {
+        return $this->hasMany(Schedule::class)
+            ->whereDate('starts_at', '>', Carbon::now());
+    }
+
+    // public function scheduledShiftsCount()
+    // {
+    //     return $this->hasOne(Schedule::class)
+    //         ->selectRaw('caregiver_id, count(*) as aggregate')
+    //         ->groupBy('caregiver_id');
+    // }
+
+    // public function getScheduledShiftsCountAttribute()
+    // {
+    //     if (!array_key_exists('scheduledShiftsCount', $this->relations)) {
+    //         $this->load('scheduledShiftsCount');
+    //     }
+
+    //     $related = $this->getRelation('scheduledShiftsCount');
+
+    //     return ($related) ? (int) $related->aggregate : 0;
+    // }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -199,6 +224,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
     }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -289,7 +315,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function getEvents($start, $end)
     {
         $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
+        foreach ($this->schedules as $schedule) {
             $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $aggregator->add($title, $schedule);
         }
@@ -333,7 +359,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return GatewayTransaction::select('gateway_transactions.*')
                                  ->with('lastHistory')
-                                 ->leftJoin('bank_accounts', function($q) {
+                                 ->leftJoin('bank_accounts', function ($q) {
                                      $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
                                        ->where('gateway_transactions.method_type', BankAccount::class);
                                  })
