@@ -80,7 +80,7 @@
                             <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                             <span>
                                 <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else><i class="fa fa-calendar-check-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
                             </span>
                             <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
                         </template>
@@ -101,7 +101,7 @@
                 <b-btn variant="default" @click="downloadSelected()"><i class="fa fa-file-pdf-o"></i> Download PDF</b-btn>
                 <b-btn variant="primary" @click="printSelected()"><i class="fa fa-print"></i> Print</b-btn>
                 <b-btn variant="info" @click="confirmSelected()" v-if="row.item.status === 'WAITING_FOR_CONFIRMATION'">Confirm Shift</b-btn>
-                <b-btn variant="info" @click="unconfirmSelected()" v-else>Unconfirm Shift</b-btn>
+                <b-btn variant="info" @click="unconfirmSelected()" v-else-if="row.item.status !== 'CLOCKED_IN'">Unconfirm Shift</b-btn>
                 <b-btn variant="primary" :href="'/business/shifts/' + row.item.id + '/duplicate'">Duplicate</b-btn>
                 <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
             </template>
@@ -249,6 +249,7 @@
                         'confirmed_at': item.confirmed_at,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
+                        'status': item.status,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });

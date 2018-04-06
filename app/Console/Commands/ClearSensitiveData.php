@@ -7,7 +7,6 @@ use App\Caregiver;
 use App\Client;
 use App\CreditCard;
 use App\User;
-use Faker\Factory;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,17 +27,6 @@ class ClearSensitiveData extends Command
     protected $description = 'Clear sensitive data from a production dump';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->faker = Factory::create();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -48,6 +36,10 @@ class ClearSensitiveData extends Command
         if (env('APP_ENV') === 'production') {
             exit('This command cannot be run in production.');
         }
+
+        // Instantiate the faker library for dummy data
+        // Do not instantiate this in the constructor since production does not have this library
+        $this->faker = \Faker\Factory::create();
 
         $this->output->writeln("Setting a new application key..\n");
         $this->call('key:generate');
