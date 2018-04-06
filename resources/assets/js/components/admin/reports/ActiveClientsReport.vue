@@ -29,16 +29,17 @@
                         </b-form-select>
                         <b-button type="submit" variant="info" class="ml-2">Generate Report</b-button>
                     </b-form>
+
+                    <div class="table-responsive mt-4">
+                        <b-table bordered striped hover show-empty
+                                :items="items"
+                                :fields="fields"
+                        >
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-            >
-            </b-table>
-        </div>
         <b-row>
             <b-col lg="12">
                 <b-card header="Select a Date Range to Compare"
@@ -57,9 +58,18 @@
                         >
                         </date-picker>
                     </b-form>
+
+                    <div class="table-responsive mt-4">
+                        <b-table bordered striped hover show-empty
+                                :items="compareItems"
+                                :fields="fields"
+                        >
+                        </b-table>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
+
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="compareItems"
