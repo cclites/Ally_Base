@@ -10,6 +10,7 @@ use App\Responses\Resources\ClientCaregiver;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Schedule;
 
 class ClientCaregiverController extends BaseController
 {
@@ -33,10 +34,16 @@ class ClientCaregiverController extends BaseController
         $data = array_map('floatval', $data);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
-            $caregiver = $client->caregivers()
-                ->with('scheduledShiftsCount')
+            $caregiver = $client->caregivers
                 ->where('id', $caregiver_id)
                 ->first();
+
+            // Append # of future shifts scheduled for this client/caregiver
+            $caregiver->scheduled_shifts_count = Schedule::where('client_id', $client->id)
+                ->where('caregiver_id', $caregiver->id)
+                ->whereDate('starts_at', '>', Carbon::now())
+                ->count();
+
             $responseData = new ClientCaregiver($client, $caregiver);
             return new CreatedResponse('The caregiver assignment has been saved.', $responseData->toResponse(null));
         }
@@ -50,10 +57,9 @@ class ClientCaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $caregivers = $client->caregivers()->withCount('scheduledShifts')->get()
-            ->map(function ($caregiver) use ($client) {
-                return (new ClientCaregiver($client, $caregiver))->toResponse(null);
-            });
+        $caregivers = $client->caregivers->map(function ($caregiver) use ($client) {
+            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+        });
 
         return $caregivers->sortBy('name')->values()->all();
     }

@@ -13,7 +13,6 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 /**
  * App\Caregiver
@@ -156,30 +155,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return $this->hasMany(Note::class);
     }
-
-    public function scheduledShifts()
-    {
-        return $this->hasMany(Schedule::class)
-            ->whereDate('starts_at', '>', Carbon::now());
-    }
-
-    // public function scheduledShiftsCount()
-    // {
-    //     return $this->hasOne(Schedule::class)
-    //         ->selectRaw('caregiver_id, count(*) as aggregate')
-    //         ->groupBy('caregiver_id');
-    // }
-
-    // public function getScheduledShiftsCountAttribute()
-    // {
-    //     if (!array_key_exists('scheduledShiftsCount', $this->relations)) {
-    //         $this->load('scheduledShiftsCount');
-    //     }
-
-    //     $related = $this->getRelation('scheduledShiftsCount');
-
-    //     return ($related) ? (int) $related->aggregate : 0;
-    // }
 
     ///////////////////////////////////////////
     /// Mutators
