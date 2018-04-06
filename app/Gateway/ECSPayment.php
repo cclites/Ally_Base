@@ -39,8 +39,8 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     function __construct()
     {
         $this->setLogin(
-            env('ECS_PAYMENTS_USERNAME'),
-            env('ECS_PAYMENTS_PASSWORD')
+            config('services.ecs.username'),
+            config('services.ecs.password')
         );
     }
 
