@@ -285,6 +285,7 @@ Route::group([
     Route::get('reports/caregivers/deposits-missing-bank-account', 'Admin\ReportsController@caregiversDepositsWithoutBankAccount')
         ->name('reports.caregivers.deposits_missing_bank_account');
 
+    Route::get('reports/bucket', 'Admin\BucketController@index')->name('reports.bucket');
     Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
     Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
     Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
