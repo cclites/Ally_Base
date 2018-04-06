@@ -1,4 +1,4 @@
-CaregiverApplicationCreate.vue<template>
+<template>
     <b-container>
         <b-row>
             <b-col class="mt-5">
