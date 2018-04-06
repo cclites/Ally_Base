@@ -39,7 +39,7 @@
             >
                 <template slot="show_details" scope="row">
                     <b-btn @click.stop="row.toggleDetails">
-                        Payment Breakdown
+                        Payment Date Breakdown
                     </b-btn>
                 </template>
                 <template slot="row-details" scope="row">
@@ -47,7 +47,7 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th>Date (or Status)</th>
+                                <th>Payment Date (or Status)</th>
                                 <th>Deposited Amount</th>
                                 <th></th>
                             </tr>
