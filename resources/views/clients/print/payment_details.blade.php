@@ -4,6 +4,10 @@
 
 @section('content')
     <style>
+        body {
+            color: #000;
+        }
+
         .header-left,
         .footer-left {
             float: left;
@@ -33,7 +37,7 @@
 
         .shifts-table {
             margin-top: 2rem;
-            font-size: .9rem;
+            font-size: 1.1rem;
         }
 
         .bg-info {
