@@ -52,6 +52,7 @@
         <li><a href="{{ route('admin.reports.finances') }}">Financial Summary</a></li>
         <li><a href="{{ route('admin.reports.client_caregiver_visits') }}">Client Caregiver Visits</a></li>
         <li><a href="{{ route('admin.reports.active_clients') }}">Active Clients Report</a></li>
+        <li><a href="{{ route('admin.reports.bucket') }}">Bucket Report</a></li>
     </ul>
 </li>
 <li>
