@@ -45,7 +45,6 @@
                     <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                     <td>
                         <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
-                        <b-btn size="sm" @click="confirmUpdateSchedule(item)">Update Schedule</b-btn>
                         <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
                             <!--<i class="fa fa-times"></i>-->
                         <!--</b-btn>-->
@@ -70,7 +69,7 @@
                         <div>Are you sure you want to update all <strong>{{ this.selectedCaregiver.firstname }} {{ this.selectedCaregiver.lastname }}</strong>'s future scheduled shifts with the new rate information?  This will update <strong>{{ this.selectedCaregiver.scheduled_shifts_count }}</strong> total shifts.</div>
                     </b-col>
                     <b-col lg="12" class="text-center">
-                        <b-btn variant="danger" class="mt-4">Yes - Update all future shifts with this new rate</b-btn>
+                        <b-btn variant="danger" class="mt-4" @click.prevent="updateSchedules">Yes - Update all future shifts with this new rate</b-btn>
                     </b-col>
                 </b-row>
             </b-container>
@@ -185,6 +184,7 @@
             </b-container>
             <div slot="modal-footer">
                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
+               <b-btn variant="warning" @click="saveCaregiver(true)">Save and Update Future Schedule</b-btn>
                <b-btn variant="info" @click="saveCaregiver()" v-if="form.caregiver_id">Save</b-btn>
             </div>
         </b-modal>
@@ -260,15 +260,11 @@
                 this.selectedCaregiver = item;
                 this.form = new Form({
                     caregiver_id: item.id,
-                    caregiver_hourly_rate: item.pivot.caregiver_hourly_rate,
-                    caregiver_daily_rate: item.pivot.caregiver_daily_rate,
-                    provider_hourly_fee: item.pivot.provider_hourly_fee,
-                    provider_daily_fee: item.pivot.provider_daily_fee,
                 });
                 this.clientCargiverScheduleModal = true;
             },
 
-            updateSchedules() {
+            saveCaregiver(updateSchedules = false) {
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
                     .then((response) => {
@@ -278,19 +274,18 @@
                         });
                         component.items.unshift(response.data.data);
                         component.clientCaregiverModal = false;
-                    })
+
+                        if (updateSchedules && response.data.data.scheduled_shifts_count > 0) {
+                            component.confirmUpdateSchedule(response.data.data)
+                        }
+                    });
             },
 
-            saveCaregiver() {
+            updateSchedules() {
                 let component = this;
-                this.form.post('/business/clients/' + component.client_id + '/caregivers')
+                this.form.post('/business/clients/' + component.client_id + '/caregivers/' + this.selectedCaregiver.id + '/schedule')
                     .then((response) => {
-                        this.fetchCaregivers()
-                        component.items = component.items.filter(caregiver => {
-                            return caregiver.id != response.data.data.id;
-                        });
-                        component.items.unshift(response.data.data);
-                        component.clientCaregiverModal = false;
+                        component.clientCargiverScheduleModal = false;
                     })
             },
 
