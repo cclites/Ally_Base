@@ -123,23 +123,39 @@ class ReportsController extends Controller
 
     public function caregiversDepositsWithoutBankAccount()
     {
-        $businesses = Business::with([
-            'caregivers' => function ($query) {
-                $query->whereHas('shifts', function ($query) {
-                    $query->where('status', 'WAITING_FOR_PAYOUT');
-                })
-                    ->doesntHave('bankAccount');
-            }
-        ])
-            ->whereHas('caregivers', function ($query) {
-                $query->whereHas('shifts', function ($query) {
-                    $query->where('status', 'WAITING_FOR_PAYOUT');
-                })
-                    ->doesntHave('bankAccount');
+        $businesses = Business::whereHas('caregivers', function ($query) {
+                $query->doesntHave('bankAccount');
             })
+            ->orderBy('name')
             ->get();
 
-        return view('admin.reports.caregivers.deposits_without_bank_account', compact('businesses'));
+        $results = collect([]);
+        foreach ($businesses as $business) {
+            $caregivers = $business->caregivers()
+                ->with(['shifts' => function ($query) {
+                    $query->where('status', 'WAITING_FOR_PAYOUT');
+                }])
+                ->doesntHave('bankAccount')
+                ->get();
+
+            if ($caregivers->count()) {
+                $results->push([
+                    'id' => $business->id,
+                    'name' => $business->name,
+                    'caregivers' => $caregivers->map(function ($item) {
+                            return [
+                                'id' => $item->id,
+                                'name' => $item->name,
+                                'email' => $item->email
+                            ];
+                        })
+                        ->sortBy('name')
+                        ->values()
+                ]);
+            }
+        }
+
+        return view('admin.reports.caregivers.deposits_without_bank_account', compact('results'));
     }
 
     public function finances()
