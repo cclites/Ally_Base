@@ -29,15 +29,6 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="3">
-                            <b-form-group label="Caregiver">
-                                <b-form-select v-model="form.caregiver_id" class="mx-1 mb-1" name="caregiver_id">
-                                    <option value="">All Caregivers</option>
-                                    <option v-for="item in caregiverList" :value="item.id">{{ item.nameLastFirst }}
-                                    </option>
-                                </b-form-select>
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="3">
                             <b-form-group label="Client">
                                 <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
                                     <option value="">Select a Client</option>
@@ -46,17 +37,6 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <!--<b-col lg="3">-->
-                            <!--<b-form-group label="Client Type">-->
-                                <!--<b-form-select v-model="form.client_type" class="mb-1" name="client_type">-->
-                                    <!--<option value="">All</option>-->
-                                    <!--<option value="private_pay">Private Pay</option>-->
-                                    <!--<option value="LTCI">LTCI</option>-->
-                                    <!--<option value="medicaid">MedicAid</option>-->
-                                    <!--<option value="VA">VA</option>-->
-                                <!--</b-form-select>-->
-                            <!--</b-form-group>-->
-                        <!--</b-col>-->
                         <b-col lg="3">
                             <b-form-group label="Export Type">
                                 <b-form-radio-group id="export_type" v-model="form.export_type" name="export_type">
@@ -72,31 +52,52 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-row v-if="selectedClient">
-                        <b-col lg="12">
-                            <h5>Claim Info</h5>
-                            <div class="d-flex justify-content-between">
-                                <div>Client Name: {{ selectedClient.name }}</div>
-                                <div v-if="selectedClient.addresses">
-                                    Client Address: {{ selectedClient.addresses[0].address1 }}<br>
-                                    {{ selectedClient.addresses[0].city }}, {{ selectedClient.addresses[0].state }}
-                                    {{ selectedClient.addresses[0].zip }}
+                    <template v-if="selectedClient">
+                        <b-row align-h="center">
+                            <b-col lg="10">
+                                <div v-if="selectedClient.ltci_name">
+                                    {{ selectedClient.ltci_name }}
                                 </div>
-                            </div>
-                            <b-table :items="items" :fields="fields" foot-clone>
-                                <template slot="FOOT_date" slot-scope="data"></template>
-                                <template slot="FOOT_hourly_total" slot-scope="data"></template>
-                                <template slot="FOOT_hours" slot-scope="data"></template>
-                                <template slot="FOOT_total" slot-scope="data">
-                                    <strong>Total: {{ summaryTotal }}</strong>
-                                </template>
-                            </b-table>
-                            <div class="d-flex justify-content-around">
-                                <b-btn variant="info">Print All Pages</b-btn>
-                                <b-btn variant="info">Print Claim Invoice Page</b-btn>
-                            </div>
-                        </b-col>
-                    </b-row>
+                                <div v-if="selectedClient.ltci_address && selectedClient.ltci_city && selectedClient.ltci_state && selectedClient.ltci_zip">
+                                    {{ selectedClient.ltci_address }} {{ selectedClient.ltci_city }}, {{ selectedClient.ltci_state }} {{ selectedClient.ltci_zip }}
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <b-row align-h="center">
+                            <b-col lg="10">
+                                <div class="d-flex justify-content-center">
+                                    Policy #: {{ selectedClient.ltci_policy }}<br>
+                                    Claim #: {{ selectedClient.ltci_claim }}
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <b-row align-h="center">
+                            <b-col lg="10">
+                                <div class="d-flex justify-content-between">
+                                    <div>Client Name: {{ selectedClient.name }}</div>
+                                    <div v-if="selectedClient.addresses">
+                                        Client Address: {{ selectedClient.addresses[0].address1 }}<br>
+                                        {{ selectedClient.addresses[0].city }}, {{ selectedClient.addresses[0].state }}
+                                        {{ selectedClient.addresses[0].zip }}
+                                    </div>
+                                </div>
+                                <b-table :items="items" :fields="fields" foot-clone>
+                                    <template slot="FOOT_date" slot-scope="data"></template>
+                                    <template slot="FOOT_hourly_total" slot-scope="data"></template>
+                                    <template slot="FOOT_hours" slot-scope="data"></template>
+                                    <template slot="FOOT_total" slot-scope="data">
+                                        <strong>Total: {{ summaryTotal }}</strong>
+                                    </template>
+                                </b-table>
+                                <div class="d-flex justify-content-between">
+                                    <a class="btn btn-info" :href="fullReport">Print All Pages</a>
+                                    <a class="btn btn-info" :href="previewPage" target="_blank">
+                                        Print Claim Invoice Page
+                                    </a>
+                                </div>
+                            </b-col>
+                        </b-row>
+                    </template>
                 </b-card>
             </b-col>
         </b-row>
@@ -155,6 +156,22 @@
 
             summaryTotal() {
                 return this.moneyFormat(_.sumBy(this.items, 'total'));
+            },
+
+            previewPage() {
+                return '/business/reports/ltci-print?client_id=' + this.selectedClient.id +
+                    '&start_date=' + this.form.start_date +
+                    '&end_date=' + this.form.end_date +
+                    '&export_type=' + this.form.export_type +
+                    '&timesheets=0';
+            },
+
+            fullReport() {
+                return '/business/reports/ltci-print?client_id=' + this.selectedClient.id +
+                    '&start_date=' + this.form.start_date +
+                    '&end_date=' + this.form.end_date +
+                    '&export_type=' + this.form.export_type +
+                    '&timesheets=1';
             }
         },
 

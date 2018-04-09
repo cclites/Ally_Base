@@ -157,6 +157,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
