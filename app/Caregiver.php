@@ -146,6 +146,17 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Schedule::class);
     }
 
+    /**
+     * A Caregiver has many Future Schedules.
+     *
+     * @return void
+     */
+    public function futureSchedules()
+    {
+        return $this->schedules()
+            ->where('starts_at', '>', Carbon::now());
+    }
+
     public function shifts()
     {
         return $this->hasMany(Shift::class);

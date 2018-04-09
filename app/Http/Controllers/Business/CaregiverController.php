@@ -137,7 +137,9 @@ class CaregiverController extends BaseController
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
-        
+
+        $caregiver->future_schedules = $client->futureSchedules()->count();
+
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
