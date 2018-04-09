@@ -13,6 +13,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * App\Caregiver

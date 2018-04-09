@@ -138,7 +138,7 @@ class CaregiverController extends BaseController
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
 
-        $caregiver->future_schedules = $client->futureSchedules()->count();
+        $caregiver->future_schedules = $caregiver->futureSchedules()->count();
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
