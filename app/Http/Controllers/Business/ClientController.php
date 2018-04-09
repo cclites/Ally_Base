@@ -146,7 +146,7 @@ class ClientController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
         ]);
         $schedules = $client->schedules()->get();
 
@@ -164,6 +164,8 @@ class ClientController extends BaseController
         if ($client->phoneNumbers->where('type', 'billing')->count() == 0) {
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
+
+        $client->future_schedules = $client->futureSchedules()->count();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
