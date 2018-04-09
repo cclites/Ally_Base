@@ -222,12 +222,24 @@
                  title="Are you sure?"
                  v-model="deactivateModal"
                  ok-title="OK">
-            <b-container fluid>
+
+            <b-container>
                 <b-row>
                     <b-col lg="12" class="text-center">
                         <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
                         <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
                         <div v-else>They have no future scheduled shifts.</div>
+                                    
+                        <b-form-group slabel-for="inactive_at" class="mt-4">
+                            <date-picker
+                                class="w-50 mx-auto"
+                                v-model="inactive_at"
+                                id="inactive_at"
+                                placeholder="Inactive Date">
+                            </date-picker>
+                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
+                        </b-form-group>
+                        
                     </b-col>
                 </b-row>
             </b-container>
@@ -295,6 +307,7 @@
                 active: this.client.active,
                 deactivateModal: false,
                 activateModal: false,
+                inactive_at: '',
             }
         },
 
@@ -322,7 +335,7 @@
 
             archiveClient() {
                 let form = new Form();
-                form.submit('delete', '/business/clients/' + this.client.id);
+                form.submit('delete', `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}`);
             },
 
             reactivateClient() {

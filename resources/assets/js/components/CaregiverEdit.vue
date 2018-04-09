@@ -107,6 +107,17 @@
                         <div class="mb-3">Are you sure you wish to archive {{ this.caregiver.name }}?</div>
                         <div v-if="caregiver.future_schedules > 0">All <span class="text-danger">{{ this.caregiver.future_schedules }}</span> of their future scheduled shifts will be unassigned.</div>
                         <div v-else>They have no future scheduled shifts.</div>
+                        
+                        <b-form-group slabel-for="inactive_at" class="mt-4">
+                            <date-picker
+                                class="w-50 mx-auto"
+                                v-model="inactive_at"
+                                id="inactive_at"
+                                placeholder="Inactive Date">
+                            </date-picker>
+                            <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
+                        </b-form-group>
+                        
                     </b-col>
                 </b-row>
             </b-container>
@@ -149,6 +160,7 @@
                 active: this.caregiver.active,
                 deactivateModal: false,
                 activateModal: false,
+                inactive_at: '',
             }
         },
 
@@ -170,7 +182,7 @@
 
             archiveCaregiver() {
                 let form = new Form();
-                form.submit('delete', '/business/caregivers/' + this.caregiver.id);
+                form.submit('delete', `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}`);
             },
 
             reactivateCaregiver() {

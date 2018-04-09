@@ -215,7 +215,13 @@ class CaregiverController extends BaseController
             return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
-        if ($caregiver->update(['active' => false])) {
+        try {
+            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+        } catch (\Exception $ex) {
+            return new ErrorResponse(422, 'Invalid inactive date.');
+        }
+
+        if ($caregiver->update(['active' => false, 'inactive_at' => $inactive_at])) {
             $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
@@ -234,7 +240,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        if ($caregiver->update(['active' => true])) {
+        if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
             return new SuccessResponse('The caregiver has been re-activated.');
         }
         return new ErrorResponse('Could not re-activate the selected caregiver.');
