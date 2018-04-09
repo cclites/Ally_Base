@@ -226,7 +226,7 @@
                 <b-row>
                     <b-col lg="12" class="text-center">
                         <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
-                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> future scheduled shifts will be deleted.</div>
+                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
                         <div v-else>They have no future scheduled shifts.</div>
                     </b-col>
                 </b-row>
