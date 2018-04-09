@@ -208,13 +208,42 @@
                 <b-col lg="12">
                     <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
-                    <b-button variant="danger" @click="archiveClient()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
-                    <b-button variant="info" @click="reactivateClient()" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                    <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
+                    <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                 </b-col>
             </b-row>
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
+        
+        <confirm-modal v-model="deactivateModal"></confirm-modal>
+
+        <b-modal id="deactivateModal"
+                 title="Are you sure?"
+                 v-model="deactivateModal"
+                 ok-title="OK">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12" class="text-center">
+                        <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
+                        <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> future scheduled shifts will be deleted.</div>
+                        <div v-else>They have no future scheduled shifts.</div>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn v-if="client.future_schedules > 0" variant="danger" class="mr-2" @click.prevent="archiveClient">Yes - Delete Future Schedules</b-btn>
+                <b-btn v-else variant="danger" class="mr-2" @click.prevent="archiveClient">Yes</b-btn>
+               <b-btn variant="default" @click="deactivateModal = false">Cancel</b-btn>
+            </div>
+        </b-modal>
+
+        <b-modal id="activateModal"
+            title="Are you sure?"
+            @ok="reactivateClient"
+            v-model="activateModal">
+                Are you sure you wish to re-activate {{ this.client.name }}?
+        </b-modal>
     </b-card>
 </template>
 
@@ -222,7 +251,7 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
-
+    
     export default {
         props: {
             'client': {},
@@ -264,6 +293,8 @@
                 }),
                 passwordModal: false,
                 active: this.client.active,
+                deactivateModal: false,
+                activateModal: false,
             }
         },
 
@@ -291,17 +322,13 @@
 
             archiveClient() {
                 let form = new Form();
-                if (confirm('Are you sure you wish to archive ' + this.client.name + '?  This will remove all future schedules.')) {
-                    form.submit('delete', '/business/clients/' + this.client.id);
-                }
+                form.submit('delete', '/business/clients/' + this.client.id);
             },
 
             reactivateClient() {
                 let form = new Form();
-                if (confirm('Are you sure you wish to re-activate ' + this.client.name + '?')) {
-                    form.post('/business/clients/' + this.client.id + '/reactivate')
-                        .then(response => this.active = 1);
-                }
+                form.post('/business/clients/' + this.client.id + '/reactivate')
+                    .then(response => this.active = 1);
             },
 
             saveProfile() {
