@@ -211,12 +211,12 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $schedules = $aggregator->where('caregiver_id', $caregiver->id)->getSchedulesBetween(Carbon::now(), Carbon::now()->addYears(2));
-        if (count($schedules)) {
-            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $schedules->first()->client->name() . '.');
+        if ($caregiver->hasActiveShift()) {
+            return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
         if ($caregiver->update(['active' => false])) {
+            $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
         return new ErrorResponse(500, 'Error archiving this caregiver.');

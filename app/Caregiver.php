@@ -291,6 +291,28 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     }
 
     /**
+     * Checks if Caregiver has a shift that is still clocked in.
+     *
+     * @return boolean
+     */
+    public function hasActiveShift()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->exists();
+    }
+
+    /**
+     * Unassign all Caregiver's schedules from now on. 
+     *
+     * @return void
+     */
+    public function unassignFromFutureSchedules()
+    {
+        $this->schedules()
+             ->where('starts_at', '>', Carbon::now())
+             ->update(['caregiver_id' => null]);
+    }
+
+    /**
      * Aggregate schedules for this caregiver and return an array of events
      *
      * @param string|\DateTime $start
