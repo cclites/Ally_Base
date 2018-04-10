@@ -18,7 +18,7 @@ trait CreditCardRequest
 
         if (!$existing || strpos($request->input('number'), '****') !== 0) {
             $rules += [
-                'number' => ['required', new CreditCardValid()],
+                'number' => ['required', new CreditCardValid(), 'confirmed'],
                 'cvv' => 'required|digits_between:3,4',
             ];
         }
