@@ -165,6 +165,15 @@ class ClientController extends BaseController
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
+        // append metrics to the payment methods if they exist
+        if (!empty($client->default_payment_id)) {
+            $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
+        }
+
+        if (!empty($client->backup_payment_id)) {
+            $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
+        }
+
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
 

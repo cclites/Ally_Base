@@ -187,4 +187,18 @@ class BankAccount extends Model implements ChargeableInterface
     {
         return $this->save();
     }
+
+    /**
+     * Get metrics on successful charges for this payment method.
+     *
+     * @return void
+     */
+    public function getChargeMetricsAttribute()
+    {   
+        return \App\GatewayTransaction::where('method_id', $this->id)
+            ->where('method_type', 'App\BankAccount')
+            ->where('success', 1)
+            ->select(\DB::raw('COUNT(*) as successful_charge_count, MIN(gateway_transactions.created_at) as first_charge_date, MAX(gateway_transactions.created_at) as last_charge_date'))
+            ->first();
+    }
 }

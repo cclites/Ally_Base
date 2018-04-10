@@ -4,7 +4,10 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row :class="{ 'mb-3' : hasMetrics }">
+            <b-col v-if="hasMetrics">First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
+            <b-col v-if="hasMetrics">Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
+            <b-col v-if="hasMetrics">Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
             <b-col class="text-right hidden-xs-down">
                 <b-btn @click="deleteMethod()">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
@@ -35,7 +38,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {
             'role': String,
             'title': {},
@@ -101,7 +108,13 @@
                     case 'office_user':
                         return '/business/clients/' + this.client.id + '/payment/' + this.source;
                 }
-            }
+            },
+
+            hasMetrics() {
+                return this.role !== 'client'
+                    && this.type !== 'provider'
+                    && this.method.charge_metrics;
+            },
         },
 
         methods: {
@@ -115,6 +128,15 @@
                             this.existing_card = {id: -1};
                         })
                 }
+            },
+
+            dateOrNever(timestamp) {
+                if (timestamp == null) {
+                    console.log('never...');
+                    return 'Never';
+                }
+
+                return this.formatDateFromUTC(timestamp)
             }
         }
     }
