@@ -13,3 +13,8 @@
         <li><a href="{{ route('caregivers.reports.payment_history') }}">Payment History</a></li>
     </ul>
 </li>
+<li>
+    <a href="/profile" aria-expanded="false">
+        <i class="mdi mdi-account-circle"></i><span class="hide-menu">My Information</span>
+    </a>
+</li>
