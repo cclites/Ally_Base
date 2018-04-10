@@ -78,6 +78,7 @@
 <script>
     export default {
         props: {
+            'submitUrl': '',
             'client': {},
             'card': {},
             'source': {},
@@ -96,17 +97,6 @@
                     expiration_year: this.card.expiration_year,
                     cvv: (this.card.last_four) ? '***' : '',
                 }),
-            }
-        },
-
-        computed: {
-            submitUrl() {
-                switch (this.$parent.role) {
-                    case 'client':
-                        return '/profile/payment/' + this.source;
-                    case 'office_user':
-                        return '/business/clients/' + this.client.id + '/payment/' + this.source
-                }
             }
         },
 

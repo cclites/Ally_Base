@@ -20,7 +20,7 @@
                     >
                     </b-form-select>
                 </b-form-group>
-                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :key="existing_card.id" />
+                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :submit-url="submitUrl" :key="existing_card.id" />
                 <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id"/>
                 <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="submitUrl"/>
                 <span class="hidden-sm-up">
@@ -99,6 +99,7 @@
                     case 'client':
                         return '/profile/payment/' + this.source;
                     case 'office_user':
+                    case 'admin':
                         return '/business/clients/' + this.client.id + '/payment/' + this.source;
                 }
             }
