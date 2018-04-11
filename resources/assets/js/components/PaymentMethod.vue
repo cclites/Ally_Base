@@ -4,12 +4,17 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row v-if="restricted">
+            <b-col lg="12" class="text-center">
+                Please Contact Ally
+            </b-col>
+        </b-row>
+        <b-row v-if="!restricted">
             <b-col class="text-right hidden-xs-down">
                 <b-btn @click="deleteMethod()">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if="!restricted">
             <b-col lg="12">
                 <b-form-group label="Payment Type" label-for="type">
                     <b-form-select
@@ -102,6 +107,9 @@
                     case 'admin':
                         return '/business/clients/' + this.client.id + '/payment/' + this.source;
                 }
+            },
+            restricted() {
+                return this.role == 'client' && this.type == 'provider';
             }
         },
 
