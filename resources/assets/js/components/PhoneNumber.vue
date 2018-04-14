@@ -1,6 +1,6 @@
 <template>
     <b-card
-        :header-bg-variant="headerVariant"
+        header-bg-variant="info"
         header-text-variant="white"
         header-tag="header"
         >
@@ -89,12 +89,6 @@
                     { text: 'Other 2', value: 'other_2' },
                     { text: 'Other 3', value: 'other_3' }
                 ]
-            }
-        },
-
-        computed: {
-            headerVariant() {
-                return this.isFixedType(this.type) ? 'info' : 'secondary';
             }
         },
 
