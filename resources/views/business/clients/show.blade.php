@@ -28,9 +28,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
-        <!-- <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#care-plan" role="tab">Care Plan</a>
-        </li> -->
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
@@ -65,6 +65,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
@@ -97,10 +98,8 @@
                                         payment-type-message="{{ $defaultPaymentTypeMessage }}"
             ></business-client-caregivers>
         </div>
-        <div class="tab-pane" id="care-plan" role="tabpanel">
-            <!-- Care Plan Placeholder -->
-            <h4>Care Plan coming soon</h4>
-            <p>This will be where you can set the activities and other care requirements for a client.</p>
+        <div class="tab-pane" id="care_plans" role="tabpanel">
+            <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
