@@ -162,8 +162,8 @@ class ScheduleController extends BaseController
         $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
         $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
         $client = Client::find($schedule->client_id);
-        if ($newTotalHours > $client->max_weekly_hours) {
-            $e = new MaximumWeeklyHoursExceeded();        
+        if (!$request->override_max_hours && $newTotalHours > $client->max_weekly_hours) {
+            $e = new MaximumWeeklyHoursExceeded('The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.');        
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
         }
         
