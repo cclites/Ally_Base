@@ -202,6 +202,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasMany(ClientExcludedCaregiver::class);
     }
 
+    public function carePlans()
+    {
+        return $this->hasMany(CarePlan::class)->with('activities');
+    }
+
     /**
      * Encrypt ssn on entry
      *

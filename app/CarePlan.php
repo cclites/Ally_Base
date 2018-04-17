@@ -48,4 +48,9 @@ class CarePlan extends Model
     {
         return $this->belongsTo(Business::class);
     }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 }
