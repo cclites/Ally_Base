@@ -293,7 +293,7 @@
                             this.clientSummary = [];
                         }
                     });
-                axios.get(this.urlPrefix + 'shifts' + this.queryString)
+                axios.get(this.urlPrefix + 'shifts' + this.queryString + "&reconciliation_report=1")
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.shifts = response.data;
