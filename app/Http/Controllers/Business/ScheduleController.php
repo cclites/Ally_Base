@@ -18,6 +18,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Client;
 
 class ScheduleController extends BaseController
 {
@@ -144,7 +145,7 @@ class ScheduleController extends BaseController
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      * @throws \Exception
      */
-    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
     {
         if (!$this->businessHasSchedule($schedule)) {
             return new ErrorResponse(403, 'You do not have access to this schedule.');
@@ -158,7 +159,16 @@ class ScheduleController extends BaseController
             return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
         }
 
+        $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
+        $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
+        $client = Client::find($schedule->client_id);
+        if ($newTotalHours > $client->max_weekly_hours) {
+            $e = new MaximumWeeklyHoursExceeded();        
+            return new ErrorResponse($e->getStatusCode(), $e->getMessage());
+        }
+        
         $notes = $request->input('notes');
+
         if ($schedule->notes != $notes) {
             if (strlen($notes)) {
                 $note = ScheduleNote::create(['note' => $notes]);
