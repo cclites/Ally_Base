@@ -120,16 +120,43 @@ class ScheduleManagerTest extends TestCase
     }
 
     /** @test */
-    public function bulk_updating_schedules_should_fail_if_max_weekly_client_hours_are_exceeded()
+    public function a_business_can_bulk_update_duration_of_schedules()
     {
-        $this->withoutExceptionHandling();
+        $date = new Carbon('next tuesday');
+        $this->createShift($date, 3);
+        $this->createShift($date->addDay(), 3);
+        $this->createShift($date->addDay(), 3);
 
+        $weekStart = $date->copy()->startOfWeek();
+        $weekEnd = $date->copy()->endOfWeek();
+
+        $data = [
+            'bydays' => ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
+            'client_id' => $this->client->id,
+            'start_date' => $weekStart->format('m/d/Y'), //'04/15/2018',
+            'end_date' => $weekEnd->format('m/d/Y'), //'04/21/2018',
+            'new_duration' => 4 * 60,
+            'new_start_time' => '01:00',
+        ];
+
+        $this->post(route('business.schedule.bulk_update'), $data)
+            ->assertStatus(200);
+        
+        $this->assertEquals(12, $this->aggregator->getTotalScheduledHoursForWeekOf($date, $this->client->id));
+    }
+
+    /** @test */
+    public function bulk_updating_schedules_should_fail_if_any_max_weekly_client_hours_are_exceeded()
+    {
         $this->client->update(['max_weekly_hours' => 10]);
 
         $date = new Carbon('next tuesday');
         $this->createShift($date, 3);
         $this->createShift($date->addDay(), 3);
         $this->createShift($date->addDay(), 3);
+
+        $date2 = new Carbon('next month');
+        $this->createShift($date2, 3);
 
         $this->assertEquals(9, $this->aggregator->getTotalScheduledHoursForWeekOf($date, $this->client->id));
 
@@ -138,33 +165,16 @@ class ScheduleManagerTest extends TestCase
 
         $data = [
             'bydays' => ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
-            'caregiver_id' => '',
             'client_id' => $this->client->id,
             'start_date' => $weekStart->format('m/d/Y'), //'04/15/2018',
-            'end_date' => $weekEnd->format('m/d/Y'), //'04/21/2018',
-            'hours_type' => '',
-            'new_caregiver_id' => '',
-            'new_caregiver_rate' => '',
-            'new_duration' => 2 * 60,
+            'end_date' => $date2->format('m/d/Y'), //'04/21/2018',
+            'new_duration' => 5 * 60,
             'new_start_time' => '01:00',
-            'new_hours_type' => '',
-            'new_note_method' => '',
-            'new_note_text' => '',
-            'new_overtime_duration' => '',
-            'new_provider_fee' => '',
-            'start_time' => null,
         ];
-
-        $this->post(route('business.schedule.bulk_update'), $data)
-            ->assertStatus(200);
-        
-        $this->assertEquals(6, $this->aggregator->getTotalScheduledHoursForWeekOf($date, $this->client->id));
-
-        $data['new_duration'] = 5 * 60;
 
         $this->post(route('business.schedule.bulk_update'), $data)
             ->assertStatus(449);
 
-        $this->assertEquals(6, $this->aggregator->getTotalScheduledHoursForWeekOf($date, $this->client->id));
+        $this->assertEquals(9, $this->aggregator->getTotalScheduledHoursForWeekOf($date, $this->client->id));
     }
 }
