@@ -6,7 +6,7 @@
                 header-text-variant="white"
         >
             <table class="table table-bordered">
-                <tr v-for="stat in stats">
+                <tr v-for="stat in stats" :key="stat.key">
                     <th>{{ stat.key }}</th>
                     <td>{{ stat.value }}</td>
                 </tr>
@@ -27,7 +27,7 @@
                                     required
                             >
                                 <option value="">--Select a Shift--</option>
-                                <option v-for="item in events" :value="item.id">{{ getTitle(item) }}</option>
+                                <option v-for="item in events" :value="item.id" :key="item.id">{{ getTitle(item) }}</option>
 
                             </b-form-select>
                             <input-help :form="form" field="" text="Only shifts scheduled within 12 Hours of the current time will show."></input-help>
@@ -43,6 +43,19 @@
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description"></span>
                             </label>
+                        </div>
+                    </b-col>
+                </b-row>
+                <b-row v-if="care_plan.activities" class="mb-4">
+                    <b-col lg="12">
+                        <h4>Care Plan for Selected Client - Please Note:</h4>
+                        <label>Activities to be Performed:</label>
+                        <ul class="">
+                            <li v-for="activity in care_plan.activities" :key="activity.id">{{ activity.name }}</li>
+                        </ul>
+                        <div v-if="care_plan.notes">
+                            <label>Note:</label>
+                            <p>{{ care_plan.notes }}</p>
                         </div>
                     </b-col>
                 </b-row>
@@ -78,6 +91,7 @@
                 allowDebug: false,
                 showManual: false,
                 stats: [],
+                care_plan: {},
             }
         },
 
@@ -134,16 +148,27 @@
 
             getTitle(item) {
                 return item.title + ' ' + moment.utc(item.start).local().format('LT') + ' - ' + moment.utc(item.end).local().format('LT');
-            }
+            },
 
+            loadCarePlan(schedule_id) {
+                let index = this.events.findIndex(item => item.id == schedule_id);
+                if (index != -1) {
+                    this.care_plan = this.events[index].care_plan || {};
+                }
+            },
         },
 
         computed: {
             time() {
                 return moment().local().format('LT');
             }
-        }
+        },
 
+        watch: {
+            'form.schedule_id': function(val) {
+                this.loadCarePlan(val);
+            }
+        },
 
     }
 </script>

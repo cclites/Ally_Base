@@ -100,6 +100,7 @@ class ScheduleEvents implements Responsable
                 // Needs to add 1 extra second to end time for FullCalendar support
                 'end' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format(\DateTime::ISO8601),
                 'backgroundColor' => $backgroundColor,
+                'care_plan' => $schedule->carePlan,
             ], $additionalOptions);
         });
     }

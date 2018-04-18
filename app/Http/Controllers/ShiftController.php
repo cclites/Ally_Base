@@ -210,7 +210,8 @@ class ShiftController extends Controller
         $start = new Carbon('-12 hours');
         $end = new Carbon('+12 hours');
         $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
-                                ->getSchedulesBetween($start, $end);
+                                ->getSchedulesBetween($start, $end)
+                                ->load('carePlan');
 
         $events = new ScheduleEventsResponse($schedules);
         return $events;
