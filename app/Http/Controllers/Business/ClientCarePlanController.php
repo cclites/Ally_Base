@@ -32,6 +32,7 @@ class ClientCarePlanController extends BaseController
             [
                 'name' => 'required',
                 'activities' => 'required|array|min:1',
+                'notes' => 'nullable',
             ],
             [
                 'activities.required' => 'You must select at least 1 activity.',
@@ -43,6 +44,10 @@ class ClientCarePlanController extends BaseController
             'name' => $data['name'],
             'business_id' => $this->business()->id,
         ]);
+
+        if (strlen($data['notes'])) {
+            $plan->notes = $data['notes'];
+        }
 
         if ($client->carePlans()->save($plan)) {
 
@@ -72,6 +77,7 @@ class ClientCarePlanController extends BaseController
             [
                 'name' => 'required',
                 'activities' => 'required|array|min:1',
+                'notes' => 'nullable',
             ],
             [
                 'activities.required' => 'You must select at least 1 activity.',
@@ -79,7 +85,12 @@ class ClientCarePlanController extends BaseController
             ]
         );
 
-        if ($carePlan->update(['name' => $data['name']])) {
+        $updates = [
+            'name' => $data['name'],
+            'notes' => strlen($data['notes']) ? $data['notes'] : null,
+        ];
+
+        if ($carePlan->update($updates)) {
 
             $carePlan->activities()->sync($data['activities']);
 

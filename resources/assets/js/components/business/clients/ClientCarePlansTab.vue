@@ -43,9 +43,9 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-row>
+                    <b-row class="mb-3">
                         <b-col lg="12">
-                            <h5>Activities of Daily Living</h5>
+                            <h5>Activities</h5>
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that are associated with this care plan."></input-help>
                             <b-row>
                                 <b-col cols="12" md="6">
@@ -67,6 +67,20 @@
                                     </div>
                                 </b-col>
                             </b-row>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <b-form-group label="Notes" label-for="notes">
+                                <b-form-textarea
+                                        id="notes"
+                                        name="notes"
+                                        :rows="3"
+                                        v-model="form.notes"
+                                >
+                                </b-form-textarea>
+                                <input-help :form="form" field="notes" text="Enter any notes to attach to schedules."></input-help>
+                            </b-form-group>
                         </b-col>
                     </b-row>
                 </form>
@@ -128,6 +142,19 @@
                         formatter: (val) => { return val.length }
                     },
                     {
+                        key: 'notes',
+                        sortable: false,
+                        formatter: (val) => { 
+                            if (! val || val.length == 0) {
+                                return '-';
+                            } else if (val.length <= 20) {
+                                return val;
+                            } else {
+                                return val.substring(0, 20) + "...";
+                            }
+                        }                        
+                    },
+                    {
                         key: 'updated_at',
                         label: 'Last Updated',
                         sortable: true,
@@ -143,6 +170,7 @@
                 form: new Form({
                     name: '',
                     activities: [],
+                    notes: '',
                 }),
             }
         },
@@ -178,12 +206,14 @@
                 if (plan) {
                     this.selectedPlan = plan;
                     this.form.name = plan.name;
+                    this.form.notes = plan.notes;
                     this.form.activities = this.getPlanActivityList();
                 } else {
                     this.selectedPlan = null;
                     this.form = new Form({
                         name: '',
                         activities: [],
+                        notes: '',
                     });
                 }
 
