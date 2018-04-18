@@ -17,7 +17,10 @@ class ClientCarePlanController extends BaseController
      */
     public function index(Request $request, Client $client)
     {
-        return $client->carePlans()->orderBy('name')->get();
+        return $client->carePlans()
+            ->withCount('futureSchedules')
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -114,6 +117,8 @@ class ClientCarePlanController extends BaseController
         }
 
         if ($carePlan->delete()) {
+            $carePlan->removeFromFutureSchedules();
+
             return new SuccessResponse('The care plan has been archived.');
         }
         return new ErrorResponse(500, 'The care plan could not be archived.');

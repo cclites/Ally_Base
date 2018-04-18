@@ -92,9 +92,12 @@
             </div>
         </b-modal>
 
-        <b-modal id="confirmDeleteModal" title="Delete Care Plan" v-model="confirmDeleteModal">
+        <b-modal id="confirmDeleteModal" title="Delete Care Plan" v-model="confirmDeleteModal" v-if="selectedPlan">
             <b-container fluid>
-                <h4>Are you sure you want to do delete the care plan "{{ selectedPlan ? selectedPlan.name : '' }}"?</h4>
+                <h4 v-if="selectedPlan.future_schedules_count > 0">
+                    There are {{ selectedPlan.future_schedules_count }} schedules with the Care Plan "{{ selectedPlan.name }}" selected.<br/><br/>Deleting this Care Plan will remove it from the future schedules.  Do you want to continue?
+                </h4>
+                <h4 v-else>Are you sure you want to do delete the Care Plan "{{ selectedPlan.name }}"?</h4>
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="confirmDeleteModal = false">Cancel</b-btn>
@@ -230,6 +233,7 @@
 
                 axios.delete(this.url + `/${plan.id}`)
                     .then( ({ data }) => {
+                        alerts.addMessage('success', data.message);
                         let index = this.items.findIndex(item => item.id == plan.id);
                         if (index != -1) {
                             this.items.splice(index, 1);

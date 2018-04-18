@@ -37,4 +37,10 @@ class Activity extends Model
     {
         return $this->belongsTo(Business::class);
     }
+
+    public function carePlans()
+    {
+        return $this->belongsToMany(CarePlan::class, 'care_plan_activities');
+    }
+
 }

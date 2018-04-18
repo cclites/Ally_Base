@@ -78,6 +78,10 @@ class ActivityController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this activity.');
         }
 
+        if ($activity->carePlans()->exists()) {
+            return new ErrorResponse(403, 'You cannot delete this activity because it is attached to a Client Care Plan.');
+        }
+
         if ($activity->delete()) {
             return new SuccessResponse('The activity has been deleted.');
         }
