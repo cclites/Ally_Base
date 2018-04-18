@@ -106,6 +106,10 @@ class ScheduleController extends BaseController
             $creator->holiday($request->overtime_duration);
         }
 
+        if ($request->care_plan_id) {
+            $creator->attachCarePlan($request->care_plan_id);
+        }
+
         if ($request->notes) {
             $note = ScheduleNote::create(['note' => $request->notes]);
             $creator->attachNote($note);
@@ -266,6 +270,10 @@ class ScheduleController extends BaseController
                         $schedule->overtime_duration = $value;
                         break;
 
+                    case 'new_care_plan_id':
+                        $schedule->care_plan_id = $value ?? null;
+                        break;
+                        
                     default:
                         $field = substr($field, 4);
                         $schedule->$field = $value;

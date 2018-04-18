@@ -54,17 +54,23 @@ class ClientController extends BaseController
 
     public function listNames()
     {
-        return $this->business()
-            ->clients()
-            ->whereHas('user', function ($query) {
-                $query->where('active', true);
-            })
+        $query = $this->business()
+            ->clients();
+            
+        if (request()->care_plans) {
+            $query->with('carePlans');
+        }
+
+        return $query->whereHas('user', function ($q) {
+            $q->where('active', true);
+        })
             ->with(['user'])->get()->map(function($client) {
                 return [
                     'id' => $client->id,
                     'firstname' => $client->user->firstname,
                     'lastname' => $client->user->lastname,
                     'name' => $client->nameLastFirst(),
+                    'care_plans' => (request()->care_plans) ? $client->carePlans : null,
                 ];
             })
             ->sortBy('name')

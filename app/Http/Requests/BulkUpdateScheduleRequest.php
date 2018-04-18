@@ -20,6 +20,7 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
             'new_hours_type'        => 'nullable|in:default,overtime,holiday',
             // overtime_duration of -1 needs to make the schedule's overtime_duration = duration
             'new_overtime_duration' => 'nullable|numeric|min:-1|max:' . $this->input('duration'),
+            'new_care_plan_id' => 'nullable', // cannot use exists rule because 0 is used for unassigned
         ];
     }
 
@@ -34,6 +35,10 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
 
         if (isset($data['new_caregiver_id']) && $data['new_caregiver_id'] == 0) {
             $data['new_caregiver_id'] = null;
+        }
+
+        if (isset($data['new_care_plan_id']) && $data['new_care_plan_id'] == 0) {
+            $data['new_care_plan_id'] = null;
         }
 
         return $data;

@@ -22,6 +22,11 @@ class ScheduleCreator
     protected $note;
 
     /**
+     * @var int
+     */
+    protected $carePlan;
+
+    /**
      * @var string
      */
     protected $rrule;
@@ -170,6 +175,18 @@ class ScheduleCreator
     public function attachNote($note)
     {
         $this->note = $note;
+        return $this;
+    }
+
+    /**
+     * Set the care plan to be attached to the created schedules.
+     *
+     * @param int $care_plan_id
+     * @return $this
+     */
+    public function attachCarePlan($care_plan_id)
+    {
+        $this->data = array_merge($this->data, compact('care_plan_id'));
         return $this;
     }
 
