@@ -59,6 +59,33 @@ class ClientCaregiverController extends BaseController
         return new ClientCaregiver($client, $caregiver);
     }
 
+    /**
+     * Get list of all the current Business' Caregivers with the exception  
+     * of ones specifically excluded from the Client and convert them 
+     * to ClientCaregiver objects.
+     *
+     * @param Client $client
+     * @return void
+     */
+    public function allCaregivers(Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
+
+        return $this->business()->caregivers()
+            ->whereNotIn('caregivers.id', $excluded_caregivers->values())
+            ->get()
+            ->map(function($caregiver) use ($client) {
+                return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
+    }
+
     public function potentialCaregivers(Client $client)
     {
         if (!$this->businessHasClient($client)) {

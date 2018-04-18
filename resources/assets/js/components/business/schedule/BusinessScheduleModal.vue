@@ -27,7 +27,13 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Assigned Caregiver" label-for="caregiver_id">
+                                <b-form-group>
+                                    <div class="float-right">
+                                        <b-btn variant="link" size="sm" @click="toggleCaregivers()">
+                                            {{ toggleCaregiversLabel }}
+                                        </b-btn>
+                                    </div>
+                                    <label for="caregiver_id">Assigned Caregiver</label>
                                     <b-form-select
                                             id="caregiver_id"
                                             name="caregiver_id"
@@ -36,7 +42,10 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
-                                    <input-help :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
+                                    <small v-if="cgMode == 'all'" class="form-text text-muted">
+                                        <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
+                                    </small>
+                                    <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -249,7 +258,9 @@
                 copiedSchedule: {},
                 allyPct: 0.05,
                 paymentType: 'NONE',
-                caregivers: [],
+                clientCaregivers: [],
+                cgMode: 'client',
+                allCaregivers: [],
                 clients: [],
                 daysOfWeek: {
                     'Sunday': 'su',
@@ -267,6 +278,7 @@
 
         mounted() {
             this.loadClientData();
+            this.loadAllCaregivers();
         },
 
         computed: {
@@ -336,6 +348,20 @@
                 return {
                     pivot: {}
                 };
+            },
+
+            caregivers() {
+                if (this.cgMode === 'all') {
+                    return this.allCaregivers;
+                }
+                return this.clientCaregivers;
+            },
+            
+            toggleCaregiversLabel() {
+                if (this.cgMode === 'all') {
+                    return "Show only Client's"
+                } 
+                return 'Show All';
             },
         },
 
@@ -468,9 +494,16 @@
                 if (this.form.client_id) {
                     axios.get('/business/clients/' + this.form.client_id + '/caregivers')
                         .then(response => {
-                            this.caregivers = response.data;
+                            this.clientCaregivers = response.data;
                         });
                 }
+            },
+
+            loadAllCaregivers() {
+                axios.get('/business/caregivers?json=1')
+                    .then(response => {
+                        this.allCaregivers = response.data;
+                    });
             },
 
             loadClientData() {
@@ -550,7 +583,11 @@
                     // (fix for tabs within tabs)
                     this.activeTab = 0;
                 });
-            }
+            },
+
+            toggleCaregivers() {
+                this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
+            },
         },
 
         watch: {
@@ -586,6 +623,7 @@
             },
 
             'form.client_id': function(val) {
+                this.cgMode = 'client';
                 this.loadAllyPctFromClient(val);
                 this.loadCaregivers();
             },
@@ -600,8 +638,13 @@
                     }
                 }
 
-                this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
-                this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+                if (this.cgMode === 'all') {
+                    this.form.caregiver_rate = 0.00; 
+                    this.form.provider_fee = 0.00;
+                } else {
+                    this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
+                    this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+                }
             },
 
             'form.hours_type': function(val, old_val) {
