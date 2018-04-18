@@ -129,9 +129,6 @@ Vue.component('business-client-caregiver-visits-report', require('./components/a
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
-Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
-Vue.component('care-plan-list', require('./components/CarePlanList.vue'));
-
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
