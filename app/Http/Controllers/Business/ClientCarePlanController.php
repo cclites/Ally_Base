@@ -48,7 +48,7 @@ class ClientCarePlanController extends BaseController
             'business_id' => $this->business()->id,
         ]);
 
-        if (strlen($data['notes'])) {
+        if (isset($data['notes']) && strlen($data['notes'])) {
             $plan->notes = $data['notes'];
         }
 

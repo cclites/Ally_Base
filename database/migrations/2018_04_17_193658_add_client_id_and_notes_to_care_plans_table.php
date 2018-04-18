@@ -14,7 +14,7 @@ class AddClientIdAndNotesToCarePlansTable extends Migration
     public function up()
     {
         Schema::table('care_plans', function (Blueprint $table) {
-            $table->unsignedInteger('client_id')->after('business_id');
+            $table->unsignedInteger('client_id')->nullable()->after('business_id');
             $table->text('notes')->nullable()->after('client_id');
 
             $table->foreign('client_id')
