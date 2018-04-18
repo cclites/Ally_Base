@@ -206,7 +206,7 @@
                 if (plan) {
                     this.selectedPlan = plan;
                     this.form.name = plan.name;
-                    this.form.notes = plan.notes;
+                    this.form.notes = plan.notes || '';
                     this.form.activities = this.getPlanActivityList();
                 } else {
                     this.selectedPlan = null;
