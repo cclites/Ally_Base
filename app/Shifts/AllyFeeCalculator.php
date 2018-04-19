@@ -2,8 +2,13 @@
 namespace App\Shifts;
 
 use App\Client;
+use App\Contracts\ChargeableInterface;
 use App\CreditCard;
 
+/**
+ * Class AllyFeeCalculator
+ * @package App\Shifts
+ */
 class AllyFeeCalculator
 {
     /**
@@ -16,18 +21,18 @@ class AllyFeeCalculator
      * Calculate a one-hour (rounded) rate of the Ally processing fee
      *
      * @param \App\Client $client
-     * @param mixed $paymentMethod
+     * @param ChargeableInterface|null $paymentMethod
      * @param float $caregiverRate
      * @param float $providerFee
+     * @return float
      */
-    public static function getHourlyRate(Client $client, $paymentMethod, $caregiverRate, $providerFee)
+    public static function getHourlyRate(Client $client, ChargeableInterface $paymentMethod = null, $caregiverRate, $providerFee)
     {
-        $paymentAmount = bcadd($caregiverRate, $providerFee, CostCalculator::DEFAULT_SCALE);
-        return round(
-            self::getFee($client, $paymentMethod, $paymentAmount),
-            CostCalculator::DECIMAL_PLACES,
-            CostCalculator::ROUNDING_METHOD
-        );
+        if ($paymentMethod) {
+            return $paymentMethod->getAllyHourlyRate($caregiverRate, $providerFee);
+        }
+
+        return $client->getAllyHourlyRate($caregiverRate, $providerFee);
     }
 
 
@@ -35,65 +40,34 @@ class AllyFeeCalculator
      * Calculate the fee based on a dollar amount (should only be used directly for misc expenses)
      *
      * @param \App\Client $client
-     * @param $paymentMethod
+     * @param ChargeableInterface|null $paymentMethod
      * @param $paymentAmount
      * @return float
      * @throws \Exception
      */
-    public static function getFee(Client $client, $paymentMethod, $paymentAmount)
+    public static function getFee(Client $client, ChargeableInterface $paymentMethod = null, $paymentAmount)
     {
-        if (!in_array($client->client_type, self::$clientTypes)) {
-            throw new \Exception('Client type ' . $client->client_type . ' is not supported at this time.');
+        if ($paymentMethod) {
+            return $paymentMethod->getAllyFee($paymentAmount);
         }
 
-        $pct = self::getPercentage($client, $paymentMethod);
-
-        return round(
-            bcmul(
-                $paymentAmount,
-                $pct,
-                CostCalculator::DEFAULT_SCALE
-            ),
-            CostCalculator::DECIMAL_PLACES,
-            CostCalculator::ROUNDING_METHOD
-        );
+        return $client->getAllyFee($paymentAmount);
     }
 
     /**
      * Return a float of the percentage used for the Ally Fee (5% is returned as 0.05)
      *
+     * @param \App\Client $client
+     * @param \App\Contracts\ChargeableInterface|null $paymentMethod
      * @return float
      */
-    public static function getPercentage(Client $client, $paymentMethod=null)
+    public static function getPercentage(Client $client, ChargeableInterface $paymentMethod = null)
     {
-        if ($client->fee_override !== null) {
-            return $client->fee_override;
+        if ($paymentMethod) {
+            return $paymentMethod->getAllyPercentage();
         }
 
-        $pct = config('ally.bank_account_fee');
-        switch($client->client_type) {
-            case 'private_pay':
-            case 'LTCI':
-            case 'medicaid':
-            case 'VA':
-                if (!$paymentMethod) {
-                    $paymentMethod = $client->getPaymentMethod();
-                    if (!$paymentMethod) $paymentMethod = new CreditCard();
-                }
-                if ($paymentMethod instanceof CreditCard) {
-                    $pct = config('ally.credit_card_fee');
-                    if (strtolower($paymentMethod->type) == 'amex') {
-                        $pct = bcadd($pct, '0.01', 2);
-                    }
-                }
-                // Default is bank account, so no more logic necessary
-                break;
-            default:
-                // Medicaid fee is used for LTCI, VA, and Medicaid.  Expand the switch cases to add more.
-                $pct = config('ally.medicaid_fee');
-                break;
-        }
-        return $pct;
+        return $client->getAllyPercentage();
     }
 
 }

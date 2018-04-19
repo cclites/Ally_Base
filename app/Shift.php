@@ -3,10 +3,12 @@
 namespace App;
 
 use App\Businesses\Timezone;
+use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\ShiftStatusManager;
+use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -92,8 +94,10 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
  */
-class Shift extends Model
+class Shift extends Model implements HasAllyFeeInterface
 {
+    use HasAllyFeeTrait;
+
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
@@ -342,6 +346,40 @@ class Shift extends Model
         }
 
         return $query->exists();
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        if ($this->costs()->hasPersistedCosts()) {
+            return (float) $this->costs()->getPersistedCosts()->ally_pct;
+        }
+
+        if ($this->client) {
+            return $this->client->getAllyPercentage();
+        }
+
+        // Default to CC fee
+        return (float) config('ally.credit_card_fee');
+    }
+
+    /**
+     * Get the rounded ally hourly rate
+     *
+     * @param $caregiverRate
+     * @param $providerFee
+     * @return float
+     */
+    public function getAllyHourlyRate($caregiverRate = null, $providerFee = null)
+    {
+        $providerFee = $providerFee ?: $this->provider_fee;
+        $caregiverRate = $caregiverRate ?: $this->caregiver_rate;
+        $amount = bcadd($providerFee, $caregiverRate, 2);
+        return $this->getAllyFee($amount);
     }
 
     ///////////////////////////////////////////
