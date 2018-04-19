@@ -171,63 +171,14 @@ class ReportsController extends Controller
         foreach ($types as $key => $value) {
             $stats->push([
                 'name' => $key,
+                'total_charges' => $value->sum('amount'),
                 'total' => $value->sum('amount'),
                 'caregiver' => $value->sum('caregiver_allotment'),
                 'business' => $value->sum('business_allotment'),
                 'system' => $value->sum('system_allotment')
             ]);
         }
-
-        $total = $payments->sum('amount');
-        $breakdown = collect([
-            [
-                'name' => 'ach',
-                'label' => 'ACH/ACH-P/Offline',
-                'total' => $payments->reduce(function ($carry, $item) {
-                    switch (strtolower($item->payment_type)) {
-                        case 'ach':
-                        case 'ach-p':
-                        case 'manual':
-                            return $carry + $item->amount;
-                        default:
-                            return $carry;
-                    }
-                })
-            ],
-            [
-                'name' => 'cc',
-                'label' => 'CC/AMEX',
-                'total' => $payments->reduce(function ($carry, $item) {
-                    switch (strtolower($item->payment_type)) {
-                        case 'amex':
-                        case 'cc':
-                            return $carry + $item->amount;
-                        default:
-                            return $carry;
-                    }
-                })
-            ],
-            [
-                'name' => 'medicaid',
-                'label' => 'MedicAid',
-                'total' => $payments->reduce(function ($carry, $item) {
-                    switch (strtolower($item->payment_type)) {
-                        case 'medicaid':
-                            return $carry + $item->amount;
-                        default:
-                            return $carry;
-                    }
-                })
-            ]
-        ])
-            ->map(function ($item) use ($total) {
-                $item['percentage'] = 0;
-                if ($total != 0) {
-                    $item['percentage'] = $item['total'] / $total;
-                }
-                return $item;
-            });
-        return response()->json(compact('stats', 'breakdown'));
+        return response()->json(compact('stats'));
     }
 
     public function shifts(Request $request)
