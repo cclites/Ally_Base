@@ -359,6 +359,17 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
              ->delete();
     }
 
+    /**
+     * A client has many future schedules.
+     *
+     * @return void
+     */
+    public function futureSchedules()
+    {
+        return $this->schedules()
+            ->where('starts_at', '>', Carbon::now());
+    }
+
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
