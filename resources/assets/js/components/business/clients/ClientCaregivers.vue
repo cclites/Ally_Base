@@ -33,7 +33,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in items">
+                <tr v-for="item in items" :key="item.id">
                     <td>{{ item.firstname }} {{ item.lastname }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
@@ -54,10 +54,29 @@
             </table>
             <hr>
             <div class="h6">Excluded Caregivers</div>
-            <b-form-field v-for="exGiver in excludedCaregivers">
+            <b-form-field v-for="exGiver in excludedCaregivers" :key="exGiver.id">
                 <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
             </b-form-field>
         </div>
+
+        <b-modal id="clientCargiverSchedule"
+                 title="Update Caregiver Schedule"
+                 v-model="clientCargiverScheduleModal"
+                 ok-title="OK">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12">
+                        <div>Are you sure you want to update all <strong>{{ this.selectedCaregiver.firstname }} {{ this.selectedCaregiver.lastname }}</strong>'s future scheduled shifts with the new rate information?  This will update <strong>{{ this.selectedCaregiver.scheduled_shifts_count }}</strong> total shifts.</div>
+                    </b-col>
+                    <b-col lg="12" class="text-center">
+                        <b-btn variant="danger" class="mt-4" @click.prevent="updateSchedules">Yes - Update all future shifts with this new rate</b-btn>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="clientCargiverScheduleModal = false">Cancel</b-btn>
+            </div>
+        </b-modal>
 
         <b-modal id="clientExcludeCargiver"
                  title="Exclude Caregiver"
@@ -73,7 +92,7 @@
                                     name="exclude_caregiver_id"
                                     v-model="excludeForm.caregiver_id"
                             >
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
@@ -91,7 +110,7 @@
                                 name="caregiver_id"
                                 v-model="form.caregiver_id"
                                 >
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
@@ -165,6 +184,7 @@
             </b-container>
             <div slot="modal-footer">
                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
+               <b-btn variant="warning" @click="saveCaregiver(true)">Save and Update Future Schedule</b-btn>
                <b-btn variant="info" @click="saveCaregiver()" v-if="form.caregiver_id">Save</b-btn>
             </div>
         </b-modal>
@@ -194,6 +214,7 @@
                 items: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
+                clientCargiverScheduleModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
                 excludeForm: {},
@@ -235,7 +256,15 @@
                 this.clientCaregiverModal = true;
             },
 
-            saveCaregiver() {
+            confirmUpdateSchedule(item) {
+                this.selectedCaregiver = item;
+                this.form = new Form({
+                    caregiver_id: item.id,
+                });
+                this.clientCargiverScheduleModal = true;
+            },
+
+            saveCaregiver(updateSchedules = false) {
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
                     .then((response) => {
@@ -245,6 +274,18 @@
                         });
                         component.items.unshift(response.data.data);
                         component.clientCaregiverModal = false;
+
+                        if (updateSchedules && response.data.data.scheduled_shifts_count > 0) {
+                            component.confirmUpdateSchedule(response.data.data)
+                        }
+                    });
+            },
+
+            updateSchedules() {
+                let component = this;
+                this.form.post('/business/clients/' + component.client_id + '/caregivers/' + this.selectedCaregiver.id + '/schedule')
+                    .then((response) => {
+                        component.clientCargiverScheduleModal = false;
                     })
             },
 

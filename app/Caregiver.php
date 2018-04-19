@@ -199,6 +199,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
     }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -289,7 +290,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function getEvents($start, $end)
     {
         $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
+        foreach ($this->schedules as $schedule) {
             $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $aggregator->add($title, $schedule);
         }
@@ -333,7 +334,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return GatewayTransaction::select('gateway_transactions.*')
                                  ->with('lastHistory')
-                                 ->leftJoin('bank_accounts', function($q) {
+                                 ->leftJoin('bank_accounts', function ($q) {
                                      $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
                                        ->where('gateway_transactions.method_type', BankAccount::class);
                                  })
