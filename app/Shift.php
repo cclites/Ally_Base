@@ -246,6 +246,11 @@ class Shift extends Model implements HasAllyFeeInterface
         return optional($date)->toDateTimeString();
     }
 
+    public function getAllyPctAttribute()
+    {
+        return $this->getAllyPercentage();
+    }
+
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////

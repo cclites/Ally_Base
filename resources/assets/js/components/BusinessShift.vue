@@ -382,8 +382,8 @@
                 deleted: false,
                 clients: [],
                 caregivers: [],
-                allyPct: 0.05,
-                paymentType: 'NONE',
+                clientAllyPct: 0.05,
+                paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
             }
         },
         mounted() {
@@ -426,6 +426,9 @@
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
                 let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
                 return totalRate.toFixed(2);
+            },
+            allyPct() {
+                return ('ally_pct' in this.shift) ? this.shift.ally_pct : this.clientAllyPct;
             },
             allyFee() {
                 if (!parseFloat(this.form.caregiver_rate)) return null;
@@ -549,7 +552,7 @@
             loadAllyPctFromClient() {
                 if (!this.form.client_id) return;
                 axios.get('/business/clients/' + this.form.client_id + '/payment_type').then(response => {
-                    this.allyPct = response.data.percentage_fee;
+                    this.clientAllyPct = response.data.percentage_fee;
                     this.paymentType = response.data.payment_type;
                 });
             },
