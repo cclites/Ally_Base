@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\ChargeableInterface;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
+use App\Traits\ChargedTransactionsTrait;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,6 +44,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class BankAccount extends Model implements ChargeableInterface
 {
+    use ChargedTransactionsTrait;
+
     protected $table = 'bank_accounts';
     protected $guarded = ['id'];
     protected $hidden = ['account_number', 'routing_number'];
@@ -64,11 +67,6 @@ class BankAccount extends Model implements ChargeableInterface
     public function business()
     {
         return $this->belongsTo(Business::class);
-    }
-
-    public function chargedTransactions()
-    {
-        return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
     ///////////////////////////////////////////

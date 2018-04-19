@@ -5,6 +5,7 @@ namespace App;
 
 use App\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
+use App\Traits\ChargedTransactionsTrait;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +41,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CreditCard extends Model implements ChargeableInterface
 {
+    use ChargedTransactionsTrait;
+
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
     protected $hidden = ['number'];
@@ -52,11 +55,6 @@ class CreditCard extends Model implements ChargeableInterface
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function chargedTransactions()
-    {
-        return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
     ///////////////////////////////////////////

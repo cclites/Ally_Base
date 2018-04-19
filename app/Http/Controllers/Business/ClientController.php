@@ -165,6 +165,13 @@ class ClientController extends BaseController
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
+        // append payment metrics and future schedule count
+        if (!empty($client->default_payment_id)) {
+            $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
+        }
+        if (!empty($client->backup_payment_id)) {
+            $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
+        }
         $client->future_schedules = $client->futureSchedules()->count();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
