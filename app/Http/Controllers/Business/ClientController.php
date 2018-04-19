@@ -370,4 +370,27 @@ class ClientController extends BaseController
         }
         return new ErrorResponse(500, 'Unable to update client password.');
     }
+
+    public function ltci(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->only([
+            'ltci_name',
+            'ltci_address',
+            'ltci_city',
+            'ltci_state',
+            'ltci_zip',
+            'ltci_policy',
+            'ltci_claim'
+        ]);
+
+        if($client->update($data)) {
+            return new SuccessResponse('Client info updated.');
+        } else {
+            return new ErrorResponse(500, 'Error updating client info.');
+        }
+    }
 }
