@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>@yield('title', 'Login') | {{ env('APP_NAME', 'Ally Management System') }}</title>
+    <title>@yield('title', 'Login') | {{ config('app.name', 'Ally Management System') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon icon -->

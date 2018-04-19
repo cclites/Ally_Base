@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>@yield('title', 'Dashboard') | {{ env('APP_NAME', 'Ally Management System') }}</title>
+    <title>@yield('title', 'Dashboard') | {{ config('app.name', 'Ally Management System') }}</title>
     @include('layouts.partials.head')
 
     <style>
