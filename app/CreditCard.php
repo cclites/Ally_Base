@@ -5,6 +5,7 @@ namespace App;
 
 use App\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
+use App\Traits\ChargedTransactionsTrait;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +41,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CreditCard extends Model implements ChargeableInterface
 {
+    use ChargedTransactionsTrait;
+
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
     protected $hidden = ['number'];
@@ -52,11 +55,6 @@ class CreditCard extends Model implements ChargeableInterface
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function chargedTransactions()
-    {
-        return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
     ///////////////////////////////////////////
@@ -169,19 +167,5 @@ class CreditCard extends Model implements ChargeableInterface
     public function persistChargeable()
     {
         return $this->save();
-    }
-
-    /**
-     * Get metrics on successful charges for this payment method.
-     *
-     * @return void
-     */
-    public function getChargeMetricsAttribute()
-    {   
-        return \App\GatewayTransaction::where('method_id', $this->id)
-            ->where('method_type', 'App\CreditCard')
-            ->where('success', 1)
-            ->select(\DB::raw('COUNT(*) as successful_charge_count, MIN(gateway_transactions.created_at) as first_charge_date, MAX(gateway_transactions.created_at) as last_charge_date'))
-            ->first();
     }
 }
