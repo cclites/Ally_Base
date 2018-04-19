@@ -307,14 +307,17 @@ class ClientController extends BaseController
         if ($request->input('use_business')) {
             if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
             if ($client->setPaymentMethod($this->business(), $backup)) {
-                return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
+                $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+                return response()->json($paymentTypeMessage);
+                //return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
             }
             return new ErrorResponse(500, 'The payment method could not be updated.');
         }
 
         $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
         if ($client->setPaymentMethod($method, $backup)) {
-            return new SuccessResponse('The payment method has been updated.');
+            $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+            return response()->json($paymentTypeMessage);
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }

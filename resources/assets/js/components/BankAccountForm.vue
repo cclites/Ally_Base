@@ -122,7 +122,7 @@
     </form>
 </template>
 
-<script lang=babel>
+<script>
     export default {
         props: {
             'submitUrl': '',
@@ -149,10 +149,6 @@
             }
         },
 
-        computed: {
-
-        },
-
         mounted() {
             this.year = parseInt(moment().format('Y'));
             this.years = _.range(this.year, this.year+11);
@@ -163,14 +159,13 @@
 
         methods: {
             submit() {
-                console.log('Submit URL' + this.submitUrl);
-                let component = this;
                 this.form.post(this.submitUrl)
-                    .then(function(response) {
-                        component.form.account_number = '*****' + component.form.account_number.slice(-4);
-                        component.form.account_number_confirmation = '';
-                        component.form.routing_number = '*********';
-                        component.form.routing_number_confirmation = '';
+                    .then((response) => {
+                        this.form.account_number = '*****' + this.form.account_number.slice(-4);
+                        this.form.account_number_confirmation = '';
+                        this.form.routing_number = '*********';
+                        this.form.routing_number_confirmation = '';
+                        this.$parent.typeMessage = response.data;
                     });
             }
         }
