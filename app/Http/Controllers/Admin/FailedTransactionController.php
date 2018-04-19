@@ -56,7 +56,7 @@ class FailedTransactionController extends Controller
     }
 
     /**
-     * Disregard the failed transaction
+     * Disregard the failed transaction, and clean up any holds.
      *
      * @param  \App\GatewayTransaction $failedTransaction
      * @return \Illuminate\Http\Response
@@ -64,6 +64,8 @@ class FailedTransactionController extends Controller
     public function destroy(GatewayTransaction $failedTransaction)
     {
         if ($failedTransaction->discardFailure()) {
+            $failedTransaction->removeHolds();
+
             return new SuccessResponse('Acknowledged a successful transaction.');
         }
         return new ErrorResponse(500, 'Unable to process failed transaction.');
