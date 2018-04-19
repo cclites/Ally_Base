@@ -42,7 +42,7 @@ class AdminReconciliationReport extends BaseReport
                     ->get()
                     ->map(function (GatewayTransaction $transaction) {
                         $transaction->net_amount = 0;
-                        if ($transaction->lastHistory->status !== 'failed') {
+                        if ($transaction->success) {
                             $transaction->net_amount = $transaction->amount;
                             if (in_array($transaction->transaction_type, ['refund', 'credit'])) {
                                 $transaction->net_amount *= -1;

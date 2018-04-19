@@ -33,7 +33,7 @@ class ClearSensitiveData extends Command
      */
     public function handle()
     {
-        if (env('APP_ENV') === 'production') {
+        if (config('app.env') === 'production') {
             exit('This command cannot be run in production.');
         }
 

@@ -39,4 +39,22 @@ return [
         'api_key' => env('SENDGRID_API_KEY'),
     ],
 
+    'ecs' => [
+        'username' => env('ECS_PAYMENTS_USERNAME'),
+        'password' => env('ECS_PAYMENTS_PASSWORD')
+    ],
+
+    'twilio' => [
+        'token' => env('TWILIO_APP_TOKEN'),
+    ],
+
+    'slack' => [
+        'endpoint' => env('SLACK_ENDPOINT'),
+        'channel' => env('SLACK_CHANNEL')
+    ],
+
+    'gmaps' => [
+        'key' => env('GMAPS_API_KEY'),
+    ]
+
 ];

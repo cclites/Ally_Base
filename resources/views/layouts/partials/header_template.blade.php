@@ -1,5 +1,5 @@
 <header
-        @if (env('APP_ENV') == 'staging')
+        @if (config('app.env') == 'staging')
         style="background:#ce4747;"
         @endif
         class="topbar">

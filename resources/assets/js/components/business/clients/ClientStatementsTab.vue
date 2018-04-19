@@ -3,7 +3,7 @@
         <div class="table-responsive">
             <b-table :items="items" :fields="fields">
                 <template slot="for_care_week" scope="data">
-                    {{ formatDate(data.item.week.start) }} - {{ formatDate(data.item.week.end) }}
+                    {{ weekStart(data.item) }} - {{ weekEnd(data.item) }}
                 </template>
                 <template slot="actions" scope="data">
                     <b-btn :href="'/business/clients/payments/'+data.item.id">View Details</b-btn>
@@ -53,11 +53,19 @@
         },
         
         methods: {
-        
+            weekStart(item) {
+                if (!item.week) return '';
+                return this.formatDate(item.week.start);
+            },
+
+            weekEnd(item) {
+                if (!item.week) return '';
+                return this.formatDate(item.week.end);
+            }
         },
         
         computed: {
-        
+
         }
     }
 </script>
