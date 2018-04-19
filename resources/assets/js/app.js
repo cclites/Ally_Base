@@ -125,6 +125,7 @@ Vue.component('bulk-delete-schedule-modal', require('./components/business/sched
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
+Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 

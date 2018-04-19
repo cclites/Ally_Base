@@ -102,6 +102,8 @@ Route::group([
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
     Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
+    Route::get('caregivers/applications/{id}/edit', 'CaregiverApplicationController@edit')->name('caregivers.applications.edit');
+    Route::put('caregivers/applications/{id}', 'CaregiverApplicationController@update')->name('caregivers.applications.update');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');
