@@ -8,12 +8,12 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ClientCaregiver;
 use App\Responses\SuccessResponse;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
 {
-    public function store(Request $request, Client $client) {
+    public function store(Request $request, Client $client)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
@@ -32,7 +32,16 @@ class ClientCaregiverController extends BaseController
         $data = array_map('floatval', $data);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
-            $caregiver = $client->caregivers->where('id', $caregiver_id)->first();
+            $caregiver = $client->caregivers
+                ->where('id', $caregiver_id)
+                ->first();
+
+            // Append # of future shifts scheduled for this client/caregiver
+            $caregiver->scheduled_shifts_count = $caregiver->schedules()->where('client_id', $client->id)
+                ->forClient($client)
+                ->future($this->business()->timezone)
+                ->count();
+
             $responseData = new ClientCaregiver($client, $caregiver);
             return new CreatedResponse('The caregiver assignment has been saved.', $responseData->toResponse(null));
         }
@@ -40,18 +49,21 @@ class ClientCaregiverController extends BaseController
         return new ErrorResponse(500, 'Unable to save caregiver assignment.');
     }
 
-    public function index(Client $client) {
+    public function index(Client $client)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $caregivers = $client->caregivers->map(function($caregiver) use ($client) {
+        $caregivers = $client->caregivers->map(function ($caregiver) use ($client) {
             return (new ClientCaregiver($client, $caregiver))->toResponse(null);
         });
+
         return $caregivers->sortBy('name')->values()->all();
     }
 
-    public function show(Client $client, Caregiver $caregiver) {
+    public function show(Client $client, Caregiver $caregiver)
+    {
         if (!$this->businessHasClient($client)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
@@ -104,8 +116,8 @@ class ClientCaregiverController extends BaseController
 
         // check for scheduled shifts and or clockin
         $check = $caregiver->schedules()
-            ->where('client_id', $client->id)
-            ->where('starts_at', '>=', Carbon::now($this->business()->timezone)->subHour())
+            ->forClient($client)
+            ->future($this->business()->timezone)
             ->exists();
 
         if ($check) {
@@ -116,5 +128,37 @@ class ClientCaregiverController extends BaseController
         $client->caregivers()->detach($caregiver->id);
 
         return new SuccessResponse($caregiver->name() . ' removed from ' . $client->name());
+    }
+
+    /**
+     * Update rate information for future scheduled shifts for client/caregiver.
+     *
+     * @param Client $client
+     * @return ErrorResponse|SuccessResponse
+     */
+    public function updateScheduleRates(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
+
+        $caregiver = $client->caregivers
+            ->where('id', $request->caregiver_id)
+            ->first();
+
+        $futureShifts = $caregiver->schedules()
+            ->forClient($client)
+            ->future($this->business()->timezone)
+            ->update([
+                'caregiver_rate' => $caregiver->pivot->caregiver_hourly_rate,
+                'provider_fee' => $caregiver->pivot->provider_hourly_fee,
+            ]);
+
+        $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
+        $caregiver_id = $request->input('caregiver_id');
+
+        return new SuccessResponse($caregiver->name() . "'s rate was applied to all future schedules.");
     }
 }

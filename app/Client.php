@@ -102,6 +102,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     use IsUserRole, Notifiable;
     use \App\Traits\HasPaymentHold;
 
+    protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
     public $dates = ['service_start_date', 'inquiry_date'];
@@ -131,9 +132,15 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'dr_first_name',
         'dr_last_name',
         'dr_phone',
-        'dr_fax'
+        'dr_fax',
+        'ltci_name',
+        'ltci_address',
+        'ltci_city',
+        'ltci_state',
+        'ltci_zip',
+        'ltci_policy',
+        'ltci_claim',
     ];
-    protected $table = 'clients';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -350,6 +357,17 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         $this->schedules()
              ->where('starts_at', '>', Carbon::now())
              ->delete();
+    }
+
+    /**
+     * A client has many future schedules.
+     *
+     * @return void
+     */
+    public function futureSchedules()
+    {
+        return $this->schedules()
+            ->where('starts_at', '>', Carbon::now());
     }
 
     public function schedules()

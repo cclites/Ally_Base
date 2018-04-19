@@ -204,7 +204,7 @@
                     if (shift.checked_in_number) {
                         return 'Telephony';
                     } else if (shift.checked_in_latitude) {
-                        return 'Mobile App';
+                        return 'GPS Location via Mobile App';
                     }
                 }
                 return 'None';

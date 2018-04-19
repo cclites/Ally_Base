@@ -230,4 +230,5 @@ class CaregiverApplication extends Model
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
+
 }

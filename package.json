@@ -21,13 +21,14 @@
   },
   "dependencies": {
     "axios": "^0.16.2",
-    "bootstrap-vue": "^1.5.1",
+    "bootstrap-vue": "~1.5.1",
     "lodash": "^4.17.4",
     "moment": "^2.19.1",
     "numeral": "^2.0.6",
     "signature_pad": "^2.3.2",
-    "vue": "^2.1.10",
+    "vue": "~2.4",
     "vue-select": "^2.2.0",
+    "vue-template-compiler": "^2.4.4",
     "vue-the-mask": "^0.11.1"
   }
 }

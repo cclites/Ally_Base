@@ -43,12 +43,12 @@ class CronSyncStaging extends Command
             exit();
         }
 
-        if (env('APP_ENV') !== 'staging') {
+        if (config('app.env') !== 'staging') {
             $this->output->error('This command can only be run on the staging env.');
             exit();
         }
 
-        $stagingDb = env('DB_DATABASE');
+        $stagingDb = \DB::connection()->getDatabaseName();
         $productionDb = 'ally';
         $backupPathStag = '/root/backups/ally_staging_pre_sync.sql.gz';
         $backupPathProd = '/root/backups/ally_production_pre_sync.sql.gz';

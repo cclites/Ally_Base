@@ -125,6 +125,8 @@ Vue.component('bulk-delete-schedule-modal', require('./components/business/sched
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
+Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
+Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 
@@ -158,6 +160,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
+Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));

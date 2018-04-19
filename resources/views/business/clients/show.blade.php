@@ -54,6 +54,11 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
+        @if($client->client_type == 'LTCI')
+            <li class="nav-item">
+                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">LTC Insurance</a>
+            </li>
+        @endif
     </ul>
 
     <!-- Smaller device tabs -->
@@ -72,6 +77,9 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                @if($client->client_type == 'LTCI')
+                    <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">LTC Insurance</a>
+                @endif
             </div>
         </li>
     </ul>
@@ -149,6 +157,9 @@
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
                                     :user-id="{{ $client->id }}"></emergency-contacts-tab>
+        </div>
+        <div class="tab-pane" id="ltci">
+            <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
         </div>
     </div>
 @endsection

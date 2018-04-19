@@ -48,6 +48,7 @@
         <li><a href="{{ route('business.reports.printable_schedule') }}">Printable Schedule</a></li>
         <li><a href="{{ route('business.reports.caregivers_missing_bank_accounts') }}">Missing Bank Accounts</a></li>
         <li><a href="{{ route('business.reports.export_timesheets') }}">Export Timesheets</a></li>
+        <li><a href="{{ route('business.reports.ltci_claims') }}">LTCI Claims</a></li>
     </ul>
 </li>
 <li>

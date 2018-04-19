@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="viewport-fit=cover, initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>@yield('title', 'Login') | {{ env('APP_NAME', 'Ally Management System') }}</title>
+    <title>@yield('title', 'Login') | {{ config('app.name', 'Ally Management System') }}</title>
     @include('layouts.partials.head')
     @stack('head')
     <style>

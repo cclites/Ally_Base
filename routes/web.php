@@ -102,6 +102,8 @@ Route::group([
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
     Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
+    Route::get('caregivers/applications/{id}/edit', 'CaregiverApplicationController@edit')->name('caregivers.applications.edit');
+    Route::put('caregivers/applications/{id}', 'CaregiverApplicationController@update')->name('caregivers.applications.update');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');
@@ -119,6 +121,7 @@ Route::group([
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
+    Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');
     Route::delete('clients/excluded-caregiver/{id}', 'Business\ClientExcludedCaregiverController@destroy')->name('clients.remove-excluded-caregiver');
@@ -130,6 +133,7 @@ Route::group([
     Route::post('clients/{client}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{client}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
     Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');
+    Route::post('clients/{client}/caregivers/{caregiver}/schedule', 'Business\ClientCaregiverController@updateScheduleRates')->name('clients.caregivers.schedule.update');
     Route::get('clients/{client}/schedule', 'Business\ClientScheduleController@index')->name('clients.schedule');
     Route::post('clients/{client}/schedule', 'Business\ClientScheduleController@create')->name('clients.schedule.create');
     Route::post('clients/{client}/schedule/single', 'Business\ClientScheduleController@createSingle')->name('clients.schedule.create.single');
@@ -147,6 +151,7 @@ Route::group([
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
+    Route::get('reports/ltci-print', 'Business\ReportsController@ltciClaimsPrint')->name('clients.ltci_print');
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
@@ -172,6 +177,8 @@ Route::group([
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
     Route::get('reports/caregivers/payment-history/{id}/print/{caregiver_id}', 'Business\ReportsController@printPaymentDetails')->name('reports.caregivers.print_payment_details');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
+    Route::get('reports/ltci-claims', 'Business\ReportsController@ltciClaims')->name('reports.ltci_claims');
+    Route::Post('reports/ltci-claims', 'Business\ReportsController@ltciClaimsData')->name('reports.ltci_claims_data');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');

@@ -146,7 +146,7 @@ class ClientController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
         ]);
         $schedules = $client->schedules()->get();
 
@@ -165,14 +165,14 @@ class ClientController extends BaseController
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
 
-        // append metrics to the payment methods if they exist
+        // append payment metrics and future schedule count
         if (!empty($client->default_payment_id)) {
             $client->defaultPayment->charge_metrics = $client->defaultPayment->charge_metrics;
         }
-
         if (!empty($client->backup_payment_id)) {
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
+        $client->future_schedules = $client->futureSchedules()->count();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
@@ -237,7 +237,13 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
-        if ($client->update(['active' => false])) {
+        try {
+            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+        } catch (\Exception $ex) {
+            return new ErrorResponse(422, 'Invalid inactive date.');
+        }
+
+        if ($client->update(['active' => false, 'inactive_at' => $inactive_at])) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
@@ -256,7 +262,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        if ($client->update(['active' => true])) {
+        if ($client->update(['active' => true, 'inactive_at' => null])) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been re-activated.');
         }
@@ -316,14 +322,17 @@ class ClientController extends BaseController
         if ($request->input('use_business')) {
             if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
             if ($client->setPaymentMethod($this->business(), $backup)) {
-                return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
+                $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+                return response()->json($paymentTypeMessage);
+                //return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
             }
             return new ErrorResponse(500, 'The payment method could not be updated.');
         }
 
         $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
         if ($client->setPaymentMethod($method, $backup)) {
-            return new SuccessResponse('The payment method has been updated.');
+            $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
+            return response()->json($paymentTypeMessage);
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
@@ -375,5 +384,28 @@ class ClientController extends BaseController
             return new SuccessResponse('The client\'s password has been updated.');
         }
         return new ErrorResponse(500, 'Unable to update client password.');
+    }
+
+    public function ltci(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->only([
+            'ltci_name',
+            'ltci_address',
+            'ltci_city',
+            'ltci_state',
+            'ltci_zip',
+            'ltci_policy',
+            'ltci_claim'
+        ]);
+
+        if($client->update($data)) {
+            return new SuccessResponse('Client info updated.');
+        } else {
+            return new ErrorResponse(500, 'Error updating client info.');
+        }
     }
 }

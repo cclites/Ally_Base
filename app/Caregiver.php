@@ -13,6 +13,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * App\Caregiver
@@ -146,6 +147,17 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Schedule::class);
     }
 
+    /**
+     * A Caregiver has many Future Schedules.
+     *
+     * @return void
+     */
+    public function futureSchedules()
+    {
+        return $this->schedules()
+            ->where('starts_at', '>', Carbon::now());
+    }
+
     public function shifts()
     {
         return $this->hasMany(Shift::class);
@@ -199,6 +211,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
     }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -279,6 +292,28 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     }
 
     /**
+     * Checks if Caregiver has a shift that is still clocked in.
+     *
+     * @return boolean
+     */
+    public function hasActiveShift()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->exists();
+    }
+
+    /**
+     * Unassign all Caregiver's schedules from now on. 
+     *
+     * @return void
+     */
+    public function unassignFromFutureSchedules()
+    {
+        $this->schedules()
+             ->where('starts_at', '>', Carbon::now())
+             ->update(['caregiver_id' => null]);
+    }
+
+    /**
      * Aggregate schedules for this caregiver and return an array of events
      *
      * @param string|\DateTime $start
@@ -289,7 +324,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function getEvents($start, $end)
     {
         $aggregator = new ScheduleAggregator();
-        foreach($this->schedules as $schedule) {
+        foreach ($this->schedules as $schedule) {
             $title = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
             $aggregator->add($title, $schedule);
         }
@@ -333,7 +368,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         return GatewayTransaction::select('gateway_transactions.*')
                                  ->with('lastHistory')
-                                 ->leftJoin('bank_accounts', function($q) {
+                                 ->leftJoin('bank_accounts', function ($q) {
                                      $q->on('bank_accounts.id', '=', 'gateway_transactions.method_id')
                                        ->where('gateway_transactions.method_type', BankAccount::class);
                                  })

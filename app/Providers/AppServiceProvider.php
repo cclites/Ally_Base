@@ -21,14 +21,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \App\GMaps\API::setKey(env('GMAPS_API_KEY'));
+        \App\GMaps\API::setKey(config('services.gmaps.key'));
 
         $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
         $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
         $this->app->bind(ACHPaymentInterface::class, ECSPayment::class);
         $this->app->bind(ChatServiceInterface::class, function() {
-            $slack = new Slack(env('SLACK_ENDPOINT'));
-            return $slack->setChannel(env('SLACK_CHANNEL'))
+            $slack = new Slack(config('services.slack.endpoint'));
+            return $slack->setChannel(config('services.slack.channel'))
                 ->setUsername('Ally Bot')
                 ->setIconUrl('https://s3.amazonaws.com/teambox-assets/avatars-v2/a052eac951312dc8d2c72c23ac675f8d47540438/thumb.png?1454879401');
         });

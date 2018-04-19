@@ -34,8 +34,8 @@
                 </div>
             </div>
 
-            @if(env('GMAPS_API_KEY') && $shift->verified)
-                <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ env('GMAPS_API_KEY') }}"></iframe>
+            @if(config('services.gmaps.key') && $shift->verified)
+                <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ config('services.gmaps.key') }}"></iframe>
             @endif
         </div>
     </div>

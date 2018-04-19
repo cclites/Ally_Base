@@ -120,11 +120,11 @@
 
         methods: {
             submit() {
-                var component = this;
                 this.form.post(this.submitUrl)
-                    .then(function(response) {
-                        component.form.number = '************ ' + component.form.number.slice(-4);
-                        component.form.cvv = '***';
+                    .then((response) => {
+                        this.form.number = '************ ' + this.form.number.slice(-4);
+                        this.form.cvv = '***';
+                        this.$parent.typeMessage = response.data;
                     });
             }
         }

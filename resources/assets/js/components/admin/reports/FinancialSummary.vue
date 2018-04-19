@@ -27,12 +27,12 @@
                     </div>
                 </b-button-toolbar>
             </b-card>
-            <b-card title="Breakdown">
-                <b-table :items="breakdown" :fields="breakdownFields"></b-table>
-            </b-card>
             <b-card title="Payment Types">
                 <b-table :items="items" :fields="fields" foot-clone>
                     <template slot="FOOT_name" scope="data"></template>
+                    <template slot="FOOT_total_charges" scope="data">
+                        {{ moneyFormat(total) }}
+                    </template>
                     <template slot="FOOT_caregiver" scope="data">
                         {{ moneyFormat(caregiverTotal) }}
                     </template>
@@ -86,6 +86,10 @@
                         label: 'Type'
                     },
                     {
+                        key: 'total_charges',
+                        formatter: (value) => { return this.moneyFormat(value) }
+                    },
+                    {
                         key: 'caregiver',
                         label: 'Total CG Deposits',
                         formatter: (value) => { return this.moneyFormat(value) }
@@ -123,7 +127,6 @@
                 axios.post('/admin/reports/finances', this.filters)
                     .then(response => {
                         this.items = response.data.stats;
-                        this.breakdown = response.data.breakdown;
                         this.fetchingData = false;
                     })
             }

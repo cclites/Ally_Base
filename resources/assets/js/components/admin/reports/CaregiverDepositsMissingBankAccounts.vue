@@ -1,7 +1,7 @@
 <template>
     <b-card>
         <b-row>
-            <b-col lg="6" v-for="business in businesses">
+            <b-col lg="12" v-for="business in businesses">
                 <b-card>
                     <b-row>
                         <b-col lg="6">
