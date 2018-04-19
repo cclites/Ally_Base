@@ -1,64 +1,56 @@
 <template>
     <b-card>
-        <b-row class="mb-3">
-            <b-col lg="2">
-                <b-form-input
-                        type="text"
-                        id="start-date"
-                        class="datepicker"
-                        v-model="searchForm.start_date"
-                        placeholder="Start Date"
-                        @change="filter"
-                >
-                </b-form-input>
-            </b-col>
+        <b-form inline @submit.prevent="filter" class="mb-4">
+            <a href="/notes/create" class="btn btn-info mr-5 mb-2">Add Note</a>
 
-            <b-col lg="2">
-                <b-form-input
-                        type="text"
-                        id="end-date"
-                        class="datepicker"
-                        v-model="searchForm.end_date"
-                        placeholder="End Date"
-                >
-                </b-form-input>
-            </b-col>
-
-            <b-col lg="2" class="text-right">
-                <b-form-select v-model="searchForm.caregiver" class="mb-3">
-                    <template slot="first">
-                        <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null">-- Caregiver --</option>
-                    </template>
-                    <option :value="caregiver.id" v-for="caregiver in caregivers">{{ caregiver.name }}</option>
-                </b-form-select>
-            </b-col>
-
-            <b-col lg="2" class="text-right">
-                <b-form-select v-model="searchForm.client" class="mb-3">
-                    <template slot="first">
-                        <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null">-- Client --</option>
-                    </template>
-                    <option :value="client.id" v-for="client in clients">{{ client.name }}</option>
-                </b-form-select>
-            </b-col>
-
-            <b-col lg="2">
-                <b-form-input
+            <b-form-input
                     type="text"
-                    id="tags"
-                    v-model="searchForm.tags"
-                    placeholder="Tags">
-                </b-form-input>
-            </b-col>
+                    id="start-date"
+                    class="datepicker mr-2 mb-2"
+                    v-model="searchForm.start_date"
+                    placeholder="Start Date"
+                    @change="filter"
+            >
+            </b-form-input>
 
-            <b-col lg="2">
-                <b-button @click="filter" variant="info">
-                    Filter
-                </b-button>
-            </b-col>
-        </b-row>
+            <b-form-input
+                    type="text"
+                    id="end-date"
+                    class="datepicker mr-2 mb-2"
+                    v-model="searchForm.end_date"
+                    placeholder="End Date"
+            >
+            </b-form-input>
+
+            <b-form-select v-model="searchForm.caregiver" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- Caregiver --</option>
+                </template>
+                <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
+            </b-form-select>
+
+            <b-form-select v-model="searchForm.client" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- Client --</option>
+                </template>
+                <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.name }}</option>
+            </b-form-select>
+
+            <b-form-input
+                type="text"
+                id="tags"
+                v-model="searchForm.tags"
+                class="mr-2 mb-2"
+                placeholder="Tags">
+            </b-form-input>
+
+            <b-button variant="info" class="mb-2">
+                Filter
+            </b-button>
+
+        </b-form>
 
         <div class="table-responsive">
             <b-table bordered striped hover show-empty

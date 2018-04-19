@@ -244,7 +244,7 @@
                         'Mileage Costs': this.moneyFormat(item.mileage_costs),
                         'Other Expenses': this.moneyFormat(item.other_expenses),
                         'Shift Total': this.moneyFormat(item.shift_total),
-                        'Type': item.hours_type,
+                        'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
                         'Charged': item.charged,
