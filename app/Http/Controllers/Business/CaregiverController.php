@@ -137,7 +137,9 @@ class CaregiverController extends BaseController
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
             $caregiver->phoneNumbers->prepend(['type' => 'primary', 'extension' => '', 'number' => '']);
         }
-        
+
+        $caregiver->future_schedules = $caregiver->futureSchedules()->count();
+
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }
 
@@ -209,12 +211,18 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $schedules = $aggregator->where('caregiver_id', $caregiver->id)->getSchedulesBetween(Carbon::now(), Carbon::now()->addYears(2));
-        if (count($schedules)) {
-            return new ErrorResponse(400, 'This caregiver still has active schedules.  Their next client is ' . $schedules->first()->client->name() . '.');
+        if ($caregiver->hasActiveShift()) {
+            return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
-        if ($caregiver->update(['active' => false])) {
+        try {
+            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+        } catch (\Exception $ex) {
+            return new ErrorResponse(422, 'Invalid inactive date.');
+        }
+
+        if ($caregiver->update(['active' => false, 'inactive_at' => $inactive_at])) {
+            $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
         return new ErrorResponse(500, 'Error archiving this caregiver.');
@@ -232,7 +240,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        if ($caregiver->update(['active' => true])) {
+        if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
             return new SuccessResponse('The caregiver has been re-activated.');
         }
         return new ErrorResponse('Could not re-activate the selected caregiver.');

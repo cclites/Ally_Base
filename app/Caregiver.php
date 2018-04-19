@@ -13,6 +13,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * App\Caregiver
@@ -146,6 +147,17 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Schedule::class);
     }
 
+    /**
+     * A Caregiver has many Future Schedules.
+     *
+     * @return void
+     */
+    public function futureSchedules()
+    {
+        return $this->schedules()
+            ->where('starts_at', '>', Carbon::now());
+    }
+
     public function shifts()
     {
         return $this->hasMany(Shift::class);
@@ -277,6 +289,28 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function getActiveShift()
     {
         return $this->shifts()->whereNull('checked_out_time')->first();
+    }
+
+    /**
+     * Checks if Caregiver has a shift that is still clocked in.
+     *
+     * @return boolean
+     */
+    public function hasActiveShift()
+    {
+        return $this->shifts()->whereNull('checked_out_time')->exists();
+    }
+
+    /**
+     * Unassign all Caregiver's schedules from now on. 
+     *
+     * @return void
+     */
+    public function unassignFromFutureSchedules()
+    {
+        $this->schedules()
+             ->where('starts_at', '>', Carbon::now())
+             ->update(['caregiver_id' => null]);
     }
 
     /**

@@ -146,7 +146,7 @@ class ClientController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
         ]);
         $schedules = $client->schedules()->get();
 
@@ -164,6 +164,8 @@ class ClientController extends BaseController
         if ($client->phoneNumbers->where('type', 'billing')->count() == 0) {
             $client->phoneNumbers->prepend(['type' => 'billing', 'extension' => '', 'number' => '']);
         }
+
+        $client->future_schedules = $client->futureSchedules()->count();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
@@ -228,7 +230,13 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
-        if ($client->update(['active' => false])) {
+        try {
+            $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
+        } catch (\Exception $ex) {
+            return new ErrorResponse(422, 'Invalid inactive date.');
+        }
+
+        if ($client->update(['active' => false, 'inactive_at' => $inactive_at])) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
@@ -247,7 +255,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        if ($client->update(['active' => true])) {
+        if ($client->update(['active' => true, 'inactive_at' => null])) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been re-activated.');
         }
