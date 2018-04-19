@@ -19,6 +19,11 @@ class ActivityController extends BaseController
     public function index()
     {
         $activities = $this->business()->allActivities();
+
+        if (request()->expectsJson()) {
+            return response()->json($activities);
+        }
+        
         return view('business.activities.index', compact('activities'));
     }
 
