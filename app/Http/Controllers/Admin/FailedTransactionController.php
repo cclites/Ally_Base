@@ -30,6 +30,7 @@ class FailedTransactionController extends Controller
                 'lastHistory'
             ]);
             return $query->has('failedTransaction')
+                         ->where('success', 1) // Do not include already failed transactions
                          ->orderBy('created_at')
                          ->get();
         }
