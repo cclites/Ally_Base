@@ -86,7 +86,7 @@
                                     :client="{{ $user->role }}"
                                     payment-type-message="{{ $payment_type_message['default'] }}"
                                     role="{{ auth()->user()->role_type }}"
-                                    :business="true">
+                                    :business="false">
                     </payment-method>
                 </div>
                 <div class="col-lg-6 col-sm-12">
@@ -96,7 +96,7 @@
                                     :client="{{ $user->role }}"
                                     payment-type-message="{{ $payment_type_message['backup'] }}"
                                     role="{{ auth()->user()->role_type }}"
-                                    :business="true">
+                                    :business="false">
                     </payment-method>
                 </div>
             </div>

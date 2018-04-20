@@ -21,7 +21,7 @@
             <input-help :form="form" field="name_on_card" text="Please enter your name, as it appears on the card."></input-help>
         </b-form-group>
         <b-row>
-            <b-col lg="7">
+            <b-col lg="6">
                 <b-form-group label="Card Number" label-for="number">
                     <b-form-input
                             id="number"
@@ -34,6 +34,21 @@
                     <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
                 </b-form-group>
             </b-col>
+            <b-col lg="6" >
+                <b-form-group label="Confirm Card Number" label-for="number_confirmation">
+                    <b-form-input
+                            id="number_confirmation"
+                            name="number_confirmation"
+                            type="text"
+                            autocomplete="off"
+                            v-model="form.number_confirmation"
+                    >
+                    </b-form-input>
+                    <input-help :form="form" field="number_confirmation" text="Re-enter your credit card number"></input-help>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <b-row>
             <b-col lg="5">
                 <b-form-group label="CVV" label-for="cvv">
                     <b-form-input
@@ -48,7 +63,6 @@
                 </b-form-group>
             </b-col>
         </b-row>
-
         <b-form-group label="Card Expiration" label-for="">
             <b-row>
                 <b-col lg="6">
@@ -78,6 +92,7 @@
 <script>
     export default {
         props: {
+            'submitUrl': '',
             'client': {},
             'card': {},
             'source': {},
@@ -92,21 +107,11 @@
                     nickname: this.card.nickname,
                     name_on_card: this.card.name_on_card,
                     number: (this.card.last_four) ? '************ ' + this.card.last_four : '',
+                    number_confirmation: '',
                     expiration_month: _.padStart(this.card.expiration_month, 2, '0'),
                     expiration_year: this.card.expiration_year,
                     cvv: (this.card.last_four) ? '***' : '',
                 }),
-            }
-        },
-
-        computed: {
-            submitUrl() {
-                switch (this.$parent.role) {
-                    case 'client':
-                        return '/profile/payment/' + this.source;
-                    case 'office_user':
-                        return '/business/clients/' + this.client.id + '/payment/' + this.source
-                }
             }
         },
 
@@ -121,10 +126,17 @@
         methods: {
             submit() {
                 this.form.post(this.submitUrl)
+<<<<<<< HEAD
                     .then((response) => {
                         this.form.number = '************ ' + this.form.number.slice(-4);
                         this.form.cvv = '***';
                         this.$parent.typeMessage = response.data;
+=======
+                    .then(function(response) {
+                        component.form.number = '************ ' + component.form.number.slice(-4);
+                        component.form.number_confirmation = '';
+                        component.form.cvv = '***';
+>>>>>>> remotes/origin/ALLY-206-confirm-account-numbers-on-add
                     });
             }
         }
