@@ -15,7 +15,7 @@
                     <td>{{ (transaction.transaction_type === 'credit') ? 'Deposit' : 'Withdrawal/Charge' }}</td>
                 </tr>
                 <tr>
-                    <th>Amount</th>
+                    <th width="100">Amount</th>
                     <td>{{ moneyFormat(transaction.amount) }}</td>
                 </tr>
                 <tr v-if="transaction.deposit && transaction.deposit.adjustment">
@@ -60,6 +60,7 @@
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
+
         <b-row v-show="!loading">
             <b-col lg="12">
                 <b-card
@@ -71,10 +72,25 @@
                         <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                         <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                     </div>
+                    <b-row class="my-3">
+                        <b-col cols="6">
+                            <b-form-select v-model="filterClientId">
+                                <option value="">All Clients</option>
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-col>
+                        <b-col cols="6">
+                            <b-form-select v-model="filterCaregiverId">
+                                <option value="">All Caregivers</option>
+                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-col>
+                    </b-row>
+                    
                     <div class="table-responsive">
                         <b-table bordered striped hover show-empty
                                  :fields="shiftFields"
-                                 :items="shifts"
+                                 :items="filteredShifts"
                                  :sort-by.sync="sortBy"
                                  :sort-desc.sync="sortDesc"
                                  class="shift-table"
@@ -253,6 +269,8 @@
                 'queryString': '?transaction_id=' + this.transaction.id,
                 'showSummary': false,
                 'loading': false,
+                filterCaregiverId: '',
+                filterClientId: '',
             }
         },
 
@@ -260,6 +278,54 @@
             summaryButtonText() {
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
+
+            filteredShifts() {
+                let results = [];
+
+                this.shifts.forEach( (item) => {
+
+                    if (this.filterClientId != '' && this.filterClientId != item.client_id) {
+                        return;
+                    }
+
+                    if (this.filterCaregiverId != '' && this.filterCaregiverId != item.caregiver_id) {
+                        return;
+                    }
+
+                    results.push(item);
+                });
+
+                return results;
+            },
+
+            clients() {
+                let results = {};
+
+                this.shifts.forEach( (item) => {
+                    
+                    if (!results[item.client_id]) {
+                        results[item.client_id] = { id: item.client_id, name: item.client_name };
+                    }
+
+                });
+
+                return results;
+            },
+
+            caregivers() {
+                let results = {};
+
+                this.shifts.forEach( (item) => {
+                    
+                    if (!results[item.caregiver_id]) {
+                        results[item.caregiver_id] = { id: item.caregiver_id, name: item.caregiver_name };
+                    }
+
+                });
+
+                return results;
+            },
+
         },
 
         mounted() {
@@ -284,6 +350,7 @@
                             this.caregiverSummary = [];
                         }
                     });
+
                 axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -293,7 +360,8 @@
                             this.clientSummary = [];
                         }
                     });
-                axios.get(this.urlPrefix + 'shifts' + this.queryString)
+
+                axios.get(this.urlPrefix + 'shifts' + this.queryString + "&reconciliation_report=1")
                     .then(response => {
                         if (Array.isArray(response.data)) {
                             this.shifts = response.data;

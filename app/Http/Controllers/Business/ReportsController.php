@@ -507,7 +507,12 @@ class ReportsController extends BaseController
         }
 
         if ($request->input('transaction_id')) {
-            $report->forTransaction(GatewayTransaction::findOrFail($request->input('transaction_id')));
+            $transaction = GatewayTransaction::findOrFail($request->input('transaction_id'));
+            $report->forTransaction($transaction);
+            
+            if ($request->input('reconciliation_report')) {
+                $report->forReconciliationReport($transaction);
+            }
         }
 
         if ($request->has('payment_method')) {

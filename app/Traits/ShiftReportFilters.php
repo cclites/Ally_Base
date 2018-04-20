@@ -24,4 +24,12 @@ trait ShiftReportFilters
             $q->where('default_payment_type', $method_type);
         });
     }
+
+    public function forReconciliationReport(GatewayTransaction $transaction) {
+        $this->query()->whereHas('payment', function($q) use ($transaction) {
+            $q->where('payments.payment_type', 'ACH-P')
+                ->orWhere('shifts.provider_fee', '>', 0);
+        });
+    }
+
 }
