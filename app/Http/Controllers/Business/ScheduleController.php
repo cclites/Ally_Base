@@ -18,6 +18,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Client;
 
 class ScheduleController extends BaseController
 {
@@ -85,7 +86,7 @@ class ScheduleController extends BaseController
      * @throws \Exception
      */
     public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
-    {
+    {        
         if (!$this->businessHasClient($request->client_id)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
@@ -144,7 +145,7 @@ class ScheduleController extends BaseController
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      * @throws \Exception
      */
-    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
     {
         if (!$this->businessHasSchedule($schedule)) {
             return new ErrorResponse(403, 'You do not have access to this schedule.');
@@ -158,7 +159,16 @@ class ScheduleController extends BaseController
             return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
         }
 
+        $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
+        $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
+        $client = Client::find($schedule->client_id);
+        if (!$request->override_max_hours && $newTotalHours > $client->max_weekly_hours) {
+            $e = new MaximumWeeklyHoursExceeded('The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.');        
+            return new ErrorResponse($e->getStatusCode(), $e->getMessage());
+        }
+        
         $notes = $request->input('notes');
+
         if ($schedule->notes != $notes) {
             if (strlen($notes)) {
                 $note = ScheduleNote::create(['note' => $notes]);
@@ -208,77 +218,114 @@ class ScheduleController extends BaseController
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      * @throws \Exception
      */
-    public function bulkUpdate(BulkUpdateScheduleRequest $request)
+    public function bulkUpdate(BulkUpdateScheduleRequest $request, ScheduleAggregator $aggregator)
     {
-        $data = $request->getUpdateData();
         $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
         $schedules = $query->get();
+        $client = Client::find($request->client_id);
 
         if (!$schedules->count()) {
             return new ErrorResponse(400, 'No matching schedules could be found.');
         }
 
         $updatedNotes = [];
+        $weeks = [];
 
         /**
          * @var Schedule $schedule
          */
-        foreach($query->get() as $schedule) {
+        \DB::beginTransaction();
 
-            foreach($data as $field => $value) {
+        try {
+            foreach($query->get() as $schedule) {
 
-                switch($field) {
+                // get week range for schedule
+                $weekStart = $schedule->starts_at->copy()->startOfWeek();
+                $weekEnd = $schedule->starts_at->copy()->endOfWeek();
+                $range = $weekStart->format('Ymd') . "-" . $weekEnd->format('Ymd');
+                $weeks[$range] = $weekStart;
 
-                    case 'new_start_time':
-                        $parts = explode(':', $value);
-                        $schedule->starts_at = $schedule->starts_at->setTime((int) $parts[0], (int) $parts[1]);
-                        break;
-
-                    case 'new_note_method':
-                        $text = $data['new_note_text'];
-                        if (!strlen($text)) {
-                            break;
-                        }
-                        if (!$schedule->note_id) {
-                            $schedule->note_id = 0;
-                        }
-                        if (!isset($updatedNotes[$schedule->note_id])) {
-                            $notes = '';
-                            if ($value == 'append') {
-                                $notes .= $schedule->notes . "\n\n";
-                            }
-                            $notes .= $text;
-                            $note = ScheduleNote::create(['note' => $notes]);
-                            $updatedNotes[$schedule->note_id] = $note;
-                        }
-                        $schedule->attachNote($updatedNotes[$schedule->note_id]);
-                        break;
-
-                    case 'new_note_text':
-                        // handled above
-                        break;
-
-                    case 'new_overtime_duration':
-                        if ($value == -1) {
-                            $schedule->overtime_duration = $schedule->duration;
-                            break;
-                        }
-                        $schedule->overtime_duration = $value;
-                        break;
-
-                    default:
-                        $field = substr($field, 4);
-                        $schedule->$field = $value;
-                }
-
-                // Save the updated schedule details
+                $schedule = $this->updateScheduleWithNewValues($schedule, $request->getUpdateData(), $updatedNotes);
                 $schedule->save();
-
             }
 
+            // enumerate week ranges
+            foreach ($weeks as $range => $date) {
+                $total = $aggregator->getTotalScheduledHoursForWeekOf($date, $client->id);
+
+                if ($total > $client->max_weekly_hours) {
+                    throw new MaximumWeeklyHoursExceeded('Schedule NOT updated because the changes would violate the Max Hours in the Client Record. Please see the Max Hours/Service Orders in the client record.');
+                }
+            }
+        }
+        catch (MaximumWeeklyHoursExceeded $e) {
+            \DB::rollBack();
+            return new ErrorResponse($e->getStatusCode(), $e->getMessage());
         }
 
+        \DB::commit();
+
         return new SuccessResponse('Matching schedules have been updated.');
+    }
+
+    /**
+     * Handle bulk updating all schedule fields.
+     *
+     * @param [type] $schedule
+     * @param [type] $newData
+     * @param [type] $updatedNotes
+     * @return void
+     */
+    public function updateScheduleWithNewValues($schedule, $newData, &$updatedNotes)
+    {
+        foreach($newData as $field => $value) {
+
+            switch($field) {
+
+                case 'new_start_time':
+                    $parts = explode(':', $value);
+                    $schedule->starts_at = $schedule->starts_at->setTime((int) $parts[0], (int) $parts[1]);
+                    break;
+
+                case 'new_note_method':
+                    $text = $newData['new_note_text'];
+                    if (!strlen($text)) {
+                        break;
+                    }
+                    if (!$schedule->note_id) {
+                        $schedule->note_id = 0;
+                    }
+                    if (!isset($updatedNotes[$schedule->note_id])) {
+                        $notes = '';
+                        if ($value == 'append') {
+                            $notes .= $schedule->notes . "\n\n";
+                        }
+                        $notes .= $text;
+                        $note = ScheduleNote::create(['note' => $notes]);
+                        $updatedNotes[$schedule->note_id] = $note;
+                    }
+                    $schedule->attachNote($updatedNotes[$schedule->note_id]);
+                    break;
+
+                case 'new_note_text':
+                    // handled above
+                    break;
+
+                case 'new_overtime_duration':
+                    if ($value == -1) {
+                        $schedule->overtime_duration = $schedule->duration;
+                        break;
+                    }
+                    $schedule->overtime_duration = $value;
+                    break;
+
+                default:
+                    $field = substr($field, 4);
+                    $schedule->$field = $value;
+            }
+        }
+
+        return $schedule;
     }
 
     /**

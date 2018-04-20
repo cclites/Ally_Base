@@ -155,6 +155,22 @@ class ScheduleAggregator
         });
     }
 
+    /**
+     * Gets the sum of hours of all the schedules during the  
+     * week of the given date for the given client id.
+     *
+     * @param Carbon $date
+     * @param int $client_id
+     * @return float
+     */
+    public function getTotalScheduledHoursForWeekOf(Carbon $date, $client_id)
+    {
+        $weekStart = $date->copy()->startOfWeek();
+        $weekEnd = $date->copy()->endOfWeek();
+        $schedules = $this->fresh()
+            ->where('client_id', $client_id)
+            ->getSchedulesStartingBetween($weekStart, $weekEnd);
 
-
+        return $schedules->sum('duration') / 60;
+    }
 }

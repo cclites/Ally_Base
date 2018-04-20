@@ -269,14 +269,10 @@ class ScheduleCreator
             $this->maxHours = Client::find($this->data['client_id'])->max_weekly_hours ?? 999;
         }
 
-        $weekStart = $date->copy()->startOfWeek();
-        $weekEnd = $date->copy()->endOfWeek();
-        $schedules = $this->scheduleAggregator->fresh()
-                                              ->where('client_id', $this->data['client_id'])
-                                              ->getSchedulesStartingBetween($weekStart, $weekEnd);
+        $totalHours = $this->scheduleAggregator->getTotalScheduledHoursForWeekOf($date, $this->data['client_id']);
 
-        if (($schedules->sum('duration') / 60) > $this->maxHours) {
-            throw new MaximumWeeklyHoursExceeded('The week of ' . $weekStart->toDateString() . ' exceeds the maximum allowed hours for this client.');
+        if ($totalHours > $this->maxHours) {
+            throw new MaximumWeeklyHoursExceeded('The week of ' . $date->toDateString() . ' exceeds the maximum allowed hours for this client.');
         }
     }
 
