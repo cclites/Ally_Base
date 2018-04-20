@@ -79,7 +79,7 @@ class CronSyncStaging extends Command
         }
 
         // Update admin password
-        User::find(138)->changePassword('StagingAdmin!@');
+        User::find(138)->changePassword(env('STAGING_ADMIN_PASSWORD', 'StagingAdmin!@'));
 
         // Re-run migrations
         \Artisan::call('migrate');
