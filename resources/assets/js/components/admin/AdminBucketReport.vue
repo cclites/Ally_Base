@@ -37,6 +37,11 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
             >
+                <template slot="payment_sum" scope="row">
+                    <a href="javascript:void(0);" v-b-popover.focus.html="popoverContents(row)" title="Payment Breakdown">
+                        {{ row.item.payment_sum }} <i class="fa fa-external-link"></i>
+                    </a>
+                </template>
                 <template slot="show_details" scope="row">
                     <b-btn @click.stop="row.toggleDetails" size="sm">
                         Deposit Payment Breakdown
@@ -154,7 +159,7 @@
                 detailsModal: false,
                 dateShiftsModal: false,
                 dateShifts: [],
-                selectedItem: {}
+                selectedItem: { client: {}, }
             }
         },
 
@@ -190,6 +195,9 @@
             viewShift(shift) {
                 this.detailsModal = true;
                 this.selectedItem = shift;
+            },
+            popoverContents(row) {
+                return `ACH: ${this.numberFormat(row.item.payment_breakdown.ach)}<br />CC: ${this.numberFormat(row.item.payment_breakdown.cc)}<br />Total: ${this.numberFormat(row.item.payment_sum)}`
             }
         }
     }

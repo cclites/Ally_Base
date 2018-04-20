@@ -97,11 +97,22 @@ class AdminBucketReport extends BaseReport
 
     function paymentsForDate($date)
     {
-        $payment = Payment::where('success', 1)
-            ->select(\DB::raw('count(*) as payment_count, sum(amount) as payment_sum'))
-            ->whereDate('created_at', $date)
-            ->first();
+        $query = Payment::where('success', 1)
+            ->select(\DB::raw('sum(amount) as payment_sum'))
+            ->whereDate('created_at', $date);
 
-        return $payment->toArray();
+        $payment = (clone $query)->addSelect(\DB::raw('count(*) as payment_count'))->first();
+        $ach = (clone $query)->whereIn('payment_type', ['ACH', 'ACH-P'])->value('payment_sum');
+        $cc = (clone $query)->whereIn('payment_type', ['CC', 'AMEX'])->value('payment_sum');
+
+        $array = $payment->toArray();
+        $array += [
+            'payment_breakdown' => [
+                'ach' => (float) $ach,
+                'cc' => (float) $cc
+            ]
+        ];
+
+        return $array;
     }
 }
