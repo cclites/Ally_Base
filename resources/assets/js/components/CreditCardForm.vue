@@ -126,17 +126,11 @@
         methods: {
             submit() {
                 this.form.post(this.submitUrl)
-<<<<<<< HEAD
                     .then((response) => {
                         this.form.number = '************ ' + this.form.number.slice(-4);
+                        this.form.number_confirmation = '';
                         this.form.cvv = '***';
                         this.$parent.typeMessage = response.data;
-=======
-                    .then(function(response) {
-                        component.form.number = '************ ' + component.form.number.slice(-4);
-                        component.form.number_confirmation = '';
-                        component.form.cvv = '***';
->>>>>>> remotes/origin/ALLY-206-confirm-account-numbers-on-add
                     });
             }
         }

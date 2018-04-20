@@ -4,19 +4,15 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-<<<<<<< HEAD
-        <b-row :class="{ 'mb-3' : hasMetrics }">
-            <b-col v-if="hasMetrics">First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
-            <b-col v-if="hasMetrics">Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
-            <b-col v-if="hasMetrics">Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
-=======
         <b-row v-if="restricted">
             <b-col lg="12" class="text-center">
                 Please Contact Ally
             </b-col>
         </b-row>
-        <b-row v-if="!restricted">
->>>>>>> remotes/origin/ALLY-206-confirm-account-numbers-on-add
+        <b-row :class="{ 'mb-3' : hasMetrics }">
+            <b-col v-if="hasMetrics">First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
+            <b-col v-if="hasMetrics">Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
+            <b-col v-if="hasMetrics">Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
             <b-col class="text-right hidden-xs-down">
                 <b-btn @click="deleteMethod()">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
@@ -32,13 +28,8 @@
                     >
                     </b-form-select>
                 </b-form-group>
-<<<<<<< HEAD
-                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :key="existing_card.id" />
-                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id" />
-=======
                 <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :submit-url="submitUrl" :key="existing_card.id" />
                 <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id"/>
->>>>>>> remotes/origin/ALLY-206-confirm-account-numbers-on-add
                 <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="submitUrl"/>
                 <span class="hidden-sm-up">
                     <b-btn @click="deleteMethod()">Delete This Payment Method</b-btn>
@@ -125,18 +116,17 @@
                         return '/business/clients/' + this.client.id + '/payment/' + this.source;
                 }
             },
-<<<<<<< HEAD
 
             hasMetrics() {
                 return this.role !== 'client'
                     && this.type !== 'provider'
                     && this.method.charge_metrics;
             },
-=======
+
             restricted() {
                 return this.role == 'client' && this.type == 'provider';
             }
->>>>>>> remotes/origin/ALLY-206-confirm-account-numbers-on-add
+
         },
 
         methods: {
