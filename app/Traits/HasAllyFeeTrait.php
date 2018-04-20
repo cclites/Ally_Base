@@ -4,6 +4,8 @@
 namespace App\Traits;
 
 
+use App\Shifts\CostCalculator;
+
 trait HasAllyFeeTrait
 {
     /**
@@ -14,8 +16,8 @@ trait HasAllyFeeTrait
      */
     public function getAllyFee($paymentAmount)
     {
-        $amount = bcmul($paymentAmount, $this->getAllyPercentage(), 2);
-        return (float) $amount;
+        $amount = bcmul($paymentAmount, $this->getAllyPercentage(), CostCalculator::DEFAULT_SCALE);
+        return (float) round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
     }
 
     /**
