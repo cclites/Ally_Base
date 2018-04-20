@@ -97,10 +97,17 @@ class GatewayTransaction extends Model
      */
     public function foundFailure()
     {
+        // If the transaction has already been marked as failed, return
+        if (! $this->success) {
+            return true;
+        }
+
+        // If a failed transaction record already exists, return
         if ($this->failedTransaction) {
             return true;
         }
 
+        // If a failed transaction record has already been marked successful, return
         if ($failedTransaction = $this->failedTransaction()->withTrashed()->first()) {
             $failedTransaction->restore();
             $failedTransaction->touch();
