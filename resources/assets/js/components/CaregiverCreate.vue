@@ -119,6 +119,15 @@
                 </b-col>
             </b-row>
         </form>
+        <b-modal id="duplicateWarning" title="Potential Duplicate Found" v-model="duplicateModal">
+            <b-container fluid>
+                <h4>{{ duplicateWarning }}  Do you want to continue anyways?</h4>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="duplicateWarning=null">No, Cancel</b-btn>
+                <b-btn variant="success" @click="saveProfileWithOverride()">Yes, Continue</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
@@ -146,8 +155,13 @@
                     password_confirmation: null,
                     title: null,
                     no_email: false,
-                })
+                }),
+                duplicateWarning: null
             }
+        },
+
+        computed: {
+            duplicateModal() { return !!this.duplicateWarning },
         },
 
         created() {
@@ -169,9 +183,25 @@
                 }
             },
 
-            saveProfile() {
-                this.form.post('/business/caregivers');
+            async saveProfile() {
+                try {
+                    await this.form.post('/business/caregivers');
+                }
+                catch(error) {
+                    switch(error.response.status) {
+                        case 449:
+                            this.duplicateWarning = error.response.data.message;
+                            break;
+                    }
+                }
+            },
+
+            saveProfileWithOverride() {
+                this.duplicateWarning = null;
+                this.form.override = true;
+                return this.saveProfile();
             }
+
         }
     }
 </script>

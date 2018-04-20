@@ -7,6 +7,7 @@ use App\CaregiverApplication;
 use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -69,7 +70,7 @@ class CaregiverController extends BaseController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @return CreatedResponse|ErrorResponse
+     * @return \Illuminate\Http\Response
      * @throws \Exception
      */
     public function store(Request $request)
@@ -85,6 +86,15 @@ class CaregiverController extends BaseController
             'title' => 'required',
         ]);
 
+        // Look for duplicates in the current business
+        if (!$request->override && $duplicate = $this->business()->checkForDuplicateUser($request->firstname, $request->lastname, $request->email, 'caregiver')) {
+            if ($duplicate == 'email') {
+                return new ConfirmationResponse('There is already a caregiver with the email address ' . $request->email . '.');
+            }
+            return new ConfirmationResponse('There is already a caregiver with the name ' . $request->firstname . ' ' . $request->lastname . '.');
+        }
+
+        // Format data for insertion
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt($data['password'] ?? str_random());
 
