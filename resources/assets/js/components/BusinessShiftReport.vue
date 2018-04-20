@@ -48,15 +48,23 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading < 2"></loading-card>
+        <loading-card v-show="loading != 1 && loading != 5"></loading-card>
 
-        <shift-history-summaries v-show="showSummary && loading >= 2"
+        <shift-history-summaries v-show="showSummary && loading >= 5"
                                  :client-charges="items.clientCharges"
                                  :caregiver-payments="items.caregiverPayments"
                                  :admin="admin"
         />
 
-        <b-row v-show="loading >= 2">
+        <b-row v-show="loading == 1">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <b-row v-show="loading >= 5">
             <b-col lg="12">
                 <b-card
                         header="Shifts"
@@ -199,8 +207,7 @@
         mounted() {
             this.setInitialFields();
             this.loadFiltersData();
-            this.loadData();
-            console.log(this.businessSettings());
+            this.loading = 1;
         },
 
         computed: {
@@ -328,7 +335,7 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
-                this.loading = 0;
+                this.loading = 2;
 
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
