@@ -28,6 +28,7 @@ class CreateScheduleRequest extends FormRequest
             'interval_type' => 'nullable|in:weekly,biweekly,monthly,bimonthly',
             'recurring_end_date' => 'nullable|integer|min:' . (int) $this->input('starts_at') . '|max:' . $maxDate->getTimestamp(),
             'bydays' => 'required_if:interval_type,weekly,biweekly|array',
+            'care_plan_id' => 'nullable|exists:care_plans,id',
         ];
     }
 

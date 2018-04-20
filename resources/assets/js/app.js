@@ -92,6 +92,7 @@ Vue.component('admin-financial-summary', require('./components/admin/reports/Fin
 Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
+Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
@@ -129,9 +130,6 @@ Vue.component('caregiver-application-edit', require('./components/caregivers/Car
 Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
 
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
-
-Vue.component('care-plan-edit', require('./components/CarePlanEdit.vue'));
-Vue.component('care-plan-list', require('./components/CarePlanList.vue'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

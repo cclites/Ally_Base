@@ -65,7 +65,7 @@
                                     >
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Clients</option>
-                                        <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text=""/>
                                 </b-form-group>
@@ -79,7 +79,7 @@
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Caregivers</option>
                                         <option value="0">Unassigned</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text=""/>
                                 </b-form-group>
@@ -94,7 +94,7 @@
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">All Days</span>
                                     </label>
-                                    <label class="custom-control custom-checkbox" v-for="day in daysOfWeek">
+                                    <label class="custom-control custom-checkbox" v-for="day in daysOfWeek" :key="day">
                                         <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="form.bydays" :value="day">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">{{ day }}</span>
@@ -190,16 +190,30 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col>
+                            <b-col sm="6">
                                 <b-form-group label="Caregiver" label-for="new_caregiver_id">
                                     <b-form-select id="new_caregiver_id"
                                                    v-model="form.new_caregiver_id"
                                     >
                                         <option value="">No Change</option>
                                         <option value="0">Unassigned</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="new_caregiver_id" text=""/>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6">
+                                <b-form-group label="Care Plan" label-for="new_care_plan_id">
+                                    <b-form-select
+                                            id="new_care_plan_id"
+                                            name="new_care_plan_id"
+                                            v-model="form.new_care_plan_id"
+                                    >
+                                        <option value="">No Change</option>
+                                        <option value="0">No Care Plan</option>
+                                        <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                    <input-help :form="form" field="new_care_plan_id" text="" />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -311,6 +325,7 @@
                     caregiver_id: (this.caregiverId > 0),
                     client_id: (this.clientId > 0),
                 },
+                care_plans: [],
             }
         },
 
@@ -367,6 +382,7 @@
                     'new_overtime_duration': '',
                     'new_caregiver_id': '',
                     'new_caregiver_rate': '',
+                    'new_care_plan_id': '',
                     'new_provider_fee': '',
                     'new_note_method': '',
                     'new_note_text': '',
@@ -436,7 +452,7 @@
             },
 
             loadData() {
-                axios.get('/business/clients/list')
+                axios.get('/business/clients/list?care_plans=1')
                     .then(response => {
                         this.clients = response.data;
                     });
@@ -446,6 +462,17 @@
                     });
             },
 
+            loadCarePlans(client_id) {
+                this.form.new_care_plan_id = '';
+                let index = this.clients.findIndex(item => item.id == client_id);
+                if (index > -1) {
+                    console.log(this.clients[index]);
+                    this.care_plans = this.clients[index].care_plans;
+                    return;
+                }
+                console.log('no plans available');
+                this.care_plans = [];
+            },
         },
 
         watch: {
@@ -517,7 +544,12 @@
                     // If the previous value was every day of the week, uncheck All Days
                     this.selectAllDays = false;
                 }
-            }
+            },
+            
+            'form.client_id': function(val) {
+                this.loadCarePlans(val);
+            },
+
         }
     }
 </script>

@@ -112,7 +112,8 @@ class Schedule extends Model
 
     public function carePlan()
     {
-        return $this->belongsTo(CarePlan::class);
+        return $this->belongsTo(CarePlan::class)
+            ->with('activities');
     }
 
     public function note()

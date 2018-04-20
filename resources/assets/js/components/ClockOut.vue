@@ -13,7 +13,7 @@
                     <h5>Recommended Care Plan Activities</h5>
                     <div class="form-check">
                         <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
-                        <label class="custom-control custom-checkbox" v-for="activity in carePlanActivities()" style="clear: left; float: left;">
+                        <label class="custom-control custom-checkbox" v-for="activity in carePlanActivities()" :key="activity.id" style="clear: left; float: left;">
                             <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
@@ -21,12 +21,18 @@
                     </div>
                 </b-col>
             </b-row>
+            <b-row v-if="carePlanNotes">
+                <b-col lg="12" class="with-padding-bottom">
+                    <h5>Care Plan Notes</h5>
+                    <p v-html="carePlanNotes"></p>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="12">
                     <h5>Additional Activities Performed</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in additionalActivities()" style="clear: left; float: left;">
+                            <label class="custom-control custom-checkbox" v-for="activity in additionalActivities()" :key="activity.id"  style="clear: left; float: left;">
                                 <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
@@ -213,12 +219,28 @@
                 return activities.filter(function(activity) {
                     return (component.carePlanActivityIds.findIndex(item => item === activity.id) === -1);
                 });
-            }
+            },
+
+            nl2br(val) {
+                if (!val || val.length === 0) {
+                    return null;
+                }
+
+                return (val + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br/>' + '$2');
+            },
         },
 
         computed: {
             time() {
                 return moment().local().format('LT');
+            },
+
+            carePlanNotes() {
+                if (!this.shift || !this.shift.schedule || !this.shift.schedule.care_plan) {
+                    return null;
+                }
+
+                return this.nl2br(this.shift.schedule.care_plan.notes);
             }
         }
     }

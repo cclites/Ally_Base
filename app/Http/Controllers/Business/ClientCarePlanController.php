@@ -6,29 +6,21 @@ use App\CarePlan;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
+use App\Client;
 
-class CarePlanController extends BaseController
+class ClientCarePlanController extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, Client $client)
     {
-        $plans = $this->business()->carePlans()->orderBy('name')->get();
-
-        if ($request->expectsJson()) {
-            return $plans;
-        }
-
-        return view('business.care_plans.index', compact('plans'));
-    }
-
-    public function create()
-    {
-        $activities = $this->business()->allActivities();
-        return view('business.care_plans.create', compact('activities'));
+        return $client->carePlans()
+            ->withCount('futureSchedules')
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -37,12 +29,13 @@ class CarePlanController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Client $client)
     {
         $data = $request->validate(
             [
                 'name' => 'required',
                 'activities' => 'required|array|min:1',
+                'notes' => 'nullable',
             ],
             [
                 'activities.required' => 'You must select at least 1 activity.',
@@ -50,34 +43,24 @@ class CarePlanController extends BaseController
             ]
         );
 
-        $plan = new CarePlan(['name' => $data['name']]);
-        if ($this->business()->carePlans()->save($plan)) {
+        $plan = new CarePlan([
+            'name' => $data['name'],
+            'business_id' => $this->business()->id,
+        ]);
+
+        if (isset($data['notes']) && strlen($data['notes'])) {
+            $plan->notes = $data['notes'];
+        }
+
+        if ($client->carePlans()->save($plan)) {
+
             $plan->activities()->sync($data['activities']);
-            return new SuccessResponse('The care plan has been created.', $plan->toArray(), route('business.care_plans.show', [$plan->id]));
+
+            return new SuccessResponse('The care plan has been created.', $plan->load('activities')->toArray());
+
         }
+
         return new ErrorResponse(500, 'Unable to create care plan.');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\CarePlan  $carePlan
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Request $request, CarePlan $carePlan)
-    {
-        if ($carePlan->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this care plan.');
-        }
-
-        $carePlan->load('activities');
-
-        if ($request->expectsJson()) {
-            return $carePlan;
-        }
-
-        $activities = $this->business()->allActivities();
-        return view('business.care_plans.show', ['plan' => $carePlan, 'activities' => $activities]);
     }
 
     /**
@@ -87,7 +70,7 @@ class CarePlanController extends BaseController
      * @param  \App\CarePlan  $carePlan
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CarePlan $carePlan)
+    public function update(Request $request, Client $client, CarePlan $carePlan)
     {
         if ($carePlan->business_id != $this->business()->id) {
             return new ErrorResponse(403, 'You do not have access to this care plan.');
@@ -97,6 +80,7 @@ class CarePlanController extends BaseController
             [
                 'name' => 'required',
                 'activities' => 'required|array|min:1',
+                'notes' => 'nullable',
             ],
             [
                 'activities.required' => 'You must select at least 1 activity.',
@@ -104,10 +88,19 @@ class CarePlanController extends BaseController
             ]
         );
 
-        if ($carePlan->update(['name' => $data['name']])) {
+        $updates = [
+            'name' => $data['name'],
+            'notes' => strlen($data['notes']) ? $data['notes'] : null,
+        ];
+
+        if ($carePlan->update($updates)) {
+
             $carePlan->activities()->sync($data['activities']);
-            return new SuccessResponse('The care plan has been updated.', $carePlan->toArray());
+
+            return new SuccessResponse('The care plan has been updated.', $carePlan->load('activities')->toArray());
+
         }
+
         return new ErrorResponse(500, 'The care plan could not be saved.');
     }
 
@@ -117,13 +110,15 @@ class CarePlanController extends BaseController
      * @param  \App\CarePlan  $carePlan
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CarePlan $carePlan)
+    public function destroy(Client $client, CarePlan $carePlan)
     {
         if ($carePlan->business_id != $this->business()->id) {
             return new ErrorResponse(403, 'You do not have access to this care plan.');
         }
 
         if ($carePlan->delete()) {
+            $carePlan->removeFromFutureSchedules();
+
             return new SuccessResponse('The care plan has been archived.');
         }
         return new ErrorResponse(500, 'The care plan could not be archived.');

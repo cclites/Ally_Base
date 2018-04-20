@@ -25,6 +25,7 @@ class UpdateScheduleRequest extends FormRequest
             'notes' => 'nullable|max:1024',
             'hours_type' => 'required|in:default,overtime,holiday',
             'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
+            'care_plan_id' => 'nullable|exists:care_plans,id',
         ];
     }
 

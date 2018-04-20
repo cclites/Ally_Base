@@ -21,7 +21,7 @@
                                             required
                                     >
                                         <option value="">--Select a Client--</option>
-                                        <option v-for="item in clients" :value="item.id">{{ item.name }}</option>
+                                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text="Select the client for this schedule." />
                                 </b-form-group>
@@ -34,7 +34,7 @@
                                             v-model="form.caregiver_id"
                                     >
                                         <option value="">--Not Assigned--</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
                                 </b-form-group>
@@ -112,7 +112,7 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col lg="12">
+                            <b-col sm="6">
                                 <b-form-group label="Special Shift Designation" label-for="hours_type">
                                     <b-form-select
                                             id="hours_type"
@@ -127,6 +127,19 @@
                                     <small class="form-text text-info" v-if="specialHoursChange">
                                         Be sure to update the caregiver's rates to reflect this special designation.
                                     </small>
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6">
+                                <b-form-group label="Care Plan" label-for="care_plan_id">
+                                    <b-form-select
+                                            id="care_plan_id"
+                                            name="care_plan_id"
+                                            v-model="form.care_plan_id"
+                                    >
+                                        <option value="">--No Care Plan--</option>
+                                        <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                    </b-form-select>
+                                    <input-help :form="form" field="care_plan_id" text="" />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -150,7 +163,7 @@
                                 <div v-if="form.interval_type">
                                     <div class="form-check" v-show="form.interval_type === 'weekly' || form.interval_type === 'biweekly'">
                                         <input-help :form="form" field="bydays" text="Select the days of the week below." />
-                                        <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek">
+                                        <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek" :key="item">
                                             <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="form.bydays" :value="item">
                                             <span class="custom-control-indicator"></span>
                                             <span class="custom-control-description">{{ index }}</span>
@@ -251,6 +264,7 @@
                 paymentType: 'NONE',
                 caregivers: [],
                 clients: [],
+                care_plans: [],
                 daysOfWeek: {
                     'Sunday': 'su',
                     'Monday': 'mo',
@@ -299,6 +313,7 @@
                         'notes': this.copiedSchedule.notes,
                         'hours_type': this.copiedSchedule.hours_type,
                         'overtime_duration': this.copiedSchedule.overtime_duration,
+                        'care_plan_id': this.copiedSchedule.care_plan_id || '',
                     }
                 }
                 return this.initialValues;
@@ -361,6 +376,7 @@
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
+                    'care_plan_id': "",
                     ...this.defaultValues
                 });
                 if (this.form.starts_at) {
@@ -379,6 +395,7 @@
                     'notes': this.selectedSchedule.notes,
                     'hours_type': this.selectedSchedule.hours_type,
                     'overtime_duration': this.selectedSchedule.overtime_duration,
+                    'care_plan_id': this.selectedSchedule.care_plan_id || '',
                 });
                 this.setDateTimeFromEvent(moment(this.selectedSchedule.starts_at, 'X'));
             },
@@ -476,7 +493,7 @@
             loadClientData() {
                 if (!this.client_id) {
                     let component = this;
-                    axios.get('/business/clients/list')
+                    axios.get('/business/clients/list?care_plans=1')
                         .then(response => {
                             component.clients = response.data;
                             this.loadCaregivers();
@@ -550,7 +567,19 @@
                     // (fix for tabs within tabs)
                     this.activeTab = 0;
                 });
-            }
+            },
+
+            loadCarePlans(client_id, old_val) {
+                if (this.form.care_plan_id && old_val) {
+                    this.form.care_plan_id = '';
+                }
+                let index = this.clients.findIndex(item => item.id == client_id);
+                if (index > -1) {
+                    this.care_plans = this.clients[index].care_plans;
+                    return;
+                } 
+                this.care_plans = [];
+            },
         },
 
         watch: {
@@ -585,7 +614,8 @@
                 this.setDateTimeFromEvent();
             },
 
-            'form.client_id': function(val) {
+            'form.client_id': function(val, old_val) {
+                this.loadCarePlans(val, old_val);
                 this.loadAllyPctFromClient(val);
                 this.loadCaregivers();
             },
