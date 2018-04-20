@@ -80,6 +80,7 @@ Route::group([
     Route::get('reports/scheduled_payments', 'Caregivers\ReportsController@scheduled')->name('caregivers.reports.scheduled');
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 
+    Route::post('/profile/bank-account', 'ProfileController@bankAccount');
 });
 
 Route::group([

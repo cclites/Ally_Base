@@ -13,9 +13,12 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
+use App\Traits\Request\BankAccountRequest;
 
 class ProfileController extends Controller
 {
+    use BankAccountRequest;
+
     public function index()
     {
         $type = auth()->user()->role_type;
@@ -108,6 +111,19 @@ class ProfileController extends Controller
             return response()->json($paymentTypeMessage);
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
+    }
+
+    public function bankAccount(Request $request)
+    {
+        $caregiver = $request->user()->role;
+
+        $existing = $caregiver->bankAccount;
+        $account = $this->validateBankAccount($request, $existing);
+        
+        if ($caregiver->setBankAccount($account)) {
+            return new SuccessResponse('The bank account has been saved.');
+        }
+        return new ErrorResponse(500, 'The bank account could not be saved.');
     }
 
     public function destroyPaymentMethod($type) {
