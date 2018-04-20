@@ -7,6 +7,7 @@ use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
+use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
@@ -278,7 +279,7 @@ class ScheduleController extends BaseController
         }
         catch (MaximumWeeklyHoursExceeded $e) {
             \DB::rollBack();
-            return new ErrorResponse($e->getStatusCode(), $e->getMessage());
+            return new ConfirmationResponse($e->getMessage());
         }
 
         \DB::commit();

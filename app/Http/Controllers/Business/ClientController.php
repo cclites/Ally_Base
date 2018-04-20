@@ -8,6 +8,7 @@ use App\Http\Controllers\PhoneController;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
+use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -91,8 +92,9 @@ class ClientController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Contracts\Support\Responsable
+     * @throws \Exception
      */
     public function store(Request $request)
     {
@@ -110,6 +112,15 @@ class ClientController extends BaseController
             ]
         );
 
+        // Look for duplicates in the current business
+        if (!$request->override && $duplicate = $this->business()->checkForDuplicateUser($request->firstname, $request->lastname, $request->email, 'client')) {
+            if ($duplicate == 'email') {
+                return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
+            }
+            return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
+        }
+
+        // Format data for insertion
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         $data['password'] = bcrypt(random_bytes(32));

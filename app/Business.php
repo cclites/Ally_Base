@@ -335,4 +335,41 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
                     ->orderBy('created_at')
                     ->get();
     }
+
+    /**
+     * Check to see if a user with the same name or email has already been entered
+     *
+     * @param string $firstname
+     * @param string $lastname
+     * @param string|null $email
+     * @param string|null $role
+     *
+     * @return false|string   Returns the matching field or false for no duplicates
+     */
+    public function checkForDuplicateUser($firstname, $lastname, $email = null, $role = null)
+    {
+        $ids = [];
+        if (!$role || $role === 'caregiver') {
+            $ids = array_merge($ids, $this->caregivers()->pluck('caregiver_id')->toArray());
+        }
+        if (!$role || $role === 'client') {
+            $ids = array_merge($ids, $this->clients()->pluck('id')->toArray());
+        }
+
+        if ($email) {
+            $matching = User::where('email', $email)->get();
+            if ($matching->whereIn('id', $ids)->count()) {
+                return 'email';
+            }
+        }
+
+        $matching = User::where('firstname', $firstname)
+            ->where('lastname', $lastname)
+            ->get();
+        if ($matching->whereIn('id', $ids)->count()) {
+            return 'name';
+        }
+
+        return false;
+    }
 }

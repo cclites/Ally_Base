@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Http\Requests\CreateScheduleRequest;
+use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -98,7 +99,7 @@ class ClientScheduleController extends BaseController
             if ($client->schedules()->save($schedule)) {
                 if ($this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
                     DB::rollBack();
-                    return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                    return new ConfirmationResponse('This update will result in the client\'s maximum weekly hours being exceeded');
                 }
                 DB::commit();
                 return new CreatedResponse('The new schedule has been successfully created.');
@@ -154,7 +155,7 @@ class ClientScheduleController extends BaseController
 
             if ($durationChanged && $this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
-                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                return new ConfirmationResponse('This update will result in the client\'s maximum weekly hours being exceeded');
             }
 
             DB::commit();
@@ -219,7 +220,7 @@ class ClientScheduleController extends BaseController
         if ($client->schedules()->save($schedule)) {
             if ($this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
-                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                return new ConfirmationResponse('This update will result in the client\'s maximum weekly hours being exceeded');
             }
             DB::commit();
             return new CreatedResponse('The single event has been created successfully.');
@@ -263,7 +264,7 @@ class ClientScheduleController extends BaseController
 
             if ($durationChanged && $this->weeklyHoursGreaterThanMax($schedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
-                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                return new ConfirmationResponse('This update will result in the client\'s maximum weekly hours being exceeded');
             }
 
             DB::commit();
@@ -285,7 +286,7 @@ class ClientScheduleController extends BaseController
 
             if ($this->weeklyHoursGreaterThanMax($newSchedule) && !$request->input('override_max_hours')) {
                 DB::rollBack();
-                return new ErrorResponse(449, 'This update will result in the client\'s maximum weekly hours being exceeded');
+                return new ConfirmationResponse('This update will result in the client\'s maximum weekly hours being exceeded');
             }
 
             DB::commit();
