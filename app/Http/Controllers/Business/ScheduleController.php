@@ -94,6 +94,20 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
+        // attach caregiver to client if relationship doesn't exist
+        $client = Client::findOrFail($request->client_id);
+        if ($request->caregiver_id && !$client->hasCaregiver($request->caregiver_id)) {
+            
+            $data = [
+                'caregiver_hourly_rate' => $request->caregiver_rate,
+                'provider_hourly_fee' => $request->provider_fee,
+            ];
+            $data = array_map('floatval', $data);
+
+            $client->caregivers()->syncWithoutDetaching([$request->caregiver_id => $data]);
+            
+        }
+
         $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
         $creator->startsAt($startsAt)
             ->duration($request->duration)

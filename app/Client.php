@@ -189,6 +189,19 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
                     ]);
     }
 
+    /**
+     * Determines if the given caregiver_id exists in the Client/Caregiver relationship.
+     *
+     * @param [type] $caregiver_id
+     * @return boolean
+     */
+    public function hasCaregiver($caregiver_id)
+    {
+        return $this->caregivers()
+            ->where('caregivers.id', $caregiver_id)
+            ->exists();
+    }
+
     public function defaultPayment()
     {
         return $this->morphTo('default_payment');
