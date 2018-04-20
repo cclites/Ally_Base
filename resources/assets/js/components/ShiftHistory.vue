@@ -1,45 +1,86 @@
 <template>
-    <b-card>
-        <b-row class="mb-2">
-            <b-col lg="6">
-            </b-col>
-            <b-col lg="6" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
-            </b-col>
-        </b-row>
+    <div>
+        <b-card>
+            <b-row>
+                <b-col lg="12">
+                    <b-card
+                            header="Select Date Range &amp; Filters"
+                            header-text-variant="white"
+                            header-bg-variant="info"
+                    >
+                        <b-form inline @submit.prevent="reloadData()">
+                            <date-picker
+                                    class="mb-1"
+                                    v-model="start_date"
+                                    placeholder="Start Date">
+                            </date-picker> &nbsp;to&nbsp;
+                            <date-picker
+                                    class="mb-1"
+                                    v-model="end_date"
+                                    placeholder="End Date">
+                            </date-picker>
+                            <b-form-select v-model="client_id" class="mx-1 mb-1">
+                                <option value="">All Clients</option>
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                            <b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
+                        </b-form>
+                    </b-card>
+                </b-col>
+            </b-row>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="shifts"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
-            >
-            </b-table>
-        </div>
+            <loading-card v-show="loading"></loading-card>
 
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
-    </b-card>
+            <div v-if="! loading" class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :current-page="currentPage"
+                        :per-page="perPage"
+                        :filter="filter"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                        @filtered="onFiltered"
+                >
+                    <template slot="actions" scope="row">
+                        <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View">
+                            <i class="fa fa-eye"></i>
+                        </b-btn>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
+        </b-card>
+
+        <!-- Details modal -->
+        <shift-details-modal v-model="detailsModal" :selected-item="selectedItem">
+            <template slot="buttons" scope="row">
+                <b-btn variant="default" @click="detailsModal=false">Close</b-btn>
+            </template>
+        </shift-details-modal>
+    </div>
 </template>
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
     import FormatsNumbers from '../mixins/FormatsNumbers';
+    import ShiftDetailsModal from "./modals/ShiftDetailsModal";
 
     export default {
+        components: {
+            ShiftDetailsModal,
+        },
+
         props: {
-            'shifts': {
+            'clients': {
                 default() {
                     return [];
                 }
@@ -50,6 +91,7 @@
 
         data() {
             return {
+                items: [],
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -58,7 +100,9 @@
                 editModalVisible: false,
                 filter: null,
                 modalDetails: { index:'', data:'' },
-                selectedItem: {},
+                selectedItem: {
+                    client: {}
+                },
                 fields: [
                     {
                         key: 'client_name',
@@ -78,7 +122,7 @@
                         sortable: true
                     },
                     {
-                        key: 'duration',
+                        key: 'hours',
                         label: 'Hours',
                         sortable: true
                     },
@@ -89,35 +133,78 @@
                         sortable: true
                     },
                     {
-                        key: 'activity_names',
-                        label: 'Activities'
-                    },
-                    {
+                        class: ['d-none', 'd-sm-none', 'd-md-table-cell', 'd-lg-table-cell', 'd-xl-table-cell'],
                         key: 'verified',
                         label: 'Verified',
                         sortable: true,
                         formatter: (value) => { return value ? 'Verified' : 'Unverified'; }
                     },
-                ]
+                    {
+                        key: 'actions',
+                        class: 'hidden-print',
+                        label: ' ',
+                    }
+                ],
+                client_id: '',
+                start_date: moment().startOf('month').format('MM/DD/YYYY'),
+                end_date: moment().endOf('month').format('MM/DD/YYYY'),
+                loading: true,
+                detailsModal: false,
             }
         },
 
         mounted() {
-            this.totalRows = this.items.length;
+            this.reloadData();
+        },
+
+        computed: {
+            queryString() {
+                return `?client_id=${this.client_id}&start_date=${this.start_date}&end_date=${this.end_date}`;
+            },
         },
 
         methods: {
-            details(item, index, button) {
-                this.selectedItem = item;
-                this.modalDetails.data = JSON.stringify(item, null, 2);
-                this.modalDetails.index = index;
-//                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
-                this.editModalVisible = true;
+            reloadData() {
+                this.loadData();
             },
+            
+            loadData() {
+                this.loading = true;
+
+                axios.get('/reports/shifts' + this.queryString)
+                    .then(response => {
+                        if (Array.isArray(response.data)) {
+                            this.items = response.data;
+                        }
+                        else {
+                            this.items = [];
+                        }
+                        this.loading = false;
+                        this.totalRows = this.items.length;
+                    });
+            },
+
+            details(item) {
+                let component = this;
+                axios.get('/shifts/' + item.id)
+                    .then(function(response) {
+                        let shift = response.data;
+                        shift.checked_in_time = moment.utc(shift.checked_in_time).local().format('L LT');
+                        shift.checked_out_time = moment.utc(shift.checked_out_time).local().format('L LT');
+                        component.selectedItem = shift;
+                        component.detailsModal = true;
+                        console.log(component.selectedItem);
+                    })
+                    .catch(function(error) {
+                        alert('Error loading shift details');
+                    });
+            },
+
             resetModal() {
                 this.modalDetails.data = '';
                 this.modalDetails.index = '';
             },
+
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;

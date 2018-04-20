@@ -3,5 +3,5 @@
 @section('title', 'Shift History')
 
 @section('content')
-    <shift-history :shifts="{{ $shifts }}"></shift-history>
+    <shift-history :clients="{{ $clients }}"></shift-history>
 @endsection

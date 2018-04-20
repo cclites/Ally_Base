@@ -24,22 +24,28 @@ class ReportsController extends Controller
 
     public function shifts()
     {
-        $shifts = auth()->user()->role
-            ->shifts()
-            ->with('activities')
-            ->whereNotNull('checked_out_time')
-            ->orderBy('checked_in_time', 'DESC')
-            ->get();
-        $shifts = $shifts->map(function ($shift) {
-            $shift->client_name = ($shift->client) ? $shift->client->name() : '';
-            $shift->activity_names = collect($shift->activities)
-                ->sortBy('name')
-                ->pluck('name')
-                ->implode(', ');
-            return $shift;
-        });
+        if (request()->expectsJson()) {
+            $report = new ShiftsReport();
+            $report->where('caregiver_id', auth()->user()->id)
+                    ->where('checked_out_time', '<>', null)
+                    ->orderBy('checked_in_time');
+    
+            if (request()->has('start_date') || request()->has('end_date')) {
+                $timezone = auth()->user()->role->businesses()->first()->timezone;
+                $startDate = new Carbon(request()->input('start_date') . ' 00:00:00', $timezone);
+                $endDate = new Carbon(request()->input('end_date') . ' 23:59:59', $timezone);
+                $report->between($startDate, $endDate);
+            }
 
-        return view('caregivers.reports.shifts', compact('shifts'));
+            if ($client_id = request()->input('client_id')) {
+                $report->where('client_id', $client_id);
+            }
+
+            return $report->rows();
+        }
+
+        $clients = auth()->user()->role->clients;
+        return view('caregivers.reports.shifts', compact('clients'));
     }
 
     public function paymentHistory()
