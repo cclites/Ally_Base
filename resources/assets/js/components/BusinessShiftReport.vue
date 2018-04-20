@@ -48,15 +48,15 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading != 1 && loading != 5"></loading-card>
+        <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
 
-        <shift-history-summaries v-show="showSummary && loading >= 5"
+        <shift-history-summaries v-show="showSummary && loaded >= 3"
                                  :client-charges="items.clientCharges"
                                  :caregiver-payments="items.caregiverPayments"
                                  :admin="admin"
         />
 
-        <b-row v-show="loading == 1">
+        <b-row v-show="loaded == -1">
             <b-col lg="12">
                 <b-card class="text-center text-muted">
                     Select filters and press Generate Report
@@ -64,7 +64,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-show="loading >= 5">
+        <b-row v-show="loaded >= 3">
             <b-col lg="12">
                 <b-card
                         header="Shifts"
@@ -199,7 +199,7 @@
                 ],
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
-                loading: 0,
+                loaded: -1,
                 charge_status: '',
             }
         },
@@ -207,7 +207,6 @@
         mounted() {
             this.setInitialFields();
             this.loadFiltersData();
-            this.loading = 1;
         },
 
         computed: {
@@ -335,7 +334,7 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
 
-                this.loading = 2;
+                this.loaded = 0;
 
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
@@ -345,7 +344,7 @@
                         else {
                             this.items.caregiverPayments = [];
                         }
-                        this.loading++;
+                        this.loaded++;
                     });
                 axios.get(this.urlPrefix + 'client_charges' + this.queryString)
                     .then(response => {
@@ -355,7 +354,7 @@
                         else {
                             this.items.clientCharges = [];
                         }
-                        this.loading++;
+                        this.loaded++;
                     });
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
@@ -365,7 +364,7 @@
                         else {
                             this.items.shifts = [];
                         }
-                        this.loading++;
+                        this.loaded++;
                     });
             },
 
