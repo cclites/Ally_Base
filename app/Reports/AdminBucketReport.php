@@ -2,6 +2,7 @@
 namespace App\Reports;
 
 use App\Deposit;
+use App\Payment;
 use Carbon\Carbon;
 
 class AdminBucketReport extends BaseReport
@@ -34,7 +35,9 @@ class AdminBucketReport extends BaseReport
     {
         $results = [];
         for($date = $this->startDate; $date <= $this->endDate; $date->addDay()) {
-            $results[] = $this->depositsForDate($date->toDateString());
+            $deposits = $this->depositsForDate($date->toDateString());
+            $payments = $this->paymentsForDate($date->toDateString());
+            $results[] = $deposits + $payments;
         }
         return collect($results);
     }
@@ -49,6 +52,7 @@ class AdminBucketReport extends BaseReport
     function depositsForDate($date)
     {
         $deposits = Deposit::with(['shifts', 'shifts.payment', 'shifts.payment.client'])
+            ->where('success', 1)
             ->whereDate('created_at', $date)
             ->get();
         $paymentDates = [];
@@ -83,11 +87,21 @@ class AdminBucketReport extends BaseReport
 
         return [
             'date' => $date,
-            'count' => $deposits->count(),
-            'sum' => $deposits->sum('amount'),
+            'deposit_count' => $deposits->count(),
+            'deposit_sum' => $deposits->sum('amount'),
             'payment_dates' => $paymentDates,
             'missing' => $missing,
             'failed' => $failed
         ];
+    }
+
+    function paymentsForDate($date)
+    {
+        $payment = Payment::where('success', 1)
+            ->select(\DB::raw('count(*) as payment_count, sum(amount) as payment_sum'))
+            ->whereDate('created_at', $date)
+            ->first();
+
+        return $payment->toArray();
     }
 }

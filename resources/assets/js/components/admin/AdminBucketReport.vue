@@ -38,8 +38,8 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="show_details" scope="row">
-                    <b-btn @click.stop="row.toggleDetails">
-                        Payment Date Breakdown
+                    <b-btn @click.stop="row.toggleDetails" size="sm">
+                        Deposit Payment Breakdown
                     </b-btn>
                 </template>
                 <template slot="row-details" scope="row">
@@ -124,16 +124,27 @@
                 fields: [
                     {
                         key: 'date',
-                        label: 'Deposit Date',
+                        label: 'Date',
                         sortable: true,
                     },
                     {
-                        key: 'count',
+                        key: 'payment_count',
+                        label: 'Payment Count',
+                        sortable: true,
+                    },
+                    {
+                        key: 'payment_sum',
+                        label: 'Payment Sum',
+                        sortable: true,
+                        formatter: this.numberFormat
+                    },
+                    {
+                        key: 'deposit_count',
                         label: 'Deposit Count',
                         sortable: true,
                     },
                     {
-                        key: 'sum',
+                        key: 'deposit_sum',
                         label: 'Deposit Sum',
                         sortable: true,
                         formatter: this.numberFormat
@@ -153,12 +164,12 @@
         computed: {
             totalItems() {
                 return this.items.reduce((previous, current) => {
-                    return previous + parseFloat(current.count);
+                    return previous + parseFloat(current.deposit_count);
                 }, 0);
             },
             totalAmount() {
                 return this.items.reduce((previous, current) => {
-                    return previous + parseFloat(current.sum);
+                    return previous + parseFloat(current.deposit_sum);
                 }, 0);
             }
         },
