@@ -12,6 +12,7 @@ use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use App\Traits\ActiveBusiness;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Http\Response;
 
 class ReportsController extends Controller
 {
@@ -85,7 +86,13 @@ class ReportsController extends Controller
             });
         $business = $caregiver->businesses->first();
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
-        return $pdf->download($year . '_year_summary.pdf');
+        $filename = $year . '_year_summary.pdf';
+        // return $pdf->download($filename);
+        // For mobile app support, download as octet-stream
+        return new Response($pdf->output(), 200, array(
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' =>  'attachment; filename="'.$filename.'"'
+        ));
     }
 
     public function paymentDetails($id)
@@ -109,7 +116,13 @@ class ReportsController extends Controller
 
         if (strtolower(request()->type) == 'pdf') {
             $pdf = PDF::loadView('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'))->setOrientation('landscape');
-            return $pdf->download('deposit_details.pdf');
+            $filename = 'deposit_details.pdf';
+            // return $pdf->download($filename);
+            // For mobile app support, download as octet-stream
+            return new Response($pdf->output(), 200, array(
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' =>  'attachment; filename="'.$filename.'"'
+            ));
         }
 
         return view('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'));
