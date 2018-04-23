@@ -3,6 +3,11 @@
         <form @submit.prevent="clockOut()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">
+                    <b-form-group label="Clocked In Time" label-for="time">
+                        <b-form-input v-model="clockInTime" readonly></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="12">
                     <b-form-group label="Current Time" label-for="time">
                         <b-form-input v-model="time" readonly></b-form-input>
                     </b-form-group>
@@ -140,7 +145,11 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {
             'shift': {},
             'activities': Array,
@@ -162,8 +171,14 @@
                     other_expenses_desc: null,
                     signature: null
                 }),
-                showManual: false
+                showManual: false,
+                time: null,
+                clockInTime: null,
             }
+        },
+
+        mounted() {
+            this.setTimes();
         },
 
         methods: {
@@ -228,13 +243,15 @@
 
                 return (val + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br/>' + '$2');
             },
+
+            setTimes() {
+                this.time = this.formatTime();
+                this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
+                setInterval(() => this.time = this.formatTime(), 1000 * 60)
+            }
         },
 
         computed: {
-            time() {
-                return moment().local().format('LT');
-            },
-
             carePlanNotes() {
                 if (!this.shift || !this.shift.schedule || !this.shift.schedule.care_plan) {
                     return null;
