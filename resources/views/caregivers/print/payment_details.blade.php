@@ -43,7 +43,7 @@
     <div class="container-fluid">
         <div class="row print-header">
             <div class="header-left">
-                <div class="logo"><img src="/images/AllyLogo.png" /></div>
+                <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
                 <div class="h4">{{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>
                 @if($business->address2)
