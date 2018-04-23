@@ -31,12 +31,19 @@
         }
 
         .print-header {
-            margin: 1rem 0;
+            margin: 0;
+            background-color: #ccc;
+            padding: 15px;
+        }
+
+        .logo img {
+            max-height: 80px;
         }
     </style>
     <div class="container-fluid">
         <div class="row print-header">
             <div class="header-left">
+                <div class="logo"><img src="/images/AllyLogo.png" /></div>
                 <div class="h4">{{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>
                 @if($business->address2)
