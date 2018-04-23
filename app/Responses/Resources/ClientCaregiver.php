@@ -14,6 +14,9 @@ class ClientCaregiver implements Responsable
     {
         $this->client = $client;
         $this->caregiver = $caregiver;
+        if (!$caregiver->pivot && $relation = $client->caregivers->where('id', $caregiver->id)->first()) {
+            $this->caregiver = $relation;
+        }
     }
 
     /**
