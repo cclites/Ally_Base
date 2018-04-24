@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Replace curly braces to prevent XSS attacks with Vue.js interpolation
+ *
+ * @param  string  $value
+ * @return string
+ */
+function interpol_escape($value)
+{
+    return str_replace(['{{', '}}'], ['❴❴', '❵❵'], $value);
+}
+
 function collection_only_values($collection, $values = []) {
     return $collection->map(function($item) use ($values)
     {
