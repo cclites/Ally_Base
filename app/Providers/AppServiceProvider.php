@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             Schema::defaultStringLength(191);
         }
 
-        \Blade::setEchoFormat('interpol_escape(e(%s))');
+        \Blade::setEchoFormat('interpol_escape(e(%s, true))');
 
         \View::composer('*', function ($view) {
             $business = $this->app->make(ActiveBusiness::class);
