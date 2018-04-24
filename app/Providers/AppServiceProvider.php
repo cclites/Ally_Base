@@ -39,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
             Schema::defaultStringLength(191);
         }
 
+        // ALLY-271 Escape curly braces to prevent interpolation, double-encode entities
         \Blade::setEchoFormat('interpol_escape(e(%s, true))');
 
         \View::composer('*', function ($view) {
