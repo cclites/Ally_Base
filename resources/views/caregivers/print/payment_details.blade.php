@@ -44,7 +44,7 @@
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
-                <div class="h4">{{ $business->name }}</div>
+                <div class="h4">Associatied Provider: {{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>
                 @if($business->address2)
                     <div>{{ $business->address2 }}</div>
@@ -94,7 +94,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Activities Performed</th>
-                        <th>Client</th>
+                        <th>Client (Employer)</th>
                         <th>Rate</th>
                         <th>Hours Type</th>
                         <th>Mileage</th>
