@@ -623,7 +623,7 @@
             {
                 if (this.selectedSchedule) {
                     // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.selectedSchedule.caregiver_id == val) {
+                    if (this.selectedSchedule.caregiver_id == this.selectedCaregiver.id) {
                         this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
                         this.form.provider_fee = this.selectedSchedule.provider_fee
                         return;
