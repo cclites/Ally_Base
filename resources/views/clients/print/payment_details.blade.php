@@ -64,7 +64,7 @@
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
-                <div class="h4">Associated Provider: {{ $business->name }}</div>
+                <div class="h4">Associated Provider: {{ $payment->business->name }}</div>
                 <br>
                 <div>{{ $payment->business->address1 }}</div>
                 @if($payment->business->address2)
