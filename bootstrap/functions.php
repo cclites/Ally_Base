@@ -8,7 +8,7 @@
  */
 function interpol_escape($value)
 {
-    return str_replace(['{{', '}}'], ['{ {', '} }'], $value);
+    return preg_replace('/({|}|&#123;|&#125;|&#x7b;|&#x7d;)(?=\S)/', '$1 ', $value);
 }
 
 function collection_only_values($collection, $values = []) {
