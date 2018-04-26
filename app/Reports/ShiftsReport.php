@@ -81,6 +81,8 @@ class ShiftsReport extends BaseReport
                 'charged' => !($shift->statusManager()->isPending()),
                 'charged_at' => $shift->charged_at,
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
+                // Send both verified and EVV for backwards compatibility
+                'verified' => $shift->verified,
                 'EVV' => $shift->verified,
             ];
             return $row;
