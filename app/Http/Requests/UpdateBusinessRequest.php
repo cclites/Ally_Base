@@ -39,7 +39,7 @@ class UpdateBusinessRequest extends FormRequest
             'state' => 'nullable|string',
             'zip' => 'nullable|string',
             'country' => 'nullable|string',
-            'timezone' => 'string|nullable'
+            'timezone' => 'string|required'
         ];
     }
 }
