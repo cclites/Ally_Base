@@ -39,7 +39,7 @@ class PaymentHistoryController extends Controller
         $compactedDetails = $this->getPaymentDetails($id);
         //return view('clients.print.payment_details', $compactedDetails);
 
-        $pdf = PDF::setOption('margin-left', '2mm')->setOption('margin-right', '2mm')->loadView('clients.print.payment_details', $compactedDetails);//->setOrientation('landscape');
+        $pdf = PDF::setOption('margin-left', '2mm')->setOrientation('landscape')->setOption('margin-right', '2mm')->loadView('clients.print.payment_details', $compactedDetails);//->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
     }
 

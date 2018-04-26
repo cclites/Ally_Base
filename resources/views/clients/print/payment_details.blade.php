@@ -153,7 +153,7 @@
                             </td>
                             <td>{{ $shift->EVV ? 'Yes' : 'No' }}</td>
                             <td>
-                                <div style="font-size: .8rem;">{{ $shift->activities->implode(', ') }}</div>
+                                <div>{{ $shift->activities->implode(', ') }}</div>
                                 {{--@foreach($shift->activities as $activity)--}}
                                     {{--<div>{{ $activity }}</div>--}}
                                 {{--@endforeach--}}
