@@ -49,11 +49,11 @@ class BusinessController extends Controller
     {
         $businessData = $request->validate([
             'name' => 'required',
-            'address1' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'zip' => 'required',
-            'phone1' => 'required',
+            'address1' => 'string|nullable',
+            'city' => 'string|nullable',
+            'state' => 'string|nullable',
+            'zip' => 'string|nullable',
+            'phone1' => 'string|nullable',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
         $businessData['country'] = 'US';
@@ -111,11 +111,11 @@ class BusinessController extends Controller
     {
         $businessData = $request->validate([
             'name' => 'required',
-            'address1' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'zip' => 'required',
-            'phone1' => 'required',
+            'address1' => 'string|nullable',
+            'city' => 'string|nullable',
+            'state' => 'string|nullable',
+            'zip' => 'string|nullable',
+            'phone1' => 'string|nullable',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
 
