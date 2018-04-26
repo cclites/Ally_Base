@@ -512,6 +512,7 @@
                     axios.get('/business/clients/' + this.form.client_id + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
+                            this.prefillRates();
                         });
                 }
             },
@@ -617,6 +618,21 @@
             toggleCaregivers() {
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
+
+            prefillRates()
+            {
+                if (this.selectedSchedule) {
+                    // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
+                    if (this.selectedSchedule.caregiver_id == val) {
+                        this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
+                        this.form.provider_fee = this.selectedSchedule.provider_fee
+                        return;
+                    }
+                }
+
+                this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
+                this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+            }
         },
 
         watch: {
@@ -659,22 +675,7 @@
             },
 
             'form.caregiver_id': function(val, old_val) {
-                if (this.selectedSchedule) {
-                    // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.selectedSchedule.caregiver_id == val) {
-                        this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
-                        this.form.provider_fee = this.selectedSchedule.provider_fee
-                        return;
-                    }
-                }
-
-                if (this.cgMode === 'all') {
-                    this.form.caregiver_rate = 0.00; 
-                    this.form.provider_fee = 0.00;
-                } else {
-                    this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
-                    this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
-                }
+                this.prefillRates();
             },
 
             'form.hours_type': function(val, old_val) {
