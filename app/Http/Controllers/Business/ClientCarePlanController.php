@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\CarePlan;
+use App\Responses\ConfirmationResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use App\Client;
 
 class ClientCarePlanController extends BaseController
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -56,11 +58,22 @@ class ClientCarePlanController extends BaseController
 
             $plan->activities()->sync($data['activities']);
 
-            return new SuccessResponse('The care plan has been created.', $plan->load('activities')->toArray());
+            return new SuccessResponse('The care plan has been created.', $plan->load('activities')->toArray(), '.');
 
         }
 
         return new ErrorResponse(500, 'Unable to create care plan.');
+    }
+
+    /**
+     * @param \App\Client $client
+     * @param \App\CarePlan $carePlan
+     * @return \App\CarePlan
+     */
+    public function show(Client $client, CarePlan $carePlan)
+    {
+        $carePlan->future_schedules_count = $carePlan->futureSchedules()->count();
+        return $carePlan;
     }
 
     /**
@@ -97,7 +110,7 @@ class ClientCarePlanController extends BaseController
 
             $carePlan->activities()->sync($data['activities']);
 
-            return new SuccessResponse('The care plan has been updated.', $carePlan->load('activities')->toArray());
+            return new SuccessResponse('The care plan has been updated.', $carePlan->load('activities')->toArray(), '.');
 
         }
 
@@ -119,7 +132,7 @@ class ClientCarePlanController extends BaseController
         if ($carePlan->delete()) {
             $carePlan->removeFromFutureSchedules();
 
-            return new SuccessResponse('The care plan has been archived.');
+            return new SuccessResponse('The care plan has been archived.', [], '.');
         }
         return new ErrorResponse(500, 'The care plan could not be archived.');
     }

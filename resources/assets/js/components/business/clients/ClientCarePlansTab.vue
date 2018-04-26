@@ -92,14 +92,15 @@
             </div>
         </b-modal>
 
-        <b-modal id="confirmDeleteModal" title="Delete Care Plan" v-model="confirmDeleteModal" v-if="selectedPlan">
-            <b-container fluid>
+        <b-modal id="confirmDeleteModal" title="Delete Care Plan" v-model="confirmDeleteModal">
+            <loading-card v-if="!selectedPlan" text=""></loading-card>
+            <b-container fluid v-if="selectedPlan">
                 <h4 v-if="selectedPlan.future_schedules_count > 0">
                     There are {{ selectedPlan.future_schedules_count }} schedules with the Care Plan "{{ selectedPlan.name }}" selected.<br/><br/>Deleting this Care Plan will remove it from the future schedules.  Do you want to continue?
                 </h4>
                 <h4 v-else>Are you sure you want to do delete the Care Plan "{{ selectedPlan.name }}"?</h4>
             </b-container>
-            <div slot="modal-footer">
+            <div slot="modal-footer" v-if="selectedPlan">
                 <b-btn variant="default" @click="confirmDeleteModal = false">Cancel</b-btn>
                 <b-btn variant="danger" @click="destroyPlan(selectedPlan, true)" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
@@ -169,12 +170,13 @@
                 ],
                 items: [],
                 planModal: false,
-                selectedPlan: {},
+                selectedPlan: null,
                 form: new Form({
                     name: '',
                     activities: [],
                     notes: '',
                 }),
+                serverFutureScheduleWarning: null,
             }
         },
 
@@ -193,6 +195,10 @@
 
             modalTitle() {
                 return (this.selectedPlan) ? 'Edit Care Plan' : 'Add a New Care Plan';
+            },
+
+            serverFutureScheduleModal() {
+                return !!this.serverFutureScheduleWarning;
             }
         },
 
@@ -223,30 +229,31 @@
                 this.clientPlanModal = true;
             },
 
-            destroyPlan(plan, confirmed = false) {
+            async destroyPlan(plan, confirmed = false) {
 
                 if (! confirmed) {
-                    this.selectedPlan = plan;
+                    this.selectedPlan = null;
                     this.confirmDeleteModal = true;
+                    try {
+                        // Load a fresh copy to verify the future schedules count
+                        let response = await axios.get(this.planUrl(plan));
+                        this.selectedPlan = response.data;
+                    }
+                    catch (error) {
+                        alert('Error fetching care plan details.  Try refreshing.');
+                    }
                     return;
                 }
 
-                axios.delete(this.url + `/${plan.id}`)
-                    .then( ({ data }) => {
-                        alerts.addMessage('success', data.message);
-                        let index = this.items.findIndex(item => item.id == plan.id);
-                        if (index != -1) {
-                            this.items.splice(index, 1);
-                        }
-                        this.confirmDeleteModal = false;
-                    });
+                let form = new Form;
+                form.submit('delete', this.planUrl(plan));
             },
 
             submitForm() {
                 let url = this.url;
                 let method = 'post';
                 if (this.selectedPlan) {
-                    url = url + '/' + this.selectedPlan.id;
+                    url = this.planUrl(this.selectedPlan);
                     method = 'patch';
                 }
 
@@ -287,6 +294,10 @@
 
                 return list;
             },
+
+            planUrl(plan) {
+                return this.url + '/' + plan.id;
+            }
         }
     }
 </script>
