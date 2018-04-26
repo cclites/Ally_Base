@@ -64,11 +64,12 @@ class AxiosResponseHandler {
 
     handleRedirect() {
         let data = this.getResponseData();
-        if (window.location.href === data.redirect) {
+        let current = window.location.pathname + window.location.search + window.location.hash;
+        if (data.redirect === '.' || data.redirect === current) {
             window.location.reload();
             return;
         }
-        window.location.href = data.redirect;
+        window.location = data.redirect;
     }
 
     hasError() {
