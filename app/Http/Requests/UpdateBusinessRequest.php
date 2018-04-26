@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidTimezoneOrOffset;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBusinessRequest extends FormRequest
@@ -39,7 +40,7 @@ class UpdateBusinessRequest extends FormRequest
             'state' => 'nullable|string',
             'zip' => 'nullable|string',
             'country' => 'nullable|string',
-            'timezone' => 'string|required'
+            'timezone' => ['required', new ValidTimezoneOrOffset()],
         ];
     }
 }
