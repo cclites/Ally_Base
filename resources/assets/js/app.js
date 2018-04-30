@@ -39,6 +39,7 @@ Vue.component('emergency-contacts-tab', require('./components/users/EmergencyCon
 Vue.component('loading-card', require('./components/LoadingCard.vue'));
 Vue.component('signature-pad', require('./components/SignaturePad'));
 Vue.component('select2', require('./components/Select2'));
+Vue.component('quick-search', require('./components/QuickSearch'));
 
 
 // Client
