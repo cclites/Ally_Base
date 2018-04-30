@@ -205,6 +205,7 @@
         },
 
         mounted() {
+            this.loadFiltersFromStorage();
             this.setInitialFields();
             this.loadFiltersData();
         },
@@ -308,13 +309,7 @@
         },
 
         methods: {
-            reloadData() {
-                this.setLocalStorage('sortBy', 'Day');
-                this.setLocalStorage('sortDesc', 'false');
-                return this.loadData();
-            },
-            loadData() {
-                // Attempt to load local storage information first
+            loadFiltersFromStorage() {
                 if (typeof(Storage) !== "undefined") {
                     let startDate = this.getLocalStorage('startDate');
                     if (startDate) this.start_date = startDate;
@@ -333,7 +328,13 @@
                     let showSummary = this.getLocalStorage('showSummary');
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
-
+            },
+            reloadData() {
+                this.setLocalStorage('sortBy', 'Day');
+                this.setLocalStorage('sortDesc', 'false');
+                return this.loadData();
+            },
+            loadData() {
                 this.loaded = 0;
 
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
