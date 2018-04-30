@@ -148,6 +148,7 @@
 
         props: {
             admin: Number,
+            autoload: Number,
             imports: Array
         },
 
@@ -208,6 +209,9 @@
             this.loadFiltersFromStorage();
             this.setInitialFields();
             this.loadFiltersData();
+            if (this.autoload) {
+                this.loadData();
+            }
         },
 
         computed: {
