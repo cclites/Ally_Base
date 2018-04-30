@@ -28,7 +28,7 @@
     </ul>
 </li>
  <li>
-    <a class="has-arrow" href="{{ route('business.reports.shifts') }}" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
+    <a class="has-arrow" href="{{ route('business.reports.shifts') }}?autoload=0" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
