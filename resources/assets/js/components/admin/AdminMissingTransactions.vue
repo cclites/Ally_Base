@@ -9,7 +9,9 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -35,6 +37,7 @@
                 sortBy: null,
                 sortDesc: false,
                 filter: null,
+                loading: false,
                 items: [],
                 fields: [
                     {
@@ -83,6 +86,7 @@
         methods: {
 
             loadData() {
+                this.loading = true;
                 axios.get('/admin/missing_transactions?json=1')
                     .then(response => {
                         this.items = response.data.map(transaction => {
@@ -94,6 +98,10 @@
                             .filter(transaction => {
                                 return transaction.last_status !== 'failed';
                             });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
         },

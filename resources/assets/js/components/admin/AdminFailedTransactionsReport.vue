@@ -8,7 +8,9 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -39,6 +41,7 @@
                 sortDesc: false,
                 filter: null,
                 items: [],
+                loading: false,
                 business_id: "",
                 businesses: [],
                 fields: [
@@ -108,6 +111,7 @@
 
         methods: {
             loadItems() {
+                this.loading = true;
                 axios.get('/admin/failed_transactions/?json=1')
                     .then(response => {
                         this.items = response.data.map(function(item) {
@@ -144,6 +148,10 @@
                             item.last_history_action = (item.last_history) ? item.last_history.action : '';
                             return item;
                         });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             markSuccessful(transaction) {

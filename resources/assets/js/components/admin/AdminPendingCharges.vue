@@ -33,19 +33,24 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col sm="12">
-                <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
-            </b-col>
-        </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-            </b-table>
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading">
+            <b-row>
+                <b-col sm="12">
+                    <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+                </b-col>
+            </b-row>
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                </b-table>
+            </div>
         </div>
     </b-card>
 </template>
@@ -68,6 +73,7 @@
                 businesses: [],
                 processing: false,
                 charges: [],
+                loading: false,
                 fields: [
                     {
                         key: 'client_id',
@@ -148,9 +154,14 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                this.loading = true;
                 axios.get('/admin/charges/pending/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.charges = response.data;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             loadItemsPerClient() {

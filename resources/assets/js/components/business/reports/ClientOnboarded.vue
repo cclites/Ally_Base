@@ -1,9 +1,13 @@
 <template>
     <b-row>
         <b-col>
-            <b-card title="Caregiver Onboarded Status">
-                <div class="table-responsive">
+            <b-card title="Client Onboarded Status">
+                
+                <loading-card v-show="loading"></loading-card>
+
+                <div v-show="! loading" class="table-responsive">
                     <b-table :items="clients"
+                            show-empty
                              :fields="fields">
                         <template slot="emailSentAt" scope="data">
                             <span v-if="data.item.user.email_sent_at">{{ formatDateTime(data.item.user.email_sent_at) }}</span>
@@ -29,6 +33,7 @@
         data() {
             return{
                 clients: [],
+                loading: true,
                 fields: [
                     {
                         key: 'nameLastFirst',
@@ -54,11 +59,15 @@
 
         methods: {
             fetchClientData() {
+                this.loading = true;
                 axios.post('/business/reports/clients-onboarded')
                     .then(response => {
                         this.clients = _.sortBy(response.data, 'nameLastFirst');
-                    }).catch(error => {
-                    console.error(error.response);
+                        this.loading = false;
+                    })
+                    .catch(error => {
+                        this.loading = false;
+                        console.error(error.response);
                 });
             }
         }

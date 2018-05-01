@@ -4,11 +4,14 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <div class="text-right">
+        <div class="text-right mb-2">
             <b-btn href="/business/reports/reconciliation?export=1" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
         </div>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :fields="fields"
                      :items="items"
@@ -50,6 +53,7 @@
                 'sortBy': 'created_at',
                 'sortDesc': true,
                 'items': [],
+                loading: false,
                 'fields': [
                     {
                         key: 'created_at',
@@ -84,6 +88,7 @@
             },
 
             loadData() {
+                this.loading = true;
                 axios.get('/business/reports/reconciliation?json=1')
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -92,6 +97,10 @@
                         else {
                             this.items = [];
                         }
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             }
         },

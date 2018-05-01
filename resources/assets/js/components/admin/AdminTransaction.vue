@@ -234,6 +234,9 @@
                             this.shifts = [];
                         }
                         this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 

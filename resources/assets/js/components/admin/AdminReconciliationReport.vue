@@ -39,17 +39,30 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="transactions"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-            </b-table>
-        </div>
-        <div class="text-right">
-            <h4>Total: ${{ numberFormat(totalAmount) }}</h4>
+
+        <loading-card v-show="! neverLoaded && loading"></loading-card>
+
+        <b-row v-show="neverLoaded">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <div v-show="! neverLoaded && ! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="transactions"
+                        :fields="fields"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                </b-table>
+            </div>
+            <div class="text-right">
+                <h4>Total: ${{ numberFormat(totalAmount) }}</h4>
+            </div>
         </div>
     </b-card>
 </template>
@@ -78,6 +91,8 @@
                 clients: [],
                 processing: false,
                 transactions: [],
+                loading: false,
+                neverLoaded: true,
                 fields: [
                     {
                         key: 'created_at',
@@ -130,6 +145,7 @@
                 axios.get('/admin/caregivers').then(response => this.caregivers = response.data);
             },
             loadTransactions() {
+                this.loading = true;
                 let url = '/admin/reports/reconciliation/';
                 if (this.client_id) {
                     url = url + 'client/' + this.client_id;
@@ -139,6 +155,7 @@
                     url = url + 'business/' + this.business_id;
                 }
                 else {
+                    this.loading = false;
                     this.transactions = [];
                     return;
                 }
@@ -149,6 +166,12 @@
                             transaction.last_status = (transaction.last_history) ? transaction.last_history.status : "";
                             return transaction;
                         });
+                        this.loading = false;
+                        this.neverLoaded = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
+                        this.neverLoaded = false;
                     });
             },
         },

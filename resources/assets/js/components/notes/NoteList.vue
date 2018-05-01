@@ -46,46 +46,50 @@
                 placeholder="Tags">
             </b-form-input>
 
-            <b-button variant="info" class="mb-2">
+            <b-button variant="info" type="submit" class="mb-2">
                 Filter
             </b-button>
 
         </b-form>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :sort-by.sync="sortBy"
-                     @filtered="onFiltered"
-            >
-                <template slot="created_at" scope="data">
-                    {{ createdAt(data) }}
-                </template>
-                <template slot="caregiver" scope="data">
-                    <span v-if="data.item.caregiver">{{ data.item.caregiver.name }}</span>
-                </template>
-                <template slot="client" scope="data">
-                    <span v-if="data.item.client">{{ data.item.client.name }}</span>
-                </template>
-                <template slot="action" scope="data">
-                    <a class="btn btn-secondary" :href="'/notes/' + data.item.id + '/edit'">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                </template>
-            </b-table>
-        </div>
+        <loading-card v-show="loading"></loading-card>
 
-        <b-row>
-            <b-col lg="6">
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
+        <div v-show="! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :current-page="currentPage"
+                        :per-page="perPage"
+                        :sort-by.sync="sortBy"
+                        @filtered="onFiltered"
+                >
+                    <template slot="created_at" scope="data">
+                        {{ createdAt(data) }}
+                    </template>
+                    <template slot="caregiver" scope="data">
+                        <span v-if="data.item.caregiver">{{ data.item.caregiver.name }}</span>
+                    </template>
+                    <template slot="client" scope="data">
+                        <span v-if="data.item.client">{{ data.item.client.name }}</span>
+                    </template>
+                    <template slot="action" scope="data">
+                        <a class="btn btn-secondary" :href="'/notes/' + data.item.id + '/edit'">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6">
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
+        </div>
     </b-card>
 </template>
 
@@ -111,6 +115,7 @@
                 currentPage: 1,
                 sortBy: null,
                 selectedItem: {},
+                loading: false,
                 fields: [
                     {
                         key: 'created_at',
@@ -184,10 +189,14 @@
                 return moment(data.item.created_at).format('L');
             },
             filter() {
+                this.loading = true;
                 axios.post('/notes/search', this.searchForm)
                     .then(response => {
                         this.items = response.data;
-                    }).catch(error => {
+                        this.loading = false;
+                    })
+                    .catch(error => {
+                        this.loading = false;
                         console.error(error.response);
                     });
             }

@@ -2,6 +2,7 @@
     <b-card>
         <div class="table-responsive">
             <b-table :items="items"
+                     show-empty
                      :fields="fields">
             </b-table>
         </div>

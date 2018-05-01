@@ -52,7 +52,10 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <template v-if="selectedClient">
+
+                    <loading-card v-show="loading"></loading-card>
+
+                    <template v-if="selectedClient && ! loading">
                         <b-row align-h="center">
                             <b-col lg="10">
                                 <div v-if="selectedClient.ltci_name">
@@ -127,6 +130,7 @@
                 selectedClient: false,
                 selectedItem: {},
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'date',
@@ -178,10 +182,15 @@
         methods: {
 
             fetchPreview() {
+                this.loading = true;
                 this.form.post('/business/reports/ltci-claims')
                     .then(response => {
                         this.items = response.data.summary;
                         this.selectedClient = response.data.client;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 
