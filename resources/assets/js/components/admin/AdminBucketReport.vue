@@ -19,16 +19,16 @@
                         </date-picker>
                         &nbsp;&nbsp;
                         <b-button @click="loadItems()" variant="info" :disabled="processing">
-                            <i class="fa fa-spinner fa-spin" v-show="processing"></i> Generate Bucket Report
+                            <i class="fa fa-spinner fa-spin" v-show="processing"></i> Generate Bank Report
                         </b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
         <b-row>
-            <b-col sm="12">
-                <b>This date range includes {{ totalItems }} deposits for a total amount of {{ numberFormat(totalAmount) }}.</b>
-            </b-col>
+            <!--<b-col sm="12">-->
+                <!--<b>This date range includes {{ totalItems }} deposits for a total amount of {{ numberFormat(totalAmount) }}.</b>-->
+            <!--</b-col>-->
         </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
@@ -44,7 +44,7 @@
                 </template>
                 <template slot="show_details" scope="row">
                     <b-btn @click.stop="row.toggleDetails" size="sm">
-                        Deposit Payment Breakdown
+                        Outgoing Breakdown
                     </b-btn>
                 </template>
                 <template slot="row-details" scope="row">
@@ -134,23 +134,23 @@
                     },
                     {
                         key: 'payment_count',
-                        label: 'Payment Count',
+                        label: 'Incoming Count',
                         sortable: true,
                     },
                     {
                         key: 'payment_sum',
-                        label: 'Payment Sum',
+                        label: 'Incoming Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
                     {
                         key: 'deposit_count',
-                        label: 'Deposit Count',
+                        label: 'Outgoing Count',
                         sortable: true,
                     },
                     {
                         key: 'deposit_sum',
-                        label: 'Deposit Sum',
+                        label: 'Outgoing Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
