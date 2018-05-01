@@ -309,7 +309,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function unassignFromFutureSchedules()
     {
         $this->schedules()
-             ->where('starts_at', '>', Carbon::now())
+             ->where('starts_at', '>=', Carbon::today())
              ->update(['caregiver_id' => null]);
     }
 
