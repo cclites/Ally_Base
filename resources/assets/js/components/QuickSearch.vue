@@ -73,4 +73,5 @@ export default {
     padding-left: 25px;
 }
 .selected-tag { display: none }
+.v-select .spinner { text-indent: 10rem }
 </style>
