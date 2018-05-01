@@ -90,7 +90,7 @@ class SarasotaImportProcessor extends BaseImportProcessor
     {
         $rate = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('RateOfPay', $rowNo));
         if ($overtime) {
-            return bcmul($rate, $this->overTimeMultiplier, 2);
+            return round(bcmul($rate, $this->overTimeMultiplier, 4), 2);
         }
         return $rate;
     }

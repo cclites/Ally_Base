@@ -74,7 +74,7 @@ class AcornImportProcessor extends BaseImportProcessor
     {
         $rate = (float) $this->worksheet->getValue('Payroll Rate', $rowNo);
         if ($overtime) {
-            return bcmul($rate, $this->overTimeMultiplier, 2);
+            return round(bcmul($rate, $this->overTimeMultiplier, 4), 2);
         }
         return $rate;
     }
