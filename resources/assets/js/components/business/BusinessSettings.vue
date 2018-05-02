@@ -38,6 +38,16 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
                         </b-form-group>
+
+                        <b-form-group label="Allow Manual Timesheets" label-for="allows_manual_shifts">
+                            <b-form-select id="allows_manual_shifts"
+                                           v-model="businessSettings.allows_manual_shifts"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="allows_manual_shifts" text="Allow Caregivers to submit shift information manually."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -176,7 +186,8 @@
                     country: this.business.country,
                     timezone: this.business.timezone,
                     auto_confirm: this.business.auto_confirm,
-                    ask_on_confirm: this.business.ask_on_confirm
+                    ask_on_confirm: this.business.ask_on_confirm,
+                    allows_manual_shifts: this.business.allows_manual_shifts,
                 }),
                 timezones: [
                     "America/New_York",
