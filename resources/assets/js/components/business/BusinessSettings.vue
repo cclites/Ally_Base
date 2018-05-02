@@ -44,7 +44,7 @@
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
                                            tabindex="2"
-                                           disabled="true">
+                                           disabled>
                                 <option value="1">Enabled</option>
                                 <option value="0">Disabled</option>
                             </b-form-select>
