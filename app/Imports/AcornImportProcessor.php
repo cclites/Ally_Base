@@ -112,7 +112,8 @@ END;
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo);
+        // Get evaluated Bill Total column
+        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo, true);
         // Divide bill total by total hours to get provider hourly rate
         return round($billTotal / ($this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo)), 2);
     }
