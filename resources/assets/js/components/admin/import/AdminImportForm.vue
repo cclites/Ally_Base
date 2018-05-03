@@ -25,6 +25,11 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label>Importer Description:</label>
+            <pre>{{ importerDescription }}</pre>
+        </div>
+
         <button type="submit" class="btn btn-info" :disabled="submitting">
             <i class="fa fa-spinner fa-spin" v-show="submitting"></i> Start Import
         </button>
@@ -47,6 +52,7 @@
                 file: null,
                 provider: "",
                 submitting: false,
+                importerDescription: "",
             }
         },
 
@@ -75,6 +81,14 @@
                     //
                 }
                 this.submitting = false;
+            },
+
+            async loadDescription() {
+                this.importerDescription = "";
+                if (this.provider) {
+                    const response = await axios.get('/admin/import/description/' + this.provider);
+                    this.importerDescription = response.data.description;
+                }
             }
         },
 
@@ -85,6 +99,10 @@
 
             localName(val) {
                 this.$emit('update:name', val);
+            },
+
+            provider() {
+                this.loadDescription();
             }
         }
     }

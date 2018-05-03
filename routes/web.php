@@ -285,6 +285,7 @@ Route::group([
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
     Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
     Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+    Route::get('import/description/{provider}', 'Admin\ShiftImportController@getDescription')->name('import.description');
     Route::resource('imports', 'Admin\ShiftImportController');
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');
