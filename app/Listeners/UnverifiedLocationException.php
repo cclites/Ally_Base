@@ -28,6 +28,11 @@ class UnverifiedLocationException
         $shift = $event->shift;
         $business = $shift->business;
 
+        if (!$business->location_exceptions) {
+            // Business has location exceptions disabled
+            return;
+        }
+
         $checked_in_time = local_date($shift->checked_in_time, 'm/d/Y g:iA', $business->timezone);
         $checked_out_time = local_date($shift->checked_out_time, 'm/d/Y g:iA', $business->timezone);
         $description = $shift->caregiver->name() . "'s shift for " . $shift->client->name() .

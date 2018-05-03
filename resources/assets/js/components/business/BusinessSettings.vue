@@ -38,6 +38,25 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
                         </b-form-group>
+                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-select id="location_exceptions"
+                                           v-model="businessSettings.location_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions">
+                            <b-form-select id="timesheet_exceptions"
+                                           v-model="businessSettings.timesheet_exceptions"
+                                           readonly
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -176,7 +195,9 @@
                     country: this.business.country,
                     timezone: this.business.timezone,
                     auto_confirm: this.business.auto_confirm,
-                    ask_on_confirm: this.business.ask_on_confirm
+                    ask_on_confirm: this.business.ask_on_confirm,
+                    location_exceptions: this.business.location_exceptions,
+                    timesheet_exceptions: this.business.timesheet_exceptions,
                 }),
                 timezones: [
                     "America/New_York",
