@@ -22,6 +22,13 @@ interface ImportProcessor
     function handle();
 
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription();
+
+    /**
      * Get the caregiver name in a "Last, First" format
      *
      * @param $rowNo

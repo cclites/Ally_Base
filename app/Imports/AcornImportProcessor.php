@@ -8,6 +8,30 @@ class AcornImportProcessor extends BaseImportProcessor
 {
 
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription()
+    {
+        return <<<END
+The Acorn format uses the following column headers:
+
+Caregiver Name (first and last)
+Client Name (first and last)
+Actual Clock In (clock in time)
+Pay Regular Hours (Regular Hours)
+Pay OT Hours (OT Hours)
+Payroll Rate (Caregiver Rate)
+Bill Total / Total Hours (Provider Fee)
+No mileage or other expense calculations are included in this format.
+
+Overtime Multiplier: 1.5 (Default)
+END;
+
+    }
+
+    /**
      * Get the caregiver name in a "Last, First" format
      *
      * @param $rowNo

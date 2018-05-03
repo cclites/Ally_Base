@@ -7,6 +7,32 @@ use Carbon\Carbon;
 class SarasotaImportProcessor extends BaseImportProcessor
 {
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription()
+    {
+        return <<<END
+The Sarasota format uses the following column headers:
+
+CaregiverLastName
+CaregiverFirstName
+ClientLastName
+ClientFirstName
+Date + StartTime (clock in time)
+Hours with ModifierType === REG (Regular Hours)
+Hours with other ModifierType (OT Hours)
+RateOfPay (Caregiver Rate)
+TotalBillable / Hours (Provider Fee)
+No mileage or other expense calculations are included in this format.
+
+Overtime Multiplier: 1.0 (Not increased)
+END;
+
+    }
+
+    /**
      * Do not adjust overtime rates for Sarasota
      *
      * @var float
