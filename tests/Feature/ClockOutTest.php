@@ -153,17 +153,6 @@ class ClockOutTest extends TestCase
         $this->assertEquals(Shift::WAITING_FOR_AUTHORIZATION, $shift->status);
     }
 
-    public function test_auto_confirm_disabled_does_not_create_exceptions()
-    {
-        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
-        $shift = $this->createShift();
-        $clockOut = new ClockOut($this->caregiver);
-        $result = $clockOut->clockOut($shift);
-
-        // Exception should not exist
-        $this->assertEquals(0, $shift->exceptions()->count());
-    }
-
     public function test_auto_confirm_disabled_creates_verified_shifts_waiting_for_confirmation()
     {
         $this->business = factory(Business::class)->create(['auto_confirm' => false]);

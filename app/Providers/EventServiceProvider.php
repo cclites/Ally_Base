@@ -8,12 +8,13 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Events\UnverifiedShiftCreated;
+use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\PostToSlackOnFailedTransaction;
 use App\Listeners\ShiftStatusUpdate;
 use App\Listeners\UnverifiedShiftAcknowledgement;
-use App\Listeners\UnverifiedShiftException;
+use App\Listeners\UnverifiedLocationException;
 use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -26,8 +27,8 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        UnverifiedShiftCreated::class   => [
-            UnverifiedShiftException::class,
+        UnverifiedShiftLocation::class   => [
+            UnverifiedLocationException::class,
         ],
         UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,

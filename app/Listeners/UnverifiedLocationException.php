@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\UnverifiedShiftCreated;
+use App\Events\UnverifiedShiftLocation;
 use App\SystemException;
 use Carbon\Carbon;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,31 +14,28 @@ use Illuminate\Contracts\Queue\ShouldQueue;
  *
  * @package App\Listeners
  */
-class UnverifiedShiftException
+class UnverifiedLocationException
 {
 
     /**
      * Handle the event.
      *
-     * @param  UnverifiedShiftCreated  $event
+     * @param  UnverifiedShiftLocation  $event
      * @return void
      */
-    public function handle(UnverifiedShiftCreated $event)
+    public function handle(UnverifiedShiftLocation $event)
     {
         $shift = $event->shift;
         $business = $shift->business;
 
-        // Only create an exception if auto_confirm is true
-        if (!$business->auto_confirm) return;
-
         $checked_in_time = local_date($shift->checked_in_time, 'm/d/Y g:iA', $business->timezone);
         $checked_out_time = local_date($shift->checked_out_time, 'm/d/Y g:iA', $business->timezone);
         $description = $shift->caregiver->name() . "'s shift for " . $shift->client->name() .
-            " clocked in at $checked_in_time and clocked out at $checked_out_time was NOT verified through our geolocation or telephony services." .
-            " You will need to manually confirm this shift to qualify it for payment.";
+            " clocked in at $checked_in_time and clocked out at $checked_out_time was unable to be verified through our geolocation services." .
+            " This shift is 'unconfirmed'.  You may click 'View Shift' below or see the Shift History Report to confirm it and qualify it for payment.";
 
         $exception = new SystemException([
-            'title' => 'Unverified Shift for ' . $shift->caregiver->name(),
+            'title' => 'Unverified Shift ' . $shift->caregiver->name() . ' - Geolocation Failed',
             'description' => $description,
             'reference_url' => route('business.shifts.show', [$shift->id]),
             'business_id' => $business->id,
