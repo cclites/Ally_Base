@@ -73,6 +73,8 @@ Route::group([
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
     Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
+    Route::get('manual-timesheet', 'ManualTimesheetsController@create')->name('caregivers.manual-timesheets');
+    Route::post('manual-timesheet', 'ManualTimesheetsController@store');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
@@ -211,6 +213,9 @@ Route::group([
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
+
+    Route::get('manual-timesheets', 'ManualTimesheetsController@create')->name('manual-timesheets');
+    Route::post('manual-timesheets', 'ManualTimesheetsController@store');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -299,6 +304,9 @@ Route::group([
     Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
+
+    Route::get('manual-timesheets', 'ManualTimesheetsController@create');
+    Route::post('manual-timesheets', 'ManualTimesheetsController@store');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

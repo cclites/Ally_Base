@@ -195,6 +195,7 @@ Vue.component('caregiver-application-list', require('./components/caregivers/Car
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.component('mask-input', require('./components/MaskInput'));
+Vue.component('manual-timesheets', require('./components/ManualTimesheets'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
