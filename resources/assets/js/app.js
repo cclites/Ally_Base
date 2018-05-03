@@ -139,7 +139,6 @@ Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 Vue.component('caregiver-payment-history', require('./components/caregivers/CaregiverPaymentHistory'));
 Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
-Vue.component('caregiver-manual-timesheets', require('./components/caregivers/CaregiverManualTimesheets'));
 
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 

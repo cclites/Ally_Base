@@ -256,14 +256,4 @@ class ShiftController extends Controller
 
         return response()->json($data);
     }
-
-    /**
-     * Returns view for creating a manual shift.
-     *
-     * @return void
-     */
-    public function createManualShift()
-    {
-        return view('caregivers.manual_timesheets');
-    }
 }

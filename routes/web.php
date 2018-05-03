@@ -73,7 +73,6 @@ Route::group([
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
     Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
-    Route::get('manual-timesheets', 'ShiftController@createManualShift')->name('manual_timesheet');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
