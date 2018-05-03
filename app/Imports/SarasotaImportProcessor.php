@@ -28,6 +28,8 @@ TotalBillable / Hours (Provider Fee)
 No mileage or other expense calculations are included in this format.
 
 Overtime Multiplier: 1.0 (Not increased)
+
+Any rows without a caregiver name are skipped. (Total Rows)
 END;
 
     }
@@ -158,4 +160,16 @@ END;
         return 0.0;
     }
 
+    /**
+     * Determine if the row reflects a valid shift, or if it should be skipped (ex. Summary or Total row)
+     *
+     * @param $rowNo
+     * @return bool
+     */
+    function skipRow($rowNo)
+    {
+        // Skip if caregiver name is empty
+        $name = trim($this->getCaregiverName($rowNo));
+        return empty($name);
+    }
 }
