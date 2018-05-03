@@ -24,7 +24,8 @@ Pay Regular Hours (Regular Hours)
 Pay OT Hours (OT Hours)
 Payroll Rate (Caregiver Rate)
 Bill Total / Total Hours (Provider Fee)
-No mileage or other expense calculations are included in this format.
+Mileage in dollar amounts (Divided by registry mileage_rate to get Mileage)
+Expenses in dollar amounts (Other Expenses)
 
 Overtime Multiplier: 1.5 (Default)
 END;
@@ -126,7 +127,12 @@ END;
      */
     function getMileage($rowNo)
     {
-        return 0.0;
+        $mileageAmount = $this->worksheet->getValue('Mileage', $rowNo);
+        $mileageRate = $this->business->mileage_rate;
+        return round(
+            bcdiv($mileageAmount, $mileageRate, 4),
+            2
+        );
     }
 
     /**
@@ -137,7 +143,7 @@ END;
      */
     function getOtherExpenses($rowNo)
     {
-        return 0.0;
+        return (float) $this->worksheet->getValue('Expenses', $rowNo);
     }
 
     /**

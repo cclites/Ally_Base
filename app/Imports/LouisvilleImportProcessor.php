@@ -28,7 +28,7 @@ ReferralRate / Hours (Provider Fee)
 Mileage in dollar amounts (Divided by registry mileage_rate to get Mileage)
 No other expense calculations are included in this format.
 
-Overtime Multiplier: 1.5 (Default)
+Overtime Multiplier: 1.5 (default but only used in reverse to calculate regular hour rate on combined rows)
 END;
 
     }
