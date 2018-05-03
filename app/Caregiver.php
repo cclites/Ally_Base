@@ -90,7 +90,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_address',
         'w9_city_state_zip',
         'w9_account_numbers',
-        'w9_ssn',
         'w9_employer_id_number'
     ];
 
@@ -199,7 +198,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
      */
     public function setw9SsnAttribute($value)
     {
-        $this->attributes['w9_ssn'] = Crypt::encrypt($value);
+        $this->setSsnAttribute($value);
     }
 
     /**
@@ -209,7 +208,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
      */
     public function getw9SsnAttribute()
     {
-        return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
+        return $this->getSsnAttribute();
     }
 
     ///////////////////////////////////////////
