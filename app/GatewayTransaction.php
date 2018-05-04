@@ -5,6 +5,7 @@ namespace App;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\GatewayTransaction
@@ -46,8 +47,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class GatewayTransaction extends Model
+class GatewayTransaction extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'gateway_transactions';
     protected $guarded = ['id'];
 

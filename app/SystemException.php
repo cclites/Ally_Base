@@ -3,6 +3,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\SystemException
@@ -36,8 +37,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class SystemException extends Model
+class SystemException extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $guarded = ['id'];
 
     ///////////////////////////////////////////

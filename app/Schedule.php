@@ -7,6 +7,7 @@ use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 
 /**
@@ -53,8 +54,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereWeekday($value)
  * @mixin \Eloquent
  */
-class Schedule extends Model
+class Schedule extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'schedules';
     protected $guarded = ['id'];
     protected $dates = ['starts_at'];

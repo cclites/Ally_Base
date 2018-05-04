@@ -8,6 +8,7 @@ use App\Traits\PreventsDelete;
 use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\User
@@ -53,13 +54,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string|null $gender
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereGender($value)
  */
-class User extends Authenticatable implements HasPaymentHold
+class User extends Authenticatable implements HasPaymentHold, Auditable
 {
     use Notifiable;
     use PreventsDelete;
     use CanImpersonate;
     use HiddenIdTrait;
     use \App\Traits\HasPaymentHold;
+    use \OwenIt\Auditing\Auditable;
 
     /**
      * The attributes that are mass assignable.

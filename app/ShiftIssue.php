@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ShiftIssue
@@ -20,8 +21,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereShiftId($value)
  * @mixin \Eloquent
  */
-class ShiftIssue extends Model
+class ShiftIssue extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'shift_issues';
     public $timestamps = false;
     protected $guarded = ['id'];

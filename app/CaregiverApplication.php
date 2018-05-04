@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CaregiverApplication
@@ -187,8 +188,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereZip($value)
  * @mixin \Eloquent
  */
-class CaregiverApplication extends Model
+class CaregiverApplication extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $guarded = ['id'];
 
     public function position()

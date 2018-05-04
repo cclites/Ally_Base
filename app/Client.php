@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Client
@@ -97,10 +98,11 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use IsUserRole, Notifiable;
     use \App\Traits\HasPaymentHold;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'clients';
     public $timestamps = false;

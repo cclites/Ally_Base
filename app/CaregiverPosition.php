@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CaregiverPosition
@@ -18,8 +19,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverPosition whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class CaregiverPosition extends Model
+class CaregiverPosition extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    
     protected $guarded = ['id'];
 
     public function caregiverApplications()

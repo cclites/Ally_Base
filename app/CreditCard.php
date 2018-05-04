@@ -9,6 +9,7 @@ use App\Traits\ChargedTransactionsTrait;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CreditCard
@@ -39,9 +40,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
-class CreditCard extends Model implements ChargeableInterface
+class CreditCard extends Model implements ChargeableInterface, Auditable
 {
     use ChargedTransactionsTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'credit_cards';
     protected $guarded = ['id'];

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ScheduleNote
@@ -18,8 +19,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class ScheduleNote extends Model
+class ScheduleNote extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'schedule_notes';
     protected $guarded = ['id'];
 

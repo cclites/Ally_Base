@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\GatewayTransactionHistory
@@ -24,8 +25,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class GatewayTransactionHistory extends Model
+class GatewayTransactionHistory extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'gateway_transaction_history';
     protected $guarded = ['id'];
 
