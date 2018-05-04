@@ -27,15 +27,22 @@ class QuickSearchController extends BaseController
             $caregivers = $this->business()->caregivers()->with('user');
         }
 
-        $clients = $clients->whereHas('user', function ($query) use($q) {
+        $nameQuery = "CONCAT(firstname, ' ', lastname) like '%$q%'";
+
+        // check if testing enviornment because sqlite doesn't have CONCAT function
+        if (\App::runningUnitTests()) {
+            $nameQuery = "printf('%s %s', firstname, lastname) like '%$q%'";
+        }
+
+        $clients = $clients->whereHas('user', function ($query) use($q, $nameQuery) {
                 $query->where('active', true)
-                    ->whereRaw("CONCAT(firstname, ' ', lastname) like '%$q%'");
+                    ->whereRaw($nameQuery);
             })
             ->get();
 
-        $caregivers = $caregivers->whereHas('user', function ($query) use($q) {
+        $caregivers = $caregivers->whereHas('user', function ($query) use($q, $nameQuery) {
                 $query->where('active', true)
-                    ->whereRaw("CONCAT(firstname, ' ', lastname) like '%$q%'");
+                    ->whereRaw($nameQuery);
             })
             ->get();
 
