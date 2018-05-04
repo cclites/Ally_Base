@@ -89,7 +89,9 @@
                     </ol>
                 </div>
                 <div class="col-md-6 col-lg-4 hidden-xs-down pt-3">
-                    <quick-search></quick-search>
+                    @if (in_array(auth()->user()->role_type, ['admin', 'office_user']))
+                        <quick-search></quick-search>
+                    @endif
                     {{--<div class="d-flex m-t-10 justify-content-end">--}}
                         {{--<div class="d-flex m-r-20 m-l-10 hidden-md-down">--}}
                             {{--<div class="chart-text m-r-10">--}}
