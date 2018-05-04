@@ -211,6 +211,8 @@ Route::group([
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
+
+    Route::get('audit-log', 'Admin\AuditLogController@index');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
