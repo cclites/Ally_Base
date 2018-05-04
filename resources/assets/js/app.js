@@ -77,6 +77,7 @@ Vue.component('admin-reconciliation-report', require('./components/admin/AdminRe
 Vue.component('admin-transaction', require('./components/admin/AdminTransaction.vue'));
 Vue.component('admin-transactions-report', require('./components/admin/AdminTransactionsReport.vue'));
 Vue.component('admin-active-clients-report', require('./components/admin/reports/ActiveClientsReport.vue'));
+Vue.component('admin-audit-log', require('./components/admin/reports/AuditLog'));
 Vue.component('authorized-payment-checkbox', require('./components/admin/AuthorizePaymentCheckbox.vue'));
 Vue.component('charge-payment-button', require('./components/admin/ChargePaymentButton.vue'));
 Vue.component('business-create', require('./components/BusinessCreate.vue'));
