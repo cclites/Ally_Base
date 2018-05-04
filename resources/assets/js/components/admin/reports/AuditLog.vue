@@ -169,7 +169,7 @@
         methods: {
             loadReport() {
                 this.loading = true;
-                axios.get(`/business/audit-log?start=${this.start_date}&end=${this.end_date}`)
+                axios.get(`/admin/audit-log?start=${this.start_date}&end=${this.end_date}`)
                     .then( ({ data }) => {
                         this.items = data;
                         this.loading = false;
