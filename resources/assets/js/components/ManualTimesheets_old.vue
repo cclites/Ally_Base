@@ -3,7 +3,6 @@
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white">
-            
         <!-- CLIENT DROPDOWNS -->
         <b-row>
             <b-col lg="6">
@@ -35,140 +34,130 @@
             </b-col>
         </b-row>
         <!-- /end CLIENT DROPDOWNS -->
-
-        <!-- WEEK DROPDOWN -->
-        <b-row>
-            <b-col lg="6">
-                <b-form-group label="Week" label-for="week">
-                    <b-form-select
-                            id="week"
-                            name="week"
-                            v-model="form.week"
-                    >
-                        <option value="">-- Select Week --</option>
-                        <option v-for="item in weekRanges" :value="item" :key="item">{{ item }}</option>
-                    </b-form-select>
-                    <input-help :form="form" field="week" text=""></input-help>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <!-- /end WEEK DROPDOWN -->
             
         <!-- SHIFTS TABLE -->                
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col"></th>
-                        <th scope="col">Sun</th>
-                        <th scope="col">Mon</th>
-                        <th scope="col">Tues</th>
-                        <th scope="col">Wed</th>
-                        <th scope="col">Thur</th>
-                        <th scope="col">Fri</th>
-                        <th scope="col">Sat</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <form @submit.prevent="addShift()" @keydown="shiftForm.clearError($event.target.name)">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Start Time</th>
+                            <th scope="col">End Time</th>
+                            <th scope="col">Miles</th>
+                            <th scope="col">Expenses</th>
+                            <th scope="col">CG Rate</th>
+                            <th scope="col">PV Rate</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- SHIFT ROW ENTRY -->
+                        <tr>
+                            <th scope="row"> <!-- date -->
+                                <date-picker v-model="shiftForm.date" placeholder="MM/DD/YYYY"></date-picker>
+                                <input-help :form="shiftForm" field="date" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- start_time -->
+                                <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                                <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- end_time -->
+                                <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                                <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- mileage -->
+                                <b-form-input
+                                        id="mileage"
+                                        name="mileage"
+                                        type="number"
+                                        v-model="shiftForm.mileage"
+                                        step="any"
+                                        min="0"
+                                        max="1000"
+                                >
+                                </b-form-input>
+                                <input-help :form="shiftForm" field="mileage" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- other_expenses -->
+                                <b-form-input
+                                        id="other_expenses"
+                                        name="other_expenses"
+                                        type="number"
+                                        v-model="shiftForm.other_expenses"
+                                        step="any"
+                                        min="0"
+                                        max="1000"
+                                >
+                                </b-form-input>
+                                <input-help :form="shiftForm" field="other_expenses" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- caregiver_rate -->
+                                <b-form-input
+                                        id="caregiver_rate"
+                                        name="caregiver_rate"
+                                        type="number"
+                                        step="any"
+                                        min="0"
+                                        max="1000"
+                                        v-model="shiftForm.caregiver_rate"
+                                >
+                                </b-form-input>
+                                <input-help :form="shiftForm" field="caregiver_rate" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- provider_fee -->
+                                <b-form-input
+                                        id="provider_fee"
+                                        name="provider_fee"
+                                        type="number"
+                                        step="any"
+                                        min="0"
+                                        max="1000"
+                                        v-model="shiftForm.provider_fee"
+                                >
+                                </b-form-input>
+                                <input-help :form="shiftForm" field="provider_fee" text=""></input-help>
+                            </th>
+                            <th scope="row"> <!-- action -->
+                                <b-button variant="info" @click.prevent="addShift()">
+                                    Add
+                                </b-button>
+                            </th>
+                        </tr>
+                        <!-- /end SHIFT ROW ENTRY -->
 
-                    <tr>
-                        <th>Time In</th>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- start_time -->
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Time Out</th>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </td>
-                    </tr>
-<!--                     
-                        <th scope="row"> 
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </th>
-                        <th scope="row"> 
-                            <b-form-input
-                                    id="mileage"
-                                    name="mileage"
-                                    type="number"
-                                    v-model="shiftForm.mileage"
-                                    step="any"
-                                    min="0"
-                                    max="1000"
-                            >
-                            </b-form-input>
-                            <input-help :form="shiftForm" field="mileage" text=""></input-help>
-                        </th>
-                        <th scope="row"> 
-                            <b-form-input
-                                    id="other_expenses"
-                                    name="other_expenses"
-                                    type="number"
-                                    v-model="shiftForm.other_expenses"
-                                    step="any"
-                                    min="0"
-                                    max="1000"
-                            >
-                            </b-form-input>
-                            <input-help :form="shiftForm" field="other_expenses" text=""></input-help>
-                        </th>
-                    </tr> -->
-
-                </tbody>
-            </table>
-        </div>
+                        <tr v-for="(item, index) in form.shifts" :key="index">
+                            <th scope="row"> <!-- date -->
+                                {{ item.date }}
+                            </th>
+                            <th scope="row"> <!-- start_time -->
+                                {{ item.start_time }}
+                            </th>
+                            <th scope="row"> <!-- end_time -->
+                                {{ item.end_time }}
+                            </th>
+                            <th scope="row"> <!-- mileage -->
+                                {{ item.mileage }}
+                            </th>
+                            <th scope="row"> <!-- other_expenses -->
+                                ${{ item.other_expenses }}
+                            </th>
+                            <th scope="row"> <!-- caregiver_rate -->
+                                ${{ item.caregiver_rate }}
+                            </th>
+                            <th scope="row"> <!-- provider_fee -->
+                                ${{ item.provider_fee }}
+                            </th>
+                            <th scope="row"> <!-- action -->
+                                <b-button variant="danger" @click="removeShift(index)">
+                                    <i class="fa fa-trash-o"></i>
+                                </b-button>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
         <!-- /end SHIFTS TABLE -->
 
         <!-- ACTIVITIES / NOTES -->
@@ -223,15 +212,12 @@
             return{
                 caregiver: {},
                 client: {},
-                weekRanges: ['4/29/18 - 5/5/18'],
-                
                 form: new Form({
                     client_id: '',
                     caregiver_id: '',
                     shifts: [],
                     activities: [],
                     caregiver_comments: '',
-                    week: '',
                 }),
                 shiftForm: new Form(this.newShift()),
             }
