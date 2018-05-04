@@ -88,7 +88,7 @@
                         @yield('breadcrumbs')
                     </ol>
                 </div>
-                <div class="col-md-6 col-lg-4 align-self-center text-right hidden-xs-down">
+                <div class="col-md-6 col-lg-4 hidden-xs-down pt-3">
                     <quick-search></quick-search>
                     {{--<div class="d-flex m-t-10 justify-content-end">--}}
                         {{--<div class="d-flex m-r-20 m-l-10 hidden-md-down">--}}
