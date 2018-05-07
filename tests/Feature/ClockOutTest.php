@@ -5,6 +5,7 @@ use App\Activity;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Events\UnverifiedShiftLocation;
 use App\Events\UnverifiedShiftCreated;
 use App\PhoneNumber;
 use App\Shift;
@@ -102,6 +103,29 @@ class ClockOutTest extends TestCase
         $this->assertEquals($issue->id, $shift->issues()->value('id'));
     }
 
+    public function test_unverified_location_dispatches_event()
+    {
+        \Event::fake();
+        $shift = $this->createShift();
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->clockOut($shift);
+
+        \Event::assertDispatched(UnverifiedShiftLocation::class, function ($e) use ($shift) {
+            return $e->shift->id === $shift->id;
+        });
+    }
+
+    public function test_using_telephony_number_does_not_dispatches_locations_event()
+    {
+        \Event::fake();
+        $shift = $this->createShift();
+        $clockOut = new ClockOut($this->caregiver);
+        $clockOut->setNumber(555555555);
+        $result = $clockOut->clockOut($shift);
+
+        \Event::assertNotDispatched(UnverifiedShiftLocation::class);
+    }
+
     public function test_auto_confirm_does_create_unverified_exceptions()
     {
         $this->business = factory(Business::class)->create(['auto_confirm' => true]);
@@ -127,17 +151,6 @@ class ClockOutTest extends TestCase
                            ->clockOut($shift);
 
         $this->assertEquals(Shift::WAITING_FOR_AUTHORIZATION, $shift->status);
-    }
-
-    public function test_auto_confirm_disabled_does_not_create_exceptions()
-    {
-        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
-        $shift = $this->createShift();
-        $clockOut = new ClockOut($this->caregiver);
-        $result = $clockOut->clockOut($shift);
-
-        // Exception should not exist
-        $this->assertEquals(0, $shift->exceptions()->count());
     }
 
     public function test_auto_confirm_disabled_creates_verified_shifts_waiting_for_confirmation()

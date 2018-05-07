@@ -29,6 +29,8 @@ class UpdateBusinessRequest extends FormRequest
             'scheduling' => 'required|bool',
             'auto_confirm' => 'required|bool',
             'ask_on_confirm' => 'required|bool',
+            'location_exceptions' => 'required|bool',
+            'timesheet_exceptions' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',

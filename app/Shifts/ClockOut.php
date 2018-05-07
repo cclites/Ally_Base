@@ -3,6 +3,7 @@
 namespace App\Shifts;
 
 use App\Events\ShiftModified;
+use App\Events\UnverifiedShiftLocation;
 use App\Events\UnverifiedShiftCreated;
 use App\Shift;
 use App\ShiftIssue;
@@ -70,6 +71,9 @@ class ClockOut extends ClockBase
 
         if (!$verified) {
             event(new UnverifiedShiftCreated($shift));
+            if (!$this->number) {
+                event(new UnverifiedShiftLocation($shift));
+            }
         }
 
         return $update;
