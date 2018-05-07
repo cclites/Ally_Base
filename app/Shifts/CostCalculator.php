@@ -64,6 +64,7 @@ class CostCalculator
      * Return the total ally allotments accounting for expense reimbursements
      *
      * @return float
+     * @throws \Exception
      */
     public function getAllyFee()
     {

@@ -6,6 +6,7 @@ namespace App;
 use App\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
+use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +43,7 @@ use Illuminate\Database\Eloquent\Model;
 class CreditCard extends Model implements ChargeableInterface
 {
     use ChargedTransactionsTrait;
+    use HasAllyFeeTrait;
 
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
@@ -167,5 +169,19 @@ class CreditCard extends Model implements ChargeableInterface
     public function persistChargeable()
     {
         return $this->save();
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        $fee = config('ally.credit_card_fee');
+        if (strtolower($this->type) === 'amex') {
+            return (float) bcadd($fee, '0.01', 4);
+        }
+        return (float) $fee;
     }
 }

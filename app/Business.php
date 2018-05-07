@@ -7,6 +7,7 @@ use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\HasAllyFeeTrait;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -80,6 +81,7 @@ use Illuminate\Database\Eloquent\Model;
 class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold
 {
     use \App\Traits\HasPaymentHold;
+    use HasAllyFeeTrait;
 
     protected $table = 'businesses';
     protected $guarded = ['id'];
@@ -371,5 +373,15 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         }
 
         return false;
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        return (float) config('ally.bank_account_fee');
     }
 }
