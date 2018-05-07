@@ -18,8 +18,8 @@
                         >
                         </date-picker>
                         &nbsp;&nbsp;
-                        <b-button @click="loadItems()" variant="info" :disabled="loading">
-                            Generate Report
+                        <b-button @click="loadItems()" variant="info" :disabled="processing">
+                            <i class="fa fa-spinner fa-spin" v-show="processing"></i> Generate Bank Report
                         </b-button>
                     </b-form>
                 </b-card>
@@ -148,23 +148,23 @@
                     },
                     {
                         key: 'payment_count',
-                        label: 'Payment Count',
+                        label: 'Incoming Count',
                         sortable: true,
                     },
                     {
                         key: 'payment_sum',
-                        label: 'Payment Sum',
+                        label: 'Incoming Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
                     {
                         key: 'deposit_count',
-                        label: 'Deposit Count',
+                        label: 'Outgoing Count',
                         sortable: true,
                     },
                     {
                         key: 'deposit_sum',
-                        label: 'Deposit Sum',
+                        label: 'Outgoing Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
