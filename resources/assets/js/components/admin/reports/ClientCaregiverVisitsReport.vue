@@ -35,10 +35,20 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="2" class="pt-lg-4">
-                        <b-btn @click="fetchData" class="mt-lg-2">Search</b-btn>
+                        <b-button 
+                            type="submit" 
+                            @click.prevent="fetchData"
+                            variant="info"
+                            class="mt-lg-2"
+                        >
+                            Search
+                        </b-button>
                     </b-col>
                 </b-row>
-                <b-table :items="items" :fields="fields"></b-table>
+
+                <loading-card v-show="loading"></loading-card>
+
+                <b-table v-show="! loading" show-empty :items="items" :fields="fields"></b-table>
             </b-card>
         </b-col>
     </b-row>
@@ -56,6 +66,7 @@
                     startDate: this.startDate,
                     endDate: this.endDate
                 },
+                loading: false,
                 items: [],
                 fields: [
                     {
@@ -83,12 +94,15 @@
 
         methods: {
             fetchData() {
+                this.loading = true;
                 axios.post('/admin/reports/client-caregiver-visits', this.filter)
                     .then(response => {
                         this.items = response.data.table_data;
                         this.filter.startDate = response.data.range[0];
                         this.filter.endDate = response.data.range[1];
+                        this.loading = false;
                     }).catch(error => {
+                        this.loading = false;
                         console.error(error.response);
                     });
             }

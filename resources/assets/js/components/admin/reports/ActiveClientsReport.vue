@@ -28,8 +28,8 @@
                         </b-form-select>
                         <b-button type="submit" variant="info" class="ml-2">Generate Report</b-button>
                     </b-form>
-
-                    <div class="table-responsive mt-4">
+    
+                    <div v-show="! loading" class="table-responsive mt-4">
                         <b-table bordered striped hover show-empty
                                 :items="items"
                                 :fields="fields"
@@ -57,8 +57,8 @@
                         >
                         </date-picker>
                     </b-form>
-
-                    <div class="table-responsive mt-4">
+    
+                    <div v-show="! loading" class="table-responsive mt-4">
                         <b-table bordered striped hover show-empty
                                 :items="compareItems"
                                 :fields="fields"
@@ -69,7 +69,9 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="compareItems"
                      :fields="fields"
@@ -149,6 +151,7 @@
                 business_id: "",
                 businesses: [],
                 items: [],
+                loading: false,
                 compareItems: [],
                 differences: {},
                 fields: [
@@ -175,11 +178,16 @@
             },
 
             loadItems() {
+                this.loading = true;
                 axios.get(`/admin/reports/active-clients?start_date=${this.start_date}&end_date=${this.end_date}&start_date2=${this.start_date2}&end_date2=${this.end_date2}&business_id=${this.business_id}`)
                     .then(response => {
                         this.items = [response.data.report1];
                         this.compareItems = [response.data.report2];
                         this.differences = response.data.report3;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 

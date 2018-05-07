@@ -6,20 +6,25 @@
                     <b-col>
                         <b-row>
                             <b-col lg="6">
-                                <b-button-toolbar class="mb-1">
+                                <b-button-toolbar class="mb-2">
                                     <b-input-group size="sm" class="w-30 mx-1" left="Days from now">
                                         <b-form-input v-model="form.daysFromNow" type="number"></b-form-input>
                                     </b-input-group>
-                                    <b-btn @click="fetchReportData">Search</b-btn>
+                                    <b-btn @click="fetchReportData" variant="info">Search</b-btn>
                                 </b-button-toolbar>
                             </b-col>
                         </b-row>
-                        <div class="table-responsive">
-                            <b-table :items="cards"
-                                     :fields="fields">
-                            </b-table>
+
+                        <loading-card v-show="loading"></loading-card>
+
+                        <div v-show="! loading">
+                            <div class="table-responsive">
+                                <b-table :items="cards"
+                                        show-empty
+                                        :fields="fields">
+                                </b-table>
+                            </div>
                         </div>
-                        <div class="ml-2" v-if="cards.length == 0">No results.</div>
                     </b-col>
                 </b-row>
             </b-card>
@@ -38,6 +43,7 @@
                 form: new Form({
                     daysFromNow: this.days
                 }),
+                loading: false,
                 fields: [
                     {
                         key: 'user',
@@ -58,10 +64,15 @@
 
         methods: {
             fetchReportData() {
+                this.loading = true;
                 this.form.post('/business/reports/credit-cards')
                     .then((response) => {
                         this.cards = _.sortBy(response.data, 'user.name');
+                        this.loading = false;
                     })
+                    .catch(e => {
+                        this.loading = false;
+                    });
             }
         },
 

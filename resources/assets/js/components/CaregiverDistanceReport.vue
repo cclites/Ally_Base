@@ -40,43 +40,49 @@
             </b-col>
             <b-col xlg="1" lg="2" md="3">
                 <b-form-group label="Generate">
-                    <b-button id="generateReport" variant="info" @click="generateReport()"><i class="fa fa-refresh fa-spin" v-if="loading"></i> Generate Report</b-button>
+                    <b-button id="generateReport" variant="info" @click="generateReport()" :disabled="loading">
+                        <i class="fa fa-refresh fa-spin" v-if="loading"></i> Generate Report
+                    </b-button>
                 </b-form-group>
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
-            >
-                <template slot="address1" scope="row">
-                    {{ row.item.address.address1 }}
-                </template>
-                <template slot="zip" scope="row">
-                    {{ row.item.address.zip }}
-                </template>
-                <template slot="actions" scope="row">
-                    <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
-                    <b-button :href="'/business/clients/' + form.client_id" size="sm">View Client</b-button>
-                </template>
-            </b-table>
-        </div>
+        <loading-card v-show="loading"></loading-card>
 
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
+        <div v-show="! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :current-page="currentPage"
+                        :per-page="perPage"
+                        :filter="filter"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                        @filtered="onFiltered"
+                >
+                    <template slot="address1" scope="row">
+                        {{ row.item.address.address1 }}
+                    </template>
+                    <template slot="zip" scope="row">
+                        {{ row.item.address.zip }}
+                    </template>
+                    <template slot="actions" scope="row">
+                        <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
+                        <b-button :href="'/business/clients/' + form.client_id" size="sm">View Client</b-button>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
+        </div>
     </b-card>
 </template>
 
@@ -169,7 +175,7 @@
 
         watch: {
             'form.client_id': function() {
-                this.items = [];
+                this.generateReport();
             }
         }
     }

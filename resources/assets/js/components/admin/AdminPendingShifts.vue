@@ -32,7 +32,10 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -72,6 +75,7 @@
                 business_id: "",
                 businesses: [],
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'shift_time',
@@ -163,6 +167,7 @@
             },
 
             loadItems() {
+                this.loading = true;
                 let url = '/admin/charges/pending_shifts?start_date=' + this.start_date + '&end_date=' + this.end_date;
                 if (this.business_id) url = url + '&business_id=' + this.business_id;
                 axios.get(url)
@@ -173,6 +178,10 @@
                             item.authorized = (item.status === 'WAITING_FOR_CHARGE');
                             return item;
                         });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 
