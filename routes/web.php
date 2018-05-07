@@ -98,6 +98,7 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
