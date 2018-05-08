@@ -34,11 +34,9 @@ class ClockIn extends ClockBase
         ]);
 
         if ($shift->verified) {
-            if (!is_null($this->latitude)) {
-                $this->verifyGeocode($schedule->client);
-            } else {
-                $this->verifyPhoneNumber($schedule->client);
-            }
+            $this->verifyEVV($schedule->client);
+            $shift->checked_in_distance = $this->distance;
+            $shift->checked_in_verified = true;
         }
 
         if ($this->caregiver->shifts()->save($shift)) {
@@ -78,6 +76,8 @@ class ClockIn extends ClockBase
 
         if ($shift->verified) {
             $this->verifyEVV($client);
+            $shift->checked_in_distance = $this->distance;
+            $shift->checked_in_verified = true;
         }
 
         if ($this->caregiver->shifts()->save($shift)) {

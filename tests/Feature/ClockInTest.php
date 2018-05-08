@@ -78,6 +78,22 @@ class ClockInTest extends TestCase
         $this->assertTrue($shift->isVerified());
     }
 
+    public function test_a_shift_has_distance_and_verified_set_with_valid_geocode()
+    {
+        // Make a client address
+        $latitude = 45;
+        $longitude = -80;
+        $type = 'evv';
+        $address = factory(Address::class)->make(compact('type', 'latitude', 'longitude'));
+        $this->client->addresses()->save($address);
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->setGeocode($latitude, $longitude)->clockIn($this->schedule);
+
+        $this->assertTrue($shift->checked_in_verified);
+        $this->assertNotNull($shift->checked_in_distance);
+    }
+
     public function test_a_shift_can_be_clocked_in_to_without_a_schedule()
     {
         $clockIn = new ClockIn($this->caregiver);
@@ -98,5 +114,6 @@ class ClockInTest extends TestCase
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertTrue($shift->isVerified());
+        $this->assertTrue($shift->checked_in_verified);
     }
 }

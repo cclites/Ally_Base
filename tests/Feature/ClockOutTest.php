@@ -67,6 +67,40 @@ class ClockOutTest extends TestCase
         $this->assertTrue($shift->isVerified());
     }
 
+    public function test_a_shift_has_distance_and_verified_set_with_valid_geocode()
+    {
+        // Make a client address
+        $latitude = 45;
+        $longitude = -80;
+        $type = 'evv';
+        $address = factory(\App\Address::class)->make(compact('type', 'latitude', 'longitude'));
+        $this->client->addresses()->save($address);
+
+        $shift = $this->createShift(['verified' => true]);
+        $clockOut = new ClockOut($this->caregiver);
+        $clockOut->setGeocode($latitude, $longitude)->clockOut($shift);
+
+        $this->assertTrue($shift->checked_out_verified);
+        $this->assertNotNull($shift->checked_out_distance);
+    }
+
+    public function test_an_unverified_shift_being_clocked_out_with_a_valid_location_still_sets_distance()
+    {
+        // Make a client address
+        $latitude = 45;
+        $longitude = -80;
+        $type = 'evv';
+        $address = factory(\App\Address::class)->make(compact('type', 'latitude', 'longitude'));
+        $this->client->addresses()->save($address);
+
+        $shift = $this->createShift(['verified' => false]);
+        $clockOut = new ClockOut($this->caregiver);
+        $clockOut->setGeocode($latitude, $longitude)->clockOut($shift);
+
+        $this->assertTrue($shift->checked_out_verified);
+        $this->assertNotNull($shift->checked_out_distance);
+    }
+
     public function test_initially_verified_shift_is_unverified_when_clocking_out_manually()
     {
         $shift = $this->createShift(['verified' => true, 'checked_in_number' => 5555555555]);
