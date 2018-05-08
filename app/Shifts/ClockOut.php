@@ -70,6 +70,8 @@ class ClockOut extends ClockBase
             'checked_out_longitude' => $this->longitude,
             'checked_out_distance' => $this->distance,
             'checked_out_number' => $this->number,
+            'checked_out_ip' => \Request::ip(),
+            'checked_out_agent' => \Request::userAgent(),
             'checked_out_verified' => $clockOutVerified ?? false,
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,

@@ -20,6 +20,11 @@ class AddMoreEvvDetailsToShifts extends Migration
             $table->mediumInteger('checked_out_distance')->unsigned()->nullable()->after('checked_out_longitude')
                 ->comment('The distance in meters from the client evv address.');
             $table->boolean('checked_out_verified')->default(0)->after('checked_out_distance');
+
+            $table->string('checked_in_ip')->nullable()->after('checked_in_distance');
+            $table->string('checked_in_agent')->nullable()->after('checked_in_distance');
+            $table->string('checked_out_ip')->nullable()->after('checked_out_distance');
+            $table->string('checked_out_agent')->nullable()->after('checked_out_distance');
         });
 
         \App\Shift::chunk(100, function($shifts) {
