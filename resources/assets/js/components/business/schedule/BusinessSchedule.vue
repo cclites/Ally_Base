@@ -164,6 +164,7 @@
             },
 
             fetchEvents() {
+                this.events = [];
                 this.loading = true;
                 axios.get(this.eventsUrl)
                     .then( ({ data }) => {
@@ -189,16 +190,19 @@
             },
             
             renderEvent: function( event, element, view ) {
-                let commentNone = $('<i/>', {
-                    class: 'fa fa-comment',
-                });
-                let commentSome = $('<i/>', {
-                    class: 'fa fa-comment',
-                });
+                let iconColor = 'ffffff';
+                if (event.unassigned) {
+                    iconColor = 'd91c4e';
+                } else if (event.note == "Caregiver Canceled" || event.note == "Client Canceled") {
+                    iconColor = 'f2f214';
+                }
 
                 let note = $('<span/>', {
                     class: 'fc-note-btn',
-                    html: commentSome,
+                    style: 'color: #' + iconColor,
+                    html: $('<i/>', {
+                        class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
+                    }),
                 });
 
                 let vm = this;
@@ -244,7 +248,7 @@
 .fc-note-btn { float: right!important; z-index: 99; padding-left: 5px }
 .fc-event { cursor: pointer; }
 .fc-note-btn:hover {
-    color: #d3d3d3;
+    filter: brightness(85%);
     cursor: pointer;
 }
 </style>

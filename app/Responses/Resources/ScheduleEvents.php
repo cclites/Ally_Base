@@ -27,36 +27,45 @@ class ScheduleEvents implements Responsable
         ];
 
     /**
+     * Background color themes for each schedule type.
+     * 
+     * Currently all backgrounds are set to be the same colors.  Uncomment other 
+     * colors and remove duplicates to reboot this behavior.
+     * 
      * @var array
      */
     protected $backgroundColors = [
         'past' => [
-            '#7f7f6f',
-            '#59665b',
             '#849290',
-            '#adad85',
-            '#999966',
-            '#85858e',
+            '#849290',
+            // '#7f7f6f',
+            // '#59665b',
+            // '#adad85',
+            // '#999966',
+            // '#85858e',
         ],
         'current' => [
-            '#34A82D',
             '#27c11e',
-            '#32872d',
-            '#009933',
-            '#00cc44',
-            '#008000',
-            '#2d862d'
+            '#27c11e',
+            // '#34A82D',
+            // '#32872d',
+            // '#009933',
+            // '#00cc44',
+            // '#008000',
+            // '#2d862d'
         ],
         'future' => [
-            '#0000ff',
-            '#0000b3',
-            '#3333cc',
-            '#24248f',
-            '#1e88e5',
-            '#095da6',
-            '#7460ee',
-            '#3d7a98',
-            '#4fb7ea',
+            '#1c81d9',
+            '#1c81d9',
+            // '#0000ff',
+            // '#0000b3',
+            // '#3333cc',
+            // '#24248f',
+            // '#1e88e5',
+            // '#095da6',
+            // '#7460ee',
+            // '#3d7a98',
+            // '#4fb7ea',
         ],
     ];
 
@@ -72,6 +81,11 @@ class ScheduleEvents implements Responsable
         return $this;
     }
 
+    /**
+     * Get stats on the schedules.
+     *
+     * @return void
+     */
     public function kpis()
     {
         $totalShifts = 0;
@@ -133,6 +147,8 @@ class ScheduleEvents implements Responsable
                 'caregiver' => $schedule->caregiver ? $schedule->caregiver->name() : 'None',
                 'start_time' => $schedule->starts_at->format('g:i A'),
                 'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                'note' => empty($schedule->note) ? '' : $schedule->note->note,
+                'unassigned' => empty($schedule->caregiver),
             ], $additionalOptions);
         });
     }
