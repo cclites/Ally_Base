@@ -19,7 +19,8 @@
         "rlanvin/php-rrule": "^1.6",
         "s-ichikawa/laravel-sendgrid-driver": "^2.0",
         "tplaner/when": "^2.1",
-        "twilio/sdk": "^5.14"
+        "twilio/sdk": "^5.14",
+        "ua-parser/uap-php": "^3.5"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "dev-master",

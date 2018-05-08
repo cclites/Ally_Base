@@ -134,6 +134,15 @@
                         label: 'Distance (m)',
                         sortable: true,
                     },
+                    {
+                        key: 'os',
+                        label: 'OS',
+                        sortable: true,
+                    },
+                    {
+                        key: 'browser',
+                        sortable: true,
+                    }
                 ]
             }
         },
@@ -165,6 +174,8 @@
                             item.client_name = item.client.nameLastFirst;
                             item.checked_in_method = item.checked_in_number ? 'Telephony' : 'Geolocation';
                             item.checked_out_method = item.checked_out_number ? 'Telephony' : 'Geolocation';
+                            item.os = (item.user_agent.os) ? item.user_agent.os.family + ' ' + (item.user_agent.os.major ? item.user_agent.os.major : '') : '';
+                            item.browser = (item.user_agent.ua) ? item.user_agent.ua.family + ' ' + (item.user_agent.ua.major ? item.user_agent.ua.major : '') : '';
                             return item;
                         });
                     });
