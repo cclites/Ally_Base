@@ -60,72 +60,147 @@
                 <thead>
                     <tr>
                         <th scope="col"></th>
-                        <th scope="col"></th>
-                        <th scope="col"></th>
+                        <th scope="col">Sun</th>
+                        <th scope="col">Mon</th>
+                        <th scope="col">Tues</th>
+                        <th scope="col">Wed</th>
+                        <th scope="col">Thur</th>
+                        <th scope="col">Fri</th>
+                        <th scope="col">Sat</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="day in weekdays" :key="day">
-                        <th>{{ day }}</th>
-                        <td>
-                            1:00 PM - 5:32 PM
+                    <tr>
+                        <th>Time In</th>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
                         </td>
-                        <td>
-                            <b-button variant="info" size="xs" @click="showModal = true">
-                                <i class="fa fa-edit"></i>
-                            </b-button>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- start_time -->
+                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
                         </td>
                     </tr>
+                    <tr>
+                        <th>Time Out</th>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                        <td scope="row"> <!-- end_time -->
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </td>
+                    </tr>
+<!--                     
+                        <th scope="row"> 
+                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
+                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
+                        </th>
+                        <th scope="row"> 
+                            <b-form-input
+                                    id="mileage"
+                                    name="mileage"
+                                    type="number"
+                                    v-model="shiftForm.mileage"
+                                    step="any"
+                                    min="0"
+                                    max="1000"
+                            >
+                            </b-form-input>
+                            <input-help :form="shiftForm" field="mileage" text=""></input-help>
+                        </th>
+                        <th scope="row"> 
+                            <b-form-input
+                                    id="other_expenses"
+                                    name="other_expenses"
+                                    type="number"
+                                    v-model="shiftForm.other_expenses"
+                                    step="any"
+                                    min="0"
+                                    max="1000"
+                            >
+                            </b-form-input>
+                            <input-help :form="shiftForm" field="other_expenses" text=""></input-help>
+                        </th>
+                    </tr> -->
+
                 </tbody>
             </table>
         </div>
         <!-- /end SHIFTS TABLE -->
 
+        <!-- ACTIVITIES / NOTES -->
         <b-row class="mt-3">
+            <b-col md="6">
+                <label>Global Activities</label>
+                <div class="form-check">
+                    <label class="custom-control custom-checkbox" v-for="activity in activities" :key="activity.id" style="clear: left; float: left;">
+                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                        <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                    </label>
+                </div>
+            </b-col>
+            <b-col md="6">
+                <b-form-group label="Global Notes" label-for="caregiver_comments">
+                    <b-textarea
+                            id="caregiver_comments"
+                            name="caregiver_comments"
+                            :rows="8"
+                            v-model="form.caregiver_comments"
+                    ></b-textarea>
+                    <input-help :form="form" field="caregiver_comments" text=""></input-help>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <!-- /end ACTIVITIES / NOTES -->
+
+        <b-row class="mt-3 text-right">
             <b-col md="12">
                 <b-button variant="success" type="button" @click="submit()">Submit Timesheet</b-button>
             </b-col>
         </b-row>
-
-        <b-modal title="Sunday 05/25/18" v-model="showModal" size="lg">
-            <b-container fluid>
-
-                <!-- ACTIVITIES / NOTES -->
-                <b-row>
-                    <b-col md="12">
-                        <label>Global Activities</label>
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox" v-for="activity in activities" :key="activity.id" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                            </label>
-                        </div>
-                    </b-col>
-                </b-row>
-                <b-row class="mt-3">
-                    <b-col md="12">
-                        <b-form-group label="Global Notes" label-for="caregiver_comments">
-                            <b-textarea
-                                    id="caregiver_comments"
-                                    name="caregiver_comments"
-                                    :rows="8"
-                                    v-model="form.caregiver_comments"
-                            ></b-textarea>
-                            <input-help :form="form" field="caregiver_comments" text=""></input-help>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-                <!-- /end ACTIVITIES / NOTES -->
-                
-            </b-container>
-            <div slot="modal-footer">
-                <b-button variant="success" type="submit" @click="showModal = false">Save</b-button>
-                <b-btn variant="default" @click="showModal = false">Close</b-btn>
-            </div>
-        </b-modal>
-
-
 
     </b-card>
 </template>
@@ -145,8 +220,6 @@
 
         data() {
             return{
-                weekdays: ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'],
-                showModal: false,
                 caregiver: {},
                 client: {},
                 weekRanges: ['4/29/18 - 5/5/18'],
