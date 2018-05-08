@@ -4,6 +4,7 @@ namespace App\Shifts;
 
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftCreated;
+use App\Exceptions\UnverifiedLocationException;
 use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
@@ -39,6 +40,7 @@ class ClockOut extends ClockBase
      * @param ShiftIssue[] $issues
      *
      * @return bool
+     * @throws \App\Exceptions\UnverifiedLocationException
      */
     public function clockOut(Shift $shift, $activities = [], $issues = [])
     {
@@ -58,7 +60,7 @@ class ClockOut extends ClockBase
             $this->verifyEVV($shift->client);
             $clockOutVerified = true;
         }
-        catch (\Exception $e) {
+        catch (UnverifiedLocationException $e) {
             if ($verified) throw $e;
         }
 
