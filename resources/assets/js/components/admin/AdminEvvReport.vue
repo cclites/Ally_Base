@@ -44,7 +44,7 @@
                             <option value="">All Clients</option>
                             <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
                         </b-form-select>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
+                        &nbsp;&nbsp;<b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -54,7 +54,15 @@
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
-        <div class="table-responsive">
+        <loading-card v-if="loaded == 0"></loading-card>
+        <b-row v-if="loaded < 0">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+        <div class="table-responsive" v-if="loaded > 0">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -62,7 +70,6 @@
                      :sort-desc.sync="sortDesc"
                      :filter="filter"
             >
-
             </b-table>
         </div>
     </b-card>
@@ -82,6 +89,7 @@
                 sortBy: 'shift_time',
                 sortDesc: false,
                 filter: null,
+                loaded: -1,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                 business_id: "",
@@ -187,6 +195,7 @@
             },
 
             loadItems() {
+                this.loaded = 0;
                 let url = '/admin/reports/evv?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
                     '&business_id=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id;
                 axios.get(url)
@@ -202,7 +211,9 @@
                             item.browser = (item.user_agent.ua) ? item.user_agent.ua.family + (item.user_agent.ua.major ? ' ' + item.user_agent.ua.major : '') : '';
                             return item;
                         });
-                    });
+                        this.loaded = 1;
+                    })
+                    .catch(error => this.loaded = -1);
             },
 
             dayFormat(date) {
