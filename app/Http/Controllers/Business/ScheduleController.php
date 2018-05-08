@@ -58,7 +58,11 @@ class ScheduleController extends BaseController
             $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
             return $clientName . ' (' . $caregiverName . ')';
         });
-        return $events;
+
+        return [
+            'kpis' => $events->kpis(),
+            'events' => $events->toArray(),
+        ];
     }
 
     /**

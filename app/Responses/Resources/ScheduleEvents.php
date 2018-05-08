@@ -72,6 +72,33 @@ class ScheduleEvents implements Responsable
         return $this;
     }
 
+    public function kpis()
+    {
+        $totalShifts = 0;
+        $unassignedShifts = 0;
+        $totalMinutes = 0;
+        $unassignedMinutes = 0;
+
+        foreach($this->schedules as $s) {
+            $totalMinutes += $s->duration;
+            $totalShifts ++;
+
+            if (empty($s->caregiver)) {
+                $unassignedShifts++;
+                $unassignedMinutes += $s->duration;
+            }
+        }
+
+        return [
+            'total_shifts' => $totalShifts,
+            'total_hours' => floor($totalMinutes/60),
+            'unassigned_shifts' => $unassignedShifts,
+            'unassigned_hours' => floor($unassignedMinutes/60),
+            'assigned_shifts' => $totalShifts - $unassignedShifts,
+            'assigned_hours' => floor(($totalMinutes - $unassignedMinutes)/60),
+        ];
+    }
+
     public function toArray()
     {
         return $this->schedules->map(function(Schedule $schedule) {
@@ -104,8 +131,8 @@ class ScheduleEvents implements Responsable
 
                 'client' => $schedule->client->name(),
                 'caregiver' => $schedule->caregiver ? $schedule->caregiver->name() : 'None',
-                'start_time' => $schedule->starts_at->format('h:i A'),
-                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('h:i A'),
+                'start_time' => $schedule->starts_at->format('g:i A'),
+                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
             ], $additionalOptions);
         });
     }

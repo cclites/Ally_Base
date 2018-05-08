@@ -7,6 +7,8 @@
 <script>
     export default {
         props: {
+            loading: false,
+
             events: {
                 default() {
                     return []
@@ -69,7 +71,6 @@
 
         data() {
             return {
-                loading: false,
             }
         },
 
@@ -114,6 +115,10 @@
 
                     eventResize(...args) {
                         self.$emit('event-resize', ...args)
+                    },
+
+                    viewRender(...args) {
+                        self.$emit('view-render', ...args)
                     },
 
                     dayClick(...args){
