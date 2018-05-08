@@ -16,7 +16,7 @@ class UpdateScheduleRequest extends FormRequest
         $minDate = Carbon::now()->setTime(0, 0, 0);
         $maxDate = Carbon::now()->addDays(735); // A little over 2 years
         return [
-            'starts_at' => 'required|integer|min:' . $minDate->getTimestamp() . '|max:' . $maxDate->getTimestamp(),
+            'starts_at' => 'required|integer|max:' . $maxDate->getTimestamp(), //|min:' . $minDate->getTimestamp() . '
             'duration' => 'required|numeric|min:1',
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'nullable|exists:caregivers,id',
@@ -32,7 +32,7 @@ class UpdateScheduleRequest extends FormRequest
     public function messages()
     {
         return [
-            'starts_at.min' => 'You cannot edit past schedules.  The starting date must be today or later.',
+            // 'starts_at.min' => 'You cannot edit past schedules.  The starting date must be today or later.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.'
         ];

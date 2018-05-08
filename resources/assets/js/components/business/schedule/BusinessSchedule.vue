@@ -73,6 +73,12 @@
                                     :client-id="filterClientId"
                                     @refresh-events="fetchEvents()"
         />
+
+        <b-modal title="Edit Past Schedule?" v-model="confirmEditModal" size="md" @ok="scheduleModal = true">
+            <b-container fluid>
+                You can edit this past schedule, but any changes to charges or payments must be records in the <a href="/business/reports/shifts?autoload=0">Shift History</a>.
+            </b-container>
+        </b-modal>
     </b-card>
 </template>
 
@@ -114,6 +120,7 @@
                     unassigned_hours: 0,
                     unassigned_shifts: 0,
                 },
+                confirmEditModal: false,
             }
         },
 
@@ -187,6 +194,21 @@
                 });
                 axios.get('/business/clients').then(response => this.clients = response.data);
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+            },
+                
+            editSchedule(event, jsEvent, view) {
+                axios.get('/business/schedule/' + event.id)
+                    .then(response => {
+                        this.selectedSchedule = response.data;
+                        if(this.selectedSchedule.is_past) {
+                            this.confirmEditModal = true;
+                        } else {
+                            this.scheduleModal = true;
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('Error loading schedule details');
+                    });
             },
             
             renderEvent: function( event, element, view ) {

@@ -19,17 +19,6 @@ export default {
             }
         },
 
-        editSchedule(event, jsEvent, view) {
-            axios.get('/business/schedule/' + event.id)
-                .then(response => {
-                    this.selectedSchedule = response.data;
-                    this.scheduleModal = true;
-                })
-                .catch(function(error) {
-                    alert('Error loading schedule details');
-                });
-        },
-
         refreshEvents() {
             this.$refs.calendar.fireMethod('refetchEvents');
         },

@@ -6,6 +6,7 @@ use App\Schedule as ScheduleModel;
 use App\Scheduling\RuleGenerator;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class Schedule implements Responsable
 {
@@ -24,6 +25,7 @@ class Schedule implements Responsable
 
         $timestamp = $this->schedule->starts_at->timestamp;
         $array['starts_at'] = $timestamp;
+        $array['is_past'] = $this->schedule->starts_at < Carbon::now($this->schedule->business->timezone)->setTime(0, 0);;
 
         return $array;
     }
