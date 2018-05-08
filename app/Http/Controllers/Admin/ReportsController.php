@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\DuplicateDepositReport;
+use App\Reports\EVVReport;
 use App\Reports\OnHoldReport;
 use App\Reports\PendingTransactionsReport;
 use App\Payment;
@@ -353,5 +354,19 @@ class ReportsController extends Controller
         }
 
         return view('admin.reports.active_clients');
+    }
+
+    public function evv(Request $request)
+    {
+        if ($request->expectsJson() && $request->input('json')) {
+            $report = new EVVReport();
+            if ($businessId = $request->input('business_id')) {
+                $report->where('business_id', $businessId);
+            }
+            $this->addShiftReportFilters($report, $request);
+            return $report->rows();
+        }
+
+        return view('admin.reports.evv');
     }
 }
