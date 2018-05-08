@@ -34,6 +34,11 @@
             @event-render="renderEvent"
         />
 
+        <schedule-notes-modal v-model="notesModal"
+                                :event="selectedEvent"
+                                @refresh="refreshEvents()"
+        />
+
         <business-schedule-modal :model.sync="scheduleModal"
                                :selected-event="selectedEvent"
                                :selected-schedule="selectedSchedule"
@@ -83,6 +88,8 @@
                 events: '/business/schedule/events',
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
+                notesModal: false,
+                selectedEvent: {},
             }
         },
 
@@ -142,7 +149,10 @@
                     html: commentSome,
                 });
 
+                let vm = this;
                 note.click((e) => {
+                    vm.selectedEvent = event;
+                    vm.notesModal = true;
                     e.preventDefault();
                     e.stopPropagation();
                 });
