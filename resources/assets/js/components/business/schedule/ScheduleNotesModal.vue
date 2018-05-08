@@ -71,7 +71,7 @@
             },
 
             eventTitle() {
-                return `Note for ${this.event.caregiver} on ${this.startDate}`;
+                return `Note for ${this.event.client} on ${this.startDate}`;
             }
         },
 
