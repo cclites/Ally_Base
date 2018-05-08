@@ -109,7 +109,7 @@
                     },
                     {
                         key: 'checked_in_distance',
-                        label: 'Distance',
+                        label: 'Distance (m)',
                         sortable: true,
                     },
                     {
@@ -131,7 +131,7 @@
                     },
                     {
                         key: 'checked_out_distance',
-                        label: 'Distance',
+                        label: 'Distance (m)',
                         sortable: true,
                     },
                 ]
