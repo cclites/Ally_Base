@@ -31,12 +31,18 @@
                 </b-card>
             </b-col>
         </b-row>
+        <b-row>
+            <b-col lg="12" class="text-right">
+                <b-form-input v-model="filter" placeholder="Type to Search" />
+            </b-col>
+        </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
+                     :filter="filter"
             >
 
             </b-table>
@@ -57,6 +63,7 @@
             return {
                 sortBy: 'shift_time',
                 sortDesc: false,
+                filter: null,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
                 business_id: "",
