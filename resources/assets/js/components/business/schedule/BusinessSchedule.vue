@@ -225,6 +225,16 @@
             },
         },
 
+        watch: {
+            filterCaregiverId() {
+                this.fetchEvents();
+            },
+            
+            filterClientId() {
+                this.fetchEvents();
+            },
+        },
+
         mixins: [ManageCalendar]
     }
 </script>
