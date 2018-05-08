@@ -12,19 +12,27 @@
                         <b-form-select v-model="filterCaregiverId">
                             <option :value="-1">All Caregivers</option>
                             <option :value="0">Unassigned Shifts</option>
-                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                     <b-col cols="6">
                         <b-form-select v-model="filterClientId">
                             <option :value="-1">All Clients</option>
-                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                 </b-row>
             </b-col>
         </b-row>
-        <full-calendar ref="calendar" :events="filteredEventsUrl" :default-view="defaultView" :header="header" @day-click="createSchedule" @event-selected="editSchedule"  />
+
+        <full-calendar ref="calendar" 
+            :events="filteredEventsUrl" 
+            :default-view="defaultView" 
+            :header="header" 
+            @day-click="createSchedule" 
+            @event-selected="editSchedule" 
+            @event-render="renderEvent"
+        />
 
         <business-schedule-modal :model.sync="scheduleModal"
                                :selected-event="selectedEvent"
@@ -119,9 +127,52 @@
             isFilterable() {
                 if (this.client || this.caregiver) return false;
                 return true;
-            }
+            },
+
+            renderEvent: function( event, element, view ) {
+                let commentNone = $('<i/>', {
+                    class: 'fa fa-comment',
+                });
+                let commentSome = $('<i/>', {
+                    class: 'fa fa-comment',
+                });
+
+                let note = $('<span/>', {
+                    class: 'fc-note-btn',
+                    html: commentSome,
+                });
+
+                note.click((e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                let data = [`CG: ${event.caregiver}`, `C: ${event.client}`, `${event.start_time} - ${event.end_time}`];
+                let title = $('<span/>', {
+                    class: 'fc-title',
+                    html: data.join('<br/>'),
+                });
+                
+                let content = element.find('.fc-content');
+                if (view.name == 'agendaWeek') {
+                    content.html($('<div/>').append(note, title));
+                } else {
+                    content.html(title);
+                    content.parent().prepend(note);
+                }
+            },
         },
 
         mixins: [ManageCalendar]
     }
 </script>
+
+<style>
+.fc-event { text-align: left!important; }
+.fc-note-btn { float: right!important; z-index: 99; padding-left: 5px }
+.fc-event { cursor: pointer; }
+.fc-note-btn:hover {
+    color: #d3d3d3;
+    cursor: pointer;
+}
+</style>

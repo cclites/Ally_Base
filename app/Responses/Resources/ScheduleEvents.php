@@ -101,6 +101,11 @@ class ScheduleEvents implements Responsable
                 'end' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format(\DateTime::ISO8601),
                 'backgroundColor' => $backgroundColor,
                 'care_plan' => $schedule->carePlan,
+
+                'client' => $schedule->client->name(),
+                'caregiver' => $schedule->caregiver ? $schedule->caregiver->name() : 'None',
+                'start_time' => $schedule->starts_at->format('h:i A'),
+                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('h:i A'),
             ], $additionalOptions);
         });
     }
