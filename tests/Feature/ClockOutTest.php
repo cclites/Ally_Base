@@ -101,6 +101,23 @@ class ClockOutTest extends TestCase
         $this->assertNotNull($shift->checked_out_distance);
     }
 
+    public function test_an_unverified_location_still_records_distance()
+    {
+        // Make a client address
+        $latitude = 45;
+        $longitude = -80;
+        $type = 'evv';
+        $address = factory(\App\Address::class)->make(compact('type', 'latitude', 'longitude'));
+        $this->client->addresses()->save($address);
+
+        $shift = $this->createShift(['verified' => false]);
+        $clockOut = new ClockOut($this->caregiver);
+        $clockOut->setGeocode($latitude + 1, $longitude + 1)->clockOut($shift);
+
+        $this->assertFalse($shift->checked_out_verified);
+        $this->assertNotNull($shift->checked_out_distance);
+    }
+
     public function test_initially_verified_shift_is_unverified_when_clocking_out_manually()
     {
         $shift = $this->createShift(['verified' => true, 'checked_in_number' => 5555555555]);

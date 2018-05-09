@@ -3,6 +3,7 @@ namespace App\Shifts;
 
 use App\Business;
 use App\Client;
+use App\Exceptions\UnverifiedLocationException;
 use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
@@ -35,11 +36,17 @@ class ClockIn extends ClockBase
             'provider_fee' => $schedule->getProviderFee()
         ]);
 
-        if ($shift->verified) {
+        // Attempt to verify EVV regardless of previous status,
+        // but only throw the exception if it's an attempt at a verified clock in (non-manual)
+        try {
             $this->verifyEVV($schedule->client);
-            $shift->checked_in_distance = $this->distance;
             $shift->checked_in_verified = true;
         }
+        catch (UnverifiedLocationException $e) {
+            if ($shift->verified) throw $e;
+        }
+
+        $shift->checked_in_distance = $this->distance;
 
         if ($this->caregiver->shifts()->save($shift)) {
             return $shift;
@@ -78,11 +85,17 @@ class ClockIn extends ClockBase
             'provider_fee' => $rates->provider_hourly_fee
         ]);
 
-        if ($shift->verified) {
+        // Attempt to verify EVV regardless of previous status,
+        // but only throw the exception if it's an attempt at a verified clock in (non-manual)
+        try {
             $this->verifyEVV($client);
-            $shift->checked_in_distance = $this->distance;
             $shift->checked_in_verified = true;
         }
+        catch (UnverifiedLocationException $e) {
+            if ($shift->verified) throw $e;
+        }
+
+        $shift->checked_in_distance = $this->distance;
 
         if ($this->caregiver->shifts()->save($shift)) {
             return $shift;

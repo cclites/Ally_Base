@@ -94,6 +94,24 @@ class ClockInTest extends TestCase
         $this->assertNotNull($shift->checked_in_distance);
     }
 
+    public function test_an_unverified_shift_being_clocked_into_still_records_distance()
+    {
+        // Make a client address
+        $latitude = 45;
+        $longitude = -80;
+        $type = 'evv';
+        $address = factory(\App\Address::class)->make(compact('type', 'latitude', 'longitude'));
+        $this->client->addresses()->save($address);
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->setManual()
+            ->setGeocode($latitude + 1, $longitude + 1)
+            ->clockIn($this->schedule);
+
+        $this->assertEquals(false, $shift->checked_in_verified);
+        $this->assertNotNull($shift->checked_in_distance);
+    }
+
     public function test_a_shift_can_be_clocked_in_to_without_a_schedule()
     {
         $clockIn = new ClockIn($this->caregiver);
