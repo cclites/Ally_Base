@@ -44,7 +44,27 @@
                             <option value="">All Clients</option>
                             <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
                         </b-form-select>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
+                        <b-form-select
+                                id="method"
+                                name="method"
+                                v-model="filter_method"
+                        >
+                            <option value="">--Filter by Method--</option>
+                            <option value="">ANY</option>
+                            <option value="geolocation">Geolocation</option>
+                            <option value="telephony">Telephony</option>
+                        </b-form-select>
+                        <b-form-select
+                                id="method"
+                                name="method"
+                                v-model="filter_verified"
+                        >
+                            <option value="">--Filter by Verified--</option>
+                            <option value="">ANY</option>
+                            <option value="0">Unverified</option>
+                            <option value="1">Verified</option>
+                        </b-form-select>
+                        &nbsp;<br /><b-button type="submit" variant="info" :disabled="loaded === 0">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
@@ -92,6 +112,8 @@
                 loaded: -1,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').subtract(1, 'days').format('MM/DD/YYYY'),
+                filter_method: "",
+                filter_verified: "",
                 business_id: "",
                 businesses: [],
                 caregiver_id: "",
@@ -199,7 +221,8 @@
             loadItems() {
                 this.loaded = 0;
                 let url = '/admin/reports/evv?json=1&start_date=' + this.start_date + '&end_date=' + this.end_date +
-                    '&business_id=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id;
+                    '&business_id=' + this.business_id + '&caregiver_id=' + this.caregiver_id +  '&client_id=' + this.client_id +
+                    '&method=' + this.filter_method + '&verified=' + this.filter_verified;
                 axios.get(url)
                     .then(response => {
                         this.items = response.data.map(function (item) {

@@ -363,6 +363,13 @@ class ReportsController extends Controller
             if ($businessId = $request->input('business_id')) {
                 $report->where('business_id', $businessId);
             }
+            if ($method = $request->input('method')) {
+                if ($method === 'geolocation') $report->geolocationOnly();
+                if ($method === 'telephony') $report->telephonyOnly();
+            }
+            if (strlen($request->input('verified'))) {
+                $report->where('verified', $request->input('verified'));
+            }
             $this->addShiftReportFilters($report, $request);
             return $report->rows();
         }

@@ -22,6 +22,29 @@ class EVVReport extends ShiftsReport
         $this->query = Shift::where('checked_in', 1)
             ->with(['client', 'caregiver', 'business']);
     }
+
+    /**
+     * Filter by telephony shifts only
+     */
+    public function telephonyOnly()
+    {
+        $this->query->where(function($q) {
+            $q->whereNotNull('checked_in_number')
+                ->orWhereNotNull('checked_out_number');
+        });
+    }
+
+    /**
+     * Filter by geolocation shifts only
+     */
+    public function geolocationOnly()
+    {
+        $this->query->where(function($q) {
+            $q->whereNull('checked_in_number')
+                ->orWhereNull('checked_out_number');
+        });
+    }
+
     /**
      * Return the collection of rows matching report criteria
      *
