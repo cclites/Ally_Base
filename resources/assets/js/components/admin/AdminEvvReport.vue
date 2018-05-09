@@ -140,6 +140,7 @@
                     {
                         key: 'checked_in_distance',
                         label: 'Distance (m)',
+                        formatter: this.distanceFormat,
                         sortable: true,
                     },
                     {
@@ -162,6 +163,7 @@
                     {
                         key: 'checked_out_distance',
                         label: 'Distance (m)',
+                        formatter: this.distanceFormat,
                         sortable: true,
                     },
                     {
@@ -209,6 +211,11 @@
                             item.checked_out_method = item.checked_out_number ? 'Telephony' : 'Geolocation';
                             item.os = (item.user_agent.os) ? item.user_agent.os.family + (item.user_agent.os.major ? ' ' + item.user_agent.os.major : '') : '';
                             item.browser = (item.user_agent.ua) ? item.user_agent.ua.family + (item.user_agent.ua.major ? ' ' + item.user_agent.ua.major : '') : '';
+
+                            // Replace null distances with blocked for geolocation
+                            if (item.checked_in_method === 'Geolocation' && item.checked_in_distance === null) item.checked_in_distance = 'Blocked';
+                            if (item.checked_out_method === 'Geolocation' && item.checked_out_distance === null) item.checked_out_distance = 'Blocked';
+
                             return item;
                         });
                         this.loaded = 1;
@@ -222,6 +229,10 @@
 
             yesNo(val) {
                 return val ? '<i class="fa fa-check-square-o"></i>' : '<i class="fa fa-times-rectangle-o"></i>';
+            },
+
+            distanceFormat(val) {
+                return (val === 0) ? '<1' : val;
             }
         }
     }
