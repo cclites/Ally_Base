@@ -217,7 +217,7 @@ class ClockOutTest extends TestCase
             'business_id' => $this->business->id,
             'client_id' => $this->client->id,
             'caregiver_id' => $this->caregiver->id,
-            'checked_in' => true,
+            'checked_in_method' => Shift::METHOD_GEOLOCATION,
             'checked_in_time' => Carbon::now()->subHour(),
             'checked_in_number' => null,
             'checked_in_latitude' => null,

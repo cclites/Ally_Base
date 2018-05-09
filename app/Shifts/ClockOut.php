@@ -65,6 +65,7 @@ class ClockOut extends ClockBase
         }
 
         $update = $shift->update([
+            'checked_out_method' => $this->getMethod(),
             'checked_out_time' => Carbon::now(),
             'checked_out_latitude' => $this->latitude,
             'checked_out_longitude' => $this->longitude,

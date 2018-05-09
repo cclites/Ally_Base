@@ -43,10 +43,17 @@ class ClockInTest extends TestCase
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertEquals(Shift::CLOCKED_IN, $shift->status);
-        $this->assertTrue($shift->checked_in);
         $this->assertLessThan(3, $shift->checked_in_time->diffInSeconds(Carbon::now()));
         $this->assertNull($shift->checked_out_time);
         $this->assertFalse($shift->isVerified());
+    }
+
+    public function test_checked_in_method_defaults_to_geolocation()
+    {
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->setManual()->clockIn($this->schedule);
+
+        $this->assertEquals(Shift::METHOD_GEOLOCATION, $shift->checked_in_method);
     }
 
     public function test_a_schedule_can_be_clocked_in_to_with_a_client_number()
@@ -60,6 +67,7 @@ class ClockInTest extends TestCase
 
         $this->assertInstanceOf(Shift::class, $shift);
         $this->assertTrue($shift->isVerified());
+        $this->assertEquals(Shift::METHOD_TELEPHONY, $shift->checked_in_method);
     }
 
     public function test_a_schedule_can_be_clocked_in_to_with_a_valid_geocode()

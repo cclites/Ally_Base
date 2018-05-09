@@ -97,5 +97,21 @@ class ScheduleConverterTest extends TestCase
         $this->assertTrue($result);
     }
 
+    public function test_converted_shift_records_method_converted()
+    {
+        $date = Carbon::now();
+        $schedule = factory(Schedule::class)->create([
+            'starts_at' => $date,
+            'business_id' => $this->business->id,
+            'client_id' => 1,
+            'caregiver_id' => 1,
+        ]);
+
+        $start = $date->copy()->subHour(); $end = $date->copy()->addHour();
+        $convertedShifts = $this->scheduleConverter->convertAllBetween($start, $end);
+
+        $this->assertEquals(Shift::METHOD_CONVERTED, $convertedShifts[0]->checked_in_method);
+        $this->assertEquals(Shift::METHOD_CONVERTED, $convertedShifts[0]->checked_out_method);
+    }
 
 }
