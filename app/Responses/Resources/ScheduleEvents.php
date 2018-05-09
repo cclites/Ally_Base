@@ -29,43 +29,40 @@ class ScheduleEvents implements Responsable
     /**
      * Background color themes for each schedule type.
      * 
-     * Currently all backgrounds are set to be the same colors.  Uncomment other 
-     * colors and remove duplicates to reboot this behavior.
+     * Currently all backgrounds are hard coded in the toArray function.
+     * To re-implement this feature, use the $this->getBackgroundColor method
+     * to auto calculate one of the colors in these arrays.
      * 
      * @var array
      */
     protected $backgroundColors = [
         'past' => [
             '#849290',
-            '#849290',
-            // '#7f7f6f',
-            // '#59665b',
-            // '#adad85',
-            // '#999966',
-            // '#85858e',
+            '#7f7f6f',
+            '#59665b',
+            '#adad85',
+            '#999966',
+            '#85858e',
         ],
         'current' => [
             '#27c11e',
-            '#27c11e',
-            // '#34A82D',
-            // '#32872d',
-            // '#009933',
-            // '#00cc44',
-            // '#008000',
-            // '#2d862d'
+            '#34A82D',
+            '#32872d',
+            '#009933',
+            '#00cc44',
+            '#008000',
+            '#2d862d'
         ],
         'future' => [
-            '#1c81d9',
-            '#1c81d9',
-            // '#0000ff',
-            // '#0000b3',
-            // '#3333cc',
-            // '#24248f',
-            // '#1e88e5',
-            // '#095da6',
-            // '#7460ee',
-            // '#3d7a98',
-            // '#4fb7ea',
+            '#0000ff',
+            '#0000b3',
+            '#3333cc',
+            '#24248f',
+            '#1e88e5',
+            '#095da6',
+            '#7460ee',
+            '#3d7a98',
+            '#4fb7ea',
         ],
     ];
 
@@ -124,15 +121,26 @@ class ScheduleEvents implements Responsable
             $title = $this->resolveEventTitle($schedule);
 
             if ($schedule->isClockedIn()) {
-                $backgroundColor = $this->getBackgroundColor('current', $title);
+                $backgroundColor = '#27c11e'; // current 
                 $title .= ': Clocked In';
             }
             elseif($schedule->starts_at < Carbon::now()) {
-                $backgroundColor = $this->getBackgroundColor('past', $title);
+                $backgroundColor = '#849290'; // past 
             }
             else {
-                $backgroundColor = $this->getBackgroundColor('future', $title);
+                switch($schedule->status) {
+                    case Schedule::CLIENT_CANCELED:
+                        $backgroundColor = '#f2f214'; // client cancel
+                        break;
+                    case Schedule::CAREGIVER_CANCELED:
+                        $backgroundColor = '#d91c4e'; // CG cancel
+                        break;
+                    default:
+                        $backgroundColor = '#1c81d9'; // ok / future
+                        break;
+                }
             }
+
 
             return array_merge([
                 'id' => $schedule->id,
@@ -149,6 +157,7 @@ class ScheduleEvents implements Responsable
                 'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
                 'unassigned' => empty($schedule->caregiver),
+                'status' => $schedule->status,
             ], $additionalOptions);
         });
     }

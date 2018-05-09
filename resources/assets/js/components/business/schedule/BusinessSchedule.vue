@@ -190,16 +190,8 @@
             },
             
             renderEvent: function( event, element, view ) {
-                let iconColor = 'ffffff';
-                if (event.unassigned) {
-                    iconColor = 'd91c4e';
-                } else if (event.note == "Caregiver Canceled" || event.note == "Client Canceled") {
-                    iconColor = 'f2f214';
-                }
-
                 let note = $('<span/>', {
                     class: 'fc-note-btn',
-                    style: 'color: #' + iconColor,
                     html: $('<i/>', {
                         class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
                     }),

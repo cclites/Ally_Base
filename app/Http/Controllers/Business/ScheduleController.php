@@ -210,6 +210,53 @@ class ScheduleController extends BaseController
     }
 
     /**
+     * Update a single schedule status and notes.
+     *
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function updateStatus(Schedule $schedule)
+    {
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
+            return new ErrorResponse(400, 'Past schedules are unable to be modified.');
+        }
+
+        if ($schedule->shifts->count()) {
+            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
+        }
+        
+        // update notes
+        $notes = request()->notes;
+        if ($schedule->notes != $notes) {
+            if (strlen($notes)) {
+                $note = ScheduleNote::create(['note' => $notes]);
+                $schedule->attachNote($note);
+            }
+            else {
+                $schedule->deleteNote();
+            }
+        }
+
+        // set status
+        $status = request()->status;
+        if (! in_array($status, [
+            Schedule::OK,
+            Schedule::CAREGIVER_CANCELED,
+            Schedule::CLIENT_CANCELED,
+        ])) {
+            $status = Schedule::OK;
+        }
+        $schedule->update(['status' => $status]);
+
+        return new SuccessResponse('The schedule has been updated.');
+    }
+
+    /**
      * Delete a single schedule
      *
      * @param \App\Schedule $schedule

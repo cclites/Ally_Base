@@ -1,34 +1,26 @@
 <template>
     <b-modal :title="eventTitle" v-model="showModal" size="md">
-        <b-container fluid>
-            <b-row>
-                <b-col>
-                    <b-form-radio-group v-model="form.noteType" name="radioSubComponent">
-                        <div><b-form-radio value="1">Client Canceled</b-form-radio></div>
-                        <div><b-form-radio value="2">Caregiver Canceled</b-form-radio></div>
-                        <div><b-form-radio value="3">Open Shift (will remove assigned CG)</b-form-radio></div>
-                        <div><b-form-radio value="4">Other</b-form-radio></div>
-                        
-                        <b-textarea id="notes"
-                                    :rows="3"
-                                    :disabled="form.noteType != 4"
-                                    v-model="form.notes"
-                                    placeholder="Other Notes"
-                        />
-                    </b-form-radio-group>
-                </b-col>
-            </b-row>
-        </b-container>
+        <div class="p-3">
+            <h5>Status:</h5>
+            <b-form-radio-group v-model="form.status" name="status">
+                <div><b-form-radio value="OK">OK</b-form-radio></div>
+                <div><b-form-radio value="CLIENT_CANCELED">Client Canceled</b-form-radio></div>
+                <div><b-form-radio value="CAREGIVER_CANCELED">Caregiver Canceled</b-form-radio></div>
+            </b-form-radio-group>
+
+            <h5 class="mt-3">Notes:</h5>
+            <b-textarea id="notes"
+                        :rows="3"
+                        v-model="form.notes"
+            />
+        </div>
+        
         <div slot="modal-footer">
             <b-btn variant="info" @click="save()" :disabled="busy">
                 <i class="fa fa-spinner fa-spin" v-show="busy"></i>
                 Save
             </b-btn>
-            <b-btn variant="danger" @click="deleteNote()" :disabled="busy">
-                <i class="fa fa-spinner fa-spin" v-show="busy"></i>
-                Delete Note
-            </b-btn>
-            <b-btn variant="default" @click="showModal = false">Cancel</b-btn>
+            <b-btn variant="default" @click="showModal = false">Close</b-btn>
         </div>
     </b-modal>
 </template>
@@ -50,7 +42,8 @@
             return {
                 busy: false,
                 form: new Form({
-                    noteType: 1,
+                    id: '',
+                    status: 'OK',
                     notes: '',
                 }),
             }
@@ -75,34 +68,28 @@
             }
         },
 
-        mounted() {
-        },
-
         methods: {
             save() {
-                let url = '/business/schedule/bulk_update';
-                this.submitting = true;
-                this.form.post(url)
+                let url = `/business/schedule/${this.form.id}/status`;
+                this.busy = true;
+                this.form.patch(url)
                     .then(response => {
-                        this.$emit('refresh-events');
+                        this.$emit('refresh');
                         this.showModal = false;
-                        this.submitting = false;
+                        this.busy = false;
                     })
-                    .catch(error => {
-                        this.submitting = false;
+                    .catch(e => {
+                        this.busy = false;
                     });
-            },
-
-            deleteNote() {
-
             },
         },
 
         watch: {
-            event() {
+            showModal() {
                 this.form = new Form({
-                    noteType: 1,
-                    notes: '',
+                    id: this.event.id,
+                    status: this.event.status || 'OK',
+                    notes: this.event.note || '',
                 });
             },
         },
