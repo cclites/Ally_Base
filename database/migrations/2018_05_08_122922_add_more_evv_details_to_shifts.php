@@ -43,14 +43,18 @@ class AddMoreEvvDetailsToShifts extends Migration
                 if ($shift->checked_out_number) {
                     $shift->checked_out_verified = true;
                 }
-                if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                    if ($address = $shift->client->evvAddress) {
-                        /** @var \App\Address $address */
+                if ($address = $shift->client->evvAddress) {
+                    /** @var \App\Address $address */
+                    if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
                         $shift->checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-                        if ($shift->checked_in_distance === false) $shift->checked_in_distance = null;
+                        if ($shift->checked_in_distance === false) {
+                            $shift->checked_in_distance = null;
+                        }
                         if ($shift->checked_in_distance !== null && $shift->checked_in_distance <= \App\Shifts\ClockIn::MAXIMUM_DISTANCE_METERS) {
                             $shift->checked_in_verified = true;
                         }
+                    }
+                    if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
                         $shift->checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
                         if ($shift->checked_out_distance === false) $shift->checked_out_distance = null;
                         if ($shift->checked_out_distance !== null && $shift->checked_out_distance <= \App\Shifts\ClockOut::MAXIMUM_DISTANCE_METERS) {
