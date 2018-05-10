@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateManualTimesheetsRequest;
+use App\Responses\ErrorResponse;
 
 class ManualTimesheetsController extends Controller
 {
@@ -23,7 +24,7 @@ class ManualTimesheetsController extends Controller
     public function create()
     {
         $caregiver = '{}';
-            if (auth()->user()->role_type == 'caregiver') {
+        if (auth()->user()->role_type == 'caregiver') {
             $caregiver = auth()->user();
         }
 
@@ -45,7 +46,12 @@ class ManualTimesheetsController extends Controller
      */
     public function store(CreateManualTimesheetsRequest $request)
     {
-        dd($request->validated());
+        if (auth()->user()->role_type == 'caregiver' && $request->caregiver_id != auth()->user()->id) {
+            $caregiver = auth()->user();
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        print_r($request->validated());
         // dd(request()->all());
     }
 

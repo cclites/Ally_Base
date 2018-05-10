@@ -56,6 +56,7 @@
             
         <!-- SHIFTS TABLE -->
         <div class="table-responsive">
+            <input-help :form="form" field="shifts" text=""></input-help>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -65,7 +66,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="shift in form.shifts" :key="shift.date">
+                    <tr v-for="shift in shifts" :key="shift.date">
                         <th>{{ dow(shift.date) }}</th>
                         <td>
                             {{ shiftDisplayTime(shift) }}
@@ -169,18 +170,9 @@
 <script>
     export default {
         props: {
-            'cg': {
-                type: Object,
-                default: {},
-            },
-            'caregivers': {
-                type: Array,
-                default: [],
-            },
-            'activities': {
-                type: Array,
-                default: [],
-            },
+            'cg': { type: Object, default: {} },
+            'caregivers': { type: Array, default: [] },
+            'activities': { type: Array, default: [] },
         },
 
         data() {
@@ -189,26 +181,41 @@
                 caregiver: {},
                 client: {},
                 weekRanges: [],
-                
+                shiftForm: new Form({}),
+                shifts: [],
                 form: new Form({
                     client_id: '',
                     caregiver_id: '',
                     shifts: [],
                     week: {},
                 }),
-
-                shiftForm: new Form({}),
             }
         },
 
-        mounted() {
-            if (this.cg.id) {
-                this.caregiver = this.cg;
-                this.form.caregiver_id = this.caregiver.id;
-            }
+        computed: {
+            modalTitle() {
+                if (! this.shiftForm.date) {
+                    return '';
+                }
 
-            this.weekRanges = this.generateWeeks();
-            this.form.week = this.weekRanges[0];
+                return this.dow(this.shiftForm.date, true) + ' ' + moment(this.shiftForm.date).format('M/D/YYYY');
+            },
+
+            isCaregiver() {
+                return this.caregiver.id ? true : false;
+            },
+
+            hasClients() {
+                return this.caregiver.clients && this.caregiver.clients.length > 0;
+            },
+
+            defaultRate() {
+                return this.client.caregiver_hourly_rate || 0;
+            },
+
+            defaultFee() {
+                return this.client.provider_hourly_fee || 0;
+            },
         },
 
         methods: {
@@ -225,10 +232,24 @@
                     return;
                 }
 
-                var index = this.form.shifts.findIndex(x => x.date == this.shiftForm.date);
-                this.form.shifts[index] = this.shiftForm.data();
+                var index = this.shifts.findIndex(x => x.date == this.shiftForm.date);
+                this.shifts[index] = this.shiftForm.data();
 
                 this.showModal = false;
+            },
+
+            submit() {
+                // submit only the shifts filled out  
+                this.form.shifts = this.shifts.filter(x => x.start_time != '');
+
+                this.form.submit('post', '/manual-timesheet')
+                    .then( ({ data }) => {
+                        console.log(data);
+                    })
+                    .catch(e => {
+                        console.log('submit timesheet error:');
+                        console.log(e);
+                    });
             },
 
             dow(date, full = false) {
@@ -259,17 +280,6 @@
                     });
                 });
                 return shifts;
-            },
-
-            submit() {
-                this.form.submit('post', '/business/manual-timesheets')
-                    .then( ({ data }) => {
-                        console.log(data);
-                    })
-                    .catch(e => {
-                        console.log('submit timesheet error:');
-                        console.log(e);
-                    });
             },
 
             isValidShift(data) {
@@ -348,32 +358,6 @@
             },
         },
 
-        computed: {
-            modalTitle() {
-                if (! this.shiftForm.date) {
-                    return '';
-                }
-
-                return this.dow(this.shiftForm.date, true) + ' ' + moment(this.shiftForm.date).format('M/D/YYYY');
-            },
-
-            isCaregiver() {
-                return this.caregiver.id ? true : false;
-            },
-
-            hasClients() {
-                return this.caregiver.clients && this.caregiver.clients.length > 0;
-            },
-
-            defaultRate() {
-                return this.client.caregiver_hourly_rate || 0;
-            },
-
-            defaultFee() {
-                return this.client.provider_hourly_fee || 0;
-            },
-        },
-
         watch: {
             // sets client dropdown to only selected caregivers clients
             'form.caregiver_id': function(newVal, oldVal) {
@@ -407,12 +391,22 @@
                     this.client = {};
                 }
                 
-                this.form.shifts = this.generateShiftsForWeek(this.form.week);
+                this.shifts = this.generateShiftsForWeek(this.form.week);
             },
 
             'form.week': function(newVal, oldVal) {
-                this.form.shifts = this.generateShiftsForWeek(this.form.week);
+                this.shifts = this.generateShiftsForWeek(this.form.week);
             }
-        }
+        },
+
+        mounted() {
+            if (this.cg.id) {
+                this.caregiver = this.cg;
+                this.form.caregiver_id = this.caregiver.id;
+            }
+
+            this.weekRanges = this.generateWeeks();
+            this.form.week = this.weekRanges[0];
+        },
     }
 </script>

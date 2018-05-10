@@ -26,8 +26,6 @@ class CreateManualTimesheetsRequest extends FormRequest
         return [
             'caregiver_id' => 'required|exists:caregivers,id',
             'client_id' => 'required|exists:clients,id',
-            'caregiver_comments' => 'nullable',
-            'activities' => 'required|array|min:1',
             'shifts' => 'required|array|min:1',
             
             'shifts.*.mileage' => 'nullable|numeric|max:1000|min:0',
@@ -37,6 +35,8 @@ class CreateManualTimesheetsRequest extends FormRequest
             'shifts.*.end_time' => 'required|date_format:H:i',
             'shifts.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
             'shifts.*.provider_fee' => 'required|numeric|max:1000|min:0',
+            'shifts.*.activities' => 'required|array|min:1',
+            'shifts.*.caregiver_comments' => 'nullable',
         ];
     }
 
