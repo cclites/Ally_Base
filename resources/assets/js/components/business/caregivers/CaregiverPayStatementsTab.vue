@@ -20,7 +20,7 @@
                         Manual Adjustment
                     </span>
                         <span v-else>
-                        {{ formatDate(row.item.start) }} - {{ formatDate(row.item.end) }}
+                        {{ formatDate(row.item.week.start) }} - {{ formatDate(row.item.week.end) }}
                     </span>
                     </template>
                     <template slot="success" scope="data">
