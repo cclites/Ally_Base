@@ -4,7 +4,7 @@
 
 @section('content')
     <manual-timesheets 
-        {{-- :caregiver="{{ $caregiver }}"  --}}
+        :cg="{{ $caregiver }}" 
         :activities="{{ $activities OR '[]' }}"
         :caregivers="{{ $caregivers OR '[]' }}"
     ></manual-timesheets>

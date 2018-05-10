@@ -22,11 +22,11 @@ class ManualTimesheetsController extends Controller
      */
     public function create()
     {
-        if (auth()->user()->role_type == 'caregiver') {
-            $caregiver = auth()->user();
-        };
-
         $caregiver = '{}';
+            if (auth()->user()->role_type == 'caregiver') {
+            $caregiver = auth()->user();
+        }
+
         $business = activeBusiness();
         $activities = $business->allActivities();
         $caregivers = $this->caregiverClientList($business);

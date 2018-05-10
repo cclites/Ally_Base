@@ -214,8 +214,8 @@ Route::group([
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
 
-    Route::get('manual-timesheets', 'ManualTimesheetsController@create')->name('manual-timesheets');
-    Route::post('manual-timesheets', 'ManualTimesheetsController@store');
+    // Route::get('manual-timesheets', 'ManualTimesheetsController@create')->name('manual-timesheets');
+    // Route::post('manual-timesheets', 'ManualTimesheetsController@store');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -305,8 +305,8 @@ Route::group([
     Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
 
-    Route::get('manual-timesheets', 'ManualTimesheetsController@create');
-    Route::post('manual-timesheets', 'ManualTimesheetsController@store');
+    // Route::get('manual-timesheets', 'ManualTimesheetsController@create');
+    // Route::post('manual-timesheets', 'ManualTimesheetsController@store');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

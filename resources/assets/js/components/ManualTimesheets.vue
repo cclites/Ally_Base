@@ -6,7 +6,7 @@
             
         <!-- CLIENT DROPDOWNS -->
         <b-row>
-            <b-col lg="6">
+            <b-col lg="6" v-show="! isCaregiver">
                 <b-form-group label="Caregiver" label-for="caregiver_id">
                     <b-form-select
                             id="caregiver_id"
@@ -93,7 +93,7 @@
                 <!-- ACTIVITIES / NOTES -->
                 <b-row>
                     <b-col md="12">
-                        <label>Global Activities</label>
+                        <label>Activities Performed</label>
                         <div class="form-check">
                             <label class="custom-control custom-checkbox" v-for="activity in activities" :key="activity.id" style="clear: left; float: left;">
                                 <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
@@ -105,7 +105,7 @@
                 </b-row>
                 <b-row class="mt-3">
                     <b-col md="12">
-                        <b-form-group label="Global Notes" label-for="caregiver_comments">
+                        <b-form-group label="Notes" label-for="caregiver_comments">
                             <b-textarea
                                     id="caregiver_comments"
                                     name="caregiver_comments"
@@ -133,6 +133,10 @@
 <script>
     export default {
         props: {
+            'cg': {
+                type: Object,
+                default: {},
+            },
             'caregivers': {
                 type: Array,
                 default: [],
@@ -164,7 +168,8 @@
         },
 
         mounted() {
-            if (this.isCaregiver) {
+            if (this.cg.id) {
+                this.caregiver = this.cg;
                 this.form.caregiver_id = this.caregiver.id;
             }
         },

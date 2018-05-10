@@ -51,11 +51,11 @@
         <li><a href="{{ route('business.reports.ltci_claims') }}">LTCI Claims</a></li>
     </ul>
 </li>
-@if (activeBusiness() && activeBusiness()->allows_manual_shifts)
+{{-- @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
 <li>
     <a class="has-arrow" href="{{ route('business.manual-timesheets') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Manual Timesheet</span></a>
 </li>
-@endif
+@endif --}}
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>
     <ul aria-expanded="false" class="collapse">
