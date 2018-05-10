@@ -102,13 +102,23 @@
             </div>
 
         </b-card>
+
+        <b-modal title="Create Client" v-model="createClientModal" size="lg">
+            <b-container fluid>
+                <form @keydown="createClientForm.clearError($event.target.name)">
+                    <client-create-form v-model="createClientForm"></client-create-form>
+                </form>
+            </b-container>
+        </b-modal>
     </div>
 </template>
 
 <script>
+    import ClientCreateForm from "../../forms/ClientCreateForm";
     export default {
 
         components: {
+            ClientCreateForm,
             'admin-import-form': require('./AdminImportForm'),
             'admin-import-id-row': require('./AdminImportIdRow'),
         },
@@ -132,6 +142,10 @@
                 'page': 1,
                 'itemsPerPage': 50,
                 'filtered': [],
+                'createClientModal': false,
+                'createClientForm': new Form(),
+                'createCaregiverModal': false,
+                'createCaregiverForm': new Form(),
             }
         },
 
