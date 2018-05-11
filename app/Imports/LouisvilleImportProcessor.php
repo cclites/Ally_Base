@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use Carbon\Carbon;
 
-class SarasotaImportProcessor extends BaseImportProcessor
+class LouisvilleImportProcessor extends BaseImportProcessor
 {
     /**
      * Return a text based description that summarizes what fields/techniques this import processor uses
@@ -14,22 +14,21 @@ class SarasotaImportProcessor extends BaseImportProcessor
     function getDescription()
     {
         return <<<END
-The Sarasota format uses the following column headers:
+The Louisville format uses the following column headers:
 
-CaregiverLastName
-CaregiverFirstName
-ClientLastName
-ClientFirstName
+CaregiverLast
+CaregiverFirst
+ClientLast
+ClientFirst
 Date + StartTime (clock in time)
-Hours with ModifierType === REG (Regular Hours)
-Hours with other ModifierType (OT Hours)
-RateOfPay (Caregiver Rate)
-TotalBillable / Hours (Provider Fee)
-No mileage or other expense calculations are included in this format.
+HoursWorked (Regular Hours)
+Over Time Hrs (OT Hours)
+CaregiverRate, if the row has overtime hours, divide by the overtime multiplier for the regular hour rate (Caregiver Rate)
+ReferralRate / Hours (Provider Fee)
+Mileage in dollar amounts (Divided by registry mileage_rate to get Mileage)
+No other expense calculations are included in this format.
 
-Overtime Multiplier: 1.0 (Not increased)
-
-Any rows without a caregiver name are skipped. (Total Rows)
+Overtime Multiplier: 1.5 (default but only used in reverse to calculate regular hour rate on combined rows)
 END;
 
     }
@@ -39,7 +38,7 @@ END;
      *
      * @var float
      */
-    public $overTimeMultiplier = 1.0;
+    public $overTimeMultiplier = 1.5;
 
     /**
      * Get the caregiver name in a "Last, First" format
@@ -49,8 +48,8 @@ END;
      */
     function getCaregiverName($rowNo)
     {
-        return $this->worksheet->getValue('CaregiverLastName', $rowNo) . ', '
-            . $this->worksheet->getValue('CaregiverFirstName', $rowNo);
+        return $this->worksheet->getValue('CaregiverLast', $rowNo) . ', '
+            . $this->worksheet->getValue('CaregiverFirst', $rowNo);
     }
 
     /**
@@ -61,8 +60,8 @@ END;
      */
     function getClientName($rowNo)
     {
-        return $this->worksheet->getValue('ClientLastName', $rowNo) . ', '
-            . $this->worksheet->getValue('ClientFirstName', $rowNo);
+        return $this->worksheet->getValue('ClientLast', $rowNo) . ', '
+            . $this->worksheet->getValue('ClientFirst', $rowNo);
     }
 
     /**
@@ -87,10 +86,7 @@ END;
      */
     function getRegularHours($rowNo)
     {
-        if ($this->worksheet->getValue('ModifierType', $rowNo) === 'REG') {
-            return (float) $this->worksheet->getValue('Hours', $rowNo);
-        }
-        return 0.0;
+        return (float) $this->worksheet->getValue('HoursWorked', $rowNo);
     }
 
     /**
@@ -101,10 +97,7 @@ END;
      */
     function getOvertimeHours($rowNo)
     {
-        if ($this->worksheet->getValue('ModifierType', $rowNo) !== 'REG') {
-            return (float) $this->worksheet->getValue('Hours', $rowNo);
-        }
-        return 0.0;
+        return (float) $this->worksheet->getValue('Over Time Hrs', $rowNo);
     }
 
     /**
@@ -116,9 +109,10 @@ END;
      */
     function getCaregiverRate($rowNo, $overtime = false)
     {
-        $rate = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('RateOfPay', $rowNo));
-        if ($overtime) {
-            return round(bcmul($rate, $this->overTimeMultiplier, 4), 2);
+        $rate = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('CaregiverRate', $rowNo));
+        // Reverse the overtime multiplier for Louisville (Overtime rate is given in worksheet for combined rows)
+        if (!$overtime && $this->getOvertimeHours($rowNo) > 0) {
+            return round(bcdiv($rate, $this->overTimeMultiplier, 4), 2);
         }
         return $rate;
     }
@@ -132,8 +126,8 @@ END;
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        $billTotal = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('TotalBillable', $rowNo));
-        $hours = (float) $this->worksheet->getValue('Hours', $rowNo);
+        $billTotal = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('ReferralRate', $rowNo));
+        $hours = (float) $this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo);
         // Divide bill total by total hours to get provider hourly rate
         return round($billTotal / $hours, 2);
     }
@@ -146,7 +140,12 @@ END;
      */
     function getMileage($rowNo)
     {
-        return 0.0;
+        $mileageAmount = $this->worksheet->getValue('Mileage', $rowNo);
+        $mileageRate = $this->business->mileage_rate;
+        return round(
+            bcdiv($mileageAmount, $mileageRate, 4),
+            2
+        );
     }
 
     /**
@@ -168,8 +167,6 @@ END;
      */
     function skipRow($rowNo)
     {
-        // Skip if caregiver name is empty
-        $name = trim($this->getCaregiverName($rowNo));
-        return empty($name);
+        return false;
     }
 }

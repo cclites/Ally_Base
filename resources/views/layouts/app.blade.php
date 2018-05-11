@@ -82,13 +82,16 @@
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
             <div class="row page-titles">
-                <div class="col-md-5 col-8 align-self-center">
+                <div class="col-md-6 col-lg-8 align-self-center">
                     <h3 class="text-themecolor">@yield('title', 'Dashboard')</h3>
                     <ol class="breadcrumb">
                         @yield('breadcrumbs')
                     </ol>
                 </div>
-                <div class="col-md-7 col-4 align-self-center">
+                <div class="col-md-6 col-lg-4 hidden-xs-down pt-3">
+                    @if (in_array(auth()->user()->role_type, ['admin', 'office_user']))
+                        <quick-search></quick-search>
+                    @endif
                     {{--<div class="d-flex m-t-10 justify-content-end">--}}
                         {{--<div class="d-flex m-r-20 m-l-10 hidden-md-down">--}}
                             {{--<div class="chart-text m-r-10">--}}

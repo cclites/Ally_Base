@@ -4,7 +4,7 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row class="mb-2">
             <b-col sm="6">
                 <b-row>
                     <b-col cols="6">
@@ -22,7 +22,10 @@
                 </b-row>
             </b-col>
         </b-row>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :fields="fields"
                      :items="filteredItems"
@@ -55,6 +58,7 @@
             return {
                 items: [],
                 sortBy: null,
+                loading: true,
                 sortDesc: null,
                 clients: [],
                 caregivers: [],
@@ -104,6 +108,7 @@
 
         methods: {
             loadData() {
+                this.loading = true;
                 let component = this;
                 axios.get('/business/reports/client_caregivers?json=1')
                     .then(function(response) {
@@ -113,6 +118,10 @@
                         else {
                             component.items = [];
                         }
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 

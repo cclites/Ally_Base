@@ -47,6 +47,11 @@ abstract class BaseImportProcessor implements ImportProcessor
         $collection = collect();
 
         for($i=2, $n=$this->worksheet->getRowCount(); $i<=$n; $i++) {
+
+            if ($this->skipRow($i)) {
+                continue;
+            }
+
             $shift = null;
             if ($this->getRegularHours($i) > 0) {
                 $shift = $this->addRegularShift($collection, $i);
@@ -54,6 +59,7 @@ abstract class BaseImportProcessor implements ImportProcessor
             if ($this->getOvertimeHours($i) > 0) {
                 $this->addOvertimeShift($collection, $i, $shift);
             }
+
         }
 
         return $collection;

@@ -1,7 +1,7 @@
 <template>
     <b-card title="Clients without Email">
         <div class="table-responsive">
-            <b-table :items="items" :fields="fields">
+            <b-table :items="items" :fields="fields" show-empty>
                 <template slot="link_to_client" scope="data">
                     <a :href="'/business/clients/' + data.item.id" class="btn btn-secondary">
                         <i class="fa fa-edit"></i>

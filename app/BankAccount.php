@@ -6,6 +6,7 @@ use App\Contracts\ChargeableInterface;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
+use App\Traits\HasAllyFeeTrait;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 
@@ -45,6 +46,7 @@ use Illuminate\Database\Eloquent\Model;
 class BankAccount extends Model implements ChargeableInterface
 {
     use ChargedTransactionsTrait;
+    use HasAllyFeeTrait;
 
     protected $table = 'bank_accounts';
     protected $guarded = ['id'];
@@ -99,7 +101,7 @@ class BankAccount extends Model implements ChargeableInterface
     }
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
 
     public static function getAccountTypes()
@@ -184,5 +186,15 @@ class BankAccount extends Model implements ChargeableInterface
     public function persistChargeable()
     {
         return $this->save();
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        return (float) config('ally.bank_account_fee');
     }
 }

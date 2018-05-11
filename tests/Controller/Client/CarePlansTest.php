@@ -82,8 +82,8 @@ class CarePlansTest extends TestCase
         $plan2 = $this->createCarePlan();
         $this->createSchedule(Carbon::parse('yesterday'), $plan2);
         $this->createSchedule(Carbon::parse('today'), $plan2);
-        $this->createSchedule(Carbon::parse('next monday'), $plan2);
-        $this->createSchedule(Carbon::parse('next tuesday'), $plan2);
+        $this->createSchedule(Carbon::parse('today +7 days'), $plan2);
+        $this->createSchedule(Carbon::parse('today +8 days'), $plan2);
         
         $this->json('get', $this->getRoute())
             ->assertJsonFragment([
@@ -113,8 +113,8 @@ class CarePlansTest extends TestCase
     public function if_a_care_plan_is_deleted_it_should_be_removed_only_from_future_schedules()
     {
         $plan = $this->createCarePlan();
-        $schedule = $this->createSchedule(Carbon::parse('next monday'), $plan);
-        $schedule2 = $this->createSchedule(Carbon::parse('next tuesday'), $plan);
+        $schedule = $this->createSchedule(Carbon::parse('today +7 days'), $plan);
+        $schedule2 = $this->createSchedule(Carbon::parse('today +8 days'), $plan);
         $schedule3 = $this->createSchedule(Carbon::parse('yesterday'), $plan);
 
         $this->json('delete', $this->getRoute('destroy', $plan))

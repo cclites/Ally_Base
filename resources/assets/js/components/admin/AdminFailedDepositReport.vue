@@ -8,7 +8,9 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -37,6 +39,7 @@
                 sortDesc: false,
                 filter: null,
                 items: [],
+                loading: false,
                 business_id: "",
                 businesses: [],
                 fields: [
@@ -82,6 +85,7 @@
 
         methods: {
             loadItems() {
+                this.loading = true;
                 axios.get('/admin/deposits/failed?json=1')
                     .then(response => {
                         this.items = response.data.map(function(item) {
@@ -90,6 +94,10 @@
                             item.last_action = (item.transaction && item.transaction.last_history) ? item.transaction.last_history.created_at : '';
                             return item;
                         });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             markSuccessful(deposit) {

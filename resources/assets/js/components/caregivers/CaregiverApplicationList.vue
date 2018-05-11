@@ -50,52 +50,56 @@
             </b-col>
 
             <b-col lg="2">
-                <b-button @click="filter" variant="success">
+                <b-button @click="filter" variant="info">
                     Filter
                 </b-button>
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :sort-by.sync="sortBy"
-                     @filtered="onFiltered"
-            >
-                <template slot="created_at" scope="data">
-                    {{ dateFormat(data.item.created_at) }}
-                </template>
-                <template slot="name" scope="data">
-                    {{ data.item.first_name }} {{ data.item.last_name }}
-                </template>
-                <template slot="city" scope="data">
-                    {{ data.item.city }} {{ data.item.zip }}
-                </template>
-                <template slot="position" scope="data">
-                    <span v-if="data.item.position">{{ data.item.position.name }}</span>
-                </template>
-                <template slot="status" scope="data">
-                    <span v-if="data.item.status">{{ data.item.status.name }}</span>
-                </template>
-                <template slot="action" scope="data">
-                    <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-eye"></i></a>
-                    <a :href="'/business/caregivers/applications/' + data.item.id + '/edit'" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
-                    <a :href="'/business/caregivers/create?app_id=' + data.item.id" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</a>
-                </template>
-            </b-table>
-        </div>
+        <loading-card v-show="loading"></loading-card>
 
-        <b-row>
-            <b-col lg="6">
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
+        <div v-show="! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :current-page="currentPage"
+                        :per-page="perPage"
+                        :sort-by.sync="sortBy"
+                        @filtered="onFiltered"
+                >
+                    <template slot="created_at" scope="data">
+                        {{ dateFormat(data.item.created_at) }}
+                    </template>
+                    <template slot="name" scope="data">
+                        {{ data.item.first_name }} {{ data.item.last_name }}
+                    </template>
+                    <template slot="city" scope="data">
+                        {{ data.item.city }} {{ data.item.zip }}
+                    </template>
+                    <template slot="position" scope="data">
+                        <span v-if="data.item.position">{{ data.item.position.name }}</span>
+                    </template>
+                    <template slot="status" scope="data">
+                        <span v-if="data.item.status">{{ data.item.status.name }}</span>
+                    </template>
+                    <template slot="action" scope="data">
+                        <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-eye"></i></a>
+                        <a :href="'/business/caregivers/applications/' + data.item.id + '/edit'" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
+                        <a :href="'/business/caregivers/create?app_id=' + data.item.id" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</a>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6">
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
+        </div>
     </b-card>
 </template>
 
@@ -123,6 +127,7 @@
                 currentPage: 1,
                 sortBy: null,
                 selectedItem: {},
+                loading: false,
                 fields: [
                     {
                         key: 'created_at',
@@ -193,12 +198,16 @@
                 return moment(date).format('L');
             },
             filter() {
+                this.loading = true;
                 axios.post('/business/caregivers/applications/search', this.searchForm)
                     .then(response => {
                         this.items = response.data;
-                    }).catch(error => {
-                    console.error(error.response);
-                });
+                        this.loading = false;
+                    })
+                    .catch(error => {
+                        this.loading = false;
+                        console.error(error.response);
+                    });
             }
         }
     }

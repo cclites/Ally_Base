@@ -52,7 +52,6 @@ class ShiftsReport extends BaseReport
     {
         $shifts = $this->query->with(['caregiver', 'client', 'statusHistory'])->get();
         $rows = $shifts->map(function(Shift $shift) {
-            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
             $row = [
                 'id' => $shift->id,
                 'checked_in_time' => $shift->checked_in_time->format('c'),
@@ -65,15 +64,15 @@ class ShiftsReport extends BaseReport
                 'caregiver_name' => optional($shift->caregiver)->nameLastFirst(),
                 'caregiver_rate' => $shift->caregiver_rate,
                 'provider_fee' => $shift->provider_fee,
-                'ally_fee' => number_format($allyFee, 2),
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2),
+                'ally_fee' => $shift->getAllyHourlyRate(),
+                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $shift->getAllyHourlyRate(), 2),
                 'other_expenses' => number_format($shift->other_expenses, 2),
                 'mileage' => number_format($shift->mileage, 2),
                 'mileage_costs' => number_format($shift->costs()->getMileageCost(), 2),
                 'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
                 'provider_total' => number_format($shift->costs()->getProviderFee(), 2),
                 'ally_total' => number_format($shift->costs()->getAllyFee(), 2),
-                'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
+                'ally_pct' => $shift->getAllyPercentage(),
                 'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),

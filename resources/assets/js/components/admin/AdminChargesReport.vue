@@ -35,7 +35,10 @@
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -76,6 +79,7 @@
                 business_id: "",
                 businesses: [],
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'id',
@@ -137,6 +141,7 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                this.loading = true;
                 axios.get('/admin/charges?json=1&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.items = response.data.map(function(item) {
@@ -147,6 +152,10 @@
                             item.status = (item.transaction && item.transaction.last_history) ? item.transaction.last_history.status : '';
                             return item;
                         });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             markSuccessful(charge) {

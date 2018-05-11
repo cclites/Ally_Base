@@ -52,33 +52,38 @@
                 <h4>{{ this.shiftMsg }}</h4>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
-            </b-col>
-        </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-                <template slot="status" scope="data">
-                    <span style="color: red; font-weight: bold" v-if="data.value == 'failed'">{{ data.value }}</span>
-                    <span style="color: darkgreen" v-else>{{ data.value }}</span>
-                </template>
-                <template slot="success" scope="data">
-                    <span style="color: red; font-weight: bold" v-if="data.value == 0">No</span>
-                    <span style="color: darkgreen" v-else>Yes</span>
-                </template>
-                <template slot="actions" scope="row">
-                    <b-btn size="sm" :href="'/admin/transactions/' + row.item.transaction_id" v-if="row.item.transaction_id">View Transaction</b-btn>
-                    <b-btn size="sm" @click="markFailed(row.item)" variant="success" v-if="row.item.success">Mark Failed</b-btn>
-                    <b-btn size="sm" @click="markSuccessful(row.item)" variant="danger" v-else>Mark Successful</b-btn>
-                </template>
-            </b-table>
+
+        <loading-card v-show="loading"></loading-card>
+        
+        <div v-if="! loading">
+            <b-row>
+                <b-col class="text-right">
+                    <b-form-input v-model="filter" placeholder="Type to Search" />
+                </b-col>
+            </b-row>
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :filter="filter"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                    <template slot="status" scope="data">
+                        <span style="color: red; font-weight: bold" v-if="data.value == 'failed'">{{ data.value }}</span>
+                        <span style="color: darkgreen" v-else>{{ data.value }}</span>
+                    </template>
+                    <template slot="success" scope="data">
+                        <span style="color: red; font-weight: bold" v-if="data.value == 0">No</span>
+                        <span style="color: darkgreen" v-else>Yes</span>
+                    </template>
+                    <template slot="actions" scope="row">
+                        <b-btn size="sm" :href="'/admin/transactions/' + row.item.transaction_id" v-if="row.item.transaction_id">View Transaction</b-btn>
+                        <b-btn size="sm" @click="markFailed(row.item)" variant="success" v-if="row.item.success">Mark Failed</b-btn>
+                        <b-btn size="sm" @click="markSuccessful(row.item)" variant="danger" v-else>Mark Successful</b-btn>
+                    </template>
+                </b-table>
+            </div>
         </div>
     </b-card>
 </template>
@@ -102,6 +107,7 @@
                 shiftId: this.initialShiftId,
                 shiftMsg: "",
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'id',
@@ -163,6 +169,7 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                this.loading = true;
                 let shiftId = this.shiftId;
                 axios.get('/admin/deposits?json=1&shift_id=' + shiftId + '&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
@@ -177,6 +184,10 @@
                         if (shiftId) {
                             this.shiftMsg = "Below are deposits relating ONLY to shift ID " + shiftId;
                         }
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             loadItemsWithoutShift() {

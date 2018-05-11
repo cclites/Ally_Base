@@ -3,7 +3,7 @@ namespace App\Contracts;
 
 use App\GatewayTransaction;
 
-interface ChargeableInterface
+interface ChargeableInterface extends HasAllyFeeInterface
 {
     /**
      * @param float $amount

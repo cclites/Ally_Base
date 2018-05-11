@@ -70,49 +70,54 @@
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                :items="items"
-                :fields="fields"
-                :sort-by.sync="sortBy"
-                :sort-desc.sync="sortDesc"
-                :per-page="perPage"
-                :current-page="currentPage"
-            >
-                <template slot="checked_in_time" scope="data">
-                    {{ dayFormat(data.value) }}
-                </template>
-                <template slot="business_id" scope="{value:id}">
-                    {{ provider(id).name }}
-                </template>
-                <template slot="EVV" scope="data">
-                    <span v-if="data.value" style="color: green">
-                        <i class="fa fa-check-square-o"></i>
-                    </span>
-                    <span v-else style="color: darkred">
-                        <i class="fa fa-times-rectangle-o"></i>
-                    </span>
-                </template>
-                <template slot="bottom-row" scope="data">
-                    <th colspan="5" class="text-right">Totals</th>
-                    <th>{{ sum('hours') }}</th>
-                    <th>{{ sum('mileage_costs') }}</th>
-                    <th>{{ sum('shift_total') }}</th>
-                    <th>{{ sum('caregiver_total') }}</th>
-                    <th>{{ sum('provider_total') }}</th>
-                    <th>{{ sum('ally_total') }}</th>
-                    <th colspan="2"></th>
-                </template>
-            </b-table>
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                    :items="items"
+                    :fields="fields"
+                    :sort-by.sync="sortBy"
+                    :sort-desc.sync="sortDesc"
+                    :per-page="perPage"
+                    :current-page="currentPage"
+                >
+                    <template slot="checked_in_time" scope="data">
+                        {{ dayFormat(data.value) }}
+                    </template>
+                    <template slot="business_id" scope="{value:id}">
+                        {{ provider(id).name }}
+                    </template>
+                    <template slot="EVV" scope="data">
+                        <span v-if="data.value" style="color: green">
+                            <i class="fa fa-check-square-o"></i>
+                        </span>
+                        <span v-else style="color: darkred">
+                            <i class="fa fa-times-rectangle-o"></i>
+                        </span>
+                    </template>
+                    <template slot="bottom-row" scope="data">
+                        <th colspan="5" class="text-right">Totals</th>
+                        <th>{{ sum('hours') }}</th>
+                        <th>{{ sum('mileage_costs') }}</th>
+                        <th>{{ sum('shift_total') }}</th>
+                        <th>{{ sum('caregiver_total') }}</th>
+                        <th>{{ sum('provider_total') }}</th>
+                        <th>{{ sum('ally_total') }}</th>
+                        <th colspan="2"></th>
+                    </template>
+                </b-table>
+            </div>
+            <b-row>
+                <b-col lg="6">
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
         </div>
-        <b-row>
-            <b-col lg="6">
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
     </b-card>
 </template>
 
@@ -146,6 +151,7 @@
                 caregivers: [],
                 toggle_statuses: false,
                 statuses: [],
+                loading: false,
                 items: [],
                 fields: [
                     {
@@ -277,6 +283,8 @@
             },
             
             loadItems() {
+                this.loading = true;
+
                 let params = {
                     start_date: this.start_date,
                     end_date: this.end_date,
@@ -291,6 +299,10 @@
                     .then(response => {
                         this.items = response.data;
                         this.totalRows = response.data.length;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 

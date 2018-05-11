@@ -80,6 +80,7 @@ class ShiftController extends BaseController
 
         // Load needed relationships
         $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
+        $shift->append(['ally_pct']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();

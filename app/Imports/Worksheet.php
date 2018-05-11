@@ -83,14 +83,21 @@ class Worksheet
         return true;
     }
 
-    public function getValue($header, $rowNo)
+    /**
+     * @param $header
+     * @param $rowNo
+     * @param bool $evaluate   Whether or not to return a plain string or to evaluate a formula
+     * @return false|null|string
+     * @throws \PHPExcel_Exception
+     */
+    public function getValue($header, $rowNo, $evaluate = false)
     {
         $column = $this->findColumn($header);
         if ($column === false) {
             return null;
         }
         $cell = $this->sheet->getCell($column . $rowNo);
-        $value = $cell->getValue();
+        $value = $evaluate ? $cell->getCalculatedValue() : $cell->getValue();
 
         if(\PHPExcel_Shared_Date::isDateTime($cell)) {
             return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));

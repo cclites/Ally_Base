@@ -100,6 +100,7 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
@@ -290,6 +291,7 @@ Route::group([
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
     Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
     Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+    Route::get('import/description/{provider}', 'Admin\ShiftImportController@getDescription')->name('import.description');
     Route::resource('imports', 'Admin\ShiftImportController');
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');

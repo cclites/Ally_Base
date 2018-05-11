@@ -48,6 +48,16 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="allows_manual_shifts" text="Allow Caregivers to submit shift information manually."></input-help>
                         </b-form-group>
+
+                        <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions">
+                            <b-form-select id="timesheet_exceptions"
+                                           v-model="businessSettings.timesheet_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -78,6 +88,16 @@
                                 <option value="unassigned">Unassigned Shifts</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                        </b-form-group>
+
+                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-select id="location_exceptions"
+                                           v-model="businessSettings.location_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -118,7 +138,7 @@
                         </b-form-group>
                         <b-form-group label="Timezone">
                             <b-form-select id="timezone" v-model="businessSettings.timezone" tabindex="13">
-                                <option v-for="timezone in timezones" :value="timezone">{{ timezone }}</option>
+                                <option v-for="timezone in timezones" :value="timezone" :key="timezone">{{ timezone }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-btn @click="update" variant="info">
@@ -188,6 +208,8 @@
                     auto_confirm: this.business.auto_confirm,
                     ask_on_confirm: this.business.ask_on_confirm,
                     allows_manual_shifts: this.business.allows_manual_shifts,
+                    location_exceptions: this.business.location_exceptions,
+                    timesheet_exceptions: this.business.timesheet_exceptions,
                 }),
                 timezones: [
                     "America/New_York",

@@ -8,6 +8,31 @@ class AcornImportProcessor extends BaseImportProcessor
 {
 
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription()
+    {
+        return <<<END
+The Acorn format uses the following column headers:
+
+Caregiver Name (first and last)
+Client Name (first and last)
+Actual Clock In (clock in time)
+Pay Regular Hours (Regular Hours)
+Pay OT Hours (OT Hours)
+Payroll Rate (Caregiver Rate)
+Bill Total / Total Hours (Provider Fee)
+Mileage in dollar amounts (Divided by registry mileage_rate to get Mileage)
+Expenses in dollar amounts (Other Expenses)
+
+Overtime Multiplier: 1.5 (Default)
+END;
+
+    }
+
+    /**
      * Get the caregiver name in a "Last, First" format
      *
      * @param $rowNo
@@ -74,7 +99,7 @@ class AcornImportProcessor extends BaseImportProcessor
     {
         $rate = (float) $this->worksheet->getValue('Payroll Rate', $rowNo);
         if ($overtime) {
-            return bcmul($rate, $this->overTimeMultiplier, 2);
+            return round(bcmul($rate, $this->overTimeMultiplier, 4), 2);
         }
         return $rate;
     }
@@ -88,7 +113,8 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getProviderFee($rowNo, $overtime = false)
     {
-        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo);
+        // Get evaluated Bill Total column
+        $billTotal = (float) $this->worksheet->getValue('Bill Total', $rowNo, true);
         // Divide bill total by total hours to get provider hourly rate
         return round($billTotal / ($this->getRegularHours($rowNo) + $this->getOvertimeHours($rowNo)), 2);
     }
@@ -101,7 +127,12 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getMileage($rowNo)
     {
-        return 0.0;
+        $mileageAmount = $this->worksheet->getValue('Mileage', $rowNo);
+        $mileageRate = $this->business->mileage_rate;
+        return round(
+            bcdiv($mileageAmount, $mileageRate, 4),
+            2
+        );
     }
 
     /**
@@ -112,7 +143,17 @@ class AcornImportProcessor extends BaseImportProcessor
      */
     function getOtherExpenses($rowNo)
     {
-        return 0.0;
+        return (float) $this->worksheet->getValue('Expenses', $rowNo);
     }
 
+    /**
+     * Determine if the row reflects a valid shift, or if it should be skipped (ex. Summary or Total row)
+     *
+     * @param $rowNo
+     * @return bool
+     */
+    function skipRow($rowNo)
+    {
+        return false;
+    }
 }

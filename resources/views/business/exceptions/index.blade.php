@@ -22,7 +22,7 @@
         <div class="tab-pane active" id="active-exceptions" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-exception-list :exceptions="{{ $exceptions }}" title="Active Exceptions"></business-exception-list>
+                    <business-exception-list :exceptions="{{ $exceptions }}" title="Active Exceptions" :hide-acknowledged="1" ></business-exception-list>
                 </div>
             </div>
         </div>
