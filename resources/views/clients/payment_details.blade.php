@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/payment-history">Payment History</a></li>
             <li class="breadcrumb-item active">Payment Details</li>
             @break
-        @case('office_user')
+        @default
             <li class="breadcrumb-item"><a href="{{ url()->previous() }}#client_payment_history">Client Statements</a></li>
             <li class="breadcrumb-item active">Payment Details</li>
             @break
