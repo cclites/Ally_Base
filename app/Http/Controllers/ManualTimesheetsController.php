@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateManualTimesheetsRequest;
 use App\Responses\ErrorResponse;
+use App\Timesheet;
+use App\TimesheetEntry;
 
 class ManualTimesheetsController extends Controller
 {
@@ -51,8 +53,18 @@ class ManualTimesheetsController extends Controller
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        print_r($request->validated());
-        // dd(request()->all());
+        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['shifts' => []  ]));
+        $timesheet->business_id = activeBusiness()->id;
+        $timesheet->save();
+        
+        foreach($request->validated()['shifts'] as $shift) {
+            if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => []]))) {
+                $entry->activities()->sync($shift['activities']);
+            } 
+        }
+
+        // TODO: create exception for timesheet
+        // TODO: return proper response
     }
 
     /**
