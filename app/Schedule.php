@@ -76,6 +76,14 @@ class Schedule extends Model
         });
     }
 
+    ///////////////////////////////////////
+    /// Schedule Statuses
+    ///////////////////////////////////////
+
+    const OK = 'OK';
+    const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
+    const CLIENT_CANCELED = 'CLIENT_CANCELED';
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
