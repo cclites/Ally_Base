@@ -8,6 +8,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header text-white bg-info">Login</div>
+
                 <div class="card-body">
                     <form class="form-horizontal" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
