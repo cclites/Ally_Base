@@ -69,7 +69,7 @@
                 switch (this.roleType) {
                     case 'client':
                         return '/payment-history/' + this.payment.id + '/print';
-                    case 'office_user':
+                    default:
                         return '/business/clients/payments/' + this.payment.id + '/print';
                 }
             }
