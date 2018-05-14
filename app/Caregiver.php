@@ -310,6 +310,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     {
         $this->schedules()
              ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->update(['caregiver_id' => null]);
     }
 

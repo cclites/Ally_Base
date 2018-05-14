@@ -374,6 +374,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     {
         $this->schedules()
              ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->delete();
     }
 
