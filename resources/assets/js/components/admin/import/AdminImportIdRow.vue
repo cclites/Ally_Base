@@ -11,8 +11,10 @@
             <b-popover :show.sync="clientPopover"
                        :target="`clientIdentifier${index}`"
                        placement="top"
-                       title="Client Mapping"
             >
+                <template slot="title">
+                    Client Mapping <b-button size="sm" @click="emitCreateClient()">Create a New Client</b-button>
+                </template>
                 <div class="form-group" v-if="clientPopover">
                     <select2 class="form-control" v-model="model.client_id" ref="client">
                         <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
@@ -32,8 +34,10 @@
             <b-popover :show.sync="caregiverPopover"
                        :target="`cgIdentifier${index}`"
                        placement="top"
-                       title="Caregiver Mapping"
             >
+                <template slot="title">
+                    Caregiver Mapping <b-button size="sm" @click="emitCreateCaregiver()">Create a New Caregiver</b-button>
+                </template>
                 <div class="form-group" v-if="caregiverPopover">
                     <select2 class="form-control" v-model="model.caregiver_id" ref="caregiver">
                         <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
@@ -99,19 +103,22 @@
             dateToLocal(val) {
                 return moment.utc(val, 'YYYY-MM-DD HH:mm:ss').local().format(moment.HTML5_FMT.DATETIME_LOCAL);
             },
+
             dateFromLocal(val) {
                 return moment(val, moment.HTML5_FMT.DATETIME_LOCAL).utc().format('YYYY-MM-DD HH:mm:ss');
             },
+
             getNameById(array, id) {
                 let index = array.findIndex(item => item.id == id);
                 if (index < 0) return "";
                 return array[index].nameLastFirst;
             },
+
             async saveMapping(type) {
                 let id = this.model[`${type}_id`];
                 let name = this.identifiers[`${type}_name`];
 
-                // POST to REST endpoint @todo
+                // POST to REST endpoint
                 const form = new Form({ id, name });
                 const response = await form.post('/admin/import/map/' + type);
 
@@ -121,6 +128,16 @@
                 if (this[`${type}Popover`]) {
                     this[`${type}Popover`] = false;
                 }
+            },
+
+            emitCreateClient() {
+                this.clientPopover = false;
+                this.$emit('createClient', this.identifiers.client_name);
+            },
+
+            emitCreateCaregiver() {
+                this.caregiverPopover = false;
+                this.$emit('createCaregiver', this.identifiers.caregiver_name);
             }
         },
 
@@ -163,4 +180,5 @@
     }
     .red { color: red }
     .bold { font-weight: bold; }
+    .popover { max-width: 400px; }
 </style>

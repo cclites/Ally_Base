@@ -104,7 +104,7 @@ class CaregiverController extends BaseController
             $caregiver->setAutoEmail();
         }
         if ($this->business()->caregivers()->save($caregiver)) {
-            return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id], route('business.caregivers.show', [$caregiver->id]));
+            return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id, 'url' => route('business.caregivers.show', [$caregiver->id])]);
         }
 
         return new ErrorResponse(500, 'The caregiver could not be created.');

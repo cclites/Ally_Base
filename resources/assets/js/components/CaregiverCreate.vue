@@ -65,7 +65,10 @@
 
             async saveProfile() {
                 try {
-                    await this.form.post('/business/caregivers');
+                    const response = await this.form.post('/business/caregivers');
+                    if (response.data.data.url) {
+                        window.location.href = response.data.data.url;
+                    }
                 }
                 catch(error) {
                     switch(error.response.status) {

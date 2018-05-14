@@ -134,7 +134,7 @@ class ClientController extends BaseController
                 'status' => $data['onboard_status']
             ]);
             $client->onboardStatusHistory()->save($history);
-            return new CreatedResponse('The client has been created.', ['id' => $client->id], route('business.clients.edit', [$client->id]));
+            return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
         return new ErrorResponse(500, 'The client could not be created.');

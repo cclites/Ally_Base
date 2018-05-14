@@ -51,6 +51,8 @@
                                              :key="row.index"
                                              :index="row.index"
                                              @mappedIdentifier="mapIdentifier"
+                                             @createClient="loadCreateClient"
+                                             @createCaregiver="loadCreateCaregiver"
                         ></admin-import-id-row>
                         </tbody>
                     </table>
@@ -103,21 +105,49 @@
 
         </b-card>
 
-        <b-modal title="Create Client" v-model="createClientModal" size="lg">
-            <b-container fluid>
+        <b-modal title="Create Client" v-model="createClientModal" size="lg" @ok="saveCreateClient()">
+            <b-container fluid v-if="createClientModal" :key="createClientName">
                 <form @keydown="createClientForm.clearError($event.target.name)">
                     <client-create-form v-model="createClientForm"></client-create-form>
                 </form>
             </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="info" @click="saveCreateClient()" :disabled="submitting">
+                    <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    <i class="fa fa-save" v-show="!submitting"></i>
+                    Create Client
+                </b-btn>
+                <b-btn variant="default" @click="createClientModal=false">Close</b-btn>
+            </div>
+        </b-modal>
+
+        <b-modal title="Create Caregiver" v-model="createCaregiverModal" size="lg">
+            <b-container fluid v-if="createCaregiverModal" :key="createCaregiverName">
+                <form @keydown="createCaregiverForm.clearError($event.target.name)">
+                    <caregiver-create-form v-model="createCaregiverForm"></caregiver-create-form>
+                </form>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="info" @click="saveCreateCaregiver()" :disabled="submitting">
+                    <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
+                    <i class="fa fa-save" v-show="!submitting"></i>
+                    Create Caregiver
+                </b-btn>
+                <b-btn variant="default" @click="createCaregiverModal=false">Close</b-btn>
+            </div>
         </b-modal>
     </div>
 </template>
 
 <script>
     import ClientCreateForm from "../../forms/ClientCreateForm";
+    import CaregiverCreateForm from "../../forms/CaregiverCreateForm";
+    import axios from "axios";
+
     export default {
 
         components: {
+            CaregiverCreateForm,
             ClientCreateForm,
             'admin-import-form': require('./AdminImportForm'),
             'admin-import-id-row': require('./AdminImportIdRow'),
@@ -144,8 +174,10 @@
                 'filtered': [],
                 'createClientModal': false,
                 'createClientForm': new Form(),
+                'createClientName': '',
                 'createCaregiverModal': false,
                 'createCaregiverForm': new Form(),
+                'createCaregiverName': '',
             }
         },
 
@@ -278,7 +310,108 @@
                     this.draft = false;
                     this.imported = [];
                 }
-            }
+            },
+
+            loadCreateClient(name)
+            {
+                this.createClientName = name;
+                this.createClientForm = new Form({
+                    'firstname': name.split(',')[1],
+                    'lastname': name.split(',')[0],
+                    'no_email': 1,
+                    'username': moment().unix(),
+                });
+                this.createClientModal = true;
+            },
+
+            loadCreateCaregiver(name)
+            {
+                this.createCaregiverName = name;
+                let password = _(12).range().map(_.partial(_.random, 33, 126, false)).map(_.ary(String.fromCharCode)).join('');
+                this.createCaregiverForm = new Form({
+                    'firstname': name.split(',')[1],
+                    'lastname': name.split(',')[0],
+                    'no_email': 1,
+                    'username': moment().unix(),
+                    'password': password,
+                    'password_confirmation': password,
+                });
+                this.createCaregiverModal = true;
+            },
+
+            getBusinessId() {
+                let first = this.imported[0];
+                if (!first || !first.shift || !first.shift.business_id) {
+                    alert('Unable to determine the business ID from the import data.');
+                    return false;
+                }
+                return first.shift.business_id;
+            },
+
+            async saveCreateClient() {
+                this.submitting = true;
+
+                let business_id = this.getBusinessId();
+                if (!business_id) return;
+
+                try {
+                    // Ensure  the active business matches the import business
+                    await axios.post('/admin/businesses/active_business', {business_id});
+
+                    // Store the client
+                    const response = await this.createClientForm.post('/business/clients');
+                    const id = response.data.data.id;
+                    const name = this.createClientName;
+                    if (id) {
+                        // Save the mapping
+                        axios.post('/admin/import/map/client', {id, name});
+                        this.mapIdentifier('client', name, id);
+
+                        // Close the modal
+                        this.createClientModal = false;
+                    }
+
+                    // Reload the client list
+                    this.loadClients();
+                }
+                catch(error) {
+                    console.log(error);
+                }
+                this.submitting = false;
+            },
+
+            async saveCreateCaregiver()
+            {
+                this.submitting = true;
+
+                let business_id = this.getBusinessId();
+                if (!business_id) return;
+
+                try {
+                    // Ensure  the active business matches the import business
+                    await axios.post('/admin/businesses/active_business', {business_id});
+
+                    // Store the client
+                    const response = await this.createCaregiverForm.post('/business/caregivers');
+                    const id = response.data.data.id;
+                    const name = this.createCaregiverName;
+                    if (id) {
+                        // Save the mapping
+                        axios.post('/admin/import/map/caregiver', {id, name});
+                        this.mapIdentifier('caregiver', name, id);
+
+                        // Close the modal
+                        this.createCaregiverModal = false;
+                    }
+
+                    // Reload the caregiver list
+                    this.loadCaregivers();
+                }
+                catch(error) {
+                    console.log(error);
+                }
+                this.submitting = false;
+            },
         },
 
         watch: {

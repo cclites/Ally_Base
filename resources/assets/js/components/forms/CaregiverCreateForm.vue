@@ -17,7 +17,7 @@
                         id="lastname"
                         name="lastname"
                         type="text"
-                        v-model="form.lastname"
+                        v-model.lazy="form.lastname"
                         required
                 >
                 </b-form-input>
@@ -120,16 +120,16 @@
         data() {
             return {
                 form: new Form({
-                    firstname: this.value.firstname,
-                    lastname: this.value.lastname,
-                    email: this.value.email,
-                    no_email: this.value.no_email,
-                    username: this.value.username,
-                    date_of_birth: this.value.date_of_birth,
-                    ssn: this.value.ssn,
-                    password: null,
-                    password_confirmation: null,
-                    title: this.value.title,
+                    firstname: this.value.firstname || null,
+                    lastname: this.value.lastname || null,
+                    email: this.value.email || null,
+                    no_email: !!this.value.no_email,
+                    username: this.value.username || null,
+                    date_of_birth: this.value.date_of_birth || null,
+                    ssn: this.value.ssn || null,
+                    password: this.value.password || null,
+                    password_confirmation: this.value.password_confirmation || null,
+                    title: this.value.title || null,
                 }),
             }
         },

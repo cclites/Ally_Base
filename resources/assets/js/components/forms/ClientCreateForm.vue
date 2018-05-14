@@ -112,15 +112,15 @@
         data() {
             return {
                 form: new Form({
-                    firstname: this.value.firstname,
-                    lastname: this.value.lastname,
-                    email: this.value.email,
-                    no_email: this.value.no_email,
-                    username: this.value.username,
-                    date_of_birth: this.value.date_of_birth,
-                    client_type: this.value.client_type ? this.value.client_type : '',
-                    ssn: this.value.ssn,
-                    onboard_status: this.value.onboard_status ? this.value.onboard_status : '',
+                    firstname: this.value.firstname || null,
+                    lastname: this.value.lastname || null,
+                    email: this.value.email || null,
+                    no_email: !!this.value.no_email,
+                    username: this.value.username || null,
+                    date_of_birth: this.value.date_of_birth || null,
+                    client_type: this.value.client_type || "",
+                    ssn: this.value.ssn || null,
+                    onboard_status: this.value.onboard_status || "",
                     override: false,
                 }),
             }
