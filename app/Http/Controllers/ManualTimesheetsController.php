@@ -7,6 +7,7 @@ use App\Http\Requests\CreateManualTimesheetsRequest;
 use App\Responses\ErrorResponse;
 use App\Timesheet;
 use App\TimesheetEntry;
+use App\Responses\SuccessResponse;
 
 class ManualTimesheetsController extends Controller
 {
@@ -49,22 +50,31 @@ class ManualTimesheetsController extends Controller
     public function store(CreateManualTimesheetsRequest $request)
     {
         if (auth()->user()->role_type == 'caregiver' && $request->caregiver_id != auth()->user()->id) {
-            $caregiver = auth()->user();
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['shifts' => []  ]));
+        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['shifts' => [] ]));
+        $timesheet->creator_id = auth()->user()->id;
         $timesheet->business_id = activeBusiness()->id;
         $timesheet->save();
         
         foreach($request->validated()['shifts'] as $shift) {
-            if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => []]))) {
+            if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => [] ]))) {
                 $entry->activities()->sync($shift['activities']);
             } 
         }
 
-        // TODO: create exception for timesheet
-        // TODO: return proper response
+        return new SuccessResponse('Your timesheet has been submitted for approval.', ['timesheet' => $timesheet->fresh()->toArray()]);
+    }
+
+    /**
+     * View a Manual Timesheet (for Business)
+     *
+     * @return void
+     */
+    public function view()
+    {
+        return new ErrorResponse(400, "Not implemented", []);
     }
 
     /**

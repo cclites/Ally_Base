@@ -217,6 +217,8 @@ Route::group([
 
     // Route::get('manual-timesheets', 'ManualTimesheetsController@create')->name('manual-timesheets');
     // Route::post('manual-timesheets', 'ManualTimesheetsController@store');
+    Route::get('manual-timesheet/{timesheet}', 'ManualTimesheetsController@view')->name('manual-timesheet');
+    
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

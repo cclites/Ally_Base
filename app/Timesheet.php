@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Events\TimesheetCreated;
 
 class Timesheet extends Model
 {
@@ -12,6 +13,10 @@ class Timesheet extends Model
 
     protected $with = ['entries'];
     
+    protected $dispatchesEvents = [
+        'created' => TimesheetCreated::class,
+    ];
+
     //////////////////////////////////////
     /// Relationship Methods
     //////////////////////////////////////
@@ -49,6 +54,16 @@ class Timesheet extends Model
     }
 
     /**
+     * A Timesheet belongs to a Creator.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * A Timesheet belongs to a Business.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -56,6 +71,16 @@ class Timesheet extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * A Timesheet can have many SystemExceptions.
+     *
+     * @return void
+     */
+    public function exceptions()
+    {
+        return $this->morphMany(SystemException::class, 'reference');
     }
 
     ///////////////////////////////////////////

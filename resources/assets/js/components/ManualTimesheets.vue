@@ -245,6 +245,11 @@
                 this.form.submit('post', '/manual-timesheet')
                     .then( ({ data }) => {
                         console.log(data);
+                        this.shiftForm = new Form({});
+                        this.shifts = [];
+                        this.form.week = {};
+                        this.form.client_id = '';
+                        this.form.shifts = [];
                     })
                     .catch(e => {
                         console.log('submit timesheet error:');

@@ -18,6 +18,7 @@ class CreateTimesheetsTable extends Migration
             $table->unsignedInteger('business_id');
 			$table->unsignedInteger('caregiver_id');
             $table->unsignedInteger('client_id');
+            $table->unsignedInteger('creator_id');
             $table->dateTime('confirmed_at')->nullable();
             $table->dateTime('denied_at')->nullable();
             $table->timestamps();
@@ -39,7 +40,14 @@ class CreateTimesheetsTable extends Migration
                 ->on('clients')
                 ->onUpdate('CASCADE')
                 ->onDelete('RESTRICT');
+
+            $table->foreign('creator_id', 'fk_timesheets_creator_id')
+                ->references('id')
+                ->on('users')
+                ->onUpdate('CASCADE')
+                ->onDelete('RESTRICT');
         });
+
     }
 
     /**
