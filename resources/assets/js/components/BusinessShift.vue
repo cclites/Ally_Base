@@ -291,7 +291,7 @@
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
                         <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
-                        <b-button variant="success" type="submit" v-else>Save Shift</b-button>
+                        <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
                         <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
@@ -363,6 +363,7 @@
                 caregivers: [],
                 clientAllyPct: 0.05,
                 paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
+                submitting: false,
             }
         },
         mounted() {
@@ -483,6 +484,7 @@
                 }
             },
             saveShift(callback) {
+                this.submitting = true;
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
@@ -494,11 +496,13 @@
                     this.form.post('/business/shifts').then(response => {
                         this.$emit('shiftCreated', response.data.data.shift);
                         this.status = response.data.data.status;
+                        this.submitting = false;
                         if(callback) {
                             callback();
                         }
+                    }).catch(error => {
+                        this.submitting = false;
                     });
-
                 }
             },
             adminOverride() {
