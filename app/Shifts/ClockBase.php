@@ -89,4 +89,12 @@ abstract class ClockBase
     {
         $this->distance = $meters;
     }
+
+    protected function getMethod()
+    {
+        if ($this->number) {
+            return Shift::METHOD_TELEPHONY;
+        }
+        return Shift::METHOD_GEOLOCATION;
+    }
 }
