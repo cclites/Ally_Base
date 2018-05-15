@@ -12,7 +12,7 @@
                                        v-model="form.business_id"
                         >
                             <option value="">--Select Business--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="business_id" text="Select a business" />
                     </b-form-group>
@@ -21,7 +21,7 @@
                                        v-model="form.client_id"
                         >
                             <option value="">--Business Transaction--</option>
-                            <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
                         </b-form-select>
                         <input-help :form="form" field="client_id" text="Select a client or run a business transaction" />
                     </b-form-group>

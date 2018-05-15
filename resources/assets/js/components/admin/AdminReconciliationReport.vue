@@ -14,7 +14,7 @@
                                 required
                         >
                             <option value="">--Select a Client--</option>
-                            <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
                         </b-form-select>
                         <b-form-select
                                 id="caregiver_id"
@@ -23,7 +23,7 @@
                                 required
                         >
                             <option value="">--Select a Caregiver--</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
                         </b-form-select>
                         <b-form-select
                                 id="business_id"
@@ -32,7 +32,7 @@
                                 required
                         >
                             <option value="">--Select a Provider--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button @click="loadTransactions()" variant="info">Generate Report</b-button>
                     </b-form>

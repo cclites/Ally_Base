@@ -211,7 +211,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in issues" :key="issue">
+                            <tr v-for="issue in issues" :key="issue.id">
                                 <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
                                 <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
                                 <td>{{ issue.comments }}</td>

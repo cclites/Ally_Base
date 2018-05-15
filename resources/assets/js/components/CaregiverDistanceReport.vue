@@ -8,7 +8,7 @@
                         name="client_id"
                         v-model="form.client_id"
                         >
-                        <option v-for="client in clientsFilter" :value="client.id">{{ client.name }}</option>
+                        <option v-for="client in clientsFilter" :value="client.id" :key="client.id">{{ client.name }}</option>
                     </b-form-select>
                     <input-help :form="form" field="client_id" text="Select a client to generate caregiver distances from."></input-help>
                 </b-form-group>

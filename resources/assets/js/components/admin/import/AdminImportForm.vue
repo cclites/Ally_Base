@@ -22,7 +22,7 @@
         <div class="form-group">
             <label for="business_id">Business: </label>
             <select id="business_id" v-model="businessId" class="form-control">
-                <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
             </select>
         </div>
 

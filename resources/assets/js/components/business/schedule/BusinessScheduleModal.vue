@@ -371,11 +371,11 @@
                 }
                 return this.clientCaregivers;
             },
-            
+
             toggleCaregiversLabel() {
                 if (this.cgMode === 'all') {
                     return "Show only Client's"
-                } 
+                }
                 return 'Show All';
             },
         },

@@ -34,7 +34,7 @@
                                 <b-form-group label="Caregiver">
                                     <b-form-select v-model="form.caregiver_id" class="mx-1 mb-1" name="caregiver_id">
                                         <option value="">All Caregivers</option>
-                                        <option v-for="item in caregiverList" :value="item.id">{{ item.nameLastFirst }}
+                                        <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.nameLastFirst }}
                                         </option>
                                     </b-form-select>
                                 </b-form-group>
@@ -43,7 +43,7 @@
                                 <b-form-group label="Client">
                                     <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
                                         <option value="">All Clients</option>
-                                        <option v-for="item in clientList" :value="item.id">{{ item.nameLastFirst }}
+                                        <option v-for="item in clientList" :value="item.id" :key="item.id">{{ item.nameLastFirst }}
                                         </option>
                                     </b-form-select>
                                 </b-form-group>

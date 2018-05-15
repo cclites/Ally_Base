@@ -5,7 +5,7 @@
                 <b-form-group label="Caregiver">
                     <b-form-select v-model="caregiver_id">
                         <option value="">All</option>
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
