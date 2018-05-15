@@ -55,6 +55,11 @@ return [
 
     'gmaps' => [
         'key' => env('GMAPS_API_KEY'),
+    ],
+
+    'microbilt' => [
+        'id' => env('MICROBILT_ID'),
+        'password' => env('MICROBILT_PASSWORD'),
     ]
 
 ];

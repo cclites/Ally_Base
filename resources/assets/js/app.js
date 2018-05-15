@@ -198,6 +198,7 @@ Vue.component('caregiver-application-list', require('./components/caregivers/Car
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.component('mask-input', require('./components/MaskInput'));
+Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
