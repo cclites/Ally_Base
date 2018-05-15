@@ -30,9 +30,11 @@ class Microbilt {
     public function verifyBankAccount($first_last, $account_number, $routing_number)
     {
         $names = self::splitName($first_last);
-
         if ($names === false) {
-            return false;
+            return [
+                'valid' => false,
+                'exception' => 'Invalid name.',
+            ];
         }
 
         $xml = <<<XML
@@ -59,6 +61,9 @@ class Microbilt {
                 <glob:AccountNum>$account_number</glob:AccountNum>
                 <glob:TypeOfBankAcct>1</glob:TypeOfBankAcct>
             </glob:BankAccount>
+            <glob:CheckAmt xmlns="http://schema.microbilt.com/globals">
+                <glob:Amt>1</glob:Amt>
+            </glob:CheckAmt>
             <glob:RuleNum xmlns="http://schema.microbilt.com/globals">55</glob:RuleNum> 
             <glob:LaneId xmlns="http://schema.microbilt.com/globals">113</glob:LaneId>
         </mes:inquiry> 
@@ -67,11 +72,8 @@ class Microbilt {
 </soapenv:Envelope>
 XML;
 
-// return '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><GetReportResponse xmlns="http://schema.microbilt.com/messages/"><GetReportResult><MsgRsHdr xmlns="http://schema.microbilt.com/globals"><RqUID>{E87DB715-4F57-4FF1-BAF6-85DE2C97EE0D}</RqUID><Status><StatusCode>0</StatusCode><Severity>Info</Severity><StatusDesc>OK</StatusDesc></Status></MsgRsHdr><RESPONSE transaction="MICR" subTransaction="INQUIRY" timeStamp="2018-05-15 11:11:18" xmlns="http://schema.microbilt.com/messages/MBRVD/v1_0"><REQUESTINGSYSTEM id="1" appName="MBRVD" originationTimestamp="2018-05-15 11:11:17"/><HEADER><HIERARCHY corporation="ALHC" company="ALHC" division="ALHC" market="ALHC"/></HEADER><STATUS action="DONE" type="SUCCESS"><applicationNumber>77905522265C</applicationNumber></STATUS><CONTENT><DECISION><decision code="A">ACCEPT</decision><decisionTimestamp>2018-05-15 11:11:18</decisionTimestamp><REASONS/><PROPERTIES/></DECISION><SERVICEDETAILS/></CONTENT></RESPONSE></GetReportResult></GetReportResponse></s:Body></s:Envelope>';
-
-        // $url = 'https://sdkstage.microbilt.com/WebServices/MBrVd/MBRVD.svc?wsdl';
         $url = 'https://creditserver.microbilt.com/WebServices/MBRVD/MBRVD.svc?wsdl';
-        $ch = curl_init($xml);
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -83,32 +85,61 @@ XML;
             'Accept: text/xml',
         ));
         
-        $curlResult = curl_exec($ch);
-
-        parse_str($curlResult, $result);
-        // $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $result = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        dd($result);
         
         $response = ['raw' => $result];
         try {
+            // parse response
             $xml = self::cleanXml($result);
-            dd($xml);
             $xml = simplexml_load_string($xml) or null;
-            $report = $xml->Body->GetReportResponse->GetReportResult;
-            
-            $response['action'] = (string) $report->RESPONSE->STATUS->attributes()->action;
-            $response['status'] = (string) $report->RESPONSE->STATUS->attributes()->type;
-            // $response['decision'] = (string) $report->RESPONSE->CONTENT->DECISION->decision;
-            // $response['reasons'] = (array) $report->RESPONSE->CONTENT->DECISION->REASONS;
+            if (!$xml) {
+                $response['exception'] = 'Could not parse XML response from server.';
+                return $response;
+            }
+
+            // first check status in header for request error
+            $header = $xml->Body->GetReportResponse->GetReportResult->MsgRsHdr;
+            if ($header->Status->StatusCode == -1) {
+                $response['error'] = trim((string) $header->Status->AdditionalStatus->StatusDesc);
+                return $response;
+            }
+
+            // parse result
+            $report = $xml->Body->GetReportResponse->GetReportResult->RESPONSE;
+            $response['decision'] = (string) $report->CONTENT->DECISION->decision;
+
+            if (is_object($report->CONTENT->DECISION->PROPERTIES)) {
+                $response['message'] = (string) $report->CONTENT->DECISION->PROPERTIES->property;
+            }
+
+            switch($response['decision']) {
+                case 'ACCEPT':
+                    $response['valid'] = true;
+                    break;
+                case 'WARNING':
+                    $response['valid'] = true;
+                    break;
+                case 'DECLINE':
+                default:
+                    $response['valid'] = false;
+                    break;
+            }
         }
         catch (\Exception $ex) {
-            $response['error'] = $ex->getMessage();
+            $response['exception'] = $ex->getMessage();
         }
 
         return $response;
     }
 
+    /**
+     * Helper function to strip colons in tags so SimpleXML can parse it.
+     *
+     * @param [type] $data
+     * @return void
+     */
     protected static function cleanXml($data) 
     {
         $data = str_ireplace(['<soapenv:', '<mes:', '<glob:', '<s:'], '<', $data);

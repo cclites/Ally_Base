@@ -23,13 +23,12 @@ class MicrobiltController extends Controller
 
         $stop = microtime(true);
 
-        $response = [
+        $response = array_merge([
             'name' => request()->name,
             'account_no' => request()->account_no,
             'routing_no' => request()->routing_no,
-            'time' => $start - $stop,
-            'result' => $result,
-        ];
+            'time' => round($stop - $start, 3),
+        ], $result);
 
         return new SuccessResponse('Success', $response);
     }
