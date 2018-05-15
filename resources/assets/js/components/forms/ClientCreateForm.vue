@@ -44,7 +44,7 @@
                         v-model="form.onboard_status"
                 >
                     <option value="">--Select--</option>
-                    <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
+                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
                 </b-form-select>
                 <input-help :form="form" field="onboard_status" text="Select the Ally Agreement status of the client"></input-help>
             </b-form-group>
