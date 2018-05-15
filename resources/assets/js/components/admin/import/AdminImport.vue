@@ -89,6 +89,8 @@
                             <option value="25">25 Per Page</option>
                             <option value="50">50 Per Page</option>
                             <option value="100">100 Per Page</option>
+                            <option value="250">250 Per Page</option>
+                            <option value="999">999 Per Page</option>
                         </select>
                     </div>
                 </div>
