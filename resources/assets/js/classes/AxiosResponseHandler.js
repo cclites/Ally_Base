@@ -69,9 +69,6 @@ class AxiosResponseHandler {
     }
 
     handleRedirect() {
-        console.log('handleRedirect called, redirects: ' + this.redirects);
-        return;
-
         let data = this.getResponseData();
         let current = window.location.pathname + window.location.search + window.location.hash;
         if (data.redirect === '.' || data.redirect === current) {
