@@ -226,6 +226,8 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::get('microbilt', 'Admin\MicrobiltController@index');
+    Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
     Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');
     Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
