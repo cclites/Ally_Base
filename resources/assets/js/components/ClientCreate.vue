@@ -7,7 +7,12 @@
             <client-create-form v-model="form"></client-create-form>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Create &amp; Continue</b-button>
+                    <submit-button variant="success"
+                                   type="submit"
+                                   :submitting="submitting"
+                    >
+                        Create &amp; Continue
+                    </submit-button>
                 </b-col>
             </b-row>
         </form>
@@ -34,6 +39,7 @@
             return {
                 form: new Form(),
                 duplicateWarning: null,
+                submitting: false,
             }
         },
 
@@ -47,6 +53,7 @@
         methods: {
 
             async saveProfile() {
+                this.submitting = true;
                 try {
                     const response = await this.form.post('/business/clients');
                     if (response.data.data.url) {
@@ -54,6 +61,7 @@
                     }
                 }
                 catch(error) {
+                    this.submitting = false;
                     switch(error.response.status) {
                         case 449:
                             this.duplicateWarning = error.response.data.message;

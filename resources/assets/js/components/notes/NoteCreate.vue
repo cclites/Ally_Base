@@ -51,7 +51,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-note" variant="success" type="submit">Create</b-button>
+                    <submit-button :submitting="submitting" variant="success" type="submit">Create</submit-button>
                 </b-col>
             </b-row>
         </form>
@@ -70,13 +70,19 @@
                     client_id: '',
                     body: null,
                     tags: null
-                })
+                }),
+                submitting: false,
             }
         },
 
         methods: {
-            saveNote() {
-                this.form.post('/notes');
+            async saveNote() {
+                this.submitting = true;
+                try {
+                    await this.form.post('/notes');
+                }
+                catch (err) {}
+                this.submitting = false;
             }
         }
 
