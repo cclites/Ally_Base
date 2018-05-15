@@ -5,6 +5,7 @@ namespace App\Shifts;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftLocation;
 use App\Events\UnverifiedShiftCreated;
+use App\Exceptions\UnverifiedLocationException;
 use App\Shift;
 use App\ShiftIssue;
 use Carbon\Carbon;
@@ -40,6 +41,7 @@ class ClockOut extends ClockBase
      * @param ShiftIssue[] $issues
      *
      * @return bool
+     * @throws \App\Exceptions\UnverifiedLocationException
      */
     public function clockOut(Shift $shift, $activities = [], $issues = [])
     {
@@ -50,16 +52,28 @@ class ClockOut extends ClockBase
             }
         }
 
+        // Determine whether this is a verified clock in attempt
         $verified = ($shift->verified && !$this->manual) ? true : false;
-        if ($verified) {
+
+        // Attempt to verify EVV regardless of previous status,
+        // but only throw the exception if it's an attempt at a verified clock in
+        try {
             $this->verifyEVV($shift->client);
+            $clockOutVerified = true;
+        }
+        catch (UnverifiedLocationException $e) {
+            if ($verified) throw $e;
         }
 
         $update = $shift->update([
             'checked_out_time' => Carbon::now(),
             'checked_out_latitude' => $this->latitude,
             'checked_out_longitude' => $this->longitude,
+            'checked_out_distance' => $this->distance,
             'checked_out_number' => $this->number,
+            'checked_out_ip' => \Request::ip(),
+            'checked_out_agent' => \Request::userAgent(),
+            'checked_out_verified' => $clockOutVerified ?? false,
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,
             'other_expenses_desc' => $this->otherExpensesDesc,
