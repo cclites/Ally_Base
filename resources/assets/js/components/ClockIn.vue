@@ -13,7 +13,7 @@
             </table>
         </b-card>
         <b-card :class="{ translucent: !!loadingText }">
-            <form @submit.prevent="clockIn()" @keydown="form.clearError($event.target.name)">
+            <form @keydown="form.clearError($event.target.name)">
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Current Time" label-for="time">
@@ -52,10 +52,10 @@
                             <strong>Warning: </strong> {{ locationWarning }}
                         </div>
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" type="submit">Clock in your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)">Clock in your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
                         </div>
                         <div class="form-group" v-if="form.client_id">
-                            <b-button variant="success" type="submit">Clock in to an unscheduled shift</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()">Clock in to an unscheduled shift</b-button>
                         </div>
                     </b-col>
                 </b-row>
@@ -104,7 +104,7 @@
                 watchId: null,
                 locationOptions: {
                     enableHighAccuracy: true,
-                    maximumAge: 10000,
+                    maximumAge: 15000,
                     timeout: 30000,
                 },
             }
@@ -161,18 +161,11 @@
             },
 
             async verifyLocation() {
-                this.showLoading('Waiting for your location..');
+                this.loadLocation();
                 if (this.form.latitude === null) {
-                    await navigator.geolocation.getCurrentPosition(this.setLocation, this.handleLocationError, {
-                        maximumAge: 20000,
-                        timeout: 10000,
-                    });
-                    if (this.form.latitude === null) {
-                        // If the latitude is still null, do not try to verify the location
-                        if (!this.locationWarning) this.displayLocationWarning();
-                        this.hideLoading();
-                        return;
-                    }
+                    // If the latitude is still null, do not try to verify the location
+                    if (!this.locationWarning) this.displayLocationWarning();
+                    return;
                 }
                 try {
                     this.showLoading('Verifying location..');
@@ -241,38 +234,40 @@
                 this.form.longitude = position.coords.longitude;
             },
 
-            clockIn() {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    this.form.latitude = position.coords.latitude;
-                    this.form.longitude = position.coords.longitude;
-                    console.log(position.coords);
-                    this.submitForm();
-                }.bind(this), function(error) {
-                    this.form.latitude = null;
-                    this.form.longitude = null;
-                    console.log(error);
-                    this.submitForm();
-                }.bind(this), {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                });
+            async loadLocation()
+            {
+                if (this.form.latitude === null || !this.watchId) {
+                    this.showLoading('Waiting for your location..');
+                    await navigator.geolocation.getCurrentPosition(this.setLocation, this.handleLocationError, this.locationOptions);
+                    this.hideLoading();
+                }
             },
 
-            submitForm() {
-                var component = this;
-                this.form.post('/clock-in')
-                    .then(function(response) {
-                        if (response.data.stats) {
-                            component.stats = response.data.stats;
-                        }
-                        else {
-                            window.location = '/clock-out';
-                        }
-                    })
-                    .catch(function(error) {
-                       component.showManual = true;
-                    });
+            clockInWithoutSchedule() {
+                this.form.schedule_id = null;
+                this.loadLocation();
+                this.submitForm();
+            },
+
+            clockIn(schedule) {
+                this.form.schedule_id = schedule.id;
+                this.loadLocation();
+                this.submitForm();
+            },
+
+            async submitForm() {
+                this.showLoading('Clocking in to shift..');
+                try {
+                    const response = await this.form.post('/clock-in');
+                    if (response.data.stats) {
+                        this.stats = response.data.stats;
+                    }
+                    else {
+                        window.location = '/clock-out';
+                    }
+                }
+                catch (err) {}
+                this.hideLoading();
             },
 
             loadTime() {
