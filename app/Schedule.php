@@ -153,6 +153,21 @@ class Schedule extends Model implements Auditable
         $this->attributes['starts_at'] = $value;
     }
 
+    /**
+     * Returns the first available connected shift that is currently
+     * clocked in.
+     *
+     * @return bool
+     */
+    public function getClockedInShiftAttribute()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isClockedIn()) return $shift;
+        }
+        return null;
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -193,6 +208,24 @@ class Schedule extends Model implements Auditable
         foreach($this->shifts as $shift)
         {
             if ($shift->statusManager()->isClockedIn()) return true;
+        }
+        return false;
+    }
+
+    /**
+     * If a Schedule has a clocked in shift, this determines if the shift has
+     * gone past the scheduled end time.  This suggests that the CG might
+     * have forgotten to clock out.
+     *
+     * @return bool
+     */
+    public function shiftHasExceededEndTime()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isClockedIn()) {
+                return Carbon::now() > $shift->scheduledEndTime();
+            }
         }
         return false;
     }

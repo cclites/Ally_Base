@@ -342,4 +342,16 @@ class ShiftController extends BaseController
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
     }
+
+    /**
+     * Handles manual clock out of shift for office users.
+     *
+     * @param Shift $shift
+     * @return void
+     */
+    public function officeClockOut(Shift $shift)
+    {
+        dd($shift);
+        dd('test');
+    }
 }

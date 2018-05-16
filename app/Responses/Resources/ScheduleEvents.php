@@ -121,8 +121,14 @@ class ScheduleEvents implements Responsable
             $title = $this->resolveEventTitle($schedule);
 
             if ($schedule->isClockedIn()) {
-                $backgroundColor = '#27c11e'; // current 
-                $title .= ': Clocked In';
+                if ($schedule->shiftHasExceededEndTime()) {
+                    // CG potentially forgot to clock out
+                    $backgroundColor = '#ffb22b';
+                    $title .= ': Exceeded Scheduled Time';
+                } else {
+                    $backgroundColor = '#27c11e'; // current 
+                    $title .= ': Clocked In';
+                }
             }
             elseif($schedule->starts_at < Carbon::now()) {
                 $backgroundColor = '#849290'; // past 
@@ -131,7 +137,7 @@ class ScheduleEvents implements Responsable
                 switch($schedule->status) {
                     case Schedule::CLIENT_CANCELED:
                         $backgroundColor = '#f2f214'; // client cancel
-                        break;
+                        break; 
                     case Schedule::CAREGIVER_CANCELED:
                         $backgroundColor = '#d91c4e'; // CG cancel
                         break;
