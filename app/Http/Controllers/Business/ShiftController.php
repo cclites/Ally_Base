@@ -351,7 +351,28 @@ class ShiftController extends BaseController
      */
     public function officeClockOut(Shift $shift)
     {
-        dd($shift);
-        dd('test');
+        if (!$this->businessHasShift($shift)) {
+            return new ErrorResponse(403, 'You do not have access to this shift.');
+        }
+
+        $data = request()->validate(
+            [
+                'checked_in_time' => 'required|date',
+                'checked_out_time' => 'required|date|after_or_equal:' . request()->input('checked_in_time'),
+            ],
+            [
+                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
+            ]
+        );
+
+        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
+        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+        $data['checked_out_method'] = Shift::METHOD_OFFICE;
+
+        if ($shift->update($data)) {
+            return new SuccessResponse('Shift was successfully clocked out.');
+        }
+
+        return new ErrorResponse(500, 'The shift could not be clocked out.');
     }
 }

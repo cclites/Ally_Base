@@ -25,8 +25,9 @@ class Schedule implements Responsable
         $timestamp = $this->schedule->starts_at->timestamp;
         $array['starts_at'] = $timestamp;
 
-        $array['clocked_in_shift'] = $this->schedule->clockedInShift;
-
+        if ($shift = $this->schedule->clockedInShift) {
+            $array['clocked_in_shift'] = $shift->load('caregiver');
+        }
         return $array;
     }
 

@@ -60,6 +60,7 @@
                                :selected-schedule="selectedSchedule"
                                :initial-values="initialCreateValues"
                                @refresh-events="fetchEvents()"
+                               @clock-out="showClockOutModal()"
         />
 
         <bulk-edit-schedule-modal v-model="bulkUpdateModal"
@@ -73,6 +74,11 @@
                                     :client-id="filterClientId"
                                     @refresh-events="fetchEvents()"
         />
+
+        <schedule-clock-out-modal v-model="clockOutModal"
+                                    :shift="selectedSchedule.clocked_in_shift"
+                                    @refresh="fetchEvents()"
+        ></schedule-clock-out-modal>
     </b-card>
 </template>
 
@@ -105,6 +111,7 @@
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
                 notesModal: false,
+                clockOutModal: false,
                 selectedEvent: {},
                 events: [],
                 start: '',
@@ -157,6 +164,10 @@
         },
 
         methods: {
+            showClockOutModal() {
+                this.clockOutModal = true;
+            },
+
             onLoadView(view, element) {
                 this.start = view.start.format('YYYY-MM-DD');
                 this.end = view.end.format('YYYY-MM-DD');

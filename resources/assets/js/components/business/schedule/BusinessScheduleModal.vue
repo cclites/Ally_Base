@@ -487,16 +487,8 @@
             },
 
             clockOut() {
-                if (this.selectedSchedule.clocked_in_shift) {
-                    let url = `/business/shifts/${this.selectedSchedule.clocked_in_shift.id}/clockout`;
-                    axios.post(url)
-                        .then( ({ data }) => {
-                            console.log(data);
-                        })
-                        .catch(e => {
-                            console.log(e);
-                        })
-                }
+                this.scheduleModal = false;
+                this.$emit('clock-out');
             },
 
             deleteSchedule() {
