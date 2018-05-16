@@ -16,7 +16,7 @@
                     <b-input-group class="mx-1">
                         <b-form-select v-model="filters.provider">
                             <option value="">All Providers</option>
-                            <option v-for="provider in providers" :value="provider.id">{{ provider.name }}</option>
+                            <option v-for="provider in providers" :value="provider.id" :key="provider.id">{{ provider.name }}</option>
                         </b-form-select>
                     </b-input-group>
                     <div>

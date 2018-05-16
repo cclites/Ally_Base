@@ -7,7 +7,7 @@
                         required
                 >
                     <option value="">--Filter by Provider--</option>
-                    <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                    <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                 </b-form-select>
             </b-col>
             <b-col lg="6" class="text-right">

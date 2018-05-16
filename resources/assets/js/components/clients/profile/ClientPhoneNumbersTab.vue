@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <b-col lg="6" v-for="number in numbers">
+        <b-col lg="6" v-for="number in numbers" :key="number.id">
             <phone-number
                           :title="formatTitle(number.type)"
                           :type="number.type"

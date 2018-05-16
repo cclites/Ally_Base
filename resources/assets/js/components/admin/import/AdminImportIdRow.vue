@@ -17,7 +17,7 @@
                 </template>
                 <div class="form-group" v-if="clientPopover">
                     <select2 class="form-control" v-model="model.client_id" ref="client">
-                        <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
                     </select2>
                 </div>
                 <div class="form-group">
@@ -40,7 +40,7 @@
                 </template>
                 <div class="form-group" v-if="caregiverPopover">
                     <select2 class="form-control" v-model="model.caregiver_id" ref="caregiver">
-                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </select2>
                 </div>
                 <div class="form-group">

@@ -34,12 +34,12 @@
 
                         <b-form-select v-model="form.caregiver" class="mr-2">
                             <option value="">All Caregivers</option>
-                            <option :value="caregiver.id" v-for="caregiver in caregivers">{{ caregiver.nameLastFirst }}</option>
+                            <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                         </b-form-select>
 
                         <b-form-select v-model="form.client">
                             <option value="">All Clients</option>
-                            <option :value="client.id" v-for="client in clients">{{ client.nameLastFirst }}</option>
+                            <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
                         </b-form-select>
 
                         <b-button type="submit" variant="info" :disabled="fetchingData" class="ml-2">

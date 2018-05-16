@@ -22,7 +22,7 @@
                         <b-form-group label="Client Filter">
                             <b-form-select v-model="filter.clientId" class="mr-1 mb-1">
                                 <option value="">All Clients</option>
-                                <option v-for="item in clientList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in clientList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
@@ -30,7 +30,7 @@
                         <b-form-group label="Caregiver Filter">
                             <b-form-select v-model="filter.caregiverId" class="mx-1 mb-1">
                                 <option value="">All Caregivers</option>
-                                <option v-for="item in caregiverList" :value="item.id">{{ item.name }}</option>
+                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>

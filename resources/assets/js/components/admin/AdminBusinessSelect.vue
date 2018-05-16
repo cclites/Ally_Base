@@ -3,7 +3,7 @@
         <b-form inline @submit.prevent="submitForm()">
             <select class="form-control" v-model="form.business_id" required>
                 <option value="">--Select a Business--</option>
-                <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
             </select>
             <b-btn type="submit" variant="info">Switch Business</b-btn>
         </b-form>

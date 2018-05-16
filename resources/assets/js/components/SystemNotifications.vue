@@ -11,7 +11,7 @@
                 <li>
                     <div class="message-center">
                         <!-- Message -->
-                        <a v-for="item in items" :href="'/business/exceptions/' + item.id">
+                        <a v-for="item in items" :href="'/business/exceptions/' + item.id" :key="item.id">
                             <div class="btn btn-danger btn-circle"><i class="fa fa-link"></i></div>
                             <div class="mail-content">
                                 <h5>{{ item.title }}</h5> <span class="mail-desc">{{ item.description }}</span> <span class="time">{{ item.time }}</span>

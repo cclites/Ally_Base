@@ -127,7 +127,7 @@
                         </b-form-group>
                         <b-form-group label="Timezone">
                             <b-form-select id="timezone" v-model="businessSettings.timezone" tabindex="13">
-                                <option v-for="timezone in timezones" :value="timezone">{{ timezone }}</option>
+                                <option v-for="timezone in timezones" :value="timezone" :key="timezone">{{ timezone }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-btn @click="update" variant="info">

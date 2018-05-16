@@ -38,8 +38,8 @@
                 </b-row>
             </b-col>
         </b-row>
-        
-        <full-calendar ref="calendar" 
+
+        <full-calendar ref="calendar"
             :events="events"
             :default-view="defaultView"
             :header="header"
@@ -139,7 +139,7 @@
 
                 url += '&start=' + this.start;
                 url += '&end=' + this.end;
-                
+
                 return url;
             },
 
@@ -188,7 +188,7 @@
                 axios.get('/business/clients').then(response => this.clients = response.data);
                 axios.get('/business/caregivers').then(response => this.caregivers = response.data);
             },
-            
+
             renderEvent: function( event, element, view ) {
                 let note = $('<span/>', {
                     class: 'fc-note-btn',
@@ -210,7 +210,7 @@
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                
+
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
                     content.html($('<div/>').append(note, title));
@@ -225,7 +225,7 @@
             filterCaregiverId() {
                 this.fetchEvents();
             },
-            
+
             filterClientId() {
                 this.fetchEvents();
             },

@@ -24,7 +24,7 @@
                         >
                             <option value="">--Select a Provider--</option>
                             <option value="">All Providers</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button @click="authorizeAll()" variant="primary">Authorize All Shifts</b-button>

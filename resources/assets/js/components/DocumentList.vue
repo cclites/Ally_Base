@@ -27,7 +27,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="document in documents">
+                <tr v-for="document in documents" :key="document.id">
                     <td>
                         <a :href="'/business/documents/'+document.id+'/download'">
                             {{ document.original_filename }}

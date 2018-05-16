@@ -200,7 +200,7 @@
                         Shift Issues
                         <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                     </h5>
-                    <div class="table-responsive" v-if="issues.length">
+                    <div class="table-responsive" v-if="localIssues.length">
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -211,9 +211,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in issues" :key="issue">
-                                <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
+                            <tr v-for="issue in localIssues" :key="issue.id">
+                                <td>{{ +issue.caregiver_injury ? 'Yes' : 'No' }}</td>
+                                <td>{{ +issue.client_injury ? 'Yes' : 'No' }}</td>
                                 <td>{{ issue.comments }}</td>
                                 <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
                             </tr>
@@ -318,7 +318,7 @@
             </b-row>
         </form>
 
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="issues"></business-issue-modal>
+        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="localIssues"></business-issue-modal>
     </div>
 </template>
 
@@ -356,6 +356,7 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
+                localIssues: this.issues,
                 issueModal: false,
                 selectedIssue: null,
                 deleted: false,
@@ -492,7 +493,7 @@
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.issues = this.issues;
+                    this.form.issues = this.localIssues;
                     this.form.post('/business/shifts').then(response => {
                         this.$emit('shiftCreated', response.data.data.shift);
                         this.status = response.data.data.status;

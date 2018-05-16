@@ -12,7 +12,7 @@
                                        v-model="form.business_id"
                         >
                             <option value="">--Select Business--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="business_id" text="Select a business" />
                     </b-form-group>
@@ -21,7 +21,7 @@
                                        v-model="form.caregiver_id"
                         >
                             <option value="">--Business Transaction--</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
                         </b-form-select>
                         <input-help :form="form" field="caregiver_id" text="Select a caregiver or run a business transaction" />
                     </b-form-group>

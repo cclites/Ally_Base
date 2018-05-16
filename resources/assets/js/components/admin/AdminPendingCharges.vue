@@ -24,7 +24,7 @@
                                 required
                         >
                             <option value="">--Select a Provider--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button @click="loadItemsPerClient()" variant="info">Generate Per Client Report</b-button>
                         &nbsp;&nbsp;<b-button @click="loadItems()" variant="primary">Generate Actual Report</b-button>

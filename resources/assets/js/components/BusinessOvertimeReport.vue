@@ -11,7 +11,7 @@
                     <b-input-group class="w-25 mr-2">
                         <b-form-select v-model="search.caregiver_id">
                             <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">
                                 {{ caregiver.nameLastFirst }}
                             </option>
                         </b-form-select>
