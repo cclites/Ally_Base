@@ -148,13 +148,16 @@
                 this.showLoading('Searching available shifts..');
                 try {
                     const response = await axios.get('/caregiver/schedules/' + this.form.client_id);
-                    this.verifyLocation();
                     this.schedules = response.data;
                 }
                 catch (err) {
                     alert('Unable to load available shifts.  Make sure you have network connectivity.');
                 }
                 this.hideLoading();
+
+                // After loading schedules, verify the location.
+                // We do this here so the showing/hiding of loading messages don't conflict
+                this.verifyLocation();
             },
 
             async verifyLocation() {
