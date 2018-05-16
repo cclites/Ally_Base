@@ -91,9 +91,6 @@ class ScheduleAggregator
      */
     public function getSchedulesBetween(Carbon $start, Carbon $end)
     {
-        $startUtc = $start->copy()->setTimezone('UTC');
-        $endUtc = $end->copy()->setTimezone('UTC');
-
         switch(\DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
             case 'mysql':
                 $endFormat = "`starts_at` + INTERVAL `duration` MINUTE";
@@ -103,7 +100,7 @@ class ScheduleAggregator
                 break;
         }
 
-        return $this->query->whereRaw('(starts_at >= ? AND ' . $endFormat . ' <= ?)', [$startUtc, $endUtc])->get();
+        return $this->query()->whereRaw('(starts_at >= ? AND ' . $endFormat . ' <= ?)', [$start, $end])->get();
     }
 
 
