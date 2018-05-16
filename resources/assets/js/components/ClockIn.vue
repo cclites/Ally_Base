@@ -12,7 +12,7 @@
                 </tr>
             </table>
         </b-card>
-        <b-card title="Select a Shift to Clock In" :class="{ translucent: !!loadingText }">
+        <b-card :class="{ translucent: !!loadingText }">
             <form @submit.prevent="clockIn()" @keydown="form.clearError($event.target.name)">
                 <b-row>
                     <b-col lg="12">
@@ -170,6 +170,7 @@
                     if (this.form.latitude === null) {
                         // If the latitude is still null, do not try to verify the location
                         if (!this.locationWarning) this.displayLocationWarning();
+                        this.hideLoading();
                         return;
                     }
                 }
