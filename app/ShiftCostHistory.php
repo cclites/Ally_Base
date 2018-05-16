@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ShiftCostHistory
@@ -31,8 +32,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class ShiftCostHistory extends Model
+class ShiftCostHistory extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'shift_cost_history';
     protected $guarded = [];
 

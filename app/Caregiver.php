@@ -14,6 +14,7 @@ use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Caregiver
@@ -62,10 +63,11 @@ use Carbon\Carbon;
  * @mixin \Eloquent
  * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use IsUserRole;
     use \App\Traits\HasPaymentHold;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'caregivers';
     public $timestamps = false;

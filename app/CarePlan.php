@@ -4,6 +4,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CarePlan
@@ -29,9 +30,10 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Query\Builder|\App\CarePlan withoutTrashed()
  * @mixin \Eloquent
  */
-class CarePlan extends Model
+class CarePlan extends Model implements Auditable
 {
     use SoftDeletes;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'care_plans';
 

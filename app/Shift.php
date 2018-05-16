@@ -12,6 +12,7 @@ use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Shift
@@ -94,9 +95,10 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
  */
-class Shift extends Model implements HasAllyFeeInterface
+class Shift extends Model implements HasAllyFeeInterface, Auditable
 {
     use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];

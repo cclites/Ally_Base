@@ -4,6 +4,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Payment
@@ -43,8 +44,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Payment extends Model
+class Payment extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'payments';
     protected $guarded = ['id'];
     protected $appends = ['week'];
