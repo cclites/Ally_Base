@@ -131,6 +131,26 @@
             }
         },
 
+        computed: {
+            successfulTotal() {
+                return items.reduce(function(carry, item) {
+                    if (!item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                });
+            },
+            failedTotal() {
+                return items.reduce(function(carry, item) {
+                    if (item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                });
+            },
+            overallTotal() {
+                return items.reduce(function(carry, item) {
+                    return carry + parseFloat(item.amount);
+                });
+            }
+        },
+
         mounted() {
             this.loadBusinesses();
             this.loadItems();
