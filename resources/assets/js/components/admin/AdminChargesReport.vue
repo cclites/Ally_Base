@@ -31,6 +31,11 @@
             </b-col>
         </b-row>
         <b-row>
+            <b-col>
+                <strong>Successful Charges: </strong> {{ moneyFormat(successfulTotal) }} &nbsp;
+                <strong>Failed Charges: </strong> {{ moneyFormat(failedTotal) }} &nbsp;
+                <strong>Overall: </strong> {{ moneyFormat(overallTotal) }}
+            </b-col>
             <b-col class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
@@ -65,7 +70,10 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
 
         props: {},
 
@@ -128,6 +136,26 @@
                     },
                     'actions'
                 ]
+            }
+        },
+
+        computed: {
+            successfulTotal() {
+                return this.items.reduce(function(carry, item) {
+                    if (!item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                }, 0);
+            },
+            failedTotal() {
+                return this.items.reduce(function(carry, item) {
+                    if (item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                }, 0);
+            },
+            overallTotal() {
+                return this.items.reduce(function(carry, item) {
+                    return carry + parseFloat(item.amount);
+                }, 0);
             }
         },
 
