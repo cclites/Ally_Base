@@ -19,7 +19,7 @@
                 <tr class="top-row">
                     <th rowspan="2">Assigned Caregiver</th>
                     <th colspan="4" class="text-center hourly">Hourly</th>
-                    <!-- <th colspan="4" class="text-center daily">Daily</th> -->
+                     <th colspan="4" class="text-center daily">Daily</th>
                     <th rowspan="2"></th>
                 </tr>
                 <tr>
@@ -27,9 +27,10 @@
                     <th class="hourly">Provider Fee</th>
                     <th class="hourly">Ally Fee</th>
                     <th class="hourly">Total</th>
-                    <!-- <th class="daily">Caregiver Rate</th> -->
-                    <!-- <th class="daily">Provider Fee</th> -->
-                    <!-- <th class="daily">Ally Fee</th> -->
+                     <th class="daily">Caregiver Rate</th>
+                     <th class="daily">Provider Fee</th>
+                     <th class="daily">Ally Fee</th>
+                     <th class="daily">Total</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -39,10 +40,10 @@
                     <td class="hourly">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.ally_hourly_fee) }}</td>
                     <td class="hourly">{{ moneyFormat(item.pivot.total_hourly_fee) }}</td>
-                    <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
-                    <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
-                    <!--<td class="hourly">{{ item.pivot.ally_daily_fee }}</td>-->
-                    <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
+                    <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td>
+                    <td class="daily">{{ item.pivot.provider_daily_fee }}</td>
+                    <td class="hourly">{{ item.pivot.ally_daily_fee }}</td>
+                    <td class="daily">{{ item.pivot.total_daily_fee }}</td>
                     <td>
                         <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
                         <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
@@ -138,12 +139,22 @@
                             </b-form-input>
                             <input-help :form="form" field="provider_hourly_fee" text="Enter the provider referral fee for hourly earnings."></input-help>
                         </b-form-group>
-                        <!-- <b-form-group label="Caregiver Daily Rate" label-for="caregiver_daily_rate">
+                        <b-form-group>
+                            <div class="form-check">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" v-model="enableDailyRates">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Enable Daily Rates</span>
+                                </label>
+                            </div>
+                        </b-form-group>
+                        <b-form-group label="Caregiver Daily Rate" label-for="caregiver_daily_rate">
                             <b-form-input
                                     id="caregiver_daily_rate"
                                     name="caregiver_daily_rate"
                                     type="number"
                                     v-model="form.caregiver_daily_rate"
+                                    :disabled="!enableDailyRates"
                             >
                             </b-form-input>
                             <input-help :form="form" field="caregiver_daily_rate" text="Enter the daily earnings for this caregiver. (All day shifts)"></input-help>
@@ -154,10 +165,11 @@
                                     name="provider_daily_fee"
                                     type="number"
                                     v-model="form.provider_daily_fee"
+                                    :disabled="!enableDailyRates"
                             >
                             </b-form-input>
                             <input-help :form="form" field="provider_daily_fee" text="Enter the provider referral fee for daily shifts."></input-help>
-                        </b-form-group> -->
+                        </b-form-group>
                         <b-row>
                             <b-col>
                                 <b-form-group label="Ally Fee">
@@ -218,7 +230,8 @@
                 selectedCaregiver: {},
                 form: new Form(),
                 excludeForm: {},
-                excludedCaregivers: []
+                excludedCaregivers: [],
+                enableDailyRates: false,
             }
         },
 
@@ -368,6 +381,15 @@
 
             total() {
                 return this.subTotal + this.allyTotal;
+            }
+        },
+
+        watch: {
+            enableDailyRates(val) {
+                if (!val) {
+                    this.form.caregiver_daily_rate = null;
+                    this.form.provider_daily_fee = null;
+                }
             }
         }
     }
