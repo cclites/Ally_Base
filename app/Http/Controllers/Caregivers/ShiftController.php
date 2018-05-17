@@ -155,12 +155,8 @@ class ShiftController extends BaseController
             'mileage' => 'nullable|numeric|max:1000|min:0',
             'other_expenses' => 'nullable|numeric|max:1000|min:0',
             'other_expenses_desc' => 'nullable',
-            'latitude' => 'numeric|nullable|required_unless:manual,1',
-            'longitude' => 'numeric|nullable|required_unless:manual,1',
-            'manual' => 'nullable',
-        ], [
-            'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
-            'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
+            'latitude' => 'numeric|nullable',
+            'longitude' => 'numeric|nullable',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -195,7 +191,6 @@ class ShiftController extends BaseController
 
         try {
             $clockOut = new ClockOut($this->caregiver());
-            if (!empty($data['manual'])) $clockOut->setManual();
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
@@ -216,7 +211,11 @@ class ShiftController extends BaseController
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
         }
         catch (UnverifiedLocationException $e) {
-            return new ErrorResponse(400, $e->getMessage() . ' You will need to manually clock in.');
+            $clockOut->setManual(true);
+            if ($clockOut->clockOut($shift)) {
+                return new SuccessResponse('You have successfully clocked out.');
+            }
+            return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
         }
         catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
