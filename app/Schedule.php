@@ -153,6 +153,21 @@ class Schedule extends Model implements Auditable
         $this->attributes['starts_at'] = $value;
     }
 
+    /**
+     * Returns the first available connected shift that is currently
+     * clocked in.
+     *
+     * @return bool
+     */
+    public function getClockedInShiftAttribute()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isClockedIn()) return $shift;
+        }
+        return null;
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

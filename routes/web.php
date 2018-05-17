@@ -202,6 +202,7 @@ Route::group([
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
     Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::post('shifts/{shift}/clockout', 'Business\ShiftController@officeClockOut')->name('shifts.clockout');
 
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 

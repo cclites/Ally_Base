@@ -215,6 +215,7 @@
                     {{ submitText }}
                 </b-btn>
                 <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn v-show="selectedSchedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
                 <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
@@ -483,6 +484,11 @@
                     this.selectedSchedule = {};
                     this.makeCreateForm();
                 }
+            },
+
+            clockOut() {
+                this.scheduleModal = false;
+                this.$emit('clock-out');
             },
 
             deleteSchedule() {
