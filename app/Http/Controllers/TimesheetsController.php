@@ -47,7 +47,7 @@ class TimesheetsController extends Controller
      *
      * @return void
      */
-    public function store(CreateManualTimesheetsRequest $request)
+    public function store(CreateTimesheetsRequest $request)
     {
         if (auth()->user()->role_type == 'caregiver' && $request->caregiver_id != auth()->user()->id) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
@@ -59,6 +59,9 @@ class TimesheetsController extends Controller
         $timesheet->save();
         
         foreach($request->validated()['shifts'] as $shift) {
+            // $shift['checked_in_time'] = utc_date($shift['date'] . ' ' . $shift['start_time'], 'Y-m-d H:i', null);
+            // $shift['checked_out_time'] = utc_date($shift['date'] . ' ' . $shift['end_time'], 'Y-m-d H:i', null);
+
             if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => [] ]))) {
                 $entry->activities()->sync($shift['activities']);
             } 

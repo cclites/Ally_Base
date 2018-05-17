@@ -14,9 +14,15 @@ class TimesheetsController extends BaseController
      *
      * @return void
      */
-    public function edit()
+    public function edit(Timesheet $timesheet)
     {
-        return new ErrorResponse(400, "Not implemented", []);
+        $timesheet->load('caregiver', 'client');
+        $activities = activeBusiness()->allActivities();
+
+        return view('business.timesheet', compact(
+            'timesheet',
+            'activities'
+        ));
     }
 
     /**

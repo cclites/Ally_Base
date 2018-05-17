@@ -176,7 +176,7 @@
         },
 
         data() {
-            return{
+            return {
                 showModal: false,
                 caregiver: {},
                 client: {},
