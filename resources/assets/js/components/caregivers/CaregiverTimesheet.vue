@@ -242,7 +242,7 @@
                 // submit only the shifts filled out  
                 this.form.shifts = this.shifts.filter(x => x.start_time != '');
 
-                this.form.submit('post', '/manual-timesheet')
+                this.form.submit('post', '/timesheet')
                     .then( ({ data }) => {
                         console.log(data);
                         this.shiftForm = new Form({});

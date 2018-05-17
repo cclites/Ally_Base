@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Manual Timesheets')
+@section('title', 'Submit Timesheet')
 
 @section('content')
-    <manual-timesheets 
+    <caregiver-timesheet 
         :cg="{{ $caregiver }}" 
         :activities="{{ $activities OR '[]' }}"
         :caregivers="{{ $caregivers OR '[]' }}"
-    ></manual-timesheets>
+    ></caregiver-timesheet>
 @endsection

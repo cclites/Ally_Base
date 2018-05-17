@@ -53,7 +53,7 @@
 </li>
 {{-- @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
 <li>
-    <a class="has-arrow" href="{{ route('business.manual-timesheets') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Manual Timesheet</span></a>
+    <a class="has-arrow" href="{{ route('business.timesheet') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Manual Timesheet</span></a>
 </li>
 @endif --}}
 <li>

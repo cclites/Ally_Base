@@ -31,7 +31,7 @@ class CreateTimesheetException
         $exception = new SystemException([
             'title' => 'Manual Timesheet Submitted by ' . $event->timesheet->creator->name,
             'description' => $description,
-            'reference_url' => route('business.manual-timesheet', [$event->timesheet->id]),
+            'reference_url' => route('business.timesheet', [$event->timesheet->id]),
             'business_id' => $event->timesheet->business_id,
         ]);
 

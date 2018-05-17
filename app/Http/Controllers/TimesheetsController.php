@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\CreateManualTimesheetsRequest;
+use App\Http\Requests\CreateTimesheetsRequest;
 use App\Responses\ErrorResponse;
 use App\Timesheet;
 use App\TimesheetEntry;
 use App\Responses\SuccessResponse;
 
-class ManualTimesheetsController extends Controller
+class TimesheetsController extends Controller
 {
     /**
      * @return \App\Caregiver
@@ -35,7 +35,7 @@ class ManualTimesheetsController extends Controller
         $activities = $business->allActivities();
         $caregivers = $this->caregiverClientList($business);
 
-        return view('caregivers.manual_timesheets', compact(
+        return view('caregivers.timesheet', compact(
             'caregiver',
             'caregivers', 
             'activities'
@@ -65,16 +65,6 @@ class ManualTimesheetsController extends Controller
         }
 
         return new SuccessResponse('Your timesheet has been submitted for approval.', ['timesheet' => $timesheet->fresh()->toArray()]);
-    }
-
-    /**
-     * View a Manual Timesheet (for Business)
-     *
-     * @return void
-     */
-    public function view()
-    {
-        return new ErrorResponse(400, "Not implemented", []);
     }
 
     /**
