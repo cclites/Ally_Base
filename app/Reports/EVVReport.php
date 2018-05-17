@@ -19,7 +19,7 @@ class EVVReport extends ShiftsReport
      */
     public function __construct()
     {
-        $this->query = Shift::where('checked_in', 1)
+        $this->query = Shift::whereIn('checked_in_method', [Shift::METHOD_TELEPHONY, Shift::METHOD_GEOLOCATION])
             ->with(['client', 'caregiver', 'business']);
     }
 
