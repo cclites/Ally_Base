@@ -20,7 +20,7 @@ class TimesheetController extends Controller
     }
 
     /**
-     * Returns form for creating a manual shift.
+     * Returns form for creating a manual timesheet.
      *
      * @return void
      */
@@ -34,8 +34,10 @@ class TimesheetController extends Controller
         $business = activeBusiness();
         $activities = $business->allActivities();
         $caregivers = $this->caregiverClientList($business);
+        $success = request()->success == 1;
 
         return view('caregivers.timesheet', compact(
+            'success',
             'caregiver',
             'caregivers', 
             'activities'
@@ -43,7 +45,7 @@ class TimesheetController extends Controller
     }
 
     /**
-     * Handles submission of manual shifts.
+     * Handles submission of Timesheets.
      *
      * @return void
      */
@@ -53,14 +55,14 @@ class TimesheetController extends Controller
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['shifts' => [] ]));
+        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['entries' => [] ]));
         $timesheet->creator_id = auth()->user()->id;
         $timesheet->business_id = activeBusiness()->id;
         $timesheet->save();
         
-        foreach($request->validated()['shifts'] as $shift) {
-            if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => [] ]))) {
-                $entry->activities()->sync($shift['activities']);
+        foreach($request->validated()['entries'] as $item) {
+            if ($entry = $timesheet->entries()->create(array_diff_key($item, ['activities' => [], 'duration' => '', 'start_time' => '', 'end_time' => '', 'date' => '' ]))) {
+                $entry->activities()->sync($item['activities']);
             } 
         }
 

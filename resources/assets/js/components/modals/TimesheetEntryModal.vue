@@ -223,8 +223,10 @@
                 if (val) {
                     // convert check in/out dates to entry date start/end time
                     let checkin = moment.utc(this.entry.checked_in_time).local();
-                    let checkout = moment.utc(this.entry.checked_out_time).local();
-
+                    let checkout = moment.utc(this.entry.checked_in_time).add(1, 'hour').local();
+                    if (this.entry.checked_out_time) {
+                        checkout = moment.utc(this.entry.checked_out_time).local();
+                    }
                     let data = {
                         date: checkin.format('MM/DD/YYYY'),
                         start_time: checkin.format('HH:mm'),

@@ -1,24 +1,11 @@
 <template>
-    <b-card header="Manual Timesheet"
+    <b-card header="Submit Timesheet"
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white">
             
         <!-- CLIENT DROPDOWNS -->
         <b-row>
-            <b-col lg="6" v-show="! isCaregiver">
-                <b-form-group label="Caregiver" label-for="caregiver_id">
-                    <b-form-select
-                            id="caregiver_id"
-                            name="caregiver_id"
-                            v-model="form.caregiver_id"
-                    >
-                        <option value="">-- Select Caregiver --</option>
-                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
-                    </b-form-select>
-                    <input-help :form="form" field="caregiver_id" text=""></input-help>
-                </b-form-group>
-            </b-col>
             <b-col lg="6">
                 <b-form-group label="Client" label-for="client_id">
                     <b-form-select
@@ -43,7 +30,7 @@
                     <b-form-select
                             id="week"
                             name="week"
-                            v-model="form.week"
+                            v-model="week"
                     >
                         <option value="">-- Select Week --</option>
                         <option v-for="item in weekRanges" :value="item" :key="item.id">{{ item.display }}</option>
@@ -54,9 +41,9 @@
         </b-row>
         <!-- /end WEEK DROPDOWN -->
             
-        <!-- SHIFTS TABLE -->
+        <!-- ENTRIES TABLE -->
         <div class="table-responsive">
-            <input-help :form="form" field="shifts" text=""></input-help>
+            <input-help :form="form" field="entries" text=""></input-help>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -66,13 +53,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="shift in shifts" :key="shift.date">
-                        <th>{{ dow(shift.date) }}</th>
+                    <tr v-for="(day, index) in week.days" :key="index">
+                        <th>{{ dow(day) }}</th>
                         <td>
-                            {{ shiftDisplayTime(shift) }}
+                            {{ formatEntryDisplay(shifts[index]) }}
                         </td>
                         <td>
-                            <b-button variant="info" size="xs" @click="editShift(shift)">
+                            <b-button variant="info" size="xs" @click="editEntry(index)" :disabled="! canEdit">
                                 <i class="fa fa-edit"></i>
                             </b-button>
                         </td>
@@ -80,95 +67,35 @@
                 </tbody>
             </table>
         </div>
-        <!-- /end SHIFTS TABLE -->
+        <!-- /end ENTRIES TABLE -->
 
         <b-row class="mt-3">
             <b-col md="12">
-                <b-button variant="success" type="button" @click="submit()">Submit Timesheet</b-button>
+                <b-button variant="success" type="button" @click="submit()" :disabled="busy">
+                    <i v-show="busy" class="fa fa-spinner fa-spin"></i>
+                    Submit Timesheet
+                </b-button>
             </b-col>
         </b-row>
 
-        <b-modal :title="modalTitle" v-model="showModal" size="lg">
-            <b-container fluid>
-                <b-row>
-                    <b-col md="12">
+        <timesheet-entry-modal
+            :entry="selectedEntry"
+            :activities="activities"
+            v-model="showEntryModal"
+            @updated="updateEntry"
+        ></timesheet-entry-modal>
 
-                        <!-- start_time -->
-                        <b-form-group label="Clocked In" label-for="start_time">
-                            <time-picker v-model="shiftForm.start_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="start_time" text=""></input-help>
-                        </b-form-group>
-
-                        <!-- end_time -->
-                        <b-form-group label="Clocked Out" label-for="end_time">
-                            <time-picker v-model="shiftForm.end_time" placeholder="HH:MM"></time-picker>
-                            <input-help :form="shiftForm" field="end_time" text=""></input-help>
-                        </b-form-group>
-
-                        <!-- activities -->
-                        <b-form-group label="Activities Performed Out" label-for="">
-                            <input-help :form="shiftForm" field="activities" text=""></input-help>
-                            <div class="form-check">
-                                <label class="custom-control custom-checkbox" v-for="activity in activities" :key="activity.id" style="clear: left; float: left;">
-                                    <input type="checkbox" class="custom-control-input" v-model="shiftForm.activities" :value="activity.id">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                                </label>
-                            </div>
-                        </b-form-group>
-
-                        <!-- mileage -->
-                        <b-form-group label="Mileage" label-for="mileage">
-                            <b-form-input
-                                    id="mileage"
-                                    name="mileage"
-                                    type="number"
-                                    v-model="shiftForm.mileage"
-                                    step="any"
-                                    min="0"
-                                    max="1000"
-                            />
-                            <input-help :form="shiftForm" field="mileage" text=""></input-help>
-                        </b-form-group>
-                        
-                        <!-- other_expenses -->
-                        <b-form-group label="Other Expenses" label-for="other_expenses">
-                            <b-form-input
-                                    id="other_expenses"
-                                    name="other_expenses"
-                                    type="number"
-                                    v-model="shiftForm.other_expenses"
-                                    step="any"
-                                    min="0"
-                                    max="1000"
-                            />
-                            <input-help :form="shiftForm" field="other_expenses" text=""></input-help>
-                        </b-form-group>
-
-                        <b-form-group label="Notes" label-for="caregiver_comments">
-                            <b-textarea
-                                    id="caregiver_comments"
-                                    name="caregiver_comments"
-                                    :rows="4"
-                                    v-model="shiftForm.caregiver_comments"
-                            ></b-textarea>
-                            <input-help :form="shiftForm" field="caregiver_comments" text=""></input-help>
-                        </b-form-group>
-
-                    </b-col>
-                </b-row>
-            </b-container>
-
-            <div slot="modal-footer">
-                <b-button variant="success" type="submit" @click="updateShift()">Save</b-button>
-                <b-btn variant="default" @click="showModal = false">Close</b-btn>
-            </div>
-        </b-modal>
     </b-card>
 </template>
 
 <script>
+    import FormatDates from '../../mixins/FormatsDates';
+    import TimesheetEntryModal from '../modals/TimesheetEntryModal';
+
     export default {
+        mixins: [ FormatDates ],
+        components: { TimesheetEntryModal },
+
         props: {
             'cg': { type: Object, default: {} },
             'caregivers': { type: Array, default: [] },
@@ -177,34 +104,24 @@
 
         data() {
             return {
-                showModal: false,
+                busy: false,
                 caregiver: {},
                 client: {},
                 weekRanges: [],
-                shiftForm: new Form({}),
+                week: {},
                 shifts: [],
                 form: new Form({
                     client_id: '',
                     caregiver_id: '',
-                    shifts: [],
-                    week: {},
+                    entries: [],
                 }),
+                showEntryModal: false,
+                selectedEntry: {},
+                selectedIndex: null,
             }
         },
 
         computed: {
-            modalTitle() {
-                if (! this.shiftForm.date) {
-                    return '';
-                }
-
-                return this.dow(this.shiftForm.date, true) + ' ' + moment(this.shiftForm.date).format('M/D/YYYY');
-            },
-
-            isCaregiver() {
-                return this.caregiver.id ? true : false;
-            },
-
             hasClients() {
                 return this.caregiver.clients && this.caregiver.clients.length > 0;
             },
@@ -216,44 +133,51 @@
             defaultFee() {
                 return this.client.provider_hourly_fee || 0;
             },
+
+            canEdit() {
+                return this.form.client_id ? true : false;
+            },
         },
 
         methods: {
-            editShift(shift) {
-                this.shiftForm = new Form(shift);
-                this.showModal = true;
-            },
+            editEntry(index) {
+                this.selectedIndex = index;
+                this.selectedEntry = this.form.entries[index];
 
-            updateShift() {
-                console.log(this.shiftForm.data());
-
-                this.shiftForm.clearError();
-                if (!this.isValidShift(this.shiftForm)) {
-                    return;
+                // set default check in time for day of the week
+                if (! this.selectedEntry.checked_in_time) {
+                    this.selectedEntry.checked_in_time = moment(this.week.days[index], 'YYYY-MM-DD');
                 }
 
-                var index = this.shifts.findIndex(x => x.date == this.shiftForm.date);
-                this.shifts[index] = this.shiftForm.data();
+                this.showEntryModal = true;
+            },
 
-                this.showModal = false;
+            updateEntry(entry) {
+                this.form.entries.splice(this.selectedIndex, 1, entry);
+                this.shifts.splice(this.selectedIndex, 1, entry);
+                this.selectedEntry = null;
             },
 
             submit() {
-                // submit only the shifts filled out  
-                this.form.shifts = this.shifts.filter(x => x.start_time != '');
+                this.busy = true;
+                let data = this.form.data();
+
+                // submit only the entries filled out
+                this.form.entries = this.form.entries.filter(x => x.checked_out_time != '');
 
                 this.form.submit('post', '/timesheet')
                     .then( ({ data }) => {
-                        console.log(data);
-                        this.shiftForm = new Form({});
-                        this.shifts = [];
-                        this.form.week = {};
-                        this.form.client_id = '';
-                        this.form.shifts = [];
+                        window.location = '/timesheet?success=1';
+                        // this.form.client_id = '';
+                        // this.form.shifts = [];
+                        // this.week = this.weekRanges[0];
                     })
                     .catch(e => {
                         console.log('submit timesheet error:');
                         console.log(e);
+                        // revert back to the unfiltered list
+                        this.form.entries = this.shifts;
+                        this.busy = false;
                     });
             },
 
@@ -261,72 +185,21 @@
                 return moment(date).format(full ? 'dddd' : 'ddd');
             },
 
-            shiftDisplayTime(shift) {
-                if (shift.start_time == '' || shift.end_time == '') {
-                    return '-';
-                }
-
-                return `${shift.start_time} - ${shift.end_time}`;
-            },
-
-            generateShiftsForWeek(week) {
-                let shifts = [];
+            generateEntriesForWeek(week) {
+                let entries = [];
                 week.days.forEach( (date) => {
-                    shifts.push({
-                        date: date,
-                        start_time: '',
-                        end_time: '',
+                    entries.push({
+                        checked_in_time: '',
+                        checked_out_time: '',
                         mileage: 0,
                         other_expenses: 0,
-                        caregiver_rate: this.defaultRate || 0,
-                        provider_fee: this.defaultFee || 0,
+                        caregiver_rate: this.defaultRate || 0.00,
+                        provider_fee: this.defaultFee || 0.00,
                         caregiver_comments: '',
                         activities: [],
                     });
                 });
-                return shifts;
-            },
-
-            isValidShift(data) {
-                if (!this.validDate(data.start_time)) {
-                    this.shiftForm.addError('start_time', 'Clock in time is required');
-                }
-                
-                if (!this.validDate(data.end_time)) {
-                    this.shiftForm.addError('end_time', 'Clock out time is required');
-                }
-
-                if (data.mileage === '' || isNaN(data.mileage)) {
-                    this.shiftForm.addError('mileage', 'Invalid entry');
-                }
-                
-                if (isNaN(data.other_expenses)) {
-                    this.shiftForm.addError('other_expenses', 'Invalid entry');
-                }
-
-                if (! data.activities || data.activities.length == 0) {
-                    this.shiftForm.addError('activities', 'You must select at least one activity');
-                }
-                
-                // if (isNaN(data.caregiver_rate)) {
-                //     this.shiftForm.addError('caregiver_rate', 'Invalid');
-                // }
-
-                // if (isNaN(data.provider_fee)) {
-                //     this.shiftForm.addError('provider_fee', 'Invalid');
-                // }
-                
-                return !this.shiftForm.hasError();
-            },
-
-            validDate(val) {
-                if (!val || val == '') return false;
-                return moment(val, 'mm/dd/yyyy').isValid();
-            },
-            
-            validTime() {
-                if (!val || val == '') return false;
-                return moment(this.value, 'hh:mm').isValid();
+                return entries;
             },
 
             generateWeeks() {
@@ -360,6 +233,18 @@
                     days.push(moment(end).subtract(i, 'days').format('YYYY-MM-DD'));                    
                 }
                 return days;
+            },
+
+            formatEntryDisplay(entry) {
+                if (!entry) { 
+                    return ''; 
+                }
+
+                if (entry.checked_in_time && entry.checked_out_time) {
+                    return this.formatTimeFromUTC(entry.checked_in_time) + ' - ' + this.formatTimeFromUTC(entry.checked_out_time);
+                } else {
+                    return '-';
+                }
             },
         },
 
@@ -396,11 +281,13 @@
                     this.client = {};
                 }
                 
-                this.shifts = this.generateShiftsForWeek(this.form.week);
+                this.form.entries = this.generateEntriesForWeek(this.week);
+                this.shifts = this.form.entries;
             },
 
-            'form.week': function(newVal, oldVal) {
-                this.shifts = this.generateShiftsForWeek(this.form.week);
+            'week': function(newVal, oldVal) {
+                this.form.entries = this.generateEntriesForWeek(this.week);
+                this.shifts = this.form.entries;
             }
         },
 
@@ -411,7 +298,7 @@
             }
 
             this.weekRanges = this.generateWeeks();
-            this.form.week = this.weekRanges[0];
+            this.week = this.weekRanges[0];
         },
     }
 </script>

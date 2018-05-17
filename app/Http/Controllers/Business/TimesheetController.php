@@ -43,15 +43,13 @@ class TimesheetController extends BaseController
      */
     public function update(ApproveTimesheetRequest $request, Timesheet $timesheet)
     {
-        return true;
-        
         if (!$this->businessHasTimesheet($timesheet)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
         
         if ($request->deny == 1) {
             $timesheet->deny();
-
+ 
             return new SuccessResponse(
                 'Timesheet has been denied.', 
                 $timesheet->fresh()->load('caregiver', 'client')

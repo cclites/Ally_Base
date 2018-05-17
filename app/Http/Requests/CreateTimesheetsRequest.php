@@ -26,17 +26,16 @@ class CreateTimesheetsRequest extends FormRequest
         return [
             'caregiver_id' => 'required|exists:caregivers,id',
             'client_id' => 'required|exists:clients,id',
-            'shifts' => 'required|array|min:1',
+            'entries' => 'required|array|min:1',
             
-            'shifts.*.mileage' => 'nullable|numeric|max:1000|min:0',
-            'shifts.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
-            'shifts.*.date' => 'required|date',
-            'shifts.*.start_time' => 'required|date_format:H:i',
-            'shifts.*.end_time' => 'required|date_format:H:i',
-            'shifts.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'shifts.*.provider_fee' => 'required|numeric|max:1000|min:0',
-            'shifts.*.activities' => 'required|array|min:1',
-            'shifts.*.caregiver_comments' => 'nullable',
+            'entries.*.mileage' => 'nullable|numeric|max:1000|min:0',
+            'entries.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
+            'entries.*.checked_in_time' => 'required|date_format:Y-m-d H:i:s',
+            'entries.*.checked_out_time' => 'required|date_format:Y-m-d H:i:s',
+            'entries.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
+            'entries.*.provider_fee' => 'required|numeric|max:1000|min:0',
+            'entries.*.activities' => 'required|array|min:1',
+            'entries.*.caregiver_comments' => 'nullable',
         ];
     }
 
@@ -50,8 +49,8 @@ class CreateTimesheetsRequest extends FormRequest
         return [
             'caregiver_id.*' => 'You must select a caregiver.',
             'client_id.*' => 'You must select a client.',
-            'shifts.*.*' => 'One of the shifts contains invalid data.',
-            'shifts.*' => 'You must add at least one shift.',
+            'entries.*.*' => 'One of the entries contains invalid data.',
+            'entries.*' => 'You must add at least one shift.',
             'activities.*' => 'You must select at least 1 activity.',
         ];
     }

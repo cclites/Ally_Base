@@ -200,7 +200,7 @@ Vue.component('caregiver-application-list', require('./components/caregivers/Car
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.component('mask-input', require('./components/MaskInput'));
-Vue.component('caregiver-timesheet', require('./components/Caregivers/CaregiverTimesheet'));
+Vue.component('caregiver-timesheet', require('./components/caregivers/CaregiverTimesheet'));
 Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 

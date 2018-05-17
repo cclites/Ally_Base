@@ -153,14 +153,10 @@
         },
 
         methods: {
-            deny() {
-
-            },
-            
             updateEntry(entry) {
                 this.form.entries.splice(this.selectedIndex, 1, entry);
                 this.selectedEntry = null;
-            },
+        },
 
             editEntry(entry, index) {
                 this.selectedEntry = entry;

@@ -30,9 +30,6 @@ class ApproveTimesheetRequest extends FormRequest
             
             'entries.*.mileage' => 'nullable|numeric|max:1000|min:0',
             'entries.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
-            // 'entries.*.date' => 'required|date',
-            // 'entries.*.start_time' => 'required|date_format:H:i',
-            // 'entries.*.end_time' => 'required|date_format:H:i',
             'entries.*.checked_in_time' => 'required|date_format:Y-m-d H:i:s',
             'entries.*.checked_out_time' => 'required|date_format:Y-m-d H:i:s',
             'entries.*.caregiver_rate' => 'required|numeric|max:1000|min:0',
