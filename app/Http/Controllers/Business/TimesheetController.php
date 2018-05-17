@@ -106,6 +106,7 @@ class TimesheetController extends BaseController
             $data['caregiver_rate'] = $entry['caregiver_rate'];
             $data['provider_fee'] = $entry['provider_fee'];
 
+            $data['timesheet_id'] = $timesheet->id;
             $data['caregiver_id'] = $timesheet->caregiver_id;
             $data['client_id'] = $timesheet->client_id;
             $data['business_id'] = $timesheet->business_id;
