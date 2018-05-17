@@ -14,6 +14,7 @@ use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Caregiver
@@ -62,10 +63,11 @@ use Carbon\Carbon;
  * @mixin \Eloquent
  * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use IsUserRole;
     use \App\Traits\HasPaymentHold;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -308,7 +310,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function unassignFromFutureSchedules()
     {
         $this->schedules()
-             ->where('starts_at', '>', Carbon::now())
+             ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->update(['caregiver_id' => null]);
     }
 

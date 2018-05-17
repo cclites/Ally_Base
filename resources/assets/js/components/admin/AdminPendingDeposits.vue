@@ -24,7 +24,7 @@
                             required
                             >
                             <option value="">--Select a Provider--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">List Pending Deposits</b-button>
                         &nbsp;&nbsp;<b-button @click="processDeposits()" variant="danger" :disabled="processing">Process Deposits</b-button>

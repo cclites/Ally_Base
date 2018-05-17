@@ -371,11 +371,11 @@
                 }
                 return this.clientCaregivers;
             },
-            
+
             toggleCaregiversLabel() {
                 if (this.cgMode === 'all') {
                     return "Show only Client's"
-                } 
+                }
                 return 'Show All';
             },
         },
@@ -653,6 +653,14 @@
 
                 // Re-create the form object
                 this.makeForm();
+
+                // reset cg mode
+                if (this.initialValues.caregiver_id) {
+                    console.log('has cargiver');
+                    this.cgMode = 'all';
+                } else {
+                    this.cgMode = 'client';
+                }
             },
 
             scheduleModal(val) {
@@ -669,9 +677,10 @@
 
             'form.client_id': function(val, old_val) {
                 this.loadCarePlans(val, old_val);
-                this.cgMode = 'client';
-                this.loadAllyPctFromClient(val);
-                this.loadCaregivers();
+                if (this.cgMode == 'client') {
+                    this.loadAllyPctFromClient(val);
+                    this.loadCaregivers();
+                }
             },
 
             'form.caregiver_id': function(val, old_val) {

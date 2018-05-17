@@ -180,7 +180,7 @@
                                 >
                                     <option value="">--Please Select--</option>
                                     <option v-if="hiddenOnboardStatuses[form.onboard_status]" :value="form.onboard_status">{{ hiddenOnboardStatuses[form.onboard_status] }}</option>
-                                    <option v-for="(display, value) in onboardStatuses" :value="value">{{ display }}</option>
+                                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
                                 </b-form-select>
                                 <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
                             </b-form-group>

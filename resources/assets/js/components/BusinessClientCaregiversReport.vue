@@ -10,13 +10,13 @@
                     <b-col cols="6">
                         <b-form-select v-model="filterCaregiverId">
                             <option value="">All Caregivers</option>
-                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                     <b-col cols="6">
                         <b-form-select v-model="filterClientId">
                             <option value="">All Clients</option>
-                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                 </b-row>

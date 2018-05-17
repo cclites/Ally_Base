@@ -3,7 +3,7 @@
         <b-container fluid>
             <b-row>
                 <div class="form-check row">
-                    <div class="col-sm-auto" v-for="field in availableFields">
+                    <div class="col-sm-auto" v-for="field in availableFields" :key="field">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="localFields" :value="field">
                             <span class="custom-control-indicator"></span>

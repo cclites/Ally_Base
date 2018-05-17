@@ -27,7 +27,7 @@
                             class="mt-1"
                         >
                             <option value="">-- All Businesses</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         <b-form-select
                             id="client_id"
@@ -36,7 +36,7 @@
                             class="mt-1"
                         >
                             <option value="">-- All Clients</option>
-                            <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.name }}</option>
                         </b-form-select>
                         <b-form-select
                             id="caregiver_id"
@@ -45,7 +45,7 @@
                             class="mt-1"
                         >
                             <option value="">-- All Carevigers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
                         <span class="d-none d-sm-inline">&nbsp;</span>
                         <b-button 

@@ -9,6 +9,7 @@ use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\HasAllyFeeTrait;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Business
@@ -78,10 +79,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ask_on_confirm
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
-class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold
+class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use \App\Traits\HasPaymentHold;
     use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'businesses';
     protected $guarded = ['id'];

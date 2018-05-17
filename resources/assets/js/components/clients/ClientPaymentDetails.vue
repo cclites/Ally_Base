@@ -28,7 +28,7 @@
                     <td colspan="3">{{ payment.notes }}</td>
                     <td>{{ this.moneyFormat(payment.amount) }}</td>
                 </tr>
-                <tr v-for="shift in shifts">
+                <tr v-for="shift in shifts" :key="shift.id">
                     <td>{{ formatDateFromUTC(shift.checked_in_time.date) }}</td>
                     <td>
                         {{ formatTimeFromUTC(shift.checked_in_time.date) }} - {{ formatTimeFromUTC(shift.checked_out_time.date) }}
@@ -69,7 +69,7 @@
                 switch (this.roleType) {
                     case 'client':
                         return '/payment-history/' + this.payment.id + '/print';
-                    case 'office_user':
+                    default:
                         return '/business/clients/payments/' + this.payment.id + '/print';
                 }
             }

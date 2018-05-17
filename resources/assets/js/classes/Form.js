@@ -19,6 +19,11 @@ class Form {
         this.errorMods = 0;
     }
 
+    disableRedirects() {
+        this.handler.redirects = false;
+        return this;
+    }
+
     /**
      * Fetch all relevant data for the form.
      */

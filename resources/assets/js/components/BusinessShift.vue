@@ -200,7 +200,7 @@
                         Shift Issues
                         <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                     </h5>
-                    <div class="table-responsive" v-if="issues.length">
+                    <div class="table-responsive" v-if="localIssues.length">
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -211,9 +211,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in issues" :key="issue">
-                                <td>{{ issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ issue.client_injury ? 'Yes' : 'No' }}</td>
+                            <tr v-for="issue in localIssues" :key="issue.id">
+                                <td>{{ +issue.caregiver_injury ? 'Yes' : 'No' }}</td>
+                                <td>{{ +issue.client_injury ? 'Yes' : 'No' }}</td>
                                 <td>{{ issue.comments }}</td>
                                 <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
                             </tr>
@@ -291,7 +291,7 @@
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
                         <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
-                        <b-button variant="success" type="submit" v-else>Save Shift</b-button>
+                        <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
                         <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
@@ -318,7 +318,7 @@
             </b-row>
         </form>
 
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="issues"></business-issue-modal>
+        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="localIssues"></business-issue-modal>
     </div>
 </template>
 
@@ -356,6 +356,7 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
+                localIssues: this.issues,
                 issueModal: false,
                 selectedIssue: null,
                 deleted: false,
@@ -363,6 +364,7 @@
                 caregivers: [],
                 clientAllyPct: 0.05,
                 paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
+                submitting: false,
             }
         },
         mounted() {
@@ -483,6 +485,7 @@
                 }
             },
             saveShift(callback) {
+                this.submitting = true;
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
@@ -490,15 +493,17 @@
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.issues = this.issues;
+                    this.form.issues = this.localIssues;
                     this.form.post('/business/shifts').then(response => {
                         this.$emit('shiftCreated', response.data.data.shift);
                         this.status = response.data.data.status;
+                        this.submitting = false;
                         if(callback) {
                             callback();
                         }
+                    }).catch(error => {
+                        this.submitting = false;
                     });
-
                 }
             },
             adminOverride() {

@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Client
@@ -99,11 +100,12 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
+class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface, Auditable
 {
     use IsUserRole, Notifiable;
     use \App\Traits\HasPaymentHold;
     use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -367,7 +369,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public function clearFutureSchedules()
     {
         $this->schedules()
-             ->where('starts_at', '>', Carbon::now())
+             ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->delete();
     }
 

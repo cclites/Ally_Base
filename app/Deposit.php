@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Deposit
@@ -35,8 +36,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Deposit extends Model
+class Deposit extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'deposits';
     protected $guarded = ['id'];
     protected $appends = ['week'];

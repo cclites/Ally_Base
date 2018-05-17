@@ -192,6 +192,7 @@ Route::group([
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
     Route::post('schedule/bulk_delete', 'Business\ScheduleController@bulkDestroy')->name('schedule.bulk_delete');
+    Route::patch('schedule/{schedule}/status', 'Business\ScheduleController@updateStatus')->name('schedule.update_status');
     Route::resource('schedule', 'Business\ScheduleController');
 
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
@@ -232,6 +233,8 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::get('microbilt', 'Admin\MicrobiltController@index');
+    Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
     Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');
     Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
@@ -303,6 +306,7 @@ Route::group([
         ->name('reports.caregivers.deposits_missing_bank_account');
 
     Route::get('reports/bucket', 'Admin\BucketController@index')->name('reports.bucket');
+    Route::get('reports/evv', 'Admin\ReportsController@evv')->name('reports.evv');
     Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
     Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
     Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
@@ -311,6 +315,7 @@ Route::group([
 
     // Route::get('manual-timesheets', 'ManualTimesheetsController@create');
     // Route::post('manual-timesheets', 'ManualTimesheetsController@store');
+    Route::get('audit-log', 'Admin\AuditLogController@index')->name('reports.audit-log');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

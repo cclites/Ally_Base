@@ -27,20 +27,26 @@ class ScheduleEvents implements Responsable
         ];
 
     /**
+     * Background color themes for each schedule type.
+     * 
+     * Currently all backgrounds are hard coded in the toArray function.
+     * To re-implement this feature, use the $this->getBackgroundColor method
+     * to auto calculate one of the colors in these arrays.
+     * 
      * @var array
      */
     protected $backgroundColors = [
         'past' => [
+            '#849290',
             '#7f7f6f',
             '#59665b',
-            '#849290',
             '#adad85',
             '#999966',
             '#85858e',
         ],
         'current' => [
-            '#34A82D',
             '#27c11e',
+            '#34A82D',
             '#32872d',
             '#009933',
             '#00cc44',
@@ -72,6 +78,38 @@ class ScheduleEvents implements Responsable
         return $this;
     }
 
+    /**
+     * Get stats on the schedules.
+     *
+     * @return void
+     */
+    public function kpis()
+    {
+        $totalShifts = 0;
+        $unassignedShifts = 0;
+        $totalMinutes = 0;
+        $unassignedMinutes = 0;
+
+        foreach($this->schedules as $s) {
+            $totalMinutes += $s->duration;
+            $totalShifts ++;
+
+            if (empty($s->caregiver)) {
+                $unassignedShifts++;
+                $unassignedMinutes += $s->duration;
+            }
+        }
+
+        return [
+            'total_shifts' => $totalShifts,
+            'total_hours' => floor($totalMinutes/60),
+            'unassigned_shifts' => $unassignedShifts,
+            'unassigned_hours' => floor($unassignedMinutes/60),
+            'assigned_shifts' => $totalShifts - $unassignedShifts,
+            'assigned_hours' => floor(($totalMinutes - $unassignedMinutes)/60),
+        ];
+    }
+
     public function toArray()
     {
         return $this->schedules->map(function(Schedule $schedule) {
@@ -83,15 +121,26 @@ class ScheduleEvents implements Responsable
             $title = $this->resolveEventTitle($schedule);
 
             if ($schedule->isClockedIn()) {
-                $backgroundColor = $this->getBackgroundColor('current', $title);
+                $backgroundColor = '#27c11e'; // current 
                 $title .= ': Clocked In';
             }
             elseif($schedule->starts_at < Carbon::now()) {
-                $backgroundColor = $this->getBackgroundColor('past', $title);
+                $backgroundColor = '#849290'; // past 
             }
             else {
-                $backgroundColor = $this->getBackgroundColor('future', $title);
+                switch($schedule->status) {
+                    case Schedule::CLIENT_CANCELED:
+                        $backgroundColor = '#f2f214'; // client cancel
+                        break;
+                    case Schedule::CAREGIVER_CANCELED:
+                        $backgroundColor = '#d91c4e'; // CG cancel
+                        break;
+                    default:
+                        $backgroundColor = '#1c81d9'; // ok / future
+                        break;
+                }
             }
+
 
             return array_merge([
                 'id' => $schedule->id,
@@ -101,6 +150,14 @@ class ScheduleEvents implements Responsable
                 'end' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format(\DateTime::ISO8601),
                 'backgroundColor' => $backgroundColor,
                 'care_plan' => $schedule->carePlan,
+
+                'client' => $schedule->client->name(),
+                'caregiver' => $schedule->caregiver ? $schedule->caregiver->name() : 'None',
+                'start_time' => $schedule->starts_at->format('g:i A'),
+                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                'note' => empty($schedule->note) ? '' : $schedule->note->note,
+                'unassigned' => empty($schedule->caregiver),
+                'status' => $schedule->status,
             ], $additionalOptions);
         });
     }

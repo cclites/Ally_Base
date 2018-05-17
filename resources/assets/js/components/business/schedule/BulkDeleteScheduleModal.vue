@@ -65,7 +65,7 @@
                                     >
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Clients</option>
-                                        <option v-for="client in clients" :value="client.id">{{ client.name }}</option>
+                                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text=""/>
                                 </b-form-group>
@@ -79,7 +79,7 @@
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Caregivers</option>
                                         <option value="0">Unassigned</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text=""/>
                                 </b-form-group>
@@ -94,7 +94,7 @@
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">All Days</span>
                                     </label>
-                                    <label class="custom-control custom-checkbox" v-for="day in daysOfWeek">
+                                    <label class="custom-control custom-checkbox" v-for="day in daysOfWeek" :key="day">
                                         <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="form.bydays" :value="day">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">{{ day }}</span>

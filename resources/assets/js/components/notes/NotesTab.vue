@@ -2,7 +2,8 @@
     <div>
         <b-card v-for="note in notes"
                 class="mb-3"
-                header-tag="header">
+                header-tag="header"
+                :key="note.id">
                 <div slot="header">
                     <b-row align-h="between">
                         <b-col>

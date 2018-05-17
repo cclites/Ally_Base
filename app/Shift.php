@@ -12,6 +12,7 @@ use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Shift
@@ -94,9 +95,10 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
  */
-class Shift extends Model implements HasAllyFeeInterface
+class Shift extends Model implements HasAllyFeeInterface, Auditable
 {
     use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];
@@ -128,6 +130,17 @@ class Shift extends Model implements HasAllyFeeInterface
     const PAID_CAREGIVER_ONLY_NOT_CHARGED = 'PAID_CAREGIVER_ONLY_NOT_CHARGED'; // Shift that failed payment to the business, paid successfully to the caregiver, but still requires payment from the client
     const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
     const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
+
+    ////////////////////////////////////
+    //// Shift Methods
+    ////////////////////////////////////
+
+    const METHOD_CONVERTED = 'Converted';  //  The shift was converted from a schedule
+    const METHOD_GEOLOCATION = 'Geolocation';  //  The shift was clocked in/out from the mobile app using geolocation
+    const METHOD_OFFICE = 'Office';  //  The shift was manually created or clocked out from the office user interface
+    const METHOD_TELEPHONY = 'Telephony';  //  The shift was clocked in/out from the telephony system
+    const METHOD_TIMESHEET = 'Timesheet';  //  The shift was created from a manual timesheet submitted by the caregiver
+    const METHOD_UNKNOWN = 'Unknown';  //  The check in/out method is unknown, most likely from before we implemented this logic
 
     //////////////////////////////////////
     /// Relationship Methods

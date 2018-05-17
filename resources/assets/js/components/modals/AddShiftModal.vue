@@ -11,7 +11,14 @@
             ></business-shift>
         </b-container>
         <div slot="modal-footer">
-            <b-button variant="success" type="submit" @click="saveShift()">Save Shift</b-button>
+            <submit-button variant="success"
+                           type="submit"
+                           @click.native="saveShift()"
+                           :submitting="submitting"
+                           icon="fa fa-save"
+            >
+                Save Shift
+            </submit-button>
             <b-btn variant="default" @click="showModal = false">Close</b-btn>
         </div>
     </b-modal>
@@ -22,6 +29,7 @@
         data() { 
             return {
                 activities: [],
+                isMounted: false,
             }
         },
 
@@ -43,6 +51,9 @@
                     this.$emit('input', value);
                 }
             },
+            submitting() {
+                return this.isMounted ? this.$refs.businessShift.submitting : false;
+            }
         },
 
         methods: {
@@ -69,6 +80,7 @@
         },
 
         mounted() {
+            this.isMounted = true;
             this.loadData();
         },
     }
