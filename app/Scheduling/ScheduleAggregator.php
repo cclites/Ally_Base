@@ -100,7 +100,11 @@ class ScheduleAggregator
                 break;
         }
 
-        return $this->query()->whereRaw('(starts_at >= ? AND ' . $endFormat . ' <= ?)', [$start, $end])->get();
+        return $this->query()
+            ->whereRaw(
+                '( (starts_at >= ? AND starts_at <= ?) OR (' . $endFormat . ' >= ? AND ' . $endFormat . ' <= ?) )',
+                [$start, $end, $start, $end]
+            )->get();
     }
 
 
