@@ -73,8 +73,8 @@ Route::group([
     Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
     Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
-    Route::get('timesheet', 'TimesheetsController@create')->name('caregivers.timesheet');
-    Route::post('timesheet', 'TimesheetsController@store')->name('caregivers.timesheet.store');
+    Route::get('timesheet', 'TimesheetController@create')->name('caregivers.timesheet');
+    Route::post('timesheet', 'TimesheetController@store')->name('caregivers.timesheet.store');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
@@ -216,8 +216,8 @@ Route::group([
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
 
-    Route::get('timesheet/{timesheet}', 'Business\TimesheetsController@edit')->name('timesheet');
-    Route::put('timesheet/{timesheet}', 'Business\TimesheetsController@approve')->name('timesheet.approve');
+    Route::get('timesheet/{timesheet}', 'Business\TimesheetController@edit')->name('timesheet');
+    Route::post('timesheet/{timesheet}', 'Business\TimesheetController@update')->name('timesheet.update');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

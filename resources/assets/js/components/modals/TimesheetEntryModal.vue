@@ -28,6 +28,30 @@
                         </div>
                     </b-form-group>
 
+                    <b-form-group v-show="isOfficeUser" label="Caregiver Hourly Rate" label-for="caregiver_rate">
+                        <b-form-input
+                                id="caregiver_rate"
+                                name="caregiver_rate"
+                                type="number"
+                                step="any"
+                                v-model="form.caregiver_rate"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="caregiver_rate" text=""></input-help>
+                    </b-form-group>
+
+                    <b-form-group v-show="isOfficeUser" label="Provider Hourly Fee" label-for="provider_fee">
+                        <b-form-input
+                                id="provider_fee"
+                                name="provider_fee"
+                                type="number"
+                                step="any"
+                                v-model="form.provider_fee"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="provider_fee" text=""></input-help>
+                    </b-form-group>
+
                     <!-- mileage -->
                     <b-form-group label="Mileage" label-for="mileage">
                         <b-form-input
@@ -83,6 +107,7 @@
             value: {},
             entry: { type: Object, default: {} },
             activities: { type: Array, default: [] },
+            isOfficeUser: { type: Boolean, default: false },
         },
 
         data: () => ({
@@ -120,11 +145,97 @@
         },
 
         methods: {
+            updateShift() {
+                this.form.clearError();
+                if (!this.isValidShift(this.form)) {
+                    return;
+                }
+
+                // convert date and start/end time to proper check in/out datetime
+                this.form.checked_in_time = moment(this.form.date + ' ' + this.form.start_time, 'MM/DD/YYYY HH:mm').utc().format('YYYY-MM-DD HH:mm:ss');
+
+                let start = moment(this.form.start_time, 'HH:mm');
+                let end = moment(this.form.end_time, 'HH:mm');
+
+                let endDate = moment(this.form.date + ' ' + this.form.end_time, 'MM/DD/YYYY HH:mm');
+                if (end.isBefore(start)) {
+                    // overlaps to the next day
+                    endDate = endDate.add(1, 'day');
+                }
+                this.form.checked_out_time = endDate.utc().format('YYYY-MM-DD HH:mm:ss');
+
+                this.$emit('updated', this.form.data());
+                this.showModal = false;
+            },
+
+            isValidShift(data) {
+                if (!this.validDate(data.start_time)) {
+                    this.form.addError('start_time', 'Clock in time is required');
+                }
+                
+                if (!this.validDate(data.end_time)) {
+                    this.form.addError('end_time', 'Clock out time is required');
+                }
+
+                if (data.mileage === '' || isNaN(data.mileage)) {
+                    this.form.addError('mileage', 'Invalid entry');
+                }
+                
+                if (isNaN(data.other_expenses)) {
+                    this.form.addError('other_expenses', 'Invalid entry');
+                }
+
+                if (! data.activities || data.activities.length == 0) {
+                    this.form.addError('activities', 'You must select at least one activity');
+                }
+                
+                if (this.isOfficeUser) {
+                    if (isNaN(data.caregiver_rate)) {
+                        this.form.addError('caregiver_rate', 'Invalid');
+                    }
+
+                    if (isNaN(data.provider_fee)) {
+                        this.form.addError('provider_fee', 'Invalid');
+                    }
+                }
+                
+                return !this.form.hasError();
+            },
+
+            validDate(val) {
+                if (!val || val == '') return false;
+                return moment(val, 'mm/dd/yyyy').isValid();
+            },
+            
+            validTime() {
+                if (!val || val == '') return false;
+                return moment(this.value, 'hh:mm').isValid();
+            },
+
+            dow(date, full = false) {
+                return moment(date).format(full ? 'dddd' : 'ddd');
+            },
+
         },
 
         watch: {
-            entry() {
-                this.form = new Form(this.entry);
+            entry(val) {
+                if (val) {
+                    // convert check in/out dates to entry date start/end time
+                    let checkin = moment.utc(this.entry.checked_in_time).local();
+                    let checkout = moment.utc(this.entry.checked_out_time).local();
+
+                    let data = {
+                        date: checkin.format('MM/DD/YYYY'),
+                        start_time: checkin.format('HH:mm'),
+                        end_time: checkout.format('HH:mm'),
+                    }
+
+                    this.form = new Form({
+                        ...data,
+                        ...this.entry
+                    });
+                }
             },
         },
 

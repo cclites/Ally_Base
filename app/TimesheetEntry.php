@@ -9,11 +9,9 @@ class TimesheetEntry extends Model
 {
     protected $guarded = ['id'];
 
-    protected $appends = ['duration'];
+    protected $appends = ['duration', 'activities'];
 
     protected $dates = ['checked_in_time', 'checked_out_time'];
-
-    protected $with = ['activities'];
 
     protected static function boot() {
         parent::boot();
@@ -45,7 +43,7 @@ class TimesheetEntry extends Model
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'timesheet_entry_activities')
-                    ->orderBy('code');
+            ->orderBy('code');
     }
 
     ///////////////////////////////////////////
@@ -71,24 +69,15 @@ class TimesheetEntry extends Model
     }
     
     /**
-     * Convert the start_time to valid checked in date.
+     * Get flattend array of activity attributes.
      *
-     * @param [type] $value
      * @return void
      */
-    public function setStartTimeAttribute($value)
+    public function getActivitiesAttribute()
     {
-        $this->attributes['checked_in_time'] = Carbon::parse($this->date . ' ' . $value);
-    }
-
-    /**
-     * Convert the end_time to valid checked out date.
-     *
-     * @param [type] $value
-     * @return void
-     */
-    public function setEndTimeAttribute($value)
-    {
-        $this->attributes['checked_out_time'] = Carbon::parse($this->date . ' ' . $value);
+        return $this->activities()
+            ->get()
+            ->pluck('id')
+            ->toArray();
     }
 }

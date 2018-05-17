@@ -175,6 +175,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Shift::class);
     }
 
+    public function timesheets()
+    {
+        return $this->hasMany(Timesheet::class);
+    }
+
     public function notes()
     {
         return $this->hasMany(Note::class);

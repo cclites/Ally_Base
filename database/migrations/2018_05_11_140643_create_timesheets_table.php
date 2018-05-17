@@ -19,7 +19,7 @@ class CreateTimesheetsTable extends Migration
 			$table->unsignedInteger('caregiver_id');
             $table->unsignedInteger('client_id');
             $table->unsignedInteger('creator_id');
-            $table->dateTime('confirmed_at')->nullable();
+            $table->dateTime('approved_at')->nullable();
             $table->dateTime('denied_at')->nullable();
             $table->timestamps();
 

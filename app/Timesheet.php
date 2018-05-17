@@ -4,12 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Events\TimesheetCreated;
+use Carbon\Carbon;
 
 class Timesheet extends Model
 {
     protected $guarded = ['id'];
 
-    protected $dates = ['confirmed_at', 'denied_at'];
+    protected $dates = ['approved_at', 'denied_at'];
 
     protected $with = ['entries'];
     
@@ -92,9 +93,9 @@ class Timesheet extends Model
      *
      * @return void
      */
-    public function getIsConfirmedAttribute()
+    public function getIsApprovedAttribute()
     {
-        return $this->confirmed_at != null;
+        return $this->approved_at != null;
     }
 
     /**
@@ -105,5 +106,58 @@ class Timesheet extends Model
     public function getIsDeniedAttribute()
     {
         return $this->denied_at != null;
+    }
+
+    ///////////////////////////////////////////
+    /// Other
+    ///////////////////////////////////////////
+
+    /**
+     * Marks all attached exceptions as acknowledged by the current 
+     * logged in user with the given note.
+     *
+     * @param string $note
+     * @return bool
+     */
+    public function acknowledgeExceptions($note = '')
+    {
+        $any = false;
+
+        foreach($this->exceptions as $ex) {
+            $ex->acknowledge($note);
+            $any = true;
+        }
+
+        return $any;
+    }
+
+    /**
+     * Method to mark Timesheet as approved. Also automatically ackowledges
+     * any connected exceptions.
+     *
+     * @return void
+     */
+    public function approve()
+    {
+        $this->update([
+            'approved_at' => Carbon::now(),
+        ]);
+
+        $this->acknowledgeExceptions('Timesheet Approved');
+    }
+
+    /**
+     * Method to mark Timesheet as denied.  Also automatically ackowledges
+     * any connected exceptions.
+     *
+     * @return void
+     */
+    public function deny()
+    {
+        $this->update([
+            'denied_at' => Carbon::now(),
+        ]);
+
+        $this->acknowledgeExceptions('Timesheet Denied');
     }
 }

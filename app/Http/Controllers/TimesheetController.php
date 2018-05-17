@@ -9,7 +9,7 @@ use App\Timesheet;
 use App\TimesheetEntry;
 use App\Responses\SuccessResponse;
 
-class TimesheetsController extends Controller
+class TimesheetController extends Controller
 {
     /**
      * @return \App\Caregiver
@@ -59,9 +59,6 @@ class TimesheetsController extends Controller
         $timesheet->save();
         
         foreach($request->validated()['shifts'] as $shift) {
-            // $shift['checked_in_time'] = utc_date($shift['date'] . ' ' . $shift['start_time'], 'Y-m-d H:i', null);
-            // $shift['checked_out_time'] = utc_date($shift['date'] . ' ' . $shift['end_time'], 'Y-m-d H:i', null);
-
             if ($entry = $timesheet->entries()->create(array_diff_key($shift, ['activities' => [] ]))) {
                 $entry->activities()->sync($shift['activities']);
             } 
