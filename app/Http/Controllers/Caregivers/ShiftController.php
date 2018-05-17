@@ -19,9 +19,9 @@ use Illuminate\Http\Request;
 
 class ShiftController extends BaseController
 {
-    public function index()
+    public function index(Schedule $schedule = null)
     {
-        return view('caregivers.clock_in');
+        return view('caregivers.clock_in', compact('schedule'));
     }
 
     public function clockedIn()

@@ -71,8 +71,8 @@ Route::group([
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
-    Route::get('clock-in/{schedule_id?}', 'Caregivers\ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule_id?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
     Route::get('clock-out', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
     Route::post('clock-out', 'Caregivers\ShiftController@clockOut')->name('clock_out');
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');

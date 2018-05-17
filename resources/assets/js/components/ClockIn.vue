@@ -81,8 +81,7 @@
         mixins: [FormatsDates],
 
         props: {
-            'events': {},
-            'selected': {}
+            'selectedSchedule': {}
         },
 
         data() {
@@ -132,6 +131,17 @@
                 this.loadingText = null;
             },
 
+            checkSelected() {
+                if (!this.selectedSchedule.id) return;
+
+                let client = this.clients.findIndex(item => item.id === this.selectedSchedule.client_id);
+                if (client === -1) {
+                    alert('You are unable to clock in to the selected schedule.  The registry has not assigned you to this client.');
+                }
+
+                this.form.client_id = this.selectedSchedule.client_id;
+            },
+
             async loadClients() {
                 this.showLoading('Loading clients..');
                 try {
@@ -142,6 +152,9 @@
                     alert('Unable to load client list.  Make sure you have network connectivity.');
                 }
                 this.hideLoading();
+
+                // Load the selected schedule
+                this.checkSelected();
             },
 
             async loadSchedules() {
