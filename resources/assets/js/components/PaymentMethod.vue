@@ -9,10 +9,7 @@
                 Please Contact Ally
             </b-col>
         </b-row>
-        <b-row :class="{ 'mb-3' : hasMetrics }">
-            <b-col v-if="hasMetrics">First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
-            <b-col v-if="hasMetrics">Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
-            <b-col v-if="hasMetrics">Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
+        <b-row>
             <b-col class="text-right hidden-xs-down">
                 <b-btn @click="deleteMethod()">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
@@ -38,6 +35,11 @@
                     {{ typeMessage }}
                 </small>
             </b-col>
+        </b-row>
+        <b-row v-show="hasMetrics" class="mt-3">
+            <b-col>First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
+            <b-col>Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
+            <b-col>Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
         </b-row>
     </b-card>
 </template>
