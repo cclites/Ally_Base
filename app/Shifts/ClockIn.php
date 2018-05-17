@@ -5,14 +5,19 @@ use App\Business;
 use App\Client;
 use App\Exceptions\UnverifiedLocationException;
 use App\Schedule;
+use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
 
 class ClockIn extends ClockBase
 {
     /**
+     * Clock in to a specific schedule
+     *
      * @param Schedule $schedule
      * @return Shift|false
+     * @throws \App\Exceptions\InvalidScheduleParameters
+     * @throws \App\Exceptions\UnverifiedLocationException
      */
     public function clockIn(Schedule $schedule)
     {
@@ -54,6 +59,14 @@ class ClockIn extends ClockBase
         return false;
     }
 
+    /**
+     * Clock in without a schedule
+     *
+     * @param \App\Business $business
+     * @param \App\Client $client
+     * @return \App\Shift|bool
+     * @throws \App\Exceptions\UnverifiedLocationException
+     */
     public function clockInWithoutSchedule(Business $business, Client $client)
     {
         // Find rates through relationship, if no rates, set to 0

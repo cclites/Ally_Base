@@ -66,13 +66,19 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver']
 ], function() {
-    Route::get('schedule', 'ScheduleController@index')->name('schedule');
-    Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('clock-in/{schedule_id?}', 'ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule_id?}', 'ShiftController@clockIn')->name('clock_in');
-    Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
-    Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
-    Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('clients');
+    Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
+    Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
+
+    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-out', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
+    Route::post('clock-out', 'Caregivers\ShiftController@clockOut')->name('clock_out');
+    Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
