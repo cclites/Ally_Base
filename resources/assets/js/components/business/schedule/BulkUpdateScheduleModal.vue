@@ -102,6 +102,17 @@
                                 </div>
                             </b-col>
                         </b-row>
+                        <b-row>
+                            <b-col>
+                                <div class="form-check">
+                                    <input-help :form="form" field="daily_rates" text="Select the rate structure you wish to match against."/>
+                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_hourly_rates" :value="0">
+                                    <label for="update_hourly_rates" class="rate-label">Hourly Rates</label>
+                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_daily_rates" :value="1">
+                                    <label for="update_daily_rates" class="rate-label">Daily Rates</label>
+                                </div>
+                            </b-col>
+                        </b-row>
                     </b-card>
                 </b-col>
             </b-row>
@@ -255,6 +266,15 @@
                         </b-row>
                         <b-row>
                             <b-col>
+                                <small class="form-text text-muted with-padding-bottom">
+                                    <span v-if="form.daily_rates" class="text-info">Notice: You are updating DAILY rate schedules.</span>
+                                    <span v-else-if="form.daily_rates === 0" class="text-info">Notice: You are updating HOURLY rate schedules.</span>
+                                    <span v-else class="text-warning">You must select the rate structure to match against.</span>
+                                </small>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col>
                                 <b-form-group label="New Note" label-for="new_note_method">
                                     <b-form-select id="new_note_method"
                                                    v-model="form.new_note_method"
@@ -281,7 +301,7 @@
             </b-row>
         </b-container>
         <div slot="modal-footer">
-           <b-btn variant="default" @click="showModal=false">Close</b-btn>
+            <b-btn variant="default" @click="showModal=false">Close</b-btn>
             <b-btn variant="info" @click="save()" :disabled="submitting">
                 <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
                 Update Schedules
@@ -375,6 +395,7 @@
                     'client_id': (this.clientId > 0) ? this.clientId : '-',
                     'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
                     'bydays': [],
+                    'daily_rates': null,
 
                     'new_start_time': '',
                     'new_duration': null,
@@ -426,11 +447,12 @@
             },
 
             save() {
-                let message = 'Are you sure you wish to update all schedules between ' + this.form.start_date +
+                let rateStructure = (this.form.daily_rates === 0) ? 'HOURLY' : (this.form.daily_rates === 1 ? 'DAILY' : '');
+                let message = 'Are you sure you wish to update all ' + rateStructure + ' schedules between ' + this.form.start_date +
                     ' and ' + this.form.end_date + ' matching the given criteria?';
 
                 if (this.form.end_date === '01/01/2100') {
-                    message = 'Are you sure you wish to update all schedules after ' + this.form.start_date +
+                    message = 'Are you sure you wish to update all ' + rateStructure + ' schedules after ' + this.form.start_date +
                             ' matching the given criteria?';
                 }
 
@@ -553,3 +575,12 @@
         }
     }
 </script>
+
+<style>
+    .rate-label {
+        padding-right: 30px;
+    }
+    [type="radio"]:not(:checked) + label {
+        font-size: 14px;
+    }
+</style>

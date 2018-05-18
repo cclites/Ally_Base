@@ -1,5 +1,5 @@
 <template>
-    <bulk-edit-schedule-modal v-model="showModal"></bulk-edit-schedule-modal>
+    <bulk-update-schedule-modal v-model="showModal"></bulk-update-schedule-modal>
 </template>
 
 <script>

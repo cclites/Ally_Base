@@ -41,6 +41,10 @@ class BulkDestroyScheduleRequest extends FormRequest
             $query->where('caregiver_id', $caregiver_id);
         }
 
+        if ($this->daily_rates !== null) {
+            $query->where('daily_rates', $this->daily_rates);
+        }
+
         if ($this->hours_type) {
             $query->where('hours_type', $this->hours_type);
         }
@@ -100,7 +104,9 @@ class BulkDestroyScheduleRequest extends FormRequest
             'bydays.required'              => 'You must select at least one day of the week to match against.',
             'bydays.array'                 => 'You must select at least one day of the week to match against.',
             'client_id.exists'             => 'You must select which client(s) to match against.',
-            'caregiver_id.integer'         => 'You must select which caregiver(s) to match against.'
+            'caregiver_id.integer'         => 'You must select which caregiver(s) to match against.',
+            'daily_rates.*'                => 'You must select a rate structure to match against.',
+            'start_time.*'                 => 'Please enter a valid start time.',
         ];
     }
 }

@@ -10,6 +10,7 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
     protected function updateRules()
     {
         return [
+            'daily_rates'           => 'required|integer',
             'new_start_time'        => 'nullable|date_format:H:i',
             'new_duration'          => 'nullable|required_with:new_start_time|numeric',
             'new_caregiver_id'      => 'nullable|integer', // cannot use exists rule because 0 is used for unassigned

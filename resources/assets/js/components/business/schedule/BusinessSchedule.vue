@@ -63,7 +63,7 @@
                                @clock-out="showClockOutModal()"
         />
 
-        <bulk-edit-schedule-modal v-model="bulkUpdateModal"
+        <bulk-update-schedule-modal v-model="bulkUpdateModal"
                                   :caregiver-id="filterCaregiverId"
                                   :client-id="filterClientId"
                                   @refresh-events="fetchEvents()"
