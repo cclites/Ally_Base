@@ -72,9 +72,16 @@ class CostCalculator
             return $this->getPersistedCosts()->ally_fee;
         }
 
-        $hours = $this->shift->duration();
         $hourlyRate = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
-        $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
+
+        if ($this->shift->daily_rates) {
+            // Still use getHourlyRate method for ease of use, but don't do any multiplication
+            $shiftFee = $hourlyRate;
+        }
+        else {
+            $hours = $this->shift->duration();
+            $shiftFee = bcmul($hours, $hourlyRate, self::DEFAULT_SCALE);
+        }
 
         $expenses = $this->getCaregiverExpenses();
         $expenseFee = AllyFeeCalculator::getFee($this->client, $this->paymentType, $expenses);
@@ -95,6 +102,10 @@ class CostCalculator
     {
         if ($this->hasPersistedCosts()) {
             return $this->getPersistedCosts()->provider_fee;
+        }
+
+        if ($this->shift->daily_rates) {
+            return $this->shift->provider_fee;
         }
 
         return round(
@@ -118,7 +129,13 @@ class CostCalculator
             return $this->getPersistedCosts()->caregiver_shift;
         }
 
-        $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        if ($this->shift->daily_rates) {
+            $shift = $this->shift->caregiver_rate;
+        }
+        else {
+            $shift = bcmul($this->shift->duration(), $this->shift->caregiver_rate, self::DEFAULT_SCALE);
+        }
+
         $expenses = 0;
         if ($expensesIncluded) {
             $expenses = $this->getCaregiverExpenses();
