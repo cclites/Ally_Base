@@ -82,7 +82,7 @@ class PaymentProcessorTest extends TestCase
         $payments = $this->processor->getPaymentModels();
         $this->assertCount(2, $payments);
         $this->assertNull($payments[0]->client_id);
-        $this->assertEquals('30', $payments[0]->amount);
+        $this->assertEquals('30.90', $payments[0]->amount);
     }
 
     public function test_clients_are_excluded_when_on_hold()
@@ -119,15 +119,18 @@ class PaymentProcessorTest extends TestCase
             'gateway_id' => 'test',
             'transaction_type' => 'sale',
             'transaction_id' => '12345',
-            'amount' => '15.00',
+            'amount' => '15.75',
             'declined' => true,
             'success' => false,
         ]);
         $mock = \Mockery::mock(ChargeableInterface::class);
         $mock->shouldReceive('charge')
-             ->with('15.00')
+             ->with('15.75')
              ->once()
              ->andReturn($mockedTransaction);
+        $mock->shouldReceive('getAllyHourlyRate')->andReturn('0');
+        $mock->shouldReceive('getAllyPercentage')->andReturn('0');
+        $mock->shouldReceive('getAllyFee')->andReturn('0');
         $client->setRelation('defaultPayment', $mock);
 
         // Charge Client
