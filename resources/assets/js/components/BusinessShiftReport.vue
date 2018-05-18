@@ -244,10 +244,10 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': this.moneyFormat(item.caregiver_rate),
-                        'Reg Rate': this.moneyFormat(item.provider_fee),
-                        'Ally Fee': this.moneyFormat(item.ally_fee),
-                        'Total Hourly': this.moneyFormat(item.hourly_total),
+                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate),
+                        'Reg Rate': this.hourlyFormat(item, item.provider_fee),
+                        'Ally Fee': this.hourlyFormat(item, item.ally_fee),
+                        'Total Hourly': this.hourlyFormat(item, item.hourly_total),
                         'Mileage': item.mileage,
                         'CG Total': this.moneyFormat(item.caregiver_total),
                         'Reg Total': this.moneyFormat(item.provider_total),
@@ -519,6 +519,10 @@
                 this.addShiftModal = false;
                 this.reloadData();
             },
+
+            hourlyFormat(item, amount) {
+                return (item.daily_rates) ? '---' : this.moneyFormat(amount);
+            }
         },
 
         watch: {
