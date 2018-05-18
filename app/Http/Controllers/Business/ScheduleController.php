@@ -321,6 +321,9 @@ class ScheduleController extends BaseController
 
             // enumerate week ranges
             foreach ($weeks as $range => $date) {
+                if (!$client || $client->id != $schedule->client_id) {
+                    $client = $schedule->client;
+                }
                 $total = $aggregator->getTotalScheduledHoursForWeekOf($date, $client->id);
 
                 if ($total > $client->max_weekly_hours) {

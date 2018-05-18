@@ -31,7 +31,7 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
 
         // Filter out null values and unallowed keys
         $data = array_filter($this->validated(), function($value, $key) use ($allowedKeys) {
-             return $value !== null && in_array($key, $allowedKeys);
+             return $value !== null && substr($key, 0, 4) === 'new_' && in_array($key, $allowedKeys);
         }, ARRAY_FILTER_USE_BOTH);
 
         if (isset($data['new_caregiver_id']) && $data['new_caregiver_id'] == 0) {
