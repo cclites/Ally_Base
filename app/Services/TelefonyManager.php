@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Caregiver;
 use App\Client;
+use App\Exceptions\TelefonyMessageException;
 use App\PhoneNumber;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
@@ -159,6 +160,12 @@ class TelefonyManager
 
         foreach($schedules as $schedule) {
             if ($schedule->caregiver) {
+                if ($schedule->daily_rates) {
+                    throw new TelefonyMessageException('This shift was set up as an all day shift.  
+                    We do not allow clock ins to daily shifts.  
+                    You may now hang up.  
+                    If you think this was an error, please contact your provider to ask for details on your schedule.');
+                }
                 return $schedule;
             }
         }
