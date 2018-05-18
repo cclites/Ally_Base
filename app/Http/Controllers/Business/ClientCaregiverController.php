@@ -148,12 +148,24 @@ class ClientCaregiverController extends BaseController
             ->where('id', $request->caregiver_id)
             ->first();
 
-        $futureShifts = $caregiver->schedules()
+        // Update hourly shifts
+        $caregiver->schedules()
+            ->where('daily_rates', 0)
             ->forClient($client)
             ->future($this->business()->timezone)
             ->update([
                 'caregiver_rate' => $caregiver->pivot->caregiver_hourly_rate,
                 'provider_fee' => $caregiver->pivot->provider_hourly_fee,
+            ]);
+
+        // Update daily shifts
+        $caregiver->schedules()
+            ->where('daily_rates', 1)
+            ->forClient($client)
+            ->future($this->business()->timezone)
+            ->update([
+                'caregiver_rate' => $caregiver->pivot->caregiver_daily_rate,
+                'provider_fee' => $caregiver->pivot->provider_daily_fee,
             ]);
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
