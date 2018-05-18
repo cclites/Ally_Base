@@ -92,6 +92,7 @@ class BulkDestroyScheduleRequest extends FormRequest
             'caregiver_id' => 'nullable|integer', // cannot use exists rule because 0 is used for unassigned
             'hours_type'   => 'nullable|in:default,overtime,holiday',
             'bydays'       => 'required|array', // match all days if null
+            'daily_rates'  => 'nullable|integer',
         ];
     }
 
@@ -105,7 +106,7 @@ class BulkDestroyScheduleRequest extends FormRequest
             'bydays.array'                 => 'You must select at least one day of the week to match against.',
             'client_id.exists'             => 'You must select which client(s) to match against.',
             'caregiver_id.integer'         => 'You must select which caregiver(s) to match against.',
-            'daily_rates.*'                => 'You must select a rate structure to match against.',
+            'daily_rates.*'                => 'You must select a shift type of hourly or daily to match against.',
             'start_time.*'                 => 'Please enter a valid start time.',
         ];
     }

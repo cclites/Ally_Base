@@ -219,6 +219,14 @@ Vue.filter('capitalize', value => {
     return value.toString().charAt(0).toUpperCase() + value.slice(1);
 });
 
+Vue.filter('uppercase', value => {
+    return value.toString().toUpperCase();
+});
+
+Vue.filter('lowercase', value => {
+    return value.toString().toLowerCase();
+});
+
 Vue.filter('nl2br', value => {
     return value.toString().replace(/(?:\r\n|\r|\n)/g, '<br />');
 });

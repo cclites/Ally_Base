@@ -105,13 +105,13 @@
                         <b-row>
                             <b-col>
                                 <div class="form-check">
-                                    <input-help :form="form" field="daily_rates" text="Select the rate structure you wish to match against."/>
+                                    <input-help :form="form" field="daily_rates" text="Select the shift type you wish to match against."/>
                                     <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_any_rates" value="">
-                                    <label for="delete_any_rates" class="rate-label">Any Type of Rate</label>
+                                    <label for="delete_any_rates" class="rate-label">Any Type</label>
                                     <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_hourly_rates" :value="0">
-                                    <label for="delete_hourly_rates" class="rate-label">Hourly Rates</label>
+                                    <label for="delete_hourly_rates" class="rate-label">Hourly Shifts Only</label>
                                     <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_daily_rates" :value="1">
-                                    <label for="delete_daily_rates" class="rate-label">Daily Rates</label>
+                                    <label for="delete_daily_rates" class="rate-label">Daily Shifts Only</label>
                                 </div>
                             </b-col>
                         </b-row>

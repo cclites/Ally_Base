@@ -36,7 +36,7 @@ class UpdateScheduleRequest extends FormRequest
             'starts_at.min' => 'You cannot edit past schedules.  The starting date must be today or later.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
-            'daily_rates.*' => 'You must select hourly or daily rates.'
+            'daily_rates.*' => 'You must select whether the shift is hourly or daily.'
         ];
     }
 }

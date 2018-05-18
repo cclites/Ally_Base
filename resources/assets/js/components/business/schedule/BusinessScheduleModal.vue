@@ -51,15 +51,16 @@
                         </b-row>
                         <b-row>
                             <b-col>
+                                <strong>Shift Type: </strong>
                                 <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
-                                <label for="create_hourly_rates" class="rate-label">Use Hourly Rates</label>
+                                <label for="create_hourly_rates" class="rate-label">Hourly</label>
                                 <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_daily_rates" :value="1">
-                                <label for="create_daily_rates" class="rate-label">Use Daily Rates</label>
+                                <label for="create_daily_rates" class="rate-label">Daily</label>
                             </b-col>
                         </b-row>
                         <b-row v-show="form.daily_rates !== null">
                             <b-col sm="6">
-                                <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
+                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
                                             id="caregiver_rate"
                                             name="caregiver_rate"
@@ -72,7 +73,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Provider Fee" label-for="provider_fee">
+                                <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
                                     <b-form-input
                                             id="provider_fee"
                                             name="provider_fee"
@@ -88,12 +89,12 @@
                                 Payment Type: {{ paymentType }} ({{ displayAllyPct }}% Processing Fee)
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Ally Fee" label-for="ally_fee">
+                                <b-form-group :label="`Ally ${rateType} Fee`" label-for="ally_fee">
                                     {{ allyFee }}
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Total Rate" label-for="ally_fee">
+                                <b-form-group :label="`Total ${rateType} Rate`" label-for="ally_fee">
                                     {{ totalRate }}
                                 </b-form-group>
                             </b-col>
@@ -123,8 +124,10 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
+                                            :readonly="!!form.daily_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.daily_rates" />
+                                    <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -387,6 +390,16 @@
                 }
                 return 'Show All';
             },
+
+            rateType() {
+                if (this.form.daily_rates === 0) {
+                    return 'Hourly';
+                }
+                if (this.form.daily_rates === 1) {
+                    return 'Daily';
+                }
+                return '';
+            }
         },
 
         methods: {
@@ -647,9 +660,8 @@
                     }
                 }
 
-                let type = (this.form.daily_rates) ? 'daily' : 'hourly';
-                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${type}_rate`];
-                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${type}_fee`];
+                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
+                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
             }
         },
 
@@ -693,6 +705,21 @@
                 this.setDateTimeFromEvent();
             },
 
+            startTime(val) {
+                if (this.form.daily_rates) {
+                    // Lock end time to start time for daily rates
+                    this.endTime = val;
+                }
+            },
+
+            'form.daily_rates': function(val, old_val) {
+                this.prefillRates();
+                if (val) {
+                    // Lock end time to start time for daily rates
+                    this.endTime = this.startTime;
+                }
+            },
+
             'form.client_id': function(val, old_val) {
                 this.loadCarePlans(val, old_val);
                 if (this.cgMode == 'client') {
@@ -702,10 +729,6 @@
             },
 
             'form.caregiver_id': function(val, old_val) {
-                this.prefillRates();
-            },
-
-            'form.daily_rates': function(val, old_val) {
                 this.prefillRates();
             },
 
