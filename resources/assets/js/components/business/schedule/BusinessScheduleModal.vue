@@ -50,6 +50,14 @@
                             </b-col>
                         </b-row>
                         <b-row>
+                            <b-col>
+                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
+                                <label for="create_hourly_rates" class="rate-label">Use Hourly Rates</label>
+                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_daily_rates" :value="1">
+                                <label for="create_daily_rates" class="rate-label">Use Daily Rates</label>
+                            </b-col>
+                        </b-row>
+                        <b-row v-show="form.daily_rates !== null">
                             <b-col sm="6">
                                 <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
                                     <b-form-input
@@ -395,6 +403,7 @@
                     'duration': 0,
                     'caregiver_id': "",
                     'client_id': "",
+                    'daily_rates': null,
                     'caregiver_rate': "",
                     'provider_fee': "",
                     'notes': "",
@@ -417,6 +426,7 @@
                     'duration': this.selectedSchedule.duration,
                     'caregiver_id': this.selectedSchedule.caregiver_id,
                     'client_id': this.selectedSchedule.client_id,
+                    'daily_rates': this.selectedSchedule.daily_rates,
                     'caregiver_rate': this.selectedSchedule.caregiver_rate,
                     'provider_fee': this.selectedSchedule.provider_fee,
                     'notes': this.selectedSchedule.notes,
@@ -506,6 +516,7 @@
             },
 
             loadAllyPctFromClient(client_id) {
+                if (!client_id) return;
                 let component = this;
                 axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
                     component.allyPct = response.data.percentage_fee;
@@ -636,8 +647,9 @@
                     }
                 }
 
-                this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
-                this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+                let type = (this.form.daily_rates) ? 'daily' : 'hourly';
+                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${type}_rate`];
+                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${type}_fee`];
             }
         },
 
@@ -690,6 +702,10 @@
             },
 
             'form.caregiver_id': function(val, old_val) {
+                this.prefillRates();
+            },
+
+            'form.daily_rates': function(val, old_val) {
                 this.prefillRates();
             },
 

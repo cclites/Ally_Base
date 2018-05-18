@@ -156,13 +156,14 @@ class ScheduleCreator
     /**
      * Set the rates for the created schedules
      *
-     * @param $caregiver_rate
-     * @param $provider_fee
+     * @param int $caregiver_rate
+     * @param int $provider_fee
+     * @param bool $daily_rates
      * @return $this
      */
-    public function rates($caregiver_rate = 0, $provider_fee = 0)
+    public function rates($caregiver_rate = 0, $provider_fee = 0, $daily_rates = false)
     {
-        $this->data = array_merge($this->data, compact('caregiver_rate', 'provider_fee'));
+        $this->data = array_merge($this->data, compact('caregiver_rate', 'provider_fee', 'daily_rates'));
         return $this;
     }
 
