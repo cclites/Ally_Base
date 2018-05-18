@@ -9,13 +9,10 @@ use App\Responses\SuccessResponse;
 use App\Http\Requests\ApproveTimesheetRequest;
 use App\Shift;
 use DB;
+use App\Http\Requests\CreateTimesheetsRequest;
 
 class TimesheetController extends BaseController
 {
-    public function isCaregiver()
-    {
-        
-    }
     /**
      * Returns form for creating a manual timesheet.
      *
@@ -46,26 +43,54 @@ class TimesheetController extends BaseController
     /**
      * Handles submission of Timesheets.
      *
-     * @return void
+     * @param CreateTimesheetsRequest $request
+     * @param Timesheet $timesheet
+     * @return \Illuminate\Http\Response
      */
     public function store(CreateTimesheetsRequest $request)
     {
-        if (auth()->user()->role_type == 'caregiver' && $request->caregiver_id != auth()->user()->id) {
+        if (!$this->businessHasCaregiver($request->caregiver_id)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
-
-        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['entries' => [] ]));
-        $timesheet->creator_id = auth()->user()->id;
-        $timesheet->business_id = activeBusiness()->id;
-        $timesheet->save();
         
-        foreach($request->validated()['entries'] as $item) {
-            if ($entry = $timesheet->entries()->create(array_diff_key($item, ['activities' => [], 'duration' => '', 'start_time' => '', 'end_time' => '', 'date' => '' ]))) {
-                $entry->activities()->sync($item['activities']);
-            } 
+        if (!$this->businessHasClient($request->client_id)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        
+        DB::beginTransaction();
+
+        $timesheet = Timesheet::createWithEntries(
+            $request->validated(),
+            auth()->user(),
+            activeBusiness()
+        );
+
+        if ($timesheet !== false) {
+            if ($request->approve == 1) {
+                if ($timesheet->createShiftsFromEntries()) {
+                    $timesheet->approve();
+                    
+                    DB::commit();
+
+                    return new SuccessResponse(
+                        'Timesheet has been saved and converted into Shifts', 
+                        $timesheet, 
+                        route('business.timesheet', ['timesheet' => $timesheet])
+                    );
+                }
+            } else {
+                DB::commit();
+
+                return new SuccessResponse(
+                    'Timesheet has been saved.', 
+                    $timesheet, 
+                    route('business.timesheet', ['timesheet' => $timesheet])
+                );
+            }
         }
 
-        return new SuccessResponse('Your timesheet has been submitted for approval.', ['timesheet' => $timesheet->fresh()->toArray()]);
+        DB::rollBack();
+        return new ErrorResponse(500, 'An unexpected error occurred while saving the Timesheet.');
     }
 
     /**
@@ -102,7 +127,7 @@ class TimesheetController extends BaseController
     public function update(ApproveTimesheetRequest $request, Timesheet $timesheet)
     {
         if (!$this->businessHasTimesheet($timesheet)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+            return new ErrorResponse(403, 'You do not have access to this Timesheet.');
         }
         
         if ($request->deny == 1) {
@@ -115,75 +140,27 @@ class TimesheetController extends BaseController
         }
 
         DB::beginTransaction();
+        
+        $timesheet = $timesheet->updateWithEntries($request->validated());
 
-        $timesheet->update(array_diff_key($request->validated(), ['entries' => [] ]));
-
-        $timesheet->entries()->delete();
-        foreach($request->validated()['entries'] as $item) {
-            if ($entry = $timesheet->entries()->create(array_diff_key($item, ['activities' => [], 'duration' => '', 'start_time' => '', 'end_time' => '', 'date' => '' ]))) {
-                $entry->activities()->sync($item['activities']);
-            }
-        }
-
-        if ($request->approve == 1) {
-            if ($this->convertTimesheetToShift($timesheet->fresh())) {
-                $timesheet->approve();
-                
+        if ($timesheet != false) {
+            if ($request->approve == 1) {
+                if ($timesheet->createShiftsFromEntries()) {
+                    $timesheet->approve();
+                    
+                    DB::commit();
+                    return new SuccessResponse('Timesheet has been approved.', $timesheet);
+                }
+            } else {
                 DB::commit();
-                return new SuccessResponse(
-                    'Timesheet has been approved.', 
-                    $timesheet->fresh()->load('caregiver', 'client')
-                );
+                return new SuccessResponse('Timesheet was updated.', $timesheet);
             }
-        } else {
-            DB::commit();
-            return new SuccessResponse(
-                'Timesheet was updated.', 
-                $timesheet->fresh()->load('caregiver', 'client')
-            );
         }
 
         DB::rollBack();
-        return new ErrorResponse(500, 'An unexpected error occurred while converting the Timesheet to Shifts.');
+        return new ErrorResponse(500, 'An unexpected error occurred while saving the Timesheet.');
     }
 
-    /**
-     * Helper function to convert a Timesheet to actual Shifts.
-     *
-     * @param \App\Timesheet $timesheet
-     * @return void
-     */
-    public function convertTimesheetToShift($timesheet)
-    {
-        foreach($timesheet->entries as $entry) {
-            $data['checked_in_time'] = $entry['checked_in_time'];
-            $data['checked_out_time'] = $entry['checked_out_time'];
-            $data['mileage'] = $entry['mileage'];
-            $data['other_expenses'] = $entry['other_expenses'];
-            $data['caregiver_comments'] = $entry['caregiver_comments'];
-            $data['caregiver_rate'] = $entry['caregiver_rate'];
-            $data['provider_fee'] = $entry['provider_fee'];
-
-            $data['timesheet_id'] = $timesheet->id;
-            $data['caregiver_id'] = $timesheet->caregiver_id;
-            $data['client_id'] = $timesheet->client_id;
-            $data['business_id'] = $timesheet->business_id;
-            $data['checked_in_method'] = Shift::METHOD_TIMESHEET;
-            $data['checked_out_method'] = Shift::METHOD_TIMESHEET;
-            $data['hours_type'] = 'default';
-            $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-            $data['verified'] = false;
-
-            if ($shift = Shift::create($data)) {
-                $shift->activities()->sync($entry->activities);
-            } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
     /**
      * Gets list of all the businesses caregivers with attached clients
      * in simple array.  Intended for smart dropdowns.

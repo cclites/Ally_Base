@@ -71,7 +71,7 @@
 
         <b-row class="mt-3">
             <b-col md="12">
-                <b-button variant="success" type="button" @click="submit()" :disabled="busy">
+                <b-button variant="info" type="button" @click="submit()" :disabled="busy">
                     <i v-show="busy" class="fa fa-spinner fa-spin"></i>
                     Submit Timesheet
                 </b-button>
@@ -89,11 +89,11 @@
 </template>
 
 <script>
-    import FormatDates from '../../mixins/FormatsDates';
     import TimesheetEntryModal from '../modals/TimesheetEntryModal';
+    import ManageTimesheet from '../../mixins/ManageTimesheet';
 
     export default {
-        mixins: [ FormatDates ],
+        mixins: [ ManageTimesheet ],
         components: { TimesheetEntryModal },
 
         props: {
@@ -181,71 +181,6 @@
                     });
             },
 
-            dow(date, full = false) {
-                return moment(date).format(full ? 'dddd' : 'ddd');
-            },
-
-            generateEntriesForWeek(week) {
-                let entries = [];
-                week.days.forEach( (date) => {
-                    entries.push({
-                        checked_in_time: '',
-                        checked_out_time: '',
-                        mileage: 0,
-                        other_expenses: 0,
-                        caregiver_rate: this.defaultRate || 0.00,
-                        provider_fee: this.defaultFee || 0.00,
-                        caregiver_comments: '',
-                        activities: [],
-                    });
-                });
-                return entries;
-            },
-
-            generateWeeks() {
-                let weeks = [];
-                var start = null;
-                var end = null;
-
-                for (var i = 0; i < 4; i++) {
-                    if (i > 0) {
-                        start = moment().subtract(i * 7, 'days').startOf('week');
-                        end = moment().subtract(i * 7, 'days').endOf('week');
-                    } else {
-                        start = moment().startOf('week');
-                        end = moment().endOf('week');
-                    }
-
-                    let w = {
-                       id: i,
-                       display: start.format('M/D/YYYY') + ' - ' + end.format('M/D/YYYY'),
-                       days: this.getDatesInRange(start, end),
-                    };
-                    weeks.push(w);
-                }
-
-                return weeks;
-            },
-
-            getDatesInRange(start, end) {
-                let days = [];
-                for (var i = 6; i >= 0; i--) {
-                    days.push(moment(end).subtract(i, 'days').format('YYYY-MM-DD'));                    
-                }
-                return days;
-            },
-
-            formatEntryDisplay(entry) {
-                if (!entry) { 
-                    return ''; 
-                }
-
-                if (entry.checked_in_time && entry.checked_out_time) {
-                    return this.formatTimeFromUTC(entry.checked_in_time) + ' - ' + this.formatTimeFromUTC(entry.checked_out_time);
-                } else {
-                    return '-';
-                }
-            },
         },
 
         watch: {
@@ -281,13 +216,11 @@
                     this.client = {};
                 }
                 
-                this.form.entries = this.generateEntriesForWeek(this.week);
-                this.shifts = this.form.entries;
+                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, this.defaultRate, this.defaultFee);
             },
 
             'week': function(newVal, oldVal) {
-                this.form.entries = this.generateEntriesForWeek(this.week);
-                this.shifts = this.form.entries;
+                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, this.defaultRate, this.defaultFee);
             }
         },
 

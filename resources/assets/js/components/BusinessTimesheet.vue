@@ -8,7 +8,7 @@
         <div v-show="isApproved" class="alert alert-success mb-3">This Timesheet has already been approved.</div>
         <div v-show="isDenied" class="alert alert-danger mb-3">This Timesheet has already been denied.</div>
 
-        <b-row class="mb-3">
+        <b-row>
             <!-- CLIENT DROPDOWNS -->
             <b-col lg="6">
                 <b-form-group label="Caregiver" label-for="caregiver_id">
@@ -41,17 +41,31 @@
         </b-row>
         <!-- /end CLIENT DROPDOWNS -->
         
+        <!-- WEEK DROPDOWN -->
+        <b-row>
+            <b-col lg="6">
+                <b-form-group label="Week" label-for="week">
+                    <b-form-select
+                            id="week"
+                            name="week"
+                            v-model="week"
+                    >
+                        <option value="">-- Select Week --</option>
+                        <option v-for="item in weekRanges" :value="item" :key="item.id">{{ item.display }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="week" text=""></input-help>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <!-- /end WEEK DROPDOWN -->
+            
         <!-- SHIFTS TABLE -->
-        <b-btn variant="info" @click="createEntry()">
-            <i class="fa fa-plus"></i> Add Entry
-        </b-btn>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th scope="col">Date</th>
-                        <th scope="col">Start Time</th>
-                        <th scope="col">End Time</th>
+                        <th scope="col">Time</th>
                         <th scope="col">Miles</th>
                         <th scope="col">Expenses</th>
                         <th scope="col">CG Rate</th>
@@ -62,39 +76,36 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in form.entries" :key="index">
+                    <tr v-for="(day, index) in week.days" :key="index">
                         <td scope="row"> <!-- date -->
-                            {{ formatDateFromUTC(item.checked_in_time) }}
+                            {{ formatDateFromUTC(day) }}
                         </td>
-                        <td scope="row"> <!-- start_time -->
-                            {{ formatTimeFromUTC(item.checked_in_time) }}
-                        </td>
-                        <td scope="row"> <!-- end_time -->
-                            {{ formatTimeFromUTC(item.checked_out_time) }}
+                        <td scope="row"> <!-- time -->
+                            {{ formatEntryDisplay(shifts[index]) }}
                         </td>
                         <td scope="row"> <!-- mileage -->
-                            {{ item.mileage }}
+                            {{ shifts[index].mileage }}
                         </td>
                         <td scope="row"> <!-- other_expenses -->
-                            ${{ item.other_expenses }}
+                            ${{ shifts[index].other_expenses }}
                         </td>
                         <td scope="row"> <!-- caregiver_rate -->
-                            ${{ item.caregiver_rate }}
+                            ${{ shifts[index].caregiver_rate }}
                         </td>
                         <td scope="row"> <!-- provider_fee -->
-                            ${{ item.provider_fee }}
+                            ${{ shifts[index].provider_fee }}
                         </td>
                         <td scope="row"> <!-- activities -->
-                            {{ item.activities.length }}
+                            {{ shifts[index].activities.length }}
                         </td>
                         <td scope="row"> <!-- notes -->
-                            {{ item.caregiver_comments ? 'Yes' : 'No' }}
+                            {{ shifts[index].caregiver_comments ? 'Yes' : 'No' }}
                         </td>
                         <td scope="row" v-if="!isDenied && !isApproved"> <!-- action -->
-                            <b-button variant="info" @click="editEntry(item, index)" :disabled="busy > 0">
+                            <b-button variant="info" @click="editEntry(index)" :disabled="busy > 0 || ! canEdit">
                                 <i class="fa fa-edit"></i>
                             </b-button>
-                            <b-button variant="danger" @click="removeShift(index)" :disabled="busy > 0">
+                            <b-button variant="danger" @click="clearShift(index)" :disabled="busy > 0 || ! canEdit">
                                 <i class="fa fa-trash-o"></i>
                             </b-button>
                         </td>
@@ -138,7 +149,7 @@
         <b-modal title="Delete Timesheet Entry" v-model="confirmDeleteModal">
             Are you sure you want to remove this timesheet entry?
             <div slot="modal-footer">
-                <b-button variant="danger" @click="removeShift(deleteIndex, false)">Yes</b-button>
+                <b-button variant="danger" @click="clearShift(deleteIndex, false)">Yes</b-button>
                 <b-btn variant="default" @click="confirmDeleteModal = false">Cancel</b-btn>
             </div>
         </b-modal>
@@ -146,11 +157,11 @@
 </template>
 
 <script>
-    import FormatDates from '../mixins/FormatsDates';
+    import ManageTimesheet from '../mixins/ManageTimesheet';
     import TimesheetEntryModal from './modals/TimesheetEntryModal';
 
     export default {
-        mixins: [ FormatDates ],
+        mixins: [ ManageTimesheet ],
         components: { TimesheetEntryModal },
 
         props: {
@@ -164,6 +175,9 @@
                 busy: 0,
                 caregiver: {},
                 client: {},
+                weekRanges: [],
+                week: {},
+                shifts: [],
                 form: new Form({}),
                 showEntryModal: false,
                 selectedEntry: {},
@@ -171,116 +185,6 @@
                 deleteIndex: null,
                 confirmDeleteModal: false,
             }
-        },
-
-        mounted() {
-            if (this.timesheet.id) {
-                this.form = new Form(this.timesheet);
-            } else {
-                this.form = new Form({
-                    approved_at: null,
-                    business: {},
-                    business_id: '',
-                    caregiver: {},
-                    caregiver_id: '',
-                    client: {},
-                    client_id: '',
-                    created_at: '',
-                    creator_id: '',
-                    denied_at: null,
-                    entries: [],
-                    id: '',
-                    updated_at: '',
-                });
-            }
-        },
-
-        methods: {
-            createEntry() {
-                this.selectedEntry = this.emptyShift();
-                this.selectedIndex = -1;
-                this.showEntryModal = true;
-            },
-
-            updateEntry(entry) {
-                if (this.selectedIndex > -1) {
-                    this.form.entries.splice(this.selectedIndex, 1, entry);
-                } else {
-                    this.form.entries.push(entry);
-                }
-                this.selectedEntry = null;
-            },
-
-            editEntry(entry, index) {
-                this.selectedEntry = entry;
-                this.selectedIndex = index;
-                this.showEntryModal = true;
-            },
-
-            emptyShift() {
-                return {
-                    id: '',
-                    caregiver_comments: '',
-                    checked_in_time: moment.utc(),
-                    checked_out_time: '',
-                    mileage: 0,
-                    other_expenses: 0,
-                    caregiver_rate: this.defaultRate || 0,
-                    provider_fee: this.defaultFee || 0,
-                    activities: [],
-                }
-            },
-
-            save(approve = false) {
-                this.busy = 1;
-                this.form.submit('post', this.url + approve ? '?approve=1' : '')
-                    .then( ({ data }) => {
-                        this.form = new Form(data.data);
-                        this.busy = 0;
-                    })
-                    .catch(e => {
-                        this.busy = 0;
-                        console.log('submit timesheet error:');
-                        console.log(e);
-                    });
-            },
-
-            deny() {
-                this.busy = 2;
-                this.form.submit('post', this.url + '?deny=1')
-                    .then( ({ data }) => {
-                        this.form = new Form(data.data);
-                        this.busy = 0;
-                    })
-                    .catch(e => {
-                        this.busy = 0;
-                        console.log('submit timesheet error:');
-                        console.log(e);
-                    });
-            },
-
-            addShift() {
-                // this.shiftForm.clearError();
-                // if (!this.isValidShift(this.shiftForm)) {
-                //     return;
-                // }
-
-                // this.form.entries.push(this.shiftForm.data())
-
-                // this.shiftForm = new Form(this.emptyShift());
-            },
-
-            removeShift(index, confirm = true) {
-                if (confirm) {
-                    this.confirmDeleteModal = true;
-                    this.deleteIndex = index;
-                    return;
-                }
-
-                this.form.entries.splice(index, 1);
-                this.deleteIndex = null;
-                this.confirmDeleteModal = false;
-            },
         },
 
         computed: {
@@ -315,10 +219,125 @@
             defaultFee() {
                 return this.client.provider_hourly_fee || 0;
             },
+
+            canEdit() {
+                return this.form.client_id ? true : false;
+            },
+
+            mode() {
+                if (this.timesheet.id) {
+                    // has a timesheet
+                    if (this.timesheet.exception_count > 0) {
+                        // reviewing caregiver submitted timesheet
+                        return 'review';
+                    } else {
+                        // editing office user timesheet
+                        return 'edit';
+                    }
+                } else {
+                    // creating office user timesheet
+                    return 'create';
+                }
+            }
+        },
+
+        methods: {
+            editEntry(index) {
+                this.selectedIndex = index;
+                this.selectedEntry = this.form.entries[index];
+
+                // set default check in time for day of the week
+                if (! this.selectedEntry.checked_in_time) {
+                    this.selectedEntry.checked_in_time = moment(this.week.days[index], 'YYYY-MM-DD');
+                }
+
+                this.showEntryModal = true;
+            },
+
+            updateEntry(entry) {
+                this.form.entries.splice(this.selectedIndex, 1, entry);
+                this.shifts.splice(this.selectedIndex, 1, entry);
+                this.selectedEntry = null;
+            },
+
+            save(approve = false) {
+                this.busy = 1;
+
+                let url = this.url;
+                if (approve) {
+                    url += '?approve=1';
+                }
+
+                // submit only the entries filled out
+                this.form.entries = this.form.entries.filter(x => x.checked_out_time != '');
+
+                this.form.submit('post', url)
+                    .then( ({ data }) => {
+                        console.log(data);
+                        this.form = new Form(data.data);
+                        this.shifts = this.form.entries;
+                        this.busy = 0;
+                    })
+                    .catch(e => {
+                        console.log('submit timesheet error:');
+                        console.log(e);
+                        // revert back to the unfiltered list
+                        this.form.entries = this.shifts;
+                        this.busy = 0;
+                    });
+            },
+
+            deny() {
+                this.busy = 2;
+                this.form.submit('post', this.url + '?deny=1')
+                    .then( ({ data }) => {
+                        this.form = new Form(data.data);
+                        this.busy = 0;
+                    })
+                    .catch(e => {
+                        this.busy = 0;
+                        console.log('submit timesheet error:');
+                        console.log(e);
+                    });
+            },
+
+            clearShift(index, confirm = true) {
+                if (confirm) {
+                    this.confirmDeleteModal = true;
+                    this.deleteIndex = index;
+                    return;
+                }
+
+                this.form.entries.splice(index, 1, {
+                    ...this.emptyShift,
+                    caregiver_rate: this.defaultRate || 0.00,
+                    provider_fee: this.defaultFee || 0.00,
+                });
+                this.shifts = this.form.entries;
+                this.deleteIndex = null;
+                this.confirmDeleteModal = false;
+            },
+
+            generateEntries() {
+                let entriesForDates = [];
+                if (this.timesheet.id) {
+                    entriesForDates = this.timesheet.entries.map(item => {
+                        return {
+                            date: moment(item.checked_in_time).local().format('YYYY-MM-DD'),
+                            entry: item,
+                        }
+                    });
+                }
+                this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, this.defaultRate, this.defaultFee);
+                this.form.entries = this.shifts;
+            },
         },
 
         watch: {
-            // sets client dropdown to only selected caregivers clients
+            /**
+            * sets client dropdown to only selected caregivers clients
+            * and resets the shift form.
+            */
             'form.caregiver_id': function(newVal, oldVal) {
                 var results = this.caregivers.filter(function(c) {
                     return c.id == newVal;
@@ -337,8 +356,10 @@
 
             },
 
-            // sets current selected client so rates/fees can be loaded
-            // and resets the shift form
+            /**
+            * sets current selected client so rates/fees can be loaded
+            * and resets the shift form.
+            */
             'form.client_id': function(newVal, oldVal) {
                 if (this.caregiver.clients) {
                     var results = this.caregiver.clients.filter(function(c) {
@@ -353,7 +374,47 @@
                 } else {
                     this.client = {};
                 }
+
+                this.generateEntries();
             },
-        }
+
+            'week': function(newVal, oldVal) {
+                this.generateEntries();
+            },
+
+            /**
+            * Clear entry form when modal closes.
+             */
+            showEntryModal(val) {
+                if (val == false) {
+                    this.selectedEntry = {};
+                }
+            },
+        },
+
+        mounted() {
+            this.weekRanges = this.generateWeeks();
+            this.week = this.weekRanges[0];
+            if (this.timesheet.id) {
+                this.form = new Form(this.timesheet);
+            } else {
+                this.form = new Form({
+                    approved_at: null,
+                    business: {},
+                    business_id: '',
+                    caregiver: {},
+                    caregiver_id: '',
+                    client: {},
+                    client_id: '',
+                    created_at: '',
+                    creator_id: '',
+                    denied_at: null,
+                    entries: [],
+                    id: '',
+                    updated_at: '',
+                });
+            }
+        },
+
     }
 </script>

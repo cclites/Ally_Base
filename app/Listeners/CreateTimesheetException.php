@@ -19,22 +19,25 @@ class CreateTimesheetException
     }
 
     /**
-     * Handle the event.
+     * Generate a System Exception if the Timesheet was created 
+     * by the Caregiver.
      *
      * @param  TimesheetCreated  $event
      * @return void
      */
     public function handle(TimesheetCreated $event)
     {
-        $description = "Caregiver {$event->timesheet->caregiver->name} has entered a timesheet for review.  Please review and confirm these shifts.  These shifts are not confirmed and will not appear in the Shift History Report until they are confirmed.  Please click 'View Timesheet' below to Confirm or Deny the Timesheet.";
+        if ($event->timesheet->creator_id == $event->timesheet->caregiver_id) {
+            $description = "Caregiver {$event->timesheet->caregiver->name} has entered a timesheet for review.  Please review and confirm these shifts.  These shifts are not confirmed and will not appear in the Shift History Report until they are confirmed.  Please click 'View Timesheet' below to Confirm or Deny the Timesheet.";
 
-        $exception = new SystemException([
-            'title' => 'Manual Timesheet Submitted by ' . $event->timesheet->creator->name,
-            'description' => $description,
-            'reference_url' => route('business.timesheet', [$event->timesheet->id]),
-            'business_id' => $event->timesheet->business_id,
-        ]);
+            $exception = new SystemException([
+                'title' => 'Manual Timesheet Submitted by ' . $event->timesheet->creator->name,
+                'description' => $description,
+                'reference_url' => route('business.timesheet', [$event->timesheet->id]),
+                'business_id' => $event->timesheet->business_id,
+            ]);
 
-        $event->timesheet->exceptions()->save($exception);
+            $event->timesheet->exceptions()->save($exception);
+        }
     }
 }
