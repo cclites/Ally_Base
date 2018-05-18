@@ -98,8 +98,6 @@
 
         props: {
             'cg': { type: Object, default: {} },
-            'caregivers': { type: Array, default: [] },
-            'activities': { type: Array, default: [] },
         },
 
         data() {
@@ -110,11 +108,7 @@
                 weekRanges: [],
                 week: {},
                 shifts: [],
-                form: new Form({
-                    client_id: '',
-                    caregiver_id: '',
-                    entries: [],
-                }),
+                form: new Form({}),
                 showEntryModal: false,
                 selectedEntry: {},
                 selectedIndex: null,
@@ -216,11 +210,11 @@
                     this.client = {};
                 }
                 
-                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, this.defaultRate, this.defaultFee);
+                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, [], this.defaultRate, this.defaultFee);
             },
 
             'week': function(newVal, oldVal) {
-                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, this.defaultRate, this.defaultFee);
+                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, [],this.defaultRate, this.defaultFee);
             }
         },
 
@@ -232,6 +226,7 @@
 
             this.weekRanges = this.generateWeeks();
             this.week = this.weekRanges[0];
+            this.form = new Form(this.emptyTimesheet);
         },
     }
 </script>

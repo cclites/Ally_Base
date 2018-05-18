@@ -3,6 +3,11 @@ import FormatDates from './FormatsDates';
 export default {
     mixins: [ FormatDates ],
 
+    props: {
+        'activities': { type: Array, default: [] },
+        'caregivers': { type: Array, default: [] },
+    },
+
     data () {
 
     },
@@ -15,9 +20,27 @@ export default {
                 mileage: 0,
                 other_expenses: 0,
                 caregiver_rate: 0.00,
-                provider_fee: 0.00,
+                provider_fee: 0.00, 
                 caregiver_comments: '',
                 activities: [],
+            };
+        },
+
+        emptyTimesheet() {
+            return {
+                approved_at: null,
+                business: {},
+                business_id: '',
+                caregiver: {},
+                caregiver_id: '',
+                client: {},
+                client_id: '',
+                created_at: '',
+                creator_id: '',
+                denied_at: null,
+                entries: [],
+                id: '',
+                updated_at: '',
             };
         },
     },

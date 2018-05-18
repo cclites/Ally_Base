@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Review Manual Timesheet"
+    <b-card :header="cardTitle"
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white">
@@ -16,6 +16,7 @@
                             id="caregiver_id"
                             name="caregiver_id"
                             v-model="form.caregiver_id"
+                            :disabled="isReviewing"
                     >
                         <option value="">-- Select Caregiver --</option>
                         <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
@@ -26,10 +27,10 @@
             <b-col lg="6">
                 <b-form-group label="Client" label-for="client_id">
                     <b-form-select
-                            :disabled="!hasClients"
                             id="client_id"
                             name="client_id"
                             v-model="form.client_id"
+                            :disabled="!hasClients || isReviewing"
                     >
                         <option value="">-- Select Client --</option>
                         <option v-for="item in caregiver.clients" :value="item.id" :key="item.id">{{ item.name }}</option>
@@ -49,6 +50,7 @@
                             id="week"
                             name="week"
                             v-model="week"
+                            :disabled="isReviewing"
                     >
                         <option value="">-- Select Week --</option>
                         <option v-for="item in weekRanges" :value="item" :key="item.id">{{ item.display }}</option>
@@ -101,11 +103,11 @@
                         <td scope="row"> <!-- notes -->
                             {{ shifts[index].caregiver_comments ? 'Yes' : 'No' }}
                         </td>
-                        <td scope="row" v-if="!isDenied && !isApproved"> <!-- action -->
-                            <b-button variant="info" @click="editEntry(index)" :disabled="busy > 0 || ! canEdit">
+                        <td scope="row" v-if="!isLocked"> <!-- action -->
+                            <b-button variant="info" @click="editEntry(index)" :disabled="isBusy || ! canEdit">
                                 <i class="fa fa-edit"></i>
                             </b-button>
-                            <b-button variant="danger" @click="clearShift(index)" :disabled="busy > 0 || ! canEdit">
+                            <b-button variant="danger" @click="clearShift(index)" :disabled="isBusy || ! canEdit">
                                 <i class="fa fa-trash-o"></i>
                             </b-button>
                         </td>
@@ -121,19 +123,19 @@
         </div>
         <!-- /end SHIFTS TABLE -->
 
-        <b-row class="mt-3" v-show="!isDenied && !isApproved">
+        <b-row class="mt-3" v-show="!isLocked">
             <b-col md="12">
-                <b-button variant="info" type="button" @click="save(false)" :disabled="busy > 0">
-                    <i v-show="busy == 1" class="fa fa-spinner fa-spin"></i>
+                <b-button variant="info" type="button" @click="save(false)" :disabled="isBusy">
+                    <i v-show="busy == 'save'" class="fa fa-spinner fa-spin"></i>
                     Save
                 </b-button>
-                <b-button variant="primary" type="button" @click="save(true)" :disabled="busy > 0">
-                    <i v-show="busy == 1" class="fa fa-spinner fa-spin"></i>
+                <b-button variant="primary" type="button" @click="save(true)" :disabled="isBusy">
+                    <i v-show="busy == 'approve'" class="fa fa-spinner fa-spin"></i>
                     Save and Create Shifts
                 </b-button>
-                <b-button variant="danger" type="button" @click="deny()" :disabled="busy > 0">
-                    <i v-show="busy == 2" class="fa fa-spinner fa-spin"></i>
-                    Deny
+                <b-button v-if="! isCreating" variant="danger" type="button" @click="deny()" :disabled="isBusy">
+                    <i v-show="busy == 'deny'" class="fa fa-spinner fa-spin"></i>
+                    {{ isEditing ? 'Discard Timesheet' : 'Deny' }}
                 </b-button>
             </b-col>
         </b-row>
@@ -165,29 +167,39 @@
         components: { TimesheetEntryModal },
 
         props: {
-            'activities': { type: Array, default: [] },
             'timesheet': { type: Object, default: {} },
-            'caregivers': { type: Array, default: [] },
         },
 
         data() {
             return {
-                busy: 0,
                 caregiver: {},
                 client: {},
                 weekRanges: [],
                 week: {},
                 shifts: [],
                 form: new Form({}),
-                showEntryModal: false,
                 selectedEntry: {},
                 selectedIndex: null,
+                sheet: {},
+
+                busy: false,
+                showEntryModal: false,
                 deleteIndex: null,
                 confirmDeleteModal: false,
             }
         },
 
         computed: {
+            cardTitle() {
+                if (this.isEditing) {
+                    return 'Edit Manual Timesheet';
+                } else if (this.isReviewing) {
+                    return 'Review Manual Timesheet';
+                } else if (this.isCreating) {
+                    return 'Create Manual Timesheet';
+                }
+            },
+
             url() {
                 let url = '/business/timesheet';
                 if (this.form.id) { 
@@ -225,9 +237,9 @@
             },
 
             mode() {
-                if (this.timesheet.id) {
+                if (this.sheet.id) {
                     // has a timesheet
-                    if (this.timesheet.exception_count > 0) {
+                    if (this.sheet.exception_count > 0) {
                         // reviewing caregiver submitted timesheet
                         return 'review';
                     } else {
@@ -238,6 +250,26 @@
                     // creating office user timesheet
                     return 'create';
                 }
+            },
+
+            isReviewing() { 
+                return this.mode == 'review';
+            },
+
+            isEditing() {
+                return this.mode == 'edit';
+            },
+
+            isCreating() {
+                return this.mode == 'create';
+            }, 
+
+            isLocked() {
+                return this.isApproved || this.isDenied;
+            },
+
+            isBusy() {
+                return this.busy != false;
             }
         },
 
@@ -256,12 +288,12 @@
 
             updateEntry(entry) {
                 this.form.entries.splice(this.selectedIndex, 1, entry);
-                this.shifts.splice(this.selectedIndex, 1, entry);
+                this.shifts = this.form.entries;
                 this.selectedEntry = null;
             },
 
             save(approve = false) {
-                this.busy = 1;
+                this.busy = approve ? 'approve' : 'save';
 
                 let url = this.url;
                 if (approve) {
@@ -275,27 +307,27 @@
                     .then( ({ data }) => {
                         console.log(data);
                         this.form = new Form(data.data);
-                        this.shifts = this.form.entries;
-                        this.busy = 0;
+                        this.loadTimesheet(data.data);
+                        this.busy = false;
                     })
                     .catch(e => {
                         console.log('submit timesheet error:');
                         console.log(e);
                         // revert back to the unfiltered list
                         this.form.entries = this.shifts;
-                        this.busy = 0;
+                        this.busy = false;
                     });
             },
 
             deny() {
-                this.busy = 2;
+                this.busy = 'deny';
                 this.form.submit('post', this.url + '?deny=1')
                     .then( ({ data }) => {
                         this.form = new Form(data.data);
-                        this.busy = 0;
+                        this.busy = false;
                     })
                     .catch(e => {
-                        this.busy = 0;
+                        this.busy = fase;
                         console.log('submit timesheet error:');
                         console.log(e);
                     });
@@ -318,10 +350,12 @@
                 this.confirmDeleteModal = false;
             },
 
-            generateEntries() {
+            loadTimesheet(timesheet) {
+                this.sheet = timesheet;
+
                 let entriesForDates = [];
-                if (this.timesheet.id) {
-                    entriesForDates = this.timesheet.entries.map(item => {
+                if (this.sheet.id) {
+                    entriesForDates = this.sheet.entries.map(item => {
                         return {
                             date: moment(item.checked_in_time).local().format('YYYY-MM-DD'),
                             entry: item,
@@ -375,11 +409,11 @@
                     this.client = {};
                 }
 
-                this.generateEntries();
+                this.loadTimesheet(this.sheet);
             },
 
             'week': function(newVal, oldVal) {
-                this.generateEntries();
+                this.loadTimesheet(this.sheet);
             },
 
             /**
@@ -396,23 +430,10 @@
             this.weekRanges = this.generateWeeks();
             this.week = this.weekRanges[0];
             if (this.timesheet.id) {
-                this.form = new Form(this.timesheet);
+                this.sheet = this.timesheet;
+                this.form = new Form(this.sheet);
             } else {
-                this.form = new Form({
-                    approved_at: null,
-                    business: {},
-                    business_id: '',
-                    caregiver: {},
-                    caregiver_id: '',
-                    client: {},
-                    client_id: '',
-                    created_at: '',
-                    creator_id: '',
-                    denied_at: null,
-                    entries: [],
-                    id: '',
-                    updated_at: '',
-                });
+                this.form = new Form(this.emptyTimesheet);
             }
         },
 
