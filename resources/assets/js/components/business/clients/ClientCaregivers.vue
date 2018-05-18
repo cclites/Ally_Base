@@ -127,7 +127,7 @@
                                 v-model="form.caregiver_hourly_rate"
                                 >
                             </b-form-input>
-                            <input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>
+                            <input-help :form="form" field="caregiver_hourly_rate" text="Enter this caregiver's earnings per hour for hourly shifts."></input-help>
                         </b-form-group>
                         <b-form-group label="Provider Hourly Fee" label-for="provider_hourly_fee">
                             <b-form-input
@@ -137,27 +137,30 @@
                                     v-model="form.provider_hourly_fee"
                             >
                             </b-form-input>
-                            <input-help :form="form" field="provider_hourly_fee" text="Enter the provider referral fee for hourly earnings."></input-help>
+                            <input-help :form="form" field="provider_hourly_fee" text="Enter the provider referral fee per hour for hourly shifts."></input-help>
                         </b-form-group>
-                        <b-form-group>
-                            <div class="form-check">
-                                <label class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" v-model="enableDailyRates">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">Enable Daily Rates</span>
-                                </label>
-                            </div>
-                        </b-form-group>
+                        <b-row>
+                            <b-col>
+                                <b-form-group label="Ally Fee">
+                                    {{ moneyFormat(allyHourlyTotal) }}
+                                </b-form-group>
+                            </b-col>
+                            <b-col>
+                                <b-form-group label="Hourly Total">
+                                    {{ moneyFormat(hourlyTotal) }}
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
+                        <hr />
                         <b-form-group label="Caregiver Daily Rate" label-for="caregiver_daily_rate">
                             <b-form-input
                                     id="caregiver_daily_rate"
                                     name="caregiver_daily_rate"
                                     type="number"
                                     v-model="form.caregiver_daily_rate"
-                                    :disabled="!enableDailyRates"
                             >
                             </b-form-input>
-                            <input-help :form="form" field="caregiver_daily_rate" text="Enter the daily earnings for this caregiver. (All day shifts)"></input-help>
+                            <input-help :form="form" field="caregiver_daily_rate" text="Enter this caregiver's earnings per day for daily shifts."></input-help>
                         </b-form-group>
                         <b-form-group label="Provider Daily Fee" label-for="provider_daily_fee">
                             <b-form-input
@@ -165,20 +168,19 @@
                                     name="provider_daily_fee"
                                     type="number"
                                     v-model="form.provider_daily_fee"
-                                    :disabled="!enableDailyRates"
                             >
                             </b-form-input>
-                            <input-help :form="form" field="provider_daily_fee" text="Enter the provider referral fee for daily shifts."></input-help>
+                            <input-help :form="form" field="provider_daily_fee" text="Enter the provider referral fee per day for daily shifts."></input-help>
                         </b-form-group>
                         <b-row>
                             <b-col>
                                 <b-form-group label="Ally Fee">
-                                    {{ moneyFormat(allyTotal) }}
+                                    {{ moneyFormat(allyDailyTotal) }}
                                 </b-form-group>
                             </b-col>
                             <b-col>
-                                <b-form-group label="Total">
-                                    {{ moneyFormat(total) }}
+                                <b-form-group label="Daily Total">
+                                    {{ moneyFormat(dailyTotal) }}
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -186,9 +188,10 @@
                </b-row>
                 <b-row v-if="this.selectedCaregiver.id">
                     <b-col>
+                        <hr />
                         <b-form-group>
                             <b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">
-                                Remove from Client
+                                Remove Caregiver from Client
                             </b-btn>
                         </b-form-group>
                     </b-col>
@@ -231,17 +234,46 @@
                 form: new Form(),
                 excludeForm: {},
                 excludedCaregivers: [],
-                enableDailyRates: false,
             }
-        },
-
-        mounted() {
-            this.fetchAssignedCaregivers();
         },
 
         created() {
             this.fetchCaregivers();
             this.fetchExcludedCaregivers();
+            this.fetchAssignedCaregivers();
+        },
+
+        computed: {
+            modalTitle() {
+                if (this.selectedCaregiver.id) {
+                    return 'Edit Caregiver Assignment';
+                }
+                return 'Add Caregiver Assignment';
+            },
+
+            hourlySubtotal() {
+                return parseFloat(this.form.provider_hourly_fee) + parseFloat(this.form.caregiver_hourly_rate);
+            },
+
+            dailySubtotal() {
+                return parseFloat(this.form.provider_daily_fee) + parseFloat(this.form.caregiver_daily_rate);
+            },
+
+            allyHourlyTotal() {
+                return this.hourlySubtotal * this.allyFee;
+            },
+
+            hourlyTotal() {
+                return this.hourlySubtotal + this.allyHourlyTotal;
+            },
+
+            allyDailyTotal() {
+                return this.dailySubtotal * this.allyFee;
+            },
+
+            dailyTotal() {
+                return this.dailySubtotal + this.allyDailyTotal;
+            },
         },
 
         methods: {
@@ -360,36 +392,6 @@
                             this.clientCaregiverModal = false;
                         }
                     });
-            }
-        },
-
-        computed: {
-            modalTitle() {
-                if (this.selectedCaregiver.id) {
-                    return 'Edit Caregiver Assignment';
-                }
-                return 'Add Caregiver Assignment';
-            },
-
-            subTotal() {
-                return parseFloat(this.form.provider_hourly_fee) + parseFloat(this.form.caregiver_hourly_rate);
-            },
-
-            allyTotal() {
-                return this.subTotal * this.allyFee;
-            },
-
-            total() {
-                return this.subTotal + this.allyTotal;
-            }
-        },
-
-        watch: {
-            enableDailyRates(val) {
-                if (!val) {
-                    this.form.caregiver_daily_rate = null;
-                    this.form.provider_daily_fee = null;
-                }
             }
         }
     }
