@@ -130,6 +130,40 @@ td .fc-event-container {
   line-height: 16px;
 }
 
+/* Quick Search */
+.quick-search {
+  width: 300px;
+  position: relative;
+  float: right;
+  padding-right: 15px;
+}
+.search-results {
+  width: 300px;
+  position: absolute;
+  max-height: 300px;
+  display: block;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 0;
+  width: 100%;
+  overflow-y: scroll;
+  border: 1px solid rgba(0,0,0,.26);
+  box-shadow: 0 3px 6px 0 rgba(0,0,0,.15);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  text-align: left;
+  list-style: none;
+  background: #fff;
+}
+@media (min-width: 1170px) {
+  .quick-search, .search-results {
+    width: 400px;
+  }
+}
+
 /* Print columns */
 @media print {
   .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
@@ -213,3 +247,5 @@ td .fc-event-container {
 .ct-series-c .ct-bar {
   stroke: $primary;
 }
+
+
