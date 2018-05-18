@@ -9,16 +9,42 @@
         <div v-show="isDenied" class="alert alert-danger mb-3">This Timesheet has already been denied.</div>
 
         <b-row class="mb-3">
+            <!-- CLIENT DROPDOWNS -->
             <b-col lg="6">
-                <strong>Caregiver:</strong> {{ timesheet.caregiver.name }}
+                <b-form-group label="Caregiver" label-for="caregiver_id">
+                    <b-form-select
+                            id="caregiver_id"
+                            name="caregiver_id"
+                            v-model="form.caregiver_id"
+                    >
+                        <option value="">-- Select Caregiver --</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="caregiver_id" text=""></input-help>
+                </b-form-group>
             </b-col>
             <b-col lg="6">
-                <strong>Client:</strong> {{ timesheet.client.name }}
+                <b-form-group label="Client" label-for="client_id">
+                    <b-form-select
+                            :disabled="!hasClients"
+                            id="client_id"
+                            name="client_id"
+                            v-model="form.client_id"
+                    >
+                        <option value="">-- Select Client --</option>
+                        <option v-for="item in caregiver.clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="client_id" text=""></input-help>
+                </b-form-group>
             </b-col>
+            <!-- /end CLIENT DROPDOWNS -->
         </b-row>
         <!-- /end CLIENT DROPDOWNS -->
         
-        <!-- SHIFTS TABLE -->                
+        <!-- SHIFTS TABLE -->
+        <b-btn variant="info" @click="createEntry()">
+            <i class="fa fa-plus"></i> Add Entry
+        </b-btn>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -37,44 +63,47 @@
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in form.entries" :key="index">
-                        <th scope="row"> <!-- date -->
+                        <td scope="row"> <!-- date -->
                             {{ formatDateFromUTC(item.checked_in_time) }}
-                        </th>
-                        <th scope="row"> <!-- start_time -->
+                        </td>
+                        <td scope="row"> <!-- start_time -->
                             {{ formatTimeFromUTC(item.checked_in_time) }}
-                        </th>
-                        <th scope="row"> <!-- end_time -->
+                        </td>
+                        <td scope="row"> <!-- end_time -->
                             {{ formatTimeFromUTC(item.checked_out_time) }}
-                        </th>
-                        <th scope="row"> <!-- mileage -->
+                        </td>
+                        <td scope="row"> <!-- mileage -->
                             {{ item.mileage }}
-                        </th>
-                        <th scope="row"> <!-- other_expenses -->
+                        </td>
+                        <td scope="row"> <!-- other_expenses -->
                             ${{ item.other_expenses }}
-                        </th>
-                        <th scope="row"> <!-- caregiver_rate -->
+                        </td>
+                        <td scope="row"> <!-- caregiver_rate -->
                             ${{ item.caregiver_rate }}
-                        </th>
-                        <th scope="row"> <!-- provider_fee -->
+                        </td>
+                        <td scope="row"> <!-- provider_fee -->
                             ${{ item.provider_fee }}
-                        </th>
-                        <th scope="row"> <!-- activities -->
+                        </td>
+                        <td scope="row"> <!-- activities -->
                             {{ item.activities.length }}
-                        </th>
-                        <th scope="row"> <!-- notes -->
+                        </td>
+                        <td scope="row"> <!-- notes -->
                             {{ item.caregiver_comments ? 'Yes' : 'No' }}
-                        </th>
-                        <th scope="row" v-if="!isDenied && !isApproved"> <!-- action -->
-                            <b-button variant="success" @click="editEntry(item, index)" :disabled="busy > 0">
+                        </td>
+                        <td scope="row" v-if="!isDenied && !isApproved"> <!-- action -->
+                            <b-button variant="info" @click="editEntry(item, index)" :disabled="busy > 0">
                                 <i class="fa fa-edit"></i>
                             </b-button>
                             <b-button variant="danger" @click="removeShift(index)" :disabled="busy > 0">
                                 <i class="fa fa-trash-o"></i>
                             </b-button>
-                        </th>
-                        <th scope="row" v-else>
+                        </td>
+                        <td scope="row" v-else>
                             -
-                        </th>
+                        </td>
+                    </tr>
+                    <tr v-if="form.entries && form.entries.length == 0">
+                        <td colspan="9" class="text-center">No timesheet entries</td>
                     </tr>
                 </tbody>
             </table>
@@ -83,9 +112,13 @@
 
         <b-row class="mt-3" v-show="!isDenied && !isApproved">
             <b-col md="12">
-                <b-button variant="success" type="button" @click="save(true)" :disabled="busy > 0">
+                <b-button variant="info" type="button" @click="save(false)" :disabled="busy > 0">
                     <i v-show="busy == 1" class="fa fa-spinner fa-spin"></i>
-                    Save and Approve
+                    Save
+                </b-button>
+                <b-button variant="primary" type="button" @click="save(true)" :disabled="busy > 0">
+                    <i v-show="busy == 1" class="fa fa-spinner fa-spin"></i>
+                    Save and Create Shifts
                 </b-button>
                 <b-button variant="danger" type="button" @click="deny()" :disabled="busy > 0">
                     <i v-show="busy == 2" class="fa fa-spinner fa-spin"></i>
@@ -121,14 +154,9 @@
         components: { TimesheetEntryModal },
 
         props: {
-            'activities': {
-                type: Array,
-                default: [],
-            },
-            'timesheet': {
-                type: Object,
-                default: {},
-            }
+            'activities': { type: Array, default: [] },
+            'timesheet': { type: Object, default: {} },
+            'caregivers': { type: Array, default: [] },
         },
 
         data() {
@@ -146,17 +174,42 @@
         },
 
         mounted() {
-            // if (this.isCaregiver) {
-            //     this.form.caregiver_id = this.caregiver.id;
-            // }
-            this.form = new Form(this.timesheet);
+            if (this.timesheet.id) {
+                this.form = new Form(this.timesheet);
+            } else {
+                this.form = new Form({
+                    approved_at: null,
+                    business: {},
+                    business_id: '',
+                    caregiver: {},
+                    caregiver_id: '',
+                    client: {},
+                    client_id: '',
+                    created_at: '',
+                    creator_id: '',
+                    denied_at: null,
+                    entries: [],
+                    id: '',
+                    updated_at: '',
+                });
+            }
         },
 
         methods: {
+            createEntry() {
+                this.selectedEntry = this.emptyShift();
+                this.selectedIndex = -1;
+                this.showEntryModal = true;
+            },
+
             updateEntry(entry) {
-                this.form.entries.splice(this.selectedIndex, 1, entry);
+                if (this.selectedIndex > -1) {
+                    this.form.entries.splice(this.selectedIndex, 1, entry);
+                } else {
+                    this.form.entries.push(entry);
+                }
                 this.selectedEntry = null;
-        },
+            },
 
             editEntry(entry, index) {
                 this.selectedEntry = entry;
@@ -164,17 +217,17 @@
                 this.showEntryModal = true;
             },
 
-            newShift() {
-                console.log("default rate;");
-                console.log(this.defaultRate);
+            emptyShift() {
                 return {
-                    date: '',
-                    start_time: '',
-                    end_time: '',
+                    id: '',
+                    caregiver_comments: '',
+                    checked_in_time: moment.utc(),
+                    checked_out_time: '',
                     mileage: 0,
                     other_expenses: 0,
                     caregiver_rate: this.defaultRate || 0,
                     provider_fee: this.defaultFee || 0,
+                    activities: [],
                 }
             },
 
@@ -214,7 +267,7 @@
 
                 // this.form.entries.push(this.shiftForm.data())
 
-                // this.shiftForm = new Form(this.newShift());
+                // this.shiftForm = new Form(this.emptyShift());
             },
 
             removeShift(index, confirm = true) {
@@ -240,11 +293,11 @@
             },
 
             isApproved() {
-                return this.form.approved_at;
+                return this.form.id && this.form.approved_at;
             },
 
             isDenied() {
-                return this.form.denied_at;
+                return this.form.id && this.form.denied_at;
             },
 
             isCaregiver() {
@@ -266,39 +319,41 @@
 
         watch: {
             // sets client dropdown to only selected caregivers clients
-            // 'form.caregiver_id': function(newVal, oldVal) {
-            //     var results = this.caregivers.filter(function(c) {
-            //         return c.id == newVal;
-            //     });
+            'form.caregiver_id': function(newVal, oldVal) {
+                var results = this.caregivers.filter(function(c) {
+                    return c.id == newVal;
+                });
 
-            //     if (results && results.length == 1) {
-            //         this.caregiver = results[0];
-            //     } else {
-            //         this.caregiver = {};
-            //     }
+                if (results && results.length == 1) {
+                    this.caregiver = results[0];
+                    // only reset client_id if doesn't exist in dropdown
+                    if (this.caregiver.clients.findIndex(item => item.id == this.form.client_id) == -1) {
+                        this.form.client_id = '';
+                    }
+                } else {
+                    this.caregiver = {};
+                    this.form.client_id = '';
+                }
 
-            //     this.form.client_id = '';
-            // },
+            },
 
             // sets current selected client so rates/fees can be loaded
             // and resets the shift form
-            // 'form.client_id': function(newVal, oldVal) {
-            //     if (this.caregiver.clients) {
-            //         var results = this.caregiver.clients.filter(function(c) {
-            //             return c.id == newVal;
-            //         });
+            'form.client_id': function(newVal, oldVal) {
+                if (this.caregiver.clients) {
+                    var results = this.caregiver.clients.filter(function(c) {
+                        return c.id == newVal;
+                    });
 
-            //         if (results && results.length == 1) {
-            //             this.client = results[0];
-            //         } else {
-            //             this.client = {};
-            //         }
-            //     } else {
-            //         this.client = {};
-            //     }
-                
-            //     this.shiftForm = new Form(this.newShift());
-            // },
+                    if (results && results.length == 1) {
+                        this.client = results[0];
+                    } else {
+                        this.client = {};
+                    }
+                } else {
+                    this.client = {};
+                }
+            },
         }
     }
 </script>

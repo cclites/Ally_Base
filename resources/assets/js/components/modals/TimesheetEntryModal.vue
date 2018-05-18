@@ -95,7 +95,7 @@
         </b-container>
 
         <div slot="modal-footer">
-            <b-button variant="success" type="submit" @click="updateShift()">Save</b-button>
+            <b-button variant="info" type="submit" @click="updateShift()">Save</b-button>
             <b-btn variant="default" @click="showModal = false">Close</b-btn>
         </div>
     </b-modal>

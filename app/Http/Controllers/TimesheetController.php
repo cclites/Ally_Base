@@ -12,14 +12,6 @@ use App\Responses\SuccessResponse;
 class TimesheetController extends Controller
 {
     /**
-     * @return \App\Caregiver
-     */
-    protected function caregiver()
-    {
-        return auth()->user()->role;
-    }
-
-    /**
      * Returns form for creating a manual timesheet.
      *
      * @return void

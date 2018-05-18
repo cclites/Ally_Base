@@ -216,6 +216,7 @@ Route::group([
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
 
+    Route::get('timesheet', 'Business\TimesheetController@create')->name('timesheet.create');
     Route::get('timesheet/{timesheet}', 'Business\TimesheetController@edit')->name('timesheet');
     Route::post('timesheet/{timesheet}', 'Business\TimesheetController@update')->name('timesheet.update');
 });
