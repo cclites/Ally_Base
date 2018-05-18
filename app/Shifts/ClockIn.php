@@ -35,7 +35,7 @@ class ClockIn extends ClockBase
             'checked_in_number' => $this->number,
             'checked_in_ip' => \Request::ip(),
             'checked_in_agent' => \Request::userAgent(),
-            'all_day' => false,
+            'daily_rates' => false,
             'status' => Shift::CLOCKED_IN,
             'caregiver_rate' => $schedule->getCaregiverRate(),
             'provider_fee' => $schedule->getProviderFee()
@@ -92,7 +92,7 @@ class ClockIn extends ClockBase
             'checked_in_number' => $this->number,
             'checked_in_ip' => \Request::ip(),
             'checked_in_agent' => \Request::userAgent(),
-            'all_day' => false,
+            'daily_rates' => false,
             'status' => Shift::CLOCKED_IN,
             'caregiver_rate' => $rates->caregiver_hourly_rate,
             'provider_fee' => $rates->provider_hourly_fee
