@@ -34,6 +34,7 @@ class UpdateBusinessRequest extends FormRequest
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',
+            'calendar_remember_filters' => 'required|bool',
             'phone1' => 'nullable|string',
             'phone2' => 'nullable|string',
             'address1' => 'nullable|string',

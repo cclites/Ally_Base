@@ -69,7 +69,6 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
                         </b-form-group>
-
                         <b-form-group label="Calendar Default View" label-for="calendar_default_view">
                             <b-form-select id="calendar_default_view"
                                            tabindex="3"
@@ -88,6 +87,15 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
                             <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
+                        </b-form-group>
+                        <b-form-group label="Remember Calendar Filters" label-for="calendar_remember_filters">
+                            <b-form-select id="calendar_remember_filters"
+                                           v-model="businessSettings.calendar_remember_filters"
+                                           tabindex="2">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the Business Schedule."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -186,6 +194,7 @@
                     mileage_rate: this.business.mileage_rate,
                     calendar_default_view: this.business.calendar_default_view,
                     calendar_caregiver_filter: this.business.calendar_caregiver_filter,
+                    calendar_remember_filters: this.business.calendar_remember_filters,
                     phone1: this.business.phone1,
                     phone2: this.business.phone2,
                     address1: this.business.address1,
