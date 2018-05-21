@@ -8,6 +8,7 @@ use App\Responses\ErrorResponse;
 use App\Timesheet;
 use App\TimesheetEntry;
 use App\Responses\SuccessResponse;
+use DB;
 
 class TimesheetController extends Controller
 {
@@ -25,7 +26,7 @@ class TimesheetController extends Controller
 
         $business = activeBusiness();
         $activities = $business->allActivities();
-        $caregivers = $this->caregiverClientList($business);
+        $caregivers = $business->caregiverClientList($business);
         $success = request()->success == 1;
 
         return view('caregivers.timesheet', compact(
@@ -47,41 +48,24 @@ class TimesheetController extends Controller
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $timesheet = Timesheet::make(array_diff_key($request->validated(), ['entries' => [] ]));
-        $timesheet->creator_id = auth()->user()->id;
-        $timesheet->business_id = activeBusiness()->id;
-        $timesheet->save();
-        
-        foreach($request->validated()['entries'] as $item) {
-            if ($entry = $timesheet->entries()->create(array_diff_key($item, ['activities' => [], 'duration' => '', 'start_time' => '', 'end_time' => '', 'date' => '' ]))) {
-                $entry->activities()->sync($item['activities']);
-            } 
+        DB::beginTransaction();
+
+        $timesheet = Timesheet::createWithEntries(
+            $request->validated(),
+            auth()->user(),
+            activeBusiness()
+        );
+
+        if ($timesheet === false) {
+            DB::rollBack();
+            return new ErrorResponse(500, 'An unexpected error occurred while saving the Timesheet.');
         }
 
-        return new SuccessResponse('Your timesheet has been submitted for approval.', ['timesheet' => $timesheet->fresh()->toArray()]);
-    }
-
-    /**
-     * Gets list of all the businesses caregivers with attached clients
-     * in simple array.  Intended for smart dropdowns.
-     *
-     * @return Array
-     */
-    public function caregiverClientList($business)
-    {
-        return $business->caregivers()->with('clients')->get()->map(function ($cg) {
-            return [
-                'id' => $cg->id,
-                'name' => $cg->nameLastFirst,
-                'clients' => $cg->clients->map(function ($c) {
-                    return [
-                        'id' => $c->id,
-                        'name' => $c->nameLastFirst,
-                        'caregiver_hourly_rate' => $c->pivot->caregiver_hourly_rate,
-                        'provider_hourly_fee' => $c->pivot->provider_hourly_fee,
-                    ];
-                }),
-            ];
-        });
+        DB::commit();
+        return new SuccessResponse(
+            'Your timesheet has been submitted for approval.', 
+            ['timesheet' => $timesheet], 
+            route('caregivers.timesheet') . '?success=1' 
+        );
     }
 }

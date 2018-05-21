@@ -14,27 +14,19 @@ use App\Http\Requests\CreateTimesheetsRequest;
 class TimesheetController extends BaseController
 {
     /**
-     * Returns form for creating a manual timesheet.
+     * Returns form for creating a Timesheet.
      *
      * @return void
      */
     public function create()
     {
-        $caregiver = '{}';
-        $mode = 'business';
-        if (auth()->user()->role_type == 'caregiver') {
-            $caregiver = auth()->user();
-            $mode = 'caregiver';
-        }
-
         $business = activeBusiness();
         $activities = $business->allActivities();
-        $caregivers = $this->caregiverClientList($business);
+        $caregivers = $business->caregiverClientList($business);
         $success = request()->success == 1;
 
-        return view("$mode.timesheet", compact(
+        return view("business.timesheet", compact(
             'success',
-            'caregiver',
             'caregivers', 
             'activities'
         ));
@@ -94,7 +86,7 @@ class TimesheetController extends BaseController
     }
 
     /**
-     * View a Manual Timesheet.
+     * View/edit a Timesheet.
      *
      * @param Timesheet $timesheet
      * @return \Illuminate\Http\Response
@@ -107,7 +99,7 @@ class TimesheetController extends BaseController
 
         $timesheet->load('caregiver', 'client');
         $activities = activeBusiness()->allActivities();
-        $caregivers = $this->caregiverClientList($timesheet->business);
+        $caregivers = $timesheet->business->caregiverClientList($timesheet->business);
         
         return view('business.timesheet', compact(
             'timesheet',
@@ -117,8 +109,7 @@ class TimesheetController extends BaseController
     }
 
     /**
-     * Update a Manual Timesheet and handle approval and converting to Shifts.
-     * Undocumented function
+     * Update a Timesheet and handle approval and converting to Shifts.
      *
      * @param ApproveTimesheetRequest $request
      * @param Timesheet $timesheet
@@ -130,15 +121,6 @@ class TimesheetController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this Timesheet.');
         }
         
-        if ($request->deny == 1) {
-            $timesheet->deny();
- 
-            return new SuccessResponse(
-                'Timesheet has been denied.', 
-                $timesheet->fresh()->load('caregiver', 'client')
-            );
-        }
-
         DB::beginTransaction();
         
         $timesheet = $timesheet->updateWithEntries($request->validated());
@@ -162,26 +144,21 @@ class TimesheetController extends BaseController
     }
 
     /**
-     * Gets list of all the businesses caregivers with attached clients
-     * in simple array.  Intended for smart dropdowns.
+     * Denies the Manual Timesheet.
      *
-     * @return Array
+     * @return void
      */
-    public function caregiverClientList($business)
+    public function deny(Timesheet $timesheet)
     {
-        return $business->caregivers()->with('clients')->get()->map(function ($cg) {
-            return [
-                'id' => $cg->id,
-                'name' => $cg->nameLastFirst,
-                'clients' => $cg->clients->map(function ($c) {
-                    return [
-                        'id' => $c->id,
-                        'name' => $c->nameLastFirst,
-                        'caregiver_hourly_rate' => $c->pivot->caregiver_hourly_rate,
-                        'provider_hourly_fee' => $c->pivot->provider_hourly_fee,
-                    ];
-                }),
-            ];
-        });
+        if (!$this->businessHasTimesheet($timesheet)) {
+            return new ErrorResponse(403, 'You do not have access to this Timesheet.');
+        }
+        
+        $timesheet->deny();
+
+        return new SuccessResponse(
+            'Timesheet has been denied.', 
+            $timesheet->fresh()->load('caregiver', 'client')
+        );
     }
 }
