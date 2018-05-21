@@ -8,16 +8,6 @@ export default {
         }
     },
 
-    mounted() {
-        axios.get('/business/settings?json=1')
-            .then(response => {
-                this.businessSettingsStore = response.data;
-            })
-            .catch(err => {
-                this.businessSettingsStore = {};
-            });
-    },
-
     methods: {
         getLocalStorage(item) {
             let val = localStorage.getItem(this.computedPrefix + item);
