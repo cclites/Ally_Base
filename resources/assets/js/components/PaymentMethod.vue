@@ -37,9 +37,9 @@
             </b-col>
         </b-row>
         <b-row v-show="hasMetrics" class="mt-3">
-            <b-col>First Charge: {{ dateOrNever(method.charge_metrics.first_charge_date) }}</b-col>
-            <b-col>Last Charge: {{ dateOrNever(method.charge_metrics.last_charge_date) }}</b-col>
-            <b-col>Successful Charges: {{ method.charge_metrics.successful_charge_count }}</b-col>
+            <b-col>First Charge: {{ firstCharge }}</b-col>
+            <b-col>Last Charge: {{ lastCharge }}</b-col>
+            <b-col>Successful Charges: {{ chargeCount }}</b-col>
         </b-row>
     </b-card>
 </template>
@@ -127,8 +127,28 @@
 
             restricted() {
                 return this.role == 'client' && this.type == 'provider';
-            }
+            },
 
+            firstCharge() {
+                if (this.hasMetrics && this.method.charge_metrics.first_charge_date) {
+                    return this.formatDateFromUTC(this.method.charge_metrics.first_charge_date);
+                }
+                return 'Never';
+            },
+
+            lastCharge() {
+                if (this.hasMetrics && this.method.charge_metrics.last_charge_date) {
+                    return this.formatDateFromUTC(this.method.charge_metrics.last_charge_date);
+                }
+                return 'Never';
+            },
+
+            chargeCount() {
+                if (this.hasMetrics && this.method.charge_metrics.successful_charge_count) {
+                    return this.method.charge_metrics.successful_charge_count;
+                }
+                return '0';
+            },
         },
 
         methods: {
@@ -143,15 +163,6 @@
                         })
                 }
             },
-
-            dateOrNever(timestamp) {
-                if (timestamp == null) {
-                    console.log('never...');
-                    return 'Never';
-                }
-
-                return this.formatDateFromUTC(timestamp)
-            }
         }
     }
 </script>
