@@ -139,6 +139,14 @@ class ScheduleEvents implements Responsable
                         }
                         break;
                 }
+
+                // Apply a different shade to schedules with unconfirmed shifts
+                foreach($schedule->shifts as $shift) {
+                    if ($shift->status === \App\Shift::WAITING_FOR_CONFIRMATION) {
+                        $backgroundColor = '#D0C3D3';
+                        break;
+                    }
+                }
             }
 
 
