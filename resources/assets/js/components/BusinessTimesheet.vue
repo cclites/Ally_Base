@@ -72,7 +72,7 @@
                         <th scope="col">Expenses</th>
                         <th scope="col">CG Rate</th>
                         <th scope="col">PV Rate</th>
-                        <th scope="col">ALDS</th>
+                        <th scope="col">ADLs</th>
                         <th scope="col">Notes</th>
                         <th scope="col"></th>
                     </tr>
