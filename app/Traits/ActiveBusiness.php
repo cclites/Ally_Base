@@ -6,6 +6,7 @@ use App\Caregiver;
 use App\Client;
 use App\Schedule;
 use App\Shift;
+use App\Timesheet;
 
 trait ActiveBusiness
 {
@@ -111,6 +112,28 @@ trait ActiveBusiness
             return $schedule->business_id == $this->business()->id;
         }
         return $this->business()->schedules()->where('id', $schedule)->exists();
+    }
+
+    /**
+     * Return true if a business has access to the specified timesheet or timesheet id
+     *
+     * @param int|\App\Timesheet $timesheet
+     * @return bool
+     */
+    protected function businessHasTimesheet($timesheet)
+    {
+        if (is_admin()) {
+            // Set active business to shifts's related business and return true for admins
+            if (!$timesheet instanceof Timesheet) {
+                $timesheet = Timesheet::find($timesheet);
+            }
+            $this->setBusinessAs($timesheet->business);
+            return true;
+        }
+        if ($timesheet instanceof Timesheet) {
+            return $timesheet->business_id == $this->business()->id;
+        }
+        return $this->business()->timesheets()->where('id', $timesheet)->exists();
     }
 
     /**

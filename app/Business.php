@@ -175,6 +175,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Shift::class);
     }
 
+    public function timesheets()
+    {
+        return $this->hasMany(Timesheet::class);
+    }
+
     public function notes()
     {
         return $this->hasMany(Note::class);
@@ -385,5 +390,29 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     public function getAllyPercentage()
     {
         return (float) config('ally.bank_account_fee');
+    }
+
+    /**
+     * Gets list of all the business' caregivers with attached clients
+     * in simple array.  Intended for smart dropdowns.
+     *
+     * @return array
+     */
+    public function caregiverClientList()
+    {
+        return $this->caregivers()->with('clients')->get()->map(function ($cg) {
+            return [
+                'id' => $cg->id,
+                'name' => $cg->nameLastFirst,
+                'clients' => $cg->clients->map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'name' => $c->nameLastFirst,
+                        'caregiver_hourly_rate' => $c->pivot->caregiver_hourly_rate,
+                        'provider_hourly_fee' => $c->pivot->provider_hourly_fee,
+                    ];
+                }),
+            ];
+        });
     }
 }

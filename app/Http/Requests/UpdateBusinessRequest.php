@@ -29,6 +29,7 @@ class UpdateBusinessRequest extends FormRequest
             'scheduling' => 'required|bool',
             'auto_confirm' => 'required|bool',
             'ask_on_confirm' => 'required|bool',
+            'allows_manual_shifts' => 'required|bool',
             'location_exceptions' => 'required|bool',
             'timesheet_exceptions' => 'required|bool',
             'mileage_rate' => 'required|numeric',

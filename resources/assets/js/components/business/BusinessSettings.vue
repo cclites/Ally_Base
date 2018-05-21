@@ -38,19 +38,20 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
                         </b-form-group>
-                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
-                            <b-form-select id="location_exceptions"
-                                           v-model="businessSettings.location_exceptions"
+
+                        <b-form-group label="Allow Manual Timesheets" label-for="allows_manual_shifts">
+                            <b-form-select id="allows_manual_shifts"
+                                           v-model="businessSettings.allows_manual_shifts"
                             >
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
+                            <input-help :form="businessSettings" field="allows_manual_shifts" text="Allow Caregivers to submit shift information manually."></input-help>
                         </b-form-group>
+
                         <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions">
                             <b-form-select id="timesheet_exceptions"
                                            v-model="businessSettings.timesheet_exceptions"
-                                           readonly
                             >
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
@@ -63,7 +64,7 @@
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
                                            tabindex="2"
-                                           disabled="true">
+                                           disabled>
                                 <option value="1">Enabled</option>
                                 <option value="0">Disabled</option>
                             </b-form-select>
@@ -96,6 +97,16 @@
                                 <option value="0">No</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the Business Schedule."></input-help>
+                        </b-form-group>
+
+                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-select id="location_exceptions"
+                                           v-model="businessSettings.location_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -206,6 +217,7 @@
                     timezone: this.business.timezone,
                     auto_confirm: this.business.auto_confirm,
                     ask_on_confirm: this.business.ask_on_confirm,
+                    allows_manual_shifts: this.business.allows_manual_shifts,
                     location_exceptions: this.business.location_exceptions,
                     timesheet_exceptions: this.business.timesheet_exceptions,
                 }),

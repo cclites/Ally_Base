@@ -29,7 +29,7 @@
                         >
                     </b-textarea>
                     <input-help :form="form" field="notes" text=""></input-help>
-                    <b-button variant="info" @click="acknowledge()">Acknowledge Exception</b-button>
+                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledge()">Acknowledge Exception</b-button>
                     <b-button variant="secondary" :href="exception.reference_url">{{ referenceUrlTitle }}</b-button>
                 </b-form-group>
             </b-col>
@@ -57,9 +57,14 @@
             referenceUrlTitle() {
                 if (this.exception.reference_type === 'App\\Shift') {
                     return 'View Shift';
+                } else if (this.isTimesheet) {
+                    return 'View Timesheet';
                 }
                 return 'Reference Link';
-            }
+            },
+            isTimesheet() {
+                return this.exception.reference_type === 'App\\Timesheet';
+            },
         },
         methods: {
             acknowledge() {

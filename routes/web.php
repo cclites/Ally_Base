@@ -79,6 +79,8 @@ Route::group([
 
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
+    Route::get('timesheet', 'TimesheetController@create')->name('caregivers.timesheet');
+    Route::post('timesheet', 'TimesheetController@store')->name('caregivers.timesheet.store');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
@@ -220,6 +222,12 @@ Route::group([
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
+
+    Route::get('timesheet', 'Business\TimesheetController@create')->name('timesheet.create');
+    Route::post('timesheet', 'Business\TimesheetController@store')->name('timesheet.store');
+    Route::get('timesheet/{timesheet}', 'Business\TimesheetController@edit')->name('timesheet');
+    Route::post('timesheet/{timesheet}', 'Business\TimesheetController@update')->name('timesheet.update');
+    Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -312,7 +320,6 @@ Route::group([
     Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
-
     Route::get('audit-log', 'Admin\AuditLogController@index')->name('reports.audit-log');
 });
 
