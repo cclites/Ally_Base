@@ -84,9 +84,11 @@
 
 <script>
     import ManageCalendar from '../../../mixins/ManageCalendar';
+    import LocalStorage from "../../../mixins/LocalStorage";
 
     export default {
         props: {
+            'business': Object,
             'caregiver': Object,
             'client': Object,
             'defaultView': {
@@ -99,6 +101,7 @@
         data() {
             return {
                 loading: false,
+                filtersReady: false,
                 filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
                 filterClientId: (this.client) ? this.client.id : -1,
                 header: {
@@ -121,17 +124,20 @@
                     unassigned_hours: 0,
                     unassigned_shifts: 0,
                 },
+                localStoragePrefix: 'business_schedule_',
             }
         },
 
         mounted() {
-            if (this.isFilterable) {
-                this.loadFiltersData();
-            }
+            this.loadFiltersData();
         },
 
         computed: {
             eventsUrl() {
+                if (!this.filtersReady) {
+                    return '';
+                }
+
                 let url = '/business/schedule/events?';
 
                 if (this.filterCaregiverId > -1) {
@@ -161,6 +167,10 @@
                 if (this.client || this.caregiver) return false;
                 return true;
             },
+
+            rememberFilters() {
+                return this.isFilterable && this.business && this.business.calendar_remember_filters;
+            }
         },
 
         methods: {
@@ -175,6 +185,9 @@
             },
 
             fetchEvents() {
+                if (!this.filtersReady) {
+                    return;
+                }
                 this.events = [];
                 this.loading = true;
                 axios.get(this.eventsUrl)
@@ -191,13 +204,25 @@
             },
 
             loadFiltersData() {
-                axios.get('/business/settings?json=1').then(response => {
-                    if (response.data.calendar_caregiver_filter === 'unassigned') {
-                        this.filterCaregiverId = 0;
+                if (this.isFilterable) {
+                    // Load the default filter values
+                    if (this.business) {
+                        if (this.business.calendar_caregiver_filter === 'unassigned') {
+                            this.filterCaregiverId = 0;
+                        }
+                        if (this.rememberFilters) {
+                            let localCaregiverId = this.getLocalStorage('caregiver');
+                            if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
+                            let localClientId = this.getLocalStorage('client');
+                            if (localClientId !== null) this.filterClientId = localClientId;
+                        }
                     }
-                });
-                axios.get('/business/clients').then(response => this.clients = response.data);
-                axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+
+                    // Fill the caregiver and client drop downs
+                    axios.get('/business/clients').then(response => this.clients = response.data);
+                    axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+                }
+                this.filtersReady = true;
             },
 
             renderEvent: function( event, element, view ) {
@@ -233,16 +258,26 @@
         },
 
         watch: {
-            filterCaregiverId() {
+            filterCaregiverId(val) {
                 this.fetchEvents();
+                if (this.rememberFilters) {
+                    this.setLocalStorage('caregiver', val);
+                }
             },
 
-            filterClientId() {
+            filterClientId(val) {
                 this.fetchEvents();
+                if (this.rememberFilters) {
+                    this.setLocalStorage('client', val);
+                }
             },
+
+            filtersReady(val) {
+                if (val) this.fetchEvents();
+            }
         },
 
-        mixins: [ManageCalendar]
+        mixins: [ManageCalendar, LocalStorage]
     }
 </script>
 
