@@ -87,6 +87,7 @@
                                 <option value="unassigned">Unassigned Shifts</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                            <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
                         </b-form-group>
                     </b-col>
                 </b-row>
