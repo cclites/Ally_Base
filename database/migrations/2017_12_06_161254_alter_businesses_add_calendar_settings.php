@@ -15,7 +15,7 @@ class AlterBusinessesAddCalendarSettings extends Migration
     {
         Schema::table('businesses', function (Blueprint $table) {
             $table->string('calendar_default_view')->default('month');
-            $table->string('calendar_caregiver_filter')->default('all');
+            $table->string('calendar_caregiver_filter')->default('unassigned');
         });
     }
 
