@@ -49,6 +49,8 @@ class CreateTimesheetsRequest extends FormRequest
         return [
             'caregiver_id.*' => 'You must select a caregiver.',
             'client_id.*' => 'You must select a client.',
+            'entries.*.mileage.*' => 'Mileage cannot be greater than 1000 or less than 0 for a single shift.',
+            'entries.*.other_expenses.*' => 'Other expenses cannot be greater than 1000 or less than 0 for a single shift.',
             'entries.*.*' => 'One of the entries contains invalid data.',
             'entries.*' => 'You must add at least one shift.',
             'activities.*' => 'You must select at least 1 activity.',
