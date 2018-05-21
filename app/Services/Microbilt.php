@@ -25,7 +25,7 @@ class Microbilt {
      * @param string $account_no
      * @param string $routing_no
      * 
-     * @return bool
+     * @return array
      */
     public function verifyBankAccount($first_last, $account_number, $routing_number)
     {
