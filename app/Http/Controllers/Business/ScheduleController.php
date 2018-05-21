@@ -53,11 +53,7 @@ class ScheduleController extends BaseController
         );
 
         $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
-        $events->setTitleCallback(function(Schedule $schedule) {
-            $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
-            $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            return $clientName . ' (' . $caregiverName . ')';
-        });
+        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
         return [
             'kpis' => $events->kpis(),
@@ -222,10 +218,6 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
-            return new ErrorResponse(400, 'Past schedules are unable to be modified.');
-        }
-
         if ($schedule->shifts->count()) {
             return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
         }
@@ -240,6 +232,8 @@ class ScheduleController extends BaseController
             else {
                 $schedule->deleteNote();
             }
+            // Refresh the note relationship
+            $schedule->load('note');
         }
 
         // set status
@@ -253,7 +247,11 @@ class ScheduleController extends BaseController
         }
         $schedule->update(['status' => $status]);
 
-        return new SuccessResponse('The schedule has been updated.');
+        $events = new ScheduleEventsResponse(collect([$schedule]));
+        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $data = $events->toArray()[0];
+
+        return new SuccessResponse('The schedule has been updated.', $data);
     }
 
     /**
@@ -453,4 +451,9 @@ class ScheduleController extends BaseController
         return view('business.schedule_print', compact('schedules'));
     }
 
+    protected function businessScheduleTitle(Schedule $schedule) {
+        $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
+        $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
+        return $clientName . ' (' . $caregiverName . ')';
+    }
 }

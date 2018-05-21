@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterBusinessesAddCalendarSettings extends Migration
+class AddBusinessSettingRememberFilters extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,7 @@ class AlterBusinessesAddCalendarSettings extends Migration
     public function up()
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->string('calendar_default_view')->default('month');
-            $table->string('calendar_caregiver_filter')->default('unassigned');
+            $table->boolean('calendar_remember_filters')->after('calendar_caregiver_filter')->default(1);
         });
     }
 
@@ -27,8 +26,7 @@ class AlterBusinessesAddCalendarSettings extends Migration
     public function down()
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->dropColumn('calendar_default_view');
-            $table->dropColumn('calendar_caregiver_filter');
+            $table->dropColumn('calendar_remember_filters');
         });
     }
 }
