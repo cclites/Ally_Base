@@ -48,6 +48,10 @@ class TimesheetController extends Controller
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
+        if (! activeBusiness()->allows_manual_shifts) {
+            return new ErrorResponse(403, 'Forbidden.');
+        }
+
         DB::beginTransaction();
 
         $timesheet = Timesheet::createWithEntries(
