@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class Timesheet extends Model
+class Timesheet extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
     
