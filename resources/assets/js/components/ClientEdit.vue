@@ -216,8 +216,6 @@
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
         
-        <confirm-modal v-model="deactivateModal"></confirm-modal>
-
         <b-modal id="deactivateModal"
                  title="Are you sure?"
                  v-model="deactivateModal"
