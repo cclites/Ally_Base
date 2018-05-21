@@ -52,7 +52,7 @@
 
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
-                                @refresh="fetchEvents()"
+                                @updateEvent="updateEvent"
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
@@ -203,6 +203,17 @@
                     })
             },
 
+            updateEvent(id, data) {
+                let event = this.events.find(item => {
+                    return item.id === id;
+                });
+                if (event) {
+                    event.backgroundColor = data.backgroundColor;
+                    event.note = data.note;
+                    event.status = data.status;
+                }
+            },
+
             loadFiltersData() {
                 if (this.isFilterable) {
                     // Load the default filter values
@@ -288,5 +299,8 @@
 .fc-note-btn:hover {
     filter: brightness(85%);
     cursor: pointer;
+}
+.fa-commenting {
+    color: #F2F214;
 }
 </style>
