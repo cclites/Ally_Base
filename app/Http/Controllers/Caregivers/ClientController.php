@@ -1,0 +1,77 @@
+<?php
+namespace App\Http\Controllers\Caregivers;
+
+use App\Businesses\Timezone;
+use App\Client;
+use App\Exceptions\UnverifiedLocationException;
+use App\Scheduling\ScheduleAggregator;
+use App\Shifts\ClockIn;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class ClientController extends BaseController
+{
+    /**
+     * List all clients the caregiver is assigned to
+     *
+     * @return \App\Client[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function index()
+    {
+        return $this->caregiver()->clients
+            ->sortBy('nameLastFirst')
+            ->values();
+    }
+
+    /**
+     * Verify if the caregiver is at the client's address
+     *
+     * @param \App\Client $client
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyLocation(Client $client, Request $request)
+    {
+        $clockIn = new ClockIn($this->caregiver());
+        try {
+            $clockIn->setGeocode($request->input('latitude'), $request->input('longitude'));
+            $clockIn->verifyGeocode($client);
+            $success = true;
+        }
+        catch (UnverifiedLocationException $e) {
+            $success = false;
+        }
+
+        return response()->json(['success' => $success]);
+    }
+
+    /**
+     * Return the current available schedules for a caregiver and client
+     *
+     * @param \App\Client $client
+     * @param \App\Scheduling\ScheduleAggregator $aggregator
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function currentSchedules(Client $client, ScheduleAggregator $aggregator)
+    {
+        $start = new Carbon('-2 hours', Timezone::getTimezone($client->business_id));
+        $end = new Carbon('+2 hours', Timezone::getTimezone($client->business_id));
+        $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
+            ->where('client_id', $client->id)
+            ->getSchedulesBetween($start, $end);
+
+        // Sort schedules by closest starts_at
+        if ($schedules->count() > 1) {
+            $now = Carbon::now();
+            $schedules = $schedules->sort(function($a, $b) use ($now) {
+                $diffA = $now->diffInSeconds($a->starts_at);
+                $diffB = $now->diffInSeconds($b->starts_at);
+                if ($diffA == $diffB) {
+                    return 0;
+                }
+                return ($diffA < $diffB) ? -1 : 1;
+            });
+        }
+
+        return $schedules;
+    }
+}

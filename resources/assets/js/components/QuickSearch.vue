@@ -4,7 +4,7 @@
             <i v-if="loading" class="fa fa-spinner fa-spin"></i>
             <i v-else class="fa fa-search"></i>
             <input type="text" 
-                placeholder="Quick Search" 
+                placeholder="Quick Search Clients and Caregivers"
                 v-model="filter" 
                 @input="onSearch" 
                 @focus="showResults()" 
@@ -14,7 +14,7 @@
         <div v-show="isSearching" class="search-results">
             <b-dropdown-item v-if="options.length == 0">No Results</b-dropdown-item>
             <b-dropdown-item v-else v-for="item in options" :key="item.id" :href="`/business/${item.role_type}s/${item.id}`">
-                {{ item.name }}
+                {{ item.name }} - {{ item.role_type | capitalize }}
             </b-dropdown-item>
         </div>
     </div>
@@ -79,12 +79,6 @@ export default {
 
 </script>
 <style>
-.quick-search {
-    width: 300px;
-    position: relative;
-    float: right;
-}
-
 .icon-control {
     position: relative;
     width:100%;
@@ -98,27 +92,5 @@ export default {
     color: #67757c;
     min-height: 38px;
     width: 90%;
-}
-
-.search-results {
-    width: 300px;
-    position: absolute;
-    max-height: 300px; 
-    display: block;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    min-width: 160px;
-    padding: 5px 0;
-    margin: 0;
-    width: 100%;
-    overflow-y: scroll;
-    border: 1px solid rgba(0,0,0,.26);
-    box-shadow: 0 3px 6px 0 rgba(0,0,0,.15);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    text-align: left;
-    list-style: none;
-    background: #fff;
 }
 </style>

@@ -53,7 +53,7 @@ abstract class ClockBase
         }
     }
 
-    protected function verifyGeocode(Client $client)
+    public function verifyGeocode(Client $client)
     {
         if (!$client->evvAddress) throw new UnverifiedLocationException('Client does not have a service (EVV) address.');
 
@@ -69,14 +69,14 @@ abstract class ClockBase
         }
     }
 
-    protected function verifyPhoneNumber(Client $client)
+    public function verifyPhoneNumber(Client $client)
     {
         if (!$client->phoneNumbers()->where('national_number', $this->number)->exists()) {
             throw new UnverifiedLocationException('The phone number does not match the client record.');
         }
     }
 
-    protected function verifyEVV(Client $client)
+    public function verifyEVV(Client $client)
     {
         if (!is_null($this->latitude)) {
             $this->verifyGeocode($client);

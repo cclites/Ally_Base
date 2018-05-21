@@ -184,7 +184,7 @@
             </b-container>
             <div slot="modal-footer">
                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
-               <b-btn variant="warning" @click="saveCaregiver(true)">Save and Update Future Schedule</b-btn>
+               <b-btn variant="warning" @click="saveCaregiver(true)" v-if="selectedCaregiver && selectedCaregiver.id">Save and Update Future Schedules</b-btn>
                <b-btn variant="info" @click="saveCaregiver()" v-if="form.caregiver_id">Save</b-btn>
             </div>
         </b-modal>

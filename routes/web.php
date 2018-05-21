@@ -66,13 +66,19 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver']
 ], function() {
-    Route::get('schedule', 'ScheduleController@index')->name('schedule');
-    Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('clock-in/{schedule_id?}', 'ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule_id?}', 'ShiftController@clockIn')->name('clock_in');
-    Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
-    Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
-    Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('clients');
+    Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
+    Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
+
+    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-out', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
+    Route::post('clock-out', 'Caregivers\ShiftController@clockOut')->name('clock_out');
+    Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::get('timesheet', 'TimesheetController@create')->name('caregivers.timesheet');
     Route::post('timesheet', 'TimesheetController@store')->name('caregivers.timesheet.store');
 
@@ -204,6 +210,7 @@ Route::group([
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
     Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::post('shifts/{shift}/clockout', 'Business\ShiftController@officeClockOut')->name('shifts.clockout');
 
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 

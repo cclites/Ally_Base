@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Caregivers;
 
 use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 
-class ScheduleController extends Controller
+class ScheduleController extends BaseController
 {
     public function index()
     {

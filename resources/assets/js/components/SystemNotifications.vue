@@ -1,7 +1,8 @@
 <template>
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-muted text-muted" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-message"></i>
-            <div class="notify" v-if="notifications.length"> <span class="heartbit"></span> <span class="point"></span> </div>
+        <a class="nav-link dropdown-toggle text-muted text-muted" id="notificationsDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="mdi mdi-message"></i>
+            <span class="badge badge-danger badge-notifications" v-if="notifications.length">{{ notifications.length }}</span>
+            <b-tooltip target="notificationsDropdown" placement="left" show title="You have exceptions that need your action!" v-if="showTooltip"></b-tooltip>
         </a>
         <div class="dropdown-menu dropdown-menu-right mailbox scale-up">
             <ul>
@@ -70,7 +71,23 @@
                     notification.time = moment.utc(notification.created_at).local().format('LT');
                     return notification;
                 })
+            },
+            showTooltip() {
+                return this.notifications.length && window.location.pathname === '/business/schedule';
             }
         }
     }
 </script>
+
+<style>
+    .badge-notifications {
+        position: absolute;
+        top: 18px;
+        left: 32px;
+    }
+    .mdi-message {
+        font-size: 24px;
+        margin-right: -7px;
+        padding-left: 7px;
+    }
+</style>

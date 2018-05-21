@@ -131,7 +131,7 @@ class ScheduleEvents implements Responsable
                 switch($schedule->status) {
                     case Schedule::CLIENT_CANCELED:
                         $backgroundColor = '#f2f214'; // client cancel
-                        break;
+                        break; 
                     case Schedule::CAREGIVER_CANCELED:
                         $backgroundColor = '#d91c4e'; // CG cancel
                         break;

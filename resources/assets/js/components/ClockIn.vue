@@ -12,25 +12,25 @@
                 </tr>
             </table>
         </b-card>
-        <b-card title="Select a Shift to Clock In">
-            <form @submit.prevent="clockIn()" @keydown="form.clearError($event.target.name)">
+        <b-card :class="{ translucent: !!loadingText }">
+            <form @keydown="form.clearError($event.target.name)">
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Current Time" label-for="time">
                             <b-form-input v-model="time" readonly></b-form-input>
                         </b-form-group>
-                        <b-form-group label="Select the shift you are clocking in for." label-for="schedule_id">
+                        <b-form-group label="Select the client you are clocking in for." label-for="client_id">
                             <b-form-select
-                                    id="schedule_id"
-                                    name="schedule_id"
-                                    v-model="form.schedule_id"
+                                    id="client_id"
+                                    name="client_id"
+                                    v-model="form.client_id"
                                     required
                             >
-                                <option value="">--Select a Shift--</option>
-                                <option v-for="item in events" :value="item.id" :key="item.id">{{ getTitle(item) }}</option>
+                                <option value="">--Select a Client--</option>
+                                <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
 
                             </b-form-select>
-                            <input-help :form="form" field="" text="Only shifts scheduled within 12 Hours of the current time will show."></input-help>
+                            <input-help :form="form" field="" text="">Only clients assigned to you will show.</input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -46,26 +46,28 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row v-if="care_plan.activities" class="mb-4">
-                    <b-col lg="12">
-                        <h4>Care Plan for Selected Client - Please Note:</h4>
-                        <label>Activities to be Performed:</label>
-                        <ul class="">
-                            <li v-for="activity in care_plan.activities" :key="activity.id">{{ activity.name }}</li>
-                        </ul>
-                        <div v-if="care_plan.notes">
-                            <label>Note:</label>
-                            <p>{{ care_plan.notes }}</p>
+                <b-row>
+                    <b-col>
+                        <div class="alert alert-warning" v-show="!!locationWarning">
+                            <strong>Warning: </strong> {{ locationWarning }}
+                        </div>
+                        <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
+                            <b-button variant="info" @click="clockIn(schedule)">Clock in your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
+                        </div>
+                        <div class="form-group" v-if="form.client_id">
+                            <b-button variant="success" @click="clockInWithoutSchedule()">Clock in to an unscheduled shift</b-button>
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
-                    <b-col lg="12">
-                        <b-button id="manual-clock-in" variant="danger" type="button" @click="manualSubmit()" v-if="showManual">Manual Clock In</b-button>
-                        <b-button id="complete-clock-in" variant="success" type="submit">Complete Clock In</b-button>
-                    </b-col>
-                </b-row>
             </form>
+        </b-card>
+        <b-card class="loading-card" v-show="!!loadingText">
+            <div class="text-center">
+                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+                <p>
+                    {{ loadingText }}
+                </p>
+            </div>
         </b-card>
     </div>
 
@@ -73,102 +75,239 @@
 </template>
 
 <script>
+    import FormatsDates from "../mixins/FormatsDates";
+
     export default {
+        mixins: [FormatsDates],
+
         props: {
-            'events': {},
-            'selected': {}
+            'selectedSchedule': {}
         },
 
         data() {
             return {
                 form: new Form({
-                    schedule_id: "",
+                    client_id: "",
+                    schedule_id: null,
                     latitude: null,
                     longitude: null,
-                    manual: 0,
                     debugMode: false,
                 }),
+                clients: [],
+                schedules: [],
                 allowDebug: false,
-                showManual: false,
                 stats: [],
-                care_plan: {},
+                time: null,
+                loadingText: null,
+                locationWarning: null,
+                watchId: null,
+                locationOptions: {
+                    enableHighAccuracy: true,
+                    maximumAge: 15000,
+                    timeout: 30000,
+                },
             }
         },
 
         mounted() {
-            if (this.selected) {
-                this.form.schedule_id = this.selected;
-            }
+            this.loadClients();
+            this.watchLocation();
+            this.loadTime();
+
+            // Refresh the time every 15s
+            setInterval(this.loadTime, 15000);
+
+            // Automatically stop watching the location if they haven't clocked in within 5 minutes
+            setTimeout(this.stopWatchingLocation, 300000);
         },
 
         methods: {
 
-            clockIn() {
+            showLoading(text = 'Loading..') {
+                this.loadingText = text;
+            },
+
+            hideLoading() {
+                this.loadingText = null;
+            },
+
+            checkSelected() {
+                if (!this.selectedSchedule.id) return;
+
+                let client = this.clients.findIndex(item => item.id === this.selectedSchedule.client_id);
+                if (client === -1) {
+                    alert('You are unable to clock in to the selected schedule.  The registry has not assigned you to this client.');
+                }
+
+                this.form.client_id = this.selectedSchedule.client_id;
+            },
+
+            async loadClients() {
+                this.showLoading('Loading clients..');
+                try {
+                    const response = await axios.get('/caregiver/clients');
+                    this.clients = response.data;
+                }
+                catch (err) {
+                    alert('Unable to load client list.  Make sure you have network connectivity.');
+                }
+                this.hideLoading();
+
+                // Load the selected schedule
+                this.checkSelected();
+            },
+
+            async loadSchedules() {
+                this.showLoading('Searching available shifts..');
+                try {
+                    const response = await axios.get('/caregiver/schedules/' + this.form.client_id);
+                    this.schedules = response.data;
+                }
+                catch (err) {
+                    alert('Unable to load available shifts.  Make sure you have network connectivity.');
+                }
+                this.hideLoading();
+
+                // After loading schedules, verify the location.
+                // We do this here so the showing/hiding of loading messages don't conflict
+                this.verifyLocation();
+            },
+
+            async verifyLocation() {
+                this.loadLocation();
+                if (this.form.latitude === null) {
+                    // If the latitude is still null, do not try to verify the location
+                    if (!this.locationWarning) this.displayLocationWarning();
+                    return;
+                }
+                try {
+                    this.showLoading('Verifying location..');
+                    const response = await axios.post('/caregiver/verify_location/' + this.form.client_id, this.form.data());
+                    if (response.data.success) {
+                        this.hideLocationWarning();
+                    }
+                    else {
+                        this.displayLocationWarning();
+                    }
+                }
+                catch(err) {
+                    this.displayLocationWarning();
+                }
+                this.hideLoading();
+            },
+
+            handleLocationError(error) {
+                console.log(error);
+                switch (error.code) {
+                    case 1:
+                        this.displayLocationWarning('Location services are disabled.  You may still clock in but the shift will need to be verified by the provider.');
+                        break;
+                    default:
+                        this.displayLocationWarning('Your device\'s location could not be found.  You may still clock in but the shift will need to be verified by the provider.');
+                }
+            },
+
+            displayLocationWarning(text) {
+                if (!text) {
+                    text = 'Your current location does not match the client’s address.  You may still clock in but the shift will need to be verified by the provider.';
+                }
+                this.locationWarning = text;
+            },
+
+            hideLocationWarning() {
+                this.locationWarning = null;
+            },
+
+            watchLocation()
+            {
                 if (!navigator.geolocation) {
                     alert('Location services are not supported on your device.');
                     return;
                 }
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    this.form.latitude = position.coords.latitude;
-                    this.form.longitude = position.coords.longitude;
-                    console.log(position.coords);
-                    this.submitForm();
-                }.bind(this), function(error) {
-                    this.form.latitude = null;
-                    this.form.longitude = null;
-                    console.log(error);
-                    this.submitForm();
-                }.bind(this), {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                });
+
+                if (this.watchId) {
+                    // Already watching
+                    return;
+                }
+
+                this.watchId = navigator.geolocation.watchPosition(this.setLocation, null, this.locationOptions);
             },
 
-            submitForm() {
-                var component = this;
-                this.form.post('/clock-in')
-                    .then(function(response) {
-                        if (response.data.stats) {
-                            component.stats = response.data.stats;
-                        }
-                        else {
-                            window.location = '/clock-out';
-                        }
-                    })
-                    .catch(function(error) {
-                       component.showManual = true;
-                    });
+            stopWatchingLocation()
+            {
+                navigator.geolocation.clearWatch(this.watchId);
+                this.watchId = null;
+                this.form.latitude = null;
+                this.form.longitude = null;
             },
 
-            manualSubmit() {
-                this.form.manual = 1;
+            setLocation(position)
+            {
+                this.form.latitude = position.coords.latitude;
+                this.form.longitude = position.coords.longitude;
+            },
+
+            async loadLocation()
+            {
+                if (this.form.latitude === null || !this.watchId) {
+                    this.showLoading('Waiting for your location..');
+                    await navigator.geolocation.getCurrentPosition(this.setLocation, this.handleLocationError, this.locationOptions);
+                    this.hideLoading();
+                }
+            },
+
+            clockInWithoutSchedule() {
+                this.form.schedule_id = null;
+                this.loadLocation();
                 this.submitForm();
             },
 
-            getTitle(item) {
-                return item.title + ' ' + moment.utc(item.start).local().format('LT') + ' - ' + moment.utc(item.end).local().format('LT');
+            clockIn(schedule) {
+                this.form.schedule_id = schedule.id;
+                this.loadLocation();
+                this.submitForm();
             },
 
-            loadCarePlan(schedule_id) {
-                let index = this.events.findIndex(item => item.id == schedule_id);
-                if (index != -1) {
-                    this.care_plan = this.events[index].care_plan || {};
+            async submitForm() {
+                this.showLoading('Clocking in to shift..');
+                try {
+                    const response = await this.form.post('/clock-in');
+                    if (response.data.stats) {
+                        this.stats = response.data.stats;
+                    }
+                    else {
+                        window.location = '/clock-out';
+                    }
                 }
+                catch (err) {}
+                this.hideLoading();
             },
-        },
 
-        computed: {
-            time() {
-                return moment().local().format('LT');
+            loadTime() {
+                this.time = moment().local().format('LT');
             }
         },
 
         watch: {
-            'form.schedule_id': function(val) {
-                this.loadCarePlan(val);
+            'form.client_id': function(val) {
+                if (val) this.loadSchedules();
             }
         },
 
     }
 </script>
+
+<style>
+    .loading-card {
+        z-index: 10000;
+        position: absolute;
+        top: 20%;
+        width: 250px;
+        left: 50%;
+        margin-left: -125px;
+    }
+
+    .translucent {
+        opacity: .5;
+    }
+</style>
