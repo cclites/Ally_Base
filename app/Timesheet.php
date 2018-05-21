@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use OwenIt\Auditing\Contracts\Auditable;
 
 class Timesheet extends Model
 {
+    use \OwenIt\Auditing\Auditable;
+    
     protected $guarded = ['id'];
 
     protected $dates = ['approved_at', 'denied_at'];

@@ -4,9 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use OwenIt\Auditing\Contracts\Auditable;
 
 class TimesheetEntry extends Model
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $guarded = ['id'];
 
     protected $appends = ['duration', 'activities'];
