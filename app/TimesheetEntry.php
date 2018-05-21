@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class TimesheetEntry extends Model
+class TimesheetEntry extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
 
