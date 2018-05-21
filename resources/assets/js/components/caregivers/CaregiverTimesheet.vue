@@ -9,7 +9,7 @@
             <b-col lg="6">
                 <b-form-group label="Client" label-for="client_id">
                     <b-form-select
-                            :disabled="!hasClients"
+                            :disabled="! hasClients"
                             id="client_id"
                             name="client_id"
                             v-model="form.client_id"
@@ -103,34 +103,11 @@
         data() {
             return {
                 busy: false,
-                caregiver: {},
-                client: {},
-                weekRanges: [],
-                week: {},
-                shifts: [],
-                form: new Form({}),
                 showEntryModal: false,
-                selectedEntry: {},
-                selectedIndex: null,
             }
         },
 
         computed: {
-            hasClients() {
-                return this.caregiver.clients && this.caregiver.clients.length > 0;
-            },
-
-            defaultRate() {
-                return this.client.caregiver_hourly_rate || 0;
-            },
-
-            defaultFee() {
-                return this.client.provider_hourly_fee || 0;
-            },
-
-            canEdit() {
-                return this.form.client_id ? true : false;
-            },
         },
 
         methods: {
@@ -161,10 +138,7 @@
 
                 this.form.submit('post', '/timesheet')
                     .then( ({ data }) => {
-                        window.location = '/timesheet?success=1';
-                        // this.form.client_id = '';
-                        // this.form.shifts = [];
-                        // this.week = this.weekRanges[0];
+                        // auto redirects
                     })
                     .catch(e => {
                         console.log('submit timesheet error:');
@@ -174,7 +148,6 @@
                         this.busy = false;
                     });
             },
-
         },
 
         watch: {
@@ -219,14 +192,14 @@
         },
 
         mounted() {
-            if (this.cg.id) {
-                this.caregiver = this.cg;
-                this.form.caregiver_id = this.caregiver.id;
-            }
-
             this.weekRanges = this.generateWeeks();
             this.week = this.weekRanges[0];
             this.form = new Form(this.emptyTimesheet);
+
+            if (this.cg.id) {
+                this.caregiver = this.cg;
+                this.form.caregiver_id = this.cg.id;
+            }
         },
     }
 </script>

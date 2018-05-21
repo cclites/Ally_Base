@@ -9,7 +9,18 @@ export default {
     },
 
     data () {
-
+        return {
+            caregiver: {},
+            client: {},
+            weekRanges: [],
+            week: {},
+            shifts: [],
+            form: new Form({}),
+            selectedEntry: {},
+            selectedIndex: null,
+            sheet: {},
+            showEntryModal: false,
+        }
     },
 
     computed: {
@@ -43,9 +54,83 @@ export default {
                 updated_at: '',
             };
         },
+
+        isApproved() {
+            return this.form.id && this.form.approved_at;
+        },
+
+        isDenied() {
+            return this.form.id && this.form.denied_at;
+        },
+
+        hasClients() {
+            return this.caregiver.clients && this.caregiver.clients.length > 0;
+        },
+
+        defaultRate() {
+            return this.client.caregiver_hourly_rate || 0;
+        },
+
+        defaultFee() {
+            return this.client.provider_hourly_fee || 0;
+        },
+
+        canEdit() {
+            return this.form.client_id ? true : false;
+        },
+
+        mode() {
+            if (this.sheet.id) {
+                // has a timesheet
+                if (this.sheet.exception_count > 0) {
+                    // reviewing caregiver submitted timesheet
+                    return 'review';
+                } else {
+                    // editing office user timesheet
+                    return 'edit';
+                }
+            } else {
+                // creating office user timesheet
+                return 'create';
+            }
+        },
+
+        isReviewing() { 
+            return this.mode == 'review';
+        },
+
+        isEditing() {
+            return this.mode == 'edit';
+        },
+
+        isCreating() {
+            return this.mode == 'create';
+        }, 
+
+        isLocked() {
+            return this.isApproved || this.isDenied;
+        },
     },
 
     methods: {
+        editEntry(index) {
+            this.selectedIndex = index;
+            this.selectedEntry = this.form.entries[index];
+
+            // set default check in time for day of the week
+            if (! this.selectedEntry.checked_in_time) {
+                this.selectedEntry.checked_in_time = moment(this.week.days[index], 'YYYY-MM-DD');
+            }
+
+            this.showEntryModal = true;
+        },
+
+        updateEntry(entry) {
+            this.form.entries.splice(this.selectedIndex, 1, entry);
+            this.shifts = this.form.entries;
+            this.selectedEntry = null;
+        },
+
         dow(date, full = false) {
             return moment(date).format(full ? 'dddd' : 'ddd');
         },

@@ -172,18 +172,7 @@
 
         data() {
             return {
-                caregiver: {},
-                client: {},
-                weekRanges: [],
-                week: {},
-                shifts: [],
-                form: new Form({}),
-                selectedEntry: {},
-                selectedIndex: null,
-                sheet: {},
-
                 busy: false,
-                showEntryModal: false,
                 deleteIndex: null,
                 confirmDeleteModal: false,
             }
@@ -208,90 +197,12 @@
                 return url;
             },
 
-            isApproved() {
-                return this.form.id && this.form.approved_at;
-            },
-
-            isDenied() {
-                return this.form.id && this.form.denied_at;
-            },
-
-            isCaregiver() {
-                return this.caregiver.id ? true : false;
-            },
-
-            hasClients() {
-                return this.caregiver.clients && this.caregiver.clients.length > 0;
-            },
-
-            defaultRate() {
-                return this.client.caregiver_hourly_rate || 0;
-            },
-
-            defaultFee() {
-                return this.client.provider_hourly_fee || 0;
-            },
-
-            canEdit() {
-                return this.form.client_id ? true : false;
-            },
-
-            mode() {
-                if (this.sheet.id) {
-                    // has a timesheet
-                    if (this.sheet.exception_count > 0) {
-                        // reviewing caregiver submitted timesheet
-                        return 'review';
-                    } else {
-                        // editing office user timesheet
-                        return 'edit';
-                    }
-                } else {
-                    // creating office user timesheet
-                    return 'create';
-                }
-            },
-
-            isReviewing() { 
-                return this.mode == 'review';
-            },
-
-            isEditing() {
-                return this.mode == 'edit';
-            },
-
-            isCreating() {
-                return this.mode == 'create';
-            }, 
-
-            isLocked() {
-                return this.isApproved || this.isDenied;
-            },
-
             isBusy() {
                 return this.busy != false;
             }
         },
 
         methods: {
-            editEntry(index) {
-                this.selectedIndex = index;
-                this.selectedEntry = this.form.entries[index];
-
-                // set default check in time for day of the week
-                if (! this.selectedEntry.checked_in_time) {
-                    this.selectedEntry.checked_in_time = moment(this.week.days[index], 'YYYY-MM-DD');
-                }
-
-                this.showEntryModal = true;
-            },
-
-            updateEntry(entry) {
-                this.form.entries.splice(this.selectedIndex, 1, entry);
-                this.shifts = this.form.entries;
-                this.selectedEntry = null;
-            },
-
             save(approve = false) {
                 this.busy = approve ? 'approve' : 'save';
 
@@ -305,7 +216,6 @@
 
                 this.form.submit('post', url)
                     .then( ({ data }) => {
-                        console.log(data);
                         this.form = new Form(data.data);
                         this.loadTimesheet(data.data);
                         this.busy = false;
@@ -321,7 +231,7 @@
 
             deny() {
                 this.busy = 'deny';
-                this.form.submit('post', this.url + '?deny=1')
+                this.form.submit('post', this.url + '/deny')
                     .then( ({ data }) => {
                         this.form = new Form(data.data);
                         this.busy = false;
