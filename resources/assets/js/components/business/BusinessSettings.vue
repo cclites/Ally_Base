@@ -77,26 +77,26 @@
                                 <option value="month">Month</option>
                                 <option value="agendaWeek">Week</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
+                            <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the schedule"></input-help>
                         </b-form-group>
-                        <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
+                        <b-form-group label="Default Schedule Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select id="calendar_caregiver_filter"
                                            tabindex="4"
                                            v-model="businessSettings.calendar_caregiver_filter">
                                 <option value="all">All Caregivers</option>
                                 <option value="unassigned">Unassigned Shifts</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                            <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the schedule"></input-help>
                             <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
                         </b-form-group>
-                        <b-form-group label="Remember Calendar Filters" label-for="calendar_remember_filters">
+                        <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters">
                             <b-form-select id="calendar_remember_filters"
                                            v-model="businessSettings.calendar_remember_filters"
                                            tabindex="2">
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the Business Schedule."></input-help>
+                            <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the schedule."></input-help>
                         </b-form-group>
 
                         <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
