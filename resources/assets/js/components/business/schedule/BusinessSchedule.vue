@@ -125,6 +125,8 @@
                     unassigned_shifts: 0,
                 },
                 localStoragePrefix: 'business_schedule_',
+                resetScrollPosition: false,
+                scroll: { top: null, left: null },
             }
         },
 
@@ -174,6 +176,21 @@
         },
 
         methods: {
+            saveScrollPosition() {
+                this.scroll = {
+                    top: $(window).scrollTop(),
+                    left: $(window).scrollLeft(),
+                }
+            },
+
+            setScrollPosition() {
+                if (this.scroll.top !== null) {
+                    console.log('setScrollPosition called');
+                    $(window).scrollTop(this.scroll.top);
+                    $(window).scrollLeft(this.scroll.left);
+                }
+            },
+
             showClockOutModal() {
                 this.clockOutModal = true;
             },
@@ -185,6 +202,7 @@
             },
 
             fetchEvents() {
+                this.saveScrollPosition();
                 if (!this.filtersReady) {
                     return;
                 }
@@ -204,6 +222,7 @@
             },
 
             updateEvent(id, data) {
+                this.saveScrollPosition();
                 let event = this.events.find(item => {
                     return item.id === id;
                 });
@@ -265,6 +284,8 @@
                     content.html(title);
                     content.parent().prepend(note);
                 }
+
+                this.resetScrollPosition = true;
             },
         },
 
@@ -285,6 +306,15 @@
 
             filtersReady(val) {
                 if (val) this.fetchEvents();
+            },
+
+            resetScrollPosition(val, old) {
+                if (val && val !== old) {
+                    setTimeout(() => {
+                        this.setScrollPosition();
+                        this.resetScrollPosition = false;
+                    }, 50);
+                }
             }
         },
 
