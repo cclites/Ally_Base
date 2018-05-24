@@ -59,25 +59,25 @@
                                :selected-event="selectedEvent"
                                :selected-schedule="selectedSchedule"
                                :initial-values="initialCreateValues"
-                               @refresh-events="fetchEvents()"
+                               @refresh-events="fetchEvents(true)"
                                @clock-out="showClockOutModal()"
         />
 
         <bulk-edit-schedule-modal v-model="bulkUpdateModal"
                                   :caregiver-id="filterCaregiverId"
                                   :client-id="filterClientId"
-                                  @refresh-events="fetchEvents()"
+                                  @refresh-events="fetchEvents(true)"
         />
 
         <bulk-delete-schedule-modal v-model="bulkDeleteModal"
                                     :caregiver-id="filterCaregiverId"
                                     :client-id="filterClientId"
-                                    @refresh-events="fetchEvents()"
+                                    @refresh-events="fetchEvents(true)"
         />
 
         <schedule-clock-out-modal v-model="clockOutModal"
                                     :shift="selectedSchedule.clocked_in_shift"
-                                    @refresh="fetchEvents()"
+                                    @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
     </b-card>
 </template>
@@ -183,6 +183,13 @@
                 }
             },
 
+            clearScrollPosition() {
+                this.scroll = {
+                    top: null,
+                    left: null,
+                };
+            },
+
             setScrollPosition() {
                 if (this.scroll.top !== null) {
                     console.log('setScrollPosition called');
@@ -201,11 +208,11 @@
                 this.fetchEvents();
             },
 
-            fetchEvents() {
-                this.saveScrollPosition();
+            fetchEvents(savePosition = false) {
                 if (!this.filtersReady) {
                     return;
                 }
+                savePosition ? this.saveScrollPosition() : this.clearScrollPosition();
                 this.events = [];
                 this.loading = true;
                 axios.get(this.eventsUrl)
@@ -313,7 +320,7 @@
                     setTimeout(() => {
                         this.setScrollPosition();
                         this.resetScrollPosition = false;
-                    }, 50);
+                    }, 10);
                 }
             }
         },
