@@ -15,7 +15,7 @@
                     </b-col>
                 </b-row>
                 <b-row v-if="carePlanActivities().length > 0">
-                    <b-col lg="12" class="with-padding-bottom">
+                    <b-col lg="12" class="with-padding-bottom-top blue-box">
                         <h5>Recommended Care Plan Activities</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
@@ -25,16 +25,14 @@
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
-                    </b-col>
-                </b-row>
-                <b-row v-if="carePlanNotes">
-                    <b-col lg="12" class="with-padding-bottom">
-                        <h5>Care Plan Notes</h5>
-                        <p v-html="carePlanNotes"></p>
+                        <div v-if="carePlanNotes">
+                            <h5>Care Plan Notes</h5>
+                            <p v-html="carePlanNotes"></p>
+                        </div>
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="12">
+                    <b-col lg="12" class="with-padding-top">
                         <h5>Additional Activities Performed</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
@@ -261,7 +259,7 @@
             setTimes() {
                 this.time = this.formatTime();
                 this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
-                setInterval(() => this.time = this.formatTime(), 1000 * 60)
+                setInterval(() => this.time = this.formatTime(), 1000 * 15)
             }
         },
 
@@ -290,5 +288,10 @@
 
     .translucent {
         opacity: .5;
+    }
+
+    .blue-box {
+        background-color: #e8f2fa;
+        border: 1px solid #c8e6f4;
     }
 </style>
