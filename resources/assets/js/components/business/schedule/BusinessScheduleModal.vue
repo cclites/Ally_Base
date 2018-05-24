@@ -354,8 +354,8 @@
 
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
-                    for(let index in this.caregivers) {
-                        let caregiver = this.caregivers[index];
+                    for(let index in this.clientCaregivers) {
+                        let caregiver = this.clientCaregivers[index];
                         if (caregiver.id == this.form.caregiver_id) {
                             return caregiver;
                         }
@@ -662,7 +662,6 @@
 
                 // reset cg mode
                 if (this.initialValues.caregiver_id) {
-                    console.log('has cargiver');
                     this.cgMode = 'all';
                 } else {
                     this.cgMode = 'client';
