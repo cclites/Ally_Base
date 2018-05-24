@@ -42,7 +42,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all'" class="form-text text-muted">
+                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
                                         <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -660,8 +660,8 @@
                 // Re-create the form object
                 this.makeForm();
 
-                // reset cg mode
-                if (this.initialValues.caregiver_id) {
+                // Use cg all mode if an caregiver is pre-selected
+                if (this.defaultValues.caregiver_id) {
                     this.cgMode = 'all';
                 } else {
                     this.cgMode = 'client';
@@ -682,10 +682,8 @@
 
             'form.client_id': function(val, old_val) {
                 this.loadCarePlans(val, old_val);
-                if (this.cgMode == 'client') {
-                    this.loadAllyPctFromClient(val);
-                    this.loadCaregivers();
-                }
+                this.loadAllyPctFromClient(val);
+                this.loadCaregivers();
             },
 
             'form.caregiver_id': function(val, old_val) {
