@@ -52,7 +52,7 @@
                             <strong>Warning: </strong> {{ locationWarning }}
                         </div>
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)">Clock in your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
                         </div>
                         <div class="form-group" v-if="form.client_id">
                             <b-button variant="success" @click="clockInWithoutSchedule()">Clock in to an unscheduled shift</b-button>
