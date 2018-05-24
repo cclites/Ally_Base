@@ -278,7 +278,7 @@
                     e.stopPropagation();
                 });
 
-                let data = [`CG: ${event.caregiver}`, `C: ${event.client}`, `${event.start_time} - ${event.end_time}`];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
