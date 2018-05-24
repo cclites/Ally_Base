@@ -14,7 +14,7 @@
                                 required
                         >
                             <option value="">--Select a Client--</option>
-                            <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
                         </b-form-select>
                         <b-form-select
                                 id="caregiver_id"
@@ -23,7 +23,7 @@
                                 required
                         >
                             <option value="">--Select a Caregiver--</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }} ({{ caregiver.id }})</option>
                         </b-form-select>
                         <b-form-select
                                 id="business_id"
@@ -32,24 +32,37 @@
                                 required
                         >
                             <option value="">--Select a Provider--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button @click="loadTransactions()" variant="info">Generate Report</b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="transactions"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-            </b-table>
-        </div>
-        <div class="text-right">
-            <h4>Total: ${{ numberFormat(totalAmount) }}</h4>
+
+        <loading-card v-show="! neverLoaded && loading"></loading-card>
+
+        <b-row v-show="neverLoaded">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select filters and press Generate Report
+                </b-card>
+            </b-col>
+        </b-row>
+
+        <div v-show="! neverLoaded && ! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="transactions"
+                        :fields="fields"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                </b-table>
+            </div>
+            <div class="text-right">
+                <h4>Total: ${{ numberFormat(totalAmount) }}</h4>
+            </div>
         </div>
     </b-card>
 </template>
@@ -78,6 +91,8 @@
                 clients: [],
                 processing: false,
                 transactions: [],
+                loading: false,
+                neverLoaded: true,
                 fields: [
                     {
                         key: 'created_at',
@@ -130,6 +145,7 @@
                 axios.get('/admin/caregivers').then(response => this.caregivers = response.data);
             },
             loadTransactions() {
+                this.loading = true;
                 let url = '/admin/reports/reconciliation/';
                 if (this.client_id) {
                     url = url + 'client/' + this.client_id;
@@ -139,6 +155,7 @@
                     url = url + 'business/' + this.business_id;
                 }
                 else {
+                    this.loading = false;
                     this.transactions = [];
                     return;
                 }
@@ -149,6 +166,12 @@
                             transaction.last_status = (transaction.last_history) ? transaction.last_history.status : "";
                             return transaction;
                         });
+                        this.loading = false;
+                        this.neverLoaded = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
+                        this.neverLoaded = false;
                     });
             },
         },

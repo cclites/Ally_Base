@@ -3,6 +3,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CaregiverLicense
@@ -24,8 +25,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class CaregiverLicense extends Model
+class CaregiverLicense extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'caregiver_licenses';
     protected $guarded = ['id'];
     public $dates = ['expires_at'];

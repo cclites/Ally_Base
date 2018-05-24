@@ -7,7 +7,9 @@ use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\HasAllyFeeTrait;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Business
@@ -77,9 +79,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $ask_on_confirm
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
-class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold
+class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use \App\Traits\HasPaymentHold;
+    use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'businesses';
     protected $guarded = ['id'];
@@ -114,6 +118,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Client::class);
     }
 
+    public function activeClients()
+    {
+        return $this->clients()->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
     public function clientsUsingProviderPayment()
     {
         return $this->morphMany(Client::class, 'default_payment');
@@ -129,6 +138,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
                 'type',
                 'default_rate'
             ]);
+    }
+
+    public function activeCaregivers()
+    {
+        return $this->caregivers()->whereHas('user', function($q) { $q->where('active', 1); });
     }
 
     public function carePlans()
@@ -169,6 +183,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     public function shifts()
     {
         return $this->hasMany(Shift::class);
+    }
+
+    public function timesheets()
+    {
+        return $this->hasMany(Timesheet::class);
     }
 
     public function notes()
@@ -371,5 +390,39 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         }
 
         return false;
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        return (float) config('ally.bank_account_fee');
+    }
+
+    /**
+     * Gets list of all the business' caregivers with attached clients
+     * in simple array.  Intended for smart dropdowns.
+     *
+     * @return array
+     */
+    public function caregiverClientList()
+    {
+        return $this->caregivers()->with('clients')->get()->map(function ($cg) {
+            return [
+                'id' => $cg->id,
+                'name' => $cg->nameLastFirst,
+                'clients' => $cg->clients->map(function ($c) {
+                    return [
+                        'id' => $c->id,
+                        'name' => $c->nameLastFirst,
+                        'caregiver_hourly_rate' => $c->pivot->caregiver_hourly_rate,
+                        'provider_hourly_fee' => $c->pivot->provider_hourly_fee,
+                    ];
+                }),
+            ];
+        });
     }
 }

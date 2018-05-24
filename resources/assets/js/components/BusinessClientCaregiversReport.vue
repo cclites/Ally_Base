@@ -4,25 +4,28 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row class="mb-2">
             <b-col sm="6">
                 <b-row>
                     <b-col cols="6">
                         <b-form-select v-model="filterCaregiverId">
                             <option value="">All Caregivers</option>
-                            <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                     <b-col cols="6">
                         <b-form-select v-model="filterClientId">
                             <option value="">All Clients</option>
-                            <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                     </b-col>
                 </b-row>
             </b-col>
         </b-row>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :fields="fields"
                      :items="filteredItems"
@@ -55,6 +58,7 @@
             return {
                 items: [],
                 sortBy: null,
+                loading: true,
                 sortDesc: null,
                 clients: [],
                 caregivers: [],
@@ -104,6 +108,7 @@
 
         methods: {
             loadData() {
+                this.loading = true;
                 let component = this;
                 axios.get('/business/reports/client_caregivers?json=1')
                     .then(function(response) {
@@ -113,6 +118,10 @@
                         else {
                             component.items = [];
                         }
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 

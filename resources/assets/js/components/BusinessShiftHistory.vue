@@ -92,7 +92,7 @@
                         <p v-if="!selectedItem.issues || !selectedItem.issues.length">
                             No issues reported
                         </p>
-                        <p else v-for="issue in selectedItem.issues">
+                        <p else v-for="issue in selectedItem.issues" :key="issue.id">
                             <strong v-if="issue.caregiver_injury">The caregiver reported an injury to themselves.<br /></strong>
                             {{ issue.comments }}
                         </p>
@@ -112,7 +112,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="activity in selectedItem.activities">
+                            <tr v-for="activity in selectedItem.activities" :key="activity.id">
                                 <td>{{ activity.code }}</td>
                                 <td>{{ activity.name }}</td>
                             </tr>

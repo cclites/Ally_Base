@@ -47,7 +47,8 @@ class ClientController extends BaseController
             ->values();
 
         if ($request->expectsJson()) {
-            return $clients;
+            // Include active clients only by default through JSON request
+            return $clients->where('active', $request->input('active', 1));
         }
 
         return view('business.clients.index', compact('clients'));
@@ -134,7 +135,7 @@ class ClientController extends BaseController
                 'status' => $data['onboard_status']
             ]);
             $client->onboardStatusHistory()->save($history);
-            return new CreatedResponse('The client has been created.', ['id' => $client->id], route('business.clients.edit', [$client->id]));
+            return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
         return new ErrorResponse(500, 'The client could not be created.');

@@ -66,13 +66,21 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver']
 ], function() {
-    Route::get('schedule', 'ScheduleController@index')->name('schedule');
-    Route::get('schedule/events', 'ScheduleController@events')->name('schedule.events');
-    Route::get('clock-in/{schedule_id?}', 'ShiftController@index')->name('shift.index');
-    Route::post('clock-in/{schedule_id?}', 'ShiftController@clockIn')->name('clock_in');
-    Route::get('clock-out', 'ShiftController@clockedIn')->name('clocked_in');
-    Route::post('clock-out', 'ShiftController@clockOut')->name('clock_out');
-    Route::get('shifts/{shift}', 'ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('clients');
+    Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
+    Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
+
+    Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
+    Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
+    Route::get('clock-out', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
+    Route::post('clock-out', 'Caregivers\ShiftController@clockOut')->name('clock_out');
+    Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
+
+    Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
+    Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
+    Route::get('timesheet', 'TimesheetController@create')->name('caregivers.timesheet');
+    Route::post('timesheet', 'TimesheetController@store')->name('caregivers.timesheet.store');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');
@@ -98,6 +106,7 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
@@ -189,6 +198,7 @@ Route::group([
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
     Route::post('schedule/bulk_delete', 'Business\ScheduleController@bulkDestroy')->name('schedule.bulk_delete');
+    Route::patch('schedule/{schedule}/status', 'Business\ScheduleController@updateStatus')->name('schedule.update_status');
     Route::resource('schedule', 'Business\ScheduleController');
 
     Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
@@ -200,6 +210,7 @@ Route::group([
     Route::post('shifts/{shift}/verify', 'Business\ShiftController@verify')->name('shifts.verify');
     Route::post('shifts/{shift}/issues', 'Business\ShiftController@storeIssue')->name('shifts.issues.store');
     Route::patch('shifts/{shift}/issues/{issue_id}', 'Business\ShiftController@updateIssue')->name('shifts.issues.update');
+    Route::post('shifts/{shift}/clockout', 'Business\ShiftController@officeClockOut')->name('shifts.clockout');
 
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
@@ -211,6 +222,12 @@ Route::group([
     Route::post('documents', 'Business\DocumentController@store');
     Route::get('documents/{document}/download', 'Business\DocumentController@download');
     Route::delete('documents/{document}', 'Business\DocumentController@destroy');
+
+    Route::get('timesheet', 'Business\TimesheetController@create')->name('timesheet.create');
+    Route::post('timesheet', 'Business\TimesheetController@store')->name('timesheet.store');
+    Route::get('timesheet/{timesheet}', 'Business\TimesheetController@edit')->name('timesheet');
+    Route::post('timesheet/{timesheet}', 'Business\TimesheetController@update')->name('timesheet.update');
+    Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -224,6 +241,8 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
+    Route::get('microbilt', 'Admin\MicrobiltController@index');
+    Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
     Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');
     Route::post('businesses/active_business', 'Admin\BusinessController@setActiveBusiness');
@@ -285,6 +304,7 @@ Route::group([
     Route::post('import/save', 'Admin\ShiftImportController@store')->name('import.save');
     Route::post('import/map/client', 'Admin\ShiftImportController@storeClientMapping')->name('import.map.client');
     Route::post('import/map/caregiver', 'Admin\ShiftImportController@storeCaregiverMapping')->name('import.map.caregiver');
+    Route::get('import/description/{provider}', 'Admin\ShiftImportController@getDescription')->name('import.description');
     Route::resource('imports', 'Admin\ShiftImportController');
 
     Route::resource('businesses.clients', 'Admin\BusinessClientController');
@@ -294,11 +314,13 @@ Route::group([
         ->name('reports.caregivers.deposits_missing_bank_account');
 
     Route::get('reports/bucket', 'Admin\BucketController@index')->name('reports.bucket');
+    Route::get('reports/evv', 'Admin\ReportsController@evv')->name('reports.evv');
     Route::get('reports/finances', 'Admin\ReportsController@finances')->name('reports.finances');
     Route::post('reports/finances', 'Admin\ReportsController@financesData')->name('reports.finances.data');
     Route::get('reports/data/shifts', 'Admin\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('audit-log', 'Admin\AuditLogController@index')->name('reports.audit-log');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

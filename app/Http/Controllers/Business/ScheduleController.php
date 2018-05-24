@@ -53,12 +53,12 @@ class ScheduleController extends BaseController
         );
 
         $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
-        $events->setTitleCallback(function(Schedule $schedule) {
-            $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
-            $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
-            return $clientName . ' (' . $caregiverName . ')';
-        });
-        return $events;
+        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+
+        return [
+            'kpis' => $events->kpis(),
+            'events' => $events->toArray(),
+        ];
     }
 
     /**
@@ -203,6 +203,55 @@ class ScheduleController extends BaseController
         unset($data['notes']);
         $schedule->update($data);
         return new SuccessResponse('The schedule has been updated.');
+    }
+
+    /**
+     * Update a single schedule status and notes.
+     *
+     * @param \App\Schedule $schedule
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
+     */
+    public function updateStatus(Schedule $schedule)
+    {
+        if (!$this->businessHasSchedule($schedule)) {
+            return new ErrorResponse(403, 'You do not have access to this schedule.');
+        }
+
+        if ($schedule->shifts->count()) {
+            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
+        }
+        
+        // update notes
+        $notes = request()->notes;
+        if ($schedule->notes != $notes) {
+            if (strlen($notes)) {
+                $note = ScheduleNote::create(['note' => $notes]);
+                $schedule->attachNote($note);
+            }
+            else {
+                $schedule->deleteNote();
+            }
+            // Refresh the note relationship
+            $schedule->load('note');
+        }
+
+        // set status
+        $status = request()->status;
+        if (! in_array($status, [
+            Schedule::OK,
+            Schedule::CAREGIVER_CANCELED,
+            Schedule::CLIENT_CANCELED,
+        ])) {
+            $status = Schedule::OK;
+        }
+        $schedule->update(['status' => $status]);
+
+        $events = new ScheduleEventsResponse(collect([$schedule]));
+        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $data = $events->toArray()[0];
+
+        return new SuccessResponse('The schedule has been updated.', $data);
     }
 
     /**
@@ -402,4 +451,9 @@ class ScheduleController extends BaseController
         return view('business.schedule_print', compact('schedules'));
     }
 
+    protected function businessScheduleTitle(Schedule $schedule) {
+        $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
+        $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
+        return $clientName . ' (' . $caregiverName . ')';
+    }
 }

@@ -2,8 +2,10 @@
 
 namespace App;
 
+use App\Businesses\Timezone;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Payment
@@ -43,8 +45,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Payment extends Model
+class Payment extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'payments';
     protected $guarded = ['id'];
     protected $appends = ['week'];
@@ -84,14 +88,13 @@ class Payment extends Model
 
     public function getWeekAttribute()
     {
-        if ($this->shifts()->exists()) {
-            $checked_in_time = optional($this->shifts()->first())->checked_in_time;
-            if (!is_null($checked_in_time)) {
-                return (object)[
-                    'start' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear)->toDateString(),
-                    'end' => $checked_in_time->setIsoDate($checked_in_time->year, $checked_in_time->weekOfYear, 7)->toDateString()
-                ];
-            }
+        $shift = $this->shifts()->orderBy('checked_in_time', 'DESC')->first();
+        if ($shift && $time = $shift->checked_in_time) {
+            $time->setTimezone(Timezone::getTimezone($shift->business_id) ?: 'America/New_York');
+            return (object) [
+                'start' => $time->setIsoDate($time->year, $time->weekOfYear)->toDateString(),
+                'end' => $time->setIsoDate($time->year, $time->weekOfYear, 7)->toDateString()
+            ];
         }
         return null;
     }

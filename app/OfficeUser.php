@@ -5,6 +5,7 @@ namespace App;
 use App\Contracts\UserRole;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\OfficeUser
@@ -31,8 +32,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $active
  * @property-read mixed $gender
  */
-class OfficeUser extends Model implements UserRole
+class OfficeUser extends Model implements UserRole, Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     use IsUserRole;
 
     protected $table = 'office_users';

@@ -7,6 +7,8 @@
 <script>
     export default {
         props: {
+            loading: false,
+
             events: {
                 default() {
                     return []
@@ -69,7 +71,6 @@
 
         data() {
             return {
-                loading: false,
             }
         },
 
@@ -89,6 +90,8 @@
                     eventSources: this.eventSources,
                     allDaySlot: false,
                     weekNumberCalculation: 'iso',
+                    renderHtml: false,
+                    height: 'auto',
 
                     eventRender(...args) {
                         if (this.sync) {
@@ -113,6 +116,10 @@
 
                     eventResize(...args) {
                         self.$emit('event-resize', ...args)
+                    },
+
+                    viewRender(...args) {
+                        self.$emit('view-render', ...args)
                     },
 
                     dayClick(...args){

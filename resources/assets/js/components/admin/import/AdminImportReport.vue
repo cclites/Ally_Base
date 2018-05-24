@@ -26,11 +26,11 @@
                 <b-form inline @submit.prevent="loadData()">
                     <select2 v-model="caregiver_id" class="form-control mx-1 mb-1">
                         <option value="">All Caregivers</option>
-                        <option v-for="item in caregivers" :value="item.id">{{ item.nameLastFirst }}</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                     </select2>
                     <select2 v-model="client_id" class="form-control mr-1 mb-1">
                         <option value="">All Clients</option>
-                        <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
+                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                     </select2>
                     &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                     &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>

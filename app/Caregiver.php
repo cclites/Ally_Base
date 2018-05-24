@@ -14,6 +14,7 @@ use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Caregiver
@@ -62,10 +63,11 @@ use Carbon\Carbon;
  * @mixin \Eloquent
  * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use IsUserRole;
     use \App\Traits\HasPaymentHold;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -90,7 +92,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_address',
         'w9_city_state_zip',
         'w9_account_numbers',
-        'w9_ssn',
         'w9_employer_id_number'
     ];
 
@@ -199,7 +200,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
      */
     public function setw9SsnAttribute($value)
     {
-        $this->attributes['w9_ssn'] = Crypt::encrypt($value);
+        $this->setSsnAttribute($value);
     }
 
     /**
@@ -209,7 +210,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
      */
     public function getw9SsnAttribute()
     {
-        return empty($this->attributes['w9_ssn']) ? null : Crypt::decrypt($this->attributes['w9_ssn']);
+        return $this->getSsnAttribute();
     }
 
     ///////////////////////////////////////////
@@ -309,7 +310,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     public function unassignFromFutureSchedules()
     {
         $this->schedules()
-             ->where('starts_at', '>', Carbon::now())
+             ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->update(['caregiver_id' => null]);
     }
 

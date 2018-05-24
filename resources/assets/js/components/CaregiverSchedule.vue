@@ -29,7 +29,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="viewModal=false">Close</b-btn>
-                <b-btn variant="info" @click="clockIn()">Clock In</b-btn>
+                <b-btn variant="info" @click="clockIn()" v-if="canClockIn">Go to Clock In</b-btn>
             </div>
         </b-modal>
     </div>
@@ -117,6 +117,22 @@
             viewTitle() {
                 if (!this.selectedEvent) return '';
                 return this.selectedEvent.title;
+            },
+
+            canClockIn() {
+                if (this.selectedEvent) {
+                    let now = moment();
+                    let start = moment(this.selectedEvent.start);
+                    let end = moment(this.selectedEvent.end);
+                    if (now >= start && now <= end.add(2, 'hours')) {
+                        return true;
+                    }
+                    if (now <= end && now >= start.subtract(2, 'hours')) {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
         }

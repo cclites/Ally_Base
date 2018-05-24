@@ -17,7 +17,7 @@
                                         v-model="client_id"
                                         disabled
                                 >
-                                    <option v-for="item in clients" :value="item.id">{{ item.name }}</option>
+                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                                 </b-form-select>
                                 <small>Type: {{ clientType }}</small>
                                 <input-help :form="form" field="client_id" text=""></input-help>
@@ -90,7 +90,7 @@
                                             v-model="form.care_plan_id"
                                     >
                                         <option value="">--No Care Plan--</option>
-                                        <option v-for="plan in carePlans" :value="plan.id">{{ plan.name }}</option>
+                                        <option v-for="plan in carePlans" :value="plan.id" :key="plan.id">{{ plan.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="care_plan_id" text=""></input-help>
                                 </b-form-group>
@@ -105,7 +105,7 @@
                                             v-model="form.caregiver_id"
                                     >
                                         <option value="">--Not Assigned--</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text="Select the caregiver for this schedule."></input-help>
                                 </b-form-group>
@@ -203,7 +203,7 @@
                                 </b-form-group>
                                 <div class="form-check" v-if="form.interval_type == 'weekly' || form.interval_type == 'biweekly'">
                                     <input-help :form="form" field="bydays" text="Select the days of the week below."></input-help>
-                                    <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek">
+                                    <label class="custom-control custom-checkbox" v-for="(item, index) in daysOfWeek" :key="index">
                                         <input type="checkbox" class="custom-control-input" name="bydays[]" v-model="form.bydays" :value="item">
                                         <span class="custom-control-indicator"></span>
                                         <span class="custom-control-description">{{ index }}</span>

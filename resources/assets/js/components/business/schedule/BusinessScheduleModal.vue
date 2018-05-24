@@ -42,7 +42,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all'" class="form-text text-muted">
+                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
                                         <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -215,6 +215,7 @@
                     {{ submitText }}
                 </b-btn>
                 <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn v-show="selectedSchedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
                 <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
@@ -353,8 +354,8 @@
 
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
-                    for(let index in this.caregivers) {
-                        let caregiver = this.caregivers[index];
+                    for(let index in this.clientCaregivers) {
+                        let caregiver = this.clientCaregivers[index];
                         if (caregiver.id == this.form.caregiver_id) {
                             return caregiver;
                         }
@@ -371,11 +372,11 @@
                 }
                 return this.clientCaregivers;
             },
-            
+
             toggleCaregiversLabel() {
                 if (this.cgMode === 'all') {
                     return "Show only Client's"
-                } 
+                }
                 return 'Show All';
             },
         },
@@ -483,6 +484,11 @@
                     this.selectedSchedule = {};
                     this.makeCreateForm();
                 }
+            },
+
+            clockOut() {
+                this.scheduleModal = false;
+                this.$emit('clock-out');
             },
 
             deleteSchedule() {
@@ -653,6 +659,13 @@
 
                 // Re-create the form object
                 this.makeForm();
+
+                // Use cg all mode if an caregiver is pre-selected
+                if (this.defaultValues.caregiver_id) {
+                    this.cgMode = 'all';
+                } else {
+                    this.cgMode = 'client';
+                }
             },
 
             scheduleModal(val) {
@@ -669,7 +682,6 @@
 
             'form.client_id': function(val, old_val) {
                 this.loadCarePlans(val, old_val);
-                this.cgMode = 'client';
                 this.loadAllyPctFromClient(val);
                 this.loadCaregivers();
             },

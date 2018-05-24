@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ShiftActivity
@@ -19,8 +20,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereShiftId($value)
  * @mixin \Eloquent
  */
-class ShiftActivity extends Model
+class ShiftActivity extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'shift_activities';
     public $timestamps = false;
     protected $guarded = ['id'];

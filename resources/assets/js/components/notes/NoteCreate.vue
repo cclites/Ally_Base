@@ -10,7 +10,7 @@
                                 v-model="form.caregiver_id"
                         >
                             <option value="">--Select--</option>
-                            <option :value="caregiver.id" v-for="caregiver in business.caregivers">{{ caregiver.name }}</option>
+                            <option :value="caregiver.id" v-for="caregiver in business.caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                     </b-form-group>
@@ -21,7 +21,7 @@
                                 v-model="form.client_id"
                         >
                             <option value="">--Select--</option>
-                            <option :value="client.id" v-for="client in business.clients">{{ client.name }}</option>
+                            <option :value="client.id" v-for="client in business.clients" :key="client.id">{{ client.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_id" text="Select a client."></input-help>
                     </b-form-group>
@@ -51,7 +51,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-note" variant="success" type="submit">Create</b-button>
+                    <submit-button :submitting="submitting" variant="success" type="submit">Create</submit-button>
                 </b-col>
             </b-row>
         </form>
@@ -70,13 +70,19 @@
                     client_id: '',
                     body: null,
                     tags: null
-                })
+                }),
+                submitting: false,
             }
         },
 
         methods: {
-            saveNote() {
-                this.form.post('/notes');
+            async saveNote() {
+                this.submitting = true;
+                try {
+                    await this.form.post('/notes');
+                }
+                catch (err) {}
+                this.submitting = false;
             }
         }
 

@@ -4,6 +4,7 @@ class AxiosResponseHandler {
         this.error = {};
         this.formErrors = {};
         this.response = {};
+        this.redirects = true;
     }
 
     handleResponse(response, alert = true) {
@@ -58,6 +59,11 @@ class AxiosResponseHandler {
     }
 
     hasRedirect() {
+        if (!this.redirects) {
+            console.log('redirects disabled');
+            return false;
+        }
+
         let data = this.getResponseData();
         return data.hasOwnProperty('redirect');
     }

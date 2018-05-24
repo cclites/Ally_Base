@@ -162,7 +162,7 @@
                 <b-col lg="12">
                     <b-form-group label="Position applying for?" class="mt-2">
                         <b-form-radio-group id="caregiver_position_id" v-model="form.caregiver_position_id" name="radioSubComponent">
-                            <b-form-radio v-for="position in positions" :value="position.id">{{ position.name }}</b-form-radio>
+                            <b-form-radio v-for="position in positions" :value="position.id" :key="position.id">{{ position.name }}</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
                 </b-col>
@@ -187,19 +187,19 @@
                     </b-form-group>
                     <b-form-group label="Preferred Days">
                         <b-form-checkbox-group id="preferred_days" v-model="form.preferred_days">
-                            <b-form-checkbox v-for="day in days" :value="day">{{ day }}</b-form-checkbox>
+                            <b-form-checkbox v-for="day in days" :value="day" :key="day">{{ day }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
                     <b-form-group label="Preferred Shift Length">
                         <b-form-checkbox-group id="preferred_shift_length" v-model="form.preferred_shift_length">
-                            <b-form-checkbox v-for="preferred_shift in shifts" :value="preferred_shift">{{ preferred_shift }}</b-form-checkbox>
+                            <b-form-checkbox v-for="preferred_shift in shifts" :value="preferred_shift" :key="preferred_shift.id">{{ preferred_shift }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Preferred Times">
                         <b-form-checkbox-group id="preferred_times" v-model="form.preferred_times">
-                            <b-form-checkbox v-for="time in times" :value="time">{{ time }}</b-form-checkbox>
+                            <b-form-checkbox v-for="time in times" :value="time" :key="time">{{ time }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
                     <b-form-group label="Work Weekends">
@@ -210,7 +210,7 @@
                     </b-form-group>
                     <b-form-group label="How many miles will you travel for an assignment?">
                         <b-form-checkbox-group id="travel_radius" v-model="form.travel_radius">
-                            <b-form-checkbox v-for="distance in travelRadius" :value="distance">{{ distance }}</b-form-checkbox>
+                            <b-form-checkbox v-for="distance in travelRadius" :value="distance" :key="distance">{{ distance }}</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
                 </b-col>
@@ -405,7 +405,7 @@
             </b-row>
             <hr>
             <template v-for="i in 3">
-                <b-row>
+                <b-row :key="i">
                     <b-col lg="4">
                         <b-form-group label="Employer Name">
                             <b-form-input :v-model="'form.employer_'+i+'_name'"></b-form-input>
@@ -530,7 +530,7 @@
                 <b-col>
                     <div class="h5">How did you hear about us?</div>
                     <b-form-checkbox-group id="heard_about" v-model="form.heard_about">
-                        <b-form-checkbox v-for="about in heardAbout" :value="about">{{ about }}</b-form-checkbox>
+                        <b-form-checkbox v-for="about in heardAbout" :value="about" :key="about">{{ about }}</b-form-checkbox>
                     </b-form-checkbox-group>
                 </b-col>
             </b-row>

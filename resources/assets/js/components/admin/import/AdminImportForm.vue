@@ -14,6 +14,7 @@
             <label for="provider">Import Type: </label>
             <select id="provider" v-model="provider" class="form-control">
                 <option value="acorn">Acorn Format</option>
+                <option value="louisville">Louisville Format</option>
                 <option value="sarasota">Sarasota Format</option>
             </select>
         </div>
@@ -21,8 +22,13 @@
         <div class="form-group">
             <label for="business_id">Business: </label>
             <select id="business_id" v-model="businessId" class="form-control">
-                <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
             </select>
+        </div>
+
+        <div class="form-group">
+            <label>Importer Description:</label>
+            <pre>{{ importerDescription }}</pre>
         </div>
 
         <button type="submit" class="btn btn-info" :disabled="submitting">
@@ -47,6 +53,7 @@
                 file: null,
                 provider: "",
                 submitting: false,
+                importerDescription: "",
             }
         },
 
@@ -75,6 +82,14 @@
                     //
                 }
                 this.submitting = false;
+            },
+
+            async loadDescription() {
+                this.importerDescription = "";
+                if (this.provider) {
+                    const response = await axios.get('/admin/import/description/' + this.provider);
+                    this.importerDescription = response.data.description;
+                }
             }
         },
 
@@ -85,6 +100,10 @@
 
             localName(val) {
                 this.$emit('update:name', val);
+            },
+
+            provider() {
+                this.loadDescription();
             }
         }
     }

@@ -23,7 +23,7 @@
                             v-model="business_id"
                             >
                             <option value="">--All Providers--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">Generate Report</b-button>
                     </b-form>
@@ -31,11 +31,19 @@
             </b-col>
         </b-row>
         <b-row>
+            <b-col>
+                <strong>Successful Charges: </strong> {{ moneyFormat(successfulTotal) }} &nbsp;
+                <strong>Failed Charges: </strong> {{ moneyFormat(failedTotal) }} &nbsp;
+                <strong>Overall: </strong> {{ moneyFormat(overallTotal) }}
+            </b-col>
             <b-col class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
-        <div class="table-responsive">
+
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-if="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -62,7 +70,10 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
 
         props: {},
 
@@ -76,6 +87,7 @@
                 business_id: "",
                 businesses: [],
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'id',
@@ -127,6 +139,26 @@
             }
         },
 
+        computed: {
+            successfulTotal() {
+                return this.items.reduce(function(carry, item) {
+                    if (!item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                }, 0);
+            },
+            failedTotal() {
+                return this.items.reduce(function(carry, item) {
+                    if (item.success) return carry;
+                    return carry + parseFloat(item.amount);
+                }, 0);
+            },
+            overallTotal() {
+                return this.items.reduce(function(carry, item) {
+                    return carry + parseFloat(item.amount);
+                }, 0);
+            }
+        },
+
         mounted() {
             this.loadBusinesses();
             this.loadItems();
@@ -137,6 +169,7 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                this.loading = true;
                 axios.get('/admin/charges?json=1&business_id=' + this.business_id + '&start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.items = response.data.map(function(item) {
@@ -147,6 +180,10 @@
                             item.status = (item.transaction && item.transaction.last_history) ? item.transaction.last_history.status : '';
                             return item;
                         });
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
             markSuccessful(charge) {

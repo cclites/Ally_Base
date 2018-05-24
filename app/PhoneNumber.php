@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\PhoneNumber
@@ -30,8 +31,10 @@ use libphonenumber\PhoneNumberUtil;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereUserId($value)
  * @mixin \Eloquent
  */
-class PhoneNumber extends Model
+class PhoneNumber extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     const DEFAULT_REGION = 'US';
     const DEFAULT_FORMAT = PhoneNumberFormat::NATIONAL;
 

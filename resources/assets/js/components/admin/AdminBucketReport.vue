@@ -19,57 +19,70 @@
                         </date-picker>
                         &nbsp;&nbsp;
                         <b-button @click="loadItems()" variant="info" :disabled="processing">
-                            <i class="fa fa-spinner fa-spin" v-show="processing"></i> Generate Bucket Report
+                            <i class="fa fa-spinner fa-spin" v-show="processing"></i> Generate Bank Report
                         </b-button>
                     </b-form>
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col sm="12">
-                <b>This date range includes {{ totalItems }} deposits for a total amount of {{ numberFormat(totalAmount) }}.</b>
+
+        <loading-card v-show="! neverLoaded && loading"></loading-card>
+
+        <b-row v-show="neverLoaded">
+            <b-col lg="12">
+                <b-card class="text-center text-muted">
+                    Select dates and press Generate Report
+                </b-card>
             </b-col>
         </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-                <template slot="payment_sum" scope="row">
-                    <a href="javascript:void(0);" v-b-popover.focus.html="popoverContents(row)" title="Payment Breakdown">
-                        {{ row.item.payment_sum }} <i class="fa fa-external-link"></i>
-                    </a>
-                </template>
-                <template slot="show_details" scope="row">
-                    <b-btn @click.stop="row.toggleDetails" size="sm">
-                        Deposit Payment Breakdown
-                    </b-btn>
-                </template>
-                <template slot="row-details" scope="row">
-                    <div class="table-responsive">
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th>Payment Date (or Status)</th>
-                                <th>Deposited Amount</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="(value,date) in row.item.payment_dates">
-                                <td>{{ date }}</td>
-                                <td>{{ numberFormat(value) }}</td>
-                                <td>
-                                    <b-btn v-if="date === 'missing' || date === 'failed'" @click="toggleDate(row.item[date])" size="sm">View {{ date }} shifts</b-btn>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </template>
-            </b-table>
+
+        <div v-show="! neverLoaded && ! loading">
+            <b-row>
+                <b-col sm="12">
+                    <b>This date range includes {{ totalItems }} deposits for a total amount of {{ numberFormat(totalAmount) }}.</b>
+                </b-col>
+            </b-row>
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                    <template slot="payment_sum" scope="row">
+                        <a href="javascript:void(0);" v-b-popover.focus.html="popoverContents(row)" title="Payment Breakdown">
+                            {{ row.item.payment_sum }} <i class="fa fa-external-link"></i>
+                        </a>
+                    </template>
+                    <template slot="show_details" scope="row">
+                        <b-btn @click.stop="row.toggleDetails" size="sm">
+                            Deposit Payment Breakdown
+                        </b-btn>
+                    </template>
+                    <template slot="row-details" scope="row">
+                        <div class="table-responsive">
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th>Payment Date (or Status)</th>
+                                    <th>Deposited Amount</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(value,date) in row.item.payment_dates">
+                                    <td>{{ date }}</td>
+                                    <td>{{ numberFormat(value) }}</td>
+                                    <td>
+                                        <b-btn v-if="date === 'missing' || date === 'failed'" @click="toggleDate(row.item[date])" size="sm">View {{ date }} shifts</b-btn>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </b-table>
+            </div>
         </div>
 
         <b-modal id="dateShiftsModal" title="Shift List Drilldown" v-model="dateShiftsModal" size="lg">
@@ -124,7 +137,8 @@
                 sortDesc: true,
                 start_date: moment().startOf('isoweek').subtract(7, 'days').format('MM/DD/YYYY'),
                 end_date: moment().format('MM/DD/YYYY'),
-                processing: false,
+                loading: false,
+                neverLoaded: true,
                 items: [],
                 fields: [
                     {
@@ -134,23 +148,23 @@
                     },
                     {
                         key: 'payment_count',
-                        label: 'Payment Count',
+                        label: 'Incoming Count',
                         sortable: true,
                     },
                     {
                         key: 'payment_sum',
-                        label: 'Payment Sum',
+                        label: 'Incoming Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
                     {
                         key: 'deposit_count',
-                        label: 'Deposit Count',
+                        label: 'Outgoing Count',
                         sortable: true,
                     },
                     {
                         key: 'deposit_sum',
-                        label: 'Deposit Sum',
+                        label: 'Outgoing Sum',
                         sortable: true,
                         formatter: this.numberFormat
                     },
@@ -181,11 +195,16 @@
 
         methods: {
             loadItems() {
-                this.processing = true;
+                this.loading = true;
                 axios.get('/admin/reports/bucket/?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.items = response.data;
-                        this.processing = false;
+                        this.loading = false;
+                        this.neverLoaded = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
+                        this.neverLoaded = false;
                     });
             },
             toggleDate(shifts) {

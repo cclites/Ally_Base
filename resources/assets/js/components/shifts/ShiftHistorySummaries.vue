@@ -22,7 +22,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="item in clientCharges">
+                            <tr v-for="item in clientCharges" :key="item.id">
                                 <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                                 <td>{{ item.hours }}</td>
                                 <td v-if="admin">{{ moneyFormat(preAllyTotal(item)) }}</td>
@@ -65,7 +65,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="item in caregiverPayments">
+                            <tr v-for="item in caregiverPayments" :key="item.id">
                                 <td><a :href="'/business/caregivers/' + item.id">{{ item.name }}</a></td>
                                 <td>{{ item.hours }}</td>
                                 <td>{{ moneyFormat(item.amount) }}</td>

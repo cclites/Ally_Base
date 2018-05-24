@@ -7,6 +7,7 @@ use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 
 /**
@@ -53,8 +54,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereWeekday($value)
  * @mixin \Eloquent
  */
-class Schedule extends Model
+class Schedule extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $table = 'schedules';
     protected $guarded = ['id'];
     protected $dates = ['starts_at'];
@@ -75,6 +78,14 @@ class Schedule extends Model
             $builder->has('client');
         });
     }
+
+    ///////////////////////////////////////
+    /// Schedule Statuses
+    ///////////////////////////////////////
+
+    const OK = 'OK';
+    const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
+    const CLIENT_CANCELED = 'CLIENT_CANCELED';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -140,6 +151,21 @@ class Schedule extends Model
             $value->setTimezone(new \DateTimeZone($this->business->timezone));
         }
         $this->attributes['starts_at'] = $value;
+    }
+
+    /**
+     * Returns the first available connected shift that is currently
+     * clocked in.
+     *
+     * @return bool
+     */
+    public function getClockedInShiftAttribute()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isClockedIn()) return $shift;
+        }
+        return null;
     }
 
     ///////////////////////////////////////////

@@ -38,7 +38,7 @@
                         header-bg-variant="info"
                 >
                     <table>
-                        <tr v-for="item of transaction.history">
+                        <tr v-for="item of transaction.history" :key="item.id">
                             <td>{{ formatDateTimeFromUTC(item.created_at) }}</td>
                             <td v-html="getIcon(item.status)"></td>
                             <td>{{ item.action }}</td>
@@ -233,6 +233,9 @@
                         else {
                             this.shifts = [];
                         }
+                        this.loading = false;
+                    })
+                    .catch(e => {
                         this.loading = false;
                     });
             },

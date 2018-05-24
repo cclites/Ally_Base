@@ -1,42 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Caregivers;
 
 use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\UnverifiedLocationException;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Rules\SignedLTCI;
 use App\Schedule;
-use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Scheduling\ScheduleAggregator;
 use App\Shifts\ClockIn;
 use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 use App\Signature;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 
-class ShiftController extends Controller
+class ShiftController extends BaseController
 {
-    /**
-     * @return \App\Caregiver
-     */
-    protected function caregiver()
+    public function index(Schedule $schedule = null)
     {
-        return auth()->user()->role;
-    }
-
-    public function index(ScheduleAggregator $aggregator, $schedule_id = null)
-    {
-        if ($this->caregiver()->isClockedIn()) {
-            return redirect()->route('clocked_in');
-        }
-        $events = $this->getRecentEvents($aggregator)->toArray();
-        return view('caregivers.clock_in', compact('events', 'schedule_id'));
+        return view('caregivers.clock_in', compact('schedule'));
     }
 
     public function clockedIn()
@@ -44,17 +29,26 @@ class ShiftController extends Controller
         if (!$this->caregiver()->isClockedIn()) {
             return redirect()->route('shift.index');
         }
+
+        // Get the active shift
         $shift = $this->caregiver()->getActiveShift();
+
+        // Load the client relationship
+        $shift->load('client');
+
+        // Load the available activities
         $activities = $shift->business->allActivities();
+
+        // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
         $notes =  '';
         if ($shift && $shift->schedule) {
-            $shift->load('client');
             $notes = $shift->schedule->notes;
             if ($shift->schedule->carePlan) {
                 $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
             }
         }
+
         return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
     }
 
@@ -96,40 +90,64 @@ class ShiftController extends Controller
         }
 
         $data = $request->validate([
-            'schedule_id' => 'exists:schedules,id',
-            'latitude' => 'numeric|nullable|required_unless:manual,1',
-            'longitude' => 'numeric|nullable|required_unless:manual,1',
-            'manual' => 'nullable',
+            'client_id' => 'required|exists:clients,id',
+            'schedule_id' => 'nullable|exists:schedules,id',
+            'latitude' => 'numeric|nullable',
+            'longitude' => 'numeric|nullable',
         ], [
-            'schedule_id.exists' => 'You must select a valid shift from the drop down.',
-            'latitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
-            'longitude.required_unless' => 'Location services must be turned on or you must manually clock in.',
+            'schedule_id.exists' => 'The selected shift is unavailable.  Please refresh and try again.',
+            'client_id.exists' => 'The selected client is unavailable.  Please refresh and try again.',
         ]);
 
         try {
-            $schedule = Schedule::find($request->input('schedule_id'));
             $clockIn = new ClockIn($this->caregiver());
-            if (!empty($data['manual'])) $clockIn->setManual();
             $clockIn->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
-            $shift = $clockIn->clockIn($schedule);
+            $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
             if ($shift) {
                 return new SuccessResponse('You have successfully clocked in.');
             }
             return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
         }
         catch (UnverifiedLocationException $e) {
-            return new ErrorResponse(400, $e->getMessage() . ' You will need to manually clock in.');
+            // Create an unverified/manual shift
+            $clockIn->setManual(true);
+            $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
+            if ($shift) {
+                return new SuccessResponse('You have successfully clocked in.');
+            }
+            return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
         }
         catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
         }
     }
 
+    /**
+     * Complete the clock in depending on whether a schedule is provided
+     *
+     * @param \App\Shifts\ClockIn $clockIn
+     * @param int|null $scheduleId
+     * @param int|null $clientId
+     * @return \App\Shift|bool|false
+     * @throws \App\Exceptions\InvalidScheduleParameters
+     * @throws \App\Exceptions\UnverifiedLocationException
+     */
+    protected function completeClockIn(ClockIn $clockIn, $scheduleId = null, $clientId = null)
+    {
+        if ($scheduleId && $schedule = Schedule::find($scheduleId)) {
+            return $clockIn->clockIn($schedule);
+        }
+        if ($clientId && $client = Client::find($clientId)) {
+            return $clockIn->clockInWithoutSchedule($client->business, $client);
+        }
+        throw new \Exception('ShiftController: Missing client or schedule to clock into.');
+    }
+
     public function clockOut(Request $request)
     {
         if (!$this->caregiver()->isClockedIn()) {
             return new ErrorResponse(400, 'You are not currently clocked in.');
-            return redirect()->route('shift.index');
+//            return redirect()->route('shift.index');
         }
 
         $data = $request->validate([
@@ -137,12 +155,8 @@ class ShiftController extends Controller
             'mileage' => 'nullable|numeric|max:1000|min:0',
             'other_expenses' => 'nullable|numeric|max:1000|min:0',
             'other_expenses_desc' => 'nullable',
-            'latitude' => 'numeric|nullable|required_unless:manual,1',
-            'longitude' => 'numeric|nullable|required_unless:manual,1',
-            'manual' => 'nullable',
-        ], [
-            'latitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
-            'longitude.required_unless' => 'Location services must be turned on or you must manually clock out.',
+            'latitude' => 'numeric|nullable',
+            'longitude' => 'numeric|nullable',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -177,7 +191,6 @@ class ShiftController extends Controller
 
         try {
             $clockOut = new ClockOut($this->caregiver());
-            if (!empty($data['manual'])) $clockOut->setManual();
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
@@ -198,30 +211,22 @@ class ShiftController extends Controller
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
         }
         catch (UnverifiedLocationException $e) {
-            return new ErrorResponse(400, $e->getMessage() . ' You will need to manually clock in.');
+            $clockOut->setManual(true);
+            if ($clockOut->clockOut($shift)) {
+                return new SuccessResponse('You have successfully clocked out.');
+            }
+            return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
         }
         catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
         }
     }
 
-    protected function getRecentEvents(ScheduleAggregator $aggregator)
-    {
-        $start = new Carbon('-12 hours');
-        $end = new Carbon('+12 hours');
-        $schedules = $aggregator->where('caregiver_id', $this->caregiver()->id)
-                                ->getSchedulesBetween($start, $end)
-                                ->load('carePlan');
-
-        $events = new ScheduleEventsResponse($schedules);
-        return $events;
-    }
-
     /**
      * Returns single shift details for report details modal.
      *
      * @param Shift $shift
-     * @return void
+     * @return \Illuminate\Http\Response
      */
     public function shift(Shift $shift)
     {

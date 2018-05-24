@@ -5,7 +5,7 @@
                 <b-col lg="3">
                     <b-form-group label="Year">
                         <b-form-select v-model="selectedYear">
-                            <option v-for="year in years" :value="year">{{ year }}</option>
+                            <option v-for="year in years" :value="year" :key="year">{{ year }}</option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>

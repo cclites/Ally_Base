@@ -24,7 +24,7 @@
                             required
                             >
                             <option value="">--Select a Provider--</option>
-                            <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                            <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info">List Pending Deposits</b-button>
                         &nbsp;&nbsp;<b-button @click="processDeposits()" variant="danger" :disabled="processing">Process Deposits</b-button>
@@ -32,19 +32,24 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col sm="12">
-                <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
-            </b-col>
-        </b-row>
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-            >
-            </b-table>
+
+        <loading-card v-if="isLoading"></loading-card>
+
+        <div v-if="! isLoading">
+            <b-row>
+                <b-col sm="12">
+                    <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+                </b-col>
+            </b-row>
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                >
+                </b-table>
+            </div>
         </div>
     </b-card>
 </template>
@@ -68,6 +73,7 @@
                 deposits: [],
                 missingAccounts: [],
                 processing: false,
+                loading: 2,
                 fields: [
                     {
                         key: 'deposit_type',
@@ -114,6 +120,9 @@
                 return this.deposits.reduce((previous, current) => {
                     return previous + parseFloat(current.amount);
                 }, 0);
+            },
+            isLoading() {
+                return this.loading < 2;
             }
         },
 
@@ -122,16 +131,25 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                this.loading = 0;
                 axios.get('/admin/deposits/pending/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
                         this.deposits = response.data.map(function(item) {
                             item.name = (item.deposit_type == 'business') ? item.business.name : item.caregiver.nameLastFirst;
                             return item;
                         });
+                        this.loading++;
+                    })
+                    .catch(e => {
+                        this.loading++;
                     });
                 axios.get('/admin/deposits/missing_accounts/' + this.business_id)
                     .then(response => {
                         this.missingAccounts = response.data;
+                        this.loading++;
+                    })
+                    .catch(e => {
+                        this.loading++;
                     });
             },
             processDeposits()

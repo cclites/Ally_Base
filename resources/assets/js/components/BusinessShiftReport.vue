@@ -134,6 +134,7 @@
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
     import AddShiftModal from "./modals/AddShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
+    import LocalStorage from "../mixins/LocalStorage";
 
     export default {
         components: {
@@ -144,7 +145,7 @@
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
+        mixins: [FormatsDates, FormatsNumbers, BusinessSettings, LocalStorage],
 
         props: {
             admin: Number,
@@ -202,6 +203,7 @@
                 urlPrefix: '/business/reports/data/',
                 loaded: -1,
                 charge_status: '',
+                localStoragePrefix: 'shift_report_',
             }
         },
 
@@ -475,22 +477,6 @@
                     float = float.replace(',', '');
                 }
                 return parseFloat(float);
-            },
-
-            getLocalStorage(item) {
-                let val = localStorage.getItem('shift_report_' + item);
-                if (typeof(val) === 'string') {
-                    if (val.toLowerCase() === 'null' || val.toLowerCase() === '') return null;
-                    if (val.toLowerCase() === 'false') return false;
-                    if (val.toLowerCase() === 'true') return true;
-                }
-                return val;
-            },
-
-            setLocalStorage(item, value) {
-                if (typeof(Storage) !== "undefined") {
-                    localStorage.setItem('shift_report_' + item, value);
-                }
             },
 
             setInitialFields() {

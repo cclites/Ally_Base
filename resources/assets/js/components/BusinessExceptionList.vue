@@ -33,6 +33,8 @@
                     return [];
                 }
             },
+            'title': String,
+            'hideAcknowledged': Number,
         },
 
         data() {
@@ -47,12 +49,16 @@
                 fields: [
                     {
                         key: 'date',
-                        label: 'Date',
                         sortable: true,
                     },
                     {
+                        key: 'reference_type',
+                        label: "Type",
+                        sortable: true,
+                        formatter: this.formatType,
+                    },
+                    {
                         key: 'title',
-                        label: 'Title',
                         sortable: true,
                     },
                     {
@@ -75,6 +81,9 @@
         },
 
         mounted() {
+            if (this.hideAcknowledged) {
+                Vue.delete(this.fields, 3);
+            }
             this.totalRows = this.items.length;
         },
 
@@ -87,6 +96,10 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            },
+
+            formatType(str) {
+                return str.replace("App\\", "");
             }
         }
     }

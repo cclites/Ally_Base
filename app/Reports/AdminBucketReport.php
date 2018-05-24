@@ -85,6 +85,9 @@ class AdminBucketReport extends BaseReport
             }
         }
 
+        // Sort paymentDates by key desc
+        krsort($paymentDates);
+
         return [
             'date' => $date,
             'deposit_count' => $deposits->count(),

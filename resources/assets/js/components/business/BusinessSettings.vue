@@ -38,19 +38,38 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
                         </b-form-group>
+
+                        <b-form-group label="Allow Manual Timesheets" label-for="allows_manual_shifts">
+                            <b-form-select id="allows_manual_shifts"
+                                           v-model="businessSettings.allows_manual_shifts"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="allows_manual_shifts" text="Allow Caregivers to submit shift information manually."></input-help>
+                        </b-form-group>
+
+                        <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions">
+                            <b-form-select id="timesheet_exceptions"
+                                           v-model="businessSettings.timesheet_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
                                            tabindex="2"
-                                           disabled="true">
+                                           disabled>
                                 <option value="1">Enabled</option>
                                 <option value="0">Disabled</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="scheduling" text="Enable or disable shift scheduling functionality"></input-help>
                         </b-form-group>
-
                         <b-form-group label="Calendar Default View" label-for="calendar_default_view">
                             <b-form-select id="calendar_default_view"
                                            tabindex="3"
@@ -58,16 +77,36 @@
                                 <option value="month">Month</option>
                                 <option value="agendaWeek">Week</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the Business Schedule"></input-help>
+                            <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the schedule"></input-help>
                         </b-form-group>
-                        <b-form-group label="Default Caregiver Filter" label-for="calendar_caregiver_filter">
+                        <b-form-group label="Default Schedule Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select id="calendar_caregiver_filter"
                                            tabindex="4"
                                            v-model="businessSettings.calendar_caregiver_filter">
                                 <option value="all">All Caregivers</option>
                                 <option value="unassigned">Unassigned Shifts</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the Business Schedule"></input-help>
+                            <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the schedule"></input-help>
+                            <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
+                        </b-form-group>
+                        <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters">
+                            <b-form-select id="calendar_remember_filters"
+                                           v-model="businessSettings.calendar_remember_filters"
+                                           tabindex="2">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the schedule."></input-help>
+                        </b-form-group>
+
+                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-select id="location_exceptions"
+                                           v-model="businessSettings.location_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -108,7 +147,7 @@
                         </b-form-group>
                         <b-form-group label="Timezone">
                             <b-form-select id="timezone" v-model="businessSettings.timezone" tabindex="13">
-                                <option v-for="timezone in timezones" :value="timezone">{{ timezone }}</option>
+                                <option v-for="timezone in timezones" :value="timezone" :key="timezone">{{ timezone }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-btn @click="update" variant="info">
@@ -166,6 +205,7 @@
                     mileage_rate: this.business.mileage_rate,
                     calendar_default_view: this.business.calendar_default_view,
                     calendar_caregiver_filter: this.business.calendar_caregiver_filter,
+                    calendar_remember_filters: this.business.calendar_remember_filters,
                     phone1: this.business.phone1,
                     phone2: this.business.phone2,
                     address1: this.business.address1,
@@ -176,7 +216,10 @@
                     country: this.business.country,
                     timezone: this.business.timezone,
                     auto_confirm: this.business.auto_confirm,
-                    ask_on_confirm: this.business.ask_on_confirm
+                    ask_on_confirm: this.business.ask_on_confirm,
+                    allows_manual_shifts: this.business.allows_manual_shifts,
+                    location_exceptions: this.business.location_exceptions,
+                    timesheet_exceptions: this.business.timesheet_exceptions,
                 }),
                 timezones: [
                     "America/New_York",

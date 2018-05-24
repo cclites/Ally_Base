@@ -6,9 +6,11 @@ namespace App;
 use App\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
+use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CreditCard
@@ -39,9 +41,11 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
-class CreditCard extends Model implements ChargeableInterface
+class CreditCard extends Model implements ChargeableInterface, Auditable
 {
     use ChargedTransactionsTrait;
+    use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'credit_cards';
     protected $guarded = ['id'];
@@ -167,5 +171,19 @@ class CreditCard extends Model implements ChargeableInterface
     public function persistChargeable()
     {
         return $this->save();
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        $fee = config('ally.credit_card_fee');
+        if (strtolower($this->type) === 'amex') {
+            return (float) bcadd($fee, '0.01', 4);
+        }
+        return (float) $fee;
     }
 }

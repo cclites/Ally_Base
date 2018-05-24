@@ -11,7 +11,7 @@
                     <b-input-group class="w-25 mr-2">
                         <b-form-select v-model="search.caregiver_id">
                             <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">
                                 {{ caregiver.nameLastFirst }}
                             </option>
                         </b-form-select>
@@ -25,32 +25,35 @@
             </b-col>
         </b-row>
 
-        <loading-card v-if="loading" />
-        <div class="table-responsive" v-else>
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
-            >
-                <template scope="total">
+        <loading-card v-show="loading"></loading-card>
+        
+        <div v-show="! loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                        :items="items"
+                        :fields="fields"
+                        :current-page="currentPage"
+                        :per-page="perPage"
+                        :filter="filter"
+                        :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
+                        @filtered="onFiltered"
+                >
+                    <template scope="total">
 
-                </template>
-            </b-table>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
         </div>
-
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
     </b-card>
 </template>
 

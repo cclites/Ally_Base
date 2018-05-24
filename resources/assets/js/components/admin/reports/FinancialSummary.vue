@@ -16,19 +16,22 @@
                     <b-input-group class="mx-1">
                         <b-form-select v-model="filters.provider">
                             <option value="">All Providers</option>
-                            <option v-for="provider in providers" :value="provider.id">{{ provider.name }}</option>
+                            <option v-for="provider in providers" :value="provider.id" :key="provider.id">{{ provider.name }}</option>
                         </b-form-select>
                     </b-input-group>
                     <div>
-                        <b-btn @click="fetchData()" variant="info" :disabled="fetchingData">
+                        <b-btn @click="fetchData()" variant="info" :disabled="loading">
                             Search
-                            <i class="fa fa-spin fa-spinner" v-show="fetchingData"></i>
+                            <i class="fa fa-spin fa-spinner" v-show="loading"></i>
                         </b-btn>
                     </div>
                 </b-button-toolbar>
             </b-card>
             <b-card title="Payment Types">
-                <b-table :items="items" :fields="fields" foot-clone>
+
+                <loading-card v-show="loading"></loading-card>
+                
+                <b-table v-show="! loading" :items="items" :fields="fields" foot-clone>
                     <template slot="FOOT_name" scope="data"></template>
                     <template slot="FOOT_total_charges" scope="data">
                         {{ moneyFormat(total) }}
@@ -66,7 +69,7 @@
                     start_date: '',
                     end_date: ''
                 },
-                fetchingData: false,
+                loading: false,
                 breakdown: [],
                 breakdownFields: [
                     'label',
@@ -113,22 +116,21 @@
             }
         },
         
-        created() {
-            this.fetchData();
-        },
-        
         mounted() {
-        
+            this.fetchData();
         },
         
         methods: {
             fetchData() {
-                this.fetchingData = true;
+                this.loading = true;
                 axios.post('/admin/reports/finances', this.filters)
                     .then(response => {
                         this.items = response.data.stats;
-                        this.fetchingData = false;
+                        this.loading = false;
                     })
+                    .catch(e => {
+                        this.loading = false;
+                    });
             }
         },
         

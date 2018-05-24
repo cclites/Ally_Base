@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ScheduleException
@@ -20,8 +21,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleException whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class ScheduleException extends Model
+class ScheduleException extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+
     protected $fillable = ['date'];
 
     ///////////////////////////////////////////

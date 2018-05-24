@@ -22,11 +22,11 @@ class PaymentHistoryController extends Controller
         $payment_details = $this->getPaymentDetails($id);
 
         switch (auth()->user()->role_type) {
-            case 'office_user':
-                $print_url = '/business/clients/payments/' . $id . '/print';
-                break;
             case 'client':
                 $print_url = '/payment-history/' . $id . '/print';
+                break;
+            default:
+                $print_url = '/business/clients/payments/' . $id . '/print';
                 break;
         }
 

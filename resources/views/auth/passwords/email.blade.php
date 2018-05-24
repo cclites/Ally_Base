@@ -38,6 +38,7 @@
                                 <button type="submit" class="btn btn-info">
                                     Send Password Reset Link
                                 </button>
+                                <a href="{{ route('login') }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </div>
                     </form>

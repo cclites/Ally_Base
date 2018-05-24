@@ -77,7 +77,7 @@ class TelefonyBase extends TestCase
             'business_id' => $this->business->id,
             'client_id' => $this->client->id,
             'caregiver_id' => $this->caregiver->id,
-            'checked_in' => true,
+            'checked_in_method' => Shift::METHOD_TELEPHONY,
             'checked_in_time' => Carbon::now()->subHour(),
             'checked_in_number' => '1234567890',
             'checked_in_latitude' => null,

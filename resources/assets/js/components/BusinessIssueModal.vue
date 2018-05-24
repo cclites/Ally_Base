@@ -57,7 +57,9 @@
         },
 
         data() {
-            return {}
+            return {
+                'form': new Form({}),
+            }
         },
 
         computed: {
@@ -69,19 +71,21 @@
                     this.$emit('input', value);
                 }
             },
-            form() {
-                return new Form({
-                    caregiver_injury: (this.selectedItem) ? this.selectedItem.caregiver_injury : 0,
-                    client_injury: (this.selectedItem) ? this.selectedItem.client_injury : 0,
-                    comments: (this.selectedItem) ? this.selectedItem.comments : '',
-                });
-            },
             title() {
                 return (this.selectedItem) ? 'Edit Issue' : 'Create Issue';
             }
         },
 
         methods: {
+            makeForm() {
+                console.log('Issue modal: makeForm called');
+                this.form = new Form({
+                    caregiver_injury: (this.selectedItem) ? this.selectedItem.caregiver_injury : 0,
+                    client_injury: (this.selectedItem) ? this.selectedItem.client_injury : 0,
+                    comments: (this.selectedItem) ? this.selectedItem.comments : '',
+                });
+            },
+
             save() {
                 if (!this.shiftId) {
                     return this.updateItems();
@@ -130,5 +134,11 @@
             }
 
         },
+
+        watch: {
+            value() {
+                this.makeForm();
+            }
+        }
     }
 </script>

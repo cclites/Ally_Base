@@ -101,3 +101,23 @@ function is_admin_now() {
 function is_office_user() {
     return Auth::user()->role_type === 'office_user';
 }
+
+/**
+ * Get the active business object or return null.
+ * 
+ * @return string
+ */
+if (! function_exists('activeBusiness')) {
+    function activeBusiness() {
+        if (Auth::check() && Auth::user()->role_type === 'caregiver') {
+            return Auth::user()->role->businesses->first();
+        }
+
+        $activeBusiness = app()->make(\App\ActiveBusiness::class);
+        if (!$business = $activeBusiness->get()) {
+            return null;
+        }
+
+        return $business;
+    }
+}

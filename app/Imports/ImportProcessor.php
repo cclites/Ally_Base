@@ -22,6 +22,21 @@ interface ImportProcessor
     function handle();
 
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription();
+
+    /**
+     * Determine if the row reflects a valid shift, or if it should be skipped (ex. Summary or Total row)
+     *
+     * @param $rowNo
+     * @return bool
+     */
+    function skipRow($rowNo);
+
+    /**
      * Get the caregiver name in a "Last, First" format
      *
      * @param $rowNo

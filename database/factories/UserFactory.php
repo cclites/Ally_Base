@@ -64,7 +64,6 @@ $factory->state(\App\Caregiver::class, 'w9', function(Faker $faker) {
         'w9_name' => $user_data['firstname'] . ' ' . $user_data['lastname'],
         'w9_business_name' => $faker->company,
         'w9_tax_classification' => $tax_classifications->pluck('value')->random(),
-        'w9_ssn' => $ssn,
         'w9_address' => $address->address1,
         'w9_city_state_zip' => $address->city . ' ' . $address->state . ' ' . $address->zip
     ]);

@@ -8,6 +8,7 @@
         "php": ">=7.0.0",
         "barryvdh/laravel-snappy": "^0.4.0",
         "bizhub/impersonate": "^0.2.0",
+        "doctrine/dbal": "^2.5",
         "fideloper/proxy": "~3.3",
         "giggsey/libphonenumber-for-php": "^8.8",
         "h4cc/wkhtmltoimage-amd64": "0.12.x",
@@ -16,10 +17,12 @@
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "^2.1",
+        "owen-it/laravel-auditing": "^6.1",
         "rlanvin/php-rrule": "^1.6",
         "s-ichikawa/laravel-sendgrid-driver": "^2.0",
         "tplaner/when": "^2.1",
-        "twilio/sdk": "^5.14"
+        "twilio/sdk": "^5.14",
+        "ua-parser/uap-php": "^3.5"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "dev-master",

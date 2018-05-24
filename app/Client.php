@@ -5,17 +5,20 @@ namespace App;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;
+use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\HasAllyFeeTrait;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Client
@@ -97,10 +100,12 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface, Auditable
 {
     use IsUserRole, Notifiable;
     use \App\Traits\HasPaymentHold;
+    use HasAllyFeeTrait;
+    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -305,15 +310,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->getAllyPercentage();
     }
 
-    /**
-     * @param $method
-     * @return float
-     */
-    public function getAllyPercentage($method = null)
-    {
-        return AllyFeeCalculator::getPercentage($this, $method);
-    }
-
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -373,7 +369,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public function clearFutureSchedules()
     {
         $this->schedules()
-             ->where('starts_at', '>', Carbon::now())
+             ->where('starts_at', '>=', Carbon::today())
+             ->doesntHave('shifts')
              ->delete();
     }
 
@@ -467,5 +464,28 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->allTransactionsQuery()
                     ->orderBy('created_at')
                     ->get();
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        if ($this->fee_override) {
+            return (float) $this->fee_override;
+        }
+
+        if ($this->defaultPayment) {
+            return $this->defaultPayment->getAllyPercentage();
+        }
+
+        if ($this->backupPayment) {
+            return $this->backupPayment->getAllyPercentage();
+        }
+
+        // Default to CC fee
+        return (float) config('ally.credit_card_fee');
     }
 }

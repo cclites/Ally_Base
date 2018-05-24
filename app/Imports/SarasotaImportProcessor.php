@@ -7,6 +7,34 @@ use Carbon\Carbon;
 class SarasotaImportProcessor extends BaseImportProcessor
 {
     /**
+     * Return a text based description that summarizes what fields/techniques this import processor uses
+     *
+     * @return string
+     */
+    function getDescription()
+    {
+        return <<<END
+The Sarasota format uses the following column headers:
+
+CaregiverLastName
+CaregiverFirstName
+ClientLastName
+ClientFirstName
+Date + StartTime (clock in time)
+Hours with ModifierType === REG (Regular Hours)
+Hours with other ModifierType (OT Hours)
+RateOfPay (Caregiver Rate)
+TotalBillable / Hours (Provider Fee)
+No mileage or other expense calculations are included in this format.
+
+Overtime Multiplier: 1.0 (Not increased)
+
+Any rows without a caregiver name are skipped. (Total Rows)
+END;
+
+    }
+
+    /**
      * Do not adjust overtime rates for Sarasota
      *
      * @var float
@@ -90,7 +118,7 @@ class SarasotaImportProcessor extends BaseImportProcessor
     {
         $rate = (float) preg_replace('/[^\d.]/', '', $this->worksheet->getValue('RateOfPay', $rowNo));
         if ($overtime) {
-            return bcmul($rate, $this->overTimeMultiplier, 2);
+            return round(bcmul($rate, $this->overTimeMultiplier, 4), 2);
         }
         return $rate;
     }
@@ -132,4 +160,16 @@ class SarasotaImportProcessor extends BaseImportProcessor
         return 0.0;
     }
 
+    /**
+     * Determine if the row reflects a valid shift, or if it should be skipped (ex. Summary or Total row)
+     *
+     * @param $rowNo
+     * @return bool
+     */
+    function skipRow($rowNo)
+    {
+        // Skip if caregiver name is empty
+        $name = trim($this->getCaregiverName($rowNo));
+        return empty($name);
+    }
 }

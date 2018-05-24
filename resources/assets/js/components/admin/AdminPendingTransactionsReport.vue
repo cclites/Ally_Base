@@ -9,7 +9,7 @@
                             required
                     >
                         <option value="">All</option>
-                        <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                        <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
@@ -33,7 +33,7 @@
                 <b-form-group label="Filter by Type">
                     <b-form-select v-model="filters.type">
                         <option value="">All</option>
-                        <option v-for="type in types" :value="type">{{ upperFirst(type) }}</option>
+                        <option v-for="type in types" :value="type" :key="type">{{ upperFirst(type) }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>

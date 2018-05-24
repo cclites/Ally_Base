@@ -22,6 +22,15 @@ class ShiftImportController extends Controller
         return view('admin.import.shifts');
     }
 
+    public function getDescription($provider)
+    {
+        // Some file that will always exist
+        $dummyFile = public_path('css/style.css');
+
+        $import = ImportManager::open($provider, new Business(), $dummyFile);
+        return response()->json(['provider' => $provider, 'description' => $import->getDescription()]);
+    }
+
     public function process(Request $request)
     {
         $request->validate([

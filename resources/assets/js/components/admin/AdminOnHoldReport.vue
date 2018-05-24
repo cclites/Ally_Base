@@ -7,7 +7,7 @@
                         required
                 >
                     <option value="">--Filter by Provider--</option>
-                    <option v-for="business in businesses" :value="business.id">{{ business.name }}</option>
+                    <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
                 </b-form-select>
             </b-col>
             <b-col lg="6" class="text-right">
@@ -15,7 +15,9 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+
+        <div v-show="! loading" class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -46,6 +48,7 @@
                 sortDesc: false,
                 filter: null,
                 items: [],
+                loading: false,
                 fields: [
                     {
                         key: 'name',
@@ -96,9 +99,14 @@
         methods: {
 
             loadData() {
+                this.loading = true;
                 axios.get('/admin/reports/on_hold?json=1&business_id=' + this.businessId)
                     .then(response => {
                         this.items = response.data;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
                     });
             },
 
