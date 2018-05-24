@@ -93,4 +93,8 @@ export default {
     min-height: 38px;
     width: 90%;
 }
+
+.icon-control input::placeholder {
+    color: #88979e;
+}
 </style>
