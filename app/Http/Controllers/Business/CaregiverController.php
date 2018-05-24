@@ -42,7 +42,8 @@ class CaregiverController extends BaseController
         })->values();
 
         if ($request->expectsJson()) {
-            return $caregivers;
+            // Include active caregivers only by default through JSON request
+            return $caregivers->where('active', $request->input('active', 1));
         }
         return view('business.caregivers.index', compact('caregivers'));
     }

@@ -118,6 +118,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Client::class);
     }
 
+    public function activeClients()
+    {
+        return $this->clients()->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
     public function clientsUsingProviderPayment()
     {
         return $this->morphMany(Client::class, 'default_payment');
@@ -133,6 +138,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
                 'type',
                 'default_rate'
             ]);
+    }
+
+    public function activeCaregivers()
+    {
+        return $this->caregivers()->whereHas('user', function($q) { $q->where('active', 1); });
     }
 
     public function carePlans()

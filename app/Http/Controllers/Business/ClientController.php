@@ -47,7 +47,8 @@ class ClientController extends BaseController
             ->values();
 
         if ($request->expectsJson()) {
-            return $clients;
+            // Include active clients only by default through JSON request
+            return $clients->where('active', $request->input('active', 1));
         }
 
         return view('business.clients.index', compact('clients'));
