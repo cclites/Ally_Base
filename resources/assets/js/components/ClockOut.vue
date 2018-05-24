@@ -14,8 +14,8 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="carePlanActivities().length > 0">
-                    <b-col lg="12" class="with-padding-bottom-top blue-box">
+                <b-row v-if="carePlanActivities().length > 0" class="with-padding-bottom-top blue-box">
+                    <b-col lg="12">
                         <h5>Recommended Care Plan Activities</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
@@ -25,10 +25,10 @@
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
-                        <div v-if="carePlanNotes">
-                            <h5>Care Plan Notes</h5>
-                            <p v-html="carePlanNotes"></p>
-                        </div>
+                    </b-col>
+                    <b-col lg="12" class="with-padding-top" v-if="carePlanNotes">
+                        <h5>Care Plan Notes</h5>
+                        <p v-html="carePlanNotes"></p>
                     </b-col>
                 </b-row>
                 <b-row>
