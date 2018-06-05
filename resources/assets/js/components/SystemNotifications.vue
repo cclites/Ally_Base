@@ -73,6 +73,8 @@
                 })
             },
             showTooltip() {
+                // Suppressed always temporarily
+                return false;
                 return this.notifications.length && window.location.pathname === '/business/schedule';
             }
         }

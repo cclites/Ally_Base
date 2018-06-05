@@ -131,6 +131,7 @@
         },
 
         mounted() {
+            this.appendColorKey();
             this.loadFiltersData();
         },
 
@@ -294,6 +295,20 @@
 
                 this.resetScrollPosition = true;
             },
+
+            appendColorKey() {
+                $('.fc-toolbar .fc-right').append(`
+<button type="button" class="fc-button fc-state-default fc-corner-left fc-corner-right hidden-sm-down dropdown-toggle" data-toggle="dropdown">Color Key</button>
+  <div class="dropdown-menu">
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #27c11e"></span> Clocked In</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #1c81d9"></span> Future Shift</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #849290"></span> Past Shift</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #D0C3D3"></span> Unconfirmed Shift</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #d9c01c"></span> Client Cancelled</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Cancelled</a>
+  </div>
+`);
+            }
         },
 
         watch: {
@@ -339,5 +354,15 @@
 }
 .fa-commenting {
     color: #F2F214;
+}
+.fc-toolbar .dropdown-item {
+    padding: 3px 6px;
+}
+.color-sample {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 3px 3px 0 3px;
+    border: 1px solid #000;
 }
 </style>
