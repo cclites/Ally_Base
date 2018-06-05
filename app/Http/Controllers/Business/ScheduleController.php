@@ -331,12 +331,14 @@ class ScheduleController extends BaseController
                 $schedule->save();
             }
 
-            // enumerate week ranges
-            foreach ($weeks as $range => $date) {
-                $total = $aggregator->getTotalScheduledHoursForWeekOf($date, $client->id);
+            if ($client) {
+                // enumerate week ranges
+                foreach ($weeks as $range => $date) {
+                    $total = $aggregator->getTotalScheduledHoursForWeekOf($date, $client->id);
 
-                if ($total > $client->max_weekly_hours) {
-                    throw new MaximumWeeklyHoursExceeded('Schedule NOT updated because the changes would violate the Max Hours in the Client Record. Please see the Max Hours/Service Orders in the client record.');
+                    if ($total > $client->max_weekly_hours) {
+                        throw new MaximumWeeklyHoursExceeded('Schedule NOT updated because the changes would violate the Max Hours in the Client Record. Please see the Max Hours/Service Orders in the client record.');
+                    }
                 }
             }
         }
