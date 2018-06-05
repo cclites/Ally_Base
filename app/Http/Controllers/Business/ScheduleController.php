@@ -95,19 +95,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        // attach caregiver to client if relationship doesn't exist
-        $client = Client::findOrFail($request->client_id);
-        if ($request->caregiver_id && !$client->hasCaregiver($request->caregiver_id)) {
-            
-            $data = [
-                'caregiver_hourly_rate' => $request->caregiver_rate,
-                'provider_hourly_fee' => $request->provider_fee,
-            ];
-            $data = array_map('floatval', $data);
-
-            $client->caregivers()->syncWithoutDetaching([$request->caregiver_id => $data]);
-            
-        }
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->daily_rates);
 
         $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
         $creator->startsAt($startsAt)
@@ -188,6 +176,8 @@ class ScheduleController extends BaseController
         
         $notes = $request->input('notes');
 
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->daily_rates);
+
         if ($schedule->notes != $notes) {
             if (strlen($notes)) {
                 $note = ScheduleNote::create(['note' => $notes]);
@@ -203,6 +193,30 @@ class ScheduleController extends BaseController
         unset($data['notes']);
         $schedule->update($data);
         return new SuccessResponse('The schedule has been updated.');
+    }
+
+    /**
+     * Protected function for making sure a client caregiver relationship exists
+     *
+     * @param $client_id
+     * @param $caregiver_id
+     */
+    protected function ensureCaregiverAssignment($client_id, $caregiver_id, $caregiver_rate, $provider_fee, $daily = false)
+    {
+        // attach caregiver to client if relationship doesn't exist
+        $client = Client::findOrFail($client_id);
+        if ($caregiver_id && !$client->hasCaregiver($caregiver_id)) {
+            $data = [
+                'caregiver_daily_rate' => $daily ? $caregiver_rate : 0,
+                'provider_daily_fee' => $daily ? $provider_fee : 0,
+                'caregiver_hourly_rate' => $daily ? 0 : $caregiver_rate,
+                'provider_hourly_fee' => $daily ? 0 : $provider_fee,
+            ];
+
+            $data = array_map('floatval', $data);
+
+            $client->caregivers()->syncWithoutDetaching([$caregiver_id => $data]);
+        }
     }
 
     /**
