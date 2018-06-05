@@ -197,8 +197,10 @@
                                     >
                                         <option value="">No Change</option>
                                         <option value="0">Unassigned</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                                        <option v-for="caregiver in clientCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
+                                    <small class="form-text text-info" v-if="form.client_id === '-' || !form.client_id">Caregiver updates are limited when "All Clients" is selected.</small>
+                                    <small class="form-text text-warning" v-else-if="clientCaregivers.length === 0">No caregivers are assigned to this client.</small>
                                     <input-help :form="form" field="new_caregiver_id" text=""/>
                                 </b-form-group>
                             </b-col>
@@ -319,6 +321,7 @@
                 lockProviderFee: true,
                 clients: [],
                 caregivers: [],
+                clientCaregivers: [],
                 submitting: false,
                 form: new Form(),
                 disabled: {
@@ -473,6 +476,19 @@
                 console.log('no plans available');
                 this.care_plans = [];
             },
+
+            loadClientCaregivers(client_id) {
+                console.log('client_id: ' + client_id);
+                if (client_id <= 0 || client_id === "-") {
+                    this.clientCaregivers = [];
+                    return;
+                }
+                this.clientCaregivers = [{"id": "", "nameLastFirst": "Loading"}];
+                axios.get('/business/clients/' + client_id + '/caregivers')
+                    .then(response => {
+                        this.clientCaregivers = response.data;
+                    });
+            }
         },
 
         watch: {
@@ -548,6 +564,8 @@
             
             'form.client_id': function(val) {
                 this.loadCarePlans(val);
+                this.form.new_caregiver_id = '';
+                this.loadClientCaregivers(val);
             },
 
         }

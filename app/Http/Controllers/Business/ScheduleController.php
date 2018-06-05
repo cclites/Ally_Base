@@ -306,6 +306,8 @@ class ScheduleController extends BaseController
         $schedules = $query->get();
         $client = Client::find($request->client_id);
 
+        $this->validateCaregiverAssignment($client);
+
         if (!$schedules->count()) {
             return new ErrorResponse(400, 'No matching schedules could be found.');
         }
@@ -471,5 +473,29 @@ class ScheduleController extends BaseController
         $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
         $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
         return $clientName . ' (' . $caregiverName . ')';
+    }
+
+    /**
+     * @param $client
+     */
+    protected function validateCaregiverAssignment($client): void
+    {
+        if (!$client) {
+            // Disable updates to caregiver assignments for all clients
+            request()->validate(
+                ['new_caregiver_id' => 'nullable|integer|max:0'],
+                ['new_caregiver_id.*' => 'You cannot update a caregiver for all clients.']
+            );
+        }
+
+        if ($client) {
+            // Require the caregiver assignment to exist for the client
+            if (!$client->hasCaregiver(request('new_caregiver_id'))) {
+                request()->validate(
+                    ['new_caregiver_id' => 'nullable|integer|max:0'],
+                    ['new_caregiver_id.*' => 'The newly selected caregiver is not assigned to the selected client.']
+                );
+            }
+        }
     }
 }
