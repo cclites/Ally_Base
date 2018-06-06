@@ -167,8 +167,8 @@
             return {
                 form: new Form({
                     caregiver_comments: null,
-                    mileage: 0,
-                    other_expenses: 0.00,
+                    mileage: "",
+                    other_expenses: "",
                     latitude: null,
                     longitude: null,
                     activities: [],
