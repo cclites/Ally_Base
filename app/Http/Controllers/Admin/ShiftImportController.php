@@ -57,7 +57,7 @@ class ShiftImportController extends Controller
             'shifts.*.checked_out_time' => 'required|date',
             'shifts.*.caregiver_rate' => 'required|numeric|max:100|min:0',
             'shifts.*.provider_fee' => 'required|numeric|max:100|min:0',
-            'shifts.*.mileage' => 'required|numeric|max:1000|min:0',
+            'shifts.*.mileage' => 'required|numeric|max:9999|min:0',
             'shifts.*.other_expenses' => 'required|numeric|max:1000|min:0',
             'shifts.*.hours_type' => 'required|in:default,overtime,holiday',
         ]);
