@@ -30,26 +30,7 @@ class ShiftController extends BaseController
             return redirect()->route('shift.index');
         }
 
-        // Get the active shift
-        $shift = $this->caregiver()->getActiveShift();
-
-        // Load the client relationship
-        $shift->load('client');
-
-        // Load the available activities
-        $activities = $shift->business->allActivities();
-
-        // Load care plan and notes from the schedule (if one exists)
-        $carePlanActivityIds = [];
-        $notes =  '';
-        if ($shift && $shift->schedule) {
-            $notes = $shift->schedule->notes;
-            if ($shift->schedule->carePlan) {
-                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
-            }
-        }
-
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
+        return view('caregivers.clocked_in');
     }
 
     public function clockIn(Request $request)
@@ -141,6 +122,34 @@ class ShiftController extends BaseController
             return $clockIn->clockInWithoutSchedule($client->business, $client);
         }
         throw new \Exception('ShiftController: Missing client or schedule to clock into.');
+    }
+
+    public function showClockOut()
+    {
+        if (!$this->caregiver()->isClockedIn()) {
+            return redirect()->route('shift.index');
+        }
+
+        // Get the active shift
+        $shift = $this->caregiver()->getActiveShift();
+
+        // Load the client relationship
+        $shift->load('client');
+
+        // Load the available activities
+        $activities = $shift->business->allActivities();
+
+        // Load care plan and notes from the schedule (if one exists)
+        $carePlanActivityIds = [];
+        $notes =  '';
+        if ($shift && $shift->schedule) {
+            $notes = $shift->schedule->notes;
+            if ($shift->schedule->carePlan) {
+                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
+            }
+        }
+
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
     }
 
     public function clockOut(Request $request)
