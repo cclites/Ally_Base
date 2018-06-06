@@ -26,13 +26,13 @@
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
@@ -69,9 +69,9 @@
                 <a class="dropdown-item" data-toggle="tab" href="#profile" role="tab">Profile</a>
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
-                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
@@ -100,15 +100,6 @@
         <div class="tab-pane" id="phones" role="tabpanel">
             <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
         </div>
-        <div class="tab-pane" id="caregivers" role="tabpanel">
-            <business-client-caregivers :client_id="{{ $client->id }}"
-                                        :ally-fee="{{ floatval($client->allyFee) }}"
-                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
-            ></business-client-caregivers>
-        </div>
-        <div class="tab-pane" id="care_plans" role="tabpanel">
-            <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
-        </div>
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
@@ -132,6 +123,15 @@
                     </payment-method>
                 </div>
             </div>
+        </div>
+        <div class="tab-pane" id="caregivers" role="tabpanel">
+            <business-client-caregivers :client_id="{{ $client->id }}"
+                                        :ally-fee="{{ floatval($client->allyFee) }}"
+                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
+            ></business-client-caregivers>
+        </div>
+        <div class="tab-pane" id="care_plans" role="tabpanel">
+            <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
         </div>
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
