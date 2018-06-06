@@ -1,5 +1,8 @@
 <template>
     <div class="row">
+        <b-col lg="12">
+            <small class="pull-right with-padding-bottom">* Any phone number on this page is approved for EVV telephony.</small>
+        </b-col>
         <b-col lg="6" v-for="number in numbers" :key="number.id">
             <phone-number
                     :title="formatTitle(number.type)"
