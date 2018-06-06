@@ -55,7 +55,8 @@
                             <b-button variant="info" @click="clockIn(schedule)">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
                         </div>
                         <div class="form-group" v-if="form.client_id">
-                            <b-button variant="success" @click="clockInWithoutSchedule()">Clock in to an unscheduled shift</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" v-if="schedules.length >= 1">Clock in to an unscheduled shift</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" v-else>Clock in</b-button>
                         </div>
                     </b-col>
                 </b-row>
