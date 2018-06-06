@@ -73,8 +73,9 @@ Route::group([
 
     Route::get('clock-in/{schedule?}', 'Caregivers\ShiftController@index')->name('shift.index');
     Route::post('clock-in/{schedule?}', 'Caregivers\ShiftController@clockIn')->name('clock_in');
-    Route::get('clock-out', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
-    Route::post('clock-out', 'Caregivers\ShiftController@clockOut')->name('clock_out');
+    Route::get('clocked-in', 'Caregivers\ShiftController@clockedIn')->name('clocked_in');
+    Route::get('clock-out', 'Caregivers\ShiftController@showClockOut')->name('clock_out');
+    Route::post('clock-out', 'Caregivers\ShiftController@clockOut');
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@shift')->name('caregivers.shift.show');
 
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');

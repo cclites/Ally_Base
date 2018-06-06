@@ -4,13 +4,6 @@
 
 @section('content')
     <div class="row">
-        <div class="col-lg-6">
-            <div class="alert alert-success" role="alert">
-                You are currently clocked-in.  Clock out below.
-            </div>
-        </div>
-    </div>
-    <div class="row">
         @if ($shift->schedule_id)
             <div class="col-12 hidden-sm-up">
                 <div class="card">

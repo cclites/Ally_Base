@@ -276,7 +276,7 @@
                         this.stats = response.data.stats;
                     }
                     else {
-                        window.location = '/clock-out';
+                        window.location = '/clocked-in';
                     }
                 }
                 catch (err) {}
