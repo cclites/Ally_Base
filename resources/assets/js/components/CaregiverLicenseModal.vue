@@ -47,7 +47,9 @@
         },
 
         data() {
-            return {}
+            return {
+                form: new Form(),
+            }
         },
 
         computed: {
@@ -59,19 +61,20 @@
                     this.$emit('input', value);
                 }
             },
-            form() {
-                return new Form({
-                    name: (this.selectedItem) ? this.selectedItem.name : '',
-                    description: (this.selectedItem) ? this.selectedItem.description : '',
-                    expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
-                });
-            },
             title() {
                 return (this.selectedItem) ? 'Edit Certification' : 'Create Certification';
             }
         },
 
         methods: {
+            makeForm() {
+                this.form = new Form({
+                    name: (this.selectedItem) ? this.selectedItem.name : '',
+                    description: (this.selectedItem) ? this.selectedItem.description : '',
+                    expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
+                });
+            },
+
             save() {
                 let component = this;
                 let method = 'post';
@@ -98,5 +101,11 @@
                     });
             }
         },
+
+        watch: {
+            selectedItem() {
+                this.makeForm();
+            }
+        }
     }
 </script>
