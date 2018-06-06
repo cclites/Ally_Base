@@ -478,7 +478,7 @@ class ScheduleController extends BaseController
     /**
      * @param $client
      */
-    protected function validateCaregiverAssignment($client): void
+    protected function validateCaregiverAssignment($client)
     {
         if (!$client) {
             // Disable updates to caregiver assignments for all clients
