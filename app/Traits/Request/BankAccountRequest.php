@@ -32,16 +32,16 @@ trait BankAccountRequest
 
         $data = $request->validate($rules);
 
-//        // Validate the bank account with Microbilt
-//        $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
-//        $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
-//        if (!$result['valid']) {
-//            // Throw a misc validation error (account number as email) with a relevant message
-//            $request->validate(
-//                ['account_number' => 'required|email'],
-//                ['account_number.*' => 'The routing number and account number you entered were determined to be invalid.']
-//            );
-//        }
+        // Validate the bank account with Microbilt
+        $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
+        $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
+        if (!$result['valid']) {
+            // Throw a misc validation error (account number as email) with a relevant message
+            $request->validate(
+                ['account_number' => 'required|email'],
+                ['account_number.*' => 'The routing number and account number you entered were determined to be invalid.']
+            );
+        }
 
         return new BankAccount($data);
     }
