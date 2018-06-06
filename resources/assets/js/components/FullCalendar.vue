@@ -157,6 +157,7 @@
 
             this.$on('rerender-events', () => {
                 $(this.$el).fullCalendar('rerenderEvents')
+                this.hideWeekButtonOnSmallDevices();
             })
 
             this.$on('refetch-events', () => {
@@ -180,13 +181,19 @@
             })
 
             cal.fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
-
+            this.hideWeekButtonOnSmallDevices();
         },
 
         methods: {
             fireMethod(...options) {
                 $(this.$el).fullCalendar(...options)
             },
+
+            hideWeekButtonOnSmallDevices()
+            {
+                let $button = $('.fc-agendaWeek-button');
+                $button.addClass('hidden-sm-down');
+            }
         },
 
         watch: {
