@@ -29,8 +29,8 @@ export default {
             return {
                 checked_in_time: '',
                 checked_out_time: '',
-                mileage: 0,
-                other_expenses: 0,
+                mileage: '',
+                other_expenses: '',
                 caregiver_rate: 0.00,
                 provider_fee: 0.00, 
                 caregiver_comments: '',
