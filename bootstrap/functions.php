@@ -11,6 +11,12 @@ function interpol_escape($value)
     return preg_replace('/({|}|&#123;|&#125;|&#x7b;|&#x7d;)(?=\S)/', '$1 ', $value);
 }
 
+function is_mobile_app()
+{
+    $match = ' AllyMS Mobile ';
+    return strpos(request()->userAgent(), $match) !== false;
+}
+
 function collection_only_values($collection, $values = []) {
     return $collection->map(function($item) use ($values)
     {
