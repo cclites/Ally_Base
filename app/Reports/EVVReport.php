@@ -59,6 +59,14 @@ class EVVReport extends ShiftsReport
                 $parser = Parser::create();
                 $parsed = $parser->parse($userAgent);
                 $shift->user_agent = json_decode(json_encode($parsed), true);
+                if (is_mobile_app($userAgent)) {
+                    $parts = explode(' ', $userAgent);
+                    $shift->user_agent['ua'] = [
+                        'family' => 'AllyMS Mobile',
+                        'major' => end($parts),
+                        'minor' => '',
+                    ];
+                }
                 return $shift;
             });
         }
