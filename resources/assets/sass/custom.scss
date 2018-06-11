@@ -253,4 +253,11 @@ td .fc-event-container {
   stroke: $primary;
 }
 
-
+/* Zoomed checkbox */
+label.large-checkbox {
+  clear: left;
+  float: left;
+}
+.large-checkbox [type=checkbox] {
+  zoom: 1.25;
+}
