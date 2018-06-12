@@ -18,7 +18,7 @@ class FixFkForEmergencyContacts extends Migration
             DB::statement('ALTER TABLE `emergency_contacts`
 	DROP FOREIGN KEY `emergency_contacts_user_id_foreign`;');
             DB::statement('ALTER TABLE `emergency_contacts`
-	ADD CONSTRAINT `emergency_contacts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE;');
+	ADD CONSTRAINT `emergency_contacts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;');
         }
     }
 
