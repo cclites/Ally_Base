@@ -45,7 +45,7 @@ class EmergencyContactController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:80',
-            'phone_number' => 'required|max:50',
+            'phone_number' => 'nullable|max:50',
             'relationship' => 'nullable|string|max:80'
         ]);
 
