@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Address;
 use App\Business;
 use App\Caregiver;
+use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 
@@ -110,6 +111,18 @@ class ImportGenerationsCaregivers extends BaseImport
                 }
                 catch(\Exception $e) {
 
+                }
+
+                // Emergency Contacts
+                for($i = 1; $i++; $i <= 3) {
+                    if ($emergencyName = $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Name", $row)) {
+                        EmergencyContact::create([
+                            'user_id' => $caregiver->id,
+                            'name' => $emergencyName,
+                            'phone_number' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Phone", $row),
+                            'relationship' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Relationship", $row),
+                        ]);
+                    }
                 }
             }
 

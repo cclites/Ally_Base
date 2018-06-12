@@ -36,13 +36,12 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
- * @property-read mixed $date_of_birth
- * @property-read mixed $email
- * @property-read mixed $first_name
- * @property-read mixed $last_name
- * @property-read mixed $name
- * @property-read mixed $name_last_first
- * @property-read mixed $username
+ * @property mixed $date_of_birth  Proxied
+ * @property mixed $email  Proxied
+ * @property mixed $first_name  Proxied
+ * @property mixed $last_name  Proxied
+ * @property mixed $name  Proxied
+ * @property mixed $username  Proxied
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverLicense[] $licenses
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
