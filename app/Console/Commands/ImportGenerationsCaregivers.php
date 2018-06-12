@@ -116,7 +116,7 @@ class ImportGenerationsCaregivers extends BaseImport
                 }
 
                 // Create Emergency Contacts
-                for($i = 1; $i++; $i <= 3) {
+                for($i = 1; $i <= 3; $i++) {
                     if ($emergencyName = $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Name", $row)) {
                         EmergencyContact::create([
                             'user_id' => $caregiver->id,
