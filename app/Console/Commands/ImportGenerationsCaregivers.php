@@ -42,8 +42,8 @@ class ImportGenerationsCaregivers extends BaseImport
 
         for($row=2; $row<$lastRow; $row++) {
 
-            $name = $this->getValue($objPHPExcel, 'Caregiver Name', $row);
-            if ($name) {
+            $name = $this->getValue($objPHPExcel, 'First Name', $row) . ' ' . $this->getValue($objPHPExcel, 'Last Name', $row);
+            if (trim($name)) {
                 $this->output->writeln('Found caregiver: ' . $name);
 
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
@@ -53,7 +53,7 @@ class ImportGenerationsCaregivers extends BaseImport
                 $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
                 $data['password'] = bcrypt(str_random(12));
                 $data['hire_date'] = filter_date($this->getValue($objPHPExcel, 'Hire Date', $row));
-                $data['gender'] = $this->getValue($objPHPExcel, 'Gender', $row);
+                $data['gender'] = strtoupper(substr($this->getValue($objPHPExcel, 'Gender', $row), 0, 1));
                 $addressData['address1'] = $this->getValue($objPHPExcel, 'Address1', $row);
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);
@@ -65,6 +65,8 @@ class ImportGenerationsCaregivers extends BaseImport
                 $phone1 = $this->getValue($objPHPExcel, 'Phone1', $row);
                 $phone2 = $this->getValue($objPHPExcel, 'Phone2', $row);
                 $email = trim($this->getValue($objPHPExcel, 'Email', $row));
+
+                // Emergency contact columns defined at bottom
 
                 // Prevent Duplicates
                 if ($email && User::where('email', $email)->exists()) {
@@ -113,7 +115,7 @@ class ImportGenerationsCaregivers extends BaseImport
 
                 }
 
-                // Emergency Contacts
+                // Create Emergency Contacts
                 for($i = 1; $i++; $i <= 3) {
                     if ($emergencyName = $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Name", $row)) {
                         EmergencyContact::create([
