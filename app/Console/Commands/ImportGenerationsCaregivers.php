@@ -121,8 +121,8 @@ class ImportGenerationsCaregivers extends BaseImport
                         EmergencyContact::create([
                             'user_id' => $caregiver->id,
                             'name' => $emergencyName,
-                            'phone_number' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Phone", $row),
-                            'relationship' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Relationship", $row),
+                            'phone_number' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Phone", $row) ?? '',
+                            'relationship' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Relationship", $row) ?? '',
                         ]);
                     }
                 }
