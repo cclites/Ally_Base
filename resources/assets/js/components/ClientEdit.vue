@@ -51,14 +51,30 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
-                        <b-form-input
-                            id="email"
-                            name="email"
-                            type="email"
-                            v-model="form.email"
-                            >
-                        </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="form.email"
+                                        :disabled="form.no_email"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_email"
+                                               v-model="form.no_email" value="1">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">No Email</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="email"
+                                    text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
                     <b-form-group label="Username" label-for="username">
                         <b-form-input
@@ -281,6 +297,7 @@
                     firstname: this.client.firstname,
                     lastname: this.client.lastname,
                     email: this.client.email,
+                    no_email: false,
                     username: this.client.username,
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
@@ -310,26 +327,20 @@
         },
 
         mounted() {
-            if (!this.client) {
-                this.form = new Form({
-                    firstname: null,
-                    lastname: null,
-                    email: null,
-                    username: null,
-                    date_of_birth: null,
-                    ssn: null,
-                    onboard_status: null,
-                    inquiry_date: '',
-                    service_start_date: '',
-                    referral: null,
-                    diagnosis: null,
-                    ambulatory: false,
-                    gender: null
-                })
-            }
+            this.checkForNoEmailDomain();
         },
 
         methods: {
+
+            checkForNoEmailDomain() {
+                let domain = 'noemail.allyms.com';
+                if (this.form.email) {
+                    if (this.form.email.substr(domain.length * -1) === domain) {
+                        this.form.no_email = true;
+                        this.form.email = null;
+                    }
+                }
+            },
 
             archiveClient() {
                 let form = new Form();
