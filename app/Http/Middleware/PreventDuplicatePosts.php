@@ -37,7 +37,7 @@ class PreventDuplicatePosts
 
             if (in_array($hash, $hashes)) {
                 $this->releaseLock();
-                return (new ErrorResponse(409, 'You submitted the same form twice. We\'ve prevented a duplicate entry.'))->toResponse($request);
+                return (new ErrorResponse(409, 'You submitted the same form twice within 15 seconds. We\'ve prevented a duplicate entry.'))->toResponse($request);
             }
 
             $hashes[] = $hash;
