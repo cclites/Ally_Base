@@ -39,13 +39,21 @@
                 </b-col>
                 <b-col lg="3" sm="4" xs="12">
                     <b-form-group>
-                        <b-button id="save-profile" variant="success" type="submit" v-if="buttonVisible">Save Number</b-button>
+                        <b-button id="save-profile"
+                                  variant="success"
+                                  type="submit"
+                                  :disabled="submitting"
+                                  v-if="buttonVisible"
+                        >
+                            <i class="fa fa-spinner fa-spin" v-show="submitting"></i> Save Number
+                        </b-button>
                     </b-form-group>
                     <b-form-group>
                         <b-button variant="danger"
                                   v-if="this.phone.id"
                                   @click="destroy"
                                   title="Delete Number"
+                                  :disabled="submitting"
                                   class="mt-2">
                             <i class="fa fa-times"></i>
                         </b-button>
@@ -87,7 +95,8 @@
                     { text: 'Other 1', value: 'other_1' },
                     { text: 'Other 2', value: 'other_2' },
                     { text: 'Other 3', value: 'other_3' }
-                ]
+                ],
+                submitting: false,
             }
         },
 
@@ -103,20 +112,22 @@
                 this.buttonVisible = true;
             },
 
-            saveNumber() {
-                if (this.phone.id) {
-                    this.form.put('/profile/phone/' + this.phone.id)
-                        .then(response => {
-                            this.buttonVisible = false;
-                            this.$emit('updated');
-                        });
-                } else {
-                    this.form.post('/profile/phone')
-                        .then(response => {
-                            this.buttonVisible = false;
-                            this.$emit('created');
-                        });
+            async saveNumber() {
+                this.submitting = true;
+                try {
+                    if (this.phone.id) {
+                        const response = await this.form.put('/profile/phone/' + this.phone.id);
+                        this.buttonVisible = false;
+                        this.$emit('updated');
+                    }
+                    else {
+                        const response = await this.form.post('/profile/phone');
+                        this.buttonVisible = false;
+                        this.$emit('created');
+                    }
                 }
+                catch (e) {}
+                this.submitting = false;
             },
 
             destroy() {
