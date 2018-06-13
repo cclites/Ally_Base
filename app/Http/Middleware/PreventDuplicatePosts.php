@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Responses\ErrorResponse;
+use Carbon\Carbon;
 use Closure;
 use Cache;
 
@@ -40,7 +41,7 @@ class PreventDuplicatePosts
             }
 
             $hashes[] = $hash;
-            Cache::put('post_request_chain', $hashes, 1);
+            Cache::put('post_request_chain', $hashes, Carbon::now()->addSeconds(15));
             $this->releaseLock();
         }
 
