@@ -24,8 +24,6 @@ class ClientPhoneController extends BaseController
                 switch($type) {
                     case 'primary':
                         return 10;
-                    case 'billing':
-                        return 9;
                     default:
                         return 1;
                 }
@@ -35,6 +33,6 @@ class ClientPhoneController extends BaseController
             if ($aNumber > $bNumber) return -1;
             return ($aNumber < $bNumber) ? 1 : 0;
         });
-        return response($numbers);
+        return response($numbers->values());
     }
 }
