@@ -7,15 +7,15 @@
                           :phone="number"
                           @created="refreshPhoneNumbers('The phone number has been saved.')"
                           @updated="refreshPhoneNumbers()"
-                          @deleted="removePhoneNumber">
+                          @deleted="refreshPhoneNumbers()">
             </phone-number>
         </b-col>
 
         <b-col lg="6">
             <b-card class="text-center pt-4"
                     style="cursor: pointer;"
-                    @click="addPhoneNumber"
-                    v-if="numbers.length < 4">
+                    @click="addPhoneNumber()"
+                    v-if="numbers.length < maximumNumbers">
                 <i class="fa fa-plus fa-5x"></i>
                 <p class="text-center h3">Add New</p>
             </b-card>
@@ -24,43 +24,25 @@
 </template>
 
 <script>
-    import PhoneNumber from '../../PhoneNumber';
+    import PhoneNumberTabs from "../../../mixins/PhoneNumberTabs";
 
     export default {
-        props: ['phoneNumbers'],
 
-        components: {
-            PhoneNumber
-        },
-
-        data() {
-            return {
-                numbers: this.phoneNumbers
-            }
-        },
+        mixins: [PhoneNumberTabs],
 
         methods: {
-            formatTitle(type) {
-                return _.capitalize(type) + ' Number';
-            },
-
-            addPhoneNumber() {
-                this.numbers.push({ type: 'home', number: '', extension: '' });
-            },
-
-            removePhoneNumber() {
-                this.refreshPhoneNumbers();
-            },
-
             refreshPhoneNumbers(message = null) {
                 axios.get('/profile/phone')
                     .then(response => {
                         this.numbers = response.data;
+
+                        // Add defaults
+                        this.addPhoneNumberIfMissing('primary', 'first');
+                        this.addPhoneNumberIfMissing('billing');
+
                         if (message) {
                             alerts.addMessage('success', message);
                         }
-                    }).catch(error => {
-                        console.error(error.response);
                     });
             }
         }

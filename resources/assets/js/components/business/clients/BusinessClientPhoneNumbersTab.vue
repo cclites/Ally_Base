@@ -20,7 +20,7 @@
             <b-card class="text-center pt-4"
                     style="cursor: pointer;"
                     @click="addPhoneNumber()"
-                    v-if="numbers.length < 4">
+                    v-if="numbers.length < maximumNumbers">
                 <i class="fa fa-plus fa-5x"></i>
                 <p class="text-center h3">Add New</p>
             </b-card>

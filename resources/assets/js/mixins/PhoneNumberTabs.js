@@ -10,6 +10,7 @@ export default {
     data() {
         return {
             numbers: [],
+            maximumNumbers: 4,
         }
     },
 
@@ -26,7 +27,7 @@ export default {
         },
 
         addPhoneNumber(type = 'home', position = 'last') {
-            let number = { type: type, number: '', extension: '', user_id: this.user.id };
+            let number = { type: type, number: '', extension: '', user_id: this.user ? this.user.id : null };
             if (position === 'first') {
                 this.numbers.unshift(number);
                 return;

@@ -80,7 +80,7 @@
                     number: this.phone.number,
                     extension: this.phone.extension,
                     type: this.type,
-                    user_id: _.isEmpty(this.user) ? null : this.user.id
+                    user_id: _.isEmpty(this.user) ? undefined : this.user.id
                 }),
                 deleteForm: new Form({
                     id: this.phone.id,
