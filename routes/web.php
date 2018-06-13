@@ -38,10 +38,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile', 'ProfileController@update');
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
-    Route::get('/profile/phone', 'PhoneController@index');
-    Route::post('/profile/phone', 'PhoneController@store');
-    Route::put('/profile/phone/{id}', 'PhoneController@update');
-    Route::delete('/profile/phone/{id}', 'PhoneController@destroy');
+    Route::resource('/profile/phone', 'PhoneController');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -99,8 +96,6 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['office_user', 'admin']
 ], function() {
-    Route::get('phone-numbers/{user}', 'UserController@phoneNumbers');
-
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
     Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
@@ -127,6 +122,7 @@ Route::group([
     Route::put('caregivers/{caregiver}/misc', 'Business\CaregiverController@misc')->name("caregivers.update_misc");
     Route::put('caregivers/{caregiver}/preferences', 'Business\CaregiverController@preferences')->name("caregivers.update_preferences");
     Route::get('caregivers/licenses/{license}/send-reminder', 'Business\CaregiverLicenseController@expirationReminder');
+    Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
@@ -139,8 +135,12 @@ Route::group([
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
-    Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
-    Route::post('clients/{client}/phone/{type}', 'Business\ClientController@phone')->name('clients.phone');
+
+    Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
+    Route::get('clients/{client}/addresses/{type}', 'Business\ClientAddressController@show')->name('clients.addresses.show');
+    Route::post('clients/{client}/addresses/{type}', 'Business\ClientAddressController@store');
+    Route::delete('clients/{client}/addresses/{type}', 'Business\ClientAddressController@destroy');
+    Route::get('clients/{client}/phones', 'Business\ClientPhoneController@index')->name('clients.phones');
     Route::post('clients/{client}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{client}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
     Route::get('clients/{client}/caregivers/{caregiver}', 'Business\ClientCaregiverController@show')->name('clients.caregivers.show');

@@ -20,14 +20,13 @@
             <b-row>
                 <b-col lg="6" sm="5" xs="12">
                     <b-form-group label="Phone Number" label-for="number">
-                        <mask-input v-model="form.number" name="number" id="number"></mask-input>
+                        <mask-input v-model="form.number" name="number"></mask-input>
                         <input-help :form="form" field="number" text="Enter full phone number."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3" sm="3" xs="12">
                     <b-form-group label="Extension" label-for="extension">
                         <b-form-input
-                                id="extension"
                                 name="extension"
                                 type="number"
                                 maxlength="5"
@@ -35,14 +34,14 @@
                                 class="input-sm"
                         >
                         </b-form-input>
-                        <input-help :form="form" field="extension" text="Enter an extension (optional)."></input-help>
+                        <input-help :form="form" field="extension" text="Enter an extension (Optional)."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3" sm="4" xs="12">
                     <b-form-group>
                         <b-button id="save-profile" variant="success" type="submit" v-if="buttonVisible">Save Number</b-button>
                     </b-form-group>
-                    <b-form-group v-if="!isFixedType(type)">
+                    <b-form-group>
                         <b-button variant="danger"
                                   v-if="this.phone.id"
                                   @click="destroy"

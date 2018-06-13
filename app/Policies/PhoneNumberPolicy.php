@@ -6,20 +6,13 @@ use App\PhoneNumber;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class PhoneNumberPolicy
+class PhoneNumberPolicy extends BasePolicy
 {
-    use HandlesAuthorization;
 
-    public $fixed_types;
-
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function create(User $user, $data)
     {
-        $this->fixed_types = collect(['primary', 'billing']);
+        $phone = new PhoneNumber($data);
+        return $this->check($user, $phone);
     }
 
     /**
@@ -31,10 +24,7 @@ class PhoneNumberPolicy
      */
     public function update(User $user, PhoneNumber $phone)
     {
-        $owner = $user->id === $phone->user_id;
-        $office_user = $user->role_type == 'office_user';
-
-        return ($owner || $office_user);
+        return $this->check($user, $phone);
     }
 
     /**
@@ -46,9 +36,17 @@ class PhoneNumberPolicy
      */
     public function delete(User $user, PhoneNumber $phone)
     {
-        $owner = $user->id === $phone->user_id;
-        $office_user = $user->role_type == 'office_user';
+        return $this->check($user, $phone);
+    }
 
-        return ($owner || $office_user) && !$this->fixed_types->contains($phone->type);
+    protected function check(User $user, PhoneNumber $phone)
+    {
+        if ($phone->user_id != $user->id) {
+            if (!$this->isAdmin() && !$this->businessHasUser($phone->user)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

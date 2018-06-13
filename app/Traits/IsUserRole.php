@@ -14,6 +14,7 @@ trait IsUserRole
 {
     use SoftDeletes;
     use HiddenIdTrait;
+    use HasAddressesAndNumbers;
 
     /**
      * IsUserRole constructor.
@@ -255,12 +256,8 @@ trait IsUserRole
 
     ///////////////////////////////////////////
     /// Forwarded Relationship Methods
+    /// (Phone numbers and addresses are in HasAddressesAndNumbers)
     ///////////////////////////////////////////
-
-    public function addresses()
-    {
-        return $this->hasMany(Address::class, 'user_id', 'id');
-    }
 
     public function bankAccounts()
     {
@@ -270,11 +267,6 @@ trait IsUserRole
     public function creditCards()
     {
         return $this->hasMany(CreditCard::class, 'user_id', 'id');
-    }
-
-    public function phoneNumbers()
-    {
-        return $this->hasMany(PhoneNumber::class, 'user_id', 'id');
     }
 
     public function documents()
