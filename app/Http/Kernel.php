@@ -25,7 +25,6 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
-        PreventDuplicatePosts::class,
     ];
 
     /**
@@ -44,6 +43,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             CheckIfImpersonating::class, // ADMIN IMPERSONATION
             RestrictMobileAppToCaregivers::class,
+            PreventDuplicatePosts::class,
         ],
 
         'api' => [
