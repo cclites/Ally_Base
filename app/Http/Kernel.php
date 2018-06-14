@@ -4,6 +4,8 @@ namespace App\Http;
 
 use App\Http\Middleware\CheckActive;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\PreventDuplicatePosts;
+use App\Http\Middleware\RestrictMobileAppToCaregivers;
 use App\Http\Middleware\TwilioRequestValidator;
 use Bizhub\Impersonate\Middleware\CheckIfImpersonating;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -23,6 +25,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
+        PreventDuplicatePosts::class,
     ];
 
     /**
@@ -40,6 +43,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             CheckIfImpersonating::class, // ADMIN IMPERSONATION
+            RestrictMobileAppToCaregivers::class,
         ],
 
         'api' => [

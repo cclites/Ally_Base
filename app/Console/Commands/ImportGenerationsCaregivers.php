@@ -40,7 +40,7 @@ class ImportGenerationsCaregivers extends BaseImport
 
         $lastRow = $this->getRowCount($objPHPExcel);
 
-        for($row=2; $row<$lastRow; $row++) {
+        for($row=2; $row<=$lastRow; $row++) {
 
             $name = $this->getValue($objPHPExcel, 'First Name', $row) . ' ' . $this->getValue($objPHPExcel, 'Last Name', $row);
             if (trim($name)) {

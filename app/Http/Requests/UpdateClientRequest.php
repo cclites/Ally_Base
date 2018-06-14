@@ -28,8 +28,8 @@ class UpdateClientRequest extends FormRequest
         return [
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
-            'username' => ['required', 'email', Rule::unique('users')->ignore($this->client->id)],
+            'email' => 'required_unless:no_email,1|nullable|email',
+            'username' => ['required', Rule::unique('users')->ignore($this->client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',

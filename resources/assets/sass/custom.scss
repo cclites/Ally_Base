@@ -29,6 +29,11 @@
   }
 }
 
+/* Show header with preloader */
+.preloader {
+  margin-top: 70px;
+}
+
 /* Logo */
 .light-logo, .dark-logo {
   max-height: 50px;
@@ -248,4 +253,12 @@ td .fc-event-container {
   stroke: $primary;
 }
 
-
+/* Zoomed checkbox */
+label.large-checkbox {
+  clear: left;
+  float: left;
+}
+.large-checkbox [type=checkbox] {
+  zoom: 1.25;
+  vertical-align: middle;
+}

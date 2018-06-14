@@ -43,6 +43,7 @@
     <div class="container-fluid">
         <div class="row print-header">
             <div class="header-left">
+                <div><a href="{{ route('caregivers.reports.payment_history') }}" class="btn btn-info">Return to Payment History</a></div>
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
                 <div class="h4">Associated Provider: {{ $business->name }}</div>
                 <div>{{ $business->address1 }}</div>

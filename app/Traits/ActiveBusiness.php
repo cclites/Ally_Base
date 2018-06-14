@@ -7,6 +7,7 @@ use App\Client;
 use App\Schedule;
 use App\Shift;
 use App\Timesheet;
+use App\User;
 
 trait ActiveBusiness
 {
@@ -68,6 +69,24 @@ trait ActiveBusiness
             $caregiver = $caregiver->id;
         }
         return $this->business()->caregivers()->where('caregiver_id', $caregiver)->exists();
+    }
+
+    /**
+     * Return true if a business has access to a user of various roles
+     *
+     * @param \App\User $user
+     * @return bool
+     */
+    protected function businessHasUser(User $user)
+    {
+        switch($user->role_type) {
+            case 'client':
+                return $this->businessHasClient($user->role);
+            case 'caregiver':
+                return $this->businessHasCaregiver($user->role);
+            default:
+                return false;
+        }
     }
 
     /**

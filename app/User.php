@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Contracts\HasPaymentHold;
+use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
 use Bizhub\Impersonate\Traits\CanImpersonate;
@@ -62,6 +63,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     use HiddenIdTrait;
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
+    use HasAddressesAndNumbers;
 
     /**
      * The attributes that are mass assignable.
@@ -109,11 +111,6 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         return null;
     }
 
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
-    }
-
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);
@@ -122,11 +119,6 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function creditCards()
     {
         return $this->hasMany(CreditCard::class);
-    }
-
-    public function phoneNumbers()
-    {
-        return $this->hasMany(PhoneNumber::class);
     }
 
     public function documents()

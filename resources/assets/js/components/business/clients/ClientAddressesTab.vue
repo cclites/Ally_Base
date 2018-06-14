@@ -7,7 +7,7 @@
         </div>
         <div class="row">
             <div class="col-md-6 col-sm-12">
-                <user-address title="Service Address" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
+                <user-address title="Service Address <small class='pull-right'>* EVV GPS Verification checks against this address.</small>" type="evv" :action="'/business/clients/'+clientId+'/address/evv'" :address="serviceAddress"></user-address>
             </div>
             <div class="col-md-6 col-sm-12">
                 <user-address title="Billing Address" type="billing" :action="'/business/clients/'+clientId+'/address/billing'" :address="billingAddress"></user-address>

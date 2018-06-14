@@ -144,7 +144,6 @@
 
         mounted() {
             this.loadBusinesses();
-            this.loadItems();
         },
 
         computed: {

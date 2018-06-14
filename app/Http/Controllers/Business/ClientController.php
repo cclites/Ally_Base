@@ -226,6 +226,10 @@ class ClientController extends BaseController
             $addOnboardRecord = true;
         }
 
+        if ($request->input('no_email')) {
+            $data['email'] = $client->getAutoEmail();
+        }
+
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $history = new OnboardStatusHistory([

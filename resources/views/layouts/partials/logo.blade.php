@@ -13,7 +13,7 @@
         </b>
         <!--End Logo icon -->
         <!-- Logo text -->
-        <span>
+        <span id="logo-text">
             <!-- dark Logo text -->
             <img src="/images/AllyLogo-text.png" alt="homepage" class="dark-logo"/>
             <!-- Light Logo text -->

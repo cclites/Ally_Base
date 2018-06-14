@@ -19,9 +19,8 @@
                         <h5>Recommended Care Plan Activities</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in carePlanActivities()" :key="activity.id" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
+                            <label class="large-checkbox" v-for="activity in carePlanActivities()" :key="activity.id">
+                                <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
@@ -36,9 +35,8 @@
                         <h5>Additional Activities Performed</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in additionalActivities()" :key="activity.id"  style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
+                            <label class="large-checkbox" v-for="activity in additionalActivities()" :key="activity.id">
+                                <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
@@ -167,8 +165,8 @@
             return {
                 form: new Form({
                     caregiver_comments: null,
-                    mileage: 0,
-                    other_expenses: 0.00,
+                    mileage: "",
+                    other_expenses: "",
                     latitude: null,
                     longitude: null,
                     activities: [],

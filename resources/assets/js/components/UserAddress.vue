@@ -25,7 +25,7 @@
                             v-model="form.address2"
                             >
                         </b-form-input>
-                        <input-help :form="form" field="address2" text="Enter an apartment number or additional address info here."></input-help>
+                        <input-help :form="form" field="address2" text="Enter an apartment number or additional address info here. (Optional)"></input-help>
                     </b-form-group>
                     <b-form-group label="City" label-for="city">
                         <b-form-input
@@ -36,15 +36,6 @@
                             >
                         </b-form-input>
                         <input-help :form="form" field="city" text="Enter the city here."></input-help>
-                    </b-form-group>
-                    <b-form-group label="County" label-for="county">
-                        <b-form-input
-                            id="county"
-                            name="county"
-                            type="text"
-                            v-model="form.county">
-                        </b-form-input>
-                        <input-help :form="form" field="county" text="Enter the county here."></input-help>
                     </b-form-group>
                     <b-form-group label="State" label-for="state">
                         <b-form-input
@@ -65,6 +56,15 @@
                             >
                         </b-form-input>
                         <input-help :form="form" field="zip" text="Enter the zip code or postal code here."></input-help>
+                    </b-form-group>
+                    <b-form-group label="County" label-for="county">
+                        <b-form-input
+                                id="county"
+                                name="county"
+                                type="text"
+                                v-model="form.county">
+                        </b-form-input>
+                        <input-help :form="form" field="county" text="Enter the county here. (Optional)"></input-help>
                     </b-form-group>
                     <b-form-group label="Country" label-for="country">
                         <b-form-select name="country" id="country" :options="countries.getOptions()" v-model="form.country">
