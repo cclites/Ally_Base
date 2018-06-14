@@ -137,9 +137,7 @@ Route::group([
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
-    Route::get('clients/{client}/addresses/{type}', 'Business\ClientAddressController@show')->name('clients.addresses.show');
-    Route::post('clients/{client}/addresses/{type}', 'Business\ClientAddressController@store');
-    Route::delete('clients/{client}/addresses/{type}', 'Business\ClientAddressController@destroy');
+    Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');
     Route::get('clients/{client}/phones', 'Business\ClientPhoneController@index')->name('clients.phones');
     Route::post('clients/{client}/caregivers', 'Business\ClientCaregiverController@store')->name('clients.caregivers.store');
     Route::get('clients/{client}/caregivers', 'Business\ClientCaregiverController@index')->name('clients.caregivers');
