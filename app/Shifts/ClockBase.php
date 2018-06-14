@@ -10,7 +10,11 @@ use App\Shift;
 
 abstract class ClockBase
 {
-    const MAXIMUM_DISTANCE_METERS = 804; // 0.5mi
+    /**
+     * The default maximum radius in meters for geolocation verification
+     */
+    const MAXIMUM_DISTANCE_METERS = 300;
+
     protected $caregiver;
     protected $latitude;
     protected $longitude;
