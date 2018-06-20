@@ -25,11 +25,16 @@ trait BankAccountRequest
             || $request->input('routing_number') !== '*********'
             || substr($existing->account_number, -4) !== substr($request->input('account_number'), -4)
             ) {
+            $bankAccountChange = true;
             $rules += [
                 'account_number' => 'required|numeric|confirmed',
                 'routing_number' => 'required|numeric|digits:9|confirmed',
             ];
+        }
 
+        $data = $request->validate($rules);
+
+        if (isset($bankAccountChange)) {
             // Validate the bank account with Microbilt
             $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
             $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
@@ -39,8 +44,6 @@ trait BankAccountRequest
                     ->send();
             }
         }
-
-        $data = $request->validate($rules);
 
         return new BankAccount($data);
     }
