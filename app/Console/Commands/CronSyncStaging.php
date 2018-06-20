@@ -79,6 +79,7 @@ class CronSyncStaging extends Command
         ), $exit);
         if ($exit) {
             $this->output->error('Error syncing production database to staging database.');
+            return;
         }
 
         // Update admin password
