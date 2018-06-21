@@ -128,7 +128,10 @@ XML;
             }
         }
         catch (\Exception $ex) {
-            $response['exception'] = $ex->getMessage();
+            $response += [
+                'exception' => $ex->getMessage(),
+                'valid' => false,
+            ];
         }
 
         return $response;
