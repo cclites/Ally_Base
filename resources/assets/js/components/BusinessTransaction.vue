@@ -37,11 +37,17 @@
                 <b-card header="Client Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
-                    <div class="table-responsive">
-                        <b-table bordered striped hover show-empty
-                                 :fields="clientSummaryFields"
-                                 :items="clientSummary">
-                        </b-table>
+                    <div class="pull-right hidden-print">
+                        <button type="button" class="btn btn-default" @click="printClientSummary()" style="margin-top: -110px">Print</button>
+                    </div>
+                    <div id="client-charge-summary">
+                        <h5 class="d-none d-print-block">Client Summary for Transaction #{{ transaction.id }}</h5>
+                        <div class="table-responsive">
+                            <b-table bordered striped hover show-empty
+                                     :fields="clientSummaryFields"
+                                     :items="clientSummary">
+                            </b-table>
+                        </div>
                     </div>
                 </b-card>
             </b-col>
@@ -49,11 +55,17 @@
                 <b-card header="Caregiver Summary"
                         header-text-variant="white"
                         header-bg-variant="info">
+                    <div class="pull-right hidden-print">
+                        <button type="button" class="btn btn-default" @click="printCaregiverSummary()" style="margin-top: -110px">Print</button>
+                    </div>
                     <div class="table-responsive">
-                        <b-table bordered striped hover show-empty
-                                 :fields="caregiverSummaryFields"
-                                 :items="caregiverSummary">
-                        </b-table>
+                        <div id="caregiver-payment-summary">
+                            <h5 class="d-none d-print-block">Caregiver Summary for Transaction #{{ transaction.id }}</h5>
+                            <b-table bordered striped hover show-empty
+                                     :fields="caregiverSummaryFields"
+                                     :items="caregiverSummary">
+                            </b-table>
+                        </div>
                     </div>
                 </b-card>
             </b-col>
@@ -336,6 +348,14 @@
 
             printTable() {
                 $(".shift-table").print();
+            },
+
+            printClientSummary() {
+                $('#client-charge-summary').print();
+            },
+
+            printCaregiverSummary() {
+                $('#caregiver-payment-summary').print();
             },
 
             loadData() {
