@@ -121,7 +121,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="shift.client.client_type == 'LTCI' ">
+                <b-row>
                     <b-col lg="12">
                         <b-form-group>
                             <signature-pad

@@ -54,7 +54,7 @@
                 </b-col>
             </b-row>
 
-            <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
+            <b-row class="with-padding-bottom" v-if="selectedItem.signature != null">
                 <b-col>
                     <strong>Client Signature</strong>
                     <div v-html="selectedItem.signature.content" class="signature"></div>
