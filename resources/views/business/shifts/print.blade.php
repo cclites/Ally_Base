@@ -23,7 +23,7 @@
                 {{ $shift->caregiver->name }}
             </div>
         </div>
-        @if($shift->client->client_type == 'LTCI' && !is_null($shift->signature))
+        @if($shift->signature)
             <div class="row with-padding-bottom">
                 <div>
                     <strong>Client Signature</strong>
