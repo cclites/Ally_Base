@@ -162,11 +162,7 @@
                     <tr>
                         <td>Total</td>
                         <td>
-                            @if($deposit->adjustment)
-                            &dollar;{{ $deposit->amount }}
-                            @else
-                                &dollar;{{ number_format($shifts->sum('caregiver_total'), 2) }}
-                            @endif
+                            &dollar;{{ number_format($deposit->amount, 2) }}
                         </td>
                     </tr>
                     </tbody>
