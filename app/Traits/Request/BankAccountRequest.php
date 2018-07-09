@@ -25,6 +25,7 @@ trait BankAccountRequest
             || $request->input('routing_number') !== '*********'
             || substr($existing->account_number, -4) !== substr($request->input('account_number'), -4)
             ) {
+            $bankAccountChange = true;
             $rules += [
                 'account_number' => 'required|numeric|confirmed',
                 'routing_number' => 'required|numeric|digits:9|confirmed',
@@ -33,11 +34,15 @@ trait BankAccountRequest
 
         $data = $request->validate($rules);
 
-        // Validate the bank account with Microbilt
-        $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
-        $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
-        if (!$result['valid']) {
-            return new ValidationErrorResponse('account_number', 'The routing number and account number you entered were determined to be invalid.');
+        if (isset($bankAccountChange)) {
+            // Validate the bank account with Microbilt
+            $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
+            $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
+            if (!$result['valid']) {
+                (new ValidationErrorResponse('account_number', 'The routing number and account number you entered were determined to be invalid.'))
+                    ->toResponse($request)
+                    ->send();
+            }
         }
 
         return new BankAccount($data);
