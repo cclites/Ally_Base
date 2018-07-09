@@ -16,7 +16,11 @@ class RestrictMobileAppToCaregivers
      */
     public function handle($request, Closure $next)
     {
-        if (is_mobile_app() && Auth::check() && Auth::user()->role_type !== 'caregiver') {
+        if (is_mobile_app()
+            && Auth::check()
+            && Auth::user()->role_type !== 'caregiver'
+            && !str_contains($request->getUri(), 'logout')
+        ) {
             return response(view('errors.mobile_app_restricted'));
         }
 
