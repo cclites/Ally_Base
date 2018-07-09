@@ -95,10 +95,15 @@ class ChargesController extends Controller
             $transaction = SinglePaymentProcessor::chargeBusiness($business, $request->amount, $request->adjustment ?? false, $request->notes);
         }
 
-        if ($transaction) {
+        if (empty($transaction)) {
+            return new ErrorResponse(400, 'Transaction failure.');
+        }
+
+        if ($transaction->success) {
             return new SuccessResponse('Transaction processed for $' . $request->amount);
         }
-        return new ErrorResponse(400, 'Transaction failure');
+
+        return new ErrorResponse(400, 'Transaction declined for $' . $request->amount);
     }
 
     public function markSuccessful(Payment $payment)

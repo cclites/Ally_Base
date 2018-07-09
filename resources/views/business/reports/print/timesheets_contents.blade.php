@@ -191,7 +191,7 @@
                                         </table>
                                     </div>
                                 </div>
-                                @if($shift->client->client_type == 'LTCI' && $shift->signature)
+                                @if($shift->signature)
                                     <div class="row with-padding-bottom">
                                         <div class="col-sm-12">
                                             <span style="font-weight: 500;">Client Signature</span>

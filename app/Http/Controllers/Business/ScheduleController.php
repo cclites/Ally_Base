@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
@@ -139,6 +140,9 @@ class ScheduleController extends BaseController
         }
         catch (MaximumWeeklyHoursExceeded $e) {
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
+        }
+        catch (InvalidScheduleParameters $e) {
+            return new ErrorResponse(400, $e->getMessage());
         }
 
         return new ErrorResponse(500, 'Unknown error creating the schedules.');
