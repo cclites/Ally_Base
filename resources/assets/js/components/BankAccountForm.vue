@@ -147,6 +147,7 @@
                     account_number_confirmation: '',
                     account_type: this.account.account_type,
                     account_holder_type: this.account.account_holder_type,
+                    ignore_validation: false,
                 }),
                 submitting: false,
                 buttonText: '',
@@ -174,12 +175,15 @@
                     this.form.routing_number = '*********';
                     this.form.routing_number_confirmation = '';
                     this.$parent.typeMessage = response.data;
-                    this.resetButtonText();
                 }
                 catch (e) {
-                    this.buttonText = 'Invalid Account';
-                    this.buttonVariant = 'danger';
+                    let errors = e.response.data.errors;
+                    if (errors && Object.keys(errors)[0] === 'account_number') {
+                        this.form.ignore_validation = true;
+                        alert('Please double check your routing number and account number.  If you are sure your numbers are correct, press Save again.');
+                    }
                 }
+                this.resetButtonText();
                 this.submitting = false;
             },
 
