@@ -34,12 +34,12 @@ trait BankAccountRequest
 
         $data = $request->validate($rules);
 
-        if (isset($bankAccountChange)) {
+        if (isset($bankAccountChange) && !$request->input('ignore_validation')) {
             // Validate the bank account with Microbilt
             $mb = new Microbilt(config('services.microbilt.id'), config('services.microbilt.password'));
             $result = $mb->verifyBankAccount($request->input('name_on_account'), $request->input('account_number'), $request->input('routing_number'));
             if (!$result['valid']) {
-                (new ValidationErrorResponse('account_number', 'The routing number and account number you entered were determined to be invalid.'))
+                (new ValidationErrorResponse('account_number', 'The routing number and account number you entered did not pass our verification check.'))
                     ->toResponse($request)
                     ->send();
             }
