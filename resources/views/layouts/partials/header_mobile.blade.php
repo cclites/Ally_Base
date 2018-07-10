@@ -28,12 +28,6 @@
                     @include('layouts.partials.active_business')
                 @endif
                 <!-- ============================================================== -->
-                <!-- Exceptions -->
-                <!-- ============================================================== -->
-                @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user']))
-                    <system-notifications></system-notifications>
-                @endif
-                <!-- ============================================================== -->
                 <!-- Profile -->
                 <!-- ============================================================== -->
                 <li class="nav-item dropdown">

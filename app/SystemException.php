@@ -66,6 +66,11 @@ class SystemException extends Model implements Auditable
     /// Other Methods
     ///////////////////////////////////////////
 
+    public function scopeNotAcknowledged($query)
+    {
+        return $query->whereNull('acknowledged_at');
+    }
+
     public function acknowledge($note = '', $user_id = null)
     {
         if (!$user_id) $user_id = \Auth::id();
