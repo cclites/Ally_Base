@@ -57,6 +57,15 @@
 </li>
 @endif
 <li>
+    <a href="{{ route('business.exceptions.index') }}">
+        <i class="fa fa-exclamation"></i>
+        <span class="hide-menu">Exceptions</span>
+        <span class="badge badge-danger badge-notifications menu-badge">
+            {{ \App\SystemException::notAcknowledged()->count() }}
+        </span>
+    </a>
+</li>
+<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.settings.index') }}">General</a></li>
