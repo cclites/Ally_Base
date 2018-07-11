@@ -48,7 +48,9 @@ class UpdateClientRequest extends FormRequest
             'dr_first_name' => 'nullable|string',
             'dr_last_name' => 'nullable|string',
             'dr_phone' => 'nullable|string',
-            'dr_fax' => 'nullable|string'
+            'dr_fax' => 'nullable|string',
+            'hospital_name' => 'nullable|string',
+            'hospital_number' => 'nullable|string',
         ];
     }
 }

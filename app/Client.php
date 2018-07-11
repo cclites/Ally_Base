@@ -138,6 +138,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'dr_last_name',
         'dr_phone',
         'dr_fax',
+        'hospital_name',
+        'hospital_number',
         'ltci_name',
         'ltci_address',
         'ltci_city',

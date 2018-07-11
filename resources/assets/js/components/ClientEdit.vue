@@ -181,6 +181,27 @@
             </b-row>
 
             <b-row>
+                <b-col>
+                    <p class="h6">Hospital</p>
+                    <hr>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Hospital Name">
+                        <b-form-input id="hospital_name"
+                                      v-model="form.hospital_name"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Contact Phone">
+                        <b-form-input id="hospital_number"
+                                      v-model="form.hospital_number"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
                 <b-col lg="12">
                     <hr />
                 </b-col>
@@ -316,7 +337,9 @@
                     dr_first_name: this.client.dr_first_name,
                     dr_last_name: this.client.dr_last_name,
                     dr_phone: this.client.dr_phone,
-                    dr_fax: this.client.dr_fax
+                    dr_fax: this.client.dr_fax,
+                    hospital_name: this.client.hospital_name,
+                    hospital_number: this.client.hospital_number,
                 }),
                 passwordModal: false,
                 active: this.client.active,
