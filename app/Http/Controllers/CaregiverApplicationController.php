@@ -54,7 +54,8 @@ class CaregiverApplicationController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|email',
-            'cell_phone' => 'required'
+            'cell_phone' => 'required',
+            'state' => 'nullable|string|size:2',
         ]);
 
         $data = $request->all();

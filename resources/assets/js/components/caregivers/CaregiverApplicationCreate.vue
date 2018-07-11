@@ -95,11 +95,9 @@
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="State">
-                        <b-form-input
-                                v-model="form.state"
-                                tabindex="10">
-                        </b-form-input>
+                    <b-form-group label="State" label-for="state">
+                        <b-form-select name="state" :options="states.getOptions()" v-model="form.state" tabindex="10" />
+                        <input-help :form="form" field="form.state" text=""></input-help>
                     </b-form-group>
                     <b-form-group label="Cell Phone Provider">
                         <b-form-input
@@ -548,6 +546,8 @@
 </style>
 
 <script>
+    import States from '../../classes/States';
+
     export default {
         props: ['business', 'positions'],
 
@@ -564,6 +564,7 @@
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
+                states: new States(),
                 form: new Form({
                     business_id: this.business.id,
                     first_name: '',
