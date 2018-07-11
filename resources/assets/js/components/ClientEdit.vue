@@ -182,7 +182,7 @@
 
             <b-row>
                 <b-col>
-                    <p class="h6">Hospital</p>
+                    <p class="h6">Preferred Hospital</p>
                     <hr>
                 </b-col>
             </b-row>
