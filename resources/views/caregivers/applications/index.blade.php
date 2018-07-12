@@ -4,8 +4,6 @@
 
 @section('content')
     <caregiver-application-list :business="{{ json_encode(activeBusiness()) }}"
-                                :applications="{{ json_encode($applications) }}"
-                                :positions="{{ json_encode($positions) }}"
-                                :statuses="{{ json_encode($statuses) }}">
+                                :applications="{{ json_encode($applications) }}">
     </caregiver-application-list>
 @endsection

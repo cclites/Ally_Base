@@ -149,10 +149,9 @@
 
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Position applying for?" class="mt-2">
-                        <b-form-radio-group id="caregiver_position_id" v-model="form.caregiver_position_id" name="radioSubComponent">
-                            <b-form-radio v-for="position in positions" :value="position.id" :key="position.id">{{ position.name }}</b-form-radio>
-                        </b-form-radio-group>
+                    <b-form-group label="What position are you applying for?">
+                        <b-form-input v-model="form.position"></b-form-input>
+                        <input-help :form="form" field="position" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -530,7 +529,7 @@
     import States from '../../classes/States';
 
     export default {
-        props: ['application', 'business', 'positions'],
+        props: ['application', 'business'],
 
         data() {
             return{

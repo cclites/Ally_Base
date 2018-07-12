@@ -211,15 +211,14 @@ class CaregiverApplication extends Model implements Auditable
         'workmans_comp' => 'boolean',
     ];
 
-    public function position()
-    {
-        return $this->belongsTo(CaregiverPosition::class, 'caregiver_position_id');
-    }
+    ////////////////////////////////////
+    //// Application Statuses
+    ////////////////////////////////////
 
-    public function status()
-    {
-        return $this->belongsTo(CaregiverApplicationStatus::class, 'caregiver_application_status_id');
-    }
+    const STATUS_NEW = 'New';
+    const STATUS_OPEN = 'Open';
+    const STATUS_CONVERTED = 'Converted';
+
 
     ///////////////////////////////////////////
     /// Mutators
@@ -251,4 +250,61 @@ class CaregiverApplication extends Model implements Auditable
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
+    public function convertToCaregiver()
+    {
+        // Business
+        $business = Business::findOrFail($this->business_id);
+
+        // Check if username exists
+        $userExists = User::where('username', $this->email)->exists();
+        if ($userExists) {
+            $alternativeUsername = str_slug($this->first_name . ' ' . $this->last_name);
+            if (User::where('username', $alternativeUsername)->exists()) {
+                $alternativeUsername .= mt_rand(1000,9999);
+            }
+        }
+
+        $caregiver = new Caregiver([
+            'firstname' => $this->first_name,
+            'lastname' => $this->last_name,
+            'ssn' => $this->ssn,
+            'email' => $this->email,
+            'username' => $alternativeUsername ?? $this->email,
+            'date_of_birth' => $this->date_of_birth,
+            'password' => bcrypt(random_bytes(32)),
+        ]);
+
+        if ($caregiver->save()) {
+            $business->caregivers()->attach($caregiver);
+
+            $address = new Address([
+                'address1' => $this->address,
+                'address2' => $this->address_2,
+                'city' => $this->city,
+                'state' => $this->state,
+                'zip' => $this->zip,
+                'country' => 'US',
+                'type' => 'home',
+            ]);
+            $caregiver->addresses()->save($address);
+
+            $cellPhone = new PhoneNumber(['type' => 'primary']);
+            $cellPhone->input($this->cell_phone);
+            $caregiver->phoneNumbers()->save($cellPhone);
+
+            if ($this->home_phone) {
+                $homePhone = new PhoneNumber(['type' => 'home']);
+                $homePhone->input($this->home_phone);
+                $caregiver->phoneNumbers()->save($homePhone);
+            }
+
+            return $caregiver;
+        }
+
+        return false;
+    }
 }

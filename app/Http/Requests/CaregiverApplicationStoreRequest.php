@@ -46,7 +46,7 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'emergency_contact_phone' => 'nullable|string|max:100',
             'worked_here_before' => 'boolean',
             'worked_before_location' => 'nullable|string|max:255',
-            'caregiver_position_id' => 'nullable|integer',
+            'position' => 'nullable|string|max:200',
             'preferred_start_date' => 'nullable|date',
             'preferred_days' => 'nullable|array',
             'preferred_times' => 'nullable|array',

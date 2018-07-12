@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <caregiver-create :app="{{ json_encode($application) }}"></caregiver-create>
+            <caregiver-create></caregiver-create>
         </div>
     </div>
 @endsection
