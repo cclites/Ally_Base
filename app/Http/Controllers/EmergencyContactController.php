@@ -89,6 +89,29 @@ class EmergencyContactController extends Controller
     }
 
     /**
+     * Change the priorty value for the given contact to the supplied value, and
+     * re-order the rest of the contacts to fit the new value.
+     *
+     * @param Request $request
+     * @param User $user
+     * @param EmergencyContact $contact
+     * @return \Illuminate\Http\Response
+     */
+    public function updatePriority(Request $request, User $user, EmergencyContact $contact)
+    {
+        $priority = $request->priority;
+        if (empty($priority) || $priority < 1) {
+            $priority = 1;
+        }
+
+        EmergencyContact::shiftPriorityDownAt($user->id, $priority, $contact->id);
+
+        $contact->update(['priority' => $priority]);
+
+        return response()->json($user->fresh()->emergencyContacts);
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\EmergencyContact  $contact
