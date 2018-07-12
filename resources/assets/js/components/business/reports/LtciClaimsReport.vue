@@ -8,7 +8,7 @@
                         header-bg-variant="info"
                 >
                     <b-row>
-                        <b-col lg="3">
+                        <b-col lg="2">
                             <b-form-group label="Start Date">
                                 <date-picker
                                         class="mb-1"
@@ -18,7 +18,7 @@
                                 </date-picker>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="3">
+                        <b-col lg="2">
                             <b-form-group label="End Date">
                                 <date-picker
                                         class="mb-1"
@@ -28,16 +28,29 @@
                                 </date-picker>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="3">
+                        <b-col lg="2">
+                            <b-form-group label="Client Type">
+                                <b-form-select v-model="clientType" class="mr-1 mb-1" name="client_id">
+                                    <option value="">All Client Types</option>
+                                    <option value="LTCI">LTC Insurance</option>
+                                    <option value="medicaid">Medicaid</option>
+                                    <option value="private_pay">Private Pay</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col lg="2">
                             <b-form-group label="Client">
                                 <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
-                                    <option value="">Select a Client</option>
-                                    <option v-for="item in clientList" :value="item.id">{{ item.nameLastFirst }}
+                                    <option v-if="clients.length === 0" selected>Loading..</option>
+                                    <option v-else value="">Select a Client</option>
+                                    <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}
                                     </option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="3">
+
+                        <b-col lg="2">
                             <b-form-group label="Export Type">
                                 <b-form-radio-group id="export_type" v-model="form.export_type" name="export_type">
                                     <b-form-radio value="html">Online</b-form-radio>
@@ -45,7 +58,7 @@
                                 </b-form-radio-group>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="3">
+                        <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <!--<b-button type="submit">Preview</b-button>-->
                                 <b-button variant="info" @click="fetchPreview()">Export</b-button>
@@ -114,10 +127,12 @@
     export default {
         mixins: [FormatsDates, FormatsNumbers],
 
-        props: ['clients', 'caregivers', 'token'],
+        props: ['token'],
 
         data() {
             return {
+                loadingClients: false,
+                clients: [],
                 preview: [],
                 form: new Form({
                     start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
@@ -127,6 +142,7 @@
                     client_type: '',
                     export_type: 'html'
                 }),
+                clientType: 'LTCI',
                 selectedClient: false,
                 selectedItem: {},
                 items: [],
@@ -150,14 +166,6 @@
         },
 
         computed: {
-            caregiverList() {
-                return _.sortBy(this.caregivers, 'nameLastFirst');
-            },
-
-            clientList() {
-                return _.sortBy(this.clients, 'nameLastFirst');
-            },
-
             summaryTotal() {
                 return this.moneyFormat(_.sumBy(this.items, 'total'));
             },
@@ -180,6 +188,12 @@
         },
 
         methods: {
+
+            async loadClients() {
+                this.clients = [];
+                const response = await axios.get('/business/clients?json=1&client_type=' + this.clientType);
+                this.clients = response.data;
+            },
 
             fetchPreview() {
                 this.loading = true;
@@ -204,6 +218,16 @@
                         return 'HOL';
                 }
             }
+        },
+
+        watch: {
+            clientType() {
+                this.loadClients();
+            }
+        },
+
+        created() {
+            this.loadClients();
         }
     }
 </script>

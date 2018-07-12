@@ -660,9 +660,7 @@ class ReportsController extends BaseController
 
     public function ltciClaims()
     {
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
-        return view('business.reports.ltci_claims', compact('caregivers', 'clients'));
+        return view('business.reports.ltci_claims');
     }
 
     public function ltciClaimsData(Request $request)
