@@ -64,26 +64,25 @@ class CaregiverApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(CaregiverApplication $application)
     {
-        $application = CaregiverApplication::with('position', 'status')->find($id);
+        $application->load('position', 'status');
         return view('caregivers.applications.show', compact('application'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int $id
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(CaregiverApplication $application)
     {
         $user = OfficeUser::find(auth()->id());
         $business = $user->businesses()->first();
-        $application = CaregiverApplication::find($id);
         $application->preferred_days = explode(',', $application->preferred_days);
         $application->preferred_times = explode(',', $application->preferred_times);
         $application->preferred_shift_length = explode(',', $application->preferred_shift_length);
@@ -96,27 +95,24 @@ class CaregiverApplicationController extends Controller
      * Update the specified resource in storage.
      *
      * @param \App\Http\Requests\CaregiverApplicationUpdateRequest $request
-     * @param  int $id
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
      */
-    public function update(CaregiverApplicationUpdateRequest $request, $id)
+    public function update(CaregiverApplicationUpdateRequest $request, CaregiverApplication $application)
     {
         $data = $request->filtered();
-        $application = CaregiverApplication::find($id);
-
         $application->update($data);
 
         return new SuccessResponse('Application Updated');
-
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CaregiverApplication  $caregiverApplication
+     * @param  \App\CaregiverApplication  $application
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CaregiverApplication $caregiverApplication)
+    public function destroy(CaregiverApplication $application)
     {
         //
     }
