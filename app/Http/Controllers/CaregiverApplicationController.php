@@ -2,32 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Address;
 use App\Business;
+use App\Caregiver;
 use App\CaregiverApplication;
 use App\CaregiverApplicationStatus;
 use App\CaregiverPosition;
-use App\OfficeUser;
+use App\Http\Requests\CaregiverApplicationStoreRequest;
+use App\Http\Requests\CaregiverApplicationUpdateRequest;
+use App\PhoneNumber;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Traits\ActiveBusiness;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CaregiverApplicationController extends Controller
 {
+    use ActiveBusiness;
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function index()
     {
-        $user = OfficeUser::find(auth()->id());
-        $business = $user->businesses()->first();
-        $applications = CaregiverApplication::with('position', 'status')->where('business_id', $business->id)->get();
-        $statuses = CaregiverApplicationStatus::all();
-        $positions = CaregiverPosition::all();
-        return view('caregivers.applications.index', compact('business', 'applications', 'statuses', 'positions'));
+        $applications = CaregiverApplication::where('business_id', $this->business()->id)->get();
+        return view('caregivers.applications.index', compact('business', 'applications'));
     }
 
     /**
@@ -38,46 +43,22 @@ class CaregiverApplicationController extends Controller
      */
     public function create(Business $business)
     {
-        $positions = CaregiverPosition::all();
-        return view('caregivers.applications.create', compact('business', 'positions'));
+        return view('caregivers.applications.create', compact('business'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  CaregiverApplicationStoreRequest $request
      * @return CreatedResponse|ErrorResponse
      */
-    public function store(Request $request)
+    public function store(CaregiverApplicationStoreRequest $request)
     {
-        $this->validate($request, [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'cell_phone' => 'required',
-            'state' => 'nullable|string|size:2',
-        ]);
-
-        $data = $request->all();
-
-        $data['preferred_days'] = $request->filled('preferred_days') ? implode(',', $data['preferred_days']) : '';
-        $data['preferred_times'] = $request->filled('preferred_times') ? implode(',', $data['preferred_times']) : '';
-        $data['preferred_shift_length'] = $request->filled('preferred_shift_length') ? implode(',', $data['preferred_shift_length']) : '';
-        $data['heard_about'] = $request->filled('preferred_shift_length') ? implode(',', $data['heard_about']) : '';
-        $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);
-
-        $data['preferred_start_date'] = Carbon::parse($data['preferred_start_date']);
-        $data['employer_1_approx_start_date'] = Carbon::parse($data['employer_1_approx_start_date']);
-        $data['employer_1_approx_end_date'] = Carbon::parse($data['employer_1_approx_end_date']);
-        $data['employer_2_approx_start_date'] = Carbon::parse($data['employer_2_approx_start_date']);
-        $data['employer_2_approx_end_date'] = Carbon::parse($data['employer_2_approx_end_date']);
-        $data['employer_3_approx_start_date'] = Carbon::parse($data['employer_3_approx_start_date']);
-        $data['employer_3_approx_end_date'] = Carbon::parse($data['employer_3_approx_end_date']);
-
+        $data = $request->filtered();
         $application = CaregiverApplication::create($data);
 
         if ($application) {
-            return new CreatedResponse('Application submitted successfully.', [], '/business/caregivers/applications');
+            return new CreatedResponse('Application submitted successfully.', [], route('applications.done', [$request->business_id, $application]));
         }
         return new ErrorResponse(500, 'The application could not be submitted.');
     }
@@ -85,82 +66,78 @@ class CaregiverApplicationController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function show(int $id)
+    public function show(CaregiverApplication $application)
     {
-        $application = CaregiverApplication::with('position', 'status')->find($id);
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
+        $this->updateStatus($application);
+
         return view('caregivers.applications.show', compact('application'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int $id
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function edit($id)
+    public function edit(CaregiverApplication $application)
     {
-        $user = OfficeUser::find(auth()->id());
-        $business = $user->businesses()->first();
-        $application = CaregiverApplication::find($id);
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
+        $this->updateStatus($application);
+
+        $business = $this->business();
         $application->preferred_days = explode(',', $application->preferred_days);
         $application->preferred_times = explode(',', $application->preferred_times);
         $application->preferred_shift_length = explode(',', $application->preferred_shift_length);
         $application->heard_about = explode(',', $application->heard_about);
-        $positions = CaregiverPosition::all();
-        return view('caregivers.applications.edit', compact('application', 'business', 'positions'));
+        return view('caregivers.applications.edit', compact('application', 'business'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int $id
+     * @param \App\Http\Requests\CaregiverApplicationUpdateRequest $request
+     * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function update(Request $request, $id)
+    public function update(CaregiverApplicationUpdateRequest $request, CaregiverApplication $application)
     {
-        $this->validate($request, [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'cell_phone' => 'required'
-        ]);
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
 
-        $data = $request->all();
-
-        $data['preferred_days'] = $request->filled('preferred_days') ? implode(',', $data['preferred_days']) : '';
-        $data['preferred_times'] = $request->filled('preferred_times') ? implode(',', $data['preferred_times']) : '';
-        $data['preferred_shift_length'] = $request->filled('preferred_shift_length') ? implode(',', $data['preferred_shift_length']) : '';
-        $data['heard_about'] = $request->filled('preferred_shift_length') ? implode(',', $data['heard_about']) : '';
-        $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);
-
-        $data['preferred_start_date'] = Carbon::parse($data['preferred_start_date']);
-        $data['employer_1_approx_start_date'] = Carbon::parse($data['employer_1_approx_start_date']);
-        $data['employer_1_approx_end_date'] = Carbon::parse($data['employer_1_approx_end_date']);
-        $data['employer_2_approx_start_date'] = Carbon::parse($data['employer_2_approx_start_date']);
-        $data['employer_2_approx_end_date'] = Carbon::parse($data['employer_2_approx_end_date']);
-        $data['employer_3_approx_start_date'] = Carbon::parse($data['employer_3_approx_start_date']);
-        $data['employer_3_approx_end_date'] = Carbon::parse($data['employer_3_approx_end_date']);
-
-        $application = CaregiverApplication::find($id);
-
+        $data = $request->filtered();
         $application->update($data);
 
         return new SuccessResponse('Application Updated');
-
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CaregiverApplication  $caregiverApplication
+     * @param  \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function destroy(CaregiverApplication $caregiverApplication)
+    public function destroy(CaregiverApplication $application)
     {
+        abort(404); // not implemented
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
         //
     }
 
@@ -169,26 +146,63 @@ class CaregiverApplicationController extends Controller
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function search(Request $request)
     {
-        $user = OfficeUser::find(auth()->id());
-        $business = Business::find($user->businesses()->first()->id);
-        $applications = CaregiverApplication::with('position', 'status')
-            ->where('business_id', $business->id)
+        $applications = CaregiverApplication::where('business_id', $this->business()->id)
             ->when($request->filled('from_date'), function ($query) use ($request) {
                 return $query->where('created_at', '>=', Carbon::parse($request->from_date));
             })
             ->when($request->filled('to_date'), function ($query) use ($request) {
                 return $query->where('created_at', '<=', Carbon::parse($request->to_date)->addDay());
             })
-            ->when($request->filled('position'), function ($query) use ($request) {
-                return $query->where('caregiver_position_id', $request->position);
-            })
             ->when($request->filled('status'), function ($query) use ($request) {
-                return $query->where('caregiver_application_status_id', $request->status);
+                return $query->where('status', $request->status);
             })
             ->get();
         return response()->json($applications);
+    }
+
+    /**
+     * Show a completed page once an application is created
+     *
+     * @param \App\Business $business
+     * @param \App\CaregiverApplication $application
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function done(Business $business, CaregiverApplication $application)
+    {
+        return view('caregivers.applications.done', compact('business', 'application'));
+    }
+
+    /**
+     * Convert an application into a caregiver
+     *
+     * @param \App\CaregiverApplication $application
+     * @return \App\Responses\CreatedResponse|\App\Responses\ErrorResponse
+     * @throws \Exception
+     */
+    public function convert(CaregiverApplication $application)
+    {
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
+        if ($application->status === CaregiverApplication::STATUS_CONVERTED) {
+            return new ErrorResponse(409, 'This application has already been converted.');
+        }
+
+        if ($caregiver = $application->convertToCaregiver()) {
+            $this->updateStatus($application, CaregiverApplication::STATUS_CONVERTED);
+            return new CreatedResponse('The application has been converted into an active caregiver.', null, route('business.caregivers.show', [$caregiver]));
+        }
+    }
+
+    protected function updateStatus(CaregiverApplication $application, $status = CaregiverApplication::STATUS_OPEN)
+    {
+        if ($status !== CaregiverApplication::STATUS_CONVERTED) {
+            $application->update(['status' => $status]);
+        }
     }
 }

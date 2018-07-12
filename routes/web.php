@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
+Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
 Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
 Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
@@ -106,9 +107,10 @@ Route::group([
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
-    Route::get('caregivers/applications/{id}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
-    Route::get('caregivers/applications/{id}/edit', 'CaregiverApplicationController@edit')->name('caregivers.applications.edit');
-    Route::put('caregivers/applications/{id}', 'CaregiverApplicationController@update')->name('caregivers.applications.update');
+    Route::get('caregivers/applications/{application}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
+    Route::get('caregivers/applications/{application}/edit', 'CaregiverApplicationController@edit')->name('caregivers.applications.edit');
+    Route::put('caregivers/applications/{application}', 'CaregiverApplicationController@update')->name('caregivers.applications.update');
+    Route::post('caregivers/applications/{application}/convert', 'CaregiverApplicationController@convert')->name('caregivers.applications.convert');
     Route::get('caregivers/distance_report', 'Business\CaregiverLocationController@report')->name('caregivers.distance_report');
     Route::post('caregivers/distances', 'Business\CaregiverLocationController@distances')->name('caregivers.distances');
     Route::resource('caregivers', 'Business\CaregiverController');

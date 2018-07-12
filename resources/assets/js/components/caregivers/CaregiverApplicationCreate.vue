@@ -7,135 +7,132 @@
         </b-row>
 
         <b-card title="Caregiver Application">
+
             <b-row>
+
                 <b-col lg="4">
                     <b-form-group label="First Name*">
-                        <b-form-input
-                                v-model="form.first_name"
-                                tabindex="1">
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Date of Birth">
-                        <b-form-input
-                                type="text"
-                                id="date_of_birth"
-                                class="datepicker"
-                                v-model="form.date_of_birth"
-                                tabindex="4"
-                        >
-                        </b-form-input>
+                        <b-form-input v-model="form.first_name" autofocus></b-form-input>
+                        <input-help :form="form" field="first_name" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
                     <b-form-group label="Middle Initial">
-                        <b-form-input
-                                v-model="form.middle_initial"
-                                tabindex="2">
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Social Security Number">
-                        <b-form-input
-                                v-model="form.ssn"
-                                tabindex="5">
-                        </b-form-input>
+                        <b-form-input v-model="form.middle_initial"></b-form-input>
+                        <input-help :form="form" field="middle_initial" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
                     <b-form-group label="Last Name*">
-                        <b-form-input
-                                v-model="form.last_name"
-                                tabindex="3">
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Email*">
-                        <b-form-input
-                                v-model="form.email"
-                                tabindex="6">
-                        </b-form-input>
+                        <b-form-input v-model="form.last_name"></b-form-input>
+                        <input-help :form="form" field="last_name" text=""></input-help>
                     </b-form-group>
                 </b-col>
+
+            </b-row>
+            <b-row>
+
+                <b-col lg="4">
+                    <b-form-group label="Date of Birth">
+                        <date-picker v-model="form.date_of_birth" />
+                        <input-help :form="form" field="date_of_birth" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+
+                <b-col lg="4">
+                    <b-form-group label="Social Security Number">
+                        <mask-input type="ssn" v-model="form.ssn"></mask-input>
+                        <input-help :form="form" field="ssn" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+
+                <b-col lg="4">
+                    <b-form-group label="Email*">
+                        <b-form-input v-model="form.email"></b-form-input>
+                        <input-help :form="form" field="email" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+
             </b-row>
 
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Address">
-                        <b-form-input
-                                v-model="form.address"
-                                tabindex="7">
-                        </b-form-input>
+                    <b-form-group label="Address*">
+                        <b-form-input v-model="form.address"></b-form-input>
+                        <input-help :form="form" field="address" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="6">
                     <b-form-group label="Address 2">
-                        <b-form-input
-                                v-model="form.address_2"
-                                tabindex="8">
-                        </b-form-input>
+                        <b-form-input v-model="form.address_2"></b-form-input>
+                        <input-help :form="form" field="address_2" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
 
             <b-row>
                 <b-col lg="4">
-                    <b-form-group label="City">
-                        <b-form-input
-                                v-model="form.city"
-                                tabindex="9">
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Cell Phone*">
-                        <b-form-input
-                                v-model="form.cell_phone"
-                                tabindex="12">
-                        </b-form-input>
+                    <b-form-group label="City*">
+                        <b-form-input v-model="form.city"></b-form-input>
+                        <input-help :form="form" field="city" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="State" label-for="state">
-                        <b-form-select name="state" :options="states.getOptions()" v-model="form.state" tabindex="10" />
+                    <b-form-group label="State*" label-for="state">
+                        <b-form-select name="state" :options="states.getOptions()" v-model="form.state" />
                         <input-help :form="form" field="form.state" text=""></input-help>
                     </b-form-group>
-                    <b-form-group label="Cell Phone Provider">
-                        <b-form-input
-                                v-model="form.cell_phone_provider"
-                                tabindex="13">
-                        </b-form-input>
+
+                </b-col>
+
+                <b-col lg="4">
+                    <b-form-group label="Zip*">
+                        <b-form-input v-model="form.zip"></b-form-input>
+                        <input-help :form="form" field="zip" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+
+            </b-row>
+            <b-row>
+
+                <b-col lg="4">
+                    <b-form-group label="Cell Phone*">
+                        <mask-input v-model="form.cell_phone" name="cell_phone"></mask-input>
+                        <input-help :form="form" field="cell_phone" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Zip">
-                        <b-form-input
-                                v-model="form.zip"
-                                tabindex="11">
-                        </b-form-input>
-                    </b-form-group>
-                    <b-form-group label="Home Phone">
-                        <b-form-input
-                                v-model="form.home_phone"
-                                tabindex="14">
-                        </b-form-input>
+                    <b-form-group label="Cell Phone Provider">
+                        <b-form-input v-model="form.cell_phone_provider"></b-form-input>
+                        <input-help :form="form" field="cell_phone_provider" text=""></input-help>
                     </b-form-group>
                 </b-col>
+
+                <b-col lg="4">
+                    <b-form-group label="Home Phone">
+                        <mask-input v-model="form.home_phone" name="home_phone"></mask-input>
+                        <input-help :form="form" field="home_phone" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+
             </b-row>
 
             <b-row>
                 <b-col lg="8">
                     <b-form-group label="Emergency Contact Name">
-                        <b-form-input
-                                v-model="form.emergency_contact_name">
-                        </b-form-input>
+                        <b-form-input v-model="form.emergency_contact_name"></b-form-input>
+                        <input-help :form="form" field="emergency_contact_name" text=""></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="4">
                     <b-form-group label="Emergency Contact Phone">
-                        <b-form-input
-                                v-model="form.emergency_contact_phone">
-                        </b-form-input>
+                        <b-form-input v-model="form.emergency_contact_phone"></b-form-input>
+                        <input-help :form="form" field="emergency_contact_phone" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -152,16 +149,16 @@
                 <b-col lg="6">
                     <b-form-group label="Which Location?" v-show="form.worked_here_before">
                         <b-form-input v-model="form.worked_before_location"></b-form-input>
+                        <input-help :form="form" field="worked_before_location" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
 
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Position applying for?" class="mt-2">
-                        <b-form-radio-group id="caregiver_position_id" v-model="form.caregiver_position_id" name="radioSubComponent">
-                            <b-form-radio v-for="position in positions" :value="position.id" :key="position.id">{{ position.name }}</b-form-radio>
-                        </b-form-radio-group>
+                    <b-form-group label="What position are you applying for?">
+                        <b-form-input v-model="form.position"></b-form-input>
+                        <input-help :form="form" field="position" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -175,13 +172,8 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Preferred Start Date">
-                        <b-form-input
-                                type="text"
-                                id="preferred_start_date"
-                                class="datepicker"
-                                v-model="form.preferred_start_date"
-                        >
-                        </b-form-input>
+                        <date-picker v-model="form.preferred_start_date" />
+                        <input-help :form="form" field="preferred_start_date" text=""></input-help>
                     </b-form-group>
                     <b-form-group label="Preferred Days">
                         <b-form-checkbox-group id="preferred_days" v-model="form.preferred_days">
@@ -225,6 +217,7 @@
                 <b-col lg="12">
                     <b-form-group label="Vehicle Year, Make, Model & Color">
                         <b-form-input v-model="form.vehicle"></b-form-input>
+                        <input-help :form="form" field="vehicle" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -254,6 +247,7 @@
                     </b-form-group>
                     <b-form-group label="How many violations?" v-show="form.moving_violation">
                         <b-form-input v-model="form.moving_violation_count" type="number"></b-form-input>
+                        <input-help :form="form" field="moving_violation_count" text=""></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="3">
@@ -265,6 +259,7 @@
                     </b-form-group>
                     <b-form-group label="How many accidents?" v-show="form.accidents">
                         <b-form-input v-model="form.accident_count" type="number"></b-form-input>
+                        <input-help :form="form" field="accident_count" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -276,6 +271,7 @@
                                          :rows="3"
                                          :max-rows="6">
                         </b-form-textarea>
+                        <input-help :form="form" field="driving_violations_desc" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -329,6 +325,7 @@
                                          :rows="3"
                                          :max-rows="6">
                         </b-form-textarea>
+                        <input-help :form="form" field="criminal_history_desc" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -377,6 +374,7 @@
                 <b-col lg="12">
                     <b-form-group label="Where did you receive workman's compensation benefits?">
                         <b-form-input v-model="form.workmans_comp_dates"></b-form-input>
+                        <input-help :form="form" field="workmans_comp_dates" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -388,6 +386,7 @@
                                          :rows="3"
                                          :max-rows="6">
                         </b-form-textarea>
+                        <input-help :form="form" field="injury_status_desc" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -406,55 +405,73 @@
                 <b-row :key="i">
                     <b-col lg="4">
                         <b-form-group label="Employer Name">
-                            <b-form-input :v-model="'form.employer_'+i+'_name'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Approximate Start Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_start_date_'+i"
-                                    class="datepicker"
-                                    :v-model="'form.employer_'+i+'_approx_start_date'"
-                            >
-                            </b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Job Title">
-                            <b-form-input type="text"
-                                    :v-model="'form.employer_'+i+'_job_title'">
-                            </b-form-input>
+                            <b-form-input v-model="form[`employer_${i}_name`]"></b-form-input>
+                            <input-help :form="form" :field="`employer_${i}_name`" text=""></input-help>
                         </b-form-group>
                     </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Approximate Start Date">
+                            <date-picker v-model="form[`employer_${i}_approx_start_date`]" />
+                            <input-help :form="form" :field="`employer_${i}_approx_start_date`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Approximate End Date">
+                            <date-picker v-model="form[`employer_${i}_approx_end_date`]" />
+                            <input-help :form="form" :field="`employer_${i}_approx_end_date`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
                     <b-col lg="4">
                         <b-form-group label="Employer City">
-                            <b-form-input :v-model="'form.employer_'+i+'_city'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Approximate End Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_end_date_'+i"
-                                    class="datepicker"
-                                    :v-model="'form.employer_'+i+'_approx_end_date'"
-                            >
-                            </b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Supervisor Name">
-                            <b-form-input type="text"
-                                          :v-model="'form.employer_'+i+'_supervisor_name'">
-                            </b-form-input>
+                            <b-form-input v-model="form[`employer_${i}_city`]"></b-form-input>
+                            <input-help :form="form" :field="`employer_${i}_city`" text=""></input-help>
                         </b-form-group>
                     </b-col>
+
                     <b-col lg="4">
                         <b-form-group label="Employer State">
-                            <b-form-input :v-model="'form.employer_'+i+'_state'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Employer Phone">
-                            <b-form-input :v-model="'form.employer_'+i+'_phone'"></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Reason for leaving?">
-                            <b-form-input type="text"
-                                          :v-model="'form.employer_'+i+'_reason_for_leaving'">
-                            </b-form-input>
+                            <b-form-select :options="states.getOptions()" v-model="form[`employer_${i}_state`]" />
+                            <input-help :form="form" :field="'employer_'+i+'_state'" text=""></input-help>
                         </b-form-group>
                     </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Employer Phone">
+                            <mask-input v-model="form[`employer_${i}_phone`]"></mask-input>
+                            <input-help :form="form" :field="`employer_${i}_phone`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Job Title">
+                            <b-form-input type="text"
+                                          v-model="form[`employer_${i}_job_title`]">
+                            </b-form-input>
+                            <input-help :form="form" :field="`employer_${i}_job_title`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Supervisor Name">
+                            <b-form-input type="text"
+                                          v-model="form[`employer_${i}_supervisor_name`]">
+                            </b-form-input>
+                            <input-help :form="form" :field="`employer_${i}_supervisor_name`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
+                    <b-col lg="4">
+                        <b-form-group label="Reason for leaving?">
+                            <b-form-input type="text"
+                                          v-model="form[`employer_${i}_reason_for_leaving`]">
+                            </b-form-input>
+                            <input-help :form="form" :field="`employer_${i}_reason_for_leaving`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+
                 </b-row>
                 <hr v-if="i != 3">
             </template>
@@ -470,59 +487,29 @@
                 </b-col>
             </b-row>
             <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_1_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_1_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_1_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_2_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_2_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_2_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_3_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_3_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_3_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
+            <template v-for="i in 3">
+                <b-row :key="i">
+                    <b-col lg="4">
+                        <b-form-group label="Reference Name">
+                            <b-form-input v-model="form[`reference_${i}_name`]"></b-form-input>
+                            <input-help :form="form" :field="`reference_${i}_name`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="4">
+                        <b-form-group label="Reference Phone">
+                            <mask-input v-model="form[`reference_${i}_phone`]"></mask-input>
+                            <input-help :form="form" :field="`reference_${i}_phone`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="4">
+                        <b-form-group label="Reference Relationship">
+                            <b-form-input v-model="form[`reference_${i}_relationship`]"></b-form-input>
+                            <input-help :form="form" :field="`reference_${i}_relationship`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <hr v-if="i != 3">
+            </template>
             <!-- How did you hear about us? -->
             <b-row>
                 <b-col>
@@ -549,7 +536,7 @@
     import States from '../../classes/States';
 
     export default {
-        props: ['business', 'positions'],
+        props: ['business'],
 
         mixins: [],
 
@@ -559,7 +546,7 @@
 
         data() {
             return{
-                days: ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri'],
+                days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
                 times: ['Mornings', 'Afternoons', 'Evenings', 'Nights'],
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
@@ -585,7 +572,7 @@
                     emergency_contact_phone: '',
                     worked_here_before: false,
                     worked_before_location: '',
-                    caregiver_position_id: '',
+                    position: '',
                     preferred_start_date: '',
                     preferred_days: '',
                     preferred_times: '',
@@ -654,73 +641,6 @@
         },
 
         created() {
-
-        },
-
-        mounted() {
-            let dob = jQuery('#date_of_birth');
-            let preferredStartDate = jQuery('#preferred_start_date');
-            let component = this;
-
-            dob.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.form.date_of_birth = dob.val();
-            });
-
-            preferredStartDate.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.preferred_start_date = preferredStartDate.val();
-            });
-
-
-            let employStartDate1 = jQuery('#approx_start_date_1');
-            let employEndDate1 = jQuery('#approx_end_date_1');
-
-            employStartDate1.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_1_approx_start_date = employStartDate1.val();
-            });
-
-            employEndDate1.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_1_approx_end_date = employEndDate1.val();
-            });
-
-            let employStartDate2 = jQuery('#approx_start_date_2');
-            let employEndDate2 = jQuery('#approx_end_date_2');
-
-            employStartDate2.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_2_approx_start_date = employStartDate2.val();
-            });
-
-            employEndDate2.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_2_approx_end_date = employEndDate2.val();
-            });
-
-            let employStartDate3 = jQuery('#approx_start_date_3');
-            let employEndDate3 = jQuery('#approx_end_date_3');
-
-            employStartDate3.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_3_approx_start_date = employStartDate3.val();
-            });
-
-            employEndDate3.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_3_approx_end_date = employEndDate3.val();
-            });
 
         },
 

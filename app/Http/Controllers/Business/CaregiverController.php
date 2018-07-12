@@ -55,16 +55,7 @@ class CaregiverController extends BaseController
      */
     public function create()
     {
-        $application = null;
-
-        if (request()->filled('app_id')) {
-            $application = CaregiverApplication::find(request('app_id'));
-            if ($application->business_id != $this->business()->id) {
-                return new ErrorResponse(403, 'You do not have access to this application');
-            }
-        }
-
-        return view('business.caregivers.create', compact('application'));
+        return view('business.caregivers.create');
     }
 
     /**
