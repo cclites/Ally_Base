@@ -36,13 +36,7 @@
 
                 <b-col lg="4">
                     <b-form-group label="Date of Birth">
-                        <b-form-input
-                                type="text"
-                                id="date_of_birth"
-                                class="datepicker"
-                                v-model="form.date_of_birth"
-                        >
-                        </b-form-input>
+                        <date-picker v-model="form.date_of_birth" />
                         <input-help :form="form" field="date_of_birth" text=""></input-help>
                     </b-form-group>
                 </b-col>
@@ -179,13 +173,7 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Preferred Start Date">
-                        <b-form-input
-                                type="text"
-                                id="preferred_start_date"
-                                class="datepicker"
-                                v-model="form.preferred_start_date"
-                        >
-                        </b-form-input>
+                        <date-picker v-model="form.preferred_start_date" />
                         <input-help :form="form" field="preferred_start_date" text=""></input-help>
                     </b-form-group>
                     <b-form-group label="Preferred Days">
@@ -418,54 +406,42 @@
                 <b-row :key="i">
                     <b-col lg="4">
                         <b-form-group label="Employer Name">
-                            <b-form-input :v-model="`form.employer_${i}_name`"></b-form-input>
+                            <b-form-input v-model="form[`employer_${i}_name`]"></b-form-input>
                             <input-help :form="form" :field="`employer_${i}_name`" text=""></input-help>
                         </b-form-group>
                     </b-col>
 
                     <b-col lg="4">
                         <b-form-group label="Approximate Start Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_start_date_'+i"
-                                    class="datepicker"
-                                    :v-model="`form.employer_${i}_approx_start_date`"
-                            >
-                            </b-form-input>
+                            <date-picker v-model="form[`employer_${i}_approx_start_date`]" />
                             <input-help :form="form" :field="`employer_${i}_approx_start_date`" text=""></input-help>
                         </b-form-group>
                     </b-col>
 
                     <b-col lg="4">
                         <b-form-group label="Approximate End Date">
-                            <b-form-input
-                                    type="text"
-                                    :id="'approx_end_date_'+i"
-                                    class="datepicker"
-                                    :v-model="`form.employer_${i}_approx_end_date`"
-                            >
-                            </b-form-input>
+                            <date-picker v-model="form[`employer_${i}_approx_end_date`]" />
                             <input-help :form="form" :field="`employer_${i}_approx_end_date`" text=""></input-help>
                         </b-form-group>
                     </b-col>
 
                     <b-col lg="4">
                         <b-form-group label="Employer City">
-                            <b-form-input :v-model="`form.employer_${i}_city`"></b-form-input>
+                            <b-form-input v-model="form[`employer_${i}_city`]"></b-form-input>
                             <input-help :form="form" :field="`employer_${i}_city`" text=""></input-help>
                         </b-form-group>
                     </b-col>
 
                     <b-col lg="4">
                         <b-form-group label="Employer State">
-                            <b-form-select :options="states.getOptions()" :v-model="`form.employer_${i}_state`" />
+                            <b-form-select :options="states.getOptions()" v-model="form[`employer_${i}_state`]" />
                             <input-help :form="form" :field="'employer_'+i+'_state'" text=""></input-help>
                         </b-form-group>
                     </b-col>
 
                     <b-col lg="4">
                         <b-form-group label="Employer Phone">
-                            <mask-input :v-model="`form.employer_${i}_phone`"></mask-input>
+                            <mask-input v-model="form[`employer_${i}_phone`]"></mask-input>
                             <input-help :form="form" :field="`employer_${i}_phone`" text=""></input-help>
                         </b-form-group>
                     </b-col>
@@ -473,7 +449,7 @@
                     <b-col lg="4">
                         <b-form-group label="Job Title">
                             <b-form-input type="text"
-                                          :v-model="`form.employer_${i}_job_title`">
+                                          v-model="form[`employer_${i}_job_title`]">
                             </b-form-input>
                             <input-help :form="form" :field="`employer_${i}_job_title`" text=""></input-help>
                         </b-form-group>
@@ -482,7 +458,7 @@
                     <b-col lg="4">
                         <b-form-group label="Supervisor Name">
                             <b-form-input type="text"
-                                          :v-model="`form.employer_${i}_supervisor_name`">
+                                          v-model="form[`employer_${i}_supervisor_name`]">
                             </b-form-input>
                             <input-help :form="form" :field="`employer_${i}_supervisor_name`" text=""></input-help>
                         </b-form-group>
@@ -491,7 +467,7 @@
                     <b-col lg="4">
                         <b-form-group label="Reason for leaving?">
                             <b-form-input type="text"
-                                          :v-model="`form.employer_${i}_reason_for_leaving`">
+                                          v-model="form[`employer_${i}_reason_for_leaving`]">
                             </b-form-input>
                             <input-help :form="form" :field="`employer_${i}_reason_for_leaving`" text=""></input-help>
                         </b-form-group>
@@ -516,19 +492,19 @@
                 <b-row :key="i">
                     <b-col lg="4">
                         <b-form-group label="Reference Name">
-                            <b-form-input :v-model="`form.reference_${i}_name`"></b-form-input>
+                            <b-form-input v-model="form[`reference_${i}_name`]"></b-form-input>
                             <input-help :form="form" :field="`reference_${i}_name`" text=""></input-help>
                         </b-form-group>
                     </b-col>
                     <b-col lg="4">
                         <b-form-group label="Reference Phone">
-                            <mask-input :v-model="`form.reference_${i}_phone`"></mask-input>
+                            <mask-input v-model="form[`reference_${i}_phone`]"></mask-input>
                             <input-help :form="form" :field="`reference_${i}_phone`" text=""></input-help>
                         </b-form-group>
                     </b-col>
                     <b-col lg="4">
                         <b-form-group label="Reference Relationship">
-                            <b-form-input :v-model="`form.reference_${i}_relationship`"></b-form-input>
+                            <b-form-input v-model="form[`reference_${i}_relationship`]"></b-form-input>
                             <input-help :form="form" :field="`reference_${i}_relationship`" text=""></input-help>
                         </b-form-group>
                     </b-col>
@@ -571,7 +547,7 @@
 
         data() {
             return{
-                days: ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri'],
+                days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
                 times: ['Mornings', 'Afternoons', 'Evenings', 'Nights'],
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
@@ -666,73 +642,6 @@
         },
 
         created() {
-
-        },
-
-        mounted() {
-            let dob = jQuery('#date_of_birth');
-            let preferredStartDate = jQuery('#preferred_start_date');
-            let component = this;
-
-            dob.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.form.date_of_birth = dob.val();
-            });
-
-            preferredStartDate.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.preferred_start_date = preferredStartDate.val();
-            });
-
-
-            let employStartDate1 = jQuery('#approx_start_date_1');
-            let employEndDate1 = jQuery('#approx_end_date_1');
-
-            employStartDate1.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_1_approx_start_date = employStartDate1.val();
-            });
-
-            employEndDate1.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_1_approx_end_date = employEndDate1.val();
-            });
-
-            let employStartDate2 = jQuery('#approx_start_date_2');
-            let employEndDate2 = jQuery('#approx_end_date_2');
-
-            employStartDate2.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_2_approx_start_date = employStartDate2.val();
-            });
-
-            employEndDate2.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_2_approx_end_date = employEndDate2.val();
-            });
-
-            let employStartDate3 = jQuery('#approx_start_date_3');
-            let employEndDate3 = jQuery('#approx_end_date_3');
-
-            employStartDate3.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_3_approx_start_date = employStartDate3.val();
-            });
-
-            employEndDate3.datepicker({
-                autoclose: true
-            }).on("changeDate", function () {
-                component.form.employer_3_approx_end_date = employEndDate3.val();
-            });
 
         },
 
