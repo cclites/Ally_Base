@@ -551,6 +551,8 @@
 </style>
 
 <script>
+    import States from '../../classes/States';
+
     export default {
         props: ['application', 'business', 'positions'],
 
@@ -561,6 +563,7 @@
                 shifts: [1, 4, 8, 12],
                 travelRadius: [5, 10, 15, 20],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
+                states: new States(),
                 form: new Form(this.application)
             }
         },
