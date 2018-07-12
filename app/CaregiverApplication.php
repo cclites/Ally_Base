@@ -194,6 +194,23 @@ class CaregiverApplication extends Model implements Auditable
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'worked_here_before' => 'boolean',
+        'work_weekends' => 'boolean',
+        'dui' => 'boolean',
+        'reckless_driving' => 'boolean',
+        'moving_violation' => 'boolean',
+        'accidents' => 'boolean',
+        'felony_conviction' => 'boolean',
+        'theft_conviction' => 'boolean',
+        'drug_conviction' => 'boolean',
+        'violence_conviction' => 'boolean',
+        'currently_injured' => 'boolean',
+        'previously_injured' => 'boolean',
+        'lift_25_lbs' => 'boolean',
+        'workmans_comp' => 'boolean',
+    ];
+
     public function position()
     {
         return $this->belongsTo(CaregiverPosition::class, 'caregiver_position_id');
