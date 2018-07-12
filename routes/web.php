@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
+Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
 Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
 Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');

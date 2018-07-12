@@ -58,7 +58,7 @@ class CaregiverApplicationController extends Controller
         $application = CaregiverApplication::create($data);
 
         if ($application) {
-            return new CreatedResponse('Application submitted successfully.', [], '/business/caregivers/applications');
+            return new CreatedResponse('Application submitted successfully.', [], route('applications.done', [$request->business_id, $application]));
         }
         return new ErrorResponse(500, 'The application could not be submitted.');
     }
@@ -165,5 +165,10 @@ class CaregiverApplicationController extends Controller
             })
             ->get();
         return response()->json($applications);
+    }
+
+    public function done(Business $business, CaregiverApplication $application)
+    {
+        return view('caregivers.applications.done', compact('business', 'application'));
     }
 }
