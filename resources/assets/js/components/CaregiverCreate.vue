@@ -56,8 +56,8 @@
             duplicateModal() { return !!this.duplicateWarning },
         },
 
-        mounted() {
-            if (!_.isEmpty(this.app)) {
+        created() {
+            if (this.app && this.app.first_name) {
                 this.form.firstname = this.app.first_name;
                 this.form.lastname = this.app.last_name;
                 this.form.email = this.app.email;
