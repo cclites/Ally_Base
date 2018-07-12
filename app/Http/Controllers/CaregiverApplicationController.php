@@ -6,6 +6,8 @@ use App\Business;
 use App\CaregiverApplication;
 use App\CaregiverApplicationStatus;
 use App\CaregiverPosition;
+use App\Http\Requests\CaregiverApplicationStoreRequest;
+use App\Http\Requests\CaregiverApplicationUpdateRequest;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -45,35 +47,12 @@ class CaregiverApplicationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  CaregiverApplicationStoreRequest $request
      * @return CreatedResponse|ErrorResponse
      */
-    public function store(Request $request)
+    public function store(CaregiverApplicationStoreRequest $request)
     {
-        $this->validate($request, [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'cell_phone' => 'required',
-            'state' => 'nullable|string|size:2',
-        ]);
-
-        $data = $request->all();
-
-        $data['preferred_days'] = $request->filled('preferred_days') ? implode(',', $data['preferred_days']) : '';
-        $data['preferred_times'] = $request->filled('preferred_times') ? implode(',', $data['preferred_times']) : '';
-        $data['preferred_shift_length'] = $request->filled('preferred_shift_length') ? implode(',', $data['preferred_shift_length']) : '';
-        $data['heard_about'] = $request->filled('preferred_shift_length') ? implode(',', $data['heard_about']) : '';
-        $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);
-
-        $data['preferred_start_date'] = Carbon::parse($data['preferred_start_date']);
-        $data['employer_1_approx_start_date'] = Carbon::parse($data['employer_1_approx_start_date']);
-        $data['employer_1_approx_end_date'] = Carbon::parse($data['employer_1_approx_end_date']);
-        $data['employer_2_approx_start_date'] = Carbon::parse($data['employer_2_approx_start_date']);
-        $data['employer_2_approx_end_date'] = Carbon::parse($data['employer_2_approx_end_date']);
-        $data['employer_3_approx_start_date'] = Carbon::parse($data['employer_3_approx_start_date']);
-        $data['employer_3_approx_end_date'] = Carbon::parse($data['employer_3_approx_end_date']);
-
+        $data = $request->filtered();
         $application = CaregiverApplication::create($data);
 
         if ($application) {
@@ -116,35 +95,13 @@ class CaregiverApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \App\Http\Requests\CaregiverApplicationUpdateRequest $request
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(CaregiverApplicationUpdateRequest $request, $id)
     {
-        $this->validate($request, [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'cell_phone' => 'required'
-        ]);
-
-        $data = $request->all();
-
-        $data['preferred_days'] = $request->filled('preferred_days') ? implode(',', $data['preferred_days']) : '';
-        $data['preferred_times'] = $request->filled('preferred_times') ? implode(',', $data['preferred_times']) : '';
-        $data['preferred_shift_length'] = $request->filled('preferred_shift_length') ? implode(',', $data['preferred_shift_length']) : '';
-        $data['heard_about'] = $request->filled('preferred_shift_length') ? implode(',', $data['heard_about']) : '';
-        $data['date_of_birth'] = Carbon::parse($data['date_of_birth']);
-
-        $data['preferred_start_date'] = Carbon::parse($data['preferred_start_date']);
-        $data['employer_1_approx_start_date'] = Carbon::parse($data['employer_1_approx_start_date']);
-        $data['employer_1_approx_end_date'] = Carbon::parse($data['employer_1_approx_end_date']);
-        $data['employer_2_approx_start_date'] = Carbon::parse($data['employer_2_approx_start_date']);
-        $data['employer_2_approx_end_date'] = Carbon::parse($data['employer_2_approx_end_date']);
-        $data['employer_3_approx_start_date'] = Carbon::parse($data['employer_3_approx_start_date']);
-        $data['employer_3_approx_end_date'] = Carbon::parse($data['employer_3_approx_end_date']);
-
+        $data = $request->filtered();
         $application = CaregiverApplication::find($id);
 
         $application->update($data);
