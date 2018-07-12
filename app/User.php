@@ -128,7 +128,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
 
     public function emergencyContacts()
     {
-        return $this->hasMany(EmergencyContact::class);
+        return $this->hasMany(EmergencyContact::class)
+            ->orderBy('priority');
     }
 
     ///////////////////////////////////////////
