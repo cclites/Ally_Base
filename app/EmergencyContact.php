@@ -83,17 +83,15 @@ class EmergencyContact extends Model implements Auditable
      *
      * @param \App\User $user_id
      * @param int $priority
-     * @param int $exclude_id
      * @return void
      */
-    public static function shiftPriorityUpAt($user_id, $priority, $exclude_id)
+    public static function shiftPriorityUpAt($user_id, $priority)
     {
         $index = $priority;
 
         self::where('user_id', $user_id)
             ->where('priority', '>', $priority)
             ->orderBy('priority')
-            ->where('id', '!=', $exclude_id)
             ->get()
             ->each(function ($item, $key) use (&$index) {
                 $item->update(['priority' => $index]);

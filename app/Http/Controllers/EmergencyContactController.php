@@ -123,9 +123,9 @@ class EmergencyContactController extends Controller
     {
         $this->authorize('delete', $contact);
 
-        EmergencyContact::shiftPriorityUpAt($contact->user_id, $contact->priority, $contact->id);
-
         $contact->delete();
+
+        EmergencyContact::shiftPriorityUpAt($contact->user_id, $contact->priority);
 
         return response()->json($contact->user->fresh()->emergencyContacts);
     }
