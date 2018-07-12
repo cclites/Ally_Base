@@ -146,10 +146,10 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-
+            <hr>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="What position are you applying for?">
+                    <b-form-group label="Which position are you applying for?">
                         <b-form-input v-model="form.position"></b-form-input>
                         <input-help :form="form" field="position" text=""></input-help>
                     </b-form-group>
