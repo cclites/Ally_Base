@@ -49,6 +49,8 @@ class EmergencyContactController extends Controller
             'relationship' => 'nullable|string|max:80'
         ]);
 
+        $data['priority'] = EmergencyContact::getNextPriorityForUser($user->id);
+
         $contact = $user->emergencyContacts()->create($data);
 
         return response()->json($contact);
@@ -120,6 +122,11 @@ class EmergencyContactController extends Controller
     public function destroy(EmergencyContact $contact)
     {
         $this->authorize('delete', $contact);
-        return response()->json($contact->delete());
+
+        EmergencyContact::shiftPriorityUpAt($contact->user_id, $contact->priority, $contact->id);
+
+        $contact->delete();
+
+        return response()->json($contact->user->fresh()->emergencyContacts);
     }
 }
