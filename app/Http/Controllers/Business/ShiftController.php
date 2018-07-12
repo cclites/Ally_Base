@@ -79,8 +79,8 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
-        $shift->append(['ally_pct']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory']);
+        $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
@@ -97,7 +97,6 @@ class ShiftController extends BaseController
             }
         }
 
-
         if ($request->expectsJson()) {
             $data += [
                 'checked_in_distance' => $checked_in_distance,
@@ -106,13 +105,11 @@ class ShiftController extends BaseController
                 'caregiver_name' => $shift->caregiver->name(),
             ];
 
-            return $data;
+            return response()->json($data);
         }
-        
-        // // Map additional data
-        $shift->append(['charged_at', 'confirmed_at']);
 
         $activities = $shift->business->allActivities();
+
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
     }
 
@@ -158,8 +155,9 @@ class ShiftController extends BaseController
                 // Update persisted costs
                 $shift->costs()->persist();
             }
+
             $shift->activities()->sync($request->input('activities', []));
-            return new SuccessResponse('You have successfully updated this shift.');
+            return new SuccessResponse('You have successfully updated this shift.', $shift->fresh());
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
