@@ -12,21 +12,23 @@ use App\OfficeUser;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Traits\ActiveBusiness;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CaregiverApplicationController extends Controller
 {
+    use ActiveBusiness;
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function index()
     {
-        $user = OfficeUser::find(auth()->id());
-        $business = $user->businesses()->first();
-        $applications = CaregiverApplication::with('position', 'status')->where('business_id', $business->id)->get();
+        $applications = CaregiverApplication::with('position', 'status')->where('business_id', $this->business()->id)->get();
         $statuses = CaregiverApplicationStatus::all();
         $positions = CaregiverPosition::all();
         return view('caregivers.applications.index', compact('business', 'applications', 'statuses', 'positions'));
@@ -66,9 +68,14 @@ class CaregiverApplicationController extends Controller
      *
      * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function show(CaregiverApplication $application)
     {
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
         $application->load('position', 'status');
         return view('caregivers.applications.show', compact('application'));
     }
@@ -78,9 +85,14 @@ class CaregiverApplicationController extends Controller
      *
      * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function edit(CaregiverApplication $application)
     {
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
         $user = OfficeUser::find(auth()->id());
         $business = $user->businesses()->first();
         $application->preferred_days = explode(',', $application->preferred_days);
@@ -97,9 +109,14 @@ class CaregiverApplicationController extends Controller
      * @param \App\Http\Requests\CaregiverApplicationUpdateRequest $request
      * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function update(CaregiverApplicationUpdateRequest $request, CaregiverApplication $application)
     {
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
         $data = $request->filtered();
         $application->update($data);
 
@@ -109,11 +126,17 @@ class CaregiverApplicationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CaregiverApplication  $application
+     * @param  \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(CaregiverApplication $application)
     {
+        abort(404); // not implemented
+        if ($application->business_id != $this->business()->id) {
+            abort(403);
+        }
+
         //
     }
 
@@ -122,13 +145,12 @@ class CaregiverApplicationController extends Controller
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
     public function search(Request $request)
     {
-        $user = OfficeUser::find(auth()->id());
-        $business = Business::find($user->businesses()->first()->id);
         $applications = CaregiverApplication::with('position', 'status')
-            ->where('business_id', $business->id)
+            ->where('business_id', $this->business()->id)
             ->when($request->filled('from_date'), function ($query) use ($request) {
                 return $query->where('created_at', '>=', Carbon::parse($request->from_date));
             })
