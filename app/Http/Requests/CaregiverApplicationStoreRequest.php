@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 use App\PhoneNumber;
 use App\Rules\PhonePossible;
 use App\Rules\ValidSSN;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CaregiverApplicationStoreRequest extends FormRequest
@@ -31,8 +32,8 @@ class CaregiverApplicationStoreRequest extends FormRequest
             'middle_initial' => 'nullable|string',
             'last_name' => 'required|string',
             'email' => 'required|email',
-            'date_of_birth' => 'required|date',
-            'ssn' => ['required', new ValidSSN()],
+            'date_of_birth' => 'nullable|date',
+            'ssn' => ['nullable', new ValidSSN()],
             'address' => 'required|string|max:255',
             'address_2' => 'nullable|string|max:255',
             'city' => 'required|string|max:255',

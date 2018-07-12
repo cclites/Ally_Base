@@ -65,7 +65,7 @@
 
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Address">
+                    <b-form-group label="Address*">
                         <b-form-input v-model="form.address"></b-form-input>
                         <input-help :form="form" field="address" text=""></input-help>
                     </b-form-group>
@@ -81,14 +81,14 @@
 
             <b-row>
                 <b-col lg="4">
-                    <b-form-group label="City">
+                    <b-form-group label="City*">
                         <b-form-input v-model="form.city"></b-form-input>
                         <input-help :form="form" field="city" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="State" label-for="state">
+                    <b-form-group label="State*" label-for="state">
                         <b-form-select name="state" :options="states.getOptions()" v-model="form.state" />
                         <input-help :form="form" field="form.state" text=""></input-help>
                     </b-form-group>
@@ -96,7 +96,7 @@
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Zip">
+                    <b-form-group label="Zip*">
                         <b-form-input v-model="form.zip"></b-form-input>
                         <input-help :form="form" field="zip" text=""></input-help>
                     </b-form-group>
