@@ -87,10 +87,8 @@
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Cell Phone*">
-                        <b-form-input
-                                v-model="form.cell_phone"
-                                tabindex="12">
-                        </b-form-input>
+                        <mask-input v-model="form.cell_phone" name="cell_phone" tabindex="12"></mask-input>
+                        <input-help :form="form" field="cell_phone" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
@@ -115,10 +113,8 @@
                         </b-form-input>
                     </b-form-group>
                     <b-form-group label="Home Phone">
-                        <b-form-input
-                                v-model="form.home_phone"
-                                tabindex="14">
-                        </b-form-input>
+                        <mask-input v-model="form.home_phone" name="home_phone" tabindex="14"></mask-input>
+                        <input-help :form="form" field="home_phone" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -444,10 +440,12 @@
                     </b-col>
                     <b-col lg="4">
                         <b-form-group label="Employer State">
-                            <b-form-input :v-model="'form.employer_'+i+'_state'"></b-form-input>
+                            <b-form-select :options="states.getOptions()" :v-model="'form.employer_'+i+'_state'" />
+                            <input-help :form="form" :field="'employer_'+i+'_state'" text=""></input-help>
                         </b-form-group>
                         <b-form-group label="Employer Phone">
-                            <b-form-input :v-model="'form.employer_'+i+'_phone'"></b-form-input>
+                            <mask-input :v-model="`form.employer_${i}_phone`"></mask-input>
+                            <input-help :form="form" :field="`employer_${i}_phone`" text=""></input-help>
                         </b-form-group>
                         <b-form-group label="Reason for leaving?">
                             <b-form-input type="text"
@@ -470,59 +468,27 @@
                 </b-col>
             </b-row>
             <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_1_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_1_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_1_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_2_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_2_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_2_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <hr>
-            <b-row>
-                <b-col lg="4">
-                    <b-form-group label="Reference Name">
-                        <b-form-input v-model="form.reference_3_name"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Phone">
-                        <b-form-input v-model="form.reference_3_phone"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="4">
-                    <b-form-group label="Reference Relationship">
-                        <b-form-input v-model="form.reference_3_relationship"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
+            <template v-for="i in 3">
+                <b-row :key="i">
+                    <b-col lg="4">
+                        <b-form-group label="Reference Name">
+                            <b-form-input :v-model="`form.reference_${i}_name`"></b-form-input>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="4">
+                        <b-form-group label="Reference Phone">
+                            <mask-input :v-model="`form.reference_${i}_phone`"></mask-input>
+                            <input-help :form="form" :field="`reference_${i}_phone`" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="4">
+                        <b-form-group label="Reference Relationship">
+                            <b-form-input :v-model="`form.reference_${i}_relationship`"></b-form-input>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <hr v-if="i != 3">
+            </template>
             <!-- How did you hear about us? -->
             <b-row>
                 <b-col>
