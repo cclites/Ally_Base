@@ -183,7 +183,7 @@
 
             fetchPreview() {
                 this.loading = true;
-                this.form.post('/business/reports/ltci-claims')
+                this.form.post('/business/reports/claims-report')
                     .then(response => {
                         this.items = response.data.summary;
                         this.selectedClient = response.data.client;
