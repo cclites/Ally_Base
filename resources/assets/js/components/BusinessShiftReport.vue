@@ -84,13 +84,15 @@
                     </b-row>
                     <shift-history-table :fields="fields" :items="shiftHistoryItems">
                         <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                            <span>
-                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
-                            </span>
-                            <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                            <div v-if="row.item.Day != 'Total'">
+                                <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <span>
+                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                                </span>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                            </div>
                         </template>
                     </shift-history-table>
                 </b-card>
@@ -120,8 +122,16 @@
             :caregiver="caregiver_id" 
             :client="client_id"
             :no-close-on-backdrop="true"
-            @shiftCreated="onShiftCreated()"
+            @shiftCreated="onShiftUpdate()"
         ></add-shift-modal>
+
+        <edit-shift-modal 
+            v-model="editShiftModal"
+            :shift_id="editingShiftId"
+            :no-close-on-backdrop="true"
+            :activities="activities"
+            @shiftUpdated="onShiftUpdate()"
+        />
     </div>
 </template>
 
@@ -133,6 +143,7 @@
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
     import AddShiftModal from "./modals/AddShiftModal";
+    import EditShiftModal from "./modals/EditShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
     import LocalStorage from "../mixins/LocalStorage";
 
@@ -142,6 +153,7 @@
             ShiftDetailsModal,
             FilterColumnsModal,
             AddShiftModal,
+            EditShiftModal,
             ShiftHistoryTable
         },
 
@@ -150,7 +162,11 @@
         props: {
             admin: Number,
             autoload: Number,
-            imports: Array
+            imports: Array,
+            activities: {
+                type: Array,
+                default: [],
+            },
         },
 
         data() {
@@ -172,6 +188,7 @@
                 sortBy: 'Day',
                 sortDesc: false,
                 addShiftModal: false,
+                editShiftModal: false,
                 detailsModal: false,
                 selectedItem: {
                     client: {}
@@ -204,6 +221,7 @@
                 loaded: -1,
                 charge_status: '',
                 localStoragePrefix: 'shift_report_',
+                editingShiftId: null,
             }
         },
 
@@ -501,7 +519,8 @@
                 this.showSummary = !this.showSummary;
             },
 
-            onShiftCreated() {
+            onShiftUpdate() {
+                this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();
             },

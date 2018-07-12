@@ -290,13 +290,13 @@
             <b-row v-if="!is_modal">
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
-                        <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
+                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
                         <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
                         <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                     </span>
-                    <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
+                    <!-- <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button> -->
                 </b-col>
                 <b-col lg="6" v-else>
                     <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
@@ -370,19 +370,7 @@
         mounted() {
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
-            // Do not check against id below to allow for shift duplication
-            if (this.shift.checked_in_time) {
-                let checkin = moment.utc(this.shift.checked_in_time).local();
-                let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
-                this.checked_in_date = checkin.format('MM/DD/YYYY');
-                this.checked_in_time = checkin.format('HH:mm');
-                this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-                this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
-                this.form.activities = this.getShiftActivityList();
-            }
-            else {
-                this.setDefaultDateTimes();
-            }
+            this.fixDateTimes();
         },
         computed: {
             leftHalfActivities() {
@@ -419,7 +407,7 @@
         methods: {
             resetForm() {
                 this.form = new Form(this.initForm());
-                this.setDefaultDateTimes();
+                this.fixDateTimes();
             },
 
             setDefaultDateTimes() {
@@ -427,6 +415,21 @@
                 this.checked_out_date = moment().format('MM/DD/YYYY');
                 this.checked_in_time = '09:00';
                 this.checked_out_time = '10:00';
+            },
+
+            fixDateTimes() {
+                // Do not check against id below to allow for shift duplication
+                if (this.shift.checked_in_time) {
+                    let checkin = moment.utc(this.shift.checked_in_time).local();
+                    let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
+                    this.checked_in_date = checkin.format('MM/DD/YYYY');
+                    this.checked_in_time = checkin.format('HH:mm');
+                    this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+                    this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
+                }
+                else {
+                    this.setDefaultDateTimes();
+                }
             },
 
             initForm() {
@@ -443,8 +446,9 @@
                     verified: ('verified' in this.shift) ? this.shift.verified : true,
                     caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
-                    activities: [],
-                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
+                    issues: ('issues' in this.shift) ? this.shift.issues : [],
+                    // issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                     override: false,
                     modal: this.is_modal,
                 };
@@ -471,6 +475,10 @@
                 return (leftHalf) ? left : clone;
             },
             getShiftActivityList() {
+                if (! ('activities' in this.shift)) {
+                    return [];
+                }
+
                 let list = [];
                 for (let activity of this.shift.activities) {
                     list.push(activity.id);
@@ -484,12 +492,26 @@
                         .then(response => this.deleted = true);
                 }
             },
-            saveShift(callback) {
+            async saveShift(confirm = false) {
                 this.submitting = true;
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
-                    this.form.patch('/business/shifts/' + this.shift.id).then(callback);
+                    try {
+                        let response = await this.form.patch('/business/shifts/' + this.shift.id)
+                        
+                        if (confirm) {
+                            let form = new Form();
+                            let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm')
+
+                            this.status = response.data.data.status;
+                        }
+
+                        this.submitting = false;
+                        this.$emit('shiftUpdated');
+                    } catch (e) {
+                        this.submitting = false;
+                    }
                 }
                 else {
                     // Create a shift (modal)
@@ -509,17 +531,6 @@
             adminOverride() {
                 this.form.override = 1;
                 return this.saveShift();
-            },
-            saveAndConfirm() {
-                this.saveShift(() => {
-                    if (this.shift.id) {
-                        let form = new Form();
-                        form.post('/business/shifts/' + this.shift.id + '/confirm')
-                            .then(response => {
-                                this.status = response.data.data.status;
-                            });
-                    }
-                });
             },
             unconfirm() {
                 if (this.shift.id) {
@@ -575,6 +586,17 @@
             },
         },
         watch: {
+            shift(newVal, oldVal) {
+
+                if (!newVal) {
+                    this.resetForm();
+                    return;
+                }
+
+                // reload form with new shift data
+                this.form = new Form(this.initForm());
+                this.fixDateTimes();
+            },
             checked_in_date(val, old) {
                 if (old) {
                     this.validateTimeDifference('checked_in_time');
