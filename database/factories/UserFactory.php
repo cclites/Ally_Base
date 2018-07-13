@@ -82,7 +82,9 @@ $factory->define(\App\Client::class, function(Faker $faker) {
         'dr_first_name' => $faker->firstName,
         'dr_last_name' => $faker->lastName,
         'dr_phone' => $faker->phoneNumber,
-        'dr_fax' => $faker->phoneNumber
+        'dr_fax' => $faker->phoneNumber,
+        'hospital_name' => $faker->company,
+        'hospital_number' => $faker->phoneNumber,
     ]);
 });
 
