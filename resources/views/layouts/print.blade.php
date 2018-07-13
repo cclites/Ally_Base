@@ -41,6 +41,7 @@
         }
         div.page
         {
+            margin: 2mm;
             page-break-after: always;
             page-break-inside: avoid;
         }

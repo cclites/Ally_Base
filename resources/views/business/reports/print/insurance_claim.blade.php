@@ -98,7 +98,7 @@
                     <div>{{ $business->phone1 }}</div>
                 </div>
                 <div class="text-right header-right">
-                    <div class="h3">Claim #{{ $claimNumber }}</div>
+                    <div class="h3">Statement</div>
                     <br>
                     <table class="header-right-table">
                         <tr>
@@ -128,10 +128,28 @@
             @include('clients.print.statement_shifts_table')
 
             <div class="row">
-                <div class="col pull-right">
-                    <strong>Total:</strong> &dollar;{{ $totalAmount }}
+                <div class="footer-left">
+                    <p></p>
+                </div>
+                <div class="footer-right">
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td>
+                                &dollar;{{ $totalAmount }}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            {{--<div class="row col-lg-12">--}}
+                {{--<div class="pull-right">--}}
+                    {{--<strong>Total:</strong> &dollar;{{ $totalAmount }}--}}
+                {{--</div>--}}
+            {{--</div>--}}
         </div>
 
         @foreach($shifts as $shift)
