@@ -99,10 +99,10 @@
                                         <strong>Total: {{ summaryTotal }}</strong>
                                     </template>
                                 </b-table>
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex pull-right">
                                     <a class="btn btn-info" :href="downloadClaimLink" target="_blank">
                                         Download Full Claim (PDF)
-                                    </a>
+                                    </a> &nbsp;
                                     <a class="btn btn-success" :href="viewClaimLink" target="_blank">
                                         View Claim (HTML)
                                     </a>

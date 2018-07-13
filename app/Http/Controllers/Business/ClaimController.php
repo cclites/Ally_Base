@@ -5,6 +5,7 @@ use App\Client;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ClaimController extends BaseController
 {
