@@ -30,6 +30,24 @@
             {{ $shift->checked_out_time->setTimezone($timezone)->format('m/d/Y g:i A') }}<br/>
         </div>
     </div>
+    <div class="row with-padding-bottom">
+        <div class="col-sm-6">
+            <strong>Mileage</strong><br/>
+            {{ $shift->mileage }}
+        </div>
+        <div class="col-sm-6">
+            <strong>Other Expenses</strong><br/>
+            &dollar;{{ number_format($shift->other_expenses, 2) }}<br/>
+        </div>
+    </div>
+    @if($shift->other_expenses_desc)
+        <div class="row with-padding-bottom">
+            <div class="col-sm-12">
+                <strong>Other Expenses Description</strong><br/>
+                {{ $shift->other_expenses_desc }}
+            </div>
+        </div>
+    @endif
     <div class="row">
         <div class="col-sm-6 with-padding-bottom">
             <strong>Special Designation</strong><br>
@@ -107,6 +125,12 @@
         </div>
     </div>
     <h4>EVV</h4>
+    <div class="row">
+        <div class="col-sm-12">
+            <strong>Was this shift electronically verified?</strong><br/>
+            {{ $shift->verified ? 'Yes' : 'No' }}
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-6">
             <table class="table">

@@ -32,12 +32,11 @@ class ClaimController extends BaseController
 
         $summary = [];
         foreach ($client->shifts as $shift) {
-            $allyFee = $shift->costs()->getAllyFee();
             $summary[] = [
                 'date' => $shift->checked_in_time->format('Y-m-d'),
                 'total' => (float) $shift->shift_total = $shift->costs()->getTotalCost(),
                 'hours' => $shift->duration,
-                'hourly_total' => round($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
+                'hourly_total' => $shift->costs()->getTotalHourlyCost(),
             ];
         }
 

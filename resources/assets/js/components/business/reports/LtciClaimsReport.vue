@@ -100,11 +100,11 @@
                                     </template>
                                 </b-table>
                                 <div class="d-flex justify-content-between">
+                                    <a class="btn btn-info" :href="downloadClaimLink" target="_blank">
+                                        Download Full Claim (PDF)
+                                    </a>
                                     <a class="btn btn-success" :href="viewClaimLink" target="_blank">
                                         View Claim (HTML)
-                                    </a>
-                                    <a class="btn btn-info" :href="downloadClaimLink" target="_blank">
-                                        Download Claim (PDF)
                                     </a>
                                 </div>
                             </b-col>

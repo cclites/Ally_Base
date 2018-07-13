@@ -94,18 +94,14 @@
                             <strong>{{ $payment->client->name }}</strong>
                         </td>
                     </tr>
-                    @if($payment->client->user->addresses()->count())
+                    @if($address = $payment->client->addresses->where('type', 'evv')->first() ?? $payment->client->addresses->first())
                         <tr>
                             <td colspan="2">
-                                <div>{{ $payment->client->user->addresses->first()->address1 }}</div>
-                                @if($payment->client->user->addresses->first()->address2)
-                                    <div>{{ $payment->client->user->addresses->first()->address2 }}</div>
+                                {{ $address->address1 }}<br />
+                                @if($address->address2)
+                                    {{ $address->address2 }}<br />
                                 @endif
-                                <div>
-                                    {{ $payment->client->user->addresses->first()->city }},
-                                    {{ $payment->client->user->addresses->first()->state }}
-                                    {{ $payment->client->user->addresses->first()->zip }}
-                                </div>
+                                {{ $address->city }}, {{ $address->state }}{{ $address->zip }}
                                 @if($payment->client->user->phoneNumbers->count())
                                     <div>{{ $payment->client->user->phoneNumbers->first()->number }}</div>
                                 @endif
