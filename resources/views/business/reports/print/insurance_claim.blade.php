@@ -9,11 +9,6 @@
             width: 50%;
         }
 
-        #cover-page {
-            width: 100%;
-            margin: 250px 0;
-        }
-
          body {
              color: #000;
          }
@@ -74,7 +69,7 @@
 
 @section('content')
         <div class="page" id="cover-page">
-            <div class="row col text-center">
+            <div class="row col text-center" style="margin: 250px 0;">
                 <h4>Attention: Claims</h4>
                 <h4>Policyholder: {{ $client->name }}</h4>
                 <h4>Policy #{{ $policyNumber }}</h4>
