@@ -73,7 +73,6 @@
 @endpush
 
 @section('content')
-    <div class="container-fluid">
         <div class="page" id="cover-page">
             <div class="row col text-center">
                 <h4>Attention: Claims</h4>
@@ -145,5 +144,4 @@
                 @include('business.shifts.print_details')
             </div>
         @endforeach
-    </div>
 @endsection
