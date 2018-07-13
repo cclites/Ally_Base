@@ -45,6 +45,10 @@
             page-break-after: always;
             page-break-inside: avoid;
         }
+        div.page:last-of-type
+        {
+            page-break-after: avoid;
+        }
     </style>
 
     @stack('head')
