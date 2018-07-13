@@ -162,7 +162,6 @@ Route::group([
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
-    Route::get('reports/ltci-print', 'Business\ReportsController@ltciClaimsPrint')->name('clients.ltci_print');
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
@@ -188,8 +187,10 @@ Route::group([
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
     Route::get('reports/caregivers/payment-history/{id}/print/{caregiver_id}', 'Business\ReportsController@printPaymentDetails')->name('reports.caregivers.print_payment_details');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
-    Route::get('reports/claims-report', 'Business\ReportsController@ltciClaims')->name('reports.claims_report');
-    Route::Post('reports/claims-report', 'Business\ReportsController@ltciClaimsData')->name('reports.claims_report');
+
+    Route::get('reports/claims-report', 'Business\ClaimController@report')->name('reports.claims_report');
+    Route::post('reports/claims-report', 'Business\ClaimController@data');
+    Route::get('reports/claims-report/print', 'Business\ClaimController@print')->name('reports.claims_report.print');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');

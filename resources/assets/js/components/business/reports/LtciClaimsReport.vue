@@ -18,6 +18,7 @@
                                 </date-picker>
                             </b-form-group>
                         </b-col>
+
                         <b-col lg="2">
                             <b-form-group label="End Date">
                                 <date-picker
@@ -28,6 +29,7 @@
                                 </date-picker>
                             </b-form-group>
                         </b-col>
+
                         <b-col lg="2">
                             <b-form-group label="Client Type">
                                 <b-form-select v-model="clientType" class="mr-1 mb-1" name="client_id">
@@ -51,17 +53,9 @@
                         </b-col>
 
                         <b-col lg="2">
-                            <b-form-group label="Export Type">
-                                <b-form-radio-group id="export_type" v-model="form.export_type" name="export_type">
-                                    <b-form-radio value="html">Online</b-form-radio>
-                                    <b-form-radio value="pdf">PDF</b-form-radio>
-                                </b-form-radio-group>
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <!--<b-button type="submit">Preview</b-button>-->
-                                <b-button variant="info" @click="fetchPreview()">Export</b-button>
+                                <b-button variant="info" @click="fetchPreview()">Generate</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -106,9 +100,11 @@
                                     </template>
                                 </b-table>
                                 <div class="d-flex justify-content-between">
-                                    <a class="btn btn-info" :href="fullReport">Print All Pages</a>
-                                    <a class="btn btn-info" :href="previewPage" target="_blank">
-                                        Print Claim Invoice Page
+                                    <a class="btn btn-success" :href="viewClaimLink" target="_blank">
+                                        View Claim (HTML)
+                                    </a>
+                                    <a class="btn btn-info" :href="downloadClaimLink" target="_blank">
+                                        Download Claim (PDF)
                                     </a>
                                 </div>
                             </b-col>
@@ -170,20 +166,15 @@
                 return this.moneyFormat(_.sumBy(this.items, 'total'));
             },
 
-            previewPage() {
-                return '/business/reports/ltci-print?client_id=' + this.selectedClient.id +
+            viewClaimLink() {
+                return '/business/reports/claims-report/print?client_id=' + this.selectedClient.id +
                     '&start_date=' + this.form.start_date +
-                    '&end_date=' + this.form.end_date +
-                    '&export_type=' + this.form.export_type +
-                    '&timesheets=0';
+                    '&end_date=' + this.form.end_date;
             },
 
-            fullReport() {
-                return '/business/reports/ltci-print?client_id=' + this.selectedClient.id +
-                    '&start_date=' + this.form.start_date +
-                    '&end_date=' + this.form.end_date +
-                    '&export_type=' + this.form.export_type +
-                    '&timesheets=1';
+            downloadClaimLink() {
+                return this.viewClaimLink +
+                    '&export_type=pdf';
             }
         },
 
