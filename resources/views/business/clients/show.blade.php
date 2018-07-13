@@ -54,11 +54,9 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
-        @if($client->client_type == 'LTCI')
-            <li class="nav-item">
-                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">LTC Insurance</a>
-            </li>
-        @endif
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->

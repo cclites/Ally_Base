@@ -2,7 +2,7 @@
     <div>
         <b-row>
             <b-col>
-                <b-card header="LTC Insurance"
+                <b-card header="Insurance Data"
                         header-text-variant="white"
                         header-bg-variant="info">
                     <b-row>
