@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('emergency-contacts/{user}', 'EmergencyContactController@store');
     Route::put('emergency-contacts/{user}/{contact}', 'EmergencyContactController@update');
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
+    Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
 });
 
 Route::group([

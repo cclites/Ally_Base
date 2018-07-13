@@ -28,8 +28,12 @@
         </b-row>
         <div class="table-responsive">
             <b-table :items="contacts"
+                     sort-by="priority"
                      :fields="fields">
                 <template slot="actions" scope="data">
+                    <b-btn v-if="data.item.priority > 1" variant="secondary" @click="raisePriority(data.item)">
+                        <i class="fa fa-chevron-up"></i>
+                    </b-btn>
                     <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)">
                         <i class="fa fa-times"></i>
                     </b-btn>
@@ -54,6 +58,7 @@
                 }),
                 contacts: this.emergencyContacts,
                 fields: [
+                    'priority',
                     'name',
                     'phone_number',
                     'relationship',
@@ -82,19 +87,25 @@
             },
 
             destroy(id) {
-                let contact_id = id;
-
                 axios.delete('/emergency-contacts/'+id)
                     .then(response => {
                         alerts.addMessage('success', 'Emergency Contact Removed');
-                        this.contacts = _.filter(this.contacts, (contact) => {
-                            return contact.id != contact_id;
-                        });
+                        this.contacts = response.data;
                     }).catch(error => {
                         console.error(error.response);
                     });
-            }
+            },
 
+            raisePriority(contact) {
+                let priority = contact.priority - 1;
+                axios.patch(`/emergency-contacts/${this.userId}/${contact.id}`, { priority })
+                    .then(response => {
+                        alerts.addMessage('success', 'Emergency Contact Priority Updated');
+                        this.contacts = response.data;
+                    }).catch(error => {
+                        console.error(error.response);
+                    });
+            },
         }
     }
 </script>
