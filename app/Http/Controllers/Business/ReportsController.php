@@ -566,15 +566,17 @@ class ReportsController extends BaseController
 
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
+        $timezone = $this->business()->timezone;
 
         $client_shift_groups = $this->clientShiftGroups($data);
+        $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
 
         switch ($data['export_type']) {
             case 'pdf':
-                $pdf = PDF::loadView('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                $pdf = PDF::loadView('business.reports.print.timesheets', $viewData);
                 return $pdf->download('timesheet_export.pdf');
             default:
-                return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                return view('business.reports.print.timesheets', $viewData);
         }
     }
 
