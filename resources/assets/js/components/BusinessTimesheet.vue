@@ -263,7 +263,7 @@
                 if (this.sheet.id) {
                     entriesForDates = this.sheet.entries.map(item => {
                         return {
-                            date: moment(item.checked_in_time).local().format('YYYY-MM-DD'),
+                            date: moment.utc(item.checked_in_time).local().format('YYYY-MM-DD'),
                             entry: item,
                         }
                     });
