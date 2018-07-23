@@ -566,15 +566,17 @@ class ReportsController extends BaseController
 
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
+        $timezone = $this->business()->timezone;
 
         $client_shift_groups = $this->clientShiftGroups($data);
+        $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
 
         switch ($data['export_type']) {
             case 'pdf':
-                $pdf = PDF::loadView('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                $pdf = PDF::loadView('business.reports.print.timesheets', $viewData);
                 return $pdf->download('timesheet_export.pdf');
             default:
-                return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                return view('business.reports.print.timesheets', $viewData);
         }
     }
 
@@ -656,102 +658,6 @@ class ReportsController extends BaseController
                        });
 
         return $shifts;
-    }
-
-    public function ltciClaims()
-    {
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
-        return view('business.reports.ltci_claims', compact('caregivers', 'clients'));
-    }
-
-    public function ltciClaimsData(Request $request)
-    {
-        $request->validate([
-            'client_id' => 'required|int',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'export_type' => 'required|string'
-        ]);
-
-        $client = Client::with([
-                'addresses',
-                'shifts' => function ($query) use ($request) {
-                    $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)]);
-                }
-            ])
-            ->find($request->client_id);
-
-        $summary = [];
-        foreach ($client->shifts as $shift) {
-            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-            $summary[] = [
-                'date' => $shift->checked_in_time->format('Y-m-d'),
-                'total' => (float) $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2),
-                'hours' => $shift->duration,
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
-            ];
-        }
-
-        return response()->json(compact('client', 'summary'));
-    }
-
-    public function ltciClaimsPrint(Request $request)
-    {
-        $data = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'export_type' => 'nullable|string'
-        ]);
-
-        $data['export_type'] = (!isset($data['export_type'])) ? '' : $data['export_type'];
-        $data['client_id'] = $request->client_id;
-        $data['caregiver_id'] = null;
-        $data['client_type'] = null;
-        $data['timesheets'] = $request->timesheets ? true : false;
-
-        $client = Client::find($request->client_id);
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
-
-        $start_date = Carbon::parse($request->start_date);
-        $end_date = Carbon::parse($request->end_date);
-
-        $client->load([
-            'addresses',
-            'shifts' => function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('checked_in_time', [Carbon::parse($start_date), Carbon::parse($end_date)]);
-            }
-        ]);
-
-        $summary = $this->ltciClaimsSummary($client);
-
-        $client_shift_groups = $this->clientShiftGroups($data);
-
-        switch ($data['export_type']) {
-            case 'pdf':
-                $pdf = PDF::loadView('business.clients.print.ltci_claim', compact('client', 'summary', 'data', 'client_shift_groups', 'start_date', 'end_date'));
-                return $pdf->download(str_slug($client->name.' export').'.pdf');
-            default:
-                return view('business.clients.print.ltci_claim', compact('client', 'summary', 'data', 'client_shift_groups', 'start_date', 'end_date'));
-        }
-    }
-
-    private function ltciClaimsSummary(Client $client)
-    {
-        $summary = collect([]);
-        foreach ($client->shifts as $shift) {
-            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-            $summary->push([
-                'date' => $shift->checked_in_time->format('Y-m-d'),
-                'total' => (float) $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2),
-                'hours' => $shift->duration,
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
-            ]);
-        }
-
-        return $summary;
     }
 
     private function clientShiftGroups(array $data)

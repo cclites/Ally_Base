@@ -3,7 +3,6 @@
 @section('title', 'Caregiver Application')
 
 @section('content')
-    <caregiver-application-create :business="{{ json_encode($business) }}"
-                                  :positions="{{ json_encode($positions) }}">
+    <caregiver-application-create :business="{{ json_encode($business) }}">
     </caregiver-application-create>
 @endsection

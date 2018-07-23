@@ -61,8 +61,8 @@
                             <th>Shift Total</th>
                         </tr>
                         <tr>
-                            <td>{{ optional($shift->checked_in_time)->format('m/d/y g:i a') }}</td>
-                            <td>{{ optional($shift->checked_out_time)->format('m/d/y g:i a') }}</td>
+                            <td>{{ optional($shift->checked_in_time)->setTimezone($timezone)->format('m/d/y g:i a') }}</td>
+                            <td>{{ optional($shift->checked_out_time)->setTimezone($timezone)->format('m/d/y g:i a') }}</td>
                             <td>
                                 @switch($shift->hours_type)
                                     @case('default')

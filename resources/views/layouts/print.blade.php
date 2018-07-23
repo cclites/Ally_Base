@@ -39,7 +39,14 @@
             left: 0 !important;
             text-align: center;
         }
+        div.page
+        {
+            page-break-after: always;
+            page-break-inside: avoid;
+        }
     </style>
+
+    @stack('head')
 </head>
 
 <body>
