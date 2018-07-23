@@ -223,18 +223,6 @@ class ShiftController extends BaseController
         // Load needed relationships
         $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
 
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $shift->checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $shift->checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
-
         $timezone = $this->business()->timezone;
 
         if (request()->filled('type') && strtolower(request('type')) == 'pdf') {

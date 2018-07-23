@@ -13,10 +13,16 @@ class AlterCaregiverApplicationPositionAndStatus extends Migration
      */
     public function up()
     {
+        try {
+            Schema::table('caregiver_applications', function(Blueprint $table) {
+                $table->dropColumn('caregiver_position_id');
+                $table->dropColumn('caregiver_application_status_id');
+            });
+        }
+        catch (\Exception $e) {}
+
         Schema::table('caregiver_applications', function(Blueprint $table) {
-            $table->dropColumn('caregiver_position_id');
             $table->string('position')->nullable();
-            $table->dropColumn('caregiver_application_status_id');
             $table->string('status')->default('New');
         });
 

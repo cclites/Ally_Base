@@ -30,7 +30,11 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
+        $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])
+            ->when($request->filled('client_type'), function($query) use ($request) {
+                return $query->where('client_type', $request->input('client_type'));
+            })
+            ->get();
 
         $clients = $clients->sort(function(Client $clientA, Client $clientB) {
             $strcmp = strcmp($clientA->lastname, $clientB->lastname);
