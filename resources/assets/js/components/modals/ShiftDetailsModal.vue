@@ -200,12 +200,10 @@
             },
 
             evvMethod(shift) {
-                if (shift.verified) {
-                    if (shift.checked_in_number) {
-                        return 'Telephony';
-                    } else if (shift.checked_in_latitude) {
-                        return 'GPS Location via Mobile App';
-                    }
+                if (shift.checked_in_number) {
+                    return 'Telephony';
+                } else if (shift.checked_in_latitude) {
+                    return 'GPS Location via Mobile App';
                 }
                 return 'None';
             }

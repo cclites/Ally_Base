@@ -6,6 +6,7 @@ export default {
     props: {
         'activities': { type: Array, default: [] },
         'caregivers': { type: Array, default: [] },
+        'timesheet': { type: Object, default: {} },
     },
 
     data () {
@@ -28,8 +29,8 @@ export default {
             return {
                 checked_in_time: '',
                 checked_out_time: '',
-                mileage: 0,
-                other_expenses: 0,
+                mileage: '',
+                other_expenses: '',
                 caregiver_rate: 0.00,
                 provider_fee: 0.00, 
                 caregiver_comments: '',
@@ -154,27 +155,33 @@ export default {
 
         generateWeeks() {
             let weeks = [];
-            var start = null;
-            var end = null;
+            let date;
 
             for (var i = 0; i < 4; i++) {
                 if (i > 0) {
-                    start = moment().subtract(i * 7, 'days').startOf('week');
-                    end = moment().subtract(i * 7, 'days').endOf('week');
+                    date =  moment().subtract(i * 7, 'days');
                 } else {
-                    start = moment().startOf('week');
-                    end = moment().endOf('week');
+                    date = moment();
                 }
 
-                let w = {
-                   id: i,
-                   display: start.format('M/D/YYYY') + ' - ' + end.format('M/D/YYYY'),
-                   days: this.getDatesInRange(start, end),
-                };
+                let w = this.getWeekObject(i, date);
                 weeks.push(w);
             }
 
             return weeks;
+        },
+
+        getWeekObject(id, dateObj) {
+            let start = moment(dateObj).startOf('isoweek');
+            let end = moment(dateObj).endOf('isoweek');
+
+            console.log(start, end);
+
+            return {
+                id: id,
+                display: start.format('M/D/YYYY') + ' - ' + end.format('M/D/YYYY'),
+                days: this.getDatesInRange(start, end),
+            };
         },
 
         getDatesInRange(start, end) {
@@ -196,5 +203,23 @@ export default {
                 return '-';
             }
         },
+
+        prepareTimesheet() {
+            this.weekRanges = this.generateWeeks();
+            if (this.timesheet.id) {
+                let entry = this.timesheet.entries[0];
+                this.week = this.getWeekObject(-1, moment.utc(entry.checked_in_time, 'YYYY-MM-DD HH:mm:ss'));
+                this.weekRanges.push(this.week);
+                this.sheet = this.timesheet;
+                this.form = new Form(this.sheet);
+            } else {
+                this.week = this.weekRanges[0];
+                this.form = new Form(this.emptyTimesheet);
+            }
+        }
+    },
+
+    mounted() {
+        this.prepareTimesheet();
     },
 }
