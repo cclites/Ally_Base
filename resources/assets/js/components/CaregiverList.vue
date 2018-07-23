@@ -154,11 +154,10 @@
             {
                 if (caregiver.phone_numbers && caregiver.phone_numbers.length > 0) {
                     let index = caregiver.phone_numbers.findIndex(function(phone) {
-                        return phone.type === 'work';
+                        return phone.type === 'primary';
                     });
-                    if (index !== -1) {
-                        return caregiver.phone_numbers[index];
-                    }
+                    if (index === -1) index = 0; // use first number found if no primary
+                    return caregiver.phone_numbers[index];
                 }
                 return {};
             },
