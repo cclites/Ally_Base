@@ -40,7 +40,9 @@ class TimesheetController extends Controller
     /**
      * Handles submission of Timesheets.
      *
-     * @return void
+     * @param \App\Http\Requests\CreateTimesheetsRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Exception
      */
     public function store(CreateTimesheetsRequest $request)
     {
