@@ -390,6 +390,9 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
                     $issue->update($item);
                 }
             }
+        } else {
+            // clear
+            ShiftIssue::where('shift_id', $this->id)->delete();
         }
 
         // create new issues from the issues that have no id
