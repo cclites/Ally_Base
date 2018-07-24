@@ -200,7 +200,7 @@
                         Shift Issues
                         <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                     </h5>
-                    <div class="table-responsive" v-if="localIssues.length">
+                    <div class="table-responsive" v-if="form.issues.length">
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -211,11 +211,25 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in localIssues" :key="issue.id">
-                                <td>{{ +issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ +issue.client_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ issue.comments }}</td>
-                                <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
+                            <tr v-for="(issue, index) in form.issues" :key="issue.id">
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].caregiver_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].client_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <b-textarea :rows="2" v-model="form.issues[index].comments" />
+                                </td>
+                                <td><b-btn size="sm" variant="danger" @click="removeIssue(index)"><i class="fa fa-times"></i></b-btn></td>
                             </tr>
                             </tbody>
                         </table>
@@ -317,8 +331,6 @@
                 </b-col>
             </b-row>
         </form>
-
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="localIssues"></business-issue-modal>
     </div>
 </template>
 
@@ -340,11 +352,6 @@
             'in_distance': {},
             'out_distance': {},
             'activities': Array,
-            'issues': {
-                default() {
-                    return [];
-                }
-            },
             'admin': Number,
             'is_modal': 0,
         },
@@ -356,9 +363,6 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
-                localIssues: this.issues,
-                issueModal: false,
-                selectedIssue: null,
                 deleted: false,
                 clients: [],
                 caregivers: [],
@@ -448,18 +452,20 @@
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
                     activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
                     issues: ('issues' in this.shift) ? this.shift.issues : [],
-                    // issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                     override: false,
                     modal: this.is_modal,
                 };
             },
             createIssue() {
-                this.selectedIssue = null;
-                this.issueModal = true;
+                this.form.issues.push({
+                    caregiver_injury: 0,
+                    client_injury: 0,
+                    comments: '',
+                    shift_id: this.shift.id,
+                })
             },
-            editIssue(issue) {
-                this.selectedIssue = issue;
-                this.issueModal = true;
+            removeIssue(index) {
+                this.form.issues.splice(index, 1);
             },
             getClockedInMoment() {
                 return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
@@ -515,7 +521,6 @@
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.issues = this.localIssues;
                     this.form.post('/business/shifts').then(response => {
                         this.$emit('shiftCreated', response.data.data.shift);
                         this.status = response.data.data.status;

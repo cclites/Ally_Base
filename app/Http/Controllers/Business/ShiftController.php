@@ -12,6 +12,7 @@ use App\ShiftIssue;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Arr;
 
 class ShiftController extends BaseController
 {
@@ -139,6 +140,11 @@ class ShiftController extends BaseController
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
+
+                'issues.id' => 'nullable|numeric',
+                'issues.caregiver_injury' => 'boolean',
+                'issues.client_injury' => 'boolean',
+                'issues.comments' => 'nullable',
             ],
             [
                 'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
@@ -150,13 +156,16 @@ class ShiftController extends BaseController
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
 
-        if ($shift->update($data)) {
+        if ($shift->update(Arr::except($data, 'issues'))) {
             if (isset($adminOverride)) {
                 // Update persisted costs
                 $shift->costs()->persist();
             }
 
             $shift->activities()->sync($request->input('activities', []));
+
+            $shift->syncIssues($data['issues']);
+            
             return new SuccessResponse('You have successfully updated this shift.', $shift->fresh());
         }
         return new ErrorResponse(500, 'The shift could not be updated.');

@@ -366,6 +366,38 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $query->exists();
     }
 
+    public function syncIssues($issues)
+    {
+        $new = collect($issues)->filter(function($item) {
+            return !isset($item['id']);
+        });
+
+        $existing = collect($issues)->filter(function($item) {
+            return isset($item['id']);
+        });
+
+        $ids = $existing->pluck('id');
+        if (count($ids)) {
+            // remove all issues with ids that aren't in the current array
+            ShiftIssue::where('shift_id', $this->id)
+                ->whereNotIn('id', $ids)
+                ->delete();
+
+            // update the existing issues in case they changed
+            foreach($existing as $item) {
+                $issue = ShiftIssue::where('id', $item['id'])->first();
+                if ($issue) {
+                    $issue->update($item);
+                }
+            }
+        }
+
+        // create new issues from the issues that have no id
+        foreach($new as $item) {
+            ShiftIssue::create($item);
+        }
+    }
+
     /**
      * Get the ally fee percentage for this entity
      *

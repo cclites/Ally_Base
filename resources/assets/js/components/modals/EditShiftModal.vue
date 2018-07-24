@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="Edit Shift" v-model="showModal" size="lg" class="modal-fit-more" hide-footer>
+    <b-modal title="Edit Shift" v-model="showModal" size="lg" class="modal-fit-more" hide-footer style="overflow-y: auto;">
         <b-container>
             <business-shift
                 v-if="shift"
@@ -7,7 +7,6 @@
                 :in_distance="shift.checked_in_distance"
                 :out_distance="shift.checked_out_distance"
                 :activities="activities"
-                :issues="shift.issues"
                 :admin="1"
                 :caregiver="shift.caregiver"
                 :client="shift.client"
