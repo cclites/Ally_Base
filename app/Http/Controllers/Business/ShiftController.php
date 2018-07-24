@@ -237,47 +237,6 @@ class ShiftController extends BaseController
         return view('business.shifts.print', compact('shift', 'timezone'));
     }
 
-    public function storeIssue(Request $request, Shift $shift)
-    {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        // Load needed relationships
-        $shift->load(['activities', 'issues']);
-
-        $data = $request->validate([
-            'caregiver_injury' => 'boolean',
-            'client_injury' => 'boolean',
-            'comments' => 'nullable',
-        ]);
-
-        $issue = new ShiftIssue($data);
-        if ($shift->issues()->save($issue)) {
-            return new CreatedResponse('The issue has been created successfully.', $issue->toArray());
-        }
-        return new ErrorResponse(500, 'Unable to create issue.');
-    }
-
-    public function updateIssue(Request $request, Shift $shift, $issue_id)
-    {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        $issue = $shift->issues()->where('id', $issue_id)->firstOrFail();
-        $data = $request->validate([
-            'caregiver_injury' => 'boolean',
-            'client_injury' => 'boolean',
-            'comments' => 'nullable',
-        ]);
-
-        if ($issue->update($data)) {
-            return new SuccessResponse('The issue has been updated successfully.', $issue->toArray());
-        }
-        return new ErrorResponse(500, 'Unable to update issue.');
-    }
-
     public function convertSchedule(Request $request, Schedule $schedule)
     {
         $request->validate([
