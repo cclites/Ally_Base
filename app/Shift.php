@@ -366,6 +366,12 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $query->exists();
     }
 
+    /**
+     * Handles adding and deleting issues based on an array of issues.
+     *
+     * @param array $issues
+     * @return void
+     */
     public function syncIssues($issues)
     {
         $new = collect($issues)->filter(function($item) {
