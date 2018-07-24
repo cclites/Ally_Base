@@ -16,7 +16,12 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        $clients = User::whereRoleType('client')->whereActive(1)->orderBy('lastname')->orderBy('firstname')->get();
+        $clients = Client::active()
+            ->join('users', 'users.id', '=', 'clients.id')
+            ->orderBy('users.lastname')
+            ->orderBy('users.firstname')
+            ->get();
+
         return response($clients);
     }
 
