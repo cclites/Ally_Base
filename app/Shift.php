@@ -394,7 +394,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
 
         // create new issues from the issues that have no id
         foreach($new as $item) {
-            ShiftIssue::create($item);
+            ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
         }
     }
 

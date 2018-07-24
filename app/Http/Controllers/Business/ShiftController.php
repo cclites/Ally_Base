@@ -42,6 +42,10 @@ class ShiftController extends BaseController
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
+                'issues.id' => 'nullable|numeric',
+                'issues.caregiver_injury' => 'boolean',
+                'issues.client_injury' => 'boolean',
+                'issues.comments' => 'nullable',
             ],
             [
                 'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
@@ -56,16 +60,9 @@ class ShiftController extends BaseController
         $data['other_expenses'] = request('other_expenses', 0);
         $data['verified'] = false;
 
-        if ($shift = Shift::create($data)) {
+        if ($shift = Shift::create(Arr::except($data, 'issues'))) {
             $shift->activities()->sync($request->input('activities', []));
-            foreach ($request->input('issues', []) as $issue) {
-                $issue = new ShiftIssue([
-                    'caregiver_injury' => $issue['caregiver_injury'] ?? 0,
-                    'client_injury' => $issue['client_injury'] ?? 0,
-                    'comments' => $issue['comments'] ?? ''
-                ]);
-                $shift->issues()->save($issue);
-            }
+            $shift->syncIssues($data['issues']);
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -140,7 +137,6 @@ class ShiftController extends BaseController
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
-
                 'issues.id' => 'nullable|numeric',
                 'issues.caregiver_injury' => 'boolean',
                 'issues.client_injury' => 'boolean',

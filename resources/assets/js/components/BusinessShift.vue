@@ -194,7 +194,7 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top" v-if="!is_modal">
+            <b-row class="with-padding-top">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
