@@ -192,10 +192,6 @@
         },
 
         mounted() {
-            this.weekRanges = this.generateWeeks();
-            this.week = this.weekRanges[0];
-            this.form = new Form(this.emptyTimesheet);
-
             if (this.cg.id) {
                 this.caregiver = this.cg;
                 this.form.caregiver_id = this.cg.id;
