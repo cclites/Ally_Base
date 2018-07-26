@@ -10,25 +10,28 @@
                             <b-form-group label="Company Name">
                                 <b-form-input v-model="form.ltci_name"></b-form-input>
                             </b-form-group>
+
+                            <b-form-group label="Company Phone">
+                                <b-form-input v-model="form.ltci_phone"></b-form-input>
+                            </b-form-group>
+
+                            <b-form-group label="Company Fax">
+                                <b-form-input v-model="form.ltci_fax"></b-form-input>
+                            </b-form-group>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Company Address">
                                 <b-form-input v-model="form.ltci_address"></b-form-input>
                             </b-form-group>
-                        </b-col>
-                    </b-row>
-                    <b-row>
-                        <b-col lg="4">
+
                             <b-form-group label="Company City">
                                 <b-form-input v-model="form.ltci_city"></b-form-input>
                             </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
+
                             <b-form-group label="Company State">
                                 <b-form-input v-model="form.ltci_state"></b-form-input>
                             </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
+
                             <b-form-group label="Company Zip">
                                 <b-form-input v-model="form.ltci_zip"></b-form-input>
                             </b-form-group>
@@ -71,7 +74,9 @@
                     ltci_state: this.client.ltci_state,
                     ltci_zip: this.client.ltci_zip,
                     ltci_policy: this.client.ltci_policy,
-                    ltci_claim: this.client.ltci_claim
+                    ltci_claim: this.client.ltci_claim,
+                    ltci_phone: this.client.ltci_phone,
+                    ltci_fax: this.client.ltci_fax
                 })
             }
         },
