@@ -177,7 +177,26 @@
                     client: {}
                 },
                 columnsModal: false,
-                availableFields: [
+                filteredFields: [],
+                urlPrefix: '/business/reports/data/',
+                loaded: -1,
+                charge_status: '',
+                localStoragePrefix: 'shift_report_',
+            }
+        },
+
+        mounted() {
+            this.loadFiltersFromStorage();
+            this.setInitialFields();
+            this.loadFiltersData();
+            if (this.autoload) {
+                this.loadData();
+            }
+        },
+
+        computed: {
+            availableFields() {
+                let fields = [
                     'Day',
                     'Time',
                     'Hours',
@@ -198,25 +217,20 @@
                     'Type',
                     'Confirmed',
                     'Charged',
-                ],
-                filteredFields: [],
-                urlPrefix: '/business/reports/data/',
-                loaded: -1,
-                charge_status: '',
-                localStoragePrefix: 'shift_report_',
-            }
-        },
+                ];
 
-        mounted() {
-            this.loadFiltersFromStorage();
-            this.setInitialFields();
-            this.loadFiltersData();
-            if (this.autoload) {
-                this.loadData();
-            }
-        },
+                // remove certain fields completely based on business settings
+                if (! this.businessSettings().co_mileage) {
+                    fields.splice(fields.indexOf('Mileage'), 1);
+                    fields.splice(fields.indexOf('Mileage Costs'), 1);
+                }
+                if (! this.businessSettings().co_expenses) {
+                    fields.splice(fields.indexOf('Other Expenses'), 1);
+                }
+                
+                return fields;
+            },
 
-        computed: {
             fields() {
                 let fields = [];
                 for (let field of this.availableFields) {

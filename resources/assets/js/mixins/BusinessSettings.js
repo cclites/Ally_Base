@@ -1,12 +1,12 @@
 export default {
     data() {
         return {
-            'businessSettingsStore': null,
+            'businessSettingsStore': {},
         }
     },
 
-    mounted() {
-        axios.get('/business/settings?json=1')
+    async mounted() {
+        await axios.get('/business/settings?json=1')
             .then(response => {
                 this.businessSettingsStore = response.data;
             })
