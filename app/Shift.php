@@ -220,6 +220,16 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $this->hasMany(ShiftStatusHistory::class);
     }
 
+    /**
+     * A Shift can have many ClientGoals.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function goals()
+    {
+        return $this->hasMany(ShiftGoal::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
