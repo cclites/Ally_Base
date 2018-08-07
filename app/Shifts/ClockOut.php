@@ -16,6 +16,7 @@ class ClockOut extends ClockBase
     protected $otherExpenses = 0;
     protected $otherExpensesDesc;
     protected $mileage = 0;
+    protected $goals = [];
 
     public function setComments($comments)
     {
@@ -33,6 +34,11 @@ class ClockOut extends ClockBase
     public function setMileage($miles)
     {
         $this->mileage = round($miles);
+    }
+
+    public function setGoals($goals)
+    {
+        $this->goals = $goals;   
     }
 
     /**
@@ -82,6 +88,8 @@ class ClockOut extends ClockBase
             'verified' => $verified,
         ]);
 
+        $this->attachGoals($shift, $this->goals);
+        
         $shift->statusManager()->ackClockOut($verified);
 
         if (!$verified) {
@@ -104,5 +112,29 @@ class ClockOut extends ClockBase
 
     public function attachIssue(Shift $shift, ShiftIssue $issue) {
         return $shift->issues()->save($issue);
+    }
+
+    /**
+     * Enuerate the goals submitted and attach a ShiftGoal for each
+     * one that contains caregiver comments.
+     *
+     * @param Shift $shift
+     * @param array $goals
+     * @return bool
+     */
+    public function attachGoals(Shift $shift, $goals)
+    {
+        foreach($goals as $key => $val) {
+            if (empty($val)) {
+                continue;
+            }
+
+            $shift->goals()->create([
+                'client_goal_id' => $key,
+                'comments' => $val,
+            ]);
+        }
+
+        return true;
     }
 }

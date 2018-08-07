@@ -159,6 +159,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     public function client()
     {
         return $this->belongsTo(Client::class)
+                    ->with('goals')
                     ->withTrashed();
     }
 

@@ -169,6 +169,7 @@ class ShiftController extends BaseController
             'other_expenses_desc' => 'nullable',
             'latitude' => 'numeric|nullable',
             'longitude' => 'numeric|nullable',
+            'goals' => 'nullable|array',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -206,6 +207,7 @@ class ShiftController extends BaseController
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
+            $clockOut->setGoals($data['goals']);
             $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues
