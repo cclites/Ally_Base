@@ -182,6 +182,71 @@
                     </b-col>
                 </b-row>
             </b-tab>
+            <b-tab title="Clock Out Questions">
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Recorded Mileage" label-for="co_mileage">
+                            <b-form-select id="co_mileage"
+                                           v-model="businessSettings.co_mileage"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_mileage" text=""></input-help>
+                        </b-form-group>
+                        <b-form-group label="Caregiver Injury" label-for="co_injuries">
+                            <b-form-select id="co_injuries"
+                                           v-model="businessSettings.co_injuries"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_injuries" text=""></input-help>
+                        </b-form-group>
+                        <b-form-group label="Comments" label-for="co_comments">
+                            <b-form-select id="co_comments"
+                                           v-model="businessSettings.co_comments"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_comments" text=""></input-help>
+                        </b-form-group>
+                        <b-btn @click="update" variant="info">
+                            Save
+                        </b-btn>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Other Expenses" label-for="co_expenses">
+                            <b-form-select id="co_expenses"
+                                           v-model="businessSettings.co_expenses"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_expenses" text=""></input-help>
+                        </b-form-group>
+                        <b-form-group label="Issues" label-for="co_issues">
+                            <b-form-select id="co_issues"
+                                           v-model="businessSettings.co_issues"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_issues" text=""></input-help>
+                        </b-form-group>
+                        <b-form-group label="Caregiver Signature" label-for="co_signature">
+                            <b-form-select id="co_signature"
+                                           v-model="businessSettings.co_signature"
+                                           tabindex="1">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_signature" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+            </b-tab>
         </b-tabs>
     </b-card>
 </template>
@@ -220,6 +285,12 @@
                     allows_manual_shifts: this.business.allows_manual_shifts,
                     location_exceptions: this.business.location_exceptions,
                     timesheet_exceptions: this.business.timesheet_exceptions,
+                    co_mileage: this.business.co_mileage,
+                    co_injuries: this.business.co_injuries,
+                    co_comments: this.business.co_comments,
+                    co_expenses: this.business.co_expenses,
+                    co_issues: this.business.co_issues,
+                    co_signature: this.business.co_signature,
                 }),
                 timezones: [
                     "America/New_York",

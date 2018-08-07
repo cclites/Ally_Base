@@ -45,6 +45,12 @@ class UpdateBusinessRequest extends FormRequest
             'zip' => 'nullable|string',
             'country' => 'nullable|string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
+            'co_mileage' => 'required|bool',
+            'co_injuries' => 'required|bool',
+            'co_comments' => 'required|bool',
+            'co_expenses' => 'required|bool',
+            'co_issues' => 'required|bool',
+            'co_signature' => 'required|bool',
         ];
     }
 }
