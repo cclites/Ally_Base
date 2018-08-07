@@ -490,7 +490,14 @@
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
-                    this.form.patch('/business/shifts/' + this.shift.id).then(callback);
+                    this.form.patch('/business/shifts/' + this.shift.id)
+                        .then(response => {
+                            callback();
+                            this.submitting = false;
+                        })
+                        .catch(e => {
+                            this.submitting = false;
+                        });
                 }
                 else {
                     // Create a shift (modal)
@@ -518,6 +525,10 @@
                         form.post('/business/shifts/' + this.shift.id + '/confirm')
                             .then(response => {
                                 this.status = response.data.data.status;
+                                this.submitting = false;
+                            })
+                            .catch(e => {
+                                this.submitting = false;
                             });
                     }
                 });
