@@ -36,6 +36,6 @@ class ShiftGoal extends Model implements Auditable
      */
     public function goal()
     {
-        return $this->hasOne(ClientGoal::class, 'client_goal_id', 'id');
+        return $this->hasOne(ClientGoal::class, 'id', 'client_goal_id');
     }
 }

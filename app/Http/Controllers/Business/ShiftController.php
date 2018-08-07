@@ -79,7 +79,7 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory', 'goals']);
         $shift->append(['ally_pct']);
 
         // Load shift data into array before loading client info
@@ -159,6 +159,7 @@ class ShiftController extends BaseController
                 $shift->costs()->persist();
             }
             $shift->activities()->sync($request->input('activities', []));
+            $shift->syncGoals($request->goals);
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');

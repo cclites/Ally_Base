@@ -26,4 +26,14 @@ class ClientGoal extends Model implements Auditable
     {
         return $this->belongsTo(Client::class);
     }
+
+    /**
+     * A ClientGoal can have many shifts.
+     *
+     * @return BelongsToMany
+     */
+    public function shifts()
+    {
+        return $this->belongsToMany(Shift::class);
+    }
 }

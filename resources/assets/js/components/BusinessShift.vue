@@ -194,6 +194,17 @@
                     </b-row>
                 </b-col>
             </b-row>
+            <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
+                <b-col lg="12">
+                    <h4>Goals:</h4>
+                    <b-form-group v-for="goal in shift.client.goals"
+                        :key="goal.id"
+                        :label="goal.question">
+                        <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                        <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row class="with-padding-top" v-if="(businessSettings().co_issues || businessSettings().co_injuries) && !is_modal">
                 <b-col lg="12">
                     <h5>
@@ -384,6 +395,7 @@
             else {
                 this.setDefaultDateTimes();
             }
+            this.setupGoalsForm();
         },
         computed: {
             leftHalfActivities() {
@@ -448,6 +460,7 @@
                     issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
                     override: false,
                     modal: this.is_modal,
+                    goals: {},
                 };
             },
             createIssue() {
@@ -584,6 +597,23 @@
                     this.clientAllyPct = response.data.percentage_fee;
                     this.paymentType = response.data.payment_type;
                 });
+            },
+            /**
+             * Initialize goals object/array form values with the actual ones
+             * attached to the shift (if any).
+             */
+            setupGoalsForm() {
+                this.form.goals = {};
+                if (this.shift.client) {
+                    this.shift.client.goals.forEach(item => {
+                        let val = '';
+                        let index = this.shift.goals.findIndex(obj => obj.pivot.client_goal_id == item.id);
+                        if (index >= 0) {
+                            val = this.shift.goals[index].pivot.comments;
+                        }
+                        this.form.goals[item.id] = val;
+                    });
+                }
             },
         },
         watch: {

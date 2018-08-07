@@ -224,11 +224,12 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     /**
      * A Shift can have many ClientGoals.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function goals()
     {
-        return $this->hasMany(ShiftGoal::class);
+        return $this->belongsToMany(ClientGoal::class, 'shift_goals')
+            ->withPivot('comments');
     }
 
     ///////////////////////////////////////////
@@ -409,6 +410,30 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $caregiverRate = $caregiverRate ?: $this->caregiver_rate;
         $amount = bcadd($providerFee, $caregiverRate, 2);
         return $this->getAllyFee($amount);
+    }
+
+    /**
+     * Sync client goals data with the current shift.
+     *
+     * @param array $goals
+     * @return Shift
+     */
+    public function syncGoals($goals)
+    {
+        // first reformat array to work with sync
+        // and drop any values with empty comments.
+        $data = [];
+        foreach($goals as $goalId => $comments) {
+            if (empty($comments)) {
+                continue;
+            }
+
+            $data[$goalId] = ['comments' => $comments];
+        }
+
+        $this->goals()->sync($data);
+
+        return $this;
     }
 
     ///////////////////////////////////////////

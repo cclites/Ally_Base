@@ -50,7 +50,7 @@ class ShiftsReport extends BaseReport
      */
     protected function results()
     {
-        $shifts = $this->query->with(['caregiver', 'client', 'statusHistory'])->get();
+        $shifts = $this->query->with(['caregiver', 'client', 'statusHistory', 'goals'])->get();
         $rows = $shifts->map(function(Shift $shift) {
             $row = [
                 'id' => $shift->id,
@@ -83,6 +83,7 @@ class ShiftsReport extends BaseReport
                 // Send both verified and EVV for backwards compatibility
                 'verified' => $shift->verified,
                 'EVV' => $shift->verified,
+                'goals' => $shift->goals,
             ];
             return $row;
         });

@@ -84,6 +84,15 @@
                 </b-col>
             </b-row>
 
+            <b-row v-if="selectedItem.goals && selectedItem.goals.length" class="with-padding-bottom">
+                <b-col sm="12">
+                    <strong>Goals</strong>
+                    <div v-for="goal in selectedItem.goals" :key="goal.id" class="mb-2">
+                        <strong>{{ goal.question }}:</strong> {{ goal.pivot.comments }}
+                    </div>
+                </b-col>
+            </b-row>
+            
             <strong>Was this Shift Electronically Verified?</strong>
             <b-row class="with-padding-bottom">
                 <b-col sm="6">
