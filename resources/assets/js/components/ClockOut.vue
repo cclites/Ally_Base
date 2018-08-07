@@ -42,7 +42,7 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_mileage">
                     <b-col lg="6">
                         <b-form-group label="Recorded Mileage" label-for="mileage">
                             <b-form-input
@@ -60,7 +60,7 @@
 
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_expenses">
                     <b-col lg-6>
                         <b-form-group label="Other Expenses" label-for="other_expenses">
                             <b-form-input
@@ -82,7 +82,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_injuries">
                     <b-col lg="12">
                         <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
                             <b-form-select
@@ -97,6 +97,10 @@
                             </b-form-select>
                             <input-help :form="form" field="caregiver_injury" text="Indicate if you suffered an injury."></input-help>
                         </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="business.co_issues">
+                    <b-col lg="12">
                         <b-form-group label="Were there any other issues on your shift?" label-for="issue_text">
                             <b-textarea
                                     id="issue_text"
@@ -109,7 +113,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_comments">
                     <b-col lg="12">
                         <b-form-group label="Comments / Notes" label-for="caregiver_comments">
                             <b-form-textarea id="caregiver_comments"
@@ -121,7 +125,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_signature">
                     <b-col lg="12">
                         <b-form-group>
                             <signature-pad
@@ -159,6 +163,7 @@
             'shift': {},
             'activities': Array,
             'carePlanActivityIds': Array,
+            'business': {},
         },
 
         data() {

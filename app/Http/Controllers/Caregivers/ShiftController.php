@@ -136,8 +136,11 @@ class ShiftController extends BaseController
         // Load the client relationship
         $shift->load('client');
 
+        // Load the business model because we need the settings
+        $business = $shift->business;
+
         // Load the available activities
-        $activities = $shift->business->allActivities();
+        $activities = $business->allActivities();
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
@@ -149,7 +152,7 @@ class ShiftController extends BaseController
             }
         }
 
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business'));
     }
 
     public function clockOut(Request $request)
