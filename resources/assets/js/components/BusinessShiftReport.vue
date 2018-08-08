@@ -84,7 +84,7 @@
                     </b-row>
                     <shift-history-table :fields="fields" :items="shiftHistoryItems">
                         <template slot="actions" scope="row">
-                            <div v-if="row.item.Day != 'Total'">
+                            <div v-if="row.item.id">
                                 <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                                 <span>
