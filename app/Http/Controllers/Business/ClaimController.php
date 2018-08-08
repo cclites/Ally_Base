@@ -49,7 +49,8 @@ class ClaimController extends BaseController
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
-            'export_type' => 'nullable|string'
+            'export_type' => 'nullable|string',
+            'report_type' => 'string|in:full,notes',
         ]);
 
         $client = Client::findOrFail($request->client_id);
@@ -77,8 +78,10 @@ class ClaimController extends BaseController
         $policyNumber = $client->ltci_policy;
         $business = $this->business();
         $timezone = $business->timezone;
+        $report_type = $request->report_type == 'notes' ? 'notes' : 'full';
+        
         // ============= //
-        $viewData = compact('client', 'business', 'timezone', 'claimNumber', 'policyNumber', 'shifts', 'totalAmount', 'start_date', 'end_date');
+        $viewData = compact('client', 'business', 'timezone', 'claimNumber', 'policyNumber', 'shifts', 'totalAmount', 'start_date', 'end_date', 'report_type');
 
         switch ($request->export_type) {
             case 'pdf':

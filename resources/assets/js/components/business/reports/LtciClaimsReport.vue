@@ -54,6 +54,15 @@
                         </b-col>
 
                         <b-col lg="2">
+                            <b-form-group label="Report Type">
+                                <b-form-select v-model="report_type" class="mr-1 mb-1" name="report_type">
+                                    <option value="full">Full Claims Report</option>
+                                    <option value="notes">Medicade Notes Report</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <!--<b-button type="submit">Preview</b-button>-->
                                 <b-button variant="info" @click="fetchPreview()" :disabled="!form.client_id">Generate</b-button>
@@ -128,6 +137,7 @@
 
         data() {
             return {
+                report_type: 'full',
                 loadingClients: false,
                 clients: [],
                 preview: [],
@@ -137,7 +147,7 @@
                     caregiver_id: '',
                     client_id: '',
                     client_type: '',
-                    export_type: 'html'
+                    export_type: 'html',
                 }),
                 clientType: 'LTCI',
                 selectedClient: false,
@@ -170,17 +180,16 @@
             viewClaimLink() {
                 return '/business/reports/claims-report/print?client_id=' + this.selectedClient.id +
                     '&start_date=' + this.form.start_date +
-                    '&end_date=' + this.form.end_date;
+                    '&end_date=' + this.form.end_date +
+                    '&report_type=' + this.report_type;
             },
 
             downloadClaimLink() {
-                return this.viewClaimLink +
-                    '&export_type=pdf';
+                return this.viewClaimLink + '&export_type=pdf&report_type=' + this.report_type;
             }
         },
 
         methods: {
-
             async loadClients() {
                 this.form.client_id = '';
                 this.selectedClient = false;
@@ -220,17 +229,11 @@
             clientType() {
                 this.loadClients();
             },
-
-            clients() {
-                if (this.clients.length == 0) {
-
-                }
-            },
         },
 
         created() {
             this.loadClients();
-        }
+        },
     }
 </script>
 
