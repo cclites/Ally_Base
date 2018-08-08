@@ -341,7 +341,9 @@ class ReportsController extends BaseController
 
     public function shiftsReport()
     {
-        return view('business.reports.shifts');
+        $activities = $this->business()->allActivities();
+        
+        return view('business.reports.shifts', compact('activities'));
     }
 
     public function certificationExpirations(Request $request)

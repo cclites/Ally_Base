@@ -367,6 +367,47 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     }
 
     /**
+     * Handles adding and deleting issues based on an array of issues.
+     *
+     * @param array $issues
+     * @return void
+     */
+    public function syncIssues($issues)
+    {
+        $new = collect($issues)->filter(function($item) {
+            return !isset($item['id']);
+        });
+
+        $existing = collect($issues)->filter(function($item) {
+            return isset($item['id']);
+        });
+
+        $ids = $existing->pluck('id');
+        if (count($ids)) {
+            // remove all issues with ids that aren't in the current array
+            ShiftIssue::where('shift_id', $this->id)
+                ->whereNotIn('id', $ids)
+                ->delete();
+
+            // update the existing issues in case they changed
+            foreach($existing as $item) {
+                $issue = ShiftIssue::where('id', $item['id'])->first();
+                if ($issue) {
+                    $issue->update($item);
+                }
+            }
+        } else {
+            // clear
+            ShiftIssue::where('shift_id', $this->id)->delete();
+        }
+
+        // create new issues from the issues that have no id
+        foreach($new as $item) {
+            ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
+        }
+    }
+
+    /**
      * Get the ally fee percentage for this entity
      *
      * @return float

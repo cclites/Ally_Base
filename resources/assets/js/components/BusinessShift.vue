@@ -194,13 +194,13 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top" v-if="!is_modal">
+            <b-row class="with-padding-top">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
                         <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                     </h5>
-                    <div class="table-responsive" v-if="localIssues.length">
+                    <div class="table-responsive" v-if="form.issues.length">
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -211,11 +211,25 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in localIssues" :key="issue.id">
-                                <td>{{ +issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ +issue.client_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ issue.comments }}</td>
-                                <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
+                            <tr v-for="(issue, index) in form.issues" :key="issue.id">
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].caregiver_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].client_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <b-textarea :rows="2" v-model="form.issues[index].comments" />
+                                </td>
+                                <td><b-btn size="sm" variant="danger" @click="removeIssue(index)"><i class="fa fa-times"></i></b-btn></td>
                             </tr>
                             </tbody>
                         </table>
@@ -290,13 +304,13 @@
             <b-row v-if="!is_modal">
                 <b-col lg="6" v-if="!shift.readOnly">
                     <span v-if="!deleted">
-                        <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
+                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
                         <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
                         <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
                         <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
                         <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
                     </span>
-                    <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
+                    <!-- <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button> -->
                 </b-col>
                 <b-col lg="6" v-else>
                     <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
@@ -317,8 +331,6 @@
                 </b-col>
             </b-row>
         </form>
-
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="localIssues"></business-issue-modal>
     </div>
 </template>
 
@@ -340,11 +352,6 @@
             'in_distance': {},
             'out_distance': {},
             'activities': Array,
-            'issues': {
-                default() {
-                    return [];
-                }
-            },
             'admin': Number,
             'is_modal': 0,
         },
@@ -356,9 +363,6 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
-                localIssues: this.issues,
-                issueModal: false,
-                selectedIssue: null,
                 deleted: false,
                 clients: [],
                 caregivers: [],
@@ -370,19 +374,7 @@
         mounted() {
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
-            // Do not check against id below to allow for shift duplication
-            if (this.shift.checked_in_time) {
-                let checkin = moment.utc(this.shift.checked_in_time).local();
-                let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
-                this.checked_in_date = checkin.format('MM/DD/YYYY');
-                this.checked_in_time = checkin.format('HH:mm');
-                this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-                this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
-                this.form.activities = this.getShiftActivityList();
-            }
-            else {
-                this.setDefaultDateTimes();
-            }
+            this.fixDateTimes();
         },
         computed: {
             leftHalfActivities() {
@@ -419,7 +411,7 @@
         methods: {
             resetForm() {
                 this.form = new Form(this.initForm());
-                this.setDefaultDateTimes();
+                this.fixDateTimes();
             },
 
             setDefaultDateTimes() {
@@ -427,6 +419,21 @@
                 this.checked_out_date = moment().format('MM/DD/YYYY');
                 this.checked_in_time = '09:00';
                 this.checked_out_time = '10:00';
+            },
+
+            fixDateTimes() {
+                // Do not check against id below to allow for shift duplication
+                if (this.shift.checked_in_time) {
+                    let checkin = moment.utc(this.shift.checked_in_time).local();
+                    let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
+                    this.checked_in_date = checkin.format('MM/DD/YYYY');
+                    this.checked_in_time = checkin.format('HH:mm');
+                    this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+                    this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
+                }
+                else {
+                    this.setDefaultDateTimes();
+                }
             },
 
             initForm() {
@@ -443,19 +450,22 @@
                     verified: ('verified' in this.shift) ? this.shift.verified : true,
                     caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
-                    activities: [],
-                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
+                    issues: ('issues' in this.shift) ? this.shift.issues : [],
                     override: false,
                     modal: this.is_modal,
                 };
             },
             createIssue() {
-                this.selectedIssue = null;
-                this.issueModal = true;
+                this.form.issues.push({
+                    caregiver_injury: 0,
+                    client_injury: 0,
+                    comments: '',
+                    shift_id: this.shift.id,
+                })
             },
-            editIssue(issue) {
-                this.selectedIssue = issue;
-                this.issueModal = true;
+            removeIssue(index) {
+                this.form.issues.splice(index, 1);
             },
             getClockedInMoment() {
                 return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
@@ -471,6 +481,10 @@
                 return (leftHalf) ? left : clone;
             },
             getShiftActivityList() {
+                if (! ('activities' in this.shift)) {
+                    return [];
+                }
+
                 let list = [];
                 for (let activity of this.shift.activities) {
                     list.push(activity.id);
@@ -484,16 +498,29 @@
                         .then(response => this.deleted = true);
                 }
             },
-            saveShift(callback) {
+            async saveShift(confirm = false) {
                 this.submitting = true;
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
-                    this.form.patch('/business/shifts/' + this.shift.id).then(callback);
+                    try {
+                        let response = await this.form.patch('/business/shifts/' + this.shift.id)
+                        
+                        if (confirm) {
+                            let form = new Form();
+                            let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm')
+
+                            this.status = response.data.data.status;
+                        }
+
+                        this.submitting = false;
+                        this.$emit('shiftUpdated');
+                    } catch (e) {
+                        this.submitting = false;
+                    }
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.issues = this.localIssues;
                     this.form.post('/business/shifts').then(response => {
                         this.$emit('shiftCreated', response.data.data.shift);
                         this.status = response.data.data.status;
@@ -509,17 +536,6 @@
             adminOverride() {
                 this.form.override = 1;
                 return this.saveShift();
-            },
-            saveAndConfirm() {
-                this.saveShift(() => {
-                    if (this.shift.id) {
-                        let form = new Form();
-                        form.post('/business/shifts/' + this.shift.id + '/confirm')
-                            .then(response => {
-                                this.status = response.data.data.status;
-                            });
-                    }
-                });
             },
             unconfirm() {
                 if (this.shift.id) {
@@ -575,6 +591,17 @@
             },
         },
         watch: {
+            shift(newVal, oldVal) {
+
+                if (!newVal) {
+                    this.resetForm();
+                    return;
+                }
+
+                // reload form with new shift data
+                this.form = new Form(this.initForm());
+                this.fixDateTimes();
+            },
             checked_in_date(val, old) {
                 if (old) {
                     this.validateTimeDifference('checked_in_time');
