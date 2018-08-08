@@ -273,4 +273,33 @@ trait IsUserRole
     {
         return $this->hasMany(Document::class, 'user_id', 'id');
     }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * Returns only active Clients.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($builder)
+    {
+        return $builder->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByName($builder, $direction = 'ASC')
+    {
+        $builder->join('users', 'users.id', '=', $this->table . '.id')
+            ->orderBy('users.lastname', $direction)
+            ->orderBy('users.firstname', $direction);
+
+        return $builder;
+    }
 }

@@ -490,4 +490,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         // Default to CC fee
         return (float) config('ally.credit_card_fee');
     }
+
+
 }
