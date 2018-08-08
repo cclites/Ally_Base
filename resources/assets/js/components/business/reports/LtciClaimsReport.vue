@@ -46,7 +46,7 @@
                                 <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
                                     <option v-if="clients.length === 0" selected>Loading..</option>
                                     <option v-else value="">Select a Client</option>
-                                    <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}
+                                    <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                                     </option>
                                 </b-form-select>
                             </b-form-group>
