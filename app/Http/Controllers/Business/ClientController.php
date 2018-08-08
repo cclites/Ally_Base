@@ -425,7 +425,9 @@ class ClientController extends BaseController
             'ltci_state',
             'ltci_zip',
             'ltci_policy',
-            'ltci_claim'
+            'ltci_claim',
+            'ltci_phone',
+            'ltci_fax',
         ]);
 
         if($client->update($data)) {

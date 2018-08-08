@@ -661,5 +661,41 @@ class ReportsController extends BaseController
 
         return $shifts;
     }
+
+    private function clientShiftGroups(array $data)
+    {
+        return $this->business()->shifts()
+            ->with('activities', 'client', 'caregiver')
+            ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
+            ->when($data['client_id'], function ($query) use ($data) {
+                return $query->where('client_id', $data['client_id']);
+            })
+            ->when($data['caregiver_id'], function ($query) use ($data) {
+                return $query->where('caregiver_id', $data['caregiver_id']);
+            })
+            ->when($data['client_type'], function ($query) use ($data) {
+                return $query->whereHas('client', function ($query) use ($data) {
+                    $query->where('client_type', $data['client_type']);
+                });
+            })
+            ->orderBy('checked_in_time')
+            //->take(500)
+            ->get()
+            ->map(function ($shift) {
+                $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
+                $shift->ally_fee = number_format($allyFee, 2);
+                $shift->hourly_total = number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2);
+                $shift->other_expenses = number_format($shift->other_expenses, 2);
+                $shift->mileage = number_format($shift->mileage, 2);
+                $shift->mileage_costs = number_format($shift->costs()->getMileageCost(), 2);
+                $shift->caregiver_total = number_format($shift->costs()->getCaregiverCost(), 2);
+                $shift->provider_total = number_format($shift->costs()->getProviderFee(), 2);
+                $shift->ally_total = number_format($shift->costs()->getAllyFee(), 2);
+                $shift->ally_pct = AllyFeeCalculator::getPercentage($shift->client, null);
+                $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2);
+                return $shift;
+            })
+            ->groupBy('client_id');
+    }
 }
 

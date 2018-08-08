@@ -236,8 +236,18 @@
                             item.browser = (item.user_agent.ua) ? item.user_agent.ua.family + (item.user_agent.ua.major ? ' ' + item.user_agent.ua.major : '') : '';
 
                             // Replace null distances with blocked for geolocation
-                            if (item.checked_in_method === 'Geolocation' && item.checked_in_distance === null) item.checked_in_distance = 'Blocked';
-                            if (item.checked_out_method === 'Geolocation' && item.checked_out_distance === null) item.checked_out_distance = 'Blocked';
+                            if (item.checked_in_method === 'Geolocation' && item.checked_in_distance === null) {
+                                item.checked_in_distance = 'Blocked';
+                                if (item.checked_in_latitude) {
+                                    item.checked_in_distance = 'Unknown'; // Usually an address issue
+                                }
+                            }
+                            if (item.checked_out_method === 'Geolocation' && item.checked_out_distance === null) {
+                                item.checked_out_distance = 'Blocked';
+                                if (item.checked_out_latitude) {
+                                    item.checked_out_distance = 'Unknown'; // Usually an address issue
+                                }
+                            }
 
                             return item;
                         });

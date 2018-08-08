@@ -80,7 +80,7 @@
                 <tbody>
                     <tr v-for="(day, index) in week.days" :key="index">
                         <td scope="row"> <!-- date -->
-                            {{ formatDateFromUTC(day) }}
+                            {{ formatDate(day) }}
                         </td>
                         <td scope="row"> <!-- time -->
                             {{ formatEntryDisplay(shifts[index]) }}
@@ -165,10 +165,6 @@
     export default {
         mixins: [ ManageTimesheet ],
         components: { TimesheetEntryModal },
-
-        props: {
-            'timesheet': { type: Object, default: {} },
-        },
 
         data() {
             return {
@@ -267,7 +263,7 @@
                 if (this.sheet.id) {
                     entriesForDates = this.sheet.entries.map(item => {
                         return {
-                            date: moment(item.checked_in_time).local().format('YYYY-MM-DD'),
+                            date: moment.utc(item.checked_in_time).local().format('YYYY-MM-DD'),
                             entry: item,
                         }
                     });
@@ -334,17 +330,6 @@
                     this.selectedEntry = {};
                 }
             },
-        },
-
-        mounted() {
-            this.weekRanges = this.generateWeeks();
-            this.week = this.weekRanges[0];
-            if (this.timesheet.id) {
-                this.sheet = this.timesheet;
-                this.form = new Form(this.sheet);
-            } else {
-                this.form = new Form(this.emptyTimesheet);
-            }
         },
 
     }

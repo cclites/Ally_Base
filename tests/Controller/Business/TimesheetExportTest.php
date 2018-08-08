@@ -16,6 +16,12 @@ class TimesheetExportTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->disableExceptionHandling();
+    }
+
     /**
      * A basic test example.
      *

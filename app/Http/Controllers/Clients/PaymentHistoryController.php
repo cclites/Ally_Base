@@ -55,7 +55,7 @@ class PaymentHistoryController extends Controller
 
         $shifts = $report->rows()->values()->map(function ($value) use ($payment) {
             $value = (object) $value;
-            $value->activities = Shift::find($value->id)->activities;
+            $value->activities = optional($payment->shifts->where('id', $value->id)->first())->activities;
             $value->checked_in_time = Carbon::parse($value->checked_in_time);
             $value->checked_out_time = Carbon::parse($value->checked_out_time);
             return $value;

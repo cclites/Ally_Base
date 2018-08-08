@@ -147,6 +147,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'ltci_zip',
         'ltci_policy',
         'ltci_claim',
+        'ltci_phone',
+        'ltci_fax',
     ];
 
     ///////////////////////////////////////////

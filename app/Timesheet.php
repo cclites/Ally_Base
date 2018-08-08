@@ -183,9 +183,9 @@ class Timesheet extends Model implements Auditable
      * necessary Caregiver and Client relations or false on error.
      *
      * @param array $data
-     * @param App\User $creator
-     * @param App\Business $business
-     * @return App\Timesheet
+     * @param \App\User $creator
+     * @param \App\Business $business
+     * @return \App\Timesheet
      */
     public static function createWithEntries($data, $creator, $business)
     {
@@ -196,7 +196,15 @@ class Timesheet extends Model implements Auditable
             $timesheet->save();
             
             foreach($data['entries'] as $item) {
-                if ($entry = $timesheet->entries()->create(Arr::except($item, ['activities', 'duration', 'start_time', 'end_time', 'date']))) {
+                if ($entry = $timesheet->entries()->create([
+                    'checked_in_time' => $item['checked_in_time'],
+                    'checked_out_time' => $item['checked_out_time'],
+                    'mileage' => (float) $item['mileage'],
+                    'other_expenses' =>  (float) $item['other_expenses'],
+                    'caregiver_comments' => $item['caregiver_comments'],
+                    'caregiver_rate' => (float) $item['caregiver_rate'],
+                    'provider_fee' => (float) $item['provider_fee'],
+                ])) {
                     $entry->activities()->sync($item['activities']);
                 } 
             }

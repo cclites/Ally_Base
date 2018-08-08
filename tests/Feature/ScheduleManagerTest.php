@@ -90,6 +90,7 @@ class ScheduleManagerTest extends TestCase
     /** @test */
     public function creating_a_schedule_should_fail_if_max_weekly_client_hours_are_exceeded()
     {
+        $this->disableExceptionHandling();
         $this->client->update(['max_weekly_hours' => 10]);
 
         $date = new Carbon('next tuesday');
@@ -148,6 +149,7 @@ class ScheduleManagerTest extends TestCase
     /** @test */
     public function bulk_updating_schedules_should_fail_if_any_max_weekly_client_hours_are_exceeded()
     {
+        $this->disableExceptionHandling();
         $this->client->update(['max_weekly_hours' => 10]);
 
         $date = new Carbon('next tuesday');
