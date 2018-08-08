@@ -32,6 +32,7 @@ class UpdateBusinessRequest extends FormRequest
             'allows_manual_shifts' => 'required|bool',
             'location_exceptions' => 'required|bool',
             'timesheet_exceptions' => 'required|bool',
+            'require_signatures' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',

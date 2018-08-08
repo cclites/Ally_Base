@@ -58,6 +58,16 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
                         </b-form-group>
+
+                        <b-form-group label="Require Signatures" label-for="require_signatures">
+                            <b-form-select id="require_signatures"
+                                           v-model="businessSettings.require_signatures"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="require_signatures" text="Require Caregiver signatures on Clock Out."></input-help>
+                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -220,6 +230,7 @@
                     allows_manual_shifts: this.business.allows_manual_shifts,
                     location_exceptions: this.business.location_exceptions,
                     timesheet_exceptions: this.business.timesheet_exceptions,
+                    require_signatures: this.business.require_signatures,
                 }),
                 timezones: [
                     "America/New_York",
