@@ -127,6 +127,7 @@
 
             @include('clients.print.statement_shifts_table')
 
+            @if ($report_type != 'notes')
             <div class="row">
                 <div class="footer-left">
                     <p></p>
@@ -144,7 +145,8 @@
                     </table>
                 </div>
             </div>
-
+            @endif
+            
             {{--<div class="row col-lg-12">--}}
                 {{--<div class="pull-right">--}}
                     {{--<strong>Total:</strong> &dollar;{{ $totalAmount }}--}}

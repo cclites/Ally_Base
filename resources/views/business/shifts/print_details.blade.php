@@ -11,10 +11,12 @@
                 <strong>Clocked In Time</strong><br/>
                 {{ $shift->checked_in_time->setTimezone($timezone)->format('m/d/Y g:i A') }}
             </div>
+            @if ($report_type != 'notes')
             <div class="with-padding-bottom">
                 <strong>Mileage</strong><br/>
                 {{ $shift->mileage }}
             </div>
+            @endif
             <div class="with-padding-bottom">
                 <strong>Special Designation</strong><br>
                 @switch($shift->hours_type)
@@ -77,15 +79,17 @@
                 <strong>Clocked Out Time</strong><br/>
                 {{ $shift->checked_out_time->setTimezone($timezone)->format('m/d/Y g:i A') }}<br/>
             </div>
-            <div class="with-padding-bottom">
-                <strong>Other Expenses</strong><br/>
-                &dollar;{{ number_format($shift->other_expenses, 2) }}<br/>
-            </div>
-            @if($shift->other_expenses_desc)
+            @if ($report_type != 'notes')
                 <div class="with-padding-bottom">
-                    <strong>Other Expenses Description</strong><br/>
-                    {{ $shift->other_expenses_desc }}
+                    <strong>Other Expenses</strong><br/>
+                    &dollar;{{ number_format($shift->other_expenses, 2) }}<br/>
                 </div>
+                @if($shift->other_expenses_desc)
+                    <div class="with-padding-bottom">
+                        <strong>Other Expenses Description</strong><br/>
+                        {{ $shift->other_expenses_desc }}
+                    </div>
+                @endif
             @endif
             <div class="with-padding-bottom">
                 <strong>Caregiver Comments</strong><br/>

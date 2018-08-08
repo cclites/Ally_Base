@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        @include('clients.print.statement_shifts_table')
+        @include('clients.print.statement_shifts_table', ['report_type' => 'full'])
 
         <div class="row">
             <div class="footer-left">
