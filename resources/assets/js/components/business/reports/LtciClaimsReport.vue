@@ -43,8 +43,9 @@
 
                         <b-col lg="2">
                             <b-form-group label="Client">
-                                <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
-                                    <option v-if="clients.length === 0" selected>Loading..</option>
+                                <label v-if="!loadingClients && clients.length === 0">No Clients of this type</label>
+                                <b-form-select v-else v-model="form.client_id" class="mr-1 mb-1" name="client_id">
+                                    <option v-if="loadingClients" selected>Loading...</option>
                                     <option v-else value="">Select a Client</option>
                                     <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                                     </option>
@@ -55,7 +56,7 @@
                         <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <!--<b-button type="submit">Preview</b-button>-->
-                                <b-button variant="info" @click="fetchPreview()">Generate</b-button>
+                                <b-button variant="info" @click="fetchPreview()" :disabled="!form.client_id">Generate</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -181,9 +182,13 @@
         methods: {
 
             async loadClients() {
+                this.form.client_id = '';
+                this.selectedClient = false;
                 this.clients = [];
+                this.loadingClients = true;
                 const response = await axios.get('/business/clients?json=1&client_type=' + this.clientType);
                 this.clients = response.data;
+                this.loadingClients = false;
             },
 
             fetchPreview() {
@@ -214,7 +219,13 @@
         watch: {
             clientType() {
                 this.loadClients();
-            }
+            },
+
+            clients() {
+                if (this.clients.length == 0) {
+
+                }
+            },
         },
 
         created() {
