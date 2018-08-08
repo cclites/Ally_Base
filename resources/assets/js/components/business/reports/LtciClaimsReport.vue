@@ -85,7 +85,7 @@
                             <b-col lg="10">
                                 <div class="d-flex justify-content-between">
                                     <div>Client Name: {{ selectedClient.name }}</div>
-                                    <div v-if="selectedClient.addresses">
+                                    <div v-if="selectedClient.addresses.length">
                                         Client Address: {{ selectedClient.addresses[0].address1 }}<br>
                                         {{ selectedClient.addresses[0].city }}, {{ selectedClient.addresses[0].state }}
                                         {{ selectedClient.addresses[0].zip }}
