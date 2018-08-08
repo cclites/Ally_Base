@@ -491,18 +491,5 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return (float) config('ally.credit_card_fee');
     }
 
-    ///////////////////////////////////////////
-    /// Query Scopes
-    ///////////////////////////////////////////
 
-    /**
-     * Returns only active Clients.
-     *
-     * @param [type] $query
-     * @return void
-     */
-    public function scopeActive($query)
-    {
-        return $query->whereHas('user', function($q) { $q->where('active', 1); });
-    }
 }
