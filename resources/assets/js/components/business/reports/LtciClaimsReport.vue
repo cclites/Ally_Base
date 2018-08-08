@@ -43,11 +43,21 @@
 
                         <b-col lg="2">
                             <b-form-group label="Client">
-                                <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
-                                    <option v-if="clients.length === 0" selected>Loading..</option>
+                                <label v-if="!loadingClients && clients.length === 0">No Clients of this type</label>
+                                <b-form-select v-else v-model="form.client_id" class="mr-1 mb-1" name="client_id">
+                                    <option v-if="loadingClients" selected>Loading...</option>
                                     <option v-else value="">Select a Client</option>
-                                    <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}
+                                    <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}
                                     </option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col lg="2">
+                            <b-form-group label="Report Type">
+                                <b-form-select v-model="report_type" class="mr-1 mb-1" name="report_type">
+                                    <option value="full">Full Claims Report</option>
+                                    <option value="notes">Medicade Notes Report</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -55,7 +65,7 @@
                         <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <!--<b-button type="submit">Preview</b-button>-->
-                                <b-button variant="info" @click="fetchPreview()">Generate</b-button>
+                                <b-button variant="info" @click="fetchPreview()" :disabled="!form.client_id">Generate</b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -85,7 +95,7 @@
                             <b-col lg="10">
                                 <div class="d-flex justify-content-between">
                                     <div>Client Name: {{ selectedClient.name }}</div>
-                                    <div v-if="selectedClient.addresses">
+                                    <div v-if="selectedClient.addresses.length">
                                         Client Address: {{ selectedClient.addresses[0].address1 }}<br>
                                         {{ selectedClient.addresses[0].city }}, {{ selectedClient.addresses[0].state }}
                                         {{ selectedClient.addresses[0].zip }}
@@ -127,6 +137,7 @@
 
         data() {
             return {
+                report_type: 'full',
                 loadingClients: false,
                 clients: [],
                 preview: [],
@@ -136,7 +147,7 @@
                     caregiver_id: '',
                     client_id: '',
                     client_type: '',
-                    export_type: 'html'
+                    export_type: 'html',
                 }),
                 clientType: 'LTCI',
                 selectedClient: false,
@@ -169,21 +180,24 @@
             viewClaimLink() {
                 return '/business/reports/claims-report/print?client_id=' + this.selectedClient.id +
                     '&start_date=' + this.form.start_date +
-                    '&end_date=' + this.form.end_date;
+                    '&end_date=' + this.form.end_date +
+                    '&report_type=' + this.report_type;
             },
 
             downloadClaimLink() {
-                return this.viewClaimLink +
-                    '&export_type=pdf';
+                return this.viewClaimLink + '&export_type=pdf&report_type=' + this.report_type;
             }
         },
 
         methods: {
-
             async loadClients() {
+                this.form.client_id = '';
+                this.selectedClient = false;
                 this.clients = [];
+                this.loadingClients = true;
                 const response = await axios.get('/business/clients?json=1&client_type=' + this.clientType);
                 this.clients = response.data;
+                this.loadingClients = false;
             },
 
             fetchPreview() {
@@ -214,12 +228,12 @@
         watch: {
             clientType() {
                 this.loadClients();
-            }
+            },
         },
 
         created() {
             this.loadClients();
-        }
+        },
     }
 </script>
 

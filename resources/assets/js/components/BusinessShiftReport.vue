@@ -125,7 +125,7 @@
             @shiftCreated="onShiftUpdate()"
         ></add-shift-modal>
 
-        <edit-shift-modal 
+        <edit-shift-modal
             v-model="editShiftModal"
             :shift_id="editingShiftId"
             :no-close-on-backdrop="true"
@@ -194,7 +194,26 @@
                     client: {}
                 },
                 columnsModal: false,
-                availableFields: [
+                filteredFields: [],
+                urlPrefix: '/business/reports/data/',
+                loaded: -1,
+                charge_status: '',
+                localStoragePrefix: 'shift_report_',
+            }
+        },
+
+        mounted() {
+            this.loadFiltersFromStorage();
+            this.setInitialFields();
+            this.loadFiltersData();
+            if (this.autoload) {
+                this.loadData();
+            }
+        },
+
+        computed: {
+            availableFields() {
+                let fields = [
                     'Day',
                     'Time',
                     'Hours',
@@ -215,26 +234,20 @@
                     'Type',
                     'Confirmed',
                     'Charged',
-                ],
-                filteredFields: [],
-                urlPrefix: '/business/reports/data/',
-                loaded: -1,
-                charge_status: '',
-                localStoragePrefix: 'shift_report_',
-                editingShiftId: null,
-            }
-        },
+                ];
 
-        mounted() {
-            this.loadFiltersFromStorage();
-            this.setInitialFields();
-            this.loadFiltersData();
-            if (this.autoload) {
-                this.loadData();
-            }
-        },
+                // remove certain fields completely based on business settings
+                if (! this.businessSettings().co_mileage) {
+                    fields.splice(fields.indexOf('Mileage'), 1);
+                    fields.splice(fields.indexOf('Mileage Costs'), 1);
+                }
+                if (! this.businessSettings().co_expenses) {
+                    fields.splice(fields.indexOf('Other Expenses'), 1);
+                }
 
-        computed: {
+                return fields;
+            },
+
             fields() {
                 let fields = [];
                 for (let field of this.availableFields) {

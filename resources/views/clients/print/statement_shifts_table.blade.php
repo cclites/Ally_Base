@@ -8,13 +8,17 @@
                 <th>EVV</th>
                 <th width="35%">Activities Performed</th>
                 <th>Caregiver</th>
-                <th>Rate</th>
+                @if ($report_type != 'notes')
+                    <th>Rate</th>
+                @endif
                 <th>Hours</th>
-                <th>Mileage</th>
-                <th>Other Exp.</th>
-                <th>Total</th>
+                @if ($report_type != 'notes')
+                    <th>Mileage</th>
+                    <th>Other Exp.</th>
+                    <th>Total</th>
+                @endif
             </tr>
-            @if(isset($payment) && $payment->adjustment)
+            @if ($report_type != 'notes' && isset($payment) && $payment->adjustment)
                 <tr>
                     <td>{{ $payment->created_at->setTimezone($timezone)->format('m/d/Y') }}</td>
                     <td>Manual Adjustment</td>
@@ -38,21 +42,25 @@
                     <td>
                         {{ $shift->caregiver_name ?? $shift->caregiver->name }}
                     </td>
-                    <td>
-                        &dollar;{{ number_format($shift->hourly_total ?? $shift->costs()->getTotalHourlyCost(), 2) }}
-                    </td>
+                    @if ($report_type != 'notes')
+                        <td>
+                            &dollar;{{ number_format($shift->hourly_total ?? $shift->costs()->getTotalHourlyCost(), 2) }}
+                        </td>
+                    @endif
                     <td>
                         {{ $shift->hours ?? $shift->duration }}
                     </td>
-                    <td>
-                        &dollar;{{ number_format($shift->mileage_costs ?? $shift->costs()->getMileageCost(), 2) }}
-                    </td>
-                    <td>
-                        &dollar;{{ number_format($shift instanceof \App\Shift ? $shift->costs()->getOtherExpenses() : $shift->other_expenses, 2) }}
-                    </td>
-                    <td>
-                        &dollar;{{ number_format($shift->shift_total ?? $shift->costs()->getTotalCost(), 2) }}
-                    </td>
+                    @if ($report_type != 'notes')
+                        <td>
+                            &dollar;{{ number_format($shift->mileage_costs ?? $shift->costs()->getMileageCost(), 2) }}
+                        </td>
+                        <td>
+                            &dollar;{{ number_format($shift instanceof \App\Shift ? $shift->costs()->getOtherExpenses() : $shift->other_expenses, 2) }}
+                        </td>
+                        <td>
+                            &dollar;{{ number_format($shift->shift_total ?? $shift->costs()->getTotalCost(), 2) }}
+                        </td>
+                    @endif
                 </tr>
             @endforeach
             </tbody>

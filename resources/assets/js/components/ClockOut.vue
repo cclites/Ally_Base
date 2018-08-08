@@ -42,7 +42,7 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_mileage">
                     <b-col lg="6">
                         <b-form-group label="Recorded Mileage" label-for="mileage">
                             <b-form-input
@@ -60,7 +60,7 @@
 
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_expenses">
                     <b-col lg-6>
                         <b-form-group label="Other Expenses" label-for="other_expenses">
                             <b-form-input
@@ -82,7 +82,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_injuries">
                     <b-col lg="12">
                         <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
                             <b-form-select
@@ -97,6 +97,10 @@
                             </b-form-select>
                             <input-help :form="form" field="caregiver_injury" text="Indicate if you suffered an injury."></input-help>
                         </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="business.co_issues">
+                    <b-col lg="12">
                         <b-form-group label="Were there any other issues on your shift?" label-for="issue_text">
                             <b-textarea
                                     id="issue_text"
@@ -109,7 +113,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_comments">
                     <b-col lg="12">
                         <b-form-group label="Comments / Notes" label-for="caregiver_comments">
                             <b-form-textarea id="caregiver_comments"
@@ -121,7 +125,18 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="shift.client.goals.length">
+                    <b-col lg="12">
+                        <h4>Goals:</h4>
+                        <b-form-group v-for="goal in shift.client.goals"
+                            :key="goal.id"
+                            :label="goal.question">
+                            <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                            <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="business.co_signature">
                     <b-col lg="12">
                         <b-form-group>
                             <signature-pad
@@ -159,6 +174,7 @@
             'shift': {},
             'activities': Array,
             'carePlanActivityIds': Array,
+            'business': {},
         },
 
         data() {
@@ -173,7 +189,8 @@
                     caregiver_injury: 0,
                     issue_text: null,
                     other_expenses_desc: null,
-                    signature: null
+                    signature: null,
+                    goals: {},
                 }),
                 showManual: false,
                 time: null,
@@ -184,6 +201,7 @@
 
         mounted() {
             this.setTimes();
+            this.setupGoalsForm();
         },
 
         methods: {
@@ -258,7 +276,14 @@
                 this.time = this.formatTime();
                 this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
                 setInterval(() => this.time = this.formatTime(), 1000 * 15)
-            }
+            },
+
+            setupGoalsForm() {
+                this.form.goals = {};
+                this.shift.client.goals.forEach(item => {
+                    this.form.goals[item.id] = '';
+                });
+            },
         },
 
         computed: {
@@ -269,7 +294,7 @@
 
                 return this.nl2br(this.shift.schedule.care_plan.notes);
             }
-        }
+        },
     }
 </script>
 

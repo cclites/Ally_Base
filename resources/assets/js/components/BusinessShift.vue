@@ -59,7 +59,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Mileage" label-for="mileage">
+                    <b-form-group v-if="businessSettings().co_mileage" label="Mileage" label-for="mileage">
                         <b-form-input
                                 id="mileage"
                                 name="mileage"
@@ -70,7 +70,7 @@
                         </b-form-input>
                         <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
                     </b-form-group>
-                    <b-form-group label="Other Expenses" label-for="other_expenses">
+                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses" label-for="other_expenses">
                         <b-form-input
                                 id="other_expenses"
                                 name="other_expenses"
@@ -147,7 +147,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col md="7" sm="6">
-                    <b-form-group label="Other Expenses Description" label-for="other_expenses_desc">
+                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
                         <b-textarea
                                 id="other_expenses_desc"
                                 name="other_expenses_desc"
@@ -157,7 +157,7 @@
                         </b-textarea>
                         <input-help :form="form" field="other_expenses_desc" text=""></input-help>
                     </b-form-group>
-                    <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
+                    <b-form-group v-if="businessSettings().co_comments" label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                         <b-textarea
                                 id="caregiver_comments"
                                 name="caregiver_comments"
@@ -194,7 +194,18 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top">
+            <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
+                <b-col lg="12">
+                    <h4>Goals:</h4>
+                    <b-form-group v-for="goal in shift.client.goals"
+                        :key="goal.id"
+                        :label="goal.question">
+                        <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                        <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="with-padding-top" v-if="(businessSettings().co_issues || businessSettings().co_injuries) && !is_modal">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
@@ -337,9 +348,10 @@
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
+    import BusinessSettings from '../mixins/BusinessSettings';
 
     export default {
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, BusinessSettings],
 
         props: {
             'shift': {
@@ -375,6 +387,7 @@
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
             this.fixDateTimes();
+            this.setupGoalsForm();
         },
         computed: {
             leftHalfActivities() {
@@ -454,6 +467,7 @@
                     issues: ('issues' in this.shift) ? this.shift.issues : [],
                     override: false,
                     modal: this.is_modal,
+                    goals: {},
                 };
             },
             createIssue() {
@@ -505,7 +519,7 @@
                 if (this.shift.id) {
                     try {
                         let response = await this.form.patch('/business/shifts/' + this.shift.id)
-                        
+
                         if (confirm) {
                             let form = new Form();
                             let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm')
@@ -588,6 +602,23 @@
                     this.clientAllyPct = response.data.percentage_fee;
                     this.paymentType = response.data.payment_type;
                 });
+            },
+            /**
+             * Initialize goals object/array form values with the actual ones
+             * attached to the shift (if any).
+             */
+            setupGoalsForm() {
+                this.form.goals = {};
+                if (this.shift.client) {
+                    this.shift.client.goals.forEach(item => {
+                        let val = '';
+                        let index = this.shift.goals.findIndex(obj => obj.pivot.client_goal_id == item.id);
+                        if (index >= 0) {
+                            val = this.shift.goals[index].pivot.comments;
+                        }
+                        this.form.goals[item.id] = val;
+                    });
+                }
             },
         },
         watch: {

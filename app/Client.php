@@ -199,6 +199,16 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     }
 
     /**
+     * A Client can have many ClientGoals.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function goals()
+    {
+        return $this->hasMany(ClientGoal::class);
+    }
+
+    /**
      * Determines if the given caregiver_id exists in the Client/Caregiver relationship.
      *
      * @param [type] $caregiver_id

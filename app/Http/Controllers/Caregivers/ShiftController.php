@@ -136,8 +136,11 @@ class ShiftController extends BaseController
         // Load the client relationship
         $shift->load('client');
 
+        // Load the business model because we need the settings
+        $business = $shift->business;
+
         // Load the available activities
-        $activities = $shift->business->allActivities();
+        $activities = $business->allActivities();
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
@@ -149,7 +152,7 @@ class ShiftController extends BaseController
             }
         }
 
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business'));
     }
 
     public function clockOut(Request $request)
@@ -166,6 +169,7 @@ class ShiftController extends BaseController
             'other_expenses_desc' => 'nullable',
             'latitude' => 'numeric|nullable',
             'longitude' => 'numeric|nullable',
+            'goals' => 'nullable|array',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -202,6 +206,7 @@ class ShiftController extends BaseController
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
+            $clockOut->setGoals($data['goals']);
             $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues

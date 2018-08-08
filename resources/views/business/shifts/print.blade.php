@@ -14,5 +14,5 @@
 @endpush
 
 @section('content')
-    @include('business.shifts.print_details')
+    @include('business.shifts.print_details', ['report_type' => 'full'])
 @endsection

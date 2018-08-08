@@ -32,7 +32,7 @@
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
+            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Plans &amp; Goals</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
@@ -130,6 +130,7 @@
         </div>
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
+            <business-client-goals :client="{{ $client }}" :goals="[]" />
         </div>
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
