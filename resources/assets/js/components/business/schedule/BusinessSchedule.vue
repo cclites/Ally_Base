@@ -246,19 +246,19 @@
 
                 // Load the default filter values
                 if (this.business) {
-                    if (this.business.calendar_caregiver_filter === 'unassigned') {
+                    if (caregiverIsFilterable && this.business.calendar_caregiver_filter === 'unassigned') {
                         this.filterCaregiverId = 0;
                     }
-                }
 
-                if (this.rememberFilters) {
-                    if (caregiverIsFilterable) {
-                        let localCaregiverId = this.getLocalStorage('caregiver');
-                        if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
-                    }
-                    if (clientIsFilterable) {
-                        let localClientId = this.getLocalStorage('client');
-                        if (localClientId !== null) this.filterClientId = localClientId;
+                    if (this.rememberFilters) {
+                        if (caregiverIsFilterable) {
+                            let localCaregiverId = this.getLocalStorage('caregiver');
+                            if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
+                        }
+                        if (clientIsFilterable) {
+                            let localClientId = this.getLocalStorage('client');
+                            if (localClientId !== null) this.filterClientId = localClientId;
+                        }
                     }
                 }
 
