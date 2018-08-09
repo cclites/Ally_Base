@@ -91,10 +91,16 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col lg="12">
+                            <b-col lg="6">
                                 <b-form-group label="Start Date" label-for="startDate">
                                     <date-picker v-model="startDate" />
                                     <input-help :form="form" field="starts_at" text="Confirm the starting date." />
+                                </b-form-group>
+                            </b-col>
+                            <b-col lg="6">
+                                <b-form-group label="End Date" label-for="startDate" v-if="firstShiftEndDate !== startDate">
+                                    <date-picker v-model="firstShiftEndDate" disabled />
+                                    <input-help :form="form" field="zzzz" text="The end date is shown when it differs from the start date." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -379,6 +385,13 @@
                 }
                 return 'Show All';
             },
+
+            firstShiftEndDate() {
+                let duration = this.getDuration();
+                return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm')
+                    .add(duration, 'minutes')
+                    .format('MM/DD/YYYY');
+            }
         },
 
         methods: {
