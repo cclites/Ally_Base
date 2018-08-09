@@ -17,8 +17,8 @@
                 </b-row>
             </b-col>
             <b-col md="5">
-                <b-row v-if="isFilterable">
-                    <b-col cols="6">
+                <b-row>
+                    <b-col cols="6" class="ml-auto" v-if="caregivers.length">
                         <b-form-group label="Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
@@ -27,7 +27,7 @@
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="6">
+                    <b-col cols="6" class="ml-auto" v-if="clients.length">
                         <b-form-group label="Client Filter" label-for="calendar_client_filter">
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
@@ -111,7 +111,7 @@
                     right:  'listDay,agendaWeek,month'
                 },
                 config: {
-                    nextDayThreshold: this.business.calendar_next_day_threshold,
+                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
                 },
                 clients: [],
                 caregivers: [],
@@ -168,11 +168,6 @@
                     'client_id': (this.filterClientId > 0) ? this.filterClientId : "",
                     'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : "",
                 }
-            },
-
-            isFilterable() {
-                if (this.client || this.caregiver) return false;
-                return true;
             },
 
             rememberFilters() {
@@ -246,24 +241,37 @@
             },
 
             loadFiltersData() {
-                if (this.isFilterable) {
-                    // Load the default filter values
-                    if (this.business) {
-                        if (this.business.calendar_caregiver_filter === 'unassigned') {
-                            this.filterCaregiverId = 0;
-                        }
-                        if (this.rememberFilters) {
-                            let localCaregiverId = this.getLocalStorage('caregiver');
-                            if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
-                            let localClientId = this.getLocalStorage('client');
-                            if (localClientId !== null) this.filterClientId = localClientId;
-                        }
-                    }
+                let clientIsFilterable = !this.client;
+                let caregiverIsFilterable = !this.caregiver;
 
-                    // Fill the caregiver and client drop downs
-                    axios.get('/business/clients').then(response => this.clients = response.data);
-                    axios.get('/business/caregivers').then(response => this.caregivers = response.data);
+                // Load the default filter values
+                if (this.business) {
+                    if (this.business.calendar_caregiver_filter === 'unassigned') {
+                        this.filterCaregiverId = 0;
+                    }
                 }
+
+                if (this.rememberFilters) {
+                    if (caregiverIsFilterable) {
+                        let localCaregiverId = this.getLocalStorage('caregiver');
+                        if (localCaregiverId !== null) this.filterCaregiverId = localCaregiverId;
+                    }
+                    if (clientIsFilterable) {
+                        let localClientId = this.getLocalStorage('client');
+                        if (localClientId !== null) this.filterClientId = localClientId;
+                    }
+                }
+
+                // Fill the caregiver and client drop downs
+                if (clientIsFilterable) {
+                    axios.get('/business/clients').then(response => this.clients = response.data);
+                }
+                if (caregiverIsFilterable) {
+                    let url = '/business/caregivers';
+                    if (this.client) url = '/business/clients/' + this.client.id + '/caregivers';
+                    axios.get(url).then(response => this.caregivers = response.data);
+                }
+
                 this.filtersReady = true;
             },
 

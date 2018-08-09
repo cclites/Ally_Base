@@ -32,14 +32,13 @@ class ClientController extends BaseController
     {
         $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])
             ->when($request->filled('client_type'), function($query) use ($request) {
-                return $query->where('client_type', $request->input('client_type'));
+                $query->where('client_type', $request->input('client_type'));
             })
-            ->get();
-
-        $clients = $clients->sort(function(Client $clientA, Client $clientB) {
-            $strcmp = strcmp($clientA->lastname, $clientB->lastname);
-            return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
-        })
+            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
+                $query->where('active', $request->input('active', 1));
+            })
+            ->orderByName()
+            ->get()
             ->map(function ($client) {
                 if ($client->addresses->count() == 1) {
                     $client->county = $client->addresses->first()->county;
@@ -51,8 +50,7 @@ class ClientController extends BaseController
             ->values();
 
         if ($request->expectsJson()) {
-            // Include active clients only by default through JSON request
-            return $clients->where('active', $request->input('active', 1));
+            return $clients;
         }
 
         return view('business.clients.index', compact('clients'));
