@@ -78,7 +78,7 @@
                                     >
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Caregivers</option>
-                                        <option value="0">Unassigned</option>
+                                        <option value="0">Open Shift</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text=""/>

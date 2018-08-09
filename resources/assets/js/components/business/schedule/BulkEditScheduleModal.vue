@@ -78,7 +78,7 @@
                                     >
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Caregivers</option>
-                                        <option value="0">Unassigned</option>
+                                        <option value="0">Open Shift</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="caregiver_id" text=""/>
@@ -196,7 +196,7 @@
                                                    v-model="form.new_caregiver_id"
                                     >
                                         <option value="">No Change</option>
-                                        <option value="0">Unassigned</option>
+                                        <option value="0">Open Shift</option>
                                         <option v-for="caregiver in clientCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <small class="form-text text-info" v-if="form.client_id === '-' || !form.client_id">Caregiver updates are limited when "All Clients" is selected.</small>

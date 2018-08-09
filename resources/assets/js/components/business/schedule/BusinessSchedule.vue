@@ -11,8 +11,8 @@
                 </b-row>
                 <b-row>
                     <b-col class="mt-3">
-                        <strong>Hours Assigned | Unassigned: </strong> {{ kpis.assigned_hours }} | {{ kpis.unassigned_hours }}<br/>
-                        <strong>Unassigned Shifts: </strong> {{ kpis.unassigned_shifts }}
+                        <strong>Hours Assigned | Open: </strong> {{ kpis.assigned_hours }} | {{ kpis.unassigned_hours }}<br/>
+                        <strong>Open Shifts: </strong> {{ kpis.unassigned_shifts }}
                     </b-col>
                 </b-row>
             </b-col>
@@ -22,7 +22,7 @@
                         <b-form-group label="Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
-                                <option :value="0">Unassigned Shifts</option>
+                                <option :value="0">Open Shifts</option>
                                 <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>

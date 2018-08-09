@@ -92,7 +92,7 @@
                             <b-form-select id="calendar_caregiver_filter"
                                            v-model="businessSettings.calendar_caregiver_filter">
                                 <option value="all">All Caregivers</option>
-                                <option value="unassigned">Unassigned Shifts</option>
+                                <option value="unassigned">Open Shifts</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the schedule"></input-help>
                             <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
