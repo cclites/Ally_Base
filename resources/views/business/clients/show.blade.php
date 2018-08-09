@@ -137,7 +137,7 @@
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
-                <business-schedule :client="{{ $client }}"></business-schedule>
+                <business-schedule :client="{{ $client }}" :business="{{ activeBusiness() }}"></business-schedule>
             </div>
         @endif
         <div class="tab-pane" id="client_notes" role="tabpanel">

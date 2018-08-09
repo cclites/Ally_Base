@@ -111,7 +111,7 @@
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
-                <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
+                <business-schedule :caregiver="{{ $caregiver }}" :business="{{ activeBusiness() }}"></business-schedule>
             </div>
         @endif
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
