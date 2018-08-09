@@ -59,12 +59,21 @@
                             <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
                         </b-form-group>
 
+                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-select id="location_exceptions"
+                                           v-model="businessSettings.location_exceptions"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
+                        </b-form-group>
+
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
-                                           tabindex="2"
                                            disabled>
                                 <option value="1">Enabled</option>
                                 <option value="0">Disabled</option>
@@ -73,7 +82,6 @@
                         </b-form-group>
                         <b-form-group label="Calendar Default View" label-for="calendar_default_view">
                             <b-form-select id="calendar_default_view"
-                                           tabindex="3"
                                            v-model="businessSettings.calendar_default_view">
                                 <option value="month">Month</option>
                                 <option value="agendaWeek">Week</option>
@@ -82,7 +90,6 @@
                         </b-form-group>
                         <b-form-group label="Default Schedule Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select id="calendar_caregiver_filter"
-                                           tabindex="4"
                                            v-model="businessSettings.calendar_caregiver_filter">
                                 <option value="all">All Caregivers</option>
                                 <option value="unassigned">Unassigned Shifts</option>
@@ -92,22 +99,17 @@
                         </b-form-group>
                         <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters">
                             <b-form-select id="calendar_remember_filters"
-                                           v-model="businessSettings.calendar_remember_filters"
-                                           tabindex="2">
+                                           v-model="businessSettings.calendar_remember_filters">
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the schedule."></input-help>
                         </b-form-group>
-
-                        <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
-                            <b-form-select id="location_exceptions"
-                                           v-model="businessSettings.location_exceptions"
-                            >
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </b-form-select>
-                            <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
+                        <b-form-group label="Calendar Next Day Threshold" label-for="calendar_next_day_threshold">
+                            <b-form-input id="calendar_next_day_threshold"
+                                           v-model="businessSettings.calendar_next_day_threshold"
+                                           />
+                            <input-help :form="businessSettings" field="calendar_next_day_threshold" text="When an shifts’s end time crosses into another day, the minimum time it must be in order for it to show on that day."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -295,6 +297,7 @@
                     calendar_default_view: this.business.calendar_default_view,
                     calendar_caregiver_filter: this.business.calendar_caregiver_filter,
                     calendar_remember_filters: this.business.calendar_remember_filters,
+                    calendar_next_day_threshold: this.business.calendar_next_day_threshold,
                     phone1: this.business.phone1,
                     phone2: this.business.phone2,
                     address1: this.business.address1,

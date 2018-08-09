@@ -43,6 +43,7 @@
             :events="events"
             :default-view="defaultView"
             :header="header"
+            :config="config"
             @day-click="createSchedule"
             @event-selected="editSchedule"
             @event-render="renderEvent"
@@ -108,6 +109,9 @@
                     left:   'prev,next today',
                     center: 'title',
                     right:  'listDay,agendaWeek,month'
+                },
+                config: {
+                    nextDayThreshold: this.business.calendar_next_day_threshold,
                 },
                 clients: [],
                 caregivers: [],

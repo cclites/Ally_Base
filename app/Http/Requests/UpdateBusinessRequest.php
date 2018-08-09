@@ -37,6 +37,7 @@ class UpdateBusinessRequest extends FormRequest
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',
             'calendar_remember_filters' => 'required|bool',
+            'calendar_next_day_threshold' => 'required|date_format:H:i:s',
             'phone1' => 'nullable|string',
             'phone2' => 'nullable|string',
             'address1' => 'nullable|string',
@@ -52,6 +53,12 @@ class UpdateBusinessRequest extends FormRequest
             'co_expenses' => 'required|bool',
             'co_issues' => 'required|bool',
             'co_signature' => 'required|bool',
+        ];
+    }
+
+    public function messages() {
+        return [
+            'calendar_next_day_threshold.date_format' => 'The next day threshold must be in 24-hour format as HH:MM:SS',
         ];
     }
 }
