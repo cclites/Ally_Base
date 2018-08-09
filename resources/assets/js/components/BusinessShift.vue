@@ -313,23 +313,7 @@
                 </b-col>
             </b-row>
             <b-row v-if="!is_modal">
-                <b-col lg="6" v-if="!shift.readOnly">
-                    <span v-if="!deleted">
-                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
-                        <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
-                        <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                        <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
-                        <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
-                    </span>
-                    <!-- <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button> -->
-                </b-col>
-                <b-col lg="6" v-else>
-                    <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                    <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
-                    <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                    <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
-                </b-col>
-                <b-col lg="6">
+                <b-col lg="4">
                     <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
                     <b-row>
                         <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
@@ -339,6 +323,35 @@
                         <span v-if="shift.charged_at"><strong>Charged:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.charged_at) }}</span>
                         <span v-else><strong>Not Charged</strong></span>
                     </b-row>
+                </b-col>
+                <b-col lg="8" class="text-right" v-if="!shift.readOnly">
+                    <div v-if="!deleted">
+                        <b-button variant="light" type="submit" @click="saveShift(false)">
+                            <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
+                        </b-button>
+                        <b-button variant="light" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
+                        <b-dropdown variant="light" v-if="shift.id">
+                            <template slot="button-content">
+                                <i class='fa fa-list'></i> Actions
+                            </template>
+                            <b-dropdown-item @click="unconfirm()" v-if="confirmed"><i class="fa fa-backward"></i> Unconfirm Shift</b-dropdown-item>
+                            <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
+                            <b-dropdown-divider></b-dropdown-divider>
+                            <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+                </b-col>
+                <b-col lg="8" class="text-right" v-else>
+                    <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                    <b-dropdown variant="light">
+                        <template slot="button-content">
+                            <i class='fa fa-list'></i> Actions
+                        </template>
+                        <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
+                        <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
+                        <b-dropdown-divider></b-dropdown-divider>
+                        <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
+                    </b-dropdown>
                 </b-col>
             </b-row>
         </form>
@@ -424,6 +437,7 @@
         methods: {
             resetForm() {
                 this.form = new Form(this.initForm());
+                this.status = (this.shift) ? this.shift.status : null;
                 this.fixDateTimes();
             },
 
@@ -623,15 +637,7 @@
         },
         watch: {
             shift(newVal, oldVal) {
-
-                if (!newVal) {
-                    this.resetForm();
-                    return;
-                }
-
-                // reload form with new shift data
-                this.form = new Form(this.initForm());
-                this.fixDateTimes();
+                this.resetForm();
             },
             checked_in_date(val, old) {
                 if (old) {
