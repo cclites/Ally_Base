@@ -59,15 +59,6 @@
                             <input-help :form="businessSettings" field="timesheet_exceptions" text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
                         </b-form-group>
 
-                        <b-form-group label="Require Signatures" label-for="require_signatures">
-                            <b-form-select id="require_signatures"
-                                           v-model="businessSettings.require_signatures"
-                            >
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </b-form-select>
-                            <input-help :form="businessSettings" field="require_signatures" text="Require Caregiver signatures on Clock Out."></input-help>
-                        </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
@@ -194,66 +185,89 @@
             </b-tab>
             <b-tab title="Clock Out Questions">
                 <b-row>
+                    <b-col lg="12">
+                        <h4>Options</h4>
+                        <hr />
+                    </b-col>
                     <b-col lg="6">
-                        <b-form-group label="Recorded Mileage" label-for="co_mileage">
+                        <b-form-group label="Allow Recording of Mileage?" label-for="co_mileage">
                             <b-form-select id="co_mileage"
-                                           v-model="businessSettings.co_mileage"
-                                           tabindex="1">
+                                           v-model="businessSettings.co_mileage">
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="co_mileage" text=""></input-help>
                         </b-form-group>
-                        <b-form-group label="Caregiver Injury" label-for="co_injuries">
-                            <b-form-select id="co_injuries"
-                                           v-model="businessSettings.co_injuries"
-                                           tabindex="1">
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
-                            </b-form-select>
-                            <input-help :form="businessSettings" field="co_injuries" text=""></input-help>
-                        </b-form-group>
-                        <b-form-group label="Comments" label-for="co_comments">
-                            <b-form-select id="co_comments"
-                                           v-model="businessSettings.co_comments"
-                                           tabindex="1">
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
-                            </b-form-select>
-                            <input-help :form="businessSettings" field="co_comments" text=""></input-help>
-                        </b-form-group>
-                        <b-btn @click="update" variant="info">
-                            Save
-                        </b-btn>
-                    </b-col>
-                    <b-col lg="6">
-                        <b-form-group label="Other Expenses" label-for="co_expenses">
+                        <b-form-group label="Allow Recording of Other Expenses?" label-for="co_expenses">
                             <b-form-select id="co_expenses"
-                                           v-model="businessSettings.co_expenses"
-                                           tabindex="1">
+                                           v-model="businessSettings.co_expenses">
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="co_expenses" text=""></input-help>
                         </b-form-group>
-                        <b-form-group label="Issues" label-for="co_issues">
-                            <b-form-select id="co_issues"
-                                           v-model="businessSettings.co_issues"
-                                           tabindex="1">
+
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Allow General Comments / Notes?" label-for="co_comments">
+                            <b-form-select id="co_comments"
+                                           v-model="businessSettings.co_comments">
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </b-form-select>
-                            <input-help :form="businessSettings" field="co_issues" text=""></input-help>
+                            <input-help :form="businessSettings" field="co_comments" text=""></input-help>
                         </b-form-group>
-                        <b-form-group label="Caregiver Signature" label-for="co_signature">
-                            <b-form-select id="co_signature"
-                                           v-model="businessSettings.co_signature"
-                                           tabindex="1">
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
+                        <b-form-group label="Client Signature" label-for="signatureOption">
+                            <b-form-select id="signatureOption"
+                                           v-model="signatureOption">
+                                <option value="do_not_show">Do Not Show</option>
+                                <option value="show">Show, Do Not Require</option>
+                                <option value="required">Show &amp; Require</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="co_signature" text=""></input-help>
                         </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <h4>System Questions</h4>
+                        <hr />
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Were you injured on your shift?" label-for="co_injuries">
+                            <b-form-select id="co_injuries"
+                                           v-model="businessSettings.co_injuries">
+                                <option value="1">Show</option>
+                                <option value="0">Do Not Show</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_injuries" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Were there any other issues on your shift?" label-for="co_issues">
+                            <b-form-select id="co_issues"
+                                           v-model="businessSettings.co_issues">
+                                <option value="1">Show</option>
+                                <option value="0">Do Not Show</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="co_issues" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <h4>Custom Questions</h4>
+                        <hr />
+                    </b-col>
+                    <b-col lg="12" class="with-padding-bottom">
+                        <center>Coming soon</center>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-btn @click="update" variant="info">
+                            Save
+                        </b-btn>
                     </b-col>
                 </b-row>
             </b-tab>
@@ -309,14 +323,50 @@
                     "America/Denver",
                     "America/Phoenix",
                     "America/Los_Angeles"
-                ]
+                ],
+                signatureMapping: {
+                    required: {
+                        co_signature: 1,
+                        require_signatures: 1,
+                    },
+                    show: {
+                        co_signature: 1,
+                        require_signatures: 0,
+                    },
+                    do_not_show: {
+                        co_signature: 0,
+                        require_signatures: 0,
+                    }
+                },
+                signatureOption: null,
             }
+        },
+
+        mounted() {
+            this.signatureOption = this.getSignatureOption(this.business);
         },
 
         methods: {
             update() {
                 this.businessSettings.put('/business/settings/' + this.business.id);
+            },
+            getSignatureOption(business) {
+                for (var option of Object.keys(this.signatureMapping)) {
+                    let obj = this.signatureMapping[option];
+                    console.log(option, obj);
+                    if (business.require_signatures === obj.require_signatures && business.co_signature === obj.co_signature) {
+                        return option;
+                    }
+                }
+            },
+            updateSignatureValues() {
+                if (!this.signatureOption) return;
+                Object.assign(this.businessSettings, this.signatureMapping[this.signatureOption]);
             }
+        },
+
+        watch: {
+            signatureOption() { this.updateSignatureValues() },
         }
     }
 </script>
