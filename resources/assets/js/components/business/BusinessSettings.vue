@@ -106,9 +106,11 @@
                             <input-help :form="businessSettings" field="calendar_remember_filters" text="Remember the last filters used when loading the schedule."></input-help>
                         </b-form-group>
                         <b-form-group label="Calendar Next Day Threshold" label-for="calendar_next_day_threshold">
-                            <b-form-input id="calendar_next_day_threshold"
-                                           v-model="businessSettings.calendar_next_day_threshold"
-                                           />
+                            <b-form-select id="calendar_next_day_threshold"
+                                           v-model="businessSettings.calendar_next_day_threshold">
+                                <option value="00:15:00">Yes</option>
+                                <option value="23:59:00">No</option>
+                            </b-form-select>
                             <input-help :form="businessSettings" field="calendar_next_day_threshold" text="When an shifts’s end time crosses into another day, the minimum time it must be in order for it to show on that day."></input-help>
                         </b-form-group>
                     </b-col>

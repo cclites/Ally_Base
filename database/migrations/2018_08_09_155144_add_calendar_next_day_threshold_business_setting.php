@@ -14,7 +14,7 @@ class AddCalendarNextDayThresholdBusinessSetting extends Migration
     public function up()
     {
         Schema::table('businesses', function(Blueprint $table) {
-            $table->time('calendar_next_day_threshold')->default('09:00:00');
+            $table->time('calendar_next_day_threshold')->default('23:59:00');
         });
     }
 
