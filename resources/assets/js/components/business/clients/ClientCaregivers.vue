@@ -124,7 +124,7 @@
                 </b-row>
                 <b-row v-if="form.caregiver_id">
                     <b-col lg="12">
-                        <strong>Fill in two of the three fields below, our system will automatically calculate the third field and the ally fee.</strong>
+                        <strong>Fill in two of the three fields below, our system will automatically calculate the third field and the Ally fee.</strong>
                         <hr />
                     </b-col>
                     <b-col lg="12">
@@ -244,7 +244,7 @@
                 if (this.selectedCaregiver.id) {
                     return 'Edit Caregiver Assignment';
                 }
-                return 'Add Caregiver Assignment';
+                return 'Add Caregiver to Client';
             },
         },
         
