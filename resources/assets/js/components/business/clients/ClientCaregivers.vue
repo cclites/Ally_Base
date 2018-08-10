@@ -117,15 +117,17 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
+                <b-row v-if="!form.caregiver_id">
+                    <b-col lg="12">
+                        <strong>Select a caregiver from the above list.</strong>
+                    </b-col>
+                </b-row>
                 <b-row v-if="form.caregiver_id">
                     <b-col lg="12">
-
-                        <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="adjustment" v-model="calculateFees" value="1">
-                            <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Calculate Registry and Ally fees below</span>
-                        </label>
-
+                        <strong>Fill in two of the three fields below, our system will automatically calculate the third field and the ally fee.</strong>
+                        <hr />
+                    </b-col>
+                    <b-col lg="12">
                         <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">
                             <b-form-input
                                 id="caregiver_hourly_rate"
@@ -133,7 +135,7 @@
                                 type="number"
                                 v-model="form.caregiver_hourly_rate"
                                 min="0"
-                                @change="updateCaregiverRate()"
+                                @change="updateRatesFromCaregiverHourly"
                             >
                             </b-form-input>
                             <input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>
@@ -146,49 +148,36 @@
                                 type="number"
                                 v-model="form.provider_hourly_fee"
                                 min="0"
-                                @change="updateProivderFee()"
+                                @change="updateRatesFromCaregiverHourly"
                             >
                             </b-form-input>
                             <input-help :form="form" field="provider_hourly_fee" text="Enter the registry hourly fee."></input-help>
                         </b-form-group>
 
-                        <b-form-group v-if="calculateFees" label="Total Hourly Rate" label-for="total_hourly_rate">
+                        <b-form-group label="Ally Hourly Fee" label-for="ally_hourly_fee">
+                            <b-form-input
+                                    id="ally_hourly_fee"
+                                    name="ally_hourly_fee"
+                                    type="number"
+                                    :value="ally_hourly_fee"
+                                    min="0"
+                                    disabled
+                            >
+                            </b-form-input>
+                        </b-form-group>
+
+                        <b-form-group label="Total Hourly Rate" label-for="total_hourly_rate">
                             <b-form-input
                                 id="total_hourly_rate"
                                 name="total_hourly_rate"
                                 type="number"
                                 v-model="total_hourly_rate"
                                 min="0"
-                                @change="updateTotalRate()"
+                                @change="updateRatesFromTotalHourly"
                             >
                             </b-form-input>
-                            <input-help :form="form" field="total_hourly_rate" text="Enter the total hourly rate charged to the client."></input-help>
+                            <input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>
                         </b-form-group>
-
-                        <!-- <b-form-group v-if="calculateFees" label="Ally Hourly Fee" label-for="ally_hourly_fee">
-                            <b-form-input
-                                id="ally_hourly_fee"
-                                name="ally_hourly_fee"
-                                type="number"
-                                v-model="ally_hourly_fee"
-                                min="0"
-                                disabled
-                            >
-                            </b-form-input>
-                        </b-form-group> -->
-
-                        <b-row>
-                            <b-col>
-                                <b-form-group label="Ally Fee">
-                                    {{ moneyFormat(allyTotal) }}
-                                </b-form-group>
-                            </b-col>
-                            <b-col>
-                                <b-form-group label="Total">
-                                    {{ moneyFormat(superTotal) }}
-                                </b-form-group>
-                            </b-col>
-                        </b-row>
 
                     </b-col>
                </b-row>
@@ -239,21 +228,26 @@
                 form: new Form(),
                 excludeForm: {},
                 excludedCaregivers: [],
-                calculateFees: true,
+                ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
-                allyTotal: 0.00,
-                superTotal: 0.00,
             }
         },
 
         mounted() {
             this.fetchAssignedCaregivers();
-        },
-
-        created() {
             this.fetchCaregivers();
             this.fetchExcludedCaregivers();
         },
+        
+        computed: {
+            modalTitle() {
+                if (this.selectedCaregiver.id) {
+                    return 'Edit Caregiver Assignment';
+                }
+                return 'Add Caregiver Assignment';
+            },
+        },
+        
 
         methods: {
             addCaregiver() {
@@ -373,55 +367,51 @@
                     });
             },
 
-            updateTotalRate() {
-                if (this.calculateFees) {
-                    this.form.caregiver_hourly_rate = parseFloat(this.total_hourly_rate) - parseFloat(this.form.provider_hourly_fee);
+            updateAllyFee() {
+                let cgRate = parseFloat(this.form.caregiver_hourly_rate);
+                let provFee = parseFloat(this.form.provider_hourly_fee);
+                if (isNaN(cgRate) || isNaN(provFee)) {
+                    this.ally_hourly_fee = 0;
+                    return;
                 }
-                
-                this.calculateTotals();
+                let computed = (cgRate + provFee) * this.allyRate;
+                this.ally_hourly_fee = computed.toFixed(2);
             },
 
-            updateCaregiverRate() {
-                if (this.calculateFees) {
-                    let registryFee = parseFloat(this.form.provider_hourly_fee);
-                    let caregiverRate = parseFloat(this.form.caregiver_hourly_rate);
-                    let totalRate = parseFloat(this.total_hourly_rate);
-                    
-                    if (registryFee > 0) {
-                        this.total_hourly_rate = registryFee + caregiverRate;
-                    } else {
-                        if (totalRate > caregiverRate) {
-                            this.form.provider_hourly_fee = (totalRate - caregiverRate);
-                        } else {
-                            this.total_hourly_rate = caregiverRate + registryFee;
-                        }
-                    }
-                } else {
-                    this.total_hourly_rate = parseFloat(this.form.provider_hourly_fee) + parseFloat(this.form.caregiver_hourly_rate);
+            updateRatesFromCaregiverHourly() {
+                this.updateAllyFee();
+                let cgRate = parseFloat(this.form.caregiver_hourly_rate);
+                let provFee = parseFloat(this.form.provider_hourly_fee);
+                let allyFee = parseFloat(this.ally_hourly_fee);
+                if (isNaN(cgRate) || isNaN(provFee)) {
+                    return;
                 }
-
-                this.calculateTotals();
+                let computed = cgRate + provFee + allyFee;
+                this.total_hourly_rate = computed.toFixed(2);
+                this.highlightInput('#total_hourly_rate');
             },
 
-            updateProivderFee() {
-                this.total_hourly_rate = parseFloat(this.form.provider_hourly_fee) + parseFloat(this.form.caregiver_hourly_rate);
-                this.calculateTotals();
+            updateRatesFromTotalHourly() {
+                let cgRate = parseFloat(this.form.caregiver_hourly_rate);
+                let totalRate = parseFloat(this.total_hourly_rate);
+                if (isNaN(cgRate) || isNaN(totalRate)) {
+                    return;
+                }
+                console.log(totalRate, 1+parseFloat(this.allyRate), cgRate);
+                let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
+                this.form.provider_hourly_fee = computed.toFixed(2);
+                this.highlightInput('#provider_hourly_fee');
+                this.updateAllyFee();
             },
 
-            calculateTotals() {
-                this.allyTotal = parseFloat(this.total_hourly_rate) * this.allyRate;
-                this.superTotal = parseFloat(this.total_hourly_rate) + this.allyTotal;
-            },
+            highlightInput(selector) {
+                $(selector).addClass('highlight-input');
+                setInterval(function() {
+                    $(selector).removeClass('highlight-input');
+                }, 300);
+            }
         },
 
-        computed: {
-            modalTitle() {
-                if (this.selectedCaregiver.id) {
-                    return 'Edit Caregiver Assignment';
-                }
-                return 'Add Caregiver Assignment';
-            },
-        },
     }
 </script>
 
@@ -437,5 +427,9 @@
     }
     tr td.hourly, tr th.hourly {
         text-align: center;
+    }
+    .highlight-input {
+        border: 1px solid blue;
+        outline: 2px solid #ddd;
     }
 </style>
