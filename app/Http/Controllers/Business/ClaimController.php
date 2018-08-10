@@ -26,7 +26,8 @@ class ClaimController extends BaseController
         $client = Client::with([
             'addresses',
             'shifts' => function ($query) use ($request) {
-                $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)]);
+                $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)])
+                    ->whereNotNull('checked_out_time');
             }
         ])
             ->find($request->client_id);
