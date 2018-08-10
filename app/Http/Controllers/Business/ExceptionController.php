@@ -16,7 +16,7 @@ class ExceptionController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = SystemException::where('business_id', $this->business()->id);
+        $query = $this->business()->exceptions();
         $exceptions = (clone $query)->whereNull('acknowledged_at')
             ->orderBy('created_at')
             ->get();
@@ -40,10 +40,7 @@ class ExceptionController extends BaseController
      */
     public function show($exception_id)
     {
-        $exception = SystemException::findOrFail($exception_id);
-        if ($this->business()->id != $exception->business_id) {
-            return new ErrorResponse(403, 'You do not have access to this exception.');
-        }
+        $exception = $this->business()->exceptions()->findOrFail($exception_id);
 
         return view('business.exceptions.show', compact('exception'));
     }
@@ -55,10 +52,7 @@ class ExceptionController extends BaseController
      */
     public function acknowledge(Request $request, $exception_id)
     {
-        $exception = SystemException::findOrFail($exception_id);
-        if ($this->business()->id != $exception->business_id) {
-            return new ErrorResponse(403, 'You do not have access to this exception.');
-        }
+        $exception = $this->business()->exceptions()->findOrFail($exception_id);
 
         if ($exception->acknowledge($request->input('notes', ''))) {
             return new SuccessResponse('You have successfully acknowlegded the exception.', [], route('business.exceptions.index'));

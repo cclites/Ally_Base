@@ -60,7 +60,7 @@
     <a href="{{ route('business.exceptions.index') }}">
         <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions
             <span class="badge badge-danger badge-notifications menu-badge">
-            {{ \App\SystemException::notAcknowledged()->count() }}
+            {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
             </span>
         </span>
 

@@ -20,6 +20,15 @@
                 </template>
             </b-table>
         </div>
+
+        <b-row>
+            <b-col lg="6" >
+                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
@@ -43,16 +52,16 @@
         data() {
             return {
                 totalRows: 0,
-                perPage: 15,
+                perPage: 25,
                 currentPage: 1,
                 sortBy: 'created_at',
-                sortDesc: false,
+                sortDesc: true,
                 filter: null,
                 selectedItem: {},
                 fields: [
                     {
                         key: 'created_at',
-                        label: 'Title',
+                        label: 'Date',
                         sortable: true,
                         formatter: (val) => this.formatDateTimeFromUTC(val),
                     },

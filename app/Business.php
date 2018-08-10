@@ -155,6 +155,10 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Deposit::class);
     }
 
+    public function exceptions() {
+        return $this->hasMany(SystemException::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
