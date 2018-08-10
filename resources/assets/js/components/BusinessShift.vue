@@ -326,10 +326,10 @@
                 </b-col>
                 <b-col lg="8" class="text-right" v-if="!shift.readOnly">
                     <div v-if="!deleted">
-                        <b-button variant="light" type="submit" @click="saveShift(false)">
+                        <b-button variant="info" type="submit" @click="saveShift(false)">
                             <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
                         </b-button>
-                        <b-button variant="light" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
+                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
                         <b-dropdown variant="light" v-if="shift.id">
                             <template slot="button-content">
                                 <i class='fa fa-list'></i> Actions
