@@ -339,9 +339,11 @@
             },
 
             allyFee() {
-                if (!parseFloat(this.form.caregiver_rate)) return null;
                 let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
+                    return 'Enter Caregiver and Provider Rates'
+                }
                 let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
                 return allyFee.toFixed(2);
             },
@@ -351,9 +353,11 @@
             },
 
             totalRate() {
-                if (this.allyFee === null) return null;
                 let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
+                    return 'Enter Caregiver and Provider Rates'
+                }
                 let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
                 return totalRate.toFixed(2);
             },
