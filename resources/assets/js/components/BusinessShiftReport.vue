@@ -85,21 +85,21 @@
                     <shift-history-table :fields="fields" :items="shiftHistoryItems">
                         <template slot="actions" scope="row">
                             <div v-if="row.item.id">
-                                <!--<b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>-->
-                                <!--<b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>-->
-                                <!--<span>-->
-                                    <!--<b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>-->
-                                    <!--<b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>-->
-                                <!--</span>-->
-                                <!--<b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>-->
+                                <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <span>
+                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                                </span>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
 
-                                <b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">
-                                    <b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>
-                                    <b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>
-                                    <b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>
-                                    <b-dropdown-divider></b-dropdown-divider>
-                                    <b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>
-                                </b-dropdown>
+                                <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
+                                    <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
+                                    <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                                    <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                                    <!--<b-dropdown-divider></b-dropdown-divider>-->
+                                    <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
+                                <!--</b-dropdown>-->
                             </div>
                         </template>
                     </shift-history-table>
