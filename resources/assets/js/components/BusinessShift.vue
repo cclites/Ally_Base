@@ -436,6 +436,7 @@
         },
         methods: {
             resetForm() {
+                this.deleted = false;
                 this.form = new Form(this.initForm());
                 this.status = (this.shift) ? this.shift.status : null;
                 this.fixDateTimes();
