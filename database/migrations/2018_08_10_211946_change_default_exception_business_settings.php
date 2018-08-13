@@ -17,7 +17,7 @@ class ChangeDefaultExceptionBusinessSettings extends Migration
             $table->boolean('location_exceptions')->default(0)->change();
         });
 
-        if (config('app.env') !== 'local') {
+        if (config('app.env') === 'production') {
             \App\Business::query()->update(['location_exceptions' => 0]);
             \App\SystemException::notAcknowledged()->where('reference_type', \App\Shift::class)->update(['acknowledged_at' => \Carbon\Carbon::now()]);
         }
