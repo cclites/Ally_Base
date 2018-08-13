@@ -130,7 +130,7 @@
             :caregiver="caregiver_id" 
             :client="client_id"
             :no-close-on-backdrop="true"
-            @shiftCreated="onShiftUpdate()"
+            @shift-created="onShiftCreate"
         ></add-shift-modal>
 
         <edit-shift-modal
@@ -138,7 +138,8 @@
             :shift_id="editingShiftId"
             :no-close-on-backdrop="true"
             :activities="activities"
-            @shiftUpdated="onShiftUpdate()"
+            @shift-updated="onShiftUpdate"
+            @shift-deleted="onShiftDelete"
         />
     </div>
 </template>
@@ -375,14 +376,23 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
             },
-            reloadData() {
-                this.setLocalStorage('sortBy', 'Day');
-                this.setLocalStorage('sortDesc', 'false');
-                return this.loadData();
-            },
-            loadData() {
-                this.loaded = 0;
 
+            async reloadShift(id) {
+                const response = await axios.get(this.urlPrefix + 'shifts' + this.queryString + '&shift_id=' + id);
+
+                let shift = response.data[0];
+                if (!shift) return;
+
+                let index = this.items.shifts.findIndex(item => shift.id === item.id);
+                if (index !== -1) {
+                    this.items.shifts[index] = shift;
+                    this.items.shifts.push(); // needed for Vue to detect change
+                }
+
+                this.loadSummaries();
+            },
+
+            loadSummaries() {
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -403,6 +413,18 @@
                         }
                         this.loaded++;
                     });
+            },
+
+            reloadData() {
+                this.setLocalStorage('sortBy', 'Day');
+                this.setLocalStorage('sortDesc', 'false');
+                return this.loadData();
+            },
+
+            loadData() {
+                this.loaded = 0;
+                this.loadSummaries();
+
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -442,9 +464,7 @@
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + item.id)
                         .then(response => {
-                            this.items.shifts = this.items.shifts.filter(function(shift) {
-                                return (shift.id !== item.id);
-                            });
+                            this.onShiftDelete(item.id);
                         })
                 }
             },
@@ -541,11 +561,26 @@
                 this.showSummary = !this.showSummary;
             },
 
-            onShiftUpdate() {
+            onShiftUpdate(id) {
+                console.log('Updating shift ' + id);
+                this.editShiftModal = false;
+                this.addShiftModal = false;
+                this.reloadShift(id, false);
+            },
+
+            onShiftCreate() {
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();
             },
+
+            onShiftDelete(id) {
+                console.log('Deleting shift ' + id);
+                this.editShiftModal = false;
+                this.addShiftModal = false;
+                this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
+                this.loadSummaries();
+            }
         },
 
         watch: {

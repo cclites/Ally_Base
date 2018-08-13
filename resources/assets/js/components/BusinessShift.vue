@@ -523,7 +523,10 @@
                 if (confirm('Are you sure you wish to delete this shift?')) {
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + this.shift.id)
-                        .then(response => this.deleted = true);
+                        .then(response => {
+                            this.deleted = true;
+                            this.$emit('shift-deleted', this.shift.id);
+                        });
                 }
             },
             async saveShift(confirm = false) {
@@ -532,30 +535,30 @@
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
                     try {
-                        let response = await this.form.patch('/business/shifts/' + this.shift.id)
-
+                        let response = await this.form.patch('/business/shifts/' + this.shift.id);
                         if (confirm) {
-                            let form = new Form();
-                            let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm')
-
-                            this.status = response.data.data.status;
+                            try {
+                                let form = new Form();
+                                let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm');
+                            }
+                            catch (e) {
+                                console.log(e);
+                            }
                         }
-
+                        this.$emit('shift-updated', this.shift.id);
                         this.submitting = false;
-                        this.$emit('shiftUpdated');
+
                     } catch (e) {
+                        console.log(e);
                         this.submitting = false;
                     }
                 }
                 else {
                     // Create a shift (modal)
                     this.form.post('/business/shifts').then(response => {
-                        this.$emit('shiftCreated', response.data.data.shift);
+                        this.$emit('shift-created', response.data.data.shift.id);
                         this.status = response.data.data.status;
                         this.submitting = false;
-                        if(callback) {
-                            callback();
-                        }
                     }).catch(error => {
                         this.submitting = false;
                     });

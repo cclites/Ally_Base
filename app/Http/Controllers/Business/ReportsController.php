@@ -508,6 +508,10 @@ class ReportsController extends BaseController
             $report->where('import_id', $request->import_id);
         }
 
+        if ($request->input('shift_id')) {
+            $report->where('id', $request->shift_id);
+        }
+
         if ($request->input('transaction_id')) {
             $transaction = GatewayTransaction::findOrFail($request->input('transaction_id'));
             $report->forTransaction($transaction);

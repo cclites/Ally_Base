@@ -10,7 +10,8 @@
                 :admin="1"
                 :caregiver="shift.caregiver"
                 :client="shift.client"
-                @shiftUpdated="$emit('shiftUpdated')"
+                @shift-updated="$emit('shift-updated', shift.id)"
+                @shift-deleted="$emit('shift-deleted', shift.id)"
             ></business-shift>
         </b-container>
     </b-modal>
