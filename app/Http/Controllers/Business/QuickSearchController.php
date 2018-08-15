@@ -15,6 +15,7 @@ class QuickSearchController extends BaseController
         }
 
         $query = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
+            ->whereIn('role_type', ['client', 'caregiver'])
             ->where('active', 1)
             ->orderBy('firstname')
             ->orderBy('lastname');
