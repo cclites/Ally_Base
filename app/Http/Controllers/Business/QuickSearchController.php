@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Responses\SuccessResponse;
-use App\Client;
-use App\Caregiver;
+use App\User;
 use DB;
 
 class QuickSearchController extends BaseController
@@ -15,46 +14,41 @@ class QuickSearchController extends BaseController
             return new SuccessResponse(null, []);
         }
 
-        $q = request('q');
-        
-        if (empty($this->business()->id)) {
-            // admin -> show all
-            $clients = Client::with('user');
-            $caregivers = Caregiver::with('user');
-        } else {
-            // only show for current business
-            $clients = $this->business()->clients()->with('user');
-            $caregivers = $this->business()->caregivers()->with('user');
+        $query = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
+            ->where('active', 1)
+            ->orderBy('firstname')
+            ->orderBy('lastname');
+
+        if (!is_admin_now()) {
+            $query->leftJoin('clients', 'clients.id', '=', 'users.id')
+                ->leftJoin('business_caregivers', function($join) {
+                    $join->on('business_caregivers.business_id', '=', DB::raw((int) $this->business()->id));
+                    $join->on('business_caregivers.caregiver_id', '=', 'users.id');
+                })
+                ->where(function($query) {
+                    $query->where('business_caregivers.business_id', $this->business()->id)
+                        ->orWhere('clients.business_id', $this->business()->id);
+                });
         }
 
-        $nameQuery = "CONCAT(firstname, ' ', lastname) like '%$q%'";
+        $query->where(function($query) {
+            $q = request('q');
+            if (\App::runningUnitTests()) {
+                // check if testing enviornment because sqlite doesn't have CONCAT function
+                $query->whereRaw("printf('%s %s', firstname, lastname) like ?", ["%$q%"]);
+            }
+            else {
+                $query->whereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%$q%"]);
+            }
+            $query->orWhere('email', 'LIKE', "%$q%");
+        });
 
-        // check if testing enviornment because sqlite doesn't have CONCAT function
-        if (\App::runningUnitTests()) {
-            $nameQuery = "printf('%s %s', firstname, lastname) like '%$q%'";
-        }
+        $keys = ['id', 'name', 'role_type'];
 
-        $clients = $clients->whereHas('user', function ($query) use($q, $nameQuery) {
-                $query->where('active', true)
-                    ->whereRaw($nameQuery);
-            })
-            ->get();
+        $users = $query->get()->map(function($user) use ($keys) {
+            return $user->only($keys);
+        });
 
-        $caregivers = $caregivers->whereHas('user', function ($query) use($q, $nameQuery) {
-                $query->where('active', true)
-                    ->whereRaw($nameQuery);
-            })
-            ->get();
-
-        $data = $clients->concat($caregivers)
-            ->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->user->firstname . ' ' . $item->user->lastname,
-                    'role_type' => $item->user->role_type,
-                ];
-            })->sortBy('name')->values()->all();
-
-        return new SuccessResponse(null, $data);
+        return new SuccessResponse(null, $users);
     }
 }
