@@ -114,26 +114,3 @@ if (!Array.prototype.includes) {
     });
 }
 
-// IE/Edge Objects.Entries Polyfill
-if (!Object.entries) {
-    Object.entries = function( obj ){
-        var ownProps = Object.keys( obj ),
-            i = ownProps.length,
-            resArray = new Array(i); // preallocate the Array
-        while (i--)
-            resArray[i] = [ownProps[i], obj[ownProps[i]]];
-
-        return resArray;
-    };
-}
-if (!Object.prototype.entries) {
-    Object.prototype.entries = function(){
-        var ownProps = Object.keys(this),
-            i = ownProps.length,
-            resArray = new Array(i); // preallocate the Array
-        while (i--)
-            resArray[i] = [ownProps[i], obj[ownProps[i]]];
-
-        return resArray;
-    };
-}
