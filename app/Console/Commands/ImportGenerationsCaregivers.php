@@ -6,6 +6,7 @@ use App\Address;
 use App\Business;
 use App\Caregiver;
 use App\EmergencyContact;
+use App\Note;
 use App\PhoneNumber;
 use App\User;
 
