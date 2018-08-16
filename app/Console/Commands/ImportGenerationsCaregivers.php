@@ -38,6 +38,8 @@ class ImportGenerationsCaregivers extends BaseImport
 
         $objPHPExcel = $this->loadSheet();
 
+        \DB::beginTransaction();
+
         $lastRow = $this->getRowCount($objPHPExcel);
 
         for($row=2; $row<=$lastRow; $row++) {
@@ -48,7 +50,7 @@ class ImportGenerationsCaregivers extends BaseImport
 
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
                 $data['lastname'] = $this->getValue($objPHPExcel, 'Last Name', $row);
-                $data['ssn'] = str_pad($this->getValue($objPHPExcel, 'SSN', $row), 9, '0', STR_PAD_LEFT);
+                $data['ssn'] = str_pad(str_replace('-', '', $this->getValue($objPHPExcel, 'SSN', $row)), 9, '0', STR_PAD_LEFT);
                 $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
                 $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
                 $data['password'] = bcrypt(str_random(12));
@@ -58,7 +60,7 @@ class ImportGenerationsCaregivers extends BaseImport
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);
                 $addressData['state'] = $this->getValue($objPHPExcel, 'State', $row);
-                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row);
+                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row) ?: $this->getValue($objPHPExcel, 'PostalCode', $row);
                 $addressData['country'] = 'US';
                 $addressData['type'] = 'home';
 
@@ -126,7 +128,19 @@ class ImportGenerationsCaregivers extends BaseImport
                         ]);
                     }
                 }
+
+                // Create Note
+                if ($officeNote = $this->getValue($objPHPExcel, "OfficeNote", $row)) {
+                    $officeUser = $business->users()->first();
+                    $caregiver->notes()->save(new Note([
+                        'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
+                        'created_by' => $officeUser->id,
+                        'business_id' => $business->id,
+                    ]));
+                }
             }
+
+            \DB::commit();
 
         }
 

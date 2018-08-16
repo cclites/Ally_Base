@@ -17,7 +17,7 @@
                         </b-col>
                     </b-row>
                 </div>
-            {{ note.body }}
+            <div class="note-body">{{ note.body }}</div>
         </b-card>
 
         <b-card v-if="!notes.length">
@@ -27,6 +27,10 @@
 </template>
 
 <style lang="scss">
+    .note-body {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
 </style>
 
 <script>
