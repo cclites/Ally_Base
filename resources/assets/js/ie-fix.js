@@ -126,3 +126,14 @@ if (!Object.entries) {
         return resArray;
     };
 }
+if (!Object.prototype.entries) {
+    Object.prototype.entries = function(){
+        var ownProps = Object.keys(this),
+            i = ownProps.length,
+            resArray = new Array(i); // preallocate the Array
+        while (i--)
+            resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+        return resArray;
+    };
+}
