@@ -6,6 +6,8 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "ext-simplexml": "*",
+        "ext-dom": "*",
         "barryvdh/laravel-snappy": "^0.4.0",
         "bizhub/impersonate": "^0.2.0",
         "doctrine/dbal": "^2.5",
