@@ -65,4 +65,11 @@
     </ul>
 </li>
 
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-diamond"></i><span class="hide-menu">Testing</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('admin.microbilt') }}">Microbilt</a></li>
+        <li><a href="{{ route('admin.tellus') }}">Tellus</a></li>
 
+    </ul>
+</li>

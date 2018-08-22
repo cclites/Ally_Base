@@ -243,7 +243,9 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['admin'],
 ], function() {
-    Route::get('microbilt', 'Admin\MicrobiltController@index');
+    Route::get('tellus', 'Admin\TellusController@index')->name('tellus');
+    Route::get('tellus/download/{shift}', 'Admin\TellusController@download');
+    Route::get('microbilt', 'Admin\MicrobiltController@index')->name('microbilt');
     Route::post('microbilt', 'Admin\MicrobiltController@test');
     Route::post('users/{user}/hold', 'Admin\UserController@addHold');
     Route::delete('users/{user}/hold', 'Admin\UserController@removeHold');

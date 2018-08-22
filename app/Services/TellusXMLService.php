@@ -79,7 +79,6 @@ class TellusXMLService
             $service = new SimpleXMLElement('<RenderedService />');
         }
         else {
-            var_dump('Adding child to parent');
             $service = $parent->addChild('RenderedService');
         }
         $array = $this->shiftToArray($shift);

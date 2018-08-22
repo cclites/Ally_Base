@@ -55,6 +55,7 @@ Vue.component('client-phone-numbers-tab', require('./components/clients/profile/
 Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/profile/CaregiverPhoneNumbersTab'));
 
 // Admin
+Vue.component('admin-tellus-component', require('./components/admin/AdminTellusComponent'));
 Vue.component('admin-business-select', require('./components/admin/AdminBusinessSelect'));
 Vue.component('admin-import', require('./components/admin/import/AdminImport'));
 Vue.component('admin-import-report', require('./components/admin/import/AdminImportReport'));
