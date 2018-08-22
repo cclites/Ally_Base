@@ -18,4 +18,5 @@ class TellusController extends Controller
         $service->addShift($shift);
         return $service->downloadXml();
     }
+
 }
