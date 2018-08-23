@@ -12,6 +12,9 @@
 
         <b-form-group label="XML" label-for="shift_id" v-if="loaded">
             <b-textarea :rows="10" v-model="xml"/>
+            <pre v-if="response">
+                {{ response }}
+            </pre>
             <b-btn @click="submit()" variant="success">Submit to Tellus</b-btn>
         </b-form-group>
     </b-card>
@@ -25,6 +28,7 @@
                 shift_id: '',
                 xml: null,
                 loaded: false,
+                response: null,
             }
         },
         computed: {
@@ -39,10 +43,14 @@
                 this.xml = response.data;
                 this.loaded = true;
             },
-            submit() {
-                this.validateXML(this.xml);
+            async submit() {
+                if (!this.validateXML(this.xml)) {
+                    return;
+                }
+                this.response = 'Submitting to Tellus..';
                 let form = new Form({xml: this.xml});
-                alert('Submission coming soon');
+                const response = await form.post('/admin/tellis');
+                this.response = response.data;
             },
             validateXML(xml) {
                 // code for IE
@@ -59,7 +67,7 @@
                         return false;
                     }
                     else {
-                        alert("No errors found");
+                        return true;
                     }
                 }
                 // code for Mozilla, Firefox, Opera, etc.
@@ -73,12 +81,11 @@
                         return false;
                     }
                     else {
-                        alert("No errors found");
                         return true;
                     }
                 }
                 else {
-                    return confirm('Your browser cannot handle XML validation');
+                    return confirm('Your browser cannot handle XML validation. Continue anyway?');
                 }
             }
         }
