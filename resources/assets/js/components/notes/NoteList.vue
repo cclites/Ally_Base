@@ -1,8 +1,6 @@
 <template>
     <b-card>
         <b-form inline @submit.prevent="filter" class="mb-4">
-            <a href="/notes/create" class="btn btn-info mr-5 mb-2">Add Note</a>
-
             <b-form-input
                     type="text"
                     id="start-date"
@@ -49,12 +47,13 @@
             <b-button variant="info" type="submit" class="mb-2">
                 Filter
             </b-button>
-
         </b-form>
 
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
+            <b-btn variant="info" class="mb-3" @click="create()">Add Note</b-btn>
+
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
                         :items="items"
@@ -64,9 +63,6 @@
                         :sort-by.sync="sortBy"
                         @filtered="onFiltered"
                 >
-                    <template slot="created_at" scope="data">
-                        {{ createdAt(data) }}
-                    </template>
                     <template slot="caregiver" scope="data">
                         <span v-if="data.item.caregiver">{{ data.item.caregiver.name }}</span>
                     </template>
@@ -74,9 +70,9 @@
                         <span v-if="data.item.client">{{ data.item.client.name }}</span>
                     </template>
                     <template slot="action" scope="data">
-                        <a class="btn btn-secondary" :href="'/notes/' + data.item.id + '/edit'">
+                        <b-btn variant="secondary" @click="edit(data.item)">
                             <i class="fa fa-edit"></i>
-                        </a>
+                        </b-btn>
                     </template>
                 </b-table>
             </div>
@@ -90,20 +86,33 @@
                 </b-col>
             </b-row>
         </div>
+
+        <b-modal id="noteModal" :title="noteModalTitle" v-model="noteModal" size="lg">
+            <note-form :business="business" :note="note" ref="noteForm" />
+
+            <div slot="modal-footer">
+               <b-btn variant="default" @click="noteModal=false">Close</b-btn>
+               <b-btn variant="danger" @click="destroy()" v-if="note.id">Delete</b-btn>
+               <b-btn variant="info" @click="save()">Save</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
 <script>
+    import FormatsDates from '../../mixins/FormatsDates';
+    export default {      
+        mixins: [ FormatsDates ],
 
-    import moment from 'moment';
-
-    export default {
         props: {
             'business': Object,
         },
 
         data() {
             return {
+                note: {},
+                noteModal: false,
+
                 items: this.business.notes,
                 searchForm: {
                     caregiver: null,
@@ -113,14 +122,14 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: null,
-                selectedItem: {},
+                sortBy: 'created_at',
                 loading: false,
                 fields: [
                     {
                         key: 'created_at',
                         label: 'Note Date',
                         sortable: true,
+                        formatter: d => { return this.formatDateFromUTC(d) },
                     },
                     {
                         key: 'caregiver',
@@ -176,7 +185,10 @@
             },
             clients() {
                 return _.sortBy(this.business.clients, ['name']);
-            }
+            },
+            noteModalTitle() {
+                return this.note.id ? 'Edit Note' : 'Add Note';
+            },
         },
 
         methods: {
@@ -185,9 +197,7 @@
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
             },
-            createdAt(data) {
-                return moment(data.item.created_at).format('L');
-            },
+            
             filter() {
                 this.loading = true;
                 axios.post('/notes/search', this.searchForm)
@@ -199,7 +209,51 @@
                         this.loading = false;
                         console.error(error.response);
                     });
-            }
+            },
+
+            create() {
+                this.note = {
+                    caregiver_id: this.searchForm.caregiver ? this.searchForm.caregiver : '',
+                    client_id: this.searchForm.client ? this.searchForm.client : '',
+                };
+                this.noteModal = true;
+            },
+
+            edit(note) {
+                this.note = {};
+                this.note = note;
+                this.noteModal = true;
+            },
+            
+            save() {
+                this.$refs.noteForm.submit()
+                    .then(note => {
+                        if (this.note.id) {
+                            this.items = this.items.filter(obj => obj.id != this.note.id);
+                        }
+                        this.items.push(note);
+                        this.note = {};
+                        this.noteModal = false;
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    })
+            },
+
+            destroy() {
+                let f = new Form({});
+
+                f.submit('delete', '/notes/' + this.note.id)
+                    .then( ({ data }) => {
+                        this.items = this.items.filter(obj => obj.id != this.note.id);
+                        this.note = {};
+                        this.noteModal = false;
+                    })
+            },
         }
     }
 </script>
+
+<style>
+.datepicker { z-index: 1000!important };
+</style>

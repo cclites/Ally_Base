@@ -136,8 +136,6 @@ Vue.component('business-client-caregiver-visits-report', require('./components/a
 Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
 Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
 
-Vue.component('notes-tab', require('./components/notes/NotesTab'));
-
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
@@ -193,10 +191,10 @@ Vue.component('phone-number', require('./components/PhoneNumber.vue'));
 Vue.component('user-address', require('./components/UserAddress.vue'));
 Vue.component('document-list', require('./components/DocumentList.vue'));
 // notes
-Vue.component('note-create', require('./components/notes/NoteCreate'));
 Vue.component('note-list', require('./components/notes/NoteList'));
-Vue.component('note-edit', require('./components/notes/NoteEdit'));
+Vue.component('notes-tab', require('./components/notes/NotesTab'));
 Vue.component('note-form', require('./components/notes/NoteForm'));
+Vue.component('note-create', require('./components/notes/NoteCreate'));
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
