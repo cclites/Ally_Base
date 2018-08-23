@@ -53,6 +53,10 @@ class UpdateBusinessRequest extends FormRequest
             'co_expenses' => 'required|bool',
             'co_issues' => 'required|bool',
             'co_signature' => 'required|bool',
+            'ein' => 'nullable',
+            'medicaid_id' => 'nullable',
+            'medicaid_npi_number' => 'nullable',
+            'medicaid_npi_taxonomy' => 'nullable',
         ];
     }
 

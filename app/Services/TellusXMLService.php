@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Client;
 use App\Shift;
 use Carbon\Carbon;
 use DOMDocument;
@@ -12,6 +13,17 @@ class TellusXMLService
     protected $useSchedule = true;
     protected $shifts = [];
 
+    protected $apiEndpoint;
+    protected $apiUsername;
+    protected $apiPassword;
+
+    public function __construct()
+    {
+        $this->apiEndpoint = config('services.tellus.endpoint');
+        $this->apiUsername = config('services.tellus.username');
+        $this->apiPassword = config('services.tellus.password');
+    }
+
     /**
      * @param Shift|Shift[] $shifts
      */
@@ -19,6 +31,38 @@ class TellusXMLService
     {
         if (!is_array($shifts)) $shifts = [$shifts];
         $this->shifts = array_merge($this->shifts, $shifts);
+    }
+
+    /**
+     * Send XML to the Tellus Endpoint
+     *
+     * @param null $providedXml
+     * @return mixed
+     * @throws \Exception
+     */
+    public function sendXml($providedXml = null)
+    {
+       if (!$providedXml && !count($this->shifts)) {
+           throw new \Exception('You must either provide XML or provide shifts to generate XML.');
+       }
+
+       if (!$providedXml) {
+           $providedXml = $this->getXml();
+       }
+
+        $process = curl_init($this->apiEndpoint);
+        curl_setopt($process, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
+        curl_setopt($process, CURLOPT_HEADER, 1);
+        curl_setopt($process, CURLOPT_USERPWD, $this->apiUsername . ":" . $this->apiPassword);
+        curl_setopt($process, CURLOPT_TIMEOUT, 30);
+        curl_setopt($process, CURLOPT_POST, 1);
+        curl_setopt($process, CURLOPT_POSTFIELDS, $providedXml);
+        curl_setopt($process, CURLOPT_RETURNTRANSFER, true);
+
+        $result = curl_exec($process);
+        curl_close($process);
+
+        return $result;
     }
 
     /**
@@ -109,22 +153,24 @@ class TellusXMLService
         $address = $shift->client->addresses()->where('type', 'evv')->first();
         $geocode = $address->getGeocode();
 
+        $diagnosisCodes = $this->getDiagnosisCodes($client);
+
         return [
             'SourceSystem' => 'ALLY',
             'Juridiction' => $business->state ?: 'FL',
-            'Payer' => '',
-            'Plan' => '',
+            'Payer' => 'AHCA',
+            'Plan' => 'ALLY',
             'Program' => '',
             'DeliverySystem' => 'ALLY',
             'ProviderName' => $business->name,
-            'ProviderMedicaidID' => '',
-            'ProviderNpi' => '',
-            'ProviderNpiTaxonomy' => '',
-            'ProviderEin' => '',
+            'ProviderMedicaidID' => $business->medicaid_id,
+            'ProviderNpi' => $business->medicaid_npi_number,
+            'ProviderNpiTaxonomy' => $business->medicaid_npi_taxonomy,
+            'ProviderEin' => $business->ein,
             'CaregiverFirstName' => $caregiver->firstname,
             'CaregiverLastName' => $caregiver->lastname,
-            'CaregiverLicenseNumber' => '',
-            'RecipientMedicaidId' => '',
+            'CaregiverLicenseNumber' => $caregiver->medicaid_id ?: $business->medicaid_id,
+            'RecipientMedicaidId' => $client->medicaid_id,
             'RecipientMemberId' => '',
             'RecipientFirstName' => $client->firstname,
             'RecipientLastName' => $client->lastname,
@@ -135,13 +181,13 @@ class TellusXMLService
             'ServiceState' => $address->state,
             'ServiceZip' => $address->zip,
             'VisitId' => $shift->id,
-            'ServiceCode' => '',
+            'ServiceCode' => 'S9122',
             'ServiceCodeMod1' => '',
             'ServiceCodeMod2' => '',
-            'DiagnosisCode1' => '',
-            'DiagnosisCode2' => '',
-            'DiagnosisCode3' => '',
-            'DiagnosisCode4' => '',
+            'DiagnosisCode1' => $diagnosisCodes[0],
+            'DiagnosisCode2' => $diagnosisCodes[1],
+            'DiagnosisCode3' => $diagnosisCodes[2],
+            'DiagnosisCode4' => $diagnosisCodes[3],
             'StartVerificationType' => $this->getVerificationMethod($shift),
             'EndVerificationType' => $this->getVerificationMethod($shift),
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift),
@@ -193,5 +239,14 @@ class TellusXMLService
     protected function getVerificationMethod(Shift $shift)
     {
         return 'GPS';
+    }
+
+    protected function getDiagnosisCodes(Client $client)
+    {
+        return array_pad(
+            array_map('trim', explode(',', $client->medicaid_diagnosis_codes)),
+            4,
+            ''
+        );
     }
 }

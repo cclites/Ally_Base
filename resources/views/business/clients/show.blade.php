@@ -57,6 +57,11 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
         </li>
+        @if($client->client_type === 'medicaid')
+            <li class="nav-item">
+                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
+            </li>
+        @endif
     </ul>
 
     <!-- Smaller device tabs -->
@@ -76,9 +81,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
-                @if($client->client_type == 'LTCI')
-                    <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">LTC Insurance</a>
-                @endif
+                <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
             </div>
         </li>
     </ul>

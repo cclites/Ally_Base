@@ -187,6 +187,37 @@
                     </b-col>
                 </b-row>
             </b-tab>
+            <b-tab title="Medicaid">
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="EIN">
+                            <b-form-input v-model="businessSettings.ein">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Medicaid ID">
+                            <b-form-input v-model="businessSettings.medicaid_id">
+                            </b-form-input>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="NPI Number">
+                            <b-form-input v-model="businessSettings.medicaid_npi_number">
+                            </b-form-input>
+                        </b-form-group>
+                        <b-form-group label="NPM Taxonomy">
+                            <b-form-input v-model="businessSettings.medicaid_npi_taxonomy">
+                            </b-form-input>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col>
+                        <b-btn @click="update" variant="info">
+                            Save
+                        </b-btn>
+                    </b-col>
+                </b-row>
+            </b-tab>
             <b-tab title="Clock Out Questions">
                 <b-row>
                     <b-col lg="12">
@@ -321,6 +352,10 @@
                     co_expenses: this.business.co_expenses,
                     co_issues: this.business.co_issues,
                     co_signature: this.business.co_signature,
+                    ein: this.business.ein,
+                    medicaid_id: this.business.medicaid_id,
+                    medicaid_npi_number: this.business.medicaid_npi_number,
+                    medicaid_npi_taxonomy: this.business.medicaid_npi_taxonomy,
                 }),
                 timezones: [
                     "America/New_York",

@@ -91,7 +91,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_address',
         'w9_city_state_zip',
         'w9_account_numbers',
-        'w9_employer_id_number'
+        'w9_employer_id_number',
+        'medicaid_id',
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];

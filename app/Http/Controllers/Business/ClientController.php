@@ -426,6 +426,8 @@ class ClientController extends BaseController
             'ltci_claim',
             'ltci_phone',
             'ltci_fax',
+            'medicaid_id',
+            'medicaid_diagnosis_codes'
         ]);
 
         if($client->update($data)) {

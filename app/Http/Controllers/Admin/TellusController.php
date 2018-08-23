@@ -19,4 +19,13 @@ class TellusController extends Controller
         return $service->downloadXml();
     }
 
+    public function submit(Request $request, TellusXMLService $service)
+    {
+        $request->validate([
+            'xml' => 'required'
+        ]);
+
+        return $service->sendXml($request->xml);
+    }
+
 }

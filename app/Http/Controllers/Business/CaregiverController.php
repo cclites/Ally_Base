@@ -74,6 +74,7 @@ class CaregiverController extends BaseController
             'ssn' => 'nullable',
             'password' => 'nullable|confirmed',
             'title' => 'required',
+            'medicaid_id' => 'nullable',
         ]);
 
         // Look for duplicates in the current business
@@ -176,6 +177,7 @@ class CaregiverController extends BaseController
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
             'misc' => 'nullable|string',
+            'medicaid_id' => 'nullable',
         ];
 
         if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {

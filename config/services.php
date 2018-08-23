@@ -60,6 +60,12 @@ return [
     'microbilt' => [
         'id' => env('MICROBILT_ID'),
         'password' => env('MICROBILT_PASSWORD'),
-    ]
+    ],
+
+    'tellus' => [
+        'endpoint' => env('TELLUS_ENDPOINT', 'https://integration.pilot.4tellus.com/v1.0/ALLY'),
+        'username' => env('TELLUS_USERNAME'),
+        'password' => env('TELLUS_PASSWORD'),
+    ],
 
 ];

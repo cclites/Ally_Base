@@ -81,6 +81,15 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
+                    <b-form-group label="Medicaid ID" label-for="medicaid_id">
+                        <b-form-input
+                                id="medicaid_id"
+                                type="text"
+                                v-model="form.medicaid_id"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="medicaid_id" text="The caregiver ID, or license number, for Medicaid"></input-help>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -153,7 +162,8 @@
                     title: this.caregiver.title,
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
-                    ssn: this.caregiver.masked_ssn
+                    ssn: this.caregiver.masked_ssn,
+                    medicaid_id: this.caregiver.medicaid_id
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

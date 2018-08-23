@@ -50,12 +50,38 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
+                </b-card>
+                <b-card header="Medicaid Data"
+                        header-text-variant="white"
+                        header-bg-variant="info">
                     <b-row>
-                        <b-col>
-                            <b-btn @click="updateInsuranceInfo()">Update</b-btn>
+                        <b-col lg="6">
+                            <b-form-group label="Medicaid ID">
+                                <b-form-input v-model="form.medicaid_id"></b-form-input>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Medicaid Diagnosis Code #1">
+                                <b-form-input v-model="diagnosis_codes[0]"></b-form-input>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Medicaid Diagnosis Code #2">
+                                <b-form-input v-model="diagnosis_codes[1]"></b-form-input>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Medicaid Diagnosis Code #3">
+                                <b-form-input v-model="diagnosis_codes[2]"></b-form-input>
+                            </b-form-group>
                         </b-col>
                     </b-row>
                 </b-card>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col>
+                <b-btn size="lg" variant="success" @click="updateInsuranceInfo()">Update</b-btn>
             </b-col>
         </b-row>
     </div>
@@ -76,15 +102,25 @@
                     ltci_policy: this.client.ltci_policy,
                     ltci_claim: this.client.ltci_claim,
                     ltci_phone: this.client.ltci_phone,
-                    ltci_fax: this.client.ltci_fax
-                })
+                    ltci_fax: this.client.ltci_fax,
+                    medicaid_id: this.client.medicaid_id,
+                    medicaid_diagnosis_codes: this.client.medicaid_diagnosis_codes || '',
+                }),
+                diagnosis_codes: this.splitDiagnosisCodes(this.client.medicaid_diagnosis_codes || ''),
             }
         },
 
         methods: {
             updateInsuranceInfo() {
+                this.form.medicaid_diagnosis_codes = this.joinDiagnosisCodes(this.diagnosis_codes);
                 this.form.put('/business/clients/'+this.client.id+'/ltci');
-            }
+            },
+            joinDiagnosisCodes(input) {
+                return input.filter(item => item).join(',');
+            },
+            splitDiagnosisCodes(input) {
+                return input.split(',');
+            },
         }
     }
 </script>
