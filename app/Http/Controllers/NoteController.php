@@ -9,6 +9,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Requests\CreateNoteRequest;
 
 class NoteController extends Controller
 {
@@ -47,48 +48,20 @@ class NoteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateNoteRequest $request)
     {
-        $this->validate($request, [
-            'body' => 'required|string'
-        ]);
+        if ($note = Note::create(array_merge($request->validated(), [
+            'created_by' => auth()->id(),
+        ]))) {
 
-        $note = Note::create([
-            'business_id' => $request->business_id,
-            'caregiver_id' => $request->caregiver_id,
-            'client_id' => $request->client_id,
-            'tags' => $request->tags,
-            'body' => $request->body,
-            'created_by' => auth()->id()
-        ]);
-        if ($note) {
+            if ($request->has('modal')) {
+                return new CreatedResponse('Note Created', $note->load('creator', 'client', 'caregiver'));
+            }
+
             return new CreatedResponse('Note Created', [], '/notes');
         }
+        
         return new ErrorResponse(500, 'The note could not be created.');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Note  $note
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Note $note)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $business = OfficeUser::find(auth()->id())->businesses()->with('caregivers', 'clients')->first();
-        $note = Note::with('caregiver', 'client', 'creator')->find($id);
-        return view('notes.edit', compact('note', 'business'));
     }
 
     /**
@@ -98,15 +71,16 @@ class NoteController extends Controller
      * @param  \App\Note  $note
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Note $note)
+    public function update(CreateNoteRequest $request, Note $note)
     {
-        $this->validate($request, ['body' => 'required|string']);
+        if ($note->update($request->validated())) {
+            if ($request->has('modal')) {
+                return new SuccessResponse('Note has been updated.', $note->fresh()->load('creator', 'client', 'caregiver'));
+            }
 
-        $result = $note->update($request->only(['body', 'tags', 'client_id', 'caregiver_id']));
-
-        if ($result) {
-            return new SuccessResponse('Note updated.', [], '/notes');
+            return new SuccessResponse('Note has been updated', [], '/notes');
         }
+
         return new ErrorResponse(500, 'The note could not be created.');
     }
 
@@ -118,9 +92,19 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        //
+        if ($note->delete()) {
+            return new SuccessResponse('Note deleted.');
+        }
+
+        return new ErrorResponse(500, 'The note could not be deleted.');
     }
 
+    /**
+     * Handle search filters.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function search(Request $request)
     {
         $notes = Note::with('caregiver', 'client')

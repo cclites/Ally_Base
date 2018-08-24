@@ -132,7 +132,7 @@ class CaregiverController extends BaseController
         ]);
         $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
-        $business = $this->business();
+        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {

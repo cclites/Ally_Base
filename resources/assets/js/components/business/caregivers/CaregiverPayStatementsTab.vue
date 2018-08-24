@@ -1,6 +1,9 @@
 <template>
     <div>
-        <b-card>
+        <b-card header="Pay Statements"
+                header-bg-variant="info"
+                header-text-variant="white"
+        >
             <b-row>
                 <b-col lg="3">
                     <b-form-group label="Year">
