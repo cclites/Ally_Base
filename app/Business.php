@@ -212,6 +212,16 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
+    /**
+     * Get the custom questions relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
