@@ -57,7 +57,7 @@
                             <b-form-group label="Report Type">
                                 <b-form-select v-model="report_type" class="mr-1 mb-1" name="report_type">
                                     <option value="full">Full Claims Report</option>
-                                    <option value="notes">Medicade Notes Report</option>
+                                    <option value="notes">Medicaid Notes Report</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
