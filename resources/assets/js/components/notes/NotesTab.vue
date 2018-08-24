@@ -1,4 +1,8 @@
 <template>
+    <b-card header="Notes"
+            header-bg-variant="info"
+            header-text-variant="white"
+    >
     <div class="d-flex flex-column">
         <b-btn variant="info" class="mb-3 mr-auto" @click="create()">Add Note</b-btn>
 
@@ -36,6 +40,7 @@
             </div>
         </b-modal>
     </div>
+    </b-card>
 </template>
 
 <style lang="scss">
