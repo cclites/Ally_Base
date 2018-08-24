@@ -112,4 +112,77 @@ class ManageQuestionsTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(0);
     }
+    
+    /** @test */
+    public function an_office_user_can_delete_a_question()
+    {
+        $this->actingAs($this->officeUser->user);
+        
+        $question = factory(Question::class)->create(['business_id' => $this->business->id]);
+
+        $this->assertCount(1, $this->business->questions);
+
+        $this->delete(route('business.questions.destroy', ['question' => $question->id]))
+            ->assertStatus(200);
+
+        $this->assertCount(0, $this->business->fresh()->questions);
+    }
+
+    /** @test */
+    public function an_office_user_cannot_delete_another_businesses_question()
+    {
+        $this->actingAs($this->officeUser->user);
+        
+        $question = factory(Question::class)->create();
+
+        $this->assertCount(1, Question::all());
+
+        $this->delete(route('business.questions.destroy', ['question' => $question->id]))
+            ->assertStatus(403);
+
+        $this->assertCount(1, Question::all());
+    }
+
+    /** @test */
+    public function an_office_user_can_update_a_question()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $question = factory(Question::class)->create(['business_id' => $this->business->id]);
+
+        $data = [
+            'question' => 'new question?',
+            'client_type' => 'medicaid',
+            'required' => '1',
+        ];
+
+        $this->patchJson(route('business.questions.update', ['question' => $question->id]), $data)
+            ->assertStatus(200)
+            ->assertJsonFragment($data);
+
+        $question = $question->fresh();
+
+        $this->assertEquals('new question?', $question->question);
+        $this->assertEquals(1, $question->required);
+        $this->assertEquals('medicaid', $question->client_type);
+    }
+
+    /** @test */
+    public function an_office_user_cannot_update_anther_businesses_questions()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $question = factory(Question::class)->create();
+
+        $data = [
+            'question' => 'new question?',
+            'client_type' => 'medicaid',
+            'required' => '1',
+        ];
+
+        $this->patchJson(route('business.questions.update', ['question' => $question->id]), $data)
+            ->assertStatus(403);
+
+        $this->assertEquals($question->question, $question->fresh()->question);
+    }
 }
