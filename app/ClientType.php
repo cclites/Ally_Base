@@ -5,7 +5,7 @@ namespace App;
 class ClientType 
 {
     const PRIVATE_PAY = 'private_pay';
-    const MEDICADE = 'medicade';
+    const MEDICAID = 'medicaid';
     const LTCI = 'LTCI';
     const VA = 'VA';
 

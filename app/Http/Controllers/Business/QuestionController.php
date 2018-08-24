@@ -22,16 +22,6 @@ class QuestionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-    
-    /**
      * Store a newly created resource in storage.
      *
      * @param CreateQuestionRequest $request
@@ -40,54 +30,48 @@ class QuestionController extends Controller
     public function store(CreateQuestionRequest $request)
     {
         if ($question = activeBusiness()->questions()->create($request->validated())) {
-            return new SuccessResponse('Question created.', $question);
+            return new SuccessResponse('Question has been created.', $question);
         }
 
-        return new ErrorResponse('Could not create the Question.  Please try again.');
+        return new ErrorResponse(500, 'Could not create the Question.  Please try again.');
     }
 
     /**
-     * Display the specified resource.
+     * Update the Question.
      *
-     * @param  int  $id
+     * @param CreateQuestionRequest $request
+     * @param Question $question
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function update(CreateQuestionRequest $request, Question $question)
     {
-        //
-    }
+        if ($question->business_id != activeBusiness()->id) {
+            return new ErrorResponse(403, 'You do not have access to that question.');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        if ($question->update($request->validated())) {
+            return new SuccessResponse('Question has been saved.', $question->fresh());
+        }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        return new ErrorResponse(500, 'Could not save the Question.  Please try again.');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Question  $question
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Question $question)
     {
-        //
+        if ($question->business_id != activeBusiness()->id) {
+            return new ErrorResponse(403, 'You do not have access to that question.');
+        }
+
+        if ($question->delete()) {
+            return new SuccessResponse('The question has been deleted.');
+        }
+
+        return new ErrorResponse(500, 'Could not delete the Question.  Please try again.');
     }
 }

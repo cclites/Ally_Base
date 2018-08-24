@@ -206,6 +206,7 @@ Vue.component('mask-input', require('./components/MaskInput'));
 Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
+Vue.component('question-form', require('./components/business/QuestionForm'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
