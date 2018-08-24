@@ -144,7 +144,7 @@
             </div>
         @endif
         <div class="tab-pane" id="client_notes" role="tabpanel">
-            <notes-tab :notes="{{ $client->notes }}"></notes-tab>
+            <notes-tab :notes="{{ $client->notes }}" :business="{{ $business }}" :client="{{ $client }}"></notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
