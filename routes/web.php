@@ -229,6 +229,8 @@ Route::group([
     Route::get('timesheet/{timesheet}', 'Business\TimesheetController@edit')->name('timesheet');
     Route::post('timesheet/{timesheet}', 'Business\TimesheetController@update')->name('timesheet.update');
     Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
+
+    Route::resource('questions', 'Business\QuestionController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
