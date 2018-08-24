@@ -79,8 +79,7 @@ Route::group([
 
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
-    Route::get('timesheet', 'TimesheetController@create')->name('caregivers.timesheet');
-    Route::post('timesheet', 'TimesheetController@store')->name('caregivers.timesheet.store');
+    Route::resource('timesheets', 'Caregivers\TimesheetController');
 
     Route::get('reports/payment-history', 'Caregivers\ReportsController@paymentHistory')->name('caregivers.reports.payment_history');
     Route::get('reports/payment-history/print/{year}', 'Caregivers\ReportsController@printPaymentHistory')->name('caregivers.reports.print_payment_history');

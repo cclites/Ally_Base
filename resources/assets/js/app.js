@@ -146,7 +146,9 @@ Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
 Vue.component('caregiver-schedule', require('./components/CaregiverSchedule.vue'));
 Vue.component('caregiver-payment-history', require('./components/caregivers/CaregiverPaymentHistory'));
 Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
-
+Vue.component('caregiver-payment-details', require('./components/caregivers/CaregiverPaymentDetails'));
+Vue.component('caregiver-timesheet', require('./components/caregivers/CaregiverTimesheet'));
+Vue.component('caregiver-timesheet-list', require('./components/caregivers/CaregiverTimesheetList'));
 Vue.component('caregiver-distance-report', require('./components/CaregiverDistanceReport.vue'));
 
 Vue.component('change-password', require('./components/ChangePassword.vue'));
@@ -202,7 +204,6 @@ Vue.component('caregiver-application-list', require('./components/caregivers/Car
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.component('mask-input', require('./components/MaskInput'));
-Vue.component('caregiver-timesheet', require('./components/caregivers/CaregiverTimesheet'));
 Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 

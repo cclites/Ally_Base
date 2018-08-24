@@ -4,9 +4,22 @@ export default {
     mixins: [ FormatDates ],
 
     props: {
-        'activities': { type: Array, default: [] },
-        'caregivers': { type: Array, default: [] },
-        'timesheet': { type: Object, default: {} },
+        'activities': { type: Array, default() {
+                return [];
+            }
+        },
+        'caregivers': {
+            type: Array,
+            default() {
+                return [];
+            }
+        },
+        'timesheet': {
+            type: Object,
+            default() {
+                return {};
+            }
+        },
     },
 
     data () {
@@ -153,15 +166,17 @@ export default {
             return entries;
         },
 
-        generateWeeks() {
+        generateWeeks(date) {
             let weeks = [];
-            let date;
+            date = date ? moment.utc(date) : moment();
+
+            if (moment().diff(date, 'days') > 7) {
+                date.add(7, 'days');
+            }
 
             for (var i = 0; i < 4; i++) {
                 if (i > 0) {
-                    date =  moment().subtract(i * 7, 'days');
-                } else {
-                    date = moment();
+                    date =  date.subtract(i * 7, 'days');
                 }
 
                 let w = this.getWeekObject(i, date);
@@ -182,6 +197,14 @@ export default {
                 display: start.format('M/D/YYYY') + ' - ' + end.format('M/D/YYYY'),
                 days: this.getDatesInRange(start, end),
             };
+        },
+
+        selectWeek(dateObj) {
+            let start = moment(dateObj).startOf('isoweek');
+            let end = moment(dateObj).endOf('isoweek');
+            this.week = this.weekRanges.find(item => {
+                return item.display === start.format('M/D/YYYY') + ' - ' + end.format('M/D/YYYY');
+            });
         },
 
         getDatesInRange(start, end) {
@@ -205,21 +228,96 @@ export default {
         },
 
         prepareTimesheet() {
-            this.weekRanges = this.generateWeeks();
             if (this.timesheet.id) {
                 let entry = this.timesheet.entries[0];
-                this.week = this.getWeekObject(-1, moment.utc(entry.checked_in_time, 'YYYY-MM-DD HH:mm:ss'));
-                this.weekRanges.push(this.week);
+                this.weekRanges = this.generateWeeks(entry.checked_in_time);
+                this.selectWeek(moment.utc(entry.checked_in_time));
                 this.sheet = this.timesheet;
                 this.form = new Form(this.sheet);
             } else {
+                this.weekRanges = this.generateWeeks();
                 this.week = this.weekRanges[0];
                 this.form = new Form(this.emptyTimesheet);
             }
-        }
+        },
+
+        loadTimesheet(timesheet) {
+            this.sheet = timesheet;
+
+            let entriesForDates = [];
+            if (this.sheet.id) {
+                entriesForDates = this.sheet.entries.map(item => {
+                    return {
+                        date: moment.utc(item.checked_in_time).local().format('YYYY-MM-DD'),
+                        entry: item,
+                    }
+                });
+            }
+            this.shifts = this.generateEntriesForWeek(this.week, entriesForDates, this.defaultRate, this.defaultFee);
+            this.form.entries = this.shifts;
+        },
     },
 
     mounted() {
         this.prepareTimesheet();
+    },
+
+    watch: {
+        /**
+         * sets client dropdown to only selected caregivers clients
+         * and resets the shift form.
+         */
+        'form.caregiver_id': function(newVal, oldVal) {
+            var results = this.caregivers.filter(function(c) {
+                return c.id == newVal;
+            });
+
+            if (results && results.length == 1) {
+                this.caregiver = results[0];
+                // only reset client_id if doesn't exist in dropdown
+                if (this.caregiver.clients.findIndex(item => item.id == this.form.client_id) == -1) {
+                    this.form.client_id = '';
+                }
+            } else {
+                this.caregiver = {};
+                this.form.client_id = '';
+            }
+
+        },
+
+        /**
+         * sets current selected client so rates/fees can be loaded
+         * and resets the shift form.
+         */
+        'form.client_id': function(newVal, oldVal) {
+            if (this.caregiver.clients) {
+                var results = this.caregiver.clients.filter(function(c) {
+                    return c.id == newVal;
+                });
+
+                if (results && results.length == 1) {
+                    this.client = results[0];
+                } else {
+                    this.client = {};
+                }
+            } else {
+                this.client = {};
+            }
+
+            this.loadTimesheet(this.sheet);
+        },
+
+        'week': function(newVal, oldVal) {
+            this.loadTimesheet(this.sheet);
+        },
+
+        /**
+         * Clear entry form when modal closes.
+         */
+        showEntryModal(val) {
+            if (val == false) {
+                this.selectedEntry = {};
+            }
+        },
     },
 }
