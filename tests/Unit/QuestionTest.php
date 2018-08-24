@@ -34,4 +34,24 @@ class QuestionTest extends TestCase
 
         $this->assertNull($question->fresh()->client_type);
     }
+
+    /** @test */
+    public function they_can_be_filtered_by_client_type()
+    {
+        $question = factory(Question::class)->create(['client_type' => null]);
+
+        $business = $question->business;
+
+        factory(Question::class)->create(['client_type' => ClientType::MEDICAID, 'business_id' => $business->id]);
+        factory(Question::class)->create(['client_type' => ClientType::LTCI, 'business_id' => $business->id]);
+        factory(Question::class)->create(['client_type' => ClientType::PRIVATE_PAY, 'business_id' => $business->id]);
+        
+        $this->assertCount(4, $business->fresh()->questions);
+
+        $this->assertCount(2, $business->fresh()->questions()->forType(ClientType::MEDICAID)->get());
+
+        $this->assertCount(2, $business->fresh()->questions()->forType(ClientType::PRIVATE_PAY)->get());
+
+        $this->assertCount(2, $business->fresh()->questions()->forType(ClientType::LTCI)->get());
+    }
 }

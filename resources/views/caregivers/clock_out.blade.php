@@ -19,7 +19,13 @@
             </div>
         @endif
         <div class="col-lg-6">
-            <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}" :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" :business="{{ $business }}"></clock-out>
+            <clock-out 
+                :shift="{{ $shift }}" 
+                :activities="{{ $activities }}" 
+                :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" 
+                :business="{{ $business }}" 
+                :questions="{{ $questions }}"
+            />
         </div>
         <div class="col-lg-6">
             @if ($shift->schedule_id)

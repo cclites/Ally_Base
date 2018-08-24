@@ -232,6 +232,17 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
             ->withPivot('comments');
     }
 
+    /**
+     * A Shift can have many Questions.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'shift_questions')
+            ->withPivot('answer');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

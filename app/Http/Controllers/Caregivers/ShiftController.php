@@ -142,6 +142,9 @@ class ShiftController extends BaseController
         // Load the available activities
         $activities = $business->allActivities();
 
+        // load questions related to the current client
+        $questions = $business->questions()->forType($shift->client->client_type)->get();
+
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
         $notes =  '';
@@ -152,7 +155,7 @@ class ShiftController extends BaseController
             }
         }
 
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business'));
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions'));
     }
 
     public function clockOut(Request $request)
@@ -170,6 +173,7 @@ class ShiftController extends BaseController
             'latitude' => 'numeric|nullable',
             'longitude' => 'numeric|nullable',
             'goals' => 'nullable|array',
+            'questions' => 'nullable|array',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -201,12 +205,25 @@ class ShiftController extends BaseController
             );
         }
 
+        $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
+        if ($allQuestions->count() > 0) {
+            $fields = [];
+            foreach($allQuestions as $q) {
+                if ($q->required == 1) {
+                    $fields['questions.' . $q->id] = 'required';
+                }
+            }
+
+            $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+        }
+
         try {
             $clockOut = new ClockOut($this->caregiver());
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
             $clockOut->setGoals($data['goals']);
+            $clockOut->setQuestions($data['questions'], $allQuestions);
             $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues
