@@ -26,6 +26,11 @@ abstract class BaseImportProcessor implements ImportProcessor
     public $business;
 
     /**
+     * @var array
+     */
+    protected $comments = [];
+
+    /**
      * ImportProcessor constructor.
      *
      * @param \App\Business $business
@@ -57,12 +62,37 @@ abstract class BaseImportProcessor implements ImportProcessor
                 $shift = $this->addRegularShift($collection, $i);
             }
             if ($this->getOvertimeHours($i) > 0) {
-                $this->addOvertimeShift($collection, $i, $shift);
+                $shift = $this->addOvertimeShift($collection, $i, $shift);
+            }
+            if (!$shift) {
+                $this->addExpenseOnlyShift($collection, $i);
             }
 
         }
 
         return $collection;
+    }
+
+    /**
+     * Get the caregiver comments from the shift line
+     *
+     * @param $rowNo
+     * @return string
+     */
+    function getComments($rowNo)
+    {
+        return $this->comments[$rowNo] ?? '';
+    }
+
+    /**
+     * Get the caregiver comments from the shift line
+     *
+     * @param $rowNo
+     * @return string
+     */
+    function setComments($rowNo, $comments)
+    {
+        $this->comments[$rowNo] = $comments;
     }
 
     /**
@@ -152,6 +182,23 @@ abstract class BaseImportProcessor implements ImportProcessor
     }
 
     /**
+     * Add an expense only shift
+     *
+     * @param \Illuminate\Support\Collection $collection
+     * @param $rowNo
+     * @return \App\Shift
+     */
+    function addExpenseOnlyShift(Collection $collection, $rowNo)
+    {
+        $checkIn = Carbon::now($this->business->timezone)->setTime(0,0,0)->setTimezone('UTC');
+        $hours = 0;
+
+        $this->setComments($rowNo, 'Individual expense record imported on ' . Carbon::now($this->business->timezone)->format('m/d/Y'));
+
+        return $this->_addShift($collection, $rowNo, $checkIn, $hours, false, true);
+    }
+
+    /**
      * Add a shift (used by addRegularShift and addOvertimeShift)
      *
      * @param \Illuminate\Support\Collection $collection
@@ -179,6 +226,7 @@ abstract class BaseImportProcessor implements ImportProcessor
             'mileage' => $expenses ? $this->getMileage($rowNo) : 0,
             'other_expenses' => $expenses ? $this->getOtherExpenses($rowNo) : 0,
             'hours_type' => ($overtime) ? 'overtime' : 'default',
+            'caregiver_comments' => $this->getComments($rowNo),
         ]);
 
         $array = [
