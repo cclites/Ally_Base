@@ -111,6 +111,14 @@ interface ImportProcessor
     function getOtherExpenses($rowNo);
 
     /**
+     * Get the caregiver comments from the shift line
+     *
+     * @param $rowNo
+     * @return string
+     */
+    function getComments($rowNo);
+
+    /**
      * Find a caregiver record based on the name
      *
      * @param string $name
