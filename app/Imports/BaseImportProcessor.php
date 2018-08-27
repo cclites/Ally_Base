@@ -140,13 +140,15 @@ abstract class BaseImportProcessor implements ImportProcessor
     {
         if ($shift) {
             $checkIn = new Carbon($shift->checked_out_time, 'UTC');
+            $expenses = false;
         }
         else {
             $checkIn = $this->getStartTime($rowNo)->setTimezone('UTC');
+            $expenses = true;
         }
         $hours = $this->getOvertimeHours($rowNo);
 
-        return $this->_addShift($collection, $rowNo, $checkIn, $hours, true);
+        return $this->_addShift($collection, $rowNo, $checkIn, $hours, true, $expenses);
     }
 
     /**
@@ -157,9 +159,10 @@ abstract class BaseImportProcessor implements ImportProcessor
      * @param \Carbon\Carbon $checkIn
      * @param $hours
      * @param bool $overtime
+     * @param bool $expenses
      * @return \App\Shift
      */
-    function _addShift(Collection $collection, $rowNo, Carbon $checkIn, $hours, $overtime = false)
+    function _addShift(Collection $collection, $rowNo, Carbon $checkIn, $hours, $overtime = false, $expenses = true)
     {
         $caregiverName = $this->getCaregiverName($rowNo);
         $clientName = $this->getClientName($rowNo);
@@ -173,8 +176,8 @@ abstract class BaseImportProcessor implements ImportProcessor
             'checked_out_time' => $checkOut->toDateTimeString(),
             'caregiver_rate' => $this->getCaregiverRate($rowNo, $overtime),
             'provider_fee' => $this->getProviderFee($rowNo, $overtime),
-            'mileage' => $this->getMileage($rowNo),
-            'other_expenses' => $this->getOtherExpenses($rowNo),
+            'mileage' => $expenses ? $this->getMileage($rowNo) : 0,
+            'other_expenses' => $expenses ? $this->getOtherExpenses($rowNo) : 0,
             'hours_type' => ($overtime) ? 'overtime' : 'default',
         ]);
 
