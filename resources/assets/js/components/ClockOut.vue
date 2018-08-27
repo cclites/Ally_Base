@@ -131,7 +131,7 @@
                             :key="question.id"
                             :label="question.question + (question.required ? ' *' : '')">
                             <textarea v-model="form.questions[question.id]" class="form-control" rows="3" wrap="soft"></textarea>
-                            <input-help :form="form" :field="`questions.${questions.id}`"></input-help>
+                            <input-help :form="form" :field="`questions.${question.id}`"></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>

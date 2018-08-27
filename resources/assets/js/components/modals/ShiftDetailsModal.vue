@@ -54,6 +54,14 @@
                 </b-col>
             </b-row>
 
+            <b-row v-if="selectedItem.questions && selectedItem.questions.length > 0">
+                <b-col sm="12" v-for="q in selectedItem.questions" :key="q.id">
+                    <strong>{{ q.question }}</strong>
+                    <p v-if="q.pivot.answer == ''" class="text-muted">(Unanswered)</p>
+                    <p v-else>{{ q.pivot.answer }}</p>
+                </b-col>
+            </b-row>
+
             <b-row class="with-padding-bottom" v-if="businessSettings().co_signature && selectedItem.signature != null">
                 <b-col>
                     <strong>Client Signature</strong>

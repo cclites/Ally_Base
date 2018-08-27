@@ -98,7 +98,7 @@ class ClockOut extends ClockBase
 
         $shift->syncGoals($this->goals);
         
-        $this->attachQuestions($shift);
+        $shift->syncQuestions($this->questions, $this->answers);
         
         $shift->statusManager()->ackClockOut($verified);
 
@@ -110,17 +110,6 @@ class ClockOut extends ClockBase
         }
 
         return $update;
-    }
-
-    public function attachQuestions(Shift $shift)
-    {
-        $shiftQuestions = [];
-        foreach($this->questions as $q) {
-            $answer = isset($this->answers[$q->id]) ? $this->answers[$q->id] : '';
-            $shiftQuestions[$q->id] = ['answer' => $answer];
-        }
-
-        $shift->questions()->sync($shiftQuestions);
     }
 
     public function attachActivities(Shift $shift, $activities = []) {

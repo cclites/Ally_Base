@@ -488,6 +488,23 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $this;
     }
 
+    /**
+     * Sync question answers to the shift.
+     *
+     * @param array $questions
+     * @param array $answers
+     * @return void
+     */
+    public function syncQuestions($questions, $answers)
+    {
+        $items = [];
+        foreach($questions as $q) {
+            $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
+            $items[$q->id] = ['answer' => $answer];
+        }
+        $this->questions()->sync($items);
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////

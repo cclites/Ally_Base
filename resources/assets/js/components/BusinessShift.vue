@@ -194,6 +194,16 @@
                     </b-row>
                 </b-col>
             </b-row>
+            <b-row v-if="shift.questions && shift.questions.length" class="with-padding-top">
+                <b-col lg="12">
+                    <b-form-group v-for="q in shift.questions"
+                        :key="q.id"
+                        :label="q.question + (q.required ? ' *' : '')">
+                        <textarea v-model="form.questions[q.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                        <input-help :form="form" :field="`questions.${q.id}`"></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
                 <b-col lg="12">
                     <h4>Goals:</h4>
@@ -400,7 +410,6 @@
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
             this.fixDateTimes();
-            this.setupGoalsForm();
         },
         computed: {
             leftHalfActivities() {
@@ -482,7 +491,8 @@
                     issues: ('issues' in this.shift) ? this.shift.issues : [],
                     override: false,
                     modal: this.is_modal,
-                    goals: {},
+                    goals: this.setupGoalsForm(),
+                    questions: this.setupQuestionsForm(),
                 };
             },
             createIssue() {
@@ -626,7 +636,7 @@
              * attached to the shift (if any).
              */
             setupGoalsForm() {
-                this.form.goals = {};
+                let goals = {};
                 if (this.shift.client) {
                     this.shift.client.goals.forEach(item => {
                         let val = '';
@@ -634,9 +644,23 @@
                         if (index >= 0) {
                             val = this.shift.goals[index].pivot.comments;
                         }
-                        this.form.goals[item.id] = val;
+                        goals[item.id] = val;
                     });
                 }
+                return goals;
+            },
+            /**
+             * Initialize questions object/array form values with the actual ones
+             * attached to the shift (if any).
+             */
+            setupQuestionsForm() {
+                let questions = {};
+                if (this.shift.questions) {
+                    this.shift.questions.forEach(item => {
+                        questions[item.id] = item.pivot.answer;
+                    });
+                }
+                return questions;
             },
         },
         watch: {
