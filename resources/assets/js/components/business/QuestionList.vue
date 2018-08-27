@@ -47,7 +47,7 @@
                 {
                     key: 'client_type',
                     sortable: true,
-                    formatter: x => x ? x[0].toUpperCase() + x.slice(1) : 'All',
+                    formatter: x => x ? (x[0].toUpperCase() + x.slice(1)).replace('_', ' ') : 'All',
                 },
                 {
                     key: 'question',
