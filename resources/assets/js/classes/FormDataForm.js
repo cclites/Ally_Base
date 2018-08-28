@@ -9,7 +9,7 @@ class FormDataForm extends Form {
      */
     constructor(formData) {
         let dataPairs = {};
-        for (let pair of formData.entries()) {
+        for (let pair of Object.entries(formData)) {
             dataPairs[pair[0]] = pair[1];
         }
         super(dataPairs);
