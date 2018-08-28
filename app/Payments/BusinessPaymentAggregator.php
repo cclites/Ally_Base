@@ -209,4 +209,12 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
             return false;
         }
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getEntity()
+    {
+        return $this->business;
+    }
 }

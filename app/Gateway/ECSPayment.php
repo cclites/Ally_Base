@@ -9,6 +9,12 @@ use App\Exceptions\PaymentMethodError;
 use App\GatewayTransaction;
 use App\PhoneNumber;
 
+/**
+ * Class ECSPayment
+ * Documented at https://ecspayments.transactiongateway.com/merchants/resources/integration/integration_portal.php
+ *
+ * @package App\Gateway
+ */
 class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCardPaymentInterface, RefundInterface {
 
     const APPROVED = 1;
