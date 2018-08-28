@@ -79,7 +79,7 @@ class TelefonyCheckOutController extends BaseTelefonyController
             return $this->enterPhoneNumberDigits();
         }
 
-        if ($caregiver = $this->telefony->findCaregiverByLastDigits($digits, $iteration)) {
+        if ($caregiver = $this->telefony->findCaregiverByLastDigits($this->client, $digits, $iteration)) {
             if ($caregiver->isClockedIn()) {
                 $shift = $caregiver->getActiveShift();
                 $gather = $this->telefony->gather([

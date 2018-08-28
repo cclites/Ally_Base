@@ -9,8 +9,11 @@
     <a class="has-arrow" href="{{ route('schedule') }}" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span></a>
 </li>
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
-<li>
-    <a class="has-arrow" href="{{ route('caregivers.timesheet') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Manual Timesheet</span></a>
+<li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Timesheets</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('timesheets.create') }}">Enter Timesheet</a></li>
+        <li><a href="{{ route('timesheets.index') }}">Past Timesheets</a></li>
+    </ul>
 </li>
 @endif
 <li> <a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>

@@ -137,6 +137,12 @@ class ClientController extends BaseController
                 'status' => $data['onboard_status']
             ]);
             $client->onboardStatusHistory()->save($history);
+
+            // Provider pay
+            if ($request->provider_pay) {
+                $client->setPaymentMethod($this->business());
+            }
+
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
@@ -173,7 +179,7 @@ class ClientController extends BaseController
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
-        $business = $this->business();
+        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {

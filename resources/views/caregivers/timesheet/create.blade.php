@@ -11,7 +11,7 @@
             header-bg-variant="info"
             header-text-variant="white">
             
-            Your Timesheet has been submitted for approval.
+            Your timesheet has been submitted for approval.
     </b-card>
     @else
     <caregiver-timesheet 

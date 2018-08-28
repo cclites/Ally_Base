@@ -1,5 +1,8 @@
 <template>
-    <b-card title="Client Payment Statements">
+    <b-card header="Payment Statements"
+            header-bg-variant="info"
+            header-text-variant="white"
+    >
         <div class="table-responsive">
             <b-table :items="items" :fields="fields">
                 <template slot="for_care_week" scope="data">

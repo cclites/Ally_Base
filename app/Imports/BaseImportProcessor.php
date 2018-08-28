@@ -26,6 +26,11 @@ abstract class BaseImportProcessor implements ImportProcessor
     public $business;
 
     /**
+     * @var array
+     */
+    protected $comments = [];
+
+    /**
      * ImportProcessor constructor.
      *
      * @param \App\Business $business
@@ -57,12 +62,37 @@ abstract class BaseImportProcessor implements ImportProcessor
                 $shift = $this->addRegularShift($collection, $i);
             }
             if ($this->getOvertimeHours($i) > 0) {
-                $this->addOvertimeShift($collection, $i, $shift);
+                $shift = $this->addOvertimeShift($collection, $i, $shift);
+            }
+            if (!$shift) {
+                $this->addExpenseOnlyShift($collection, $i);
             }
 
         }
 
         return $collection;
+    }
+
+    /**
+     * Get the caregiver comments from the shift line
+     *
+     * @param $rowNo
+     * @return string
+     */
+    function getComments($rowNo)
+    {
+        return $this->comments[$rowNo] ?? '';
+    }
+
+    /**
+     * Get the caregiver comments from the shift line
+     *
+     * @param $rowNo
+     * @return string
+     */
+    function setComments($rowNo, $comments)
+    {
+        $this->comments[$rowNo] = $comments;
     }
 
     /**
@@ -140,13 +170,32 @@ abstract class BaseImportProcessor implements ImportProcessor
     {
         if ($shift) {
             $checkIn = new Carbon($shift->checked_out_time, 'UTC');
+            $expenses = false;
         }
         else {
             $checkIn = $this->getStartTime($rowNo)->setTimezone('UTC');
+            $expenses = true;
         }
         $hours = $this->getOvertimeHours($rowNo);
 
-        return $this->_addShift($collection, $rowNo, $checkIn, $hours, true);
+        return $this->_addShift($collection, $rowNo, $checkIn, $hours, true, $expenses);
+    }
+
+    /**
+     * Add an expense only shift
+     *
+     * @param \Illuminate\Support\Collection $collection
+     * @param $rowNo
+     * @return \App\Shift
+     */
+    function addExpenseOnlyShift(Collection $collection, $rowNo)
+    {
+        $checkIn = Carbon::now($this->business->timezone)->setTime(0,0,0)->setTimezone('UTC');
+        $hours = 0;
+
+        $this->setComments($rowNo, 'Individual expense record imported on ' . Carbon::now($this->business->timezone)->format('m/d/Y'));
+
+        return $this->_addShift($collection, $rowNo, $checkIn, $hours, false, true);
     }
 
     /**
@@ -157,9 +206,10 @@ abstract class BaseImportProcessor implements ImportProcessor
      * @param \Carbon\Carbon $checkIn
      * @param $hours
      * @param bool $overtime
+     * @param bool $expenses
      * @return \App\Shift
      */
-    function _addShift(Collection $collection, $rowNo, Carbon $checkIn, $hours, $overtime = false)
+    function _addShift(Collection $collection, $rowNo, Carbon $checkIn, $hours, $overtime = false, $expenses = true)
     {
         $caregiverName = $this->getCaregiverName($rowNo);
         $clientName = $this->getClientName($rowNo);
@@ -173,9 +223,10 @@ abstract class BaseImportProcessor implements ImportProcessor
             'checked_out_time' => $checkOut->toDateTimeString(),
             'caregiver_rate' => $this->getCaregiverRate($rowNo, $overtime),
             'provider_fee' => $this->getProviderFee($rowNo, $overtime),
-            'mileage' => $this->getMileage($rowNo),
-            'other_expenses' => $this->getOtherExpenses($rowNo),
+            'mileage' => $expenses ? $this->getMileage($rowNo) : 0,
+            'other_expenses' => $expenses ? $this->getOtherExpenses($rowNo) : 0,
             'hours_type' => ($overtime) ? 'overtime' : 'default',
+            'caregiver_comments' => $this->getComments($rowNo),
         ]);
 
         $array = [

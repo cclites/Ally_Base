@@ -196,17 +196,7 @@ class Timesheet extends Model implements Auditable
             $timesheet->save();
             
             foreach($data['entries'] as $item) {
-                if ($entry = $timesheet->entries()->create([
-                    'checked_in_time' => $item['checked_in_time'],
-                    'checked_out_time' => $item['checked_out_time'],
-                    'mileage' => (float) $item['mileage'],
-                    'other_expenses' =>  (float) $item['other_expenses'],
-                    'caregiver_comments' => $item['caregiver_comments'],
-                    'caregiver_rate' => (float) $item['caregiver_rate'],
-                    'provider_fee' => (float) $item['provider_fee'],
-                ])) {
-                    $entry->activities()->sync($item['activities']);
-                } 
+                $timesheet->createSingleEntry($item);
             }
 
             return $timesheet->fresh()->load('caregiver', 'client');
@@ -231,9 +221,7 @@ class Timesheet extends Model implements Auditable
 
             $this->entries()->delete();
             foreach($data['entries'] as $item) {
-                if ($entry = $this->entries()->create(Arr::except($item, ['activities', 'duration', 'start_time', 'end_time', 'date']))) {
-                    $entry->activities()->sync($item['activities']);
-                }
+                $this->createSingleEntry($item);
             }
 
             return $this->fresh()->load('caregiver', 'client');
@@ -241,6 +229,23 @@ class Timesheet extends Model implements Auditable
         catch (\Exception $ex) {
             return false; 
         }
+    }
+
+    public function createSingleEntry(array $data)
+    {
+        if ($entry = $this->entries()->create([
+            'checked_in_time' => $data['checked_in_time'],
+            'checked_out_time' => $data['checked_out_time'],
+            'mileage' => (float) $data['mileage'],
+            'other_expenses' =>  (float) $data['other_expenses'],
+            'caregiver_comments' => $data['caregiver_comments'],
+            'caregiver_rate' => (float) $data['caregiver_rate'],
+            'provider_fee' => (float) $data['provider_fee'],
+        ])) {
+            $entry->activities()->sync($data['activities']);
+        }
+
+        return $entry;
     }
 
     /**

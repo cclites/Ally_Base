@@ -45,6 +45,20 @@
                                      :admin="1"
             />
 
+            <b-row v-show="showSummary && loading >= 2">
+                <b-col>
+                    <b-card>
+                        <b>Total Mileage:</b> {{ shiftTotals.mileage }} (${{ shiftTotals.mileage_costs }})
+                    </b-card>
+                </b-col>
+                <b-col>
+                    <b-card>
+                        <b>Total Other Expenses:</b> {{ shiftTotals.other_expenses }}
+                    </b-card>
+                </b-col>
+            </b-row>
+
+
             <b-row v-show="loading >= 2">
                 <b-col lg="12">
                     <b-card header="Shifts"
@@ -268,7 +282,7 @@
                 return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
                         + '&client_id=' + this.client_id + '&payment_method='
                         + '&import_id=' + this.selectedImport.id;
-            }
+            },
         },
 
         methods: {

@@ -1,10 +1,16 @@
 <template>
-    <b-card header="Submit Timesheet"
+    <b-card :header="title"
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white">
             
         <!-- CLIENT DROPDOWNS -->
+        <b-row v-if="isLocked">
+            <b-col>
+                <div class="alert alert-danger" v-if="isDenied"><strong>Denied.</strong> This timesheet has already been denied, it cannot be edited.</div>
+                <div class="alert alert-success" v-if="isApproved"><strong>Approved.</strong> This timesheet has already been approved, it cannot be edited.</div>
+            </b-col>
+        </b-row>
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Client" label-for="client_id">
@@ -31,6 +37,7 @@
                             id="week"
                             name="week"
                             v-model="week"
+                            :disabled="!!timesheet.id"
                     >
                         <option value="">-- Select Week --</option>
                         <option v-for="item in weekRanges" :value="item" :key="item.id">{{ item.display }}</option>
@@ -71,7 +78,7 @@
 
         <b-row class="mt-3">
             <b-col md="12">
-                <b-button variant="info" type="button" @click="submit()" :disabled="busy">
+                <b-button variant="info" type="button" @click="submit()" :disabled="busy || isLocked">
                     <i v-show="busy" class="fa fa-spinner fa-spin"></i>
                     Submit Timesheet
                 </b-button>
@@ -108,6 +115,9 @@
         },
 
         computed: {
+            title() {
+                return this.timesheet.id ? 'View Timesheet' : 'Submit Timesheet';
+            }
         },
 
         methods: {
@@ -129,66 +139,29 @@
                 this.selectedEntry = null;
             },
 
-            submit() {
+            async submit() {
                 this.busy = true;
                 let data = this.form.data();
 
                 // submit only the entries filled out
                 this.form.entries = this.form.entries.filter(x => x.checked_out_time != '');
 
-                this.form.submit('post', '/timesheet')
-                    .then( ({ data }) => {
-                        // auto redirects
-                    })
-                    .catch(e => {
-                        console.log('submit timesheet error:');
-                        console.log(e);
-                        // revert back to the unfiltered list
-                        this.form.entries = this.shifts;
-                        this.busy = false;
-                    });
-            },
-        },
-
-        watch: {
-            // sets client dropdown to only selected caregivers clients
-            'form.caregiver_id': function(newVal, oldVal) {
-                var results = this.caregivers.filter(function(c) {
-                    return c.id == newVal;
-                });
-
-                if (results && results.length == 1) {
-                    this.caregiver = results[0];
-                } else {
-                    this.caregiver = {};
-                }
-
-                this.form.client_id = '';
-            },
-
-            // sets current selected client so rates/fees can be loaded
-            // and resets the shift form
-            'form.client_id': function(newVal, oldVal) {
-                if (this.caregiver.clients) {
-                    var results = this.caregiver.clients.filter(function(c) {
-                        return c.id == newVal;
-                    });
-
-                    if (results && results.length == 1) {
-                        this.client = results[0];
-                    } else {
-                        this.client = {};
+                try {
+                    if (this.timesheet.id) {
+                        await this.form.put('/timesheets/' + this.timesheet.id);
                     }
-                } else {
-                    this.client = {};
+                    else {
+                        await this.form.post('/timesheets');
+                    }
                 }
-                
-                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, [], this.defaultRate, this.defaultFee);
+                catch(e) {
+                    console.log('submit timesheet error:');
+                    console.log(e);
+                    // revert back to the unfiltered list
+                    this.form.entries = this.shifts;
+                    this.busy = false;
+                }
             },
-
-            'week': function(newVal, oldVal) {
-                this.shifts = this.form.entries = this.generateEntriesForWeek(this.week, [],this.defaultRate, this.defaultFee);
-            }
         },
 
         mounted() {
