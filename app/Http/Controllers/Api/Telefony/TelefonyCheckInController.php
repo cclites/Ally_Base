@@ -79,7 +79,7 @@ class TelefonyCheckInController extends BaseTelefonyController
             return $this->enterPhoneNumberDigits();
         }
 
-        if ($caregiver = $this->telefony->findCaregiverByLastDigits($digits, $iteration)) {
+        if ($caregiver = $this->telefony->findCaregiverByLastDigits($this->client, $digits, $iteration)) {
             $gather = $this->telefony->gather([
                 'numDigits' => 1,
                 'action' => route('telefony.check-in', [$caregiver])

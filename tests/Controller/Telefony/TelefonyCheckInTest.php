@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Controller\Telefony;
 
+use App\Caregiver;
 use App\PhoneNumber;
 use App\Shift;
 
@@ -31,6 +32,19 @@ class TelefonyCheckInTest extends TelefonyBase
         $response->assertSee('<Say');
         $response->assertSee('If this is ' . $this->caregiver->firstname . ', press 1 to finish clocking in');
         $response->assertSee('<Gather numDigits="1" action="' . route('telefony.check-in', [$this->caregiver]) . '">');
+    }
+
+    public function test_accept_unassigned_caregiver_phone_number_digits()
+    {
+        // Tests a caregiver of the same business but not assigned to the client
+        $caregiver = factory(Caregiver::class)->create();
+        $this->business->caregivers()->attach($caregiver);
+        $phone = factory(PhoneNumber::class)->make(['national_number' => '5555552000']);
+        $caregiver->phoneNumbers()->save($phone);
+        $response = $this->telefonyPost('check-in/accept-digits', ['Digits' => 2000]);
+        $response->assertSee('<Say');
+        $response->assertSee('If this is ' . $caregiver->firstname . ', press 1 to finish clocking in');
+        $response->assertSee('<Gather numDigits="1" action="' . route('telefony.check-in', [$caregiver]) . '">');
     }
 
     public function test_check_in_of_caregiver_with_schedule()
