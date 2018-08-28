@@ -28,6 +28,7 @@ class TelefonyBase extends TestCase
         $this->caregiver = factory(Caregiver::class)->create();
         $this->phone = factory(PhoneNumber::class)->make(['national_number' => '1234567890']);
         $this->client->phoneNumbers()->save($this->phone);
+        $this->client->caregivers()->attach($this->caregiver);
     }
 
     protected function assertXmlHeader($response)
