@@ -33,7 +33,7 @@ class ClockOut extends ClockBase
 
     public function setMileage($miles)
     {
-        $this->mileage = round($miles);
+        $this->mileage = round($miles, 2);
     }
 
     public function setGoals($goals)
