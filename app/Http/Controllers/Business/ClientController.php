@@ -137,6 +137,12 @@ class ClientController extends BaseController
                 'status' => $data['onboard_status']
             ]);
             $client->onboardStatusHistory()->save($history);
+
+            // Provider pay
+            if ($request->provider_pay) {
+                $client->setPaymentMethod($this->business());
+            }
+
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 

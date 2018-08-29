@@ -52,7 +52,7 @@ class ChargesController extends Controller
         $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
         $processor = new PaymentProcessor($business, $startDate, $endDate);
-        return $processor->getPaymentModels();
+        return array_values($processor->getPaymentModels());
     }
 
     public function pendingDataPerClient(Request $request, Business $business)
@@ -70,8 +70,9 @@ class ChargesController extends Controller
         $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
 
         $processor = new PaymentProcessor($business, $startDate, $endDate);
-        $count = $processor->process();
-        return new SuccessResponse('There were ' . $count . ' successful transactions.');
+        $data = $processor->process();
+        $count = count($data['charges']);
+        return new SuccessResponse('There were ' . $count . ' successful transactions.', $data);
     }
 
     public function manualCharge(Request $request)

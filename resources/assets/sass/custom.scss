@@ -272,3 +272,8 @@ label.large-checkbox {
 .btn-light {
   border-color: #ddd;
 }
+
+.scroll-sidebar {
+  overflow: unset;
+  overflow-y: auto!important;
+}

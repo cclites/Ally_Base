@@ -34,24 +34,88 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading"></loading-card>
+        <div v-if="processed">
 
-        <div v-if="! loading">
-            <b-row>
-                <b-col sm="12">
-                    <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
-                </b-col>
-            </b-row>
-            <div class="table-responsive">
-                <b-table bordered striped hover show-empty
-                        :items="items"
-                        :fields="fields"
-                        :sort-by.sync="sortBy"
-                        :sort-desc.sync="sortDesc"
-                >
-                </b-table>
+            <h3>Successful Charges</h3>
+
+            <table class="table table-bordered">
+                <thead>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Gateway</th>
+                <th>Gateway ID</th>
+                <th>Internal Transaction</th>
+                <th>Amount</th>
+                </thead>
+                <tbody>
+                <tr v-if="payments.charges.length === 0">
+                    <td colspan="6">No successful charges.</td>
+                </tr>
+                <tr v-for="item in payments.charges">
+                    <td>{{ item.entity.name }}</td>
+                    <td>{{ item.payment.payment_type }}</td>
+                    <td>{{ item.transaction ? item.transaction.gateway_id : '' }}</td>
+                    <td>{{ item.transaction ? item.transaction.transaction_id : '' }}</td>
+                    <td v-if="item.transaction"><a :href="`/admin/transactions/${item.transaction.id}`" target="_blank">{{ item.transaction.id }}</a></td>
+                    <td v-else></td>
+                    <td class="successful">{{ moneyFormat(item.payment.amount) }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h3>Failed Charges</h3>
+
+            <table class="table table-bordered">
+                <thead>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Gateway</th>
+                <th>Gateway ID</th>
+                <th>Internal Transaction</th>
+                <th>Amount</th>
+                </thead>
+                <tbody>
+                <tr v-if="payments.failures.length === 0">
+                    <td colspan="6">No failed charges.</td>
+                </tr>
+                <tr v-for="item in payments.failures">
+                    <td>{{ item.entity.name }}</td>
+                    <td>{{ item.payment.payment_type }}</td>
+                    <td>{{ item.transaction ? item.transaction.gateway_id : '' }}</td>
+                    <td>{{ item.transaction ? item.transaction.transaction_id : '' }}</td>
+                    <td v-if="item.transaction"><a :href="`/admin/transactions/${item.transaction.id}`" target="_blank">{{ item.transaction.id }}</a></td>
+                    <td v-else></td>
+                    <td class="failed">{{ moneyFormat(item.payment.amount) }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <b-btn href="/admin/charges/pending" size="lg">Process More Charges</b-btn>
+
+        </div>
+
+
+        <div v-else>
+            <loading-card v-show="loading"></loading-card>
+
+            <div v-if="! loading">
+                <b-row>
+                    <b-col sm="12">
+                        <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+                    </b-col>
+                </b-row>
+                <div class="table-responsive">
+                    <b-table bordered striped hover show-empty
+                             :items="items"
+                             :fields="fields"
+                             :sort-by.sync="sortBy"
+                             :sort-desc.sync="sortDesc"
+                    >
+                    </b-table>
+                </div>
             </div>
         </div>
+
     </b-card>
 </template>
 
@@ -72,7 +136,12 @@
                 business_id: "",
                 businesses: [],
                 processing: false,
+                processed: false,
                 charges: [],
+                payments:{
+                    charges: [],
+                    failures: []
+                },
                 loading: false,
                 fields: [
                     {
@@ -154,6 +223,7 @@
                 axios.get('/admin/businesses').then(response => this.businesses = response.data);
             },
             loadItems() {
+                if (!this.business_id) return;
                 this.loading = true;
                 axios.get('/admin/charges/pending/' + this.business_id + '?start_date=' + this.start_date + '&end_date=' + this.end_date)
                     .then(response => {
@@ -170,7 +240,7 @@
                         this.charges = response.data;
                     });
             },
-            processCharges()
+            async processCharges()
             {
                 if (this.business_id && confirm('Are you sure you wish to process the charges for this business?')) {
                     this.processing = true;
@@ -178,7 +248,14 @@
                         start_date: this.start_date,
                         end_date: this.end_date,
                     });
-                    form.post('/admin/charges/pending/' + this.business_id).catch(error => { this.processing = false; })
+                    try {
+                        const response = await form.post('/admin/charges/pending/' + this.business_id);
+                        this.payments = response.data.data;
+                        this.processed = true;
+                    }
+                    catch (e) {
+                        this.processing = false;
+                    }
                 }
             }
         }
@@ -188,5 +265,15 @@
 <style>
     table:not(.form-check) {
         font-size: 13px;
+    }
+
+    .successful {
+        color: darkgreen;
+        font-weight: bold;
+    }
+
+    .failed {
+        color: red;
+        font-weight: bold;
     }
 </style>

@@ -39,13 +39,22 @@ class TelefonyManager
      * @param int $iteration
      * @return Caregiver|null
      */
-    public function findCaregiverByLastDigits($digits, $iteration=0)
+    public function findCaregiverByLastDigits(Client $client, $digits, $iteration=0)
     {
-        $caregivers = Caregiver::whereHas('phoneNumbers', function($q) use ($digits) {
+        $phoneNumberSearch = function($q) use ($digits) {
             $q->where('national_number', 'LIKE', '%' . $digits);
-        })
-            ->orderBy('id')
-            ->get();
+        };
+
+        $caregivers = $client->caregivers()
+                             ->whereHas('phoneNumbers', $phoneNumberSearch)
+                             ->get();
+
+        $businessCaregivers = $client->business->caregivers()
+                                               ->whereHas('phoneNumbers', $phoneNumberSearch)
+                                               ->whereNotIn('caregiver_id', $caregivers->pluck('id'))
+                                               ->get();
+
+        $caregivers = $caregivers->merge($businessCaregivers)->values();
 
         if (isset($caregivers[$iteration])) {
             return $caregivers[$iteration];
