@@ -21,6 +21,7 @@ use App\Reports\UnpaidShiftsReport;
 use App\Reports\UnsettledReport;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,6 +30,38 @@ use App\Reports\ActiveClientsReport;
 
 class ReportsController extends Controller
 {
+    public function emails(Request $request, $type = null)
+    {
+        if (!$type) {
+            return view('admin.reports.emails');
+        }
+
+        $query = User::where('email', 'NOT LIKE', '%@allyms.com')
+            ->where('email', 'NOT LIKE', '%noemail%');
+
+        if ($type === 'client_payments') {
+            $request->validate(['date' => 'required|date']);
+            $date = Carbon::parse($request->date, 'America/New_York');
+            $query->join('payments', 'payments.client_id', '=', 'users.id')
+                ->whereBetween('payments.created_at', [
+                    $date->copy()->setTime(0,0,0)->setTimezone('UTC')->toDateTimeString(),
+                    $date->copy()->setTime(23, 59, 59)->setTimezone('UTC')->toDateTimeString(),
+                ]);
+        }
+
+        if ($type === 'caregiver_deposits') {
+            $request->validate(['date' => 'required|date']);
+            $date = Carbon::parse($request->date, 'America/New_York');
+            $query->join('deposits', 'deposits.caregiver_id', '=', 'users.id')
+                  ->whereBetween('deposits.created_at', [
+                      $date->copy()->setTime(0,0,0)->setTimezone('UTC')->toDateTimeString(),
+                      $date->copy()->setTime(23, 59, 59)->setTimezone('UTC')->toDateTimeString(),
+                  ]);
+        }
+
+        return $query->pluck('email')->implode(',');
+    }
+
     public function unsettled($data = 'data')
     {
         $statuses = ShiftStatusManager::getUnsettledStatuses();

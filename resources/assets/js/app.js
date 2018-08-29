@@ -62,6 +62,7 @@ Vue.component('admin-bucket-report', require('./components/admin/AdminBucketRepo
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-evv-report', require('./components/admin/AdminEvvReport'));
+Vue.component('admin-emails-report', require('./components/admin/reports/AdminEmailsReport'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
 Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
 Vue.component('admin-unsettled-report', require('./components/admin/AdminUnsettledReport.vue'));
