@@ -30,6 +30,12 @@ use App\Reports\ActiveClientsReport;
 
 class ReportsController extends Controller
 {
+
+    public function index()
+    {
+        return view('admin.reports.index');
+    }
+
     public function emails(Request $request, $type = null)
     {
         if (!$type) {
