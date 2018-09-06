@@ -287,7 +287,8 @@ Route::group([
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
     Route::get('missing_transactions', 'Admin\MissingTransactionsController@index')->name('missing_transactions');
-    Route::redirect('reports', 'reports/unsettled');
+//    Route::redirect('reports', 'reports/unsettled');
+    Route::get('reports', 'Admin\ReportsController@index')->name('reports.index');
     Route::get('reports/reconciliation', 'Admin\ReconciliationController@index')->name('reports.reconciliation');
     Route::get('reports/reconciliation/business/{business}', 'Admin\ReconciliationController@business')->name('reports.reconciliation.business');
     Route::get('reports/reconciliation/caregiver/{caregiver}', 'Admin\ReconciliationController@caregiver')->name('reports.reconciliation.caregiver');
@@ -326,6 +327,12 @@ Route::group([
     Route::get('reports/data/caregiver_payments', 'Admin\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Admin\ReportsController@clientCharges')->name('reports.data.client_charges');
     Route::get('audit-log', 'Admin\AuditLogController@index')->name('reports.audit-log');
+
+    /*Nacha Ach*/
+    Route::get('nacha-ach', 'Admin\NachaAchController@index')->name('nacha_ach');
+    Route::post('nacha-ach/generate', 'Admin\NachaAchController@generate')->name('nacha_ach.generate');
+
+
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
