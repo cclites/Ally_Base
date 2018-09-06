@@ -207,6 +207,8 @@ Vue.component('caregiver-application', require('./components/caregivers/Caregive
 Vue.component('mask-input', require('./components/MaskInput'));
 Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
+Vue.component('question-list', require('./components/business/QuestionList'));
+Vue.component('question-form', require('./components/business/QuestionForm'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));

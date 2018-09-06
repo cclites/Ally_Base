@@ -291,18 +291,18 @@
                 </b-row>
                 <b-row>
                     <b-col lg="12">
-                        <h4>Custom Questions</h4>
-                        <hr />
-                    </b-col>
-                    <b-col lg="12" class="with-padding-bottom">
-                        <center>Coming soon</center>
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col lg="12">
                         <b-btn @click="update" variant="info">
                             Save
                         </b-btn>
+                        <hr />
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12" class="mt-4">
+                        <h4>Custom Questions</h4>
+                    </b-col>
+                    <b-col lg="12" class="with-padding-bottom">
+                        <question-list :business_id="business.id" />
                     </b-col>
                 </b-row>
             </b-tab>

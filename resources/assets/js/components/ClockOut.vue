@@ -125,6 +125,16 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
+                <b-row v-if="questions.length">
+                    <b-col lg="12">
+                        <b-form-group v-for="question in questions"
+                            :key="question.id"
+                            :label="question.question + (question.required ? ' *' : '')">
+                            <textarea v-model="form.questions[question.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                            <input-help :form="form" :field="`questions.${question.id}`"></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
                 <b-row v-if="shift.client.goals.length">
                     <b-col lg="12">
                         <h4>Goals:</h4>
@@ -175,6 +185,7 @@
             'activities': Array,
             'carePlanActivityIds': Array,
             'business': {},
+            'questions': Array,
         },
 
         data() {
@@ -191,6 +202,7 @@
                     other_expenses_desc: null,
                     signature: null,
                     goals: {},
+                    questions: {},
                 }),
                 showManual: false,
                 time: null,
@@ -202,6 +214,7 @@
         mounted() {
             this.setTimes();
             this.setupGoalsForm();
+            this.setupQuestions();
         },
 
         methods: {
@@ -282,6 +295,13 @@
                 this.form.goals = {};
                 this.shift.client.goals.forEach(item => {
                     this.form.goals[item.id] = '';
+                });
+            },
+
+            setupQuestions() {
+                this.form.questions = {};
+                this.questions.forEach(item => {
+                    this.form.questions[item.id] = '';
                 });
             },
         },

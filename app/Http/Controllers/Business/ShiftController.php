@@ -77,7 +77,7 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
@@ -141,18 +141,31 @@ class ShiftController extends BaseController
                 'issues.caregiver_injury' => 'boolean',
                 'issues.client_injury' => 'boolean',
                 'issues.comments' => 'nullable',
+                'questions' => 'nullable|array',
             ],
             [
                 'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
             ]
         );
 
+        $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
+        if ($allQuestions->count() > 0) {
+            $fields = [];
+            foreach($allQuestions as $q) {
+                if ($q->required == 1) {
+                    $fields['questions.' . $q->id] = 'required';
+                }
+            }
+
+            $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+        }
+
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
 
-        if ($shift->update(Arr::except($data, 'issues'))) {
+        if ($shift->update(Arr::except($data, ['issues', 'questions']))) {
             if (isset($adminOverride)) {
                 // Update persisted costs
                 $shift->costs()->persist();
@@ -161,6 +174,7 @@ class ShiftController extends BaseController
             $shift->activities()->sync($request->input('activities', []));
             $shift->syncIssues($data['issues']);
             $shift->syncGoals($request->goals);
+            $shift->syncQuestions($allQuestions, $data['questions']);
 
             return new SuccessResponse('You have successfully updated this shift.');
         }

@@ -232,6 +232,17 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
             ->withPivot('comments');
     }
 
+    /**
+     * A Shift can have many Questions.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'shift_questions')
+            ->withPivot('answer');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -475,6 +486,23 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $this->goals()->sync($data);
 
         return $this;
+    }
+
+    /**
+     * Sync question answers to the shift.
+     *
+     * @param array $questions
+     * @param array $answers
+     * @return void
+     */
+    public function syncQuestions($questions, $answers)
+    {
+        $items = [];
+        foreach($questions as $q) {
+            $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
+            $items[$q->id] = ['answer' => $answer];
+        }
+        $this->questions()->sync($items);
     }
 
     ///////////////////////////////////////////
