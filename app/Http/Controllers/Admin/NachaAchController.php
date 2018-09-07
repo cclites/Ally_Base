@@ -70,7 +70,7 @@ class NachaAchController extends Controller
             ->setTransactionCode(TransactionCode::CHECKING_DEBIT)
             ->setReceivingDfiId('09101298')
             ->setCheckDigit(7)
-            ->setDFiAccountNumber($data['account'])
+            ->setDFiAccountNumber($data['accountNumber'])
             ->setAmount($data['amount'])
             ->setIndividualId('test id')
             ->setIdividualName('Test name')
