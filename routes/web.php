@@ -163,6 +163,7 @@ Route::group([
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
+    Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
     Route::get('reports/certification_expirations', 'Business\ReportsController@certificationExpirations')->name('reports.certification_expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
     Route::post('reports/credit-cards', 'Business\ReportsController@creditCards')->name('reports.credit_cards');
