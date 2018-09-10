@@ -260,6 +260,14 @@
                 this.start = view.start.format('YYYY-MM-DD');
                 this.end = view.end.format('YYYY-MM-DD');
                 this.fetchEvents();
+                this.loadKpiToolbar();
+            },
+
+            loadKpiToolbar() {
+                let $toolbar = $('.fc-toolbar .fc-center');
+                let $element = $toolbar.find('h6');
+                if (!$element.length) $element = $toolbar.append('<h6/>').find('h6');
+                $element.html(`Scheduled Hours: 555 &nbsp; Completed Hours: 762 &nbsp; Projected Hours: 1243`)
             },
 
             fetchEvents(savePosition = false) {
@@ -470,6 +478,14 @@
 }
 .fc-toolbar .dropdown-item {
     padding: 3px 6px;
+}
+.fc-toolbar .fc-center h2 {
+    text-align: center;
+    width: 100%;
+}
+.fc-toolbar h6 {
+    /* Toolbar KPIs */
+    clear: both;
 }
 .color-sample {
     display: inline-block;
