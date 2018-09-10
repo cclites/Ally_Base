@@ -5,9 +5,18 @@
 </template>
 
 <script>
+    import fullcalendar from 'fullcalendar';
+    import fullcalendarScheduler from 'fullcalendar-scheduler';
+
     export default {
         props: {
             loading: false,
+
+            resources: {
+                default() {
+                    return []
+                },
+            },
 
             events: {
                 default() {
@@ -86,6 +95,7 @@
                     aspectRatio: 2,
                     timeFormat: 'h:mma',
                     timezone: false, // keep timezone sent from server
+                    resources: this.resources,
                     events: this.events,
                     eventSources: this.eventSources,
                     allDaySlot: false,
@@ -144,9 +154,6 @@
         },
 
         mounted() {
-            const cal = $(this.$el),
-                self = this
-
             this.$on('remove-event', (event) => {
                 if(event && event.hasOwnProperty('id')){
                     $(this.$el).fullCalendar('removeEvents', event.id);
@@ -180,13 +187,21 @@
                 })
             })
 
-            cal.fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
-            this.hideWeekButtonOnSmallDevices();
+            this.createCalendar();
         },
 
         methods: {
             fireMethod(...options) {
                 $(this.$el).fullCalendar(...options)
+            },
+
+            createCalendar() {
+                $(this.$el).fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
+                this.hideWeekButtonOnSmallDevices();
+            },
+
+            destroyCalendar() {
+                $(this.$el).fullCalendar('destroy');
             },
 
             hideWeekButtonOnSmallDevices()
@@ -210,6 +225,10 @@
                     this.$emit('rebuild-sources')
                 },
             },
+            resources() {
+                this.destroyCalendar();
+                this.createCalendar();
+            }
         },
 
         beforeDestroy() {
@@ -222,3 +241,7 @@
         },
     }
 </script>
+
+<style src="fullcalendar/dist/fullcalendar.css"></style>
+<style src="fullcalendar-scheduler/dist/scheduler.css"></style>
+

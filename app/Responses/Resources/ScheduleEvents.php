@@ -155,12 +155,13 @@ class ScheduleEvents implements Responsable
                 'title' => $title,
                 'start' => $schedule->starts_at->format(\DateTime::ISO8601),
                 // Needs to add 1 extra second to end time for FullCalendar support
-                'end' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format(\DateTime::ISO8601),
+                'end' => $schedule->starts_at->copy()->addSeconds($schedule->duration * 60 + 1)->format(\DateTime::ISO8601),
                 'backgroundColor' => $backgroundColor,
                 'care_plan' => $schedule->carePlan,
-
-                'client' => $schedule->client->name(),
-                'caregiver' => $schedule->caregiver ? $schedule->caregiver->name() : 'None',
+                'client' => $schedule->client->nameLastFirst(),
+                'client_id' => $schedule->client->id,
+                'caregiver' => $schedule->caregiver ? $schedule->caregiver->nameLastFirst() : 'OPEN',
+                'caregiver_id' => $schedule->caregiver->id ?? 0,
                 'start_time' => $schedule->starts_at->format('g:i A'),
                 'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
