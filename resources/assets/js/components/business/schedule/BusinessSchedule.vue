@@ -422,6 +422,7 @@
 </script>
 
 <style>
+.fc-view-container { font-size: 0.9em; }
 .fc-event { text-align: left!important; }
 .fc-note-btn { float: right!important; z-index: 99; padding-left: 5px }
 .fc-event { cursor: pointer; }
