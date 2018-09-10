@@ -21,14 +21,8 @@
 </template>
 
 <script>
-import vSelect from 'vue-select';
-
 export default {
     name: 'QuickSearch',
-
-    components: {
-        'v-select': vSelect
-    },
 
     data: () => ({
         options: [],

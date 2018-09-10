@@ -39,8 +39,10 @@
             </b-col>
         </b-row>
 
+        <loading-card v-show="loading" v-if="!resourcesLoaded" />
         <full-calendar ref="calendar"
             :events="events"
+            :resources="resources"
             :default-view="defaultView"
             :header="header"
             :config="config"
@@ -49,6 +51,7 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             :loading="loading"
+            v-else
         />
 
         <schedule-notes-modal v-model="notesModal"
@@ -94,7 +97,7 @@
             'client': Object,
             'defaultView': {
                 default() {
-                    return 'month';
+                    return 'timelineWeek';
                 }
             }
         },
@@ -108,10 +111,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'listDay,agendaWeek,month'
-                },
-                config: {
-                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    right:  'timelineDay,timelineWeek,month'
                 },
                 clients: [],
                 caregivers: [],
@@ -131,6 +131,10 @@
                 localStoragePrefix: 'business_schedule_',
                 resetScrollPosition: false,
                 scroll: { top: null, left: null },
+                resourceIdField: 'client_id',
+                eventsLoaded: false, // initial events load
+                caregiversLoaded: !!this.caregiver,
+                clientsLoaded: !!this.client,
             }
         },
 
@@ -172,7 +176,57 @@
 
             rememberFilters() {
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
-            }
+            },
+
+            resourcesLoaded() {
+                return this.eventsLoaded && this.caregiversLoaded && this.clientsLoaded;
+            },
+
+            resources() {
+                if (!this.resourcesLoaded) return [];
+
+                let items = this.clients;
+                this.resourceIdField = 'client_id';
+
+                if (this.client) {
+                    items = this.caregivers;
+                    this.resourceIdField = 'caregiver_id';
+                }
+
+                let resources = items.map(item => {
+                    return {
+                        id: item.id,
+                        title: item.nameLastFirst
+                    };
+                });
+
+                if (this.client) {
+                    resources.unshift({
+                        id: 0,
+                        title: 'Open Shifts',
+                    });
+                }
+
+                return resources;
+
+                // Filtering freezes browser, debug later
+                return resources.filter(resource => {
+                    return this.events.findIndex(event => event[this.resourceIdField] == resource.id) !== -1;
+                });
+            },
+
+            config() {
+                return {
+                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    resourceLabelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
+                    resourceAreaWidth: '250px',
+                    views: {
+                        timelineWeek: {
+                            slotDuration: '24:00'
+                        },
+                    }
+                }
+            },
         },
 
         methods: {
@@ -217,8 +271,12 @@
                 this.loading = true;
                 axios.get(this.eventsUrl)
                     .then( ({ data }) => {
-                        this.events = data.events;
+                        this.events = data.events.map(event => {
+                            event.resourceId = event[this.resourceIdField];
+                            return event;
+                        });
                         this.kpis = data.kpis;
+                        this.eventsLoaded = true;
                         this.loading = false;
                     })
                     .catch(e => {
@@ -263,13 +321,20 @@
                 }
 
                 // Fill the caregiver and client drop downs
+                let count = 0;
                 if (clientIsFilterable) {
-                    axios.get('/business/clients').then(response => this.clients = response.data);
+                    axios.get('/business/clients').then(response => {
+                        this.clients = response.data;
+                        this.clientsLoaded = true;
+                    });
                 }
                 if (caregiverIsFilterable) {
                     let url = '/business/caregivers';
                     if (this.client) url = '/business/clients/' + this.client.id + '/caregivers';
-                    axios.get(url).then(response => this.caregivers = response.data);
+                    axios.get(url).then(response => {
+                        this.caregivers = response.data;
+                        this.caregiversLoaded = true;
+                    });
                 }
 
                 this.filtersReady = true;
