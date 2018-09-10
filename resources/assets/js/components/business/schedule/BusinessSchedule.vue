@@ -356,18 +356,15 @@
                     e.stopPropagation();
                 });
 
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
-                let title = $('<span/>', {
-                    class: 'fc-title',
-                    html: data.join('<br/>'),
-                });
-
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
-                    content.html($('<div/>').append(note, title));
+                    this.renderAgendaWeekEvent(content, event, note);
+                } else if (view.name == 'timelineDay') {
+                    this.renderTimelineDayEvent(content, event, note);
+                } else if (view.name == 'timelineWeek') {
+                    this.renderTimelineWeekEvent(content, event, note);
                 } else {
-                    content.html(title);
-                    content.parent().prepend(note);
+                    this.renderDefaultEvent(content, event, note);
                 }
 
                 this.resetScrollPosition = true;
@@ -385,7 +382,45 @@
     <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Cancelled</a>
   </div>
 `);
+            },
+
+            renderTimelineDayEvent(content, event, note) {
+                let data = [`${event.caregiver}`];
+                let title = $('<span/>', {
+                    class: 'fc-title',
+                    html: data.join('<br/>'),
+                });
+                content.html($('<div/>').append(note, title));
+            },
+
+            renderTimelineWeekEvent(content, event, note) {
+                let data = [`${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let title = $('<span/>', {
+                    class: 'fc-title',
+                    html: data.join('<br/>'),
+                });
+                content.html($('<div/>').append(note, title));
+            },
+
+            renderAgendaWeekEvent(content, event, note) {
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let title = $('<span/>', {
+                    class: 'fc-title',
+                    html: data.join('<br/>'),
+                });
+                content.html($('<div/>').append(note, title));
+            },
+
+            renderDefaultEvent(content, event, note) {
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let title = $('<span/>', {
+                    class: 'fc-title',
+                    html: data.join('<br/>'),
+                });
+                content.html(title);
+                content.parent().prepend(note);
             }
+
         },
 
         watch: {
@@ -422,8 +457,9 @@
 </script>
 
 <style>
+.fc-view-container { font-size: 0.9em; }
 .fc-event { text-align: left!important; }
-.fc-note-btn { float: right!important; z-index: 99; padding-left: 5px }
+.fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
 .fc-event { cursor: pointer; }
 .fc-note-btn:hover {
     filter: brightness(85%);
