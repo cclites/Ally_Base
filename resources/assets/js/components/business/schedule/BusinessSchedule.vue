@@ -29,6 +29,34 @@
             </b-col>
             <b-col md="5">
                 <b-row>
+                    <b-col class="statusFilters">
+                        <label>
+                            <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light">All Statuses</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="OK"> <span class="badge badge-primary scheduled">Scheduled</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in">Clocked In</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed">Confirmed</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed">Unconfirmed</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary">Open Shift</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELLED"> <span class="badge badge-primary client_cancelled">Client Cancelled</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_cancelled">CG Cancelled</span>
+                        </label>
+                    </b-col>
+                </b-row>
+                <b-row>
                     <b-col cols="6" class="ml-auto" v-if="caregivers.length">
                         <b-form-group label="Caregiver Filter" label-for="calendar_caregiver_filter">
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
@@ -151,6 +179,8 @@
                 clientsLoaded: !!this.client,
                 caregiverView: !!this.client,
                 filterText: '',
+                statusFilters: [],
+                allStatuses: 1,
             }
         },
 
@@ -162,6 +192,20 @@
         computed: {
             filteredEvents() {
                 let events = this.events;
+
+                if (this.statusFilters.length) {
+                    events = events.filter(event => {
+                        if (this.statusFilters.includes(event.status)) {
+                            return true;
+                        }
+
+                        if (this.statusFilters.includes('OPEN') && event.caregiver_id == 0) {
+                            return true;
+                        }
+
+                        return false;
+                    });
+                }
 
                 if (this.filterText.length > 2) {
                     let regex = new RegExp(this.filterText, "i");
@@ -524,13 +568,21 @@
                     }, 10);
                 }
             },
+
+            allStatuses(val) {
+                if (val) this.statusFilters = [];
+            },
+
+            statusFilters(val) {
+                this.allStatuses = val.length ? 0 : 1;
+            }
         },
 
         mixins: [ManageCalendar, LocalStorage]
     }
 </script>
 
-<style>
+<style type="scss">
 .fc-view-container { font-size: 0.9em; }
 .fc-event { text-align: left!important; }
 .fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
@@ -573,4 +625,17 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
 }
+.badge.scheduled { background-color: #1c81d9; }
+.badge.clocked_in { background-color: #27c11e; }
+.badge.confirmed { background-color: #849290; }
+.badge.unconfirmed { background-color: #D0C3D3; }
+.badge.client_cancelled { background-color: #d91c4e; }
+.badge.cg_cancelled { background-color: #d9c01c; }
+</style>
+
+<style scoped>
+    :checked + span { border: 2px solid black; }
+    .statusFilters input {
+        display: none;
+    }
 </style>
