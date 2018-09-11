@@ -21,7 +21,7 @@
         </div>
 
         <b-row>
-            <b-col lg="6" >
+            <b-col lg="6">
                 <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
             </b-col>
             <b-col lg="6" class="text-right">
@@ -35,7 +35,7 @@
 <script>
     export default {
         props: {
-
+            role: Object
         },
 
         data() {
@@ -67,24 +67,44 @@
 
         computed: {
             items() {
-                return [
-                    { report_name: '<a href="reports/unsettled">Unsettled Report</a>', description: '' },
-                    { report_name: '<a href="reports/reconciliation">Reconciliation Report</a>', description: 'See detailed breakdown of each transaction with your bank' },
-                    { report_name: '<a href="failed_transactions">Failed Transactions</a>', description: '' },
-                    { report_name: '<a href="reports/pending_transactions">Pending Transactions</a>', description: '' },
-                    { report_name: '<a href="reports/on_hold">On Hold Report</a>', description: '' },
-                    { report_name: '<a href="deposits/failed">Failed Deposits</a>', description: '' },
-                    { report_name: '<a href="reports/shared_shifts">Shared Shifts</a>', description: '' },
-                    { report_name: '<a href="reports/unpaid_shifts">Unpaid Shifts</a>', description: '' },
-                    { report_name: '<a href="reports/caregivers/deposits-missing-bank-account">Missing Deposit Accounts</a>', description: '' },
-                    { report_name: '<a href="reports/finances">Financial Summary</a>', description: '' },
-                    { report_name: '<a href="reports/client-caregiver-visits">Client Caregiver Visits</a>', description: '' },
-                    { report_name: '<a href="reports/active-clients">Active Clients Report</a>', description: '' },
-                    { report_name: '<a href="reports/bucket">Bank Report</a>', description: '' },
-                    { report_name: '<a href="reports/evv">EVV Report</a>', description: '' },
-                    { report_name: '<a href="reports/emails">Emails Report</a>', description: '' },
-                    { report_name: '<a href="audit-log">Audit Log</a>', description: '' },
-                ]
+                if(this.role['role_type'] == 'admin') {
+                    return [
+                        { report_name: '<a href="reports/unsettled">Unsettled Report</a>', description: '' },
+                        { report_name: '<a href="reports/reconciliation">Reconciliation Report</a>', description: 'See detailed breakdown of each transaction with your bank' },
+                        { report_name: '<a href="failed_transactions">Failed Transactions</a>', description: '' },
+                        { report_name: '<a href="reports/pending_transactions">Pending Transactions</a>', description: '' },
+                        { report_name: '<a href="reports/on_hold">On Hold Report</a>', description: '' },
+                        { report_name: '<a href="deposits/failed">Failed Deposits</a>', description: '' },
+                        { report_name: '<a href="reports/shared_shifts">Shared Shifts</a>', description: '' },
+                        { report_name: '<a href="reports/unpaid_shifts">Unpaid Shifts</a>', description: '' },
+                        { report_name: '<a href="reports/caregivers/deposits-missing-bank-account">Missing Deposit Accounts</a>', description: '' },
+                        { report_name: '<a href="reports/finances">Financial Summary</a>', description: '' },
+                        { report_name: '<a href="reports/client-caregiver-visits">Client Caregiver Visits</a>', description: '' },
+                        { report_name: '<a href="reports/active-clients">Active Clients Report</a>', description: '' },
+                        { report_name: '<a href="reports/bucket">Bank Report</a>', description: '' },
+                        { report_name: '<a href="reports/evv">EVV Report</a>', description: '' },
+                        { report_name: '<a href="reports/emails">Emails Report</a>', description: '' },
+                        { report_name: '<a href="audit-log">Audit Log</a>', description: '' },
+                    ];
+                } else if(this.role['role_type'] == 'office_user') {
+                    return [
+                        { report_name: '<a href="reports/payments">Payment History</a>', description: '' },
+                        { report_name: '<a href="reports/reconciliation">Reconciliation Report</a>', description: 'See detailed breakdown of each transaction with your bank' },
+                        { report_name: '<a href="reports/overtime">Caregiver Overtime</a>', description: 'See what caregivers are at risk of overtime' },
+                        { report_name: '<a href="reports/certification_expirations">Certification Expirations</a>', description: '' },
+                        { report_name: '<a href="reports/credit-card-expiration">Credit Card Expiration</a>', description: 'See clients with expiring credit cards' },
+                        { report_name: '<a href="reports/client_caregivers">Client Caregiver Rates</a>', description: '' },
+                        { report_name: '<a href="reports/client-email-missing">Clients Without Email</a>', description: '' },
+                        { report_name: '<a href="reports/clients-onboarded">Client Online Setup</a>', description: '' },
+                        { report_name: '<a href="reports/caregivers-onboarded">Caregiver Online Setup</a>', description: '' },
+                        { report_name: '<a href="reports/printable-schedule">Printable Schedule</a>', description: '' },
+                        { report_name: '<a href="reports/caregivers-missing-bank-accounts">Missing Bank Accounts</a>', description: 'See caregivers missing bank accounts' },
+                        { report_name: '<a href="reports/export-timesheets">Export Timesheets</a>', description: 'Export timesheets for offline storage' },
+                        { report_name: '<a href="reports/claims-report">Claims Report</a>', description: '' },
+                    ];
+                } else {
+                    return [];
+                }
             }
         },
 

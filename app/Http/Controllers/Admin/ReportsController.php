@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Auth;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
@@ -33,7 +34,8 @@ class ReportsController extends Controller
 
     public function index()
     {
-        return view('admin.reports.index');
+        $role = json_encode(['role_type' => Auth::user()->role_type]);
+        return view('admin.reports.index', ['role' => $role]);
     }
 
     public function emails(Request $request, $type = null)
