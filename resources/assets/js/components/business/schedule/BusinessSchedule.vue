@@ -15,6 +15,17 @@
                         <strong>Open Shifts: </strong> {{ kpis.unassigned_shifts }}
                     </b-col>
                 </b-row>
+                <b-row>
+                    <b-col class="mt-3">
+                        <div class="form-control icon-control">
+                            <i class="fa fa-search"></i>
+                            <input type="text"
+                                   placeholder="Search Schedule"
+                                   v-model="filterText"
+                            />
+                        </div>
+                    </b-col>
+                </b-row>
             </b-col>
             <b-col md="5">
                 <b-row>
@@ -41,7 +52,7 @@
 
         <loading-card v-show="loading" v-if="!resourcesLoaded" />
         <full-calendar ref="calendar"
-            :events="events"
+            :events="filteredEvents"
             :resources="resources"
             :default-view="defaultView"
             :header="header"
@@ -135,6 +146,7 @@
                 eventsLoaded: false, // initial events load
                 caregiversLoaded: !!this.caregiver,
                 clientsLoaded: !!this.client,
+                filterText: '',
             }
         },
 
@@ -144,6 +156,20 @@
         },
 
         computed: {
+            filteredEvents() {
+                let events = this.events;
+
+                if (this.filterText.length > 2) {
+                    let regex = new RegExp(this.filterText, "i");
+                    events = events.filter(event => {
+                        let str = [event.note, event.caregiver, event.client].join( "|" );
+                        return regex.test(str);
+                    })
+                }
+
+                return events;
+            },
+
             eventsUrl() {
                 if (!this.filtersReady) {
                     return '';
