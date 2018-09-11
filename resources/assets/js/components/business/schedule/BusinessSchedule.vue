@@ -122,7 +122,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'timelineDay,timelineWeek,month'
+                    right:  'timelineDay,timelineWeek,month caregiverView fullscreen'
                 },
                 clients: [],
                 caregivers: [],
@@ -251,7 +251,19 @@
                         timelineWeek: {
                             slotDuration: '24:00'
                         },
-                    }
+                    },
+                    customButtons: {
+                        caregiverView: {
+                            text: 'Caregiver View',
+                            click: function() {
+                                alert('clicked the caregiver view button!');
+                            }
+                        },
+                        fullscreen: {
+                            text: ' ',
+                            click: this.fullscreenToggle
+                        }
+                    },
                 }
             },
         },
@@ -454,8 +466,13 @@
                 });
                 content.html(title);
                 content.parent().prepend(note);
-            }
+            },
 
+            fullscreenToggle() {
+                let $element = $(this.$el);
+                $element.toggleClass('fullscreen-calendar');
+                this.$refs.calendar.$emit('rerender-events');
+            }
         },
 
         watch: {
@@ -520,5 +537,14 @@
     height: 12px;
     margin: 3px 3px 0 3px;
     border: 1px solid #000;
+}
+.fc-fullscreen-button:before {
+    font: normal normal normal 14px/1 FontAwesome;
+    content: "\f0b2";
+}
+.fullscreen-calendar {
+    z-index: 101;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
 }
 </style>
