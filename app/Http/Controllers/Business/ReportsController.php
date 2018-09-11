@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use Auth;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
@@ -29,6 +30,13 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 class ReportsController extends BaseController
 {
+
+    public function index()
+    {
+        $role = json_encode(['role_type' => Auth::user()->role_type]);
+        return view('business.reports.index', ['role' => $role]);
+    }
+
     public function medicaidReport(Request $request)
     {
         return view('business.reports.medicaid', $this->medicaidData($request));
