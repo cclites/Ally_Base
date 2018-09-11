@@ -244,6 +244,7 @@
             config() {
                 return {
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    nowIndicator: true,
                     resourceLabelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
                     resourceAreaWidth: '250px',
                     views: {
