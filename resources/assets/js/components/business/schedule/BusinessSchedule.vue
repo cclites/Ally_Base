@@ -146,6 +146,7 @@
                 eventsLoaded: false, // initial events load
                 caregiversLoaded: !!this.caregiver,
                 clientsLoaded: !!this.client,
+                caregiverView: !!this.client,
                 filterText: '',
             }
         },
@@ -214,7 +215,7 @@
                 let items = this.clients;
                 this.resourceIdField = 'client_id';
 
-                if (this.client) {
+                if (this.caregiverView) {
                     items = this.caregivers;
                     this.resourceIdField = 'caregiver_id';
                 }
@@ -226,7 +227,7 @@
                     };
                 });
 
-                if (this.client) {
+                if (this.caregiverView) {
                     resources.unshift({
                         id: 0,
                         title: 'Open Shifts',
@@ -254,10 +255,8 @@
                     },
                     customButtons: {
                         caregiverView: {
-                            text: 'Caregiver View',
-                            click: function() {
-                                alert('clicked the caregiver view button!');
-                            }
+                            text: this.caregiverView ? 'Client View' : 'Caregiver View',
+                            click: this.caregiverViewToggle
                         },
                         fullscreen: {
                             text: ' ',
@@ -431,8 +430,12 @@
 `);
             },
 
+            getEventPersonName(event) {
+                return this.caregiverView ? event.client : event.caregiver;
+            },
+
             renderTimelineDayEvent(content, event, note) {
-                let data = [`${event.caregiver}`];
+                let data = [this.getEventPersonName(event)];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -441,7 +444,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note) {
-                let data = [`${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -472,7 +475,12 @@
                 let $element = $(this.$el);
                 $element.toggleClass('fullscreen-calendar');
                 this.$refs.calendar.$emit('rerender-events');
-            }
+            },
+
+            caregiverViewToggle() {
+                this.caregiverView = !this.caregiverView;
+                this.$refs.calendar.$emit('rerender-events');
+            },
         },
 
         watch: {
