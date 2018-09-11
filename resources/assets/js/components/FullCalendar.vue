@@ -204,6 +204,10 @@
                 $(this.$el).fullCalendar('destroy');
             },
 
+            printCalendar() {
+                $(this.$refs.calendar).print();
+            },
+
             hideWeekButtonOnSmallDevices()
             {
                 let $button = $('.fc-agendaWeek-button');
@@ -244,4 +248,3 @@
 
 <style src="fullcalendar/dist/fullcalendar.css"></style>
 <style src="fullcalendar-scheduler/dist/scheduler.css"></style>
-

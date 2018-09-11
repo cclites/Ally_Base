@@ -94,6 +94,9 @@
                                     :shift="selectedSchedule.clocked_in_shift"
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
+
+        <iframe id="printFrame" width="0" height="0" src="/calendar-print.html">
+        </iframe>
     </b-card>
 </template>
 
@@ -122,7 +125,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'timelineDay,timelineWeek,month caregiverView fullscreen'
+                    right:  'timelineDay,timelineWeek,month caregiverView print fullscreen'
                 },
                 clients: [],
                 caregivers: [],
@@ -261,6 +264,10 @@
                         fullscreen: {
                             text: ' ',
                             click: this.fullscreenToggle
+                        },
+                        print: {
+                            text: ' ',
+                            click: this.printCalendar
                         }
                     },
                 }
@@ -481,6 +488,13 @@
                 this.caregiverView = !this.caregiverView;
                 this.$refs.calendar.$emit('rerender-events');
             },
+
+            printCalendar() {
+                console.log($(this.$refs.calendar.$el));
+                let html = $(this.$refs.calendar.$el).html();
+                $("#printFrame").contents().find('body').html(html);
+                document.getElementById("printFrame").contentWindow.print();
+            },
         },
 
         watch: {
@@ -509,7 +523,7 @@
                         this.resetScrollPosition = false;
                     }, 10);
                 }
-            }
+            },
         },
 
         mixins: [ManageCalendar, LocalStorage]
@@ -549,6 +563,10 @@
 .fc-fullscreen-button:before {
     font: normal normal normal 14px/1 FontAwesome;
     content: "\f0b2";
+}
+.fc-print-button:before {
+    font: normal normal normal 14px/1 FontAwesome;
+    content: "\f02f";
 }
 .fullscreen-calendar {
     z-index: 101;
