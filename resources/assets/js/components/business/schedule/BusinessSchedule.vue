@@ -15,6 +15,17 @@
                         <strong>Open Shifts: </strong> {{ kpis.unassigned_shifts }}
                     </b-col>
                 </b-row>
+                <b-row>
+                    <b-col class="mt-3">
+                        <div class="form-control icon-control">
+                            <i class="fa fa-search"></i>
+                            <input type="text"
+                                   placeholder="Search Schedule"
+                                   v-model="filterText"
+                            />
+                        </div>
+                    </b-col>
+                </b-row>
             </b-col>
             <b-col md="5">
                 <b-row>
@@ -41,7 +52,7 @@
 
         <loading-card v-show="loading" v-if="!resourcesLoaded" />
         <full-calendar ref="calendar"
-            :events="events"
+            :events="filteredEvents"
             :resources="resources"
             :default-view="defaultView"
             :header="header"
@@ -111,7 +122,7 @@
                 header: {
                     left:   'prev,next today',
                     center: 'title',
-                    right:  'timelineDay,timelineWeek,month'
+                    right:  'timelineDay,timelineWeek,month caregiverView fullscreen'
                 },
                 clients: [],
                 caregivers: [],
@@ -135,6 +146,8 @@
                 eventsLoaded: false, // initial events load
                 caregiversLoaded: !!this.caregiver,
                 clientsLoaded: !!this.client,
+                caregiverView: !!this.client,
+                filterText: '',
             }
         },
 
@@ -144,6 +157,20 @@
         },
 
         computed: {
+            filteredEvents() {
+                let events = this.events;
+
+                if (this.filterText.length > 2) {
+                    let regex = new RegExp(this.filterText, "i");
+                    events = events.filter(event => {
+                        let str = [event.note, event.caregiver, event.client].join( "|" );
+                        return regex.test(str);
+                    })
+                }
+
+                return events;
+            },
+
             eventsUrl() {
                 if (!this.filtersReady) {
                     return '';
@@ -188,7 +215,7 @@
                 let items = this.clients;
                 this.resourceIdField = 'client_id';
 
-                if (this.client) {
+                if (this.caregiverView) {
                     items = this.caregivers;
                     this.resourceIdField = 'caregiver_id';
                 }
@@ -200,7 +227,7 @@
                     };
                 });
 
-                if (this.client) {
+                if (this.caregiverView) {
                     resources.unshift({
                         id: 0,
                         title: 'Open Shifts',
@@ -218,13 +245,24 @@
             config() {
                 return {
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    nowIndicator: true,
                     resourceLabelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
                     resourceAreaWidth: '250px',
                     views: {
                         timelineWeek: {
                             slotDuration: '24:00'
                         },
-                    }
+                    },
+                    customButtons: {
+                        caregiverView: {
+                            text: this.caregiverView ? 'Client View' : 'Caregiver View',
+                            click: this.caregiverViewToggle
+                        },
+                        fullscreen: {
+                            text: ' ',
+                            click: this.fullscreenToggle
+                        }
+                    },
                 }
             },
         },
@@ -260,6 +298,14 @@
                 this.start = view.start.format('YYYY-MM-DD');
                 this.end = view.end.format('YYYY-MM-DD');
                 this.fetchEvents();
+                this.loadKpiToolbar();
+            },
+
+            loadKpiToolbar() {
+                let $toolbar = $('.fc-toolbar .fc-center');
+                let $element = $toolbar.find('h6');
+                if (!$element.length) $element = $toolbar.append('<h6/>').find('h6');
+                $element.html(`Scheduled Hours: 555 &nbsp; Completed Hours: 762 &nbsp; Projected Hours: 1243`)
             },
 
             fetchEvents(savePosition = false) {
@@ -384,8 +430,12 @@
 `);
             },
 
+            getEventPersonName(event) {
+                return this.caregiverView ? event.client : event.caregiver;
+            },
+
             renderTimelineDayEvent(content, event, note) {
-                let data = [`${event.caregiver}`];
+                let data = [this.getEventPersonName(event)];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -394,7 +444,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note) {
-                let data = [`${event.caregiver}`, `${event.start_time} - ${event.end_time}`];
+                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -419,8 +469,18 @@
                 });
                 content.html(title);
                 content.parent().prepend(note);
-            }
+            },
 
+            fullscreenToggle() {
+                let $element = $(this.$el);
+                $element.toggleClass('fullscreen-calendar');
+                this.$refs.calendar.$emit('rerender-events');
+            },
+
+            caregiverViewToggle() {
+                this.caregiverView = !this.caregiverView;
+                this.$refs.calendar.$emit('rerender-events');
+            },
         },
 
         watch: {
@@ -471,11 +531,28 @@
 .fc-toolbar .dropdown-item {
     padding: 3px 6px;
 }
+.fc-toolbar .fc-center h2 {
+    text-align: center;
+    width: 100%;
+}
+.fc-toolbar h6 {
+    /* Toolbar KPIs */
+    clear: both;
+}
 .color-sample {
     display: inline-block;
     width: 12px;
     height: 12px;
     margin: 3px 3px 0 3px;
     border: 1px solid #000;
+}
+.fc-fullscreen-button:before {
+    font: normal normal normal 14px/1 FontAwesome;
+    content: "\f0b2";
+}
+.fullscreen-calendar {
+    z-index: 101;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
 }
 </style>

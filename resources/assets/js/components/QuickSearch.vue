@@ -84,7 +84,7 @@ export default {
 .icon-control input {
     border: 0;
     color: #67757c;
-    min-height: 38px;
+    min-height: 36px;
     width: 90%;
 }
 

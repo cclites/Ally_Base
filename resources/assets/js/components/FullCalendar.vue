@@ -163,7 +163,7 @@
             })
 
             this.$on('rerender-events', () => {
-                $(this.$el).fullCalendar('rerenderEvents')
+                $(this.$el).fullCalendar('rerenderEvents');
                 this.hideWeekButtonOnSmallDevices();
             })
 
