@@ -72,7 +72,6 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading" v-if="!resourcesLoaded" />
         <full-calendar ref="calendar"
             :events="filteredEvents"
             :resources="resources"
@@ -85,7 +84,6 @@
             @view-render="onLoadView"
             @events-reloaded="loadKpiToolbar"
             :loading="loading"
-            v-else
         />
 
         <schedule-notes-modal v-model="notesModal"
@@ -172,45 +170,21 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
+
+                // filteredEvents: [],
+                // kpis: [],
+                // resources: [],
             }
         },
 
         mounted() {
-            this.appendColorKey();
+            // this.appendColorKey();
             this.loadFiltersData();
         },
 
         computed: {
-            filteredEvents() {
-                let events = this.events;
-
-                if (this.statusFilters.length) {
-                    events = events.filter(event => {
-                        if (this.statusFilters.includes(event.status)) {
-                            return true;
-                        }
-
-                        if (this.statusFilters.includes('OPEN') && event.caregiver_id == 0) {
-                            return true;
-                        }
-
-                        return false;
-                    });
-                }
-
-                if (this.filterText.length > 2) {
-                    let regex = new RegExp(this.filterText, "i");
-                    events = events.filter(event => {
-                        let str = [event.note, event.caregiver, event.client].join( "|" );
-                        return regex.test(str);
-                    })
-                }
-
-                return events;
-            },
-
             eventsUrl() {
-                if (!this.filtersReady) {
+                if (!this.filtersReady || !this.end) {
                     return '';
                 }
 
@@ -243,13 +217,93 @@
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
             },
 
-            resourcesLoaded() {
-                return this.eventsLoaded && this.caregiversLoaded && this.clientsLoaded;
+            config() {
+                return {
+                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
+                    nowIndicator: true,
+                    resourceAreaWidth: '280px',
+                    resourceColumns: [
+                        {
+                            labelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
+                            field: 'title',
+                        },
+                        {
+                            labelText: 'S',
+                            field: 'scheduled',
+                            width: '30px',
+                        },
+                        {
+                            labelText: 'C',
+                            field: 'completed',
+                            width: '30px',
+                        },
+                        {
+                            labelText: 'P',
+                            field: 'projected',
+                            width: '30px',
+                        }
+                    ],
+                    views: {
+                        timelineWeek: {
+                            slotDuration: '24:00'
+                        },
+                    },
+                    customButtons: {
+                        caregiverView: {
+                            text: this.caregiverView ? 'Client View' : 'Caregiver View',
+                            click: this.caregiverViewToggle
+                        },
+                        fullscreen: {
+                            text: ' ',
+                            click: this.fullscreenToggle
+                        },
+                        print: {
+                            text: ' ',
+                            click: this.printCalendar
+                        }
+                    },
+                }
             },
 
-            resources() {
-                if (!this.resourcesLoaded) return [];
+            filteredEvents() { return this.getFilteredEvents(); },
 
+            kpis() { return this.getKpis(); },
+
+            resources() { return this.getResources(); },
+
+        },
+
+        methods: {
+
+            getFilteredEvents() {
+                let events = this.events;
+
+                if (this.statusFilters.length) {
+                    events = events.filter(event => {
+                        if (this.statusFilters.includes(event.status)) {
+                            return true;
+                        }
+
+                        if (this.statusFilters.includes('OPEN') && event.caregiver_id == 0) {
+                            return true;
+                        }
+
+                        return false;
+                    });
+                }
+
+                if (this.filterText.length > 2) {
+                    let regex = new RegExp(this.filterText, "i");
+                    events = events.filter(event => {
+                        let str = [event.note, event.caregiver, event.client].join( "|" );
+                        return regex.test(str);
+                    })
+                }
+
+                return events;
+            },
+
+            getResources() {
                 let items = this.clients;
                 this.resourceIdField = 'client_id';
 
@@ -259,16 +313,24 @@
                 }
 
                 let resources = items.map(item => {
+                    let kpis = this.getKpis(this.resourceIdField, item.id);
                     return {
                         id: item.id,
-                        title: item.nameLastFirst
+                        title: item.nameLastFirst,
+                        scheduled: kpis.OK.hours.toFixed(0),
+                        completed: kpis.COMPLETED.hours.toFixed(0),
+                        projected: kpis.PROJECTED.hours.toFixed(0),
                     };
                 });
 
                 if (this.caregiverView) {
+                    let openkpis = this.getKpis(this.resourceIdField, 0);
                     resources.unshift({
                         id: 0,
                         title: 'Open Shifts',
+                        scheduled: openkpis.OK.hours.toFixed(0),
+                        completed: openkpis.COMPLETED.hours.toFixed(0),
+                        projected: openkpis.PROJECTED.hours.toFixed(0),
                     });
                 }
 
@@ -280,7 +342,13 @@
                 });
             },
 
-            kpis() {
+            getKpis(matchColumn=null, matchValue=null) {
+
+                let events = this.filteredEvents;
+                if (matchColumn) {
+                    events = events.filter(event => event[matchColumn] == matchValue);
+                }
+
                 let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELLED', 'CAREGIVER_CANCELLED', 'CANCELLED', 'OPEN'];
                 let kpis = {};
 
@@ -291,7 +359,7 @@
                     }
                 }
 
-                kpis = this.filteredEvents.reduce((totals, event) => {
+                kpis = events.reduce((totals, event) => {
                     const calc = function (status) {
                         totals[status] = {
                             hours: totals[status].hours + (event.duration / 60),
@@ -325,37 +393,6 @@
                 return kpis;
             },
 
-            config() {
-                return {
-                    nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
-                    nowIndicator: true,
-                    resourceLabelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
-                    resourceAreaWidth: '250px',
-                    views: {
-                        timelineWeek: {
-                            slotDuration: '24:00'
-                        },
-                    },
-                    customButtons: {
-                        caregiverView: {
-                            text: this.caregiverView ? 'Client View' : 'Caregiver View',
-                            click: this.caregiverViewToggle
-                        },
-                        fullscreen: {
-                            text: ' ',
-                            click: this.fullscreenToggle
-                        },
-                        print: {
-                            text: ' ',
-                            click: this.printCalendar
-                        }
-                    },
-                }
-            },
-        },
-
-        methods: {
-
             saveScrollPosition() {
                 this.scroll = {
                     top: $(window).scrollTop(),
@@ -385,7 +422,7 @@
             onLoadView(view, element) {
                 this.start = view.start.format('YYYY-MM-DD');
                 this.end = view.end.format('YYYY-MM-DD');
-                this.fetchEvents();
+                // Events will be fetched if end date changes due to the end watch
             },
 
             loadKpiToolbar() {
@@ -410,7 +447,6 @@
                     return;
                 }
                 savePosition ? this.saveScrollPosition() : this.clearScrollPosition();
-                this.events = [];
                 this.loading = true;
                 axios.get(this.eventsUrl)
                     .then( ({ data }) => {
@@ -576,7 +612,8 @@
 
             caregiverViewToggle() {
                 this.caregiverView = !this.caregiverView;
-                this.$refs.calendar.$emit('rerender-events');
+                $('.fc-caregiverView-button').text(this.caregiverView ? 'Client View' : 'Caregiver View');
+                this.fetchEvents();
             },
 
             printCalendar() {
@@ -589,21 +626,15 @@
 
         watch: {
             filterCaregiverId(val) {
-                this.fetchEvents();
                 if (this.rememberFilters) {
                     this.setLocalStorage('caregiver', val);
                 }
             },
 
             filterClientId(val) {
-                this.fetchEvents();
                 if (this.rememberFilters) {
                     this.setLocalStorage('client', val);
                 }
-            },
-
-            filtersReady(val) {
-                if (val) this.fetchEvents();
             },
 
             resetScrollPosition(val, old) {
@@ -621,7 +652,11 @@
 
             statusFilters(val) {
                 this.allStatuses = val.length ? 0 : 1;
-            }
+            },
+
+            eventsUrl(val, old) {
+                this.fetchEvents();
+            },
         },
 
         mixins: [ManageCalendar, LocalStorage, FormatsNumbers]
@@ -670,6 +705,12 @@
     z-index: 101;
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
+}
+.fc-resource-area .fc-cell-content {
+    padding-left: 2px; padding-right: 2px;
+}
+.fc-resource-area .fc-widget-content:not(:first-child) .fc-cell-content {
+    overflow: visible;
 }
 .badge.scheduled { background-color: #1c81d9; }
 .badge.clocked_in { background-color: #27c11e; }
