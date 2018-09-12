@@ -23,8 +23,9 @@ class NachaAchController extends Controller
     }
 
     public function generate(Request $request) {
-        $this->setup();
+        $this->setup($request->all());
         $batch = $this->getBatch($request->all());
+
 
         $this->file->addBatch($batch);
         $output = (string)$this->file;
@@ -40,50 +41,62 @@ class NachaAchController extends Controller
         return response()->json($data, $code);
     }
 
-    private function setup() {
+    private function setup($data) {
         $this->file = new File();
-        $this->file->getHeader()->setPriorityCode(1)
-            ->setImmediateDestination('051000033')
-            ->setImmediateOrigin('059999997')
-            ->setFileCreationDate('060210')
-            ->setFileCreationTime('2232')
+        $this->file->getHeader()
+            ->setPriorityCode('01')
+            ->setImmediateDestination($data['fh_immediate_destination'])
+            ->setImmediateOrigin($data['fh_immediate_origin'])
+            ->setFileCreationDate(date('ymd'))
+            ->setFileCreationTime(date('Hi'))
+            ->setFileIdModifier('A')
+            ->setRecordSize('094')
+            ->setBlockingFactor('10')
             ->setFormatCode('1')
-            ->setImmediateDestinationName('ImdDest Name')
-            ->setImmediateOriginName('ImdOriginName')
-            ->setReferenceCode('Reference');
+            ->setImmediateDestinationName($data['fh_immediate_destination_name'])
+            ->setImmediateOriginName($data['fh_immediate_origin_name'])
+            ->setReferenceCode('ACH');
     }
 
     private function getBatch($data, $addendum = true) {
         $batch = new Batch();
         $batch->getHeader()
-            ->setCompanyName('TESTING')
-            ->setCompanyDiscretionaryData('INCLUDES OVERTIME')
-            ->setCompanyId('1419871234')
+            ->setServiceClassCode($data['bh_service_class_code'])
+            ->setCompanyName($data['bh_company_name'])
+            ->setCompanyDiscretionaryData('')
+            ->setCompanyId($data['fh_immediate_origin'])
             ->setStandardEntryClassCode('PPD')
-            ->setCompanyEntryDescription('PAYROLL')
-            ->setCompanyDescriptiveDate('0602')
-            ->setEffectiveEntryDate('0112')
+            ->setCompanyEntryDescription($data['bh_company_entry_description'])
+            ->setCompanyDescriptiveDate(date('ymd'))
+            ->setEffectiveEntryDate(date('ymd'))
             ->setOriginatorStatusCode('1')
-            ->setOriginatingDFiId('01021234');
+            ->setOriginatingDFiId($data['bh_originating_DFI_ID'])
+            ->setBatchNumber('');
 
-        $entry = (new DebitEntry)
-            ->setTransactionCode(TransactionCode::CHECKING_DEBIT)
-            ->setReceivingDfiId('09101298')
-            ->setCheckDigit(7)
-            ->setDFiAccountNumber($data['accountNumber'])
-            ->setAmount($data['amount'])
-            ->setIndividualId('test id')
-            ->setIdividualName('Test name')
-            ->setDiscretionaryData('S')
-            ->setAddendaRecordIndicator(0)
-            ->setTraceNumber('99936340', 1);
+        if(isset($data['details']) && !empty($data['details'])) {
+            foreach($data['details'] as $detail) {
+                $entry = (new DebitEntry)
+                    ->setTransactionCode(TransactionCode::CHECKING_DEBIT)
+                    ->setReceivingDfiId(substr($data['fh_immediate_destination'], 0, 8))
+                    ->setCheckDigit(substr($data['fh_immediate_destination'], -1))
+                    ->setDFiAccountNumber($detail['ppded_DFI_account_number'])
+                    ->setAmount($detail['ppded_amount'])
+                    ->setIndividualId($detail['ppded_individual_identification_number'])
+                    ->setDiscretionaryData('')
+                    ->setIdividualName($detail['ppded_individual_name'])
+                    ->setAddendaRecordIndicator(1)
+                    ->setTraceNumber('99936340', 1);
 
-        if ($addendum) {
-            $entry->addAddenda((new Addenda)
-                ->setPaymentRelatedInformation(''));
+                if ($addendum) {
+                    $entry->addAddenda((new Addenda)
+                        ->setPaymentRelatedInformation(''));
+                }
+
+                $batch->addEntry($entry);
+            }
+
         }
 
-        $batch->addEntry($entry);
         return $batch;
     }
 }

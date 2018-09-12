@@ -25,6 +25,9 @@ Vue.use(BootstrapVue);
 import VueTheMask from 'vue-the-mask';
 Vue.use(VueTheMask);
 
+import VeeValidate from 'vee-validate'
+Vue.use(VeeValidate);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
