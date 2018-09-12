@@ -1,5 +1,5 @@
 <template>
-    <b-card>
+    <b-card id="schedule-card">
         <b-row>
             <b-col md="7">
                 <b-row>
@@ -83,6 +83,7 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             @events-reloaded="loadKpiToolbar"
+            @event-mouseover="hover"
             :loading="loading"
         />
 
@@ -116,6 +117,49 @@
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
 
+        <div v-show="preview" 
+            id="preview" 
+            class="preview-window" 
+            :style="{ top: previewTop, left: previewLeft }"
+        >
+            <div class="d-flex">
+                <div class="f-1">
+                    <h4 v-if="hoverShift.caregiver_name"><a :href="`/business/caregivers/${hoverShift.caregiver_id}`">{{ hoverShift.caregiver_name }}</a></h4>
+                    <h4 v-else>OPEN</h4>
+                </div>
+                <div class="ml-auto" v-if="hoverShift.client_address">
+                    <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
+                </div>
+            </div>
+            <div>
+                <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
+                <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
+                <span>{{ hoverShift.caregiver_email }}</span>
+            </div>
+            <div class="my-2">
+                <b-btn variant="success" @click="editFromPreview()" size="xs"><i class="fa fa-edit"></i> Edit</b-btn>
+                <!-- <b-btn variant="primary" @click="copySchedule()" class="ml-2" size="xs"><i class="fa fa-copy"></i> Copy</b-btn> -->
+                <b-btn variant="danger" @click="deleteSchedule()" class="ml-2" size="xs"><i class="fa fa-times"></i> Delete</b-btn>
+            </div>
+            <div>
+                <span><strong>Dates:</strong> {{ formatDate(hoverShift.start_date) }} {{ formatTime(hoverShift.start_date) }} - {{ formatDate(hoverShift.end_date) }} {{ formatTime(hoverShift.end_date) }}</span>
+            </div>
+            <div>
+                <label for="hover_status"><strong>Status:</strong></label>
+                <b-form-select
+                    id="hover_status"
+                    name="hover_status"
+                    v-model="hoverShift.status"
+                    @change="updateStatus"
+                >
+                    <option value="OK">No Status</option>
+                    <option value="CLIENT_CANCELED">Client Cancelled</option>
+                    <option value="CAREGIVER_CANCELED">Caregiver Cancelled</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                </b-form-select>
+            </div>
+        </div>
+
         <iframe id="printFrame" width="0" height="0" src="/calendar-print.html">
         </iframe>
     </b-card>
@@ -124,6 +168,7 @@
 <script>
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
+    import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
@@ -170,10 +215,12 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
-
-                // filteredEvents: [],
-                // kpis: [],
-                // resources: [],
+                test: 'yeaaaaaaaaaa',
+                previewTop: 0,
+                previewLeft: 0,
+                preview: false,
+                hoverShift: {client: {}},
+                hoverTarget: '',
             }
         },
 
@@ -393,6 +440,127 @@
                 return kpis;
             },
 
+            updateStatus(val) {
+                if (this.hoverShift.id) {
+                    let url = `/business/schedule/${this.hoverShift.id}/status`;
+                    // this.busy = true;
+                    let form = new Form({
+                        id: this.hoverShift.id,
+                        status: val,
+                    });
+
+                    form.patch(url)
+                        .then(response => {
+                            // this.$emit('updateEvent', this.form.id, response.data.data);
+                            // this.showModal = false;
+                            this.fetchEvents(true);
+                            // this.busy = false;
+                        })
+                        .catch(e => {
+                            // this.busy = false;
+                        });
+                }
+            },
+
+            editFromPreview() {
+                axios.get('/business/schedule/' + this.hoverShift.id)
+                    .then(response => {
+                        this.selectedSchedule = response.data;
+                        this.scheduleModal = true;
+                    })
+                    .catch(function(error) {
+                        alert('Error loading schedule details');
+                    });
+                this.hidePreview();
+            },
+
+            deleteSchedule() {
+                if (this.hoverShift.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                    let form = new Form();
+                    form.submit('delete', '/business/schedule/' + this.hoverShift.id)
+                        .then(response => {
+                            this.fetchEvents(true);
+                        });
+                }
+            },
+
+            // copySchedule() {
+            //     axios.get('/business/schedule/' + this.hoverShift.id)
+            //         .then(response => {
+            //             this.selectedSchedule = response.data;
+            //             this.scheduleModal = true;
+            //         })
+            //         .catch(function(error) {
+            //             alert('Error loading schedule details');
+            //         });
+            //     this.hidePreview();
+            // },
+
+            hover(event, jsEvent, view) {
+                let target = null;
+
+                if ($(jsEvent.currentTarget).is('a')) {
+                    target = $(jsEvent.currentTarget);
+                } else {
+                    target = $(jsEvent.currentTarget).parent('a');
+                }
+                let vm = this;
+
+                this.showPreview(event, target, vm);
+            },
+
+            showPreview: _.debounce((event, target, vm) => {
+                axios.get('/business/schedule/' + event.id + '/preview')
+                    .then(response => {
+                        vm.hoverShift = response.data;
+                        vm.showPopup(target, event.id);
+                    })
+                    .catch(function(error) {
+                        vm.hoverShift = null;
+                    });
+            }, 350),
+
+            showPopup(target, shift_id) {
+                this.hoverTarget = target;
+
+                this.previewLeft = (this.hoverTarget.offset().left - $('#schedule-card').offset().left) + "px";
+                this.previewTop = (this.hoverTarget.offset().top + this.hoverTarget.height() - $('#schedule-card').offset().top) + "px";
+                this.preview = true;
+
+                let vm = this;
+
+                Vue.nextTick()
+                .then(() => {
+                    var body = document.getElementsByTagName('body');
+                    var eventRect = this.hoverTarget.get(0).getBoundingClientRect();
+                    var divRect = document.getElementById('preview').getBoundingClientRect();
+
+                    let handler = function(e) {
+                        if (vm.hoverShift.id == shift_id) {
+                            let extra = 5;
+                            if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
+                                e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
+                                    return;
+                            } 
+
+                            if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
+                                e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
+                                    return;
+                            }
+                        }
+                        
+                        vm.preview = false;
+                        document.body.removeEventListener('mousemove', handler);
+                    }
+                    document.body.addEventListener('mousemove', handler, false);
+                });
+            },
+
+            hidePreview() {
+                this.hoverShift = {};
+                this.preview = false;
+            },
+
             saveScrollPosition() {
                 this.scroll = {
                     top: $(window).scrollTop(),
@@ -530,6 +698,8 @@
                 let vm = this;
                 note.click((e) => {
                     vm.selectedEvent = event;
+                    this.preview = false;
+                    this.hoverShift = {client:{}},
                     vm.notesModal = true;
                     e.preventDefault();
                     e.stopPropagation();
@@ -659,7 +829,7 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsNumbers]
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers],
     }
 </script>
 
@@ -718,6 +888,15 @@
 .badge.unconfirmed { background-color: #D0C3D3; }
 .badge.client_cancelled { background-color: #d91c4e; }
 .badge.cg_cancelled { background-color: #d9c01c; }
+
+.preview-window {
+  z-index: 9999!important;
+  position: absolute;
+  background-color: #fff;
+  padding: 1em;
+  border: 1px solid #456789;
+  width: 450px;
+}
 </style>
 
 <style scoped>
@@ -725,4 +904,5 @@
     .statusFilters input {
         display: none;
     }
+    
 </style>

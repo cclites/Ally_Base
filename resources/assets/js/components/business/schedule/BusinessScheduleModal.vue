@@ -10,7 +10,7 @@
         >
             <b-card no-body>
                 <b-tabs card v-model="activeTab">
-                    <b-tab title="Initial Shift" id="schedule-main">
+                    <b-tab title="Shift Details" id="schedule-main">
                         <b-row>
                             <b-col sm="6">
                                 <b-form-group label="Client" label-for="client_id">
@@ -33,7 +33,7 @@
                                             {{ toggleCaregiversLabel }}
                                         </b-btn>
                                     </div>
-                                    <label for="caregiver_id">Assigned Caregiver</label>
+                                    <label for="caregiver_id">Referred Caregiver</label>
                                     <b-form-select
                                             id="caregiver_id"
                                             name="caregiver_id"
@@ -76,12 +76,14 @@
                                     <input-help :form="form" field="provider_fee" text="Enter the hourly fee charged by the provider." />
                                 </b-form-group>
                             </b-col>
-                            <b-col sm="12">
-                                Payment Type: {{ paymentType }} ({{ displayAllyPct }}% Processing Fee)
-                            </b-col>
                             <b-col sm="6">
                                 <b-form-group label="Ally Fee" label-for="ally_fee">
-                                    {{ allyFee }}
+                                    <div v-if="allyFee">
+                                        {{ allyFee }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
+                                    </div>
+                                    <div v-else>
+                                        Enter Caregiver and Provider Rates
+                                    </div>
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
@@ -128,24 +130,21 @@
                         </b-row>
                         <b-row>
                             <b-col sm="6">
-                                <b-form-group label="Special Shift Designation" label-for="hours_type">
-                                    <b-form-select
-                                            id="hours_type"
-                                            name="hours_type"
-                                            v-model="form.hours_type"
-                                    >
-                                        <option value="default">Regular Shift</option>
-                                        <option value="holiday">Holiday</option>
-                                        <option value="overtime">Overtime</option>
-                                    </b-form-select>
+                                <b-form-group label="Shift Designation" label-for="hours_type">
+                                    <b-form-radio-group id="hours_type" v-model="form.hours_type" name="hours_type">
+                                        <b-form-radio value="default">Regular</b-form-radio>
+                                        <b-form-radio value="holiday">Holiday</b-form-radio>
+                                        <b-form-radio value="overtime">Overtime</b-form-radio>
+                                    </b-form-radio-group>
+                                    
                                     <input-help :form="form" field="hours_type" text="" />
                                     <small class="form-text text-info" v-if="specialHoursChange">
-                                        Be sure to update the caregiver's rates to reflect this special designation.
+                                        Be sure to update the caregiver's rates to reflect this designation.
                                     </small>
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Care Plan" label-for="care_plan_id">
+                                <b-form-group label="Care Plan Requested by Client" label-for="care_plan_id">
                                     <b-form-select
                                             id="care_plan_id"
                                             name="care_plan_id"
@@ -342,7 +341,7 @@
                 let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
                 if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
-                    return 'Enter Caregiver and Provider Rates'
+                    return false;
                 }
                 let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
                 return allyFee.toFixed(2);
