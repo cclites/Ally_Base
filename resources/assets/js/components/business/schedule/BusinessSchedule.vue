@@ -11,12 +11,6 @@
                 </b-row>
                 <b-row>
                     <b-col class="mt-3">
-                        <strong>Hours Assigned | Open: </strong> {{ kpis.assigned_hours }} | {{ kpis.unassigned_hours }}<br/>
-                        <strong>Open Shifts: </strong> {{ kpis.unassigned_shifts }}
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col class="mt-3">
                         <div class="form-control icon-control">
                             <i class="fa fa-search"></i>
                             <input type="text"
@@ -89,6 +83,7 @@
             @event-selected="editSchedule"
             @event-render="renderEvent"
             @view-render="onLoadView"
+            @events-reloaded="loadKpiToolbar"
             :loading="loading"
             v-else
         />
@@ -131,6 +126,7 @@
 <script>
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
 
     export default {
         props: {
@@ -165,11 +161,6 @@
                 events: [],
                 start: '',
                 end: '',
-                kpis: {
-                    assigned_hours: 0,
-                    unassigned_hours: 0,
-                    unassigned_shifts: 0,
-                },
                 localStoragePrefix: 'business_schedule_',
                 resetScrollPosition: false,
                 scroll: { top: null, left: null },
@@ -289,6 +280,51 @@
                 });
             },
 
+            kpis() {
+                let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELLED', 'CAREGIVER_CANCELLED', 'CANCELLED', 'OPEN'];
+                let kpis = {};
+
+                for (let status of statuses) {
+                    kpis[status] = {
+                        hours: 0,
+                        shifts: 0
+                    }
+                }
+
+                kpis = this.filteredEvents.reduce((totals, event) => {
+                    const calc = function (status) {
+                        totals[status] = {
+                            hours: totals[status].hours + (event.duration / 60),
+                            shifts: totals[status].shifts + 1
+                        }
+                    };
+
+                    calc(event.status);
+                    if (event.caregiver_id == 0) {
+                        calc('OPEN');
+                    }
+
+                    return totals;
+                }, kpis);
+
+                kpis['COMPLETED'] = {
+                    hours: kpis.CONFIRMED.hours + kpis.UNCONFIRMED.hours,
+                    shifts: kpis.CONFIRMED.shifts + kpis.UNCONFIRMED.shifts
+                };
+
+                kpis['PROJECTED'] = {
+                    hours: kpis.COMPLETED.hours + kpis.CLOCKED_IN.hours + kpis.OK.hours,
+                    shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.OK.shifts
+                };
+
+                kpis['CANCELLED'] = {
+                    hours: kpis.CLIENT_CANCELLED.hours + kpis.CAREGIVER_CANCELLED.hours,
+                    shifts: kpis.CLIENT_CANCELLED.shifts + kpis.CAREGIVER_CANCELLED.shifts
+                };
+
+                return kpis;
+            },
+
             config() {
                 return {
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
@@ -319,6 +355,7 @@
         },
 
         methods: {
+
             saveScrollPosition() {
                 this.scroll = {
                     top: $(window).scrollTop(),
@@ -349,14 +386,23 @@
                 this.start = view.start.format('YYYY-MM-DD');
                 this.end = view.end.format('YYYY-MM-DD');
                 this.fetchEvents();
-                this.loadKpiToolbar();
             },
 
             loadKpiToolbar() {
                 let $toolbar = $('.fc-toolbar .fc-center');
                 let $element = $toolbar.find('h6');
                 if (!$element.length) $element = $toolbar.append('<h6/>').find('h6');
-                $element.html(`Scheduled Hours: 555 &nbsp; Completed Hours: 762 &nbsp; Projected Hours: 1243`)
+
+                let formatHours = (status) => this.numberFormat(this.kpis[status].hours);
+                let formatShifts = (status) => parseInt(this.kpis[status].shifts);
+
+                $element.html(`
+                Scheduled: ${formatHours('OK')} (${formatShifts('OK')}) &nbsp;
+                Completed: ${formatHours('COMPLETED')} (${formatShifts('COMPLETED')}) &nbsp;
+                Projected: ${formatHours('PROJECTED')} (${formatShifts('PROJECTED')}) &nbsp;
+                Cancelled: ${formatHours('CANCELLED')} (${formatShifts('CANCELLED')}) &nbsp;
+                Open: ${formatHours('OPEN')} (${formatShifts('OPEN')}) &nbsp;
+                `);
             },
 
             fetchEvents(savePosition = false) {
@@ -372,7 +418,7 @@
                             event.resourceId = event[this.resourceIdField];
                             return event;
                         });
-                        this.kpis = data.kpis;
+                        // this.kpis = data.kpis;
                         this.eventsLoaded = true;
                         this.loading = false;
                     })
@@ -578,7 +624,7 @@
             }
         },
 
-        mixins: [ManageCalendar, LocalStorage]
+        mixins: [ManageCalendar, LocalStorage, FormatsNumbers]
     }
 </script>
 

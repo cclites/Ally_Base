@@ -178,6 +178,7 @@
             this.$on('reload-events', () => {
                 $(this.$el).fullCalendar('removeEvents')
                 $(this.$el).fullCalendar('addEventSource', this.events)
+                this.$emit('events-reloaded');
             })
 
             this.$on('rebuild-sources', () => {
@@ -219,8 +220,7 @@
             events: {
                 deep: true,
                 handler(val) {
-                    $(this.$el).fullCalendar('removeEventSources')
-                    $(this.$el).fullCalendar('addEventSource', this.events)
+                    this.$emit('reload-events');
                 },
             },
             eventSources: {
