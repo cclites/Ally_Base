@@ -80,6 +80,7 @@
 
         data() {
             return {
+                currentView: this.defaultView,
             }
         },
 
@@ -88,20 +89,23 @@
                 const self = this;
                 return {
                     header: this.header,
-                    defaultView: this.defaultView,
+                    defaultView: this.currentView,
                     editable: this.editable,
                     selectable: this.selectable,
                     selectHelper: this.selectHelper,
                     aspectRatio: 2,
                     timeFormat: 'h:mma',
                     timezone: false, // keep timezone sent from server
-                    resources: this.resources,
                     events: this.events,
                     eventSources: this.eventSources,
                     allDaySlot: false,
                     weekNumberCalculation: 'iso',
                     renderHtml: false,
                     height: 'auto',
+
+                    resources(callback, start, end, timezone) {
+                        callback(self.resources);
+                    },
 
                     eventRender(...args) {
                         if (this.sync) {
@@ -137,6 +141,7 @@
                     },
 
                     viewRender(...args) {
+                        this.currentView = args[0].name;
                         self.$emit('view-render', ...args)
                     },
 
@@ -155,7 +160,7 @@
                     },
 
                     loading(isLoading) {
-                        self.loading = isLoading;
+                        self.$emit('update:loading', isLoading);
                     }
                 }
             },
@@ -238,8 +243,7 @@
                 },
             },
             resources() {
-                this.destroyCalendar();
-                this.createCalendar();
+                $(this.$el).fullCalendar('refetchResources');
             }
         },
 
