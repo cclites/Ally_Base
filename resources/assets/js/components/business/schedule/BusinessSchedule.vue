@@ -43,10 +43,10 @@
                             <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary">Open Shift</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELLED"> <span class="badge badge-primary client_cancelled">Client Cancelled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Cancelled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_cancelled">CG Cancelled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Cancelled</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -396,7 +396,7 @@
                     events = events.filter(event => event[matchColumn] == matchValue);
                 }
 
-                let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELLED', 'CAREGIVER_CANCELLED', 'CANCELLED', 'OPEN'];
+                let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED', 'CANCELED', 'OPEN'];
                 let kpis = {};
 
                 for (let status of statuses) {
@@ -432,9 +432,9 @@
                     shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.OK.shifts
                 };
 
-                kpis['CANCELLED'] = {
-                    hours: kpis.CLIENT_CANCELLED.hours + kpis.CAREGIVER_CANCELLED.hours,
-                    shifts: kpis.CLIENT_CANCELLED.shifts + kpis.CAREGIVER_CANCELLED.shifts
+                kpis['CANCELED'] = {
+                    hours: kpis.CLIENT_CANCELED.hours + kpis.CAREGIVER_CANCELED.hours,
+                    shifts: kpis.CLIENT_CANCELED.shifts + kpis.CAREGIVER_CANCELED.shifts
                 };
 
                 return kpis;
@@ -605,7 +605,7 @@
                 Scheduled: ${formatHours('OK')} (${formatShifts('OK')}) &nbsp;
                 Completed: ${formatHours('COMPLETED')} (${formatShifts('COMPLETED')}) &nbsp;
                 Projected: ${formatHours('PROJECTED')} (${formatShifts('PROJECTED')}) &nbsp;
-                Cancelled: ${formatHours('CANCELLED')} (${formatShifts('CANCELLED')}) &nbsp;
+                Cancelled: ${formatHours('CANCELED')} (${formatShifts('CANCELED')}) &nbsp;
                 Open: ${formatHours('OPEN')} (${formatShifts('OPEN')}) &nbsp;
                 `);
             },
@@ -886,8 +886,8 @@
 .badge.clocked_in { background-color: #27c11e; }
 .badge.confirmed { background-color: #849290; }
 .badge.unconfirmed { background-color: #D0C3D3; }
-.badge.client_cancelled { background-color: #d91c4e; }
-.badge.cg_cancelled { background-color: #d9c01c; }
+.badge.client_canceled { background-color: #d91c4e; }
+.badge.cg_canceled { background-color: #d9c01c; }
 
 .preview-window {
   z-index: 9999!important;
