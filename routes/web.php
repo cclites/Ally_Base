@@ -232,6 +232,9 @@ Route::group([
     Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 
     Route::resource('questions', 'Business\QuestionController');
+
+    /*Quickbooks*/
+    Route::get('quickbooks', 'Business\QuickbooksController@index')->name('quickbooks.index');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
@@ -334,8 +337,6 @@ Route::group([
     /*Nacha Ach*/
     Route::get('nacha-ach', 'Admin\NachaAchController@index')->name('nacha_ach');
     Route::post('nacha-ach/generate', 'Admin\NachaAchController@generate')->name('nacha_ach.generate');
-
-
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

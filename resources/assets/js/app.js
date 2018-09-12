@@ -26,7 +26,7 @@ import VueTheMask from 'vue-the-mask';
 Vue.use(VueTheMask);
 
 import VeeValidate from 'vee-validate'
-Vue.use(VeeValidate);
+Vue.use(VeeValidate, {fieldsBagName: '_fields'});
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -215,6 +215,14 @@ Vue.component('question-form', require('./components/business/QuestionForm'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
+
+/* Quickbooks */
+Vue.component('quickbooks', require('./components/business/quickbooks/Quickbooks'));
+Vue.component('quickbooks-setup', require('./components/business/quickbooks/tabs/Setup'));
+Vue.component('quickbooks-general-mapping', require('./components/business/quickbooks/tabs/GeneralMapping'));
+Vue.component('quickbooks-rate-mapping', require('./components/business/quickbooks/tabs/RateMapping'));
+Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
+Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
 
 
 

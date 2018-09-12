@@ -73,5 +73,6 @@
         <li><a href="{{ route('business.settings.index') }}">General</a></li>
         <li><a href="{{ route('business.settings.bank_accounts.index') }}">Bank Accounts</a></li>
         <li><a href="{{ route('business.activities.index') }}">Activities</a></li>
+        <li><a href="{{ route('business.quickbooks.index') }}">Quickbooks</a></li>
     </ul>
 </li>
