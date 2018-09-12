@@ -123,4 +123,22 @@ class Address extends Model implements Auditable
         $geocode = $address->getGeocode();
         return $this->distanceTo($geocode->latitude, $geocode->longitude, $units);
     }
+
+    /**
+     * Get full address string
+     *
+     * @return string
+     */
+    public function getFullAddressAttribute()
+    {
+        $fullAddress = $this->address1;
+
+        if (!empty($this->address2)) {
+            $fullAddress .= ' ' . $this->address2;
+        }
+
+        $fullAddress .= ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+
+        return $fullAddress;
+    }
 }

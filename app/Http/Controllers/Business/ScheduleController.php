@@ -24,7 +24,6 @@ use App\Client;
 
 class ScheduleController extends BaseController
 {
-
     public function index()
     {
         return view('business.schedule', ['business' => $this->business()]);
@@ -40,7 +39,7 @@ class ScheduleController extends BaseController
         }
         if ($caregiver_id = $request->input('caregiver_id')) {
             $aggregator->where('caregiver_id', $caregiver_id);
-        } elseif ($request->input('caregiver_id') === "0") {
+        } elseif ($request->input('caregiver_id') === '0') {
             $aggregator->where('caregiver_id', null);
         }
 
@@ -54,7 +53,7 @@ class ScheduleController extends BaseController
         );
 
         $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
-        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
         return [
             'kpis' => $events->kpis(),
@@ -88,7 +87,7 @@ class ScheduleController extends BaseController
      * @throws \Exception
      */
     public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
-    {        
+    {
         if (!$this->businessHasClient($request->client_id)) {
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
@@ -106,8 +105,7 @@ class ScheduleController extends BaseController
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
-        }
-        else if ($request->hours_type == 'holiday') {
+        } elseif ($request->hours_type == 'holiday') {
             $creator->holiday($request->overtime_duration);
         }
 
@@ -137,11 +135,9 @@ class ScheduleController extends BaseController
                 }
                 return new CreatedResponse('The scheduled shift has been created.');
             }
-        }
-        catch (MaximumWeeklyHoursExceeded $e) {
+        } catch (MaximumWeeklyHoursExceeded $e) {
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
-        }
-        catch (InvalidScheduleParameters $e) {
+        } catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
         }
 
@@ -174,10 +170,10 @@ class ScheduleController extends BaseController
         $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
         $client = Client::find($schedule->client_id);
         if (!$request->override_max_hours && $newTotalHours > $client->max_weekly_hours) {
-            $e = new MaximumWeeklyHoursExceeded('The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.');        
+            $e = new MaximumWeeklyHoursExceeded('The week of ' . $schedule->starts_at->toDateString() . ' exceeds the maximum allowed hours for this client.');
             return new ErrorResponse($e->getStatusCode(), $e->getMessage());
         }
-        
+
         $notes = $request->input('notes');
 
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->daily_rates);
@@ -186,8 +182,7 @@ class ScheduleController extends BaseController
             if (strlen($notes)) {
                 $note = ScheduleNote::create(['note' => $notes]);
                 $schedule->attachNote($note);
-            }
-            else {
+            } else {
                 $schedule->deleteNote();
             }
         }
@@ -239,34 +234,36 @@ class ScheduleController extends BaseController
         if ($schedule->shifts->count()) {
             return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
         }
-        
+
         // update notes
-        $notes = request()->notes;
-        if ($schedule->notes != $notes) {
-            if (strlen($notes)) {
-                $note = ScheduleNote::create(['note' => $notes]);
-                $schedule->attachNote($note);
+        if (request()->has('notes')) {
+            $notes = request()->notes;
+            if ($schedule->notes != $notes) {
+                if (strlen($notes)) {
+                    $note = ScheduleNote::create(['note' => $notes]);
+                    $schedule->attachNote($note);
+                } else {
+                    $schedule->deleteNote();
+                }
+                // Refresh the note relationship
+                $schedule->load('note');
             }
-            else {
-                $schedule->deleteNote();
-            }
-            // Refresh the note relationship
-            $schedule->load('note');
         }
 
         // set status
         $status = request()->status;
-        if (! in_array($status, [
+        if (!in_array($status, [
             Schedule::OK,
             Schedule::CAREGIVER_CANCELED,
             Schedule::CLIENT_CANCELED,
+            Schedule::CONFIRMED,
         ])) {
             $status = Schedule::OK;
         }
         $schedule->update(['status' => $status]);
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
-        $events->setTitleCallback(function(Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
         $data = $events->toArray()[0];
 
         return new SuccessResponse('The schedule has been updated.', $data);
@@ -325,12 +322,11 @@ class ScheduleController extends BaseController
         \DB::beginTransaction();
 
         try {
-            foreach($query->get() as $schedule) {
-
+            foreach ($query->get() as $schedule) {
                 // get week range for schedule
                 $weekStart = $schedule->starts_at->copy()->startOfWeek();
                 $weekEnd = $schedule->starts_at->copy()->endOfWeek();
-                $range = $weekStart->format('Ymd') . "-" . $weekEnd->format('Ymd');
+                $range = $weekStart->format('Ymd') . '-' . $weekEnd->format('Ymd');
                 $weeks[$range] = $weekStart;
 
                 $schedule = $this->updateScheduleWithNewValues($schedule, $request->getUpdateData(), $updatedNotes);
@@ -347,8 +343,7 @@ class ScheduleController extends BaseController
                     }
                 }
             }
-        }
-        catch (MaximumWeeklyHoursExceeded $e) {
+        } catch (MaximumWeeklyHoursExceeded $e) {
             \DB::rollBack();
             return new ConfirmationResponse($e->getMessage());
         }
@@ -368,10 +363,8 @@ class ScheduleController extends BaseController
      */
     public function updateScheduleWithNewValues($schedule, $newData, &$updatedNotes)
     {
-        foreach($newData as $field => $value) {
-
-            switch($field) {
-
+        foreach ($newData as $field => $value) {
+            switch ($field) {
                 case 'new_start_time':
                     $parts = explode(':', $value);
                     $schedule->starts_at = $schedule->starts_at->setTime((int) $parts[0], (int) $parts[1]);
@@ -438,7 +431,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(400, 'No matching schedules could be found.');
         }
 
-        foreach($query->get() as $schedule) {
+        foreach ($query->get() as $schedule) {
             $schedule->delete();
         }
 
@@ -465,7 +458,7 @@ class ScheduleController extends BaseController
 
         $aggregator->where('business_id', $this->business()->id);
         $schedules = $aggregator->getSchedulesBetween($start, $end);
-        $schedules->map(function($schedule) {
+        $schedules->map(function ($schedule) {
             $schedule->date = $schedule->starts_at->format('m/d/Y');
             $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
             return $schedule;
@@ -473,7 +466,8 @@ class ScheduleController extends BaseController
         return view('business.schedule_print', compact('schedules'));
     }
 
-    protected function businessScheduleTitle(Schedule $schedule) {
+    protected function businessScheduleTitle(Schedule $schedule)
+    {
         $clientName = ($schedule->client) ? $schedule->client->name() : 'Unknown Client';
         $caregiverName = ($schedule->caregiver) ? $schedule->caregiver->name() : 'No Caregiver Assigned';
         return $clientName . ' (' . $caregiverName . ')';
@@ -505,19 +499,26 @@ class ScheduleController extends BaseController
 
     public function preview(Schedule $schedule)
     {
-        $data = $schedule->toArray();
+        $data = $schedule->load(['caregiver', 'client'])->toArray();
 
-        $data['caregiver_name'] = $schedule->caregiver->nameLastFirst();
+        if ($schedule->caregiver) {
+            $data['caregiver_name'] = $schedule->caregiver->nameLastFirst();
+            $data['caregiver_email'] = $schedule->caregiver->email;
 
-        $phone = $schedule->caregiver->phoneNumbers()->where('type', 'primary')->first();
-        if (!$phone) {
-            $phone = $schedule->caregiver->phoneNumbers()->first();
+            $phone = $schedule->caregiver->phoneNumbers()->where('type', 'primary')->first();
+            if (!$phone) {
+                $phone = $schedule->caregiver->phoneNumbers()->first();
+            }
+
+            if ($phone) {
+                $data['caregiver_phone'] = $phone->number(true);
+                $data['caregiver_phone_type'] = $phone->type;
+            }
         }
 
-        if ($phone) {
-            $data['caregiver_phone'] = $phone->national_number;
-            $data['caregiver_phone_type'] = $phone->type;
-        }
+        $data['start_date'] = $schedule->starts_at->toDateTimeString();
+        $data['end_date'] = $schedule->starts_at->addMinutes($schedule->duration)->toDateTimeString();
+        $data['client_address'] = optional($schedule->client->evvAddress)->fullAddress;
 
         return response()->json($data);
     }
