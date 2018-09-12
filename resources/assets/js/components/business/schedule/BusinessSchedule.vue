@@ -1,6 +1,5 @@
 <template>
     <b-card id="schedule-card">
-        <a href="#" class="test">WHAT THE FUCK</a>
         <b-row>
             <b-col md="7">
                 <b-row>
