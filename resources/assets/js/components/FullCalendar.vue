@@ -120,6 +120,14 @@
                         self.$emit('event-selected', ...args)
                     },
 
+                    eventMouseover(...args) {
+                        self.$emit('event-mouseover', ...args)
+                    },
+
+                    eventMouseout(...args) {
+                        self.$emit('event-mouseout', ...args)
+                    },
+
                     eventDrop(...args) {
                         self.$emit('event-drop', ...args)
                     },

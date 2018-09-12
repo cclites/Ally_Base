@@ -62,6 +62,8 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             :loading="loading"
+            @event-mouseover="hover"
+            @event-mouseout="hoverOff"
             v-else
         />
 
@@ -94,6 +96,8 @@
                                     :shift="selectedSchedule.clocked_in_shift"
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
+
+        <schedule-item-popup :shift="hoverShift" />
     </b-card>
 </template>
 
@@ -148,6 +152,8 @@
                 clientsLoaded: !!this.client,
                 caregiverView: !!this.client,
                 filterText: '',
+                hoverShift: {},
+                hoverTarget: '',
             }
         },
 
@@ -268,6 +274,42 @@
         },
 
         methods: {
+            hover(event, jsEvent, view) {
+
+                if (! this.hoverTarget) {
+                    this.hoverTarget = jsEvent.target;
+                    this.showPreview(event, jsEvent.target, this);
+                }
+                // console.log(event);
+                // console.log(jsEvent);
+                // console.log(view);
+                // $(jsEvent.target).tooltip({ title: 'test' });
+                // axios.get('/business/schedule/' + event.id)
+                //     .then(response => {
+                //         this.hoverShift = response.data;
+
+                //     })
+                //     .catch(function(error) {
+                //         this.hoverShift = null;
+                //     });
+            },
+
+            showPreview: _.debounce((event, target, vm) => {
+                axios.get('/business/schedule/' + event.id)
+                    .then(response => {
+                        vm.hoverShift = response.data;
+                        $(target).tooltip({ title: 'test' });
+                    })
+                    .catch(function(error) {
+                        vm.hoverShift = null;
+                    });
+            }, 350),
+
+            hoverOff() {
+                this.hoverShift = {};
+                this.hoverTarget = '';
+            },
+
             saveScrollPosition() {
                 this.scroll = {
                     top: $(window).scrollTop(),
