@@ -813,7 +813,7 @@
   background-color: #fff;
   padding: 1em;
   border: 1px solid #456789;
-  width: 550px;
+  width: 450px;
 }
 </style>
 
