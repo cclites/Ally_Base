@@ -1,5 +1,6 @@
 <template>
-    <b-card>
+    <b-card id="schedule-card">
+        <a href="#" class="test">WHAT THE FUCK</a>
         <b-row>
             <b-col md="7">
                 <b-row>
@@ -91,7 +92,6 @@
             @view-render="onLoadView"
             :loading="loading"
             @event-mouseover="hover"
-            @event-mouseout="hoverOff"
             v-else
         />
 
@@ -125,8 +125,14 @@
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
 
-        <schedule-item-popup :shift="hoverShift" />
-        
+        <div v-show="preview" 
+            id="preview" 
+            class="preview-window" 
+            :style="{ top: previewTop, left: previewLeft }"
+        >
+            <h4>{{ hoverShift.client.nameLastFirst }}</h4>
+        </div>
+
         <iframe id="printFrame" width="0" height="0" src="/calendar-print.html">
         </iframe>
     </b-card>
@@ -183,10 +189,14 @@
                 clientsLoaded: !!this.client,
                 caregiverView: !!this.client,
                 filterText: '',
-                hoverShift: {},
-                hoverTarget: '',
                 statusFilters: [],
                 allStatuses: 1,
+                test: 'yeaaaaaaaaaa',
+                previewTop: 0,
+                previewLeft: 0,
+                preview: false,
+                hoverShift: {client: {}},
+                hoverTarget: '',
             }
         },
 
@@ -326,39 +336,68 @@
 
         methods: {
             hover(event, jsEvent, view) {
+                let target = null;
 
-                if (! this.hoverTarget) {
-                    this.hoverTarget = jsEvent.target;
-                    this.showPreview(event, jsEvent.target, this);
+                if ($(jsEvent.currentTarget).is('a')) {
+                    target = $(jsEvent.currentTarget);
+                } else {
+                    target = $(jsEvent.currentTarget).parent('a');
                 }
-                // console.log(event);
-                // console.log(jsEvent);
-                // console.log(view);
-                // $(jsEvent.target).tooltip({ title: 'test' });
-                // axios.get('/business/schedule/' + event.id)
-                //     .then(response => {
-                //         this.hoverShift = response.data;
+                let vm = this;
 
-                //     })
-                //     .catch(function(error) {
-                //         this.hoverShift = null;
-                //     });
+                this.showPreview(event, target, vm);
+
             },
 
             showPreview: _.debounce((event, target, vm) => {
                 axios.get('/business/schedule/' + event.id)
                     .then(response => {
+                        console.log('axios success');
                         vm.hoverShift = response.data;
-                        $(target).tooltip({ title: 'test' });
+                        vm.showPopup(target, event.id);
                     })
                     .catch(function(error) {
                         vm.hoverShift = null;
                     });
             }, 350),
 
-            hoverOff() {
-                this.hoverShift = {};
-                this.hoverTarget = '';
+            showPopup(target, shift_id) {
+                this.hoverTarget = target;
+
+                this.previewLeft = (this.hoverTarget.offset().left - $('#schedule-card').offset().left) + "px";
+                this.previewTop = (this.hoverTarget.offset().top + this.hoverTarget.height() - $('#schedule-card').offset().top) + "px";
+                this.preview = true;
+
+                let vm = this;
+
+                Vue.nextTick()
+                .then(() => {
+                    var body = document.getElementsByTagName('body');
+                    var eventRect = this.hoverTarget.get(0).getBoundingClientRect();
+                    var divRect = document.getElementById('preview').getBoundingClientRect();
+
+                    let handler = function(e) {
+                        if (vm.hoverShift.id == shift_id) {
+                            let extra = 5;
+                            if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
+                                e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
+                                    console.log('inside event');
+                                    return;
+                            } 
+
+                            if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
+                                e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
+                                    console.log('inside popup');
+                                    return;
+                            }
+                        }
+                        
+                        console.log('off');
+                        vm.preview = false;
+                        document.body.removeEventListener('mousemove', handler);
+                    }
+                    document.body.addEventListener('mousemove', handler, false);
+                });
             },
 
             saveScrollPosition() {
@@ -490,6 +529,8 @@
                 let vm = this;
                 note.click((e) => {
                     vm.selectedEvent = event;
+                    this.preview = false;
+                    this.hoverShift = {client:{}},
                     vm.notesModal = true;
                     e.preventDefault();
                     e.stopPropagation();
@@ -673,6 +714,15 @@
 .badge.unconfirmed { background-color: #D0C3D3; }
 .badge.client_cancelled { background-color: #d91c4e; }
 .badge.cg_cancelled { background-color: #d9c01c; }
+
+.preview-window {
+  z-index: 9999!important;
+  position: absolute;
+  background-color: #fff;
+  padding: 1em;
+  border: 1px solid #456789;
+  width: 400px;
+}
 </style>
 
 <style scoped>
@@ -680,4 +730,5 @@
     .statusFilters input {
         display: none;
     }
+    
 </style>

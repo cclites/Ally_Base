@@ -9,6 +9,8 @@ export default {
 
     methods: {
         createSchedule(date, jsEvent, view) {
+            this.preview = false;
+            this.hoverShift = {client:{}},
             this.scheduleModal = true;
             this.selectedSchedule = {};
             if (date) {
@@ -20,6 +22,8 @@ export default {
         },
 
         editSchedule(event, jsEvent, view) {
+            this.preview = false;
+            this.hoverShift = {client:{}},
             axios.get('/business/schedule/' + event.id)
                 .then(response => {
                     this.selectedSchedule = response.data;

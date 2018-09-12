@@ -75,7 +75,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.', $schedule);
         }
 
-        return new ScheduleResponse($schedule);
+        return new ScheduleResponse($schedule->load('client'));
     }
 
     /**
