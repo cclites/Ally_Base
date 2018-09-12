@@ -130,7 +130,10 @@
             class="preview-window" 
             :style="{ top: previewTop, left: previewLeft }"
         >
-            <h4>{{ hoverShift.client.nameLastFirst }}</h4>
+            <h4>{{ hoverShift.caregiver_name }}</h4>
+            <div>
+                <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
+            </div>
         </div>
 
         <iframe id="printFrame" width="0" height="0" src="/calendar-print.html">
@@ -350,7 +353,7 @@
             },
 
             showPreview: _.debounce((event, target, vm) => {
-                axios.get('/business/schedule/' + event.id)
+                axios.get('/business/schedule/' + event.id + '/preview')
                     .then(response => {
                         console.log('axios success');
                         vm.hoverShift = response.data;

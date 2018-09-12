@@ -502,4 +502,23 @@ class ScheduleController extends BaseController
             }
         }
     }
+
+    public function preview(Schedule $schedule)
+    {
+        $data = $schedule->toArray();
+
+        $data['caregiver_name'] = $schedule->caregiver->nameLastFirst();
+
+        $phone = $schedule->caregiver->phoneNumbers()->where('type', 'primary')->first();
+        if (!$phone) {
+            $phone = $schedule->caregiver->phoneNumbers()->first();
+        }
+
+        if ($phone) {
+            $data['caregiver_phone'] = $phone->national_number;
+            $data['caregiver_phone_type'] = $phone->type;
+        }
+
+        return response()->json($data);
+    }
 }
