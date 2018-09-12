@@ -30,6 +30,7 @@
     "moment": "^2.22.2",
     "numeral": "^2.0.6",
     "signature_pad": "^2.3.2",
+    "vee-validate": "^2.1.0-beta.8",
     "vue": "~2.4",
     "vue-template-compiler": "~2.4",
     "vue-the-mask": "^0.11.1"
