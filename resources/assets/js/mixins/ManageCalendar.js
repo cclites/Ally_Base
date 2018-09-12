@@ -4,21 +4,33 @@ export default {
             scheduleModal: false,
             selectedSchedule: {},
             selectedEvent: null,
+            initialCreateValues: {},
         };
     },
 
     methods: {
-        createSchedule(date, jsEvent, view) {
+        createSchedule(date, jsEvent, view, resource) {
             this.preview = false;
             this.hoverShift = {client:{}},
             this.scheduleModal = true;
             this.selectedSchedule = {};
+            this.initialCreateValues = {
+                'client_id': (this.filterClientId > 0) ? this.filterClientId : this.getInitialFromResource(resource, 'client_id'),
+                'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : this.getInitialFromResource(resource, 'caregiver_id'),
+            };
             if (date) {
                 this.selectedEvent = date;
             }
             else {
                 this.selectedEvent = moment().add(59, 'minutes').startOf('hour');
             }
+        },
+
+        getInitialFromResource(resource, field) {
+            if (resource.id && this.resourceIdField === field) {
+                return resource.id;
+            }
+            return "";
         },
 
         editSchedule(event, jsEvent, view) {

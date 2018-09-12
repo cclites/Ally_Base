@@ -155,7 +155,6 @@
                     <option value="OK">No Status</option>
                     <option value="CLIENT_CANCELED">Client Canceled</option>
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
-                    <option value="CONFIRMED">Confirmed</option>
                 </b-form-select>
             </div>
         </div>
@@ -253,19 +252,13 @@
                 return url;
             },
 
-            initialCreateValues() {
-                return {
-                    'client_id': (this.filterClientId > 0) ? this.filterClientId : "",
-                    'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : "",
-                }
-            },
-
             rememberFilters() {
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
             },
 
             config() {
                 return {
+                    eventBorderColor: '#333',
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
                     nowIndicator: true,
                     resourceAreaWidth: '280px',
@@ -292,6 +285,7 @@
                     ],
                     views: {
                         timelineWeek: {
+                            slotLabelFormat: 'ddd D',
                             slotDuration: '24:00'
                         },
                     },
@@ -321,6 +315,9 @@
         },
 
         methods: {
+            isReadOnlyStatus(status) {
+                return !['OK', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED'].includes(status);
+            },
 
             getFilteredEvents() {
                 let events = this.events;
@@ -738,7 +735,7 @@
             },
 
             renderTimelineDayEvent(content, event, note) {
-                let data = [this.getEventPersonName(event)];
+                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -888,6 +885,11 @@
 .badge.unconfirmed { background-color: #D0C3D3; }
 .badge.client_canceled { background-color: #d9c01c; }
 .badge.cg_canceled { background-color: #d91c4e; }
+
+.fc-time-area td, .fc-month-view tbody td {
+    /* calendar borders, event borders are in the config property */
+    border-color: rgba(120, 130, 140, 0.25) !important;
+}
 
 .preview-window {
   z-index: 9999!important;
