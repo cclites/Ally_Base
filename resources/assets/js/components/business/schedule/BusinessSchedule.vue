@@ -43,10 +43,10 @@
                             <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary">Open Shift</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Cancelled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Canceled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Cancelled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Canceled</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -153,8 +153,8 @@
                     @change="updateStatus"
                 >
                     <option value="OK">No Status</option>
-                    <option value="CLIENT_CANCELED">Client Cancelled</option>
-                    <option value="CAREGIVER_CANCELED">Caregiver Cancelled</option>
+                    <option value="CLIENT_CANCELED">Client Canceled</option>
+                    <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                     <option value="CONFIRMED">Confirmed</option>
                 </b-form-select>
             </div>
@@ -605,7 +605,7 @@
                 Scheduled: ${formatHours('OK')} (${formatShifts('OK')}) &nbsp;
                 Completed: ${formatHours('COMPLETED')} (${formatShifts('COMPLETED')}) &nbsp;
                 Projected: ${formatHours('PROJECTED')} (${formatShifts('PROJECTED')}) &nbsp;
-                Cancelled: ${formatHours('CANCELED')} (${formatShifts('CANCELED')}) &nbsp;
+                Canceled: ${formatHours('CANCELED')} (${formatShifts('CANCELED')}) &nbsp;
                 Open: ${formatHours('OPEN')} (${formatShifts('OPEN')}) &nbsp;
                 `);
             },
@@ -727,8 +727,8 @@
     <a class="dropdown-item"><span class="color-sample" style="background-color: #1c81d9"></span> Future Shift</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #849290"></span> Past Shift</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #D0C3D3"></span> Unconfirmed Shift</a>
-    <a class="dropdown-item"><span class="color-sample" style="background-color: #d9c01c"></span> Client Cancelled</a>
-    <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Cancelled</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #d9c01c"></span> Client Canceled</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Canceled</a>
   </div>
 `);
             },
@@ -886,8 +886,8 @@
 .badge.clocked_in { background-color: #27c11e; }
 .badge.confirmed { background-color: #849290; }
 .badge.unconfirmed { background-color: #D0C3D3; }
-.badge.client_canceled { background-color: #d91c4e; }
-.badge.cg_canceled { background-color: #d9c01c; }
+.badge.client_canceled { background-color: #d9c01c; }
+.badge.cg_canceled { background-color: #d91c4e; }
 
 .preview-window {
   z-index: 9999!important;
