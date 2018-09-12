@@ -119,34 +119,26 @@ class ScheduleEvents implements Responsable
             );
 
             $title = $this->resolveEventTitle($schedule);
+            $status = $schedule->getStatus();
 
-            if ($schedule->isClockedIn()) {
-                $backgroundColor = '#27c11e'; // current 
-                $title .= ': Clocked In';
-            }
-            else {
-                switch($schedule->status) {
-                    case Schedule::CLIENT_CANCELED:
-                        $backgroundColor = '#d9c01c'; // client cancel
-                        break; 
-                    case Schedule::CAREGIVER_CANCELED:
-                        $backgroundColor = '#d91c4e'; // CG cancel
-                        break;
-                    default:
-                        $backgroundColor = '#1c81d9'; // ok / future
-                        if($schedule->starts_at < Carbon::now()) {
-                            $backgroundColor = '#849290'; // past
-                        }
-                        break;
-                }
-
-                // Apply a different shade to schedules with unconfirmed shifts
-                foreach($schedule->shifts as $shift) {
-                    if ($shift->status === \App\Shift::WAITING_FOR_CONFIRMATION) {
-                        $backgroundColor = '#D0C3D3';
-                        break;
-                    }
-                }
+            switch($status) {
+                case Schedule::CLOCKED_IN:
+                    $backgroundColor = '#27c11e'; // current
+                    break;
+                case Schedule::CLIENT_CANCELED:
+                    $backgroundColor = '#d9c01c'; // client cancel
+                    break;
+                case Schedule::CAREGIVER_CANCELED:
+                    $backgroundColor = '#d91c4e'; // CG cancel
+                    break;
+                case Schedule::UNCONFIRMED:
+                    $backgroundColor = '#D0C3D3';
+                    break;
+                case Schedule::CONFIRMED:
+                    $backgroundColor = '#849290'; // past
+                    break;
+                default:
+                    $backgroundColor = '#1c81d9'; // ok / future
             }
 
 
@@ -166,7 +158,7 @@ class ScheduleEvents implements Responsable
                 'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
                 'unassigned' => empty($schedule->caregiver),
-                'status' => $schedule->status,
+                'status' => $status,
             ], $additionalOptions);
         });
     }

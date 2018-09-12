@@ -86,6 +86,9 @@ class Schedule extends Model implements Auditable
     const OK = 'OK';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+    const CLOCKED_IN = 'CLOCKED_IN';
+    const CONFIRMED = 'CONFIRMED';
+    const UNCONFIRMED = 'UNCONFIRMED';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -172,6 +175,23 @@ class Schedule extends Model implements Auditable
     /// Other Methods
     ///////////////////////////////////////////
 
+    public function getStatus()
+    {
+        if ($this->isClockedIn()) {
+            return self::CLOCKED_IN;
+        }
+
+        if ($this->isConfirmed()) {
+            return self::CONFIRMED;
+        }
+
+        if ($this->shifts->count()) {
+            return self::UNCONFIRMED;
+        }
+
+        return $this->status ?? self::OK;
+    }
+
     /**
      * Attach a schedule note to the schedule
      *
@@ -208,6 +228,18 @@ class Schedule extends Model implements Auditable
         foreach($this->shifts as $shift)
         {
             if ($shift->statusManager()->isClockedIn()) return true;
+        }
+        return false;
+    }
+
+    /*
+     * @return bool
+     */
+    public function isConfirmed()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isConfirmed()) return true;
         }
         return false;
     }
