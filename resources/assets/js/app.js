@@ -203,7 +203,6 @@ Vue.component('note-list', require('./components/notes/NoteList'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 Vue.component('note-form', require('./components/notes/NoteForm'));
 Vue.component('note-create', require('./components/notes/NoteCreate'));
-Vue.component('note-edit', require('./components/notes/NoteEdit'));
 
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
