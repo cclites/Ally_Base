@@ -159,10 +159,11 @@
 
             value: {
                 handler(obj){
-                    this.form = new Form({
-                            ...this.form.data(),
-                            ...obj.data()
-                    });
+                    for (let key in obj.data()) {
+                        if (this.form[key] !== obj[key]) {
+                            this.form[key] = obj[key];
+                        }
+                    }
                 },
                 deep: true
             }
