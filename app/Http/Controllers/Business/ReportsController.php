@@ -465,28 +465,6 @@ class ReportsController extends BaseController
         return response()->json($cards);
     }
 
-    public function clientOnboardedReport()
-    {
-        return view('business.reports.client_onboarded');
-    }
-
-    public function clientOnboardedData()
-    {
-        return response()->json($this->business()->clients);
-    }
-
-    public function caregiverOnboardedReport()
-    {
-        return view('business.reports.caregiver_onboarded');
-    }
-
-    public function caregiverOnboardedData()
-    {
-        $caregivers = $this->business()->caregivers;
-
-        return response()->json($caregivers);
-    }
-
     public function caregiversMissingBankAccounts()
     {
         $caregivers = $this->business()
@@ -792,5 +770,38 @@ class ReportsController extends BaseController
 
         return view('business.reports.shift_summary', compact(['type', 'users']));
     }
-}
 
+    /**
+     * See the onboard status for clients and caregivers and send electronic signup link
+     *
+     * @return Response
+     */
+    public function onboardStatus()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboard_status,
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboarded ? 'Onboarded' : 'Not Onboarded',
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.onboard-status', compact('type'));
+    }
+}

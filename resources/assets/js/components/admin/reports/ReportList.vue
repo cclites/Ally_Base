@@ -113,7 +113,7 @@ export default {
                     // { name: 'Client Progression Report', url: 'reports/', description: 'See how a client is progressing over time' },
                     // { name: 'Clients Missing Payment Methods', url: 'reports/', description: 'Shows all clients missing a payment method' },
                     { name: 'Caregivers Missing Bank Accounts', url: 'reports/caregivers-missing-bank-accounts', description: 'Shows all caregivers missing bank accounts' },
-                    // { name: 'Client & Caregiver Onboard Status', url: 'reports/', description: 'See the onboard status for clients and caregivers and send electronic signup link' },
+                    { name: 'Client & Caregiver Onboard Status', url: 'reports/onboard-status', description: 'See the onboard status for clients and caregivers and send electronic signup link' },
                     { name: 'Payment History', url: 'reports/payments', description: 'See client charges and caregiver payments over time' },
 
                     // { name: 'Clients Without Email', url: 'reports/client-email-missing', description: '' },
