@@ -216,11 +216,11 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
-                test: 'yeaaaaaaaaaa',
+
                 previewTop: 0,
                 previewLeft: 0,
                 preview: false,
-                hoverShift: {client: {}},
+                hoverShift: {},
                 hoverTarget: '',
             }
         },
@@ -504,61 +504,72 @@
                 } else {
                     target = $(jsEvent.currentTarget).parent('a');
                 }
-                let vm = this;
 
-                this.showPreview(event, target, vm);
+                _.debounce((event, target, vm) => {
+                    axios.get('/business/schedule/' + event.id + '/preview')
+                        .then(response => {
+                            vm.hoverShift = response.data;
+                            vm.showPreview(target, event.id);
+                        })
+                        .catch(function(error) {
+                            vm.hoverShift = {};
+                        });
+                }, 350)(event, target, this);
             },
 
-            showPreview: _.debounce((event, target, vm) => {
-                axios.get('/business/schedule/' + event.id + '/preview')
-                    .then(response => {
-                        vm.hoverShift = response.data;
-                        vm.showPopup(target, event.id);
-                    })
-                    .catch(function(error) {
-                        vm.hoverShift = null;
-                    });
-            }, 350),
+            showPreview(target, shift_id) {
+                // the first next tick is used to allow the data to update and change the size
+                // of the preview window before it is used to judge where to place it on the screen
+                Vue.nextTick().then(() => {
+                    let left = target.offset().left - $('#schedule-card').offset().left;
+                    let top = target.offset().top + target.height() - $('#schedule-card').offset().top;
 
-            showPopup(target, shift_id) {
-                this.hoverTarget = target;
-
-                this.previewLeft = (this.hoverTarget.offset().left - $('#schedule-card').offset().left) + "px";
-                this.previewTop = (this.hoverTarget.offset().top + this.hoverTarget.height() - $('#schedule-card').offset().top) + "px";
-                this.preview = true;
-
-                let vm = this;
-
-                Vue.nextTick()
-                .then(() => {
-                    var body = document.getElementsByTagName('body');
-                    var eventRect = this.hoverTarget.get(0).getBoundingClientRect();
-                    var divRect = document.getElementById('preview').getBoundingClientRect();
-
-                    let handler = function(e) {
-                        if (vm.hoverShift.id == shift_id) {
-                            let extra = 5;
-                            if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
-                                e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
-                                    return;
-                            } 
-
-                            if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
-                                e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
-                                    return;
-                            }
-                        }
-                        
-                        vm.preview = false;
-                        document.body.removeEventListener('mousemove', handler);
+                    let availableWidth = document.documentElement.clientWidth - $('#schedule-card').offset().left;
+                    let availableHeight = document.documentElement.clientHeight - $('#schedule-card').offset().top + document.documentElement.scrollTop;
+                  
+                    if (left + $('#preview').outerWidth() > availableWidth) {
+                        left = left - $('#preview').outerWidth() + target.width();
                     }
-                    document.body.addEventListener('mousemove', handler, false);
+
+                    if (top + $('#preview').outerHeight() > availableHeight) {
+                        top = top - $('#preview').outerHeight() - target.height();
+                    }
+
+                    this.previewLeft = left + "px";
+                    this.previewTop = top + "px";
+                    this.preview = true;
+
+                    // this next tick is used because the window need to be visible on the screen
+                    // in order to check if the mouse is hovering over it
+                    Vue.nextTick().then(() => {
+                        var eventRect = target.get(0).getBoundingClientRect();
+                        var divRect = document.getElementById('preview').getBoundingClientRect();
+
+                        let handler = function(e) {
+                            if (this.hoverShift.id == shift_id) {
+                                let extra = 5;
+                                if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
+                                    e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
+                                        return;
+                                } 
+
+                                if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
+                                    e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
+                                        return;
+                                }
+                            }
+                            
+                            this.preview = false;
+                            document.body.removeEventListener('mousemove', handler);
+                        }.bind(this);
+                        document.body.addEventListener('mousemove', handler, false);
+                    });
                 });
             },
 
             hidePreview() {
-                this.hoverShift = {};
                 this.preview = false;
+                this.hoverShift = {};
             },
 
             saveScrollPosition() {
@@ -698,8 +709,7 @@
                 let vm = this;
                 note.click((e) => {
                     vm.selectedEvent = event;
-                    this.preview = false;
-                    this.hoverShift = {client:{}},
+                    vm.hidePreview();
                     vm.notesModal = true;
                     e.preventDefault();
                     e.stopPropagation();
@@ -915,7 +925,7 @@
   background-color: #fff;
   padding: 1em;
   border: 1px solid #456789;
-  width: 450px;
+  width: 400px;
 }
 </style>
 
