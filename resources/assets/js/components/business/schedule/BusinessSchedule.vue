@@ -902,7 +902,7 @@
     border-color: rgba(120, 130, 140, 0.25) !important;
 }
 .fc-timeline-event {
-    margin-right: 4px;
+    margin-right: 4px !important;
 }
 .fc-cell-text {
     color: #222;
