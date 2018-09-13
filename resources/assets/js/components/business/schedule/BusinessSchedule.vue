@@ -1,27 +1,7 @@
 <template>
     <b-card id="schedule-card">
         <b-row>
-            <b-col md="7">
-                <b-row>
-                    <b-col>
-                        <b-btn size="sm" variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
-                        <b-btn size="sm" variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
-                        <b-btn size="sm" variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col class="mt-3">
-                        <div class="form-control icon-control">
-                            <i class="fa fa-search"></i>
-                            <input type="text"
-                                   placeholder="Search Schedule"
-                                   v-model="filterText"
-                            />
-                        </div>
-                    </b-col>
-                </b-row>
-            </b-col>
-            <b-col md="5">
+            <b-col md="6">
                 <b-row>
                     <b-col class="statusFilters">
                         <label>
@@ -50,9 +30,22 @@
                         </label>
                     </b-col>
                 </b-row>
+            </b-col>
+            <b-col md="6">
+                <b-row>
+                    <b-col class="text-right">
+                        <b-btn variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
+                        <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal">Update Schedules</b-btn>
+                        <b-btn variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
+                    </b-col>
+                </b-row>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col lg="6">
                 <b-row>
                     <b-col cols="6" class="ml-auto" v-if="caregivers.length">
-                        <b-form-group label="Caregiver Filter" label-for="calendar_caregiver_filter">
+                        <b-form-group>
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
                                 <option :value="0">Open Shifts</option>
@@ -61,7 +54,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col cols="6" class="ml-auto" v-if="clients.length">
-                        <b-form-group label="Client Filter" label-for="calendar_client_filter">
+                        <b-form-group>
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
                                 <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
@@ -69,6 +62,15 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
+            </b-col>
+            <b-col lg="6">
+                <div class="form-control icon-control">
+                    <i class="fa fa-search"></i>
+                    <input type="text"
+                           placeholder="Search Schedule"
+                           v-model="filterText"
+                    />
+                </div>
             </b-col>
         </b-row>
 
@@ -259,6 +261,7 @@
             config() {
                 return {
                     eventBorderColor: '#333',
+                    eventOverlap: false,
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
                     nowIndicator: true,
                     resourceAreaWidth: '280px',
@@ -774,6 +777,8 @@
             fullscreenToggle() {
                 let $element = $(this.$el);
                 $element.toggleClass('fullscreen-calendar');
+                $('.left-sidebar').toggle();
+                $('.footer').toggle();
                 this.$refs.calendar.$emit('rerender-events');
             },
 
@@ -842,6 +847,9 @@
 .fa-commenting {
     color: #F2F214;
 }
+.fc-toolbar {
+    padding: 0;
+}
 .fc-toolbar .dropdown-item {
     padding: 3px 6px;
 }
@@ -873,6 +881,9 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
 }
+.fc-resource-area .fc-content {
+    background-color: #fff;
+}
 .fc-resource-area .fc-cell-content {
     padding-left: 2px; padding-right: 2px;
 }
@@ -890,7 +901,13 @@
     /* calendar borders, event borders are in the config property */
     border-color: rgba(120, 130, 140, 0.25) !important;
 }
-
+.fc-timeline-event {
+    margin-right: 4px;
+}
+.fc-cell-text {
+    color: #222;
+    font-weight: 500;
+}
 .preview-window {
   z-index: 9999!important;
   position: absolute;
