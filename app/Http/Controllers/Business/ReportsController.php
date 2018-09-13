@@ -721,6 +721,16 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Shows the list of prospective clients
+     *
+     * @return Response
+     */
+    public function prospects()
+    {
+        return view('business.reports.prospects');
+    }
+
+    /**
      * See how many shifts have been worked by a caregiver
      *
      * @return Response
