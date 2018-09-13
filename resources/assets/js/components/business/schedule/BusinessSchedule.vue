@@ -64,7 +64,7 @@
                 </b-row>
             </b-col>
             <b-col lg="6">
-                <div class="form-control icon-control">
+                <div class="form-control icon-control" v-show="false">
                     <i class="fa fa-search"></i>
                     <input type="text"
                            placeholder="Search Schedule"
@@ -890,6 +890,7 @@
 .fc-resource-area .fc-widget-content:not(:first-child) .fc-cell-content {
     overflow: visible;
 }
+.statusFilters .badge { cursor: pointer; }
 .badge.scheduled { background-color: #1c81d9; }
 .badge.clocked_in { background-color: #27c11e; }
 .badge.confirmed { background-color: #849290; }
