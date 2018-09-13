@@ -719,5 +719,68 @@ class ReportsController extends BaseController
     {
         return view('business.reports.referral_sources');
     }
+
+    /**
+     * See how many shifts have been worked by a caregiver
+     *
+     * @return Response
+     */
+    public function caregiverShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('caregiver_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forCaregiver(request()->user_id)
+                ->groupBy('caregiver_id')
+                ->with('caregiver')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->caregiver->name,
+                        'user_id' => $item->caregiver->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        $type = 'caregiver';
+        $users = $this->business()->caregiverList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
+
+    /**
+     * See how many shifts a client has received
+     *
+     * @return Response
+     */
+    public function clientShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('client_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forClient(request()->user_id)
+                ->groupBy('client_id')
+                ->with('client')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->client->name,
+                        'user_id' => $item->client->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        
+        $type = 'client';
+        $users = $this->business()->clientList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
 }
 

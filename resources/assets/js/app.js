@@ -142,6 +142,7 @@ Vue.component('business-client-caregiver-visits-report', require('./components/a
 Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
 Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
 Vue.component('referral-sources-report', require('./components/business/reports/ReferralSources'));
+Vue.component('shift-summary-report', require('./components/business/reports/ShiftSummary'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
