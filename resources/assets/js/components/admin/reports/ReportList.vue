@@ -96,7 +96,7 @@ export default {
                     { name: 'Caregiver Directory', url: 'caregivers', description: 'Shows the full list of caregivers' },
                     { name: 'Credit Card Expiration', url: 'reports/credit-card-expiration', description: 'See clients with expiring credit cards' },
                     { name: 'Prospects', url: 'reports/prospects', description: 'Shows the list of prospective clients' },
-                    // { name: 'Caregiver Applications', url: 'reports/', description: 'See all caregiver applicants' },
+                    { name: 'Caregiver Applications', url: 'caregivers/applications', description: 'See all caregiver applicants' },
                     { name: 'Caregiver Cert & License Expirations', url: 'reports/certification_expirations', description: 'See a list of caregivers with an expiring certification or license' },
                     { name: 'Claims Report', url: 'reports/claims-report', description: 'Generate a claim file that can be sent to insurance carriers or Medicaid & VA payers' },
                     { name: 'Export Timesheets', url: 'reports/export-timesheets', description: 'Export timesheets for offline storage' },
