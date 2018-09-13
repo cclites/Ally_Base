@@ -17,6 +17,8 @@
         </style>
     @endif
 
+    <script>window.fcsKey = '{{ config('services.fullcalendar.key') }}';</script>
+
     @stack('head')
 </head>
 

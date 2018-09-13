@@ -102,6 +102,7 @@
                     weekNumberCalculation: 'iso',
                     renderHtml: false,
                     height: 'auto',
+                    schedulerLicenseKey: window.fcsKey,
 
                     resources(callback, start, end, timezone) {
                         callback(self.resources);
