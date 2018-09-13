@@ -89,7 +89,7 @@ export default {
                 ];
             } else if(this.role['role_type'] == 'office_user') {
                 return [
-                    // { name: 'EVV Report', url: 'reports/evv', description: 'Details on each attempted clock in and clock out' },
+                    { name: 'EVV Report', url: 'reports/evv', description: 'Details on each attempted clock in and clock out' },
                     { name: 'Reconciliation Report', url: 'reports/reconciliation', description: 'See detailed breakdown of each transaction with your bank' },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     { name: 'Client Directory', url: 'clients', description: 'Shows the full list of clients' },

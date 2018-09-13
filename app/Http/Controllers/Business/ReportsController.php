@@ -27,6 +27,7 @@ use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use App\Reports\EVVReport;
 
 class ReportsController extends BaseController
 {
@@ -803,5 +804,30 @@ class ReportsController extends BaseController
         }
 
         return view('business.reports.onboard-status', compact('type'));
+    }
+
+    /**
+     * Details on each attempted clock in and clock out
+     *
+     * @return Response
+     */
+    public function evv()
+    {
+        if (request()->expectsJson() && request()->input('json')) {
+            $report = new EVVReport();
+            $report->where('business_id', $this->business()->id);
+
+            if ($method = request()->input('method')) {
+                if ($method === 'geolocation') $report->geolocationOnly();
+                if ($method === 'telephony') $report->telephonyOnly();
+            }
+            if (strlen(request()->input('verified'))) {
+                $report->where('verified', request()->input('verified'));
+            }
+            $this->addShiftReportFilters($report, request());
+            return $report->rows();
+        }
+
+        return view('business.reports.evv');
     }
 }
