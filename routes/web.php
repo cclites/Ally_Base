@@ -195,6 +195,7 @@ Route::group([
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
     Route::get('reports/prospects', 'Business\ReportsController@prospects')->name('reports.prospects');
     Route::get('reports/evv', 'Business\ReportsController@evv')->name('reports.evv');
+    Route::get('reports/contacts', 'Business\ReportsController@contacts')->name('reports.contacts');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');

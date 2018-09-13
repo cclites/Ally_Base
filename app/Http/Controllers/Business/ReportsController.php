@@ -830,4 +830,35 @@ class ReportsController extends BaseController
 
         return view('business.reports.evv');
     }
+
+    public function contacts()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'evv')->first(),
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'home')->first(),
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.contacts', compact('type'));
+    }
 }
