@@ -16,6 +16,7 @@ class QuickbooksController extends BaseController
         $clients = $this->getClients($request);
         $caregivers = $this->getCaragivers($request);
 
+
         return view('business.quickbooks.index', compact('clients', 'caregivers'));
     }
 
