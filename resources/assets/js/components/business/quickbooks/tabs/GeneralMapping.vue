@@ -32,7 +32,7 @@
                     <b-col md="3" sm="4">
                         <b-form-select v-model="caregivingServices" id="caregiving_services" class="mb-3 mt-1">
                             <option value="">Please Select</option>
-                            <option value="Agency Fees">Agency Fees</option>
+                            <option value="Referral Fees">Referral Fees</option>
                         </b-form-select>
                     </b-col>
                 </b-row>
@@ -124,7 +124,7 @@
             return {
                 name: 'Robert Smith',
                 account: '',
-                caregivingServices: 'Agency Fees',
+                caregivingServices: 'Referral Fees',
                 mileage: 'Reimbursable Mileage',
                 expenses: 'Reimbursable Expenses',
                 credits: 'Credits',

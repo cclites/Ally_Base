@@ -21,14 +21,15 @@
 
         data() {
             return {
-                selected: 'quickBooks_online',
+                selected: 'disabled',
                 options: [
+                    { value: 'disabled', text: 'Disabled' },
                     { value: 'quickBooks_online', text: 'QuickBooks Online' },
-                    { value: 'quickBooks_desktop_2018', text: 'QuickBooks Desktop 2018' },
-                    { value: 'quickBooks_desktop_2017', text: 'QuickBooks Desktop 2017' },
-                    { value: 'quickBooks_desktop_2016', text: 'QuickBooks Desktop 2016' },
-                    { value: 'quickBooks_desktop_2015', text: 'QuickBooks Desktop 2015' },
-                    { value: 'quickBooks_desktop_older', text: 'QuickBooks Desktop Older' },
+                    // { value: 'quickBooks_desktop_2018', text: 'QuickBooks Desktop 2018' },
+                    // { value: 'quickBooks_desktop_2017', text: 'QuickBooks Desktop 2017' },
+                    // { value: 'quickBooks_desktop_2016', text: 'QuickBooks Desktop 2016' },
+                    // { value: 'quickBooks_desktop_2015', text: 'QuickBooks Desktop 2015' },
+                    // { value: 'quickBooks_desktop_older', text: 'QuickBooks Desktop Older' },
                 ]
             }
         },
