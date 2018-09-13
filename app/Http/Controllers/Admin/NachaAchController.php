@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-
+use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,9 +23,18 @@ class NachaAchController extends Controller
     }
 
     public function generate(Request $request) {
+        $request->validate([
+            'fh_immediate_destination' => 'required|digits:9|numeric',
+            'fh_immediate_origin' => 'required|max:9',
+            'fh_immediate_destination_name' => 'required',
+            'fh_immediate_origin_name' => 'required',
+            'bh_service_class_code' => 'required',
+            'bh_company_name' => 'required',
+            'bh_company_entry_description' => 'required',
+        ]);
+
         $this->setup($request->all());
         $batch = $this->getBatch($request->all());
-
 
         $this->file->addBatch($batch);
         $output = (string)$this->file;
