@@ -142,7 +142,7 @@
         </div>
 
         <b-form-group>
-            <b-btn @click="validateBeforeSubmit('header')" :disabled="errors.any('header')" variant="info">Save</b-btn>
+            <b-btn @click="validateBeforeSubmit('header')" :disabled="errors.any(form)"  variant="info">Save</b-btn>
         </b-form-group>
     </b-card>
 </template>
@@ -168,7 +168,7 @@
                     ppded_individual_identification_number: '',
                     ppded_individual_name: '',
                 },
-                details: []
+                details: [],
             }
         },
 
@@ -208,14 +208,23 @@
 
                             document.body.removeChild(element);
                         } else {
-                            alert(response.message);
+                            alerts.addMessage('error', response.message);
                         }
                     })
-                    .catch(e => {
-                        alert('Error');
+                    .catch(err => {
+                        if(err.response.data && err.response.data.errors) {
+                            let errors = err.response.data.errors;
+                            for(let index in errors) {
+                                let field = index.replace(/_/g, ' ');
+                                let newField = field.substr(field.indexOf(' ')+1);
+                                let text = errors[index][0].replace(field, newField);
+
+                                alerts.addMessage('error', text);
+                            }
+                        }
                     })
                 } else {
-                    alert('Please fill required fields');
+                    alerts.addMessage('error', 'Please fill required fields');
                 }
             },
 
@@ -227,8 +236,6 @@
 
                 this.details.push(data);
                 this.clearPpdedDetails();
-
-                console.log(this.details);
             },
 
             removeDetail(index) {
