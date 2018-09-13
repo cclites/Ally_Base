@@ -203,12 +203,15 @@ Vue.component('note-list', require('./components/notes/NoteList'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 Vue.component('note-form', require('./components/notes/NoteForm'));
 Vue.component('note-create', require('./components/notes/NoteCreate'));
+Vue.component('note-edit', require('./components/notes/NoteEdit'));
+
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
 Vue.component('caregiver-application-list', require('./components/caregivers/CaregiverApplicationList'));
 Vue.component('caregiver-application', require('./components/caregivers/CaregiverApplication'));
 
 Vue.component('mask-input', require('./components/MaskInput'));
+Vue.component('caregiver-timesheet', require('./components/caregivers/CaregiverTimesheet'));
 Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
