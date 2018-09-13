@@ -709,5 +709,15 @@ class ReportsController extends BaseController
             })
             ->groupBy('client_id');
     }
+    
+    /**
+     * List of referral sources and how many clients have been referred by each
+     *
+     * @return Response
+     */
+    public function referralSources()
+    {
+        return view('business.reports.referral_sources');
+    }
 }
 
