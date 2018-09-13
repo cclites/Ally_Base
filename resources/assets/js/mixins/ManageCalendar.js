@@ -10,8 +10,7 @@ export default {
 
     methods: {
         createSchedule(date, jsEvent, view, resource) {
-            this.preview = false;
-            this.hoverShift = {client:{}},
+            this.hidePreview();
             this.scheduleModal = true;
             this.selectedSchedule = {};
             this.initialCreateValues = {
@@ -34,8 +33,7 @@ export default {
         },
 
         editSchedule(event, jsEvent, view) {
-            this.preview = false;
-            this.hoverShift = {client:{}},
+            this.hidePreview();
             axios.get('/business/schedule/' + event.id)
                 .then(response => {
                     this.selectedSchedule = response.data;
