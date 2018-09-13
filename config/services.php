@@ -68,4 +68,8 @@ return [
         'password' => env('TELLUS_PASSWORD'),
     ],
 
+    'fullcalendar' => [
+        'key' => env('FULLCALENDAR_KEY'),
+    ]
+
 ];
