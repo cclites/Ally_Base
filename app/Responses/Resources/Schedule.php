@@ -22,8 +22,8 @@ class Schedule implements Responsable
         unset($array['business']);
         unset($array['note']);
 
-        $timestamp = $this->schedule->starts_at->timestamp;
-        $array['starts_at'] = $timestamp;
+        $array['starts_at'] = $this->schedule->starts_at->toDateTimeString();;
+        $array['offset'] = $this->schedule->starts_at->format('P');
 
         if ($shift = $this->schedule->clockedInShift) {
             $array['clocked_in_shift'] = $shift->load('caregiver');

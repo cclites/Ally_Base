@@ -80,7 +80,7 @@
             :default-view="defaultView"
             :header="header"
             :config="config"
-            @day-click="createSchedule"
+            @event-created="createSchedule"
             @event-selected="editSchedule"
             @event-render="renderEvent"
             @view-render="onLoadView"
@@ -95,9 +95,7 @@
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
-                               :selected-event="selectedEvent"
                                :selected-schedule="selectedSchedule"
-                               :initial-values="initialCreateValues"
                                @refresh-events="fetchEvents(true)"
                                @clock-out="showClockOutModal()"
         />
@@ -216,6 +214,7 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
+                fullscreen: false,
 
                 previewTop: 0,
                 previewLeft: 0,
@@ -258,8 +257,13 @@
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
             },
 
+            calendarHeight() {
+                return window.innerHeight - (this.fullscreen ? 180 : 400);
+            },
+
             config() {
                 return {
+                    height: this.calendarHeight,
                     eventBorderColor: '#333',
                     eventOverlap: false,
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
@@ -699,21 +703,25 @@
             },
 
             renderEvent: function( event, element, view ) {
-                let note = $('<span/>', {
-                    class: 'fc-note-btn',
-                    html: $('<i/>', {
-                        class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
-                    }),
-                });
+                let note = '';
 
-                let vm = this;
-                note.click((e) => {
-                    vm.selectedEvent = event;
-                    vm.hidePreview();
-                    vm.notesModal = true;
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
+                if (event.note) {
+                    note = $('<span/>', {
+                        class: 'fc-note-btn',
+                        html: $('<i/>', {
+                            class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
+                        }),
+                    });
+
+                    let vm = this;
+                    note.click((e) => {
+                        vm.selectedEvent = event;
+                        vm.hidePreview();
+                        vm.notesModal = true;
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                }
 
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
@@ -789,12 +797,14 @@
                 $element.toggleClass('fullscreen-calendar');
                 $('.left-sidebar').toggle();
                 $('.footer').toggle();
+                this.fullscreen = !this.fullscreen;
                 this.$refs.calendar.$emit('rerender-events');
             },
 
             caregiverViewToggle() {
                 this.caregiverView = !this.caregiverView;
                 $('.fc-caregiverView-button').text(this.caregiverView ? 'Client View' : 'Caregiver View');
+                $('.fc-resource-area .fc-cell-text:first').text(this.caregiverView ? 'Caregiver' : 'Client');
                 this.fetchEvents();
             },
 
@@ -807,6 +817,10 @@
         },
 
         watch: {
+            calendarHeight(val) {
+                this.$refs.calendar.setOption('height', val);
+            },
+
             filterCaregiverId(val) {
                 if (this.rememberFilters) {
                     this.setLocalStorage('caregiver', val);
