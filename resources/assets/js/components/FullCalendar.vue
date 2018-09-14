@@ -265,3 +265,12 @@
 
 <style src="fullcalendar/dist/fullcalendar.css"></style>
 <style src="fullcalendar-scheduler/dist/scheduler.css"></style>
+<style>
+    .fc-now-indicator {
+        border-color: blue;
+    }
+    .fc-now-indicator-line {
+        border-style: dotted;
+        border-left-width: 2px !important;
+    }
+</style>
