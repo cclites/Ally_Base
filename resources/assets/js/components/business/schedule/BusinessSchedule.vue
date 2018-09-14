@@ -804,6 +804,7 @@
             caregiverViewToggle() {
                 this.caregiverView = !this.caregiverView;
                 $('.fc-caregiverView-button').text(this.caregiverView ? 'Client View' : 'Caregiver View');
+                $('.fc-resource-area .fc-cell-text:first').text(this.caregiverView ? 'Caregiver' : 'Client');
                 this.fetchEvents();
             },
 
