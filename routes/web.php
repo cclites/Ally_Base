@@ -17,6 +17,8 @@ Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });
 
+Route::view('check-my-time', 'check-my-time');
+
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
 Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
