@@ -127,8 +127,6 @@ Vue.component('business-schedule', require('./components/business/schedule/Busin
 Vue.component('business-schedule-modal', require('./components/business/schedule/BusinessScheduleModal'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
-Vue.component('business-clients-onboarded', require('./components/business/reports/ClientOnboarded'));
-Vue.component('business-caregivers-onboarded', require('./components/business/reports/CaregiverOnboarded'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
 Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
@@ -141,6 +139,12 @@ Vue.component('business-caregiver-pay-statements', require('./components/busines
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
 Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
 Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
+Vue.component('referral-sources-report', require('./components/business/reports/ReferralSources'));
+Vue.component('prospects-report', require('./components/business/reports/Prospects'));
+Vue.component('shift-summary-report', require('./components/business/reports/ShiftSummary'));
+Vue.component('onboard-status-report', require('./components/business/reports/OnboardStatus'));
+Vue.component('business-evv-report', require('./components/business/reports/Evv'));
+Vue.component('contacts-report', require('./components/business/reports/Contacts'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

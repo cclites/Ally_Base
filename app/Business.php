@@ -439,4 +439,48 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
             ];
         });
     }
+
+    /**
+     * Get a simple list of caregiver names and ids.
+     *
+     * @param boolean $lastFirst
+     * @param boolean $activeOnly
+     * @return void
+     */
+    public function caregiverList($lastFirst = true, $activeOnly = false)
+    {
+        $sort = $lastFirst ? 'nameLastFirst' : 'name';
+
+        $query = $activeOnly ? $this->activeCaregivers() : $this->caregivers();
+
+        return $query->get()
+            ->sortBy($sort, SORT_NATURAL|SORT_FLAG_CASE)->map(function ($item) use($lastFirst) {
+                return [
+                    'id' => $item->id,
+                    'name' => $lastFirst ? $item->nameLastFirst : $item->name,
+                ];
+        })->values();
+    }
+
+    /**
+     * Get a simple list of client names and ids.
+     *
+     * @param boolean $lastFirst
+     * @param boolean $activeOnly
+     * @return void
+     */
+    public function clientList($lastFirst = true, $activeOnly = false)
+    {
+        $sort = $lastFirst ? 'nameLastFirst' : 'name';
+
+        $query = $activeOnly ? $this->activeClients() : $this->clients();
+
+        return $query->get()
+            ->sortBy($sort, SORT_NATURAL|SORT_FLAG_CASE)->map(function ($item) use($lastFirst) {
+                return [
+                    'id' => $item->id,
+                    'name' => $lastFirst ? $item->nameLastFirst : $item->name,
+                ];
+        })->values();
+    }
 }

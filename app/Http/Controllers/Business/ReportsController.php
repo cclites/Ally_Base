@@ -27,6 +27,7 @@ use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use App\Reports\EVVReport;
 
 class ReportsController extends BaseController
 {
@@ -465,28 +466,6 @@ class ReportsController extends BaseController
         return response()->json($cards);
     }
 
-    public function clientOnboardedReport()
-    {
-        return view('business.reports.client_onboarded');
-    }
-
-    public function clientOnboardedData()
-    {
-        return response()->json($this->business()->clients);
-    }
-
-    public function caregiverOnboardedReport()
-    {
-        return view('business.reports.caregiver_onboarded');
-    }
-
-    public function caregiverOnboardedData()
-    {
-        $caregivers = $this->business()->caregivers;
-
-        return response()->json($caregivers);
-    }
-
     public function caregiversMissingBankAccounts()
     {
         $caregivers = $this->business()
@@ -709,5 +688,177 @@ class ReportsController extends BaseController
             })
             ->groupBy('client_id');
     }
-}
+    
+    /**
+     * List of referral sources and how many clients have been referred by each
+     *
+     * @return Response
+     */
+    public function referralSources()
+    {
+        return view('business.reports.referral_sources');
+    }
 
+    /**
+     * Shows the list of prospective clients
+     *
+     * @return Response
+     */
+    public function prospects()
+    {
+        return view('business.reports.prospects');
+    }
+
+    /**
+     * See how many shifts have been worked by a caregiver
+     *
+     * @return Response
+     */
+    public function caregiverShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('caregiver_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forCaregiver(request()->user_id)
+                ->groupBy('caregiver_id')
+                ->with('caregiver')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->caregiver->name,
+                        'user_id' => $item->caregiver->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        $type = 'caregiver';
+        $users = $this->business()->caregiverList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
+
+    /**
+     * See how many shifts a client has received
+     *
+     * @return Response
+     */
+    public function clientShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('client_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forClient(request()->user_id)
+                ->groupBy('client_id')
+                ->with('client')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->client->name,
+                        'user_id' => $item->client->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        
+        $type = 'client';
+        $users = $this->business()->clientList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
+
+    /**
+     * See the onboard status for clients and caregivers and send electronic signup link
+     *
+     * @return Response
+     */
+    public function onboardStatus()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboard_status,
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboarded ? 'Onboarded' : 'Not Onboarded',
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.onboard-status', compact('type'));
+    }
+
+    /**
+     * Details on each attempted clock in and clock out
+     *
+     * @return Response
+     */
+    public function evv()
+    {
+        if (request()->expectsJson() && request()->input('json')) {
+            $report = new EVVReport();
+            $report->where('business_id', $this->business()->id);
+
+            if ($method = request()->input('method')) {
+                if ($method === 'geolocation') $report->geolocationOnly();
+                if ($method === 'telephony') $report->telephonyOnly();
+            }
+            if (strlen(request()->input('verified'))) {
+                $report->where('verified', request()->input('verified'));
+            }
+            $this->addShiftReportFilters($report, request());
+            return $report->rows();
+        }
+
+        return view('business.reports.evv');
+    }
+
+    public function contacts()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'evv')->first(),
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'home')->first(),
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.contacts', compact('type'));
+    }
+}
