@@ -231,7 +231,8 @@ Vue.component('quickbooks-rate-mapping', require('./components/business/quickboo
 Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
 Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
 
-
+/* Quickbooks API */
+Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

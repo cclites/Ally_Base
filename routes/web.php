@@ -341,6 +341,12 @@ Route::group([
     /*Nacha Ach*/
     Route::get('nacha-ach', 'Admin\NachaAchController@index')->name('nacha_ach');
     Route::post('nacha-ach/generate', 'Admin\NachaAchController@generate')->name('nacha_ach.generate');
+
+    /*QuickBooks API*/
+    Route::get('quickbooks-api', 'Admin\QuickBooksApiController@index')->name('quickbooks_api');
+    Route::get('quickbooks-api/authorization', 'Admin\QuickBooksApiController@authorization')->name('quickbooks_api.authorization');
+    Route::get('quickbooks-api/connection', 'Admin\QuickBooksApiController@connection')->name('quickbooks_api.connection');
+    Route::post('quickbooks-api/create-invoice', 'Admin\QuickBooksApiController@createInvoice');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
