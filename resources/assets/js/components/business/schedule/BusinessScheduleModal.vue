@@ -118,7 +118,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="End Time" label-for="endTime">
+                                <b-form-group :label="`End Time - ${scheduledHours} Hours`" label-for="endTime">
                                     <time-picker
                                             id="endTime"
                                             name="endTime"
@@ -158,7 +158,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Recurrence" id="schedule-recurrence" v-if="!selectedSchedule.id">
+                    <b-tab title="Recurrence" id="schedule-recurrence" v-if="!schedule.id">
                         <b-row>
                             <b-col lg="12">
                                 <b-form-group label="Recurring Period" label-for="interval_type">
@@ -219,9 +219,9 @@
                     <i class="fa fa-save" v-show="!submitting"></i>
                     {{ submitText }}
                 </b-btn>
-                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
-                <b-btn v-show="selectedSchedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
-                <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
+                <b-btn variant="primary" @click="copySchedule()" v-show="schedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn v-show="schedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
+                <b-btn variant="danger" @click="deleteSchedule()" v-show="schedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
         </b-modal>
@@ -241,21 +241,14 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             model: Boolean,
-            initialValues: {
-                type: Object,
-                default() {
-                    return {};
-                }
-            },
-            selectedEvent: {
-                type: Object,
-                default() {
-                    return moment();
-                }
-            },
+
             selectedSchedule: {
                 type: Object,
                 default() {
@@ -303,11 +296,11 @@
 
         computed: {
             title() {
+                if (this.copiedSchedule.starts_at) {
+                    return 'Copying Schedule';
+                }
                 if (this.selectedSchedule.id) {
                     return 'Editing a Scheduled Shift';
-                }
-                if (!_.isEmpty(this.copiedSchedule)) {
-                    return 'Copying Schedule';
                 }
                 return 'Schedule Shift';
             },
@@ -319,22 +312,9 @@
                 return 'Create Schedule';
             },
 
-            defaultValues() {
-                if (this.copiedSchedule.starts_at) {
-                    return {
-                        'starts_at': this.copiedSchedule.starts_at,
-                        'duration': this.copiedSchedule.duration,
-                        'caregiver_id': this.copiedSchedule.caregiver_id,
-                        'client_id': this.copiedSchedule.client_id,
-                        'caregiver_rate': this.copiedSchedule.caregiver_rate,
-                        'provider_fee': this.copiedSchedule.provider_fee,
-                        'notes': this.copiedSchedule.notes,
-                        'hours_type': this.copiedSchedule.hours_type,
-                        'overtime_duration': this.copiedSchedule.overtime_duration,
-                        'care_plan_id': this.copiedSchedule.care_plan_id || '',
-                    }
-                }
-                return this.initialValues;
+            schedule() {
+                if (this.copiedSchedule.starts_at) return this.copiedSchedule;
+                return this.selectedSchedule;
             },
 
             allyFee() {
@@ -394,68 +374,44 @@
                 return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm')
                     .add(duration, 'minutes')
                     .format('MM/DD/YYYY');
+            },
+
+            scheduledHours() {
+                if (this.form.duration) {
+                    return this.numberFormat(parseInt(this.form.duration) / 60);
+                }
+                return 0;
             }
         },
 
         methods: {
-            makeForm() {
-                if (this.selectedSchedule.id) {
-                    return this.makeEditForm();
-                }
-                return this.makeCreateForm();
-            },
 
-            makeCreateForm() {
+            makeForm() {
                 this.form = new Form({
-                    'starts_at':  "",
-                    'duration': 0,
-                    'caregiver_id': "",
-                    'client_id': "",
-                    'caregiver_rate': "",
-                    'provider_fee': "",
-                    'notes': "",
-                    'hours_type': "default",
-                    'overtime_duration': 0,
+                    'starts_at': this.schedule.starts_at || "",
+                    'duration': this.schedule.duration || 0,
+                    'caregiver_id': this.schedule.caregiver_id || "",
+                    'client_id': this.schedule.client_id || "",
+                    'caregiver_rate': this.schedule.caregiver_rate || "",
+                    'provider_fee': this.schedule.provider_fee || "",
+                    'notes': this.schedule.notes || "",
+                    'hours_type': this.schedule.hours_type || "default",
+                    'overtime_duration': this.schedule.overtime_duration || 0,
+                    'care_plan_id': this.schedule.care_plan_id || '',
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
                     'care_plan_id': "",
-                    ...this.defaultValues
                 });
-                if (this.form.starts_at) {
-                    this.setDateTimeFromEvent(moment(this.form.starts_at, 'X'));
-                }
+                this.setDateTimeFromSchedule();
             },
 
-            makeEditForm() {
-                this.form = new Form({
-                    'starts_at': this.selectedSchedule.starts_at,
-                    'duration': this.selectedSchedule.duration,
-                    'caregiver_id': this.selectedSchedule.caregiver_id,
-                    'client_id': this.selectedSchedule.client_id,
-                    'caregiver_rate': this.selectedSchedule.caregiver_rate,
-                    'provider_fee': this.selectedSchedule.provider_fee,
-                    'notes': this.selectedSchedule.notes,
-                    'hours_type': this.selectedSchedule.hours_type,
-                    'overtime_duration': this.selectedSchedule.overtime_duration,
-                    'care_plan_id': this.selectedSchedule.care_plan_id || '',
-                });
-                this.setDateTimeFromEvent(moment(this.selectedSchedule.starts_at, 'X'));
-            },
-
-            setDateTimeFromEvent(event = null) {
-                if (!event) {
-                    event = this.selectedEvent;
-                }
-                if (!this.form.duration) {
-                    this.form.duration = 60;
-                }
-                if (event) {
-                    event = moment(event);
-                    this.startDate = event.format('MM/DD/YYYY');
-                    this.startTime = (event._ambigTime) ? '09:00' : event.format('HH:mm');
-                    this.endTime = (event._ambigTime) ? '10:00' : moment(event).add(this.form.duration, 'minutes').format('HH:mm');
-                }
+            setDateTimeFromSchedule() {
+                let start = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
+                this.startDate = start.format('MM/DD/YYYY');
+                this.startTime = (start._ambigTime) ? '09:00' : start.format('HH:mm');
+                let end = moment(start).add(this.form.duration || 60, 'minutes');
+                this.endTime = (end._ambigTime) ? '10:00' : end.format('HH:mm');
             },
 
             submitForm() {
@@ -479,9 +435,9 @@
                 // Submit form
                 let url = '/business/schedule';
                 let method = 'post';
-                if (this.selectedSchedule.id) {
+                if (this.schedule.id) {
                     method = 'patch';
-                    url = url + '/' + this.selectedSchedule.id;
+                    url = url + '/' + this.schedule.id;
                 }
                 this.form.submit(method, url)
                     .then(response => {
@@ -497,8 +453,8 @@
             copySchedule() {
                 if (this.selectedSchedule.id) {
                     this.copiedSchedule = Object.assign({}, this.selectedSchedule);
-                    this.selectedSchedule = {};
-                    this.makeCreateForm();
+                    Vue.delete(this.copiedSchedule, 'id');
+                    this.makeForm();
                 }
             },
 
@@ -508,9 +464,9 @@
             },
 
             deleteSchedule() {
-                if (this.selectedSchedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                if (this.schedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
                     let form = new Form();
-                    form.submit('delete', '/business/schedule/' + this.selectedSchedule.id)
+                    form.submit('delete', '/business/schedule/' + this.schedule.id)
                         .then(response => {
                             this.refreshEvents();
                         });
@@ -643,11 +599,11 @@
 
             prefillRates()
             {
-                if (this.selectedSchedule) {
+                if (this.schedule.id) {
                     // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.selectedSchedule.caregiver_id == this.selectedCaregiver.id) {
-                        this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
-                        this.form.provider_fee = this.selectedSchedule.provider_fee
+                    if (this.schedule.caregiver_id == this.selectedCaregiver.id) {
+                        this.form.caregiver_rate = this.schedule.caregiver_rate;
+                        this.form.provider_fee = this.schedule.provider_fee
                         return;
                     }
                 }
@@ -677,7 +633,7 @@
                 this.makeForm();
 
                 // Use cg all mode if an caregiver is pre-selected
-                if (this.defaultValues.caregiver_id) {
+                if (this.schedule.caregiver_id) {
                     this.cgMode = 'all';
                 } else {
                     this.cgMode = 'client';
@@ -692,8 +648,12 @@
                 }
             },
 
-            selectedEvent() {
-                this.setDateTimeFromEvent();
+            startTime() {
+                this.form.duration = this.getDuration();
+            },
+
+            endTime() {
+                this.form.duration = this.getDuration();
             },
 
             'form.client_id': function(val, old_val) {

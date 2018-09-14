@@ -4,25 +4,27 @@ export default {
             scheduleModal: false,
             selectedSchedule: {},
             selectedEvent: null,
-            initialCreateValues: {},
         };
     },
 
     methods: {
-        createSchedule(date, jsEvent, view, resource) {
+        createSchedule({start, end, jsEvent, view, resource} = {}) {
             this.hidePreview();
-            this.scheduleModal = true;
-            this.selectedSchedule = {};
-            this.initialCreateValues = {
+
+            if (!start) {
+                start = moment('0900', 'HHmm');
+            }
+
+            start = start.local();
+            if (end) end = end.local();
+
+            this.selectedSchedule = {
+                'starts_at': start.format('YYYY-MM-DD HH:mm:ss'),
+                'duration': end ? end.diff(start, 'minutes') : 60,
                 'client_id': (this.filterClientId > 0) ? this.filterClientId : this.getInitialFromResource(resource, 'client_id'),
                 'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : this.getInitialFromResource(resource, 'caregiver_id'),
             };
-            if (date) {
-                this.selectedEvent = date;
-            }
-            else {
-                this.selectedEvent = moment().add(59, 'minutes').startOf('hour');
-            }
+            this.scheduleModal = true;
         },
 
         getInitialFromResource(resource, field) {

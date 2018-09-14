@@ -80,7 +80,7 @@
             :default-view="defaultView"
             :header="header"
             :config="config"
-            @day-click="createSchedule"
+            @event-created="createSchedule"
             @event-selected="editSchedule"
             @event-render="renderEvent"
             @view-render="onLoadView"
@@ -95,9 +95,7 @@
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
-                               :selected-event="selectedEvent"
                                :selected-schedule="selectedSchedule"
-                               :initial-values="initialCreateValues"
                                @refresh-events="fetchEvents(true)"
                                @clock-out="showClockOutModal()"
         />
