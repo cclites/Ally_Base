@@ -27,7 +27,7 @@ export default {
         },
 
         getInitialFromResource(resource, field) {
-            if (resource.id && this.resourceIdField === field) {
+            if (resource && resource.id && this.resourceIdField === field) {
                 return resource.id;
             }
             return "";
