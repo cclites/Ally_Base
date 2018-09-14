@@ -216,6 +216,7 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
+                fullscreen: false,
 
                 previewTop: 0,
                 previewLeft: 0,
@@ -258,8 +259,13 @@
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
             },
 
+            calendarHeight() {
+                return window.innerHeight - (this.fullscreen ? 180 : 400);
+            },
+
             config() {
                 return {
+                    height: this.calendarHeight,
                     eventBorderColor: '#333',
                     eventOverlap: false,
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
@@ -789,6 +795,7 @@
                 $element.toggleClass('fullscreen-calendar');
                 $('.left-sidebar').toggle();
                 $('.footer').toggle();
+                this.fullscreen = !this.fullscreen;
                 this.$refs.calendar.$emit('rerender-events');
             },
 
@@ -807,6 +814,10 @@
         },
 
         watch: {
+            calendarHeight(val) {
+                this.$refs.calendar.setOption('height', val);
+            },
+
             filterCaregiverId(val) {
                 if (this.rememberFilters) {
                     this.setLocalStorage('caregiver', val);

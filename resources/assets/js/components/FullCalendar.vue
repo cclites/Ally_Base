@@ -223,6 +223,10 @@
                 $(this.$refs.calendar).print();
             },
 
+            setOption(option, value) {
+                $(this.$el).fullCalendar('option', option, value);
+            },
+
             hideWeekButtonOnSmallDevices()
             {
                 let $button = $('.fc-agendaWeek-button');
