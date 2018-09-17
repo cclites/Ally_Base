@@ -66,7 +66,6 @@ Vue.component('admin-bucket-report', require('./components/admin/AdminBucketRepo
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-evv-report', require('./components/admin/AdminEvvReport'));
-Vue.component('admin-report', require('./components/admin/reports/ReportList'));
 Vue.component('admin-emails-report', require('./components/admin/reports/AdminEmailsReport'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
 Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
@@ -219,6 +218,8 @@ Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
+
+Vue.component('report-list', require('./components/ReportList'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));

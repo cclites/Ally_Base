@@ -1,9 +1,17 @@
 @extends('layouts.app')
 
+@section('title', 'Printable Schedules')
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/business/reports">Reports</a></li>
+    <li class="breadcrumb-item active">Printable Schedules</li>
+@endsection
+
 @section('content')
     <div class="card">
         <div class="card-header text-white bg-info">
-            <h4 class="text-white">Printable Schedule</h4>
+            <h4 class="text-white">Printable Schedules</h4>
         </div>
         <div class="card-body">
             <form action="/business/schedule/print" method="post" target="_blank">
