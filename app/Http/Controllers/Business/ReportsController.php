@@ -466,6 +466,11 @@ class ReportsController extends BaseController
         return response()->json($cards);
     }
 
+    /**
+     * Shows all caregivers missing bank accounts.
+     *
+     * @return Response
+     */
     public function caregiversMissingBankAccounts()
     {
         $caregivers = $this->business()
@@ -475,7 +480,26 @@ class ReportsController extends BaseController
             }])
             ->doesntHave('bankAccount')
             ->get();
+
         return view('business.reports.caregivers_missing_bank_accounts', compact('caregivers'));
+    }
+
+    /**
+     * Shows all clients missing a payment method.
+     *
+     * @return Response
+     */
+    public function clientsMissingPaymentMethods()
+    {
+        $clients = $this->business()
+            ->clients()
+            ->with(['shifts' => function ($query) {
+                $query->where('status', 'WAITING_FOR_CHARGE');
+            }])
+            ->whereNull('default_payment_id')
+            ->get();
+
+        return view('business.reports.clients-missing-payment-methods', compact('clients'));
     }
 
     public function printableSchedule()
