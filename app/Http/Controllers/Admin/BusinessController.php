@@ -117,6 +117,7 @@ class BusinessController extends Controller
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
+            'outgoing_sms_number' => 'string|nullable',
         ]);
 
         if ($business->update($businessData)) {
