@@ -286,3 +286,17 @@ label.large-checkbox {
   overflow: unset;
   overflow-y: auto!important;
 }
+
+.user-pills .badge-pill {
+  font-size: 12pt;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  margin-right: .5em;
+  margin-bottom: .5em;
+}
+.delete-btn {
+  color: red;
+  padding-left: 10px;
+}
