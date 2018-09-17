@@ -44,7 +44,7 @@ Vue.component('signature-pad', require('./components/SignaturePad'));
 Vue.component('select2', require('./components/Select2'));
 Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
-
+Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -219,6 +219,7 @@ Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
+Vue.component('business-sms-caregivers', require('./components/business/SmsCaregivers'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
