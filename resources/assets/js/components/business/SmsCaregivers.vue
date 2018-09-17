@@ -100,6 +100,11 @@ export default {
 
         async submit()
         {
+            if (this.selectedUsers.length == 0 && ! this.form.all) {
+                this.form.addError('recipients', 'You must add at least one recipient.');
+                return;
+            }
+            
             let confirmMessage = 'Are you sure you wish to send this SMS to the ' + this.selectedUsers.length + ' selected recipients?';
             if (this.form.all) {
                 confirmMessage = 'Are you sure you wish to send this SMS to all active Caregivers?';

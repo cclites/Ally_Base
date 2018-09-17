@@ -237,6 +237,7 @@ Route::group([
 
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/sms-caregivers', 'Business\CommunicationController@createSms')->name('communication.sms-caregivers');
+    Route::post('communication/sms-caregivers', 'Business\CommunicationController@sendSms')->name('communication.sms-caregivers.store');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbooksController@index')->name('quickbooks.index');
