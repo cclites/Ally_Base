@@ -38,17 +38,6 @@
                         </b-form-select>
                         <input-help :form="form" field="timezone" text="Select the city that matches their timezone."></input-help>
                     </b-form-group>
-                    <b-form-group label="Outgoing SMS Number" label-for="outgoing_sms_number">
-                        <b-form-input
-                                id="outgoing_sms_number"
-                                name="outgoing_sms_number"
-                                type="text"
-                                v-model="form.outgoing_sms_number"
-                                required
-                        >
-                        </b-form-input>
-                        <input-help :form="form" field="outgoing_sms_number" text="The number used to dispatch text messages."></input-help>
-                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Street Address" label-for="address1">
@@ -119,7 +108,6 @@
                     city: this.business.city,
                     state: this.business.state,
                     zip: this.business.zip,
-                    outgoing_sms_number: this.business.outgoing_sms_number,
                 })
             }
         },

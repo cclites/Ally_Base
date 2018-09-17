@@ -177,4 +177,22 @@ class BusinessController extends Controller
         $activeBusiness->set(Business::find($request->business_id));
         return new SuccessResponse('The active business has been switched.');
     }
+
+    /**
+     * Update the providers SMS settings.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Business  $business
+     * @return \Illuminate\Http\Response
+     */
+    public function updateSmsSettings(Request $request, Business $business)
+    {
+        $data = $request->validate([
+            'outgoing_sms_number' => 'string|nullable',
+        ]);
+
+        if ($business->update($data)) {
+            return new SuccessResponse('The business has been saved.');
+        }
+    }
 }

@@ -20,6 +20,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#point_of_contact" role="tab">Main Point of Contact</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#sms_settings" role="tab">SMS Settings</a>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -47,5 +50,12 @@
             </div>
         </div>
 
+        <div class="tab-pane" id="sms_settings" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <business-sms-settings :business="{{ $business OR '{}' }}" />
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

@@ -75,6 +75,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'outgoing_sms_number',
+                        label: 'SMS Number',
+                        sortable: true,
+                    },
+                    {
                         key: 'actions',
                         class: 'hidden-print'
                     }
