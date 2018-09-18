@@ -26,6 +26,7 @@ class UpdateScheduleRequest extends FormRequest
             'hours_type' => 'required|in:default,overtime,holiday',
             'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
             'care_plan_id' => 'nullable|exists:care_plans,id',
+            'status' => 'sometimes|required|string|min:2',
         ];
     }
 
@@ -34,7 +35,8 @@ class UpdateScheduleRequest extends FormRequest
         return [
             'starts_at.min' => 'You cannot edit past schedules.  The starting date must be today or later.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
-            'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.'
+            'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
+            'status' => 'The schedule status must be selected in the notes tab.',
         ];
     }
 }

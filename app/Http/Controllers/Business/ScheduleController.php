@@ -251,16 +251,7 @@ class ScheduleController extends BaseController
         }
 
         // set status
-        $status = request()->status;
-        if (!in_array($status, [
-            Schedule::OK,
-            Schedule::CAREGIVER_CANCELED,
-            Schedule::CLIENT_CANCELED,
-            Schedule::CONFIRMED,
-        ])) {
-            $status = Schedule::OK;
-        }
-        $schedule->update(['status' => $status]);
+        $schedule->update(['status' => request()->status]);
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
