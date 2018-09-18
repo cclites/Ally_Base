@@ -328,7 +328,7 @@ class ReportsController extends Controller
                 'name' => $item->nameLastFirst
             ];
         });
-        return view('business.reports.client_caregiver_visits', compact('clients','caregivers'));
+        return view('admin.reports.client_caregiver_visits', compact('clients','caregivers'));
     }
 
     public function clientCaregiverVisitsData(Request $request)
