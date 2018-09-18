@@ -238,7 +238,7 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\QuickbooksController@index')->name('quickbooks.index');
+    Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
