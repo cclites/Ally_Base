@@ -236,10 +236,10 @@ Route::group([
     Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 
     Route::resource('questions', 'Business\QuestionController');
+    Route::resource('tasks', 'Business\TasksController');
 
     /*Quickbooks*/
-    Route::get('quickbooks', 'Business\QuickbooksController@index')->name('quickbooks.index');
-    Route::resource('tasks', 'Business\TasksController');
+    Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
