@@ -17,14 +17,19 @@ class QuickBooksApiController extends Controller
 {
     public function index() {
         $auth = false;
+        $invoices = [];
+        $customers = [];
+
         if(session()->get('access')) {
             $access = unserialize(session()->get('access'));
+            $dataService = $this->getDataServiceMerged();
+            $invoices = $dataService->Query("SELECT * FROM Invoice");
+            $customers = $dataService->Query("SELECT * FROM Customer ORDERBY GivenName");
             $auth = true;
         }
 
-        $dataService = $this->getDataServiceMerged();
-        $invoices = json_encode($dataService->Query("SELECT * FROM Invoice"));
-        $customers = json_encode($dataService->Query("SELECT * FROM Customer ORDERBY GivenName"));
+        $invoices = json_encode($invoices);
+        $customers = json_encode($customers);
         $authorization = json_encode(['auth' => $auth]);
 
         return view('admin.quickbooks-api.index', compact('authorization', 'invoices', 'customers'));
