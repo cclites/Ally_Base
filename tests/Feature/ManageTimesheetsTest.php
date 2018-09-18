@@ -79,7 +79,7 @@ class ManageTimesheetsTest extends TestCase
     {
         $this->actingAs($this->caregiver->user);
 
-        $this->get(route('caregivers.timesheet'))
+        $this->get(route('timesheets.create'))
             ->assertStatus(200)
             ->assertSee('Submit Timesheet');
     }
@@ -91,7 +91,7 @@ class ManageTimesheetsTest extends TestCase
 
         $this->assertCount(0, $this->business->timesheets);
         
-        $this->post(route('caregivers.timesheet.store'), [
+        $this->post(route('timesheets.store'), [
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'entries' => [$this->generateEntry(), $this->generateEntry()],
@@ -110,7 +110,7 @@ class ManageTimesheetsTest extends TestCase
 
         $this->assertCount(0, $this->business->timesheets);
         
-        $this->post(route('caregivers.timesheet.store'), [
+        $this->post(route('timesheets.store'), [
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'entries' => [$this->generateEntry()],
@@ -126,7 +126,7 @@ class ManageTimesheetsTest extends TestCase
 
         $this->assertCount(0, SystemException::all());
         
-        $this->post(route('caregivers.timesheet.store'), [
+        $this->post(route('timesheets.store'), [
             'caregiver_id' => $this->caregiver->id,
             'client_id' => $this->client->id,
             'entries' => [$this->generateEntry()],

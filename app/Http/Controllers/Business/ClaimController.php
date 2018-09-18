@@ -11,7 +11,7 @@ class ClaimController extends BaseController
 {
     public function report()
     {
-        return view('business.reports.ltci_claims');
+        return view('business.reports.claims');
     }
 
     public function data(Request $request)

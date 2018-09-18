@@ -284,7 +284,7 @@ class ReportsController extends BaseController
                     'date' => $payment->created_at->format(\DateTime::ISO8601),
                 ];
             });
-        return view('business.reports.payments', compact('payments'));
+        return view('business.reports.payment-history', compact('payments'));
     }
 
     public function scheduled()
@@ -428,7 +428,7 @@ class ReportsController extends BaseController
             return $report->rows();
         }
 
-        return view('business.reports.client_caregivers');
+        return view('business.reports.client-caregiver-rates');
     }
 
     /**
@@ -445,7 +445,7 @@ class ReportsController extends BaseController
 
     public function creditCardExpiration()
     {
-        return view('business.reports.cc_expiration', compact('cards'));
+        return view('business.reports.credit-card-expiration', compact('cards'));
     }
 
     public function creditCards()
@@ -466,6 +466,11 @@ class ReportsController extends BaseController
         return response()->json($cards);
     }
 
+    /**
+     * Shows all caregivers missing bank accounts.
+     *
+     * @return Response
+     */
     public function caregiversMissingBankAccounts()
     {
         $caregivers = $this->business()
@@ -475,12 +480,31 @@ class ReportsController extends BaseController
             }])
             ->doesntHave('bankAccount')
             ->get();
+
         return view('business.reports.caregivers_missing_bank_accounts', compact('caregivers'));
+    }
+
+    /**
+     * Shows all clients missing a payment method.
+     *
+     * @return Response
+     */
+    public function clientsMissingPaymentMethods()
+    {
+        $clients = $this->business()
+            ->clients()
+            ->with(['shifts' => function ($query) {
+                $query->where('status', 'WAITING_FOR_CHARGE');
+            }])
+            ->whereNull('default_payment_id')
+            ->get();
+
+        return view('business.reports.clients-missing-payment-methods', compact('clients'));
     }
 
     public function printableSchedule()
     {
-        return view('business.reports.printable_schedule');
+        return view('business.reports.printable-schedules');
     }
 
     protected function addShiftReportFilters($report, Request $request)
