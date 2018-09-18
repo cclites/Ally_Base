@@ -9,7 +9,7 @@ use App\Responses\SuccessResponse;
 use App\Rules\ValidActivityCode;
 use Illuminate\Http\Request;
 
-class QuickbooksController extends BaseController
+class QuickbookController extends BaseController
 {
     public function index(Request $request)
     {

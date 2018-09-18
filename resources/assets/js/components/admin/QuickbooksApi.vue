@@ -54,7 +54,7 @@
                 <p class="text-danger" v-if="errors.has('description')">{{ errors.first('description') }}</p>
             </b-form-group>
 
-            <div class="loader" v-if="loading"></div>
+            <div class="c-loader m-0-a" v-if="loading"></div>
         </b-modal>
     </b-card>
 </template>
@@ -123,7 +123,7 @@
             },
 
             validateBeforeSubmit(evt) {
-                evt.preventDefault()
+                evt.preventDefault();
                 this.$validator.validateAll().then((result) => {
                     if (result) {
                         this.createInvoice();
@@ -219,32 +219,7 @@
 </script>
 
 <style lang="scss">
-    .loader {
-        border: 10px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 10px solid #1e88e5;
-        width: 80px;
-        height: 80px;
-        -webkit-animation: spin 2s linear infinite;
-        animation: spin 2s linear infinite;
+    .m-0-a {
         margin: 0 auto;
-    }
-
-    @-webkit-keyframes spin {
-        0% {
-            -webkit-transform: rotate(0deg);
-        }
-        100% {
-            -webkit-transform: rotate(360deg);
-        }
-    }
-
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
     }
 </style>

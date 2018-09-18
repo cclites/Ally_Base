@@ -224,6 +224,10 @@ Vue.component('report-list', require('./components/ReportList'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
+Vue.component('admin-nachaach-batch', require('./components/admin/nacha-ach/Batch'));
+Vue.component('admin-nachaach-batch-modal', require('./components/admin/nacha-ach/modal/NewBatch'));
+Vue.component('admin-nachaach-entry-details', require('./components/admin/nacha-ach/EntryDetail'));
+Vue.component('admin-nachaach-entry-detail-modal', require('./components/admin/nacha-ach/modal/NewEntryDetail'));
 
 /* Quickbooks */
 Vue.component('quickbooks', require('./components/business/quickbooks/Quickbooks'));
