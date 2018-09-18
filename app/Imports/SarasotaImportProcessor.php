@@ -168,8 +168,6 @@ END;
      */
     function skipRow($rowNo)
     {
-        // Skip if caregiver name is empty
-        $name = trim($this->getCaregiverName($rowNo));
-        return empty($name);
+        return empty(trim($this->worksheet->getValue('CaregiverLastName', $rowNo)));
     }
 }
