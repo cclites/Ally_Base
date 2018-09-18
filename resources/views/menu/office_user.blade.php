@@ -58,6 +58,15 @@
 </li>
 @endif
 <li>
+    <a href="{{ route('business.tasks.index') }}">
+        <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks
+            @if ($dueTasks = auth()->user()->role->dueTasks()->count())
+            <span class="badge badge-warning badge-notifications menu-badge">{{ $dueTasks }}</span>
+            @endif
+        </span>
+    </a>
+</li>
+<li>
     <a href="{{ route('business.exceptions.index') }}">
         <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions
             <span class="badge badge-danger badge-notifications menu-badge">

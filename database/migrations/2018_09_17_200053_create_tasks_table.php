@@ -19,8 +19,9 @@ class CreateTasksTable extends Migration
             $table->unsignedInteger('creator_id');
             $table->string('name', 255);
             $table->text('notes')->nullable();
-            $table->timestamp('due_date')->nullable();
             $table->unsignedInteger('assigned_user_id')->nullable();
+            $table->timestamp('due_date')->nullable();
+            $table->timestamp('completed_at')->nullable();
 
             $table->softDeletes();
             $table->timestamps();

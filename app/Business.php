@@ -174,9 +174,35 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(PaymentQueue::class);
     }
 
+    /**
+     * Get the office users relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function users()
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');
+    }
+
+    /**
+     * Get the office users relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function users()
+    {
+        return $this->belongsToMany(OfficeUser::class, 'business_office_users');
+    }
+
+    /**
+     * Get the office users relation (active only).
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function activeUsers()
+    {
+        return $this->users()
+            ->whereHas('user', function($q) { $q->where('active', 1); });
     }
 
     public function schedules()
@@ -220,6 +246,16 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     public function questions()
     {
         return $this->hasMany(Question::class);
+    }
+
+    /**
+     * A business can have many Tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
     }
 
     ///////////////////////////////////////////
@@ -474,6 +510,28 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         $sort = $lastFirst ? 'nameLastFirst' : 'name';
 
         $query = $activeOnly ? $this->activeClients() : $this->clients();
+
+        return $query->get()
+            ->sortBy($sort, SORT_NATURAL|SORT_FLAG_CASE)->map(function ($item) use($lastFirst) {
+                return [
+                    'id' => $item->id,
+                    'name' => $lastFirst ? $item->nameLastFirst : $item->name,
+                ];
+        })->values();
+    }
+
+    /**
+     * Get a simple list of office users names and ids.
+     *
+     * @param boolean $lastFirst
+     * @param boolean $activeOnly
+     * @return void
+     */
+    public function officeUserList($lastFirst = true, $activeOnly = false)
+    {
+        $sort = $lastFirst ? 'nameLastFirst' : 'name';
+
+        $query = $activeOnly ? $this->activeUsers() : $this->users();
 
         return $query->get()
             ->sortBy($sort, SORT_NATURAL|SORT_FLAG_CASE)->map(function ($item) use($lastFirst) {
