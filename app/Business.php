@@ -185,16 +185,6 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     }
 
     /**
-     * Get the office users relation.
-     *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function users()
-    {
-        return $this->belongsToMany(OfficeUser::class, 'business_office_users');
-    }
-
-    /**
      * Get the office users relation (active only).
      *
      * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
