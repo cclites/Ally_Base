@@ -84,8 +84,16 @@ class Schedule extends Model implements Auditable
     ///////////////////////////////////////
 
     const OK = 'OK';
+    const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+
+    ///////////////////////////////////////////
+    /// Related Shift Statuses
+    ///////////////////////////////////////////
+
+    const SCHEDULED = 'SCHEDULED';
+    const MISSED_CLOCK_IN = 'MISSED_CLOCK_IN';
     const CLOCKED_IN = 'CLOCKED_IN';
     const CONFIRMED = 'CONFIRMED';
     const UNCONFIRMED = 'UNCONFIRMED';
@@ -171,25 +179,35 @@ class Schedule extends Model implements Auditable
         return null;
     }
 
+    public function getShiftStatusAttribute()
+    {
+        return $this->getShiftStatus();
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
 
-    public function getStatus()
+    /**
+     * Return the related shift status
+     *
+     * @return string
+     */
+    public function getShiftStatus()
     {
-        if ($this->isClockedIn()) {
-            return self::CLOCKED_IN;
-        }
-
-        if ($this->isConfirmed()) {
-            return self::CONFIRMED;
-        }
-
         if ($this->shifts->count()) {
+            if ($this->isClockedIn()) {
+                return self::CLOCKED_IN;
+            }
+
+            if ($this->isConfirmed()) {
+                return self::CONFIRMED;
+            }
+
             return self::UNCONFIRMED;
         }
 
-        return $this->status ?? self::OK;
+        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
     }
 
     /**

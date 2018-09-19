@@ -197,6 +197,18 @@
                     <b-tab title="Notes" id="schedule-notes">
                         <b-row>
                             <b-col lg="12">
+                                <b-form-group label="Schedule Status" label-for="status" v-if="schedule.id">
+                                    <b-form-select
+                                            id="status"
+                                            name="status"
+                                            v-model="form.status"
+                                    >
+                                        <option value="OK">No Status</option>
+                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
+                                        <option value="CLIENT_CANCELED">Client Canceled</option>
+                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                    </b-form-select>
+                                </b-form-group>
                                 <b-form-group label="Schedule Notes" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
@@ -398,6 +410,7 @@
                     'hours_type': this.schedule.hours_type || "default",
                     'overtime_duration': this.schedule.overtime_duration || 0,
                     'care_plan_id': this.schedule.care_plan_id || '',
+                    'status': this.schedule.status || 'OK',
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
