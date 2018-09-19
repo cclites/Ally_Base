@@ -11,7 +11,13 @@
                     <option value="inactive">Inactive Caregivers</option>
                 </b-form-select>
             </b-col>
-            <b-col lg="6" class="text-right">
+            <b-col lg="3" v-if="multi_location.multiLocationRegistry == 'yes'">
+                <b-form-select v-model="location" class="mb-1" >
+                    <option value="all">All Locations</option>
+                    <option :value="multi_location.name">{{ multi_location.name }}</option>
+                </b-form-select>
+            </b-col>
+            <b-col :lg="multi_location.multiLocationRegistry == 'yes' ? '3' : '6'" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
@@ -51,6 +57,7 @@
     export default {
         props: {
             'caregivers': Array,
+            'multi_location': Object,
         },
 
         data() {
@@ -65,6 +72,7 @@
                 filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
+                location: 'all',
                 fields: [
                     {
                         key: 'firstname',
@@ -97,6 +105,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'location',
+                        label: 'Location',
+                        sortable: true,
+                    },
+                    {
                         key: 'actions',
                         class: 'hidden-print'
                     }
@@ -120,6 +133,7 @@
                         primaryphone: component.getPhone(caregiver).number,
                         zipcode: component.getAddress(caregiver).zip,
                         city: component.getAddress(caregiver).city,
+                        location: component.multi_location.name,
                         active: caregiver.user.active
                     }
                 })

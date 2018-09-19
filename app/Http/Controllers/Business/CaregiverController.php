@@ -43,7 +43,13 @@ class CaregiverController extends BaseController
         if ($request->expectsJson()) {
             return $caregivers;
         }
-        return view('business.caregivers.index', compact('caregivers'));
+
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.caregivers.index', compact('caregivers', 'multiLocation'));
     }
 
     /**

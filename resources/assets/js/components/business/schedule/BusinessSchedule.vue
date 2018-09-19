@@ -50,7 +50,7 @@
         <b-row>
             <b-col lg="6">
                 <b-row>
-                    <b-col cols="6" class="ml-auto" v-if="caregivers.length">
+                    <b-col cols="4" class="ml-auto" v-if="caregivers.length">
                         <b-form-group>
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
@@ -59,13 +59,19 @@
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="6" class="ml-auto" v-if="clients.length">
+                    <b-col cols="4" class="ml-auto" v-if="clients.length">
                         <b-form-group>
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
                                 <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
+                    </b-col>
+                    <b-col cols="4">
+                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                        </b-form-select>
                     </b-col>
                 </b-row>
             </b-col>
@@ -182,6 +188,7 @@
             'business': Object,
             'caregiver': Object,
             'client': Object,
+            'multi_location': Object,
             'defaultView': {
                 default() {
                     return 'timelineWeek';
@@ -228,6 +235,7 @@
                 preview: false,
                 hoverShift: {},
                 hoverTarget: '',
+                location: 'all',
             }
         },
 
