@@ -44,7 +44,7 @@ Vue.component('signature-pad', require('./components/SignaturePad'));
 Vue.component('select2', require('./components/Select2'));
 Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
-
+Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -96,6 +96,7 @@ Vue.component('business-office-user-modal', require('./components/admin/Business
 Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
+Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
 
 // Office User
 Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
@@ -219,6 +220,7 @@ Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
+Vue.component('business-sms-caregivers', require('./components/business/SmsCaregivers'));
 
 Vue.component('report-list', require('./components/ReportList'));
 

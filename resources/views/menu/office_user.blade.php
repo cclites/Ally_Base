@@ -57,6 +57,16 @@
     <a class="has-arrow" href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
 </li>
 @endif
+
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
+        <i class="fa fa-envelope"></i><span class="hide-menu">Communication</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.communication.sms-caregivers') }}">SMS Caregivers</a></li>
+    </ul>
+</li>
+
 <li>
     <a href="{{ route('business.exceptions.index') }}">
         <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions

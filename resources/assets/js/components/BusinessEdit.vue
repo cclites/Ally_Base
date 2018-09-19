@@ -116,13 +116,9 @@
         },
 
         methods: {
-
             submitForm() {
                 this.form.patch('/admin/businesses/' + this.business.id);
             }
-
         }
-
-
     }
 </script>

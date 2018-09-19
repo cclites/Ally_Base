@@ -237,6 +237,8 @@ Route::group([
     Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 
     Route::resource('questions', 'Business\QuestionController');
+    Route::get('communication/sms-caregivers', 'Business\CommunicationController@createSms')->name('communication.sms-caregivers');
+    Route::post('communication/sms-caregivers', 'Business\CommunicationController@sendSms')->name('communication.sms-caregivers.store');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
@@ -266,6 +268,7 @@ Route::group([
     Route::resource('businesses/{business}/users', 'Admin\OfficeUserController');
     Route::resource('businesses', 'Admin\BusinessController');
     Route::put('businesses/{business}/contact-info', 'Admin\BusinessController@updateContactInfo');
+    Route::patch('businesses/{business}/sms-settings', 'Admin\BusinessController@updateSmsSettings');
     Route::resource('clients', 'Admin\ClientController');
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');
