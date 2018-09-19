@@ -221,6 +221,9 @@ Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
 Vue.component('business-sms-caregivers', require('./components/business/SmsCaregivers'));
+Vue.component('business-task-list', require('./components/business/tasks/TaskList'));
+Vue.component('business-task-form', require('./components/business/tasks/TaskForm'));
+Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
 
 Vue.component('report-list', require('./components/ReportList'));
 

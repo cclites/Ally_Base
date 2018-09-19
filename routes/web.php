@@ -239,6 +239,7 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/sms-caregivers', 'Business\CommunicationController@createSms')->name('communication.sms-caregivers');
     Route::post('communication/sms-caregivers', 'Business\CommunicationController@sendSms')->name('communication.sms-caregivers.store');
+    Route::resource('tasks', 'Business\TasksController');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
