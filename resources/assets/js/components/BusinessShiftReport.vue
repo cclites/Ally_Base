@@ -84,6 +84,7 @@
                     </b-row>
                     <shift-history-table :fields="fields" :items="shiftHistoryItems">
                         <template slot="actions" scope="row">
+                            <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
                             <div v-if="row.item.id">
                                 <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                                 <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>

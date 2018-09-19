@@ -143,7 +143,7 @@
                             <option value="holiday">Holiday</option>
                             <option value="overtime">Overtime</option>
                         </b-form-select>
-                        <input-help :form="form" field="" text=""></input-help>
+                        <input-help :form="form" field="hours_type" text=""></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col md="7" sm="6">
@@ -593,16 +593,27 @@
                     let clockin = this.getClockedInMoment();
                     let clockout = this.getClockedOutMoment();
                     if (clockin.isValid() && clockout.isValid()) {
+                        let newVal = field === 'checked_in_time' ?  clockin : clockout;
+                        let diffFromShift = newVal.diff(moment.utc(this.shift[field]), 'minutes');
+                        // debugger;
                         let diffInMinutes = clockout.diff(clockin, 'minutes');
-                        console.log(diffInMinutes);
+
+                        this.form.clearError(field);
+
+                        if (diffFromShift === 0) {
+                            return;
+                        }
                         if (diffInMinutes < 0) {
                             this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
                         }
-                        else if (diffInMinutes > 600) {
-                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                        if (diffInMinutes === 0) {
+                            this.form.addError(field, 'Warning: This shift is set to a duration of 0 minutes.');
                         }
-                        else {
-                            this.form.clearError(field);
+                        else if (diffInMinutes > 1440) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 24 hours.');
+                        }
+                        else if (diffInMinutes > 720) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 12 hours.');
                         }
                     }
                     else {
@@ -670,14 +681,6 @@
             checked_in_date(val, old) {
                 if (old) {
                     this.validateTimeDifference('checked_in_time');
-                    if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
-                        this.checked_out_date = val;
-                    }
-                    else {
-                        if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
-                            this.checked_out_date = val;
-                        }
-                    }
                 }
             },
             checked_in_time(val, old) {
