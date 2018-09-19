@@ -12,7 +12,7 @@
     <quickbooks-api
         :connect="{{ $connect }}"
         :authorization="{{ $authorization }}"
-        :invoices="{{ $invoices }}"
-        :customers="{{ $customers }}">
+        :invoices="{{ json_encode($invoices) }}"
+        :customers="{{ json_encode($customers) }}">
     </quickbooks-api>
 @endsection

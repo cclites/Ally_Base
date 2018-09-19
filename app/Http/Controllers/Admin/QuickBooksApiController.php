@@ -3,14 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use Session;
-use URL;
-use Redirect;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 use QuickBooksOnline\API\DataService\DataService;
-use QuickBooksOnline\API\Core\Http\Serialization\XmlObjectSerializer;
 use QuickBooksOnline\API\Facades\Invoice;
 
 class QuickBooksApiController extends Controller
@@ -28,8 +24,6 @@ class QuickBooksApiController extends Controller
             $auth = true;
         }
 
-        $invoices = json_encode($invoices);
-        $customers = json_encode($customers);
         $authorization = json_encode(['auth' => $auth]);
 
         return view('admin.quickbooks-api.index', compact('authorization', 'invoices', 'customers'));

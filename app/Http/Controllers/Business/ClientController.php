@@ -53,7 +53,12 @@ class ClientController extends BaseController
             return $clients;
         }
 
-        return view('business.clients.index', compact('clients'));
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.clients.index', compact('clients', 'multiLocation'));
     }
 
     public function listNames()
