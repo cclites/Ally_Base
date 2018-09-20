@@ -243,6 +243,7 @@
         mounted() {
             // this.appendColorKey();
             this.loadFiltersData();
+            console.log(this.multi_location)
         },
 
         computed: {

@@ -105,6 +105,9 @@ Route::group([
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
+    Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
+    Route::post('care-match/client-matches/{client}', 'Business\CareMatchController@clientMatch');
+
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');
     Route::get('caregivers/applications/{application}', 'CaregiverApplicationController@show')->name('caregivers.applications.show');
@@ -138,6 +141,7 @@ Route::group([
     Route::get('clients/{client}/potential-caregivers', 'Business\ClientCaregiverController@potentialCaregivers')->name('clients.potential-caregivers');
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
+    Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

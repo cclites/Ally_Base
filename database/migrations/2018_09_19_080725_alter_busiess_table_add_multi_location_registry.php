@@ -13,7 +13,7 @@ class AlterBusiessTableAddMultiLocationRegistry extends Migration
      */
     public function up()
     {
-        Schema::table('business', function (Blueprint $table) {
+        Schema::table('businesses', function (Blueprint $table) {
             $table->enum('multi_location_registry', ['yes', 'no'])->default('no')->nullable();
         });
     }
@@ -25,7 +25,7 @@ class AlterBusiessTableAddMultiLocationRegistry extends Migration
      */
     public function down()
     {
-        Schema::table('business', function (Blueprint $table) {
+        Schema::table('businesses', function (Blueprint $table) {
             $table->dropColumn('multi_location_registry');
         });
     }

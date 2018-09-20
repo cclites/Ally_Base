@@ -21,6 +21,9 @@
     </ul>
 </li>
 <li>
+    <a href="{{ route('business.care-match') }}" ><i class="fa fa-clone"></i><span class="hide-menu">Care Match</span></a>
+</li>
+<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="/notes">Notes</a></li>

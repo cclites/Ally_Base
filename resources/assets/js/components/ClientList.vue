@@ -102,6 +102,7 @@
                         key: 'location',
                         label: 'Location',
                         sortable: true,
+                        class: 'location d-none'
                     },
                     {
                         key: 'actions',
@@ -113,6 +114,11 @@
 
         mounted() {
             this.totalRows = this.items.length;
+            if(this.multi_location.multiLocationRegistry == 'yes') {
+                document.querySelectorAll('.location').forEach(elem => {
+                    elem.classList.remove('d-none');
+                })
+            }
         },
 
         computed: {
