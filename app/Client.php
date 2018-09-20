@@ -248,37 +248,52 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasMany(CarePlan::class)->with('activities');
     }
 
-    /**
-     * Encrypt ssn on entry
-     *
-     * @param $value
-     */
+    public function preferences()
+    {
+        return $this->hasOne(ClientPreferences::class, 'id');
+    }
+
+
+    ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
     public function setSsnAttribute($value)
     {
         $this->attributes['ssn'] = Crypt::encrypt($value);
     }
 
-    /**
-     * Decrypt ssn on retrieval
-     *
-     * @return null|string
-     */
     public function getSsnAttribute()
     {
         return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
-    /**
-     * @return string
-     */
     public function getPaymentTypeAttribute()
     {
         return $this->getPaymentType();
     }
 
+    public function getAllyPercentageAttribute()
+    {
+        return $this->getAllyPercentage();
+    }
+
+
     ///////////////////////////////////////////
-    /// Mutators
+    /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Set the client's preference data
+     *
+     * @param array $data
+     * @return \App\ClientPreferences|false
+     */
+    public function setPreferences(array $data) {
+        $preferences = $this->preferences()->firstOrNew([]);
+        $preferences->fill($data);
+        return $preferences->save() ? $preferences : false;
+    }
 
     /**
      * @param $method
@@ -317,18 +332,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
         return $method;
     }
-
-    /**
-     * @return string
-     */
-    public function getAllyPercentageAttribute()
-    {
-        return $this->getAllyPercentage();
-    }
-
-    ///////////////////////////////////////////
-    /// Other Methods
-    ///////////////////////////////////////////
 
     /**
      * Retrieve the fake email address for a caregiver that does not have an email address.

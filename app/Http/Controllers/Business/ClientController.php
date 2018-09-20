@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
@@ -165,6 +166,7 @@ class ClientController extends BaseController
             'user',
             'addresses',
             'phoneNumbers',
+            'preferences',
             'bankAccounts',
             'creditCards',
             'payments',
@@ -441,5 +443,12 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    public function preferences(UpdateClientPreferencesRequest $request, Client $client) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        $client->setPreferences($request->validated());
     }
 }
