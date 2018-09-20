@@ -63,7 +63,7 @@
         <i class="fa fa-envelope"></i><span class="hide-menu">Communication</span>
     </a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('business.communication.sms-caregivers') }}">SMS Caregivers</a></li>
+        <li><a href="{{ route('business.communication.text-caregivers') }}">Text Caregivers</a></li>
     </ul>
 </li>
 

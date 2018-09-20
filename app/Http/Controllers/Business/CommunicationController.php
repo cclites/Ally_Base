@@ -13,22 +13,22 @@ use App\Responses\ErrorResponse;
 class CommunicationController extends Controller
 {
     /**
-     * Show sms-caregivers form.
+     * Show text-caregivers form.
      *
      * @return \Illuminate\Http\Response
      */
-    public function createSms()
+    public function createText()
     {
-        return view('business.communication.sms-caregivers');
+        return view('business.communication.text-caregivers');
     }
 
     /**
-     * Initiate SMS blast.
+     * Initiate SMS text blast.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function sendSms(Request $request)
+    public function sendText(Request $request)
     {
         $request->validate([
             'message' => 'required|string|min:5',
@@ -67,6 +67,6 @@ class CommunicationController extends Controller
             }
         }
 
-        return new SuccessResponse('SMS messages were successfully dispatched.');
+        return new SuccessResponse('Text messages were successfully dispatched.');
     }
 }

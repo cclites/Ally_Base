@@ -47,7 +47,7 @@
 
 <script>
 export default {
-    name: "BusinessSmsCaregivers",
+    name: "BusinessTextCaregivers",
 
     props: {
         'subject': Boolean,
@@ -117,7 +117,7 @@ export default {
             this.submitting = true;
             try {
                 this.form.recipients = this.getRecipients();
-                await this.form.post(`/business/communication/sms-caregivers`);
+                await this.form.post(`/business/communication/text-caregivers`);
                 this.resetForm();
             }
             catch (e) {}
