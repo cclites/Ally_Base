@@ -22,14 +22,8 @@
 </template>
 
 <script>
-import vSelect from 'vue-select';
-
 export default {
     name: 'UserSearchDropdown',
-
-    components: {
-        'v-select': vSelect
-    },
 
     props: {
         role: {
