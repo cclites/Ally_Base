@@ -60,14 +60,12 @@ class CareMatchController extends BaseController
             $this->careMatch->excludeOvertime($request->duration);
         }
 
-        if ($request->radius) {
-            $this->careMatch->matchesClientRadius($client, $request->radius);
-        }
+        $this->careMatch->matchesClientRadius($client, $request->radius ?: 500);
 
         if ($request->rating) {
             $this->careMatch->matchesRating($request->rating);
         }
 
-        return $this->careMatch->limit(51)->get($this->business());
+        return $this->careMatch->get($this->business());
     }
 }

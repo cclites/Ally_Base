@@ -147,12 +147,12 @@ class CareMatch
         $this->queryLocation($query);
         $this->queryOvertime($query);
 
-        $results = $query->limit($this->limit)->get();
+        $results = $query->get();
 
         $results = $this->filterActivities($results);
         $results = $this->filterLocation($results);
 
-        return $results;
+        return $results->take($this->limit)->values();
     }
 
     protected function queryRating($builder)
@@ -213,8 +213,8 @@ class CareMatch
 
     protected function filterLocation($results)
     {
-        foreach($results as $caregiver) {
-            if ($address = $caregiver->addresses->first()) {
+         foreach($results as $caregiver) {
+            if (isset($this->geocode[1]) && $address = $caregiver->addresses->first()) {
                 $caregiver->distance = $address->distanceTo($this->geocode[0], $this->geocode[1], 'mi');
             }
             if (!is_numeric($caregiver->distance)) {
@@ -222,13 +222,12 @@ class CareMatch
             }
         }
 
-        if (!$this->maximumMiles) return $results;
+        if ($this->maximumMiles) {
+            return $results->filter(function ($caregiver) {
+                return is_numeric($caregiver->distance) && $caregiver->distance <= $this->maximumMiles;
+            });
+        }
 
-        return $results->filter(function ($caregiver) {
-           if ($address = $caregiver->addresses->first()) {
-               $caregiver->distance = $address->distanceTo($this->geocode[0], $this->geocode[1], 'mi');
-           }
-           return is_numeric($caregiver->distance) && $caregiver->distance <= $this->maximumMiles;
-        });
+        return $results;
     }
 }
