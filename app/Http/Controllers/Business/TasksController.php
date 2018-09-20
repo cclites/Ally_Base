@@ -30,6 +30,8 @@ class TasksController extends Controller
             } elseif (request()->overdue == 1) {
                 $tasks->where('due_date', '<', Carbon::now()->toDateTimeString())
                     ->whereNull('completed_at');
+            } elseif (request()->complete == 1) {
+                $tasks->whereNotNull('completed_at');
             }
 
             return response()->json($tasks->latest()->get());
