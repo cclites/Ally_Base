@@ -17,8 +17,9 @@
                     <label for="status-filter" class="mr-1">Status:</label>
                     <b-form-select v-model="status" id="status-filter">
                         <option value="all">All</option>
-                        <option value="pending">Pending</option>
+                        <option value="pending">Open</option>
                         <option value="overdue">Overdue</option>
+                        <option value="complete">Complete</option>
                     </b-form-select>
                 <!-- </b-form-group> -->
             </b-col>
@@ -153,7 +154,7 @@
 
         computed: {
             getFields() {
-                if (this.status == 'all') {
+                if (this.status == 'all' || this.status == 'complete') {
                     return this.fields;
                 }
 
@@ -175,6 +176,8 @@
                     url += 'pending=1&';
                 } else if (this.status == 'overdue') {
                     url += 'overdue=1&';
+                } else if (this.status == 'complete') {
+                    url += 'complete=1&';
                 }
 
                 if (this.filter == 'created') {
