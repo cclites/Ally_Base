@@ -177,9 +177,13 @@
             // activate tab-pane for active section
             $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
         });
+
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
-            $('#calendar').fullCalendar('render');
+            if (e.target.hash === '#schedule') {
+                $('#calendar').fullCalendar('render');
+                $('#calendar').fullCalendar('refetchResources');
+            }
         });
 
         // Javascript to enable link to tab
