@@ -50,7 +50,8 @@ export default {
     name: "BusinessTextCaregivers",
 
     props: {
-        'subject': Boolean,
+        subject: false,
+        fillMessage: '',
     },
 
     data() {
@@ -64,6 +65,9 @@ export default {
 
     mounted() {
         this.resetForm();
+        if (this.fillMessage) {
+            this.form.message = this.fillMessage;
+        }
     },
 
     computed: {
@@ -137,7 +141,7 @@ export default {
                 recipients: [],
             });
             this.selectedUsers = [];
-        }
+        },
     }
 }
 </script>

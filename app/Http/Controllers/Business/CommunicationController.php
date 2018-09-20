@@ -9,9 +9,14 @@ use App\Caregiver;
 use App\Jobs\SendTextMessage;
 use App\User;
 use App\Responses\ErrorResponse;
+use App\Shift;
+use App\Schedule;
+use App\Traits\ActiveBusiness;
 
 class CommunicationController extends Controller
 {
+    use ActiveBusiness;
+
     /**
      * Show text-caregivers form.
      *
@@ -19,7 +24,30 @@ class CommunicationController extends Controller
      */
     public function createText()
     {
-        return view('business.communication.text-caregivers');
+        $message = '';
+
+        if (request()->preset == 'open-shift' && request()->has('shift_id')) {
+            $shift = Schedule::findOrFail(request()->shift_id);
+
+            if (! $this->businessHasSchedule($shift)) {
+                return new ErrorResponse(403, 'You do not have access to this shift.');
+            }
+
+            $clientName = $shift->client->name;
+            $date = $shift->starts_at->format('m/d/y');
+            $time = $shift->starts_at->format('g:i A');
+            
+            $location = '';
+            if ($shift->client->evvAddress) {
+                $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
+            }
+            $registryName = $shift->business->name;
+            $phone = $shift->business->phone1;
+            
+            $message = "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
+        }
+
+        return view('business.communication.text-caregivers', compact(['message']));
     }
 
     /**
