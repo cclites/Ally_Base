@@ -5,34 +5,34 @@
                 <b-row>
                     <b-col class="statusFilters">
                         <label>
-                            <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light">All Statuses</span>
+                            <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light" v-b-popover.hover="`Remove status filters to show all shift types. ${statusHelp}`">All Statuses</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled">Scheduled</span>
+                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled" v-b-popover.hover="`Filter future scheduled shifts. ${statusHelp}`">Scheduled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in">Clocked In</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in" v-b-popover.hover="`Filter shifts that a caregiver is currently clocked in to. ${statusHelp}`">Clocked In</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in">Missed Clock In</span>
+                            <input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in" v-b-popover.hover="`Filter shifts that have passed the start time and haven't been clocked in or created. ${statusHelp}`">Missed Clock In</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed">Confirmed</span>
+                            <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed" v-b-popover.hover="`Filter shifts that have a created and confirmed record. ${statusHelp}`">Confirmed</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed">Unconfirmed</span>
+                            <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed" v-b-popover.hover="`Filter shifts that have a created record but are still unconfirmed. ${statusHelp}`">Unconfirmed</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary open">Open Shift</span>
+                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary open" v-b-popover.hover="`Filter scheduled shifts without a referred caregiver. ${statusHelp}`">Open Shift</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Canceled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled" v-b-popover.hover="`Filter scheduled shifts that are marked Client Canceled. ${statusHelp}`">Client Canceled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Canceled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled" v-b-popover.hover="`Filter scheduled shifts that are marked Caregiver Canceled. ${statusHelp}`">CG Canceled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention">Attention Required</span>
+                            <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention" v-b-popover.hover="`Filter scheduled shifts that are marked Attention Required. ${statusHelp}`">Attention Required</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -236,6 +236,8 @@
                 hoverShift: {},
                 hoverTarget: '',
                 location: 'all',
+
+                statusHelp: "\nClick to activate or deactivate this filter."
             }
         },
 
