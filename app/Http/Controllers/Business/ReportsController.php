@@ -351,8 +351,12 @@ class ReportsController extends BaseController
     public function shiftsReport()
     {
         $activities = $this->business()->allActivities();
-        
-        return view('business.reports.shifts', compact('activities'));
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.reports.shifts', compact('activities', 'multiLocation'));
     }
 
     public function certificationExpirations(Request $request)

@@ -7,6 +7,7 @@ use App\CaregiverApplication;
 use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -43,7 +44,13 @@ class CaregiverController extends BaseController
         if ($request->expectsJson()) {
             return $caregivers;
         }
-        return view('business.caregivers.index', compact('caregivers'));
+
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.caregivers.index', compact('caregivers', 'multiLocation'));
     }
 
     /**
@@ -125,6 +132,7 @@ class CaregiverController extends BaseController
             'phoneNumbers',
             'user.documents',
             'bankAccount',
+            'availability',
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
@@ -340,13 +348,13 @@ class CaregiverController extends BaseController
         return new SuccessResponse('Caregiver updated');
     }
 
-    public function preferences(Request $request, Caregiver $caregiver)
+    public function preferences(UpdateCaregiverAvailabilityRequest $request, Caregiver $caregiver)
     {
         if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
-        $data = $request->validate(['preferences' => 'required|string']);
-        $caregiver->update($data);
+        $caregiver->update(['preferences' => $request->input('preferences')]);
+        $caregiver->setAvailability($request->validated());
         return new SuccessResponse('Caregiver updated');
     }
 }

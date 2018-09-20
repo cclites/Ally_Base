@@ -41,6 +41,10 @@
                             <option value="charged">Charged</option>
                             <option value="uncharged">Un-Charged</option>
                         </b-form-select>
+                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -173,6 +177,7 @@
             admin: Number,
             autoload: Number,
             imports: Array,
+            multi_location: Object,
             activities: {
                 type: Array,
                 default: [],
@@ -210,6 +215,7 @@
                 loaded: -1,
                 charge_status: '',
                 localStoragePrefix: 'shift_report_',
+                location: 'all'
             }
         },
 

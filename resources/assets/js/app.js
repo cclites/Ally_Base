@@ -99,7 +99,8 @@ Vue.component('admin-financial-summary', require('./components/admin/reports/Fin
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
 
 // Office User
-Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
+Vue.component('business-care-match', require('./components/business/BusinessCareMatch'));
+Vue.component('business-caregiver-availability-tab', require('./components/business/caregivers/BusinessCaregiverAvailabilityTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));
@@ -269,7 +270,7 @@ Vue.directive('tooltip', function(el, binding){
     $(el).tooltip({
         title: binding.value,
         placement: binding.arg,
-        trigger: 'hover'             
+        trigger: 'hover'
     })
 });
 

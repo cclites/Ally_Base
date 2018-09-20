@@ -12,7 +12,13 @@
     @endif
     @if($active_business)
         <?php $imports = is_admin() ? \App\Import::orderBy('id', 'DESC')->get()->toArray() : [] ?>
-        <business-shift-report :admin="{{ (int) is_admin() }}" :imports="{{ json_encode($imports) }}" :autoload="{{ (int) request('autoload', 1) }}" :activities="{{ $activities }}"></business-shift-report>
+        <business-shift-report
+            :admin="{{ (int) is_admin() }}"
+            :imports="{{ json_encode($imports) }}"
+            :autoload="{{ (int) request('autoload', 1) }}"
+            :multi_location="{{ json_encode($multiLocation) }}"
+            :activities="{{ $activities }}">
+        </business-shift-report>
         {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}
     @endif
 @endsection

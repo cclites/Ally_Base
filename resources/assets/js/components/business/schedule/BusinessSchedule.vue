@@ -8,10 +8,13 @@
                             <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light">All Statuses</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="OK"> <span class="badge badge-primary scheduled">Scheduled</span>
+                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled">Scheduled</span>
                         </label>
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in">Clocked In</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in">Missed Clock In</span>
                         </label>
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed">Confirmed</span>
@@ -20,13 +23,16 @@
                             <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed">Unconfirmed</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary">Open Shift</span>
+                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary open">Open Shift</span>
                         </label>
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Canceled</span>
                         </label>
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Canceled</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention">Attention Required</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -44,7 +50,7 @@
         <b-row>
             <b-col lg="6">
                 <b-row>
-                    <b-col cols="6" class="ml-auto" v-if="caregivers.length">
+                    <b-col cols="4" class="ml-auto" v-if="caregivers.length">
                         <b-form-group>
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
@@ -53,13 +59,19 @@
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="6" class="ml-auto" v-if="clients.length">
+                    <b-col cols="4" class="ml-auto" v-if="clients.length">
                         <b-form-group>
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
                                 <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
+                    </b-col>
+                    <b-col cols="4">
+                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                        </b-form-select>
                     </b-col>
                 </b-row>
             </b-col>
@@ -153,6 +165,7 @@
                     @change="updateStatus"
                 >
                     <option value="OK">No Status</option>
+                    <option value="ATTENTION_REQUIRED">Attention Required</option>
                     <option value="CLIENT_CANCELED">Client Canceled</option>
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                 </b-form-select>
@@ -175,6 +188,7 @@
             'business': Object,
             'caregiver': Object,
             'client': Object,
+            'multi_location': Object,
             'defaultView': {
                 default() {
                     return 'timelineWeek';
@@ -221,12 +235,14 @@
                 preview: false,
                 hoverShift: {},
                 hoverTarget: '',
+                location: 'all',
             }
         },
 
         mounted() {
             // this.appendColorKey();
             this.loadFiltersData();
+            console.log(this.multi_location)
         },
 
         computed: {
@@ -322,24 +338,14 @@
         },
 
         methods: {
-            isReadOnlyStatus(status) {
-                return !['OK', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED'].includes(status);
-            },
-
             getFilteredEvents() {
                 let events = this.events;
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
-                        if (this.statusFilters.includes(event.status)) {
-                            return true;
-                        }
-
-                        if (this.statusFilters.includes('OPEN') && event.caregiver_id == 0) {
-                            return true;
-                        }
-
-                        return false;
+                        return this.statusFilters.includes(event.status)
+                                || this.statusFilters.includes(event.shift_status)
+                                || (this.statusFilters.includes('OPEN') && event.caregiver_id == 0);
                     });
                 }
 
@@ -368,7 +374,7 @@
                     return {
                         id: item.id,
                         title: item.nameLastFirst,
-                        scheduled: kpis.OK.hours.toFixed(0),
+                        scheduled: kpis.SCHEDULED.hours.toFixed(0),
                         completed: kpis.COMPLETED.hours.toFixed(0),
                         projected: kpis.PROJECTED.hours.toFixed(0),
                     };
@@ -379,7 +385,7 @@
                     resources.unshift({
                         id: 0,
                         title: 'Open Shifts',
-                        scheduled: openkpis.OK.hours.toFixed(0),
+                        scheduled: openkpis.SCHEDULED.hours.toFixed(0),
                         completed: openkpis.COMPLETED.hours.toFixed(0),
                         projected: openkpis.PROJECTED.hours.toFixed(0),
                     });
@@ -400,7 +406,7 @@
                     events = events.filter(event => event[matchColumn] == matchValue);
                 }
 
-                let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED', 'CANCELED', 'OPEN'];
+                let statuses = ['SCHEDULED', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED', 'OPEN'];
                 let kpis = {};
 
                 for (let status of statuses) {
@@ -412,6 +418,7 @@
 
                 kpis = events.reduce((totals, event) => {
                     const calc = function (status) {
+                        if (!totals[status]) return;
                         totals[status] = {
                             hours: totals[status].hours + (event.duration / 60),
                             shifts: totals[status].shifts + 1
@@ -432,8 +439,8 @@
                 };
 
                 kpis['PROJECTED'] = {
-                    hours: kpis.COMPLETED.hours + kpis.CLOCKED_IN.hours + kpis.OK.hours,
-                    shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.OK.shifts
+                    hours: kpis.COMPLETED.hours + kpis.CLOCKED_IN.hours + kpis.SCHEDULED.hours,
+                    shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.SCHEDULED.shifts
                 };
 
                 kpis['CANCELED'] = {
@@ -617,7 +624,7 @@
                 let formatShifts = (status) => parseInt(this.kpis[status].shifts);
 
                 $element.html(`
-                Scheduled: ${formatHours('OK')} (${formatShifts('OK')}) &nbsp;
+                Scheduled: ${formatHours('SCHEDULED')} (${formatShifts('SCHEDULED')}) &nbsp;
                 Completed: ${formatHours('COMPLETED')} (${formatShifts('COMPLETED')}) &nbsp;
                 Projected: ${formatHours('PROJECTED')} (${formatShifts('PROJECTED')}) &nbsp;
                 Canceled: ${formatHours('CANCELED')} (${formatShifts('CANCELED')}) &nbsp;
@@ -919,8 +926,11 @@
 .badge.clocked_in { background-color: #27c11e; }
 .badge.confirmed { background-color: #849290; }
 .badge.unconfirmed { background-color: #D0C3D3; }
-.badge.client_canceled { background-color: #d9c01c; }
-.badge.cg_canceled { background-color: #d91c4e; }
+.badge.client_canceled { background-color: #730073; }
+.badge.cg_canceled { background-color: #ff8c00; }
+.badge.open { background-color: #d9c01c; }
+.badge.attention { background-color: #8b0000; }
+.badge.missed_clock_in { background-color: #b900b9; }
 
 .fc-time-area td, .fc-month-view tbody td {
     /* calendar borders, event borders are in the config property */
