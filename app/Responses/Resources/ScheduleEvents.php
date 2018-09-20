@@ -132,7 +132,7 @@ class ScheduleEvents implements Responsable
         $shift = $schedule->shift_status;
 
         if ($status === Schedule::ATTENTION_REQUIRED) {
-            return '#8b0000';
+            return '#C30000';
         }
 
         if ($shift === Schedule::CLOCKED_IN) {
@@ -140,7 +140,7 @@ class ScheduleEvents implements Responsable
         }
 
         if ($shift === Schedule::MISSED_CLOCK_IN) {
-            return '#b900b9';
+            return '#E468B2';
         }
 
         if ($shift === Schedule::CONFIRMED) {

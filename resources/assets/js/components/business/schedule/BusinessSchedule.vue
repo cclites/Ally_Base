@@ -583,10 +583,14 @@
                 this.hoverShift = {};
             },
 
+            scrollSelector() {
+                return $('.fc-widget-content .fc-scroller').last();
+            },
+
             saveScrollPosition() {
                 this.scroll = {
-                    top: $(window).scrollTop(),
-                    left: $(window).scrollLeft(),
+                    top: this.scrollSelector().scrollTop(),
+                    left: this.scrollSelector().scrollLeft(),
                 }
             },
 
@@ -600,8 +604,8 @@
             setScrollPosition() {
                 if (this.scroll.top !== null) {
                     console.log('setScrollPosition called');
-                    $(window).scrollTop(this.scroll.top);
-                    $(window).scrollLeft(this.scroll.left);
+                    this.scrollSelector().scrollTop(this.scroll.top);
+                    this.scrollSelector().scrollLeft(this.scroll.left);
                 }
             },
 
@@ -929,8 +933,8 @@
 .badge.client_canceled { background-color: #730073; }
 .badge.cg_canceled { background-color: #ff8c00; }
 .badge.open { background-color: #d9c01c; }
-.badge.attention { background-color: #8b0000; }
-.badge.missed_clock_in { background-color: #b900b9; }
+.badge.attention { background-color: #C30000; }
+.badge.missed_clock_in { background-color: #E468B2; }
 
 .fc-time-area td, .fc-month-view tbody td {
     /* calendar borders, event borders are in the config property */
