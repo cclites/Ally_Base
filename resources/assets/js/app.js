@@ -134,7 +134,6 @@ Vue.component('bulk-edit-schedule-modal', require('./components/business/schedul
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
-Vue.component('schedule-item-popup', require('./components/business/schedule/ScheduleItemPopup'));
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
