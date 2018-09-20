@@ -34,7 +34,7 @@ class UpdateClientRequest extends FormRequest
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
             'ssn' => ['nullable', new ValidSSN()],
-            'gender' => 'nullable|string',
+            'gender' => 'nullable|in:M,F',
             'onboard_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',

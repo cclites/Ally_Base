@@ -241,8 +241,8 @@ Route::group([
     Route::post('timesheet/{timesheet}/deny', 'Business\TimesheetController@deny')->name('timesheet.deny');
 
     Route::resource('questions', 'Business\QuestionController');
-    Route::get('communication/sms-caregivers', 'Business\CommunicationController@createSms')->name('communication.sms-caregivers');
-    Route::post('communication/sms-caregivers', 'Business\CommunicationController@sendSms')->name('communication.sms-caregivers.store');
+    Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
+    Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
     Route::resource('tasks', 'Business\TasksController');
 
     /*Quickbooks*/

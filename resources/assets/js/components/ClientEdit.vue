@@ -44,8 +44,8 @@
                     </b-form-group>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
-                            <b-form-radio value="m">Male</b-form-radio>
-                            <b-form-radio value="f">Female</b-form-radio>
+                            <b-form-radio value="M">Male</b-form-radio>
+                            <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
                 </b-col>

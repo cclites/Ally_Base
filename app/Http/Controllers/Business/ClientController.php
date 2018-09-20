@@ -118,6 +118,7 @@ class ClientController extends BaseController
                 'client_type' => 'required',
                 'ssn' => ['nullable', new ValidSSN()],
                 'onboard_status' => 'required',
+                'gender' => 'nullable|in:M,F',
             ]
         );
 

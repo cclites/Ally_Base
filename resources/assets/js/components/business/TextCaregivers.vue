@@ -47,10 +47,11 @@
 
 <script>
 export default {
-    name: "BusinessSmsCaregivers",
+    name: "BusinessTextCaregivers",
 
     props: {
-        'subject': Boolean,
+        subject: false,
+        fillMessage: '',
     },
 
     data() {
@@ -64,6 +65,9 @@ export default {
 
     mounted() {
         this.resetForm();
+        if (this.fillMessage) {
+            this.form.message = this.fillMessage;
+        }
     },
 
     computed: {
@@ -117,7 +121,7 @@ export default {
             this.submitting = true;
             try {
                 this.form.recipients = this.getRecipients();
-                await this.form.post(`/business/communication/sms-caregivers`);
+                await this.form.post(`/business/communication/text-caregivers`);
                 this.resetForm();
             }
             catch (e) {}
@@ -137,7 +141,7 @@ export default {
                 recipients: [],
             });
             this.selectedUsers = [];
-        }
+        },
     }
 }
 </script>

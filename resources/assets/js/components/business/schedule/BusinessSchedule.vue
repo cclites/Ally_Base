@@ -140,6 +140,7 @@
                     <h4 v-else>OPEN</h4>
                 </div>
                 <div class="ml-auto" v-if="hoverShift.client_address">
+                    <a v-if="! hoverShift.caregiver_name" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
                     <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                 </div>
             </div>
@@ -955,7 +956,7 @@
   background-color: #fff;
   padding: 1em;
   border: 1px solid #456789;
-  width: 400px;
+  width: 420px;
 }
 </style>
 
