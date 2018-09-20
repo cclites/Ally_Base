@@ -17,7 +17,7 @@
             <table class="table table-bordered">
                 <thead>
                 <tr class="top-row">
-                    <th rowspan="2">Assigned Caregiver</th>
+                    <th rowspan="2">Referred Caregiver</th>
                     <th colspan="4" class="text-center hourly">Hourly</th>
                     <!-- <th colspan="4" class="text-center daily">Daily</th> -->
                     <th rowspan="2"></th>
