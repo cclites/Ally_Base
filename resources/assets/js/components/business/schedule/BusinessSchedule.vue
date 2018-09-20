@@ -68,9 +68,9 @@
                         </b-form-group>
                     </b-col>
                     <b-col cols="4">
-                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                        <b-form-select v-model="location" class="mb-1" v-if="business.multi_location_registry == 'yes'">
                             <option value="all">All Locations</option>
-                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                            <option :value="business.name">{{ business.name }}</option>
                         </b-form-select>
                     </b-col>
                 </b-row>
@@ -188,7 +188,6 @@
             'business': Object,
             'caregiver': Object,
             'client': Object,
-            'multi_location': Object,
             'defaultView': {
                 default() {
                     return 'timelineWeek';
@@ -242,7 +241,6 @@
         mounted() {
             // this.appendColorKey();
             this.loadFiltersData();
-            console.log(this.multi_location)
         },
 
         computed: {
