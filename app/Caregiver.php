@@ -76,7 +76,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'bank_account_id',
         'title',
         'hire_date',
-        'gender',
         'onboarded',
         'misc',
         'preferences',

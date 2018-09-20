@@ -41,6 +41,12 @@
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                     </b-form-group>
+                    <b-form-group label="Gender">
+                        <b-form-radio-group id="gender" v-model="form.gender">
+                            <b-form-radio value="M">Male</b-form-radio>
+                            <b-form-radio value="F">Female</b-form-radio>
+                        </b-form-radio-group>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -163,6 +169,7 @@
                     date_of_birth: (this.caregiver.user.date_of_birth) ? moment(this.caregiver.user.date_of_birth).format('L') : null,
                     no_email: false,
                     ssn: this.caregiver.masked_ssn,
+                    gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id
                 }),
                 passwordModal: false,
