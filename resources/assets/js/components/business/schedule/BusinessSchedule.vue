@@ -936,6 +936,10 @@
 .badge.attention { background-color: #C30000; }
 .badge.missed_clock_in { background-color: #E468B2; }
 
+.fc-resource-area .fc-scroller {
+    /* disables horizontal scroll bar in resource area */
+    overflow: hidden !important;
+}
 .fc-time-area td, .fc-month-view tbody td {
     /* calendar borders, event borders are in the config property */
     border-color: rgba(120, 130, 140, 0.25) !important;
