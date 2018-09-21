@@ -16,7 +16,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.caregivers.index') }}">Caregiver List</a></li>
         <li><a href="{{ route('business.caregivers.create') }}">Add Caregiver</a></li>
-        <li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>
+        {{--<li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>--}}
         <li><a href="{{ route('business.caregivers.applications') }}">Applications</a></li>
     </ul>
 </li>
