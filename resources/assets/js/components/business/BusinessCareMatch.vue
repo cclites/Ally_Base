@@ -117,7 +117,7 @@
             </template>
             <template slot="actions" scope="row">
                 <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
-                <b-button :href="'/business/clients/' + form.client_id" size="sm">View Client</b-button>
+                <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
             </template>
         </b-table>
     </div>
@@ -251,5 +251,11 @@
                 return this.startDate && this.startTime ? `${this.startDate} ${this.startTime}` : null;
             }
         },
+
+        watch: {
+            clientId() {
+                this.matches = [];
+            }
+        }
     }
 </script>
