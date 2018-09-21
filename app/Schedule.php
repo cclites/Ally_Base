@@ -206,8 +206,9 @@ class Schedule extends Model implements Auditable
 
             return self::UNCONFIRMED;
         }
-
-        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        // Suppress missed clock in status for now
+//        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        return self::SCHEDULED;
     }
 
     /**

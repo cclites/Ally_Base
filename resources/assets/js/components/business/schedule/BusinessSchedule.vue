@@ -13,9 +13,9 @@
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in" v-b-popover.hover="`Filter shifts that a caregiver is currently clocked in to. ${statusHelp}`">Clocked In</span>
                         </label>
-                        <label>
-                            <input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in" v-b-popover.hover="`Filter shifts that have passed the start time and haven't been clocked in or created. ${statusHelp}`">Missed Clock In</span>
-                        </label>
+                        <!--<label>-->
+                            <!--<input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in" v-b-popover.hover="`Filter shifts that have passed the start time and haven't been clocked in or created. ${statusHelp}`">Missed Clock In</span>-->
+                        <!--</label>-->
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed" v-b-popover.hover="`Filter shifts that have a created and confirmed record. ${statusHelp}`">Confirmed</span>
                         </label>
