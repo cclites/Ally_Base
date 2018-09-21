@@ -108,7 +108,7 @@ Route::group([
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
-    Route::post('care-match/client-matches/{client}', 'Business\CareMatchController@clientMatch');
+    Route::post('care-match/client-matches/{client}', 'Business\CareMatchController@clientMatch')->name('care-match.client-matches');
 
     Route::get('caregivers/applications', 'CaregiverApplicationController@index')->name('caregivers.applications');
     Route::post('caregivers/applications/search', 'CaregiverApplicationController@search')->name('caregivers.applications.search');

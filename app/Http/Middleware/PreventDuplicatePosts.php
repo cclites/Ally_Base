@@ -13,6 +13,25 @@ class PreventDuplicatePosts
     protected $handle;
 
     /**
+     * Array of URI paths to exclude from the middleware
+     *
+     * @var array
+     */
+    protected $excludedPaths = [
+        'login',
+        'logout',
+    ];
+
+    /**
+     * Array of route names to exclude from the middleware
+     *
+     * @var array
+     */
+    protected $excludedRoutes = [
+        'business.care-match.client-matches',
+    ];
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -23,9 +42,9 @@ class PreventDuplicatePosts
     {
         $method = $request->getMethod();
         $path = $request->path();
-        $excludedPaths = ['login', 'logout'];
 
-        if ($method === 'POST' && !in_array($path, $excludedPaths)) {
+
+        if ($method === 'POST' && !$this->isExcluded()) {
             // Generate a hash
             $hash = md5($path . serialize($request->input()));
 
@@ -62,5 +81,10 @@ class PreventDuplicatePosts
 
     function releaseLock() {
         flock($this->openLockFile(), LOCK_UN);
+    }
+
+    function isExcluded() {
+        return in_array(\Request::path(), $this->excludedPaths)
+        || in_array(\Route::currentRouteName(), $this->excludedRoutes);
     }
 }
