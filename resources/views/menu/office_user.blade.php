@@ -78,7 +78,7 @@
             </div>
             <div class="col-4">
                 @if ($dueTasks = auth()->user()->role->dueTasks()->count())
-                    <span class="badge badge-warning badge-notifications menu-badge hide-menu">{{ $dueTasks }}</span>
+                    <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ $dueTasks }}</span>
                 @endif
             </div>
         </div>
@@ -91,7 +91,7 @@
                 <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions</span>
             </div>
             <div class="col-4">
-                <span class="badge badge-danger badge-notifications menu-badge hide-menu">
+                <span class="badge badge-danger badge-notifications hide-menu menu-badge">
                     {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
                 </span>
             </div>
