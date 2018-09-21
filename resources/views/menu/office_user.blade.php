@@ -2,7 +2,7 @@
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li> -->
 <li>
-    <a class="has-arrow" href="/business/schedule" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule </span></a>
+    <a href="/business/schedule" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule </span></a>
 </li>
 <li>
     <a class="has-arrow" href="{{ route('business.clients.index') }}" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Clients</span></a>
@@ -31,7 +31,7 @@
     </ul>
 </li>
  <li>
-    <a class="has-arrow" href="{{ route('business.reports.shifts') }}?autoload=0" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
+    <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
 <li>
     <a href="{{ route('business.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
@@ -57,7 +57,7 @@
 </li>
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
 <li>
-    <a class="has-arrow" href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
+    <a href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
 </li>
 @endif
 
@@ -72,21 +72,30 @@
 
 <li>
     <a href="{{ route('business.tasks.index') }}">
-        <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks
-            @if ($dueTasks = auth()->user()->role->dueTasks()->count())
-            <span class="badge badge-warning badge-notifications menu-badge">{{ $dueTasks }}</span>
-            @endif
-        </span>
+        <div class="row">
+            <div class="col-8">
+                <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
+            </div>
+            <div class="col-4">
+                @if ($dueTasks = auth()->user()->role->dueTasks()->count())
+                    <span class="badge badge-warning badge-notifications menu-badge hide-menu">{{ $dueTasks }}</span>
+                @endif
+            </div>
+        </div>
     </a>
 </li>
 <li>
     <a href="{{ route('business.exceptions.index') }}">
-        <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions
-            <span class="badge badge-danger badge-notifications menu-badge">
-            {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
-            </span>
-        </span>
-
+        <div class="row">
+            <div class="col-8">
+                <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions</span>
+            </div>
+            <div class="col-4">
+                <span class="badge badge-danger badge-notifications menu-badge hide-menu">
+                    {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
+                </span>
+            </div>
+        </div>
     </a>
 </li>
 <li>
