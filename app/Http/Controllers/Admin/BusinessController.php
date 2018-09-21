@@ -55,6 +55,7 @@ class BusinessController extends Controller
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
             'multi_location_registry' => 'string',
+            'type' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
         $businessData['country'] = 'US';
@@ -118,6 +119,7 @@ class BusinessController extends Controller
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
             'multi_location_registry' => 'string',
+            'type' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
 

@@ -54,6 +54,18 @@
                         </b-form-select>
                         <input-help :form="form" field="multi_location_registry" text="Select multi location registry "></input-help>
                     </b-form-group>
+                    <b-form-group label="Type" label-for="type">
+                        <b-form-select
+                                id="type"
+                                name="type"
+                                v-model="form.type">
+
+                            <option value="Registry">Registry</option>
+                            <option value="Agency">Agency</option>
+                            <option value="DRA">DRA</option>
+                        </b-form-select>
+                        <input-help :form="form" field="type" text="Select provider type"></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Street Address" label-for="address1">
@@ -194,6 +206,7 @@
                     phone1: null,
                     timezone: 'America/New_York',
                     multi_location_registry: 'no',
+                    type: 'Registry',
                     address1: null,
                     city: null,
                     state: null,
