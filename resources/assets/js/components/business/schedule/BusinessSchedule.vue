@@ -8,7 +8,7 @@
                             <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light" v-b-popover.hover="`Remove status filters to show all shift types. ${statusHelp}`">All Statuses</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled" v-b-popover.hover="`Filter future scheduled shifts. ${statusHelp}`">Scheduled</span>
+                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled" v-b-popover.hover="`Filter scheduled shifts with no status change. ${statusHelp}`">Scheduled</span>
                         </label>
                         <label>
                             <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in" v-b-popover.hover="`Filter shifts that a caregiver is currently clocked in to. ${statusHelp}`">Clocked In</span>
