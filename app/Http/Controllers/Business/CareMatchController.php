@@ -27,8 +27,8 @@ class CareMatchController extends BaseController
     function clientMatch(Request $request, Client $client)
     {
         $request->validate([
-            'starts_at' => 'required|date',
-            'duration' => 'integer',
+            'starts_at' => 'nullable|date',
+            'duration' => 'nullable|integer|required_if:exclude_overtime,1',
             'matches_activities' => 'boolean',
             'matches_preferences' => 'boolean',
             'matches_existing_assignments' => 'boolean',
@@ -36,16 +36,14 @@ class CareMatchController extends BaseController
             'radius' => 'nullable|numeric',
             'rating' => 'nullable|numeric',
         ], [
-            'starts_at.*' => 'The start date and time are required.',
-            'duration.*' => 'The start time and end time are required.',
+            'starts_at.*' => 'The start date and time are invalid.',
+            'duration.*' => 'The start time and end time are required for overtime calculations.',
         ]);
+
+        $this->careMatch->matchesClientActivities($client, $request->matches_activities ? 0.9 : 0);
 
         if ($request->starts_at) {
             $this->careMatch->matchesTime(Carbon::parse($request->starts_at, $this->business()->timezone), $request->duration);
-        }
-
-        if ($request->matches_activities) {
-            $this->careMatch->matchesClientActivities($client);
         }
 
         if ($request->matches_preferences) {

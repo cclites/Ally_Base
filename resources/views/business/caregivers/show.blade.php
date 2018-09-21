@@ -40,9 +40,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
         </li>
-        {{--<li class="nav-item">--}}
-            {{--<a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>--}}
-        {{--</li>--}}
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
         </li>
@@ -70,7 +70,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
-                {{--<a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>--}}
+                <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment_statement" role="tab">Pay Statements</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
@@ -133,7 +133,7 @@
             <business-caregiver-availability-tab :caregiver="{{ $caregiver }}"></business-caregiver-availability-tab>
         </div>
         <div class="tab-pane" id="skills" role="tabpanel">
-
+            <business-caregiver-skills-tab :caregiver="{{ $caregiver }}"></business-caregiver-skills-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"

@@ -134,6 +134,7 @@ class CaregiverController extends BaseController
             'user.documents',
             'bankAccount',
             'availability',
+            'skills',
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
@@ -357,6 +358,21 @@ class CaregiverController extends BaseController
         }
         $caregiver->update(['preferences' => $request->input('preferences')]);
         $caregiver->setAvailability($request->validated());
-        return new SuccessResponse('Caregiver updated');
+        return new SuccessResponse('Caregiver availability preferences updated');
+    }
+
+    public function skills(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->businessHasCaregiver($caregiver)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $request->validate([
+            'skills' => 'array',
+            'skills.*' => 'integer',
+        ]);
+
+        $caregiver->skills()->sync($request->skills);
+        return new SuccessResponse('Caregiver skills updated');
     }
 }
