@@ -101,6 +101,7 @@ Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSe
 // Office User
 Vue.component('business-care-match', require('./components/business/BusinessCareMatch'));
 Vue.component('business-caregiver-availability-tab', require('./components/business/caregivers/BusinessCaregiverAvailabilityTab'));
+Vue.component('business-caregiver-skills-tab', require('./components/business/caregivers/BusinessCaregiverSkillsTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));

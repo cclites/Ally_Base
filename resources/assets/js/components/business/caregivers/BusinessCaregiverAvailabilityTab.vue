@@ -62,7 +62,7 @@
                     <b-form-textarea v-model="form.preferences" rows="3"></b-form-textarea>
                 </b-form-group>
                 <b-form-group>
-                    <b-btn @click="updatePreferences">Save</b-btn>
+                    <b-btn @click="updatePreferences" variant="success">Save</b-btn>
                 </b-form-group>
             </b-card>
         </b-col>

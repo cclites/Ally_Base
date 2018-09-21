@@ -20,6 +20,11 @@ class CareMatch
     protected $activities = [];
 
     /**
+     * @var float
+     */
+    protected $minimumMatch = 0;
+
+    /**
      * @var array
      */
     protected $preferences = [];
@@ -65,17 +70,18 @@ class CareMatch
         return $this;
     }
 
-    function matchesActivities(array $activities)
+    function matchesActivities(array $activities, $minimumMatch=0)
     {
         $this->activities = $activities;
+        $this->minimumMatch = $minimumMatch;
         return $this;
     }
 
-    function matchesClientActivities(Client $client)
+    function matchesClientActivities(Client $client, $minimumMatch=0)
     {
-        $activities = [];
-        // todo
-        return $this->matchesActivities($activities);
+        $planIds = $client->carePlans()->pluck('id');
+        $activities = \DB::table('care_plan_activities')->whereIn('care_plan_id', $planIds)->groupBy('activity_id')->pluck('activity_id');
+        return $this->matchesActivities($activities->toArray(), $minimumMatch);
     }
 
     function matchesPreferences(array $preferences)
@@ -141,8 +147,10 @@ class CareMatch
             $query = $this->forClient->caregivers();
         }
 
+        $this->queryActivities($query);
         $this->queryPreferences($query);
         $this->queryRating($query);
+        $this->queryAvailabilityPreferences($query);
         $this->queryTime($query);
         $this->queryLocation($query);
         $this->queryOvertime($query);
@@ -160,10 +168,34 @@ class CareMatch
         return;
     }
 
+    protected function queryAvailabilityPreferences($builder)
+    {
+        if (!$this->duration && !$this->startsAt) return;
+
+        $builder->where(function($q) {
+            $q->whereHas('availability', function ($q) {
+                if ($this->startsAt) {
+                    $q->where(function ($q) {
+                        $end = $this->startsAt->copy()->addMinutes($this->duration);
+                        $q->where($this->getTimeOfDay($this->startsAt->hour), 1)
+                          ->orWhere($this->getTimeOfDay($end->hour), 1);
+                    });
+                    $q->where($this->startsAt->format('l'), 1);
+                }
+                if ($this->duration) {
+                    $hours = $this->duration / 60;
+                    $q->where('minimum_shift_hours', '<=', $hours)
+                        ->where('maximum_shift_hours', '>=', $hours);
+                }
+            })->orDoesntHave('availability');
+        });
+    }
+
     protected function queryTime($builder)
     {
         if (!$this->startsAt) return;
 //        $builder->whereRaw('caregivers.id NOT IN (SELECT caregiver_id FROM schedules s9 WHERE s9.starts_at BETWEEN ? and ? OR s9.starts_at + INTERVAL s9.duration BETWEEN ? AND ?)')
+
         $builder->whereDoesntHave('schedules', function($q) {
             $end = $this->startsAt->copy()->addMinutes($this->duration);
             $q->whereRaw('(starts_at BETWEEN ? and ? OR starts_at + INTERVAL duration MINUTE BETWEEN ? AND ?)',
@@ -171,9 +203,23 @@ class CareMatch
         });
     }
 
+    protected function getTimeOfDay($hour)
+    {
+        if ($hour > 20 || $hour < 6) return 'night';
+        if ($hour < 12) return 'morning';
+        if ($hour < 17) return 'afternoon';
+        return 'evening';
+    }
+
     protected function queryLocation($builder)
     {
         return;
+    }
+
+    protected function queryActivities($builder)
+    {
+        // Just eager load for the filter method
+        $builder->with('skills');
     }
 
     protected function queryPreferences($builder)
@@ -201,11 +247,24 @@ class CareMatch
 
     protected function filterActivities($results)
     {
-        // todo
+        $total = count($this->activities);
 
-        foreach($results as $result) {
+        foreach($results as $caregiver) {
             // percentage
-            $result->activity_match = 100;
+            $matching = [];
+            if ($caregiver->skills->count()) {
+                $matching = array_filter($this->activities, function($id) use ($caregiver) {
+                    return $caregiver->skills->contains($id);
+                });
+            }
+            $caregiver->activity_match = $total ? round(count($matching) / $total, 2) : 0;
+            $caregiver->setRelation('skills', null); // unset relation
+        }
+
+        if ($this->minimumMatch > 0) {
+            return $results->filter(function ($caregiver) {
+                return $caregiver->activity_match >= $this->minimumMatch;
+            });
         }
 
         return $results;

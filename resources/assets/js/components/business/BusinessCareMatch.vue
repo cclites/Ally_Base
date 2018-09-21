@@ -77,13 +77,13 @@
                             <span class="custom-control-description">Located within a <input type="number" step="1" v-model="radius" :disabled="!radiusEnabled" class="form-control-sm col-2"/> mile radius of service address</span>
                         </label>
                     </div>
-                    <div class="form-check">
-                        <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="ratingEnabled">
-                            <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver has a rating of at least <input type="number" step="1" :disabled="!ratingEnabled" v-model="rating" class="form-control-sm col-2"/> stars</span>
-                        </label>
-                    </div>
+                    <!--<div class="form-check">-->
+                        <!--<label class="custom-control custom-checkbox">-->
+                            <!--<input type="checkbox" class="custom-control-input" v-model="ratingEnabled">-->
+                            <!--<span class="custom-control-indicator"></span>-->
+                            <!--<span class="custom-control-description">Caregiver has a rating of at least <input type="number" step="1" :disabled="!ratingEnabled" v-model="rating" class="form-control-sm col-2"/> stars</span>-->
+                        <!--</label>-->
+                    <!--</div>-->
                 </b-col>
             </b-row>
             <b-row>
@@ -124,7 +124,11 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             clients: Array,
             schedule: {
@@ -165,11 +169,13 @@
                     {
                         key: 'distance',
                         sortable: true,
+                        formatter: this.numberFormat
                     },
                     {
                         key: 'activity_match',
                         label: 'ADL Match',
                         sortable: true,
+                        formatter: val => numeral(val).format('0%'),
                     },
                     'rating',
                     'actions'
@@ -205,7 +211,7 @@
 
             makeForm() {
                 return new Form({
-                    starts_at: `${this.startDate} ${this.startTime}`,
+                    starts_at: this.getStartsAt(),
                     duration: this.getDuration(),
                     matches_activities: this.activities,
                     matches_preferences: this.preferences,
@@ -217,7 +223,7 @@
             },
 
             async submitForm() {
-                await this.getMatches(() => this.showForm = false);
+                await this.getMatches();
             },
 
             getDuration() {
@@ -225,8 +231,8 @@
                     if (this.startTime === this.endTime) {
                         return 1440; // have 12:00am to 12:00am = 24 hours
                     }
-                    let start = moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm');
-                    let end = moment(this.startDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
+                    let start = moment('09/21/2018 ' + this.startTime, 'MM/DD/YYYY HH:mm');
+                    let end = moment('09/21/2018 ' + this.endTime, 'MM/DD/YYYY HH:mm');
                     console.log(start, end);
                     if (start && end) {
                         if (end.isBefore(start)) {
@@ -240,6 +246,10 @@
                 }
                 return null;
             },
+
+            getStartsAt() {
+                return this.startDate && this.startTime ? `${this.startDate} ${this.startTime}` : null;
+            }
         },
     }
 </script>
