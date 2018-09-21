@@ -275,7 +275,8 @@
             },
 
             calendarHeight() {
-                return window.innerHeight - (this.fullscreen ? 180 : 400);
+                return 'auto';
+                // return window.innerHeight - (this.fullscreen ? 180 : 400);
             },
 
             config() {
@@ -585,6 +586,7 @@
             },
 
             scrollSelector() {
+                if (this.calendarHeight === 'auto') return $(window);
                 return $('.fc-widget-content .fc-scroller').last();
             },
 
