@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <admin-report :role="{{ $role }}"></admin-report>
+    <report-list :role="{{ $role }}" />
 @endsection

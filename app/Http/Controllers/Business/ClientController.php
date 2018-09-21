@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
@@ -53,7 +54,12 @@ class ClientController extends BaseController
             return $clients;
         }
 
-        return view('business.clients.index', compact('clients'));
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.clients.index', compact('clients', 'multiLocation'));
     }
 
     public function listNames()
@@ -112,6 +118,7 @@ class ClientController extends BaseController
                 'client_type' => 'required',
                 'ssn' => ['nullable', new ValidSSN()],
                 'onboard_status' => 'required',
+                'gender' => 'nullable|in:M,F',
             ]
         );
 
@@ -165,6 +172,7 @@ class ClientController extends BaseController
             'user',
             'addresses',
             'phoneNumbers',
+            'preferences',
             'bankAccounts',
             'creditCards',
             'payments',
@@ -441,5 +449,12 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    public function preferences(UpdateClientPreferencesRequest $request, Client $client) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        $client->setPreferences($request->validated());
     }
 }

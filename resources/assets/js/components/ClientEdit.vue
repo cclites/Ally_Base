@@ -44,8 +44,8 @@
                     </b-form-group>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
-                            <b-form-radio value="m">Male</b-form-radio>
-                            <b-form-radio value="f">Female</b-form-radio>
+                            <b-form-radio value="M">Male</b-form-radio>
+                            <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
                 </b-col>
@@ -182,19 +182,52 @@
 
             <b-row>
                 <b-col>
-                    <p class="h6">Preferred Hospital</p>
+                    <p class="h6">Preferences</p>
                     <hr>
                 </b-col>
             </b-row>
+
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Hospital Name">
-                        <b-form-input id="hospital_name"
-                                      v-model="form.hospital_name"></b-form-input>
+                    <b-form-group label="Caregiver Gender" label-for="gender">
+                        <b-form-select id="gender"
+                                       v-model="preferences.gender"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="F">Female</option>
+                            <option value="M">Male</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="gender" text="" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver License/Certification" label-for="license">
+                        <b-form-select id="license"
+                                       v-model="preferences.license"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="CNA">CNA</option>
+                            <option value="HHA">HHA</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="license" text="" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver's Spoken Language" label-for="language">
+                        <b-form-select id="language"
+                                       v-model="preferences.language"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="language" text="" />
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Contact Phone">
+                    <b-form-group label="Preferred Hospital">
+                        <b-form-input id="hospital_name"
+                                      v-model="form.hospital_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Hospital Phone Number">
                         <b-form-input id="hospital_number"
                                       v-model="form.hospital_number"></b-form-input>
                     </b-form-group>
@@ -341,6 +374,11 @@
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                 }),
+                preferences: new Form({
+                    gender: this.client.preferences ? this.client.preferences.gender : null,
+                    license: this.client.preferences ? this.client.preferences.license : null,
+                    language: this.client.preferences ? this.client.preferences.language : null,
+                }),
                 passwordModal: false,
                 active: this.client.active,
                 deactivateModal: false,
@@ -376,16 +414,14 @@
                     .then(response => this.active = 1);
             },
 
-            saveProfile() {
-                let component = this;
-                this.form.patch('/business/clients/' + this.client.id)
-                    .then(function(response) {
-                        if (component.form.ssn) component.form.ssn = '***-**-****';
-                        if (component.form.wasModified('onboard_status')) {
-                            component.client.onboard_status = component.form.onboard_status;
-                            component.lastStatusDate = moment.utc().format();
-                        }
-                    })
+            async saveProfile() {
+                await this.form.patch('/business/clients/' + this.client.id)
+                this.preferences.post('/business/clients/' + this.client.id + '/preferences');
+                if (this.form.ssn) this.form.ssn = '***-**-****';
+                if (this.form.wasModified('onboard_status')) {
+                    this.client.onboard_status = this.form.onboard_status;
+                    this.lastStatusDate = moment.utc().format();
+                }
             },
 
             sendConfirmation() {

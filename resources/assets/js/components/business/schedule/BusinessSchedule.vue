@@ -5,28 +5,34 @@
                 <b-row>
                     <b-col class="statusFilters">
                         <label>
-                            <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light">All Statuses</span>
+                            <input type="checkbox" v-model="allStatuses" :value="1"> <span class="badge badge-light" v-b-popover.hover="`Remove status filters to show all shift types. ${statusHelp}`">All Statuses</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="OK"> <span class="badge badge-primary scheduled">Scheduled</span>
+                            <input type="checkbox" v-model="statusFilters" value="SCHEDULED"> <span class="badge badge-primary scheduled" v-b-popover.hover="`Filter scheduled shifts with no status change. ${statusHelp}`">Scheduled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in">Clocked In</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLOCKED_IN"> <span class="badge badge-primary clocked_in" v-b-popover.hover="`Filter shifts that a caregiver is currently clocked in to. ${statusHelp}`">Clocked In</span>
+                        </label>
+                        <!--<label>-->
+                            <!--<input type="checkbox" v-model="statusFilters" value="MISSED_CLOCK_IN"> <span class="badge badge-primary missed_clock_in" v-b-popover.hover="`Filter shifts that have passed the start time and haven't been clocked in or created. ${statusHelp}`">Missed Clock In</span>-->
+                        <!--</label>-->
+                        <label>
+                            <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed" v-b-popover.hover="`Filter shifts that have a created and confirmed record. ${statusHelp}`">Confirmed</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CONFIRMED"> <span class="badge badge-primary confirmed">Confirmed</span>
+                            <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed" v-b-popover.hover="`Filter shifts that have a created record but are still unconfirmed. ${statusHelp}`">Unconfirmed</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="UNCONFIRMED"> <span class="badge badge-primary unconfirmed">Unconfirmed</span>
+                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary open" v-b-popover.hover="`Filter scheduled shifts without a referred caregiver. ${statusHelp}`">Open Shift</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="OPEN"> <span class="badge badge-primary">Open Shift</span>
+                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled" v-b-popover.hover="`Filter scheduled shifts that are marked Client Canceled. ${statusHelp}`">Client Canceled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CLIENT_CANCELED"> <span class="badge badge-primary client_canceled">Client Canceled</span>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled" v-b-popover.hover="`Filter scheduled shifts that are marked Caregiver Canceled. ${statusHelp}`">CG Canceled</span>
                         </label>
                         <label>
-                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled">CG Canceled</span>
+                            <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention" v-b-popover.hover="`Filter scheduled shifts that are marked Attention Required. ${statusHelp}`">Attention Required</span>
                         </label>
                     </b-col>
                 </b-row>
@@ -44,7 +50,7 @@
         <b-row>
             <b-col lg="6">
                 <b-row>
-                    <b-col cols="6" class="ml-auto" v-if="caregivers.length">
+                    <b-col cols="4" class="ml-auto" v-if="caregivers.length">
                         <b-form-group>
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
                                 <option :value="-1">All Caregivers</option>
@@ -53,13 +59,19 @@
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="6" class="ml-auto" v-if="clients.length">
+                    <b-col cols="4" class="ml-auto" v-if="clients.length">
                         <b-form-group>
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
                                 <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
+                    </b-col>
+                    <b-col cols="4">
+                        <b-form-select v-model="location" class="mb-1" v-if="business.multi_location_registry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="business.name">{{ business.name }}</option>
+                        </b-form-select>
                     </b-col>
                 </b-row>
             </b-col>
@@ -80,7 +92,7 @@
             :default-view="defaultView"
             :header="header"
             :config="config"
-            @day-click="createSchedule"
+            @event-created="createSchedule"
             @event-selected="editSchedule"
             @event-render="renderEvent"
             @view-render="onLoadView"
@@ -95,9 +107,7 @@
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
-                               :selected-event="selectedEvent"
                                :selected-schedule="selectedSchedule"
-                               :initial-values="initialCreateValues"
                                @refresh-events="fetchEvents(true)"
                                @clock-out="showClockOutModal()"
         />
@@ -130,6 +140,7 @@
                     <h4 v-else>OPEN</h4>
                 </div>
                 <div class="ml-auto" v-if="hoverShift.client_address">
+                    <a v-if="! hoverShift.caregiver_name" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
                     <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                 </div>
             </div>
@@ -155,6 +166,7 @@
                     @change="updateStatus"
                 >
                     <option value="OK">No Status</option>
+                    <option value="ATTENTION_REQUIRED">Attention Required</option>
                     <option value="CLIENT_CANCELED">Client Canceled</option>
                     <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
                 </b-form-select>
@@ -216,12 +228,16 @@
                 filterText: '',
                 statusFilters: [],
                 allStatuses: 1,
-                test: 'yeaaaaaaaaaa',
+                fullscreen: false,
+
                 previewTop: 0,
                 previewLeft: 0,
                 preview: false,
-                hoverShift: {client: {}},
+                hoverShift: {},
                 hoverTarget: '',
+                location: 'all',
+
+                statusHelp: "\nClick to activate or deactivate this filter."
             }
         },
 
@@ -258,8 +274,14 @@
                 return this.isFilterable && this.business && this.business.calendar_remember_filters;
             },
 
+            calendarHeight() {
+                return 'auto';
+                // return window.innerHeight - (this.fullscreen ? 180 : 400);
+            },
+
             config() {
                 return {
+                    height: this.calendarHeight,
                     eventBorderColor: '#333',
                     eventOverlap: false,
                     nextDayThreshold: this.business ? this.business.calendar_next_day_threshold : '09:00:00',
@@ -318,24 +340,14 @@
         },
 
         methods: {
-            isReadOnlyStatus(status) {
-                return !['OK', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED'].includes(status);
-            },
-
             getFilteredEvents() {
                 let events = this.events;
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
-                        if (this.statusFilters.includes(event.status)) {
-                            return true;
-                        }
-
-                        if (this.statusFilters.includes('OPEN') && event.caregiver_id == 0) {
-                            return true;
-                        }
-
-                        return false;
+                        return this.statusFilters.includes(event.status)
+                                || this.statusFilters.includes(event.shift_status)
+                                || (this.statusFilters.includes('OPEN') && event.caregiver_id == 0);
                     });
                 }
 
@@ -364,7 +376,7 @@
                     return {
                         id: item.id,
                         title: item.nameLastFirst,
-                        scheduled: kpis.OK.hours.toFixed(0),
+                        scheduled: kpis.SCHEDULED.hours.toFixed(0),
                         completed: kpis.COMPLETED.hours.toFixed(0),
                         projected: kpis.PROJECTED.hours.toFixed(0),
                     };
@@ -375,7 +387,7 @@
                     resources.unshift({
                         id: 0,
                         title: 'Open Shifts',
-                        scheduled: openkpis.OK.hours.toFixed(0),
+                        scheduled: openkpis.SCHEDULED.hours.toFixed(0),
                         completed: openkpis.COMPLETED.hours.toFixed(0),
                         projected: openkpis.PROJECTED.hours.toFixed(0),
                     });
@@ -396,7 +408,7 @@
                     events = events.filter(event => event[matchColumn] == matchValue);
                 }
 
-                let statuses = ['OK', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'COMPLETED', 'PROJECTED', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED', 'CANCELED', 'OPEN'];
+                let statuses = ['SCHEDULED', 'CLOCKED_IN', 'CONFIRMED', 'UNCONFIRMED', 'CLIENT_CANCELED', 'CAREGIVER_CANCELED', 'OPEN'];
                 let kpis = {};
 
                 for (let status of statuses) {
@@ -408,6 +420,7 @@
 
                 kpis = events.reduce((totals, event) => {
                     const calc = function (status) {
+                        if (!totals[status]) return;
                         totals[status] = {
                             hours: totals[status].hours + (event.duration / 60),
                             shifts: totals[status].shifts + 1
@@ -428,8 +441,8 @@
                 };
 
                 kpis['PROJECTED'] = {
-                    hours: kpis.COMPLETED.hours + kpis.CLOCKED_IN.hours + kpis.OK.hours,
-                    shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.OK.shifts
+                    hours: kpis.COMPLETED.hours + kpis.CLOCKED_IN.hours + kpis.SCHEDULED.hours,
+                    shifts: kpis.COMPLETED.shifts + kpis.CLOCKED_IN.shifts + kpis.SCHEDULED.shifts
                 };
 
                 kpis['CANCELED'] = {
@@ -504,67 +517,83 @@
                 } else {
                     target = $(jsEvent.currentTarget).parent('a');
                 }
-                let vm = this;
 
-                this.showPreview(event, target, vm);
+                _.debounce((event, target, vm) => {
+                    axios.get('/business/schedule/' + event.id + '/preview')
+                        .then(response => {
+                            vm.hoverShift = response.data;
+                            vm.showPreview(target, event.id);
+                        })
+                        .catch(function(error) {
+                            vm.hoverShift = {};
+                        });
+                }, 350)(event, target, this);
             },
 
-            showPreview: _.debounce((event, target, vm) => {
-                axios.get('/business/schedule/' + event.id + '/preview')
-                    .then(response => {
-                        vm.hoverShift = response.data;
-                        vm.showPopup(target, event.id);
-                    })
-                    .catch(function(error) {
-                        vm.hoverShift = null;
-                    });
-            }, 350),
+            showPreview(target, shift_id) {
+                // the first next tick is used to allow the data to update and change the size
+                // of the preview window before it is used to judge where to place it on the screen
+                Vue.nextTick().then(() => {
+                    let left = target.offset().left - $('#schedule-card').offset().left;
+                    let top = target.offset().top + target.height() - $('#schedule-card').offset().top;
 
-            showPopup(target, shift_id) {
-                this.hoverTarget = target;
-
-                this.previewLeft = (this.hoverTarget.offset().left - $('#schedule-card').offset().left) + "px";
-                this.previewTop = (this.hoverTarget.offset().top + this.hoverTarget.height() - $('#schedule-card').offset().top) + "px";
-                this.preview = true;
-
-                let vm = this;
-
-                Vue.nextTick()
-                .then(() => {
-                    var body = document.getElementsByTagName('body');
-                    var eventRect = this.hoverTarget.get(0).getBoundingClientRect();
-                    var divRect = document.getElementById('preview').getBoundingClientRect();
-
-                    let handler = function(e) {
-                        if (vm.hoverShift.id == shift_id) {
-                            let extra = 5;
-                            if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
-                                e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
-                                    return;
-                            } 
-
-                            if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
-                                e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
-                                    return;
-                            }
-                        }
-                        
-                        vm.preview = false;
-                        document.body.removeEventListener('mousemove', handler);
+                    let availableWidth = document.documentElement.clientWidth - $('#schedule-card').offset().left;
+                    let availableHeight = document.documentElement.clientHeight - $('#schedule-card').offset().top + document.documentElement.scrollTop;
+                  
+                    if (left + $('#preview').outerWidth() > availableWidth) {
+                        left = left - $('#preview').outerWidth() + target.width();
                     }
-                    document.body.addEventListener('mousemove', handler, false);
+
+                    if (top + $('#preview').outerHeight() > availableHeight) {
+                        top = top - $('#preview').outerHeight() - target.height();
+                    }
+
+                    this.previewLeft = left + "px";
+                    this.previewTop = top + "px";
+                    this.preview = true;
+
+                    // this next tick is used because the window need to be visible on the screen
+                    // in order to check if the mouse is hovering over it
+                    Vue.nextTick().then(() => {
+                        var eventRect = target.get(0).getBoundingClientRect();
+                        var divRect = document.getElementById('preview').getBoundingClientRect();
+
+                        let handler = function(e) {
+                            if (this.hoverShift.id == shift_id) {
+                                let extra = 5;
+                                if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
+                                    e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
+                                        return;
+                                } 
+
+                                if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
+                                    e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
+                                        return;
+                                }
+                            }
+                            
+                            this.preview = false;
+                            document.body.removeEventListener('mousemove', handler);
+                        }.bind(this);
+                        document.body.addEventListener('mousemove', handler, false);
+                    });
                 });
             },
 
             hidePreview() {
-                this.hoverShift = {};
                 this.preview = false;
+                this.hoverShift = {};
+            },
+
+            scrollSelector() {
+                if (this.calendarHeight === 'auto') return $(window);
+                return $('.fc-widget-content .fc-scroller').last();
             },
 
             saveScrollPosition() {
                 this.scroll = {
-                    top: $(window).scrollTop(),
-                    left: $(window).scrollLeft(),
+                    top: this.scrollSelector().scrollTop(),
+                    left: this.scrollSelector().scrollLeft(),
                 }
             },
 
@@ -578,8 +607,8 @@
             setScrollPosition() {
                 if (this.scroll.top !== null) {
                     console.log('setScrollPosition called');
-                    $(window).scrollTop(this.scroll.top);
-                    $(window).scrollLeft(this.scroll.left);
+                    this.scrollSelector().scrollTop(this.scroll.top);
+                    this.scrollSelector().scrollLeft(this.scroll.left);
                 }
             },
 
@@ -602,7 +631,7 @@
                 let formatShifts = (status) => parseInt(this.kpis[status].shifts);
 
                 $element.html(`
-                Scheduled: ${formatHours('OK')} (${formatShifts('OK')}) &nbsp;
+                Scheduled: ${formatHours('SCHEDULED')} (${formatShifts('SCHEDULED')}) &nbsp;
                 Completed: ${formatHours('COMPLETED')} (${formatShifts('COMPLETED')}) &nbsp;
                 Projected: ${formatHours('PROJECTED')} (${formatShifts('PROJECTED')}) &nbsp;
                 Canceled: ${formatHours('CANCELED')} (${formatShifts('CANCELED')}) &nbsp;
@@ -688,22 +717,25 @@
             },
 
             renderEvent: function( event, element, view ) {
-                let note = $('<span/>', {
-                    class: 'fc-note-btn',
-                    html: $('<i/>', {
-                        class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
-                    }),
-                });
+                let note = '';
 
-                let vm = this;
-                note.click((e) => {
-                    vm.selectedEvent = event;
-                    this.preview = false;
-                    this.hoverShift = {client:{}},
-                    vm.notesModal = true;
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
+                if (event.note) {
+                    note = $('<span/>', {
+                        class: 'fc-note-btn',
+                        html: $('<i/>', {
+                            class: event.note ? 'fa fa-commenting' : 'fa fa-comment',
+                        }),
+                    });
+
+                    let vm = this;
+                    note.click((e) => {
+                        vm.selectedEvent = event;
+                        vm.hidePreview();
+                        vm.notesModal = true;
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                }
 
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
@@ -779,12 +811,14 @@
                 $element.toggleClass('fullscreen-calendar');
                 $('.left-sidebar').toggle();
                 $('.footer').toggle();
+                this.fullscreen = !this.fullscreen;
                 this.$refs.calendar.$emit('rerender-events');
             },
 
             caregiverViewToggle() {
                 this.caregiverView = !this.caregiverView;
                 $('.fc-caregiverView-button').text(this.caregiverView ? 'Client View' : 'Caregiver View');
+                $('.fc-resource-area .fc-cell-text:first').text(this.caregiverView ? 'Caregiver' : 'Client');
                 this.fetchEvents();
             },
 
@@ -797,6 +831,10 @@
         },
 
         watch: {
+            calendarHeight(val) {
+                this.$refs.calendar.setOption('height', val);
+            },
+
             filterCaregiverId(val) {
                 if (this.rememberFilters) {
                     this.setLocalStorage('caregiver', val);
@@ -895,9 +933,16 @@
 .badge.clocked_in { background-color: #27c11e; }
 .badge.confirmed { background-color: #849290; }
 .badge.unconfirmed { background-color: #D0C3D3; }
-.badge.client_canceled { background-color: #d9c01c; }
-.badge.cg_canceled { background-color: #d91c4e; }
+.badge.client_canceled { background-color: #730073; }
+.badge.cg_canceled { background-color: #ff8c00; }
+.badge.open { background-color: #d9c01c; }
+.badge.attention { background-color: #C30000; }
+.badge.missed_clock_in { background-color: #E468B2; }
 
+.fc-resource-area .fc-scroller {
+    /* disables horizontal scroll bar in resource area */
+    overflow: hidden !important;
+}
 .fc-time-area td, .fc-month-view tbody td {
     /* calendar borders, event borders are in the config property */
     border-color: rgba(120, 130, 140, 0.25) !important;
@@ -915,7 +960,7 @@
   background-color: #fff;
   padding: 1em;
   border: 1px solid #456789;
-  width: 450px;
+  width: 420px;
 }
 </style>
 

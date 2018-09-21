@@ -45,7 +45,9 @@ return [
     ],
 
     'twilio' => [
+        'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_APP_TOKEN'),
+        'default_number' => env('TWILIO_DEFAULT_NUMBER'),
     ],
 
     'slack' => [
@@ -70,6 +72,6 @@ return [
 
     'fullcalendar' => [
         'key' => env('FULLCALENDAR_KEY'),
-    ]
+    ],
 
 ];

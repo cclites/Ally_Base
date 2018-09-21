@@ -4,26 +4,27 @@ export default {
             scheduleModal: false,
             selectedSchedule: {},
             selectedEvent: null,
-            initialCreateValues: {},
         };
     },
 
     methods: {
-        createSchedule(date, jsEvent, view, resource) {
-            this.preview = false;
-            this.hoverShift = {client:{}},
-            this.scheduleModal = true;
-            this.selectedSchedule = {};
-            this.initialCreateValues = {
+        createSchedule({start, end, jsEvent, view, resource} = {}) {
+            this.hidePreview();
+
+            if (!start) {
+                start = moment('0900', 'HHmm');
+            }
+
+            start = start.local();
+            if (end) end = end.local();
+
+            this.selectedSchedule = {
+                'starts_at': start.format('YYYY-MM-DD HH:mm:ss'),
+                'duration': end ? end.diff(start, 'minutes') : 60,
                 'client_id': (this.filterClientId > 0) ? this.filterClientId : this.getInitialFromResource(resource, 'client_id'),
                 'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : this.getInitialFromResource(resource, 'caregiver_id'),
             };
-            if (date) {
-                this.selectedEvent = date;
-            }
-            else {
-                this.selectedEvent = moment().add(59, 'minutes').startOf('hour');
-            }
+            this.scheduleModal = true;
         },
 
         getInitialFromResource(resource, field) {
@@ -34,8 +35,7 @@ export default {
         },
 
         editSchedule(event, jsEvent, view) {
-            this.preview = false;
-            this.hoverShift = {client:{}},
+            this.hidePreview();
             axios.get('/business/schedule/' + event.id)
                 .then(response => {
                     this.selectedSchedule = response.data;

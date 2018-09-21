@@ -84,7 +84,8 @@
                             <b-form-select id="calendar_default_view"
                                            v-model="businessSettings.calendar_default_view">
                                 <option value="month">Month</option>
-                                <option value="agendaWeek">Week</option>
+                                <option value="timelineWeek">Week</option>
+                                <option value="timelineDay">Day</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_default_view" text="Choose the default view for the schedule"></input-help>
                         </b-form-group>
@@ -95,7 +96,7 @@
                                 <option value="unassigned">Open Shifts</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="calendar_caregiver_filter" text="Choose the default caregiver filter for the schedule"></input-help>
-                            <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for larger registries.</small>
+                            <small class="text-warning" v-if="businessSettings.calendar_caregiver_filter === 'all'">Warning: We do not recommend using 'All Caregivers' for monthly views.</small>
                         </b-form-group>
                         <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters">
                             <b-form-select id="calendar_remember_filters"

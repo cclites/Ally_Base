@@ -3,7 +3,9 @@
 @section('title', 'Payment History')
 
 @section('breadcrumbs')
-    Showing all client charges.
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/business/reports">Reports</a></li>
+    <li class="breadcrumb-item active">Payment History</li>
 @endsection
 
 @section('content')

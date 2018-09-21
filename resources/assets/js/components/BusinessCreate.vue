@@ -43,6 +43,17 @@
                         </b-form-select>
                         <input-help :form="form" field="timezone" text="Select the city that matches their timezone."></input-help>
                     </b-form-group>
+                    <b-form-group label="Multi Location Registry" label-for="multi_location_registry">
+                        <b-form-select
+                            id="multi_location_registry"
+                            name="multi_location_registry"
+                            v-model="form.multi_location_registry">
+
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </b-form-select>
+                        <input-help :form="form" field="multi_location_registry" text="Select multi location registry "></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Street Address" label-for="address1">
@@ -182,6 +193,7 @@
                     name: null,
                     phone1: null,
                     timezone: 'America/New_York',
+                    multi_location_registry: 'no',
                     address1: null,
                     city: null,
                     state: null,

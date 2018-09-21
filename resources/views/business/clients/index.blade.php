@@ -12,6 +12,9 @@
         <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
     @endif
     @if($active_business)
-        <client-list :clients="{{ $clients }}"></client-list>
+        <client-list
+            :clients="{{ $clients }}"
+            :multi_location="{{ json_encode($multiLocation) }}">
+        </client-list>
     @endif
 @endsection
