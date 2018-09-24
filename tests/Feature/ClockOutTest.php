@@ -185,7 +185,7 @@ class ClockOutTest extends TestCase
         $result = $clockOut->clockOut($shift);
 
         // Exception should not exist
-        $this->assertEquals(1, $shift->exceptions()->count());
+        $this->assertEquals(0, $shift->exceptions()->count());
     }
 
     public function test_auto_confirm_creates_verified_shifts_waiting_for_authorization()
