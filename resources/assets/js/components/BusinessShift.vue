@@ -116,7 +116,7 @@
                     </b-row>
                     <b-row>
                         <b-col sm="6">
-                            <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_rate">
+                            <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                 <b-form-input
                                         id="caregiver_rate"
                                         name="caregiver_rate"
@@ -129,7 +129,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
-                            <b-form-group label="Provider Hourly Fee" label-for="provider_fee">
+                            <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
                                 <b-form-input
                                         id="provider_fee"
                                         name="provider_fee"
@@ -153,7 +153,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
-                            <b-form-group label="Total Hourly Rate">
+                            <b-form-group :label="`Total ${rateType} Rate`">
                                 <b-form-input
                                         :value="totalRate"
                                         readonly
@@ -162,18 +162,6 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-form-group label="Shift Designation" label-for="hours_type">
-                        <b-form-select
-                                id="hours_type"
-                                name="hours_type"
-                                v-model="form.hours_type"
-                        >
-                            <option value="default">Regular Shift</option>
-                            <option value="holiday">Holiday</option>
-                            <option value="overtime">Overtime</option>
-                        </b-form-select>
-                        <input-help :form="form" field="hours_type" text=""></input-help>
-                    </b-form-group>
                 </b-col>
                 <b-col md="7" sm="6">
                     <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
