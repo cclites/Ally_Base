@@ -71,6 +71,17 @@
 
                     </b-col>
                     <b-col lg="6">
+                        <b-form-group label="Shift Rounding Method" label-for="shift_rounding_method">
+                            <b-form-select id="shift_rounding_method"
+                                           v-model="businessSettings.shift_rounding_method"
+                            >
+                                <option value="none">No Rounding</option>
+                                <option value="shift">Entire Shift</option>
+                                <option value="individual">Individual Clock In/Out</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="shift_rounding_method" text="Select the methodology used to round the number of hours worked on each shift."></input-help>
+                        </b-form-group>
+
                         <b-form-group label="Scheduling" label-for="scheduling">
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
@@ -346,6 +357,7 @@
                     allows_manual_shifts: this.business.allows_manual_shifts,
                     location_exceptions: this.business.location_exceptions,
                     timesheet_exceptions: this.business.timesheet_exceptions,
+                    shift_rounding_method: this.business.shift_rounding_method,
                     require_signatures: this.business.require_signatures,
                     co_mileage: this.business.co_mileage,
                     co_injuries: this.business.co_injuries,

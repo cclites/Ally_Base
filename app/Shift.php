@@ -293,12 +293,16 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     //////////////////////////////////////
 
     /**
-     * Return the number of hours worked
+     * Return the number of hours worked, calculate if not persisted
      *
      * @return float
      */
     public function duration()
     {
+        if ($this->hours) {
+            return $this->hours;
+        }
+
         return app(DurationCalculator::class)->getDuration($this);
     }
 

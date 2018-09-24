@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterAddDurationToShifts extends Migration
+class AddDurationToShiftsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,18 @@ class AlterAddDurationToShifts extends Migration
      */
     public function up()
     {
-        throw new Exception('Duration storage to be completed.');
-
         Schema::table('shifts', function (Blueprint $table) {
-            //
+            $table->decimal('hours', 6, 2)->after('caregiver_comments')->nullable();
         });
+
+        // Persist all existing shift hours
+        \DB::beginTransaction();
+        \App\Shift::chunk(100, function($shifts) {
+            $shifts->each(function (\App\Shift $shift) {
+                $shift->update(['hours' => $shift->duration()]);
+            });
+        });
+        \DB::commit();
     }
 
     /**
@@ -28,7 +35,7 @@ class AlterAddDurationToShifts extends Migration
     public function down()
     {
         Schema::table('shifts', function (Blueprint $table) {
-            //
+            $table->dropColumn('hours');
         });
     }
 }
