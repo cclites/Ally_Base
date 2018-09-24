@@ -132,7 +132,7 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
-Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
+Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
@@ -260,6 +260,14 @@ Vue.filter('capitalize', value => {
     }
 
     return value.toString().charAt(0).toUpperCase() + value.slice(1);
+});
+
+Vue.filter('uppercase', value => {
+    return value.toString().toUpperCase();
+});
+
+Vue.filter('lowercase', value => {
+    return value.toString().toLowerCase();
 });
 
 Vue.filter('nl2br', value => {

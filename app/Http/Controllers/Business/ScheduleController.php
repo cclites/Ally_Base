@@ -106,7 +106,7 @@ class ScheduleController extends BaseController
         $creator->startsAt($startsAt)
             ->duration($request->duration)
             ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
-            ->rates($request->caregiver_rate, $request->provider_fee);
+            ->rates($request->caregiver_rate, $request->provider_fee, $request->daily_rates);
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);

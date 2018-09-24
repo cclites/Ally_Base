@@ -154,6 +154,7 @@ class ScheduleConverter
             'checked_out_time'  => $start->copy()->addMinutes($schedule->duration),
             'schedule_id'       => $schedule->id,
             'hours_type'        => $schedule->hours_type,
+            'daily_rates'       => $schedule->daily_rates,
             'caregiver_rate'    => $schedule->getCaregiverRate(),
             'provider_fee'      => $schedule->getProviderFee(),
             'status'            => $status,
