@@ -7,6 +7,7 @@ use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
+use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftStatusManager;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
@@ -292,21 +293,17 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     //////////////////////////////////////
 
     /**
-     * Return the number of hours worked
+     * Return the number of hours worked, calculate if not persisted
      *
      * @return float
      */
     public function duration()
     {
-        $date1 = new Carbon($this->checked_in_time);
-        if ($this->checked_out_time) {
-            $date2 = new Carbon($this->checked_out_time);
-        } else {
-            $date2 = new Carbon();
+        if ($this->hours) {
+            return $this->hours;
         }
 
-        $duration = round($date1->diffInMinutes($date2) / 60, 2);
-        return number_format(floor(round($duration * 4)) / 4, 2);
+        return app(DurationCalculator::class)->getDuration($this);
     }
 
     /**

@@ -41,6 +41,19 @@ class ClockOutTest extends TestCase
         $this->assertFalse($shift->statusManager()->isClockedIn());
     }
 
+    public function test_hours_are_set_once_clocked_out()
+    {
+        $shift = $this->createShift();
+
+        $this->assertNull($shift->hours, 'The shift\'s hours should not be set prior to clock out.');
+        $duration = $shift->duration();
+
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->clockOut($shift);
+
+        $this->assertEquals($duration, $shift->hours, 'The shift\'s hours should be set after clock out.');
+    }
+
     public function test_unverified_shift_sends_event()
     {
         $shift = $this->createShift();

@@ -74,9 +74,7 @@ class SettingController extends BaseController
      */
     public function update(UpdateBusinessRequest $request, $id)
     {
-        $business = Business::find($id);
-        $business->update($request->validated());
-        Cache::put($business->id . '_timezone', $request->timezone, 3600);
+        app('settings')->set($this->business(), $request->validated());
 
         return new SuccessResponse('Business settings updated.');
     }
