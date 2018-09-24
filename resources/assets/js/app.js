@@ -44,7 +44,7 @@ Vue.component('signature-pad', require('./components/SignaturePad'));
 Vue.component('select2', require('./components/Select2'));
 Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
-
+Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -66,7 +66,6 @@ Vue.component('admin-bucket-report', require('./components/admin/AdminBucketRepo
 Vue.component('admin-charges-report', require('./components/admin/AdminChargesReport.vue'));
 Vue.component('admin-deposit-report', require('./components/admin/AdminDepositReport.vue'));
 Vue.component('admin-evv-report', require('./components/admin/AdminEvvReport'));
-Vue.component('admin-report', require('./components/admin/reports/ReportList'));
 Vue.component('admin-emails-report', require('./components/admin/reports/AdminEmailsReport'));
 Vue.component('admin-failed-deposit-report', require('./components/admin/AdminFailedDepositReport'));
 Vue.component('admin-failed-transactions-report', require('./components/admin/AdminFailedTransactionsReport'));
@@ -97,9 +96,12 @@ Vue.component('business-office-user-modal', require('./components/admin/Business
 Vue.component('business-contact-info-tab', require('./components/admin/BusinessContactInfoTab'));
 Vue.component('business-caregiver-deposits-missing-bank-account', require('./components/admin/reports/CaregiverDepositsMissingBankAccounts'));
 Vue.component('admin-financial-summary', require('./components/admin/reports/FinancialSummary'));
+Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
 
 // Office User
-Vue.component('business-caregiver-preferences-tab', require('./components/business/caregivers/BusinessCaregiverPreferencesTab'));
+Vue.component('business-care-match', require('./components/business/BusinessCareMatch'));
+Vue.component('business-caregiver-availability-tab', require('./components/business/caregivers/BusinessCaregiverAvailabilityTab'));
+Vue.component('business-caregiver-skills-tab', require('./components/business/caregivers/BusinessCaregiverSkillsTab'));
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));
@@ -108,6 +110,7 @@ Vue.component('business-client-addresses-tab', require('./components/business/cl
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
+Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
@@ -129,11 +132,10 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
-Vue.component('bulk-edit-schedule-modal', require('./components/business/schedule/BulkEditScheduleModal'));
+Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
-Vue.component('schedule-item-popup', require('./components/business/schedule/ScheduleItemPopup'));
 Vue.component('business-caregiver-payment-history', require('./components/business/caregivers/CaregiverPaymentHistoryTab'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
@@ -219,9 +221,19 @@ Vue.component('business-timesheet', require('./components/BusinessTimesheet'));
 Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
+Vue.component('business-text-caregivers', require('./components/business/TextCaregivers'));
+Vue.component('business-task-list', require('./components/business/tasks/TaskList'));
+Vue.component('business-task-form', require('./components/business/tasks/TaskForm'));
+Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
+
+Vue.component('report-list', require('./components/ReportList'));
 
 /* Nacha Ach */
 Vue.component('admin-nachaach', require('./components/admin/NachaAch'));
+Vue.component('admin-nachaach-batch', require('./components/admin/nacha-ach/Batch'));
+Vue.component('admin-nachaach-batch-modal', require('./components/admin/nacha-ach/modal/NewBatch'));
+Vue.component('admin-nachaach-entry-details', require('./components/admin/nacha-ach/EntryDetail'));
+Vue.component('admin-nachaach-entry-detail-modal', require('./components/admin/nacha-ach/modal/NewEntryDetail'));
 
 /* Quickbooks */
 Vue.component('quickbooks', require('./components/business/quickbooks/Quickbooks'));
@@ -231,7 +243,8 @@ Vue.component('quickbooks-rate-mapping', require('./components/business/quickboo
 Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
 Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
 
-
+/* Quickbooks API */
+Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
@@ -249,6 +262,14 @@ Vue.filter('capitalize', value => {
     return value.toString().charAt(0).toUpperCase() + value.slice(1);
 });
 
+Vue.filter('uppercase', value => {
+    return value.toString().toUpperCase();
+});
+
+Vue.filter('lowercase', value => {
+    return value.toString().toLowerCase();
+});
+
 Vue.filter('nl2br', value => {
     return value.toString().replace(/(?:\r\n|\r|\n)/g, '<br />');
 });
@@ -257,7 +278,7 @@ Vue.directive('tooltip', function(el, binding){
     $(el).tooltip({
         title: binding.value,
         placement: binding.arg,
-        trigger: 'hover'             
+        trigger: 'hover'
     })
 });
 

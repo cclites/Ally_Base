@@ -10,6 +10,7 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
     protected function updateRules()
     {
         return [
+            'daily_rates'           => 'required|integer',
             'new_start_time'        => 'nullable|date_format:H:i',
             'new_duration'          => 'nullable|required_with:new_start_time|numeric',
             'new_caregiver_id'      => 'nullable|integer', // cannot use exists rule because 0 is used for unassigned
@@ -30,7 +31,7 @@ class BulkUpdateScheduleRequest extends BulkDestroyScheduleRequest
 
         // Filter out null values and unallowed keys
         $data = array_filter($this->validated(), function($value, $key) use ($allowedKeys) {
-             return $value !== null && in_array($key, $allowedKeys);
+             return $value !== null && substr($key, 0, 4) === 'new_' && in_array($key, $allowedKeys);
         }, ARRAY_FILTER_USE_BOTH);
 
         if (isset($data['new_caregiver_id']) && $data['new_caregiver_id'] == 0) {

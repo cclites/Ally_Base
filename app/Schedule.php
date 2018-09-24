@@ -22,6 +22,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $duration
  * @property int $overtime_duration
  * @property int|null $note_id
+ * @property int $daily_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string $hours_type
@@ -84,8 +85,16 @@ class Schedule extends Model implements Auditable
     ///////////////////////////////////////
 
     const OK = 'OK';
+    const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+
+    ///////////////////////////////////////////
+    /// Related Shift Statuses
+    ///////////////////////////////////////////
+
+    const SCHEDULED = 'SCHEDULED';
+    const MISSED_CLOCK_IN = 'MISSED_CLOCK_IN';
     const CLOCKED_IN = 'CLOCKED_IN';
     const CONFIRMED = 'CONFIRMED';
     const UNCONFIRMED = 'UNCONFIRMED';
@@ -171,25 +180,36 @@ class Schedule extends Model implements Auditable
         return null;
     }
 
+    public function getShiftStatusAttribute()
+    {
+        return $this->getShiftStatus();
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
 
-    public function getStatus()
+    /**
+     * Return the related shift status
+     *
+     * @return string
+     */
+    public function getShiftStatus()
     {
-        if ($this->isClockedIn()) {
-            return self::CLOCKED_IN;
-        }
-
-        if ($this->isConfirmed()) {
-            return self::CONFIRMED;
-        }
-
         if ($this->shifts->count()) {
+            if ($this->isClockedIn()) {
+                return self::CLOCKED_IN;
+            }
+
+            if ($this->isConfirmed()) {
+                return self::CONFIRMED;
+            }
+
             return self::UNCONFIRMED;
         }
-
-        return $this->status ?? self::OK;
+        // Suppress missed clock in status for now
+//        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        return self::SCHEDULED;
     }
 
     /**
@@ -400,10 +420,7 @@ class Schedule extends Model implements Auditable
     {
         if (strlen($this->caregiver_rate)) return $this->caregiver_rate;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            if ($this->all_day) {
-                return $relation->pivot->caregiver_daily_rate;
-            }
-            return $relation->pivot->caregiver_hourly_rate;
+            return ($this->daily_rates) ? $relation->pivot->caregiver_daily_rate : $relation->pivot->caregiver_hourly_rate;
         }
         return 0;
     }
@@ -417,10 +434,7 @@ class Schedule extends Model implements Auditable
     {
         if (strlen($this->provider_fee)) return $this->provider_fee;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            if ($this->all_day) {
-                return $relation->pivot->provider_daily_fee;
-            }
-            return $relation->pivot->provider_hourly_fee;
+            return ($this->daily_rates) ? $relation->pivot->provider_daily_fee : $relation->pivot->provider_hourly_fee;
         }
         return 0;
     }

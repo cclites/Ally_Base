@@ -62,6 +62,7 @@ class ShiftsReport extends BaseReport
                 'client_name' => optional($shift->client)->nameLastFirst(),
                 'caregiver_id' => $shift->caregiver_id,
                 'caregiver_name' => optional($shift->caregiver)->nameLastFirst(),
+                'daily_rates' => $shift->daily_rates,
                 'caregiver_rate' => $shift->caregiver_rate,
                 'provider_fee' => $shift->provider_fee,
                 'ally_fee' => $shift->getAllyHourlyRate(),

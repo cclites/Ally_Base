@@ -50,8 +50,17 @@
                             </b-col>
                         </b-row>
                         <b-row>
+                            <b-col>
+                                <strong>Shift Type: </strong>
+                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
+                                <label for="create_hourly_rates" class="rate-label">Hourly</label>
+                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_daily_rates" :value="1">
+                                <label for="create_daily_rates" class="rate-label">Daily</label>
+                            </b-col>
+                        </b-row>
+                        <b-row v-show="form.daily_rates !== null">
                             <b-col sm="6">
-                                <b-form-group label="Caregiver Rate" label-for="caregiver_rate">
+                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
                                             id="caregiver_rate"
                                             name="caregiver_rate"
@@ -64,7 +73,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Provider Fee" label-for="provider_fee">
+                                <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
                                     <b-form-input
                                             id="provider_fee"
                                             name="provider_fee"
@@ -87,7 +96,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Total Rate" label-for="ally_fee">
+                                <b-form-group :label="`Total ${rateType} Rate`" label-for="ally_fee">
                                     {{ totalRate }}
                                 </b-form-group>
                             </b-col>
@@ -123,8 +132,10 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
+                                            :readonly="!!form.daily_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.daily_rates" />
+                                    <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -197,6 +208,18 @@
                     <b-tab title="Notes" id="schedule-notes">
                         <b-row>
                             <b-col lg="12">
+                                <b-form-group label="Schedule Status" label-for="status" v-if="schedule.id">
+                                    <b-form-select
+                                            id="status"
+                                            name="status"
+                                            v-model="form.status"
+                                    >
+                                        <option value="OK">No Status</option>
+                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
+                                        <option value="CLIENT_CANCELED">Client Canceled</option>
+                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                    </b-form-select>
+                                </b-form-group>
                                 <b-form-group label="Schedule Notes" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
@@ -369,6 +392,16 @@
                 return 'Show All';
             },
 
+            rateType() {
+                if (this.form.daily_rates === 0) {
+                    return 'Hourly';
+                }
+                if (this.form.daily_rates === 1) {
+                    return 'Daily';
+                }
+                return '';
+            },
+
             firstShiftEndDate() {
                 let duration = this.getDuration();
                 return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm')
@@ -392,12 +425,14 @@
                     'duration': this.schedule.duration || 0,
                     'caregiver_id': this.schedule.caregiver_id || "",
                     'client_id': this.schedule.client_id || "",
+                    'daily_rates': this.schedule.daily_rates || 0,
                     'caregiver_rate': this.schedule.caregiver_rate || "",
                     'provider_fee': this.schedule.provider_fee || "",
                     'notes': this.schedule.notes || "",
                     'hours_type': this.schedule.hours_type || "default",
                     'overtime_duration': this.schedule.overtime_duration || 0,
                     'care_plan_id': this.schedule.care_plan_id || '',
+                    'status': this.schedule.status || 'OK',
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
@@ -478,6 +513,7 @@
             },
 
             loadAllyPctFromClient(client_id) {
+                if (!client_id) return;
                 let component = this;
                 axios.get('/business/clients/' + client_id + '/payment_type').then(function(response) {
                     component.allyPct = response.data.percentage_fee;
@@ -608,8 +644,8 @@
                     }
                 }
 
-                this.form.caregiver_rate = this.selectedCaregiver.pivot.caregiver_hourly_rate;
-                this.form.provider_fee = this.selectedCaregiver.pivot.provider_hourly_fee;
+                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
+                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
             }
         },
 
@@ -654,6 +690,21 @@
 
             endTime() {
                 this.form.duration = this.getDuration();
+            },
+
+            startTime(val) {
+                if (this.form.daily_rates) {
+                    // Lock end time to start time for daily rates
+                    this.endTime = val;
+                }
+            },
+
+            'form.daily_rates': function(val, old_val) {
+                this.prefillRates();
+                if (val) {
+                    // Lock end time to start time for daily rates
+                    this.endTime = this.startTime;
+                }
             },
 
             'form.client_id': function(val, old_val) {

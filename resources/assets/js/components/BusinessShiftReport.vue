@@ -41,6 +41,10 @@
                             <option value="charged">Charged</option>
                             <option value="uncharged">Un-Charged</option>
                         </b-form-select>
+                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -173,6 +177,7 @@
             admin: Number,
             autoload: Number,
             imports: Array,
+            multi_location: Object,
             activities: {
                 type: Array,
                 default: [],
@@ -210,6 +215,7 @@
                 loaded: -1,
                 charge_status: '',
                 localStoragePrefix: 'shift_report_',
+                location: 'all'
             }
         },
 
@@ -288,10 +294,10 @@
                         'Client': item.client_name,
                         'Caregiver': item.caregiver_name,
                         'EVV': item.EVV,
-                        'CG Rate': this.moneyFormat(item.caregiver_rate),
-                        'Reg Rate': this.moneyFormat(item.provider_fee),
-                        'Ally Fee': this.moneyFormat(item.ally_fee),
-                        'Total Hourly': this.moneyFormat(item.hourly_total),
+                        'CG Rate': this.hourlyFormat(item, item.caregiver_rate),
+                        'Reg Rate': this.hourlyFormat(item, item.provider_fee),
+                        'Ally Fee': this.hourlyFormat(item, item.ally_fee),
+                        'Total Hourly': this.hourlyFormat(item, item.hourly_total),
                         'Mileage': item.mileage,
                         'CG Total': this.moneyFormat(item.caregiver_total),
                         'Reg Total': this.moneyFormat(item.provider_total),
@@ -573,6 +579,10 @@
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();
+            },
+
+            hourlyFormat(item, amount) {
+                return (item.daily_rates) ? '---' : this.moneyFormat(amount);
             },
 
             onShiftDelete(id) {

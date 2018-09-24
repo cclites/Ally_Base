@@ -2,7 +2,7 @@
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li> -->
 <li>
-    <a class="has-arrow" href="/business/schedule" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule </span></a>
+    <a href="/business/schedule" aria-expanded="false"><i class="fa fa-calendar"></i><span class="hide-menu">Schedule </span></a>
 </li>
 <li>
     <a class="has-arrow" href="{{ route('business.clients.index') }}" aria-expanded="false"><i class="fa fa-users"></i><span class="hide-menu">Clients</span></a>
@@ -16,9 +16,12 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.caregivers.index') }}">Caregiver List</a></li>
         <li><a href="{{ route('business.caregivers.create') }}">Add Caregiver</a></li>
-        <li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>
+        {{--<li><a href="{{ route('business.caregivers.distance_report') }}">Distance Report</a></li>--}}
         <li><a href="{{ route('business.caregivers.applications') }}">Applications</a></li>
     </ul>
+</li>
+<li>
+    <a href="{{ route('business.care-match') }}" ><i class="fa fa-clone"></i><span class="hide-menu">Care Match</span></a>
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
@@ -28,7 +31,7 @@
     </ul>
 </li>
  <li>
-    <a class="has-arrow" href="{{ route('business.reports.shifts') }}?autoload=0" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
+    <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
 <li>
     <a href="{{ route('business.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
@@ -54,17 +57,45 @@
 </li>
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
 <li>
-    <a class="has-arrow" href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
+    <a href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
 </li>
 @endif
+
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
+        <i class="fa fa-envelope"></i><span class="hide-menu">Communication</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.communication.text-caregivers') }}">Text Caregivers</a></li>
+    </ul>
+</li>
+
+<li>
+    <a href="{{ route('business.tasks.index') }}">
+        <div class="row">
+            <div class="col-8">
+                <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
+            </div>
+            <div class="col-4">
+                @if ($dueTasks = auth()->user()->role->dueTasks()->count())
+                    <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ $dueTasks }}</span>
+                @endif
+            </div>
+        </div>
+    </a>
+</li>
 <li>
     <a href="{{ route('business.exceptions.index') }}">
-        <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions
-            <span class="badge badge-danger badge-notifications menu-badge">
-            {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
-            </span>
-        </span>
-
+        <div class="row">
+            <div class="col-8">
+                <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions</span>
+            </div>
+            <div class="col-4">
+                <span class="badge badge-danger badge-notifications hide-menu menu-badge">
+                    {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
+                </span>
+            </div>
+        </div>
     </a>
 </li>
 <li>

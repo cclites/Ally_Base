@@ -39,6 +39,7 @@ class ShiftController extends BaseController
                 'other_expenses_desc' => 'nullable',
                 'checked_in_time' => 'required|date',
                 'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
+                'daily_rates' => 'required|boolean',
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
@@ -48,7 +49,8 @@ class ShiftController extends BaseController
                 'issues.comments' => 'nullable',
             ],
             [
-                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
+                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
+                'daily_rates.*' => 'Please select a shift type of hourly or daily.',
             ]
         );
 
@@ -134,6 +136,7 @@ class ShiftController extends BaseController
                 'other_expenses_desc' => 'nullable',
                 'checked_in_time' => 'required|date',
                 'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
+                'daily_rates' => 'required|boolean',
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
@@ -144,7 +147,8 @@ class ShiftController extends BaseController
                 'questions' => 'nullable|array',
             ],
             [
-                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.'
+                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
+                'daily_rates.*' => 'Please select a shift type of hourly or daily.',
             ]
         );
 

@@ -95,4 +95,20 @@ class ScheduleAggregatorTest extends TestCase
         $this->assertNotNull($schedules->where('id', $schedule3->id)->first(), 'Schedule (3) starts within 1 hours not found.');
         $this->assertCount(3, $schedules);
     }
+
+    public function test_aggregator_includes_daily_shifts()
+    {
+        // This test confirms a daily shift from 8AM to 8AM is still included in the aggregator get schedules between call.
+        $this->business->timezone = 'UTC';
+        Carbon::setTestNow('2018-05-18 15:00:00');
+        $schedule = $this->createSchedule(Carbon::parse('2018-05-18 08:00:00'), 24); // should be found
+
+        $start = Carbon::parse('-2 hours');
+        $end = Carbon::parse('+2 hours');
+
+        \DB::enableQueryLog();
+        $schedules = $this->aggregator->getSchedulesBetween($start, $end);
+        $log = \DB::getQueryLog();
+        $this->assertCount(1, $schedules);
+    }
 }

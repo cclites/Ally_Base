@@ -87,7 +87,36 @@
                 <b-col md="5" sm="6">
                     <b-row>
                         <b-col sm="6">
-                            <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_rate">
+                            <b-form-group label="Shift Type (Rate)" label-for="daily_rates">
+                                <b-form-select
+                                        id="daily_rates"
+                                        name="daily_rates"
+                                        v-model="form.daily_rates"
+                                >
+                                    <option :value="0">Hourly Shift</option>
+                                    <option :value="1">Daily Shift</option>
+                                </b-form-select>
+                                <input-help :form="form" field="daily_rates" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                        <b-col sm="6">
+                            <b-form-group label="Shift Designation" label-for="hours_type">
+                                <b-form-select
+                                        id="hours_type"
+                                        name="hours_type"
+                                        v-model="form.hours_type"
+                                >
+                                    <option value="default">Regular Shift</option>
+                                    <option value="holiday">Holiday</option>
+                                    <option value="overtime">Overtime</option>
+                                </b-form-select>
+                                <input-help :form="form" field="hours_type" text=""></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col sm="6">
+                            <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                 <b-form-input
                                         id="caregiver_rate"
                                         name="caregiver_rate"
@@ -100,7 +129,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
-                            <b-form-group label="Provider Hourly Fee" label-for="provider_fee">
+                            <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
                                 <b-form-input
                                         id="provider_fee"
                                         name="provider_fee"
@@ -124,7 +153,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
-                            <b-form-group label="Total Hourly Rate">
+                            <b-form-group :label="`Total ${rateType} Rate`">
                                 <b-form-input
                                         :value="totalRate"
                                         readonly
@@ -133,18 +162,6 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-form-group label="Shift Designation" label-for="hours_type">
-                        <b-form-select
-                                id="hours_type"
-                                name="hours_type"
-                                v-model="form.hours_type"
-                        >
-                            <option value="default">Regular Shift</option>
-                            <option value="holiday">Holiday</option>
-                            <option value="overtime">Overtime</option>
-                        </b-form-select>
-                        <input-help :form="form" field="hours_type" text=""></input-help>
-                    </b-form-group>
                 </b-col>
                 <b-col md="7" sm="6">
                     <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
@@ -441,6 +458,15 @@
             },
             confirmed() {
                 return this.status !== 'WAITING_FOR_CONFIRMATION' && this.status !== 'CLOCKED_IN'
+            },
+            rateType() {
+                if (this.form.daily_rates === 0) {
+                    return 'Hourly';
+                }
+                if (this.form.daily_rates === 1) {
+                    return 'Daily';
+                }
+                return '';
             }
         },
         methods: {
@@ -485,6 +511,7 @@
                     other_expenses_desc: ('other_expenses_desc' in this.shift) ? this.shift.other_expenses_desc : null,
                     hours_type: ('hours_type' in this.shift) ? this.shift.hours_type : 'default',
                     verified: ('verified' in this.shift) ? this.shift.verified : true,
+                    daily_rates: ('daily_rates' in this.shift) ? this.shift.daily_rates : 0,
                     caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
                     activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
@@ -630,8 +657,8 @@
                 axios.get('/business/clients/' + this.form.client_id + '/caregivers/' + this.form.caregiver_id).then(response => {
                     console.log(response.data.pivot);
                     if (response.data.pivot) {
-                        this.form.caregiver_rate = response.data.pivot.caregiver_hourly_rate;
-                        this.form.provider_fee = response.data.pivot.provider_hourly_fee;
+                        this.form.caregiver_rate = response.data.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
+                        this.form.provider_fee = response.data.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
                     }
                 });
             },
@@ -703,6 +730,12 @@
                     this.loadCaregiverRates();
                 }
             },
+            'form.daily_rates': function() {
+                if (this.form.caregiver_id) {
+                    this.loadCaregiverRates();
+                    alert('You have just changed the shift type.  Please verify the caregiver and provider rates match what is expected for billing purposes.');
+                }
+            }
         },
     }
 </script>

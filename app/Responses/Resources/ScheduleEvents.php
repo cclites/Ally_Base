@@ -26,46 +26,6 @@ class ScheduleEvents implements Responsable
             'all' => [],
         ];
 
-    /**
-     * Background color themes for each schedule type.
-     * 
-     * Currently all backgrounds are hard coded in the toArray function.
-     * To re-implement this feature, use the $this->getBackgroundColor method
-     * to auto calculate one of the colors in these arrays.
-     * 
-     * @var array
-     */
-    protected $backgroundColors = [
-        'past' => [
-            '#849290',
-            '#7f7f6f',
-            '#59665b',
-            '#adad85',
-            '#999966',
-            '#85858e',
-        ],
-        'current' => [
-            '#27c11e',
-            '#34A82D',
-            '#32872d',
-            '#009933',
-            '#00cc44',
-            '#008000',
-            '#2d862d'
-        ],
-        'future' => [
-            '#0000ff',
-            '#0000b3',
-            '#3333cc',
-            '#24248f',
-            '#1e88e5',
-            '#095da6',
-            '#7460ee',
-            '#3d7a98',
-            '#4fb7ea',
-        ],
-    ];
-
     public function __construct($schedules)
     {
         $this->schedules = $schedules;
@@ -81,7 +41,7 @@ class ScheduleEvents implements Responsable
     /**
      * Get stats on the schedules.
      *
-     * @return void
+     * @return array
      */
     public function kpis()
     {
@@ -119,28 +79,6 @@ class ScheduleEvents implements Responsable
             );
 
             $title = $this->resolveEventTitle($schedule);
-            $status = $schedule->getStatus();
-
-            switch($status) {
-                case Schedule::CLOCKED_IN:
-                    $backgroundColor = '#27c11e'; // current
-                    break;
-                case Schedule::CLIENT_CANCELED:
-                    $backgroundColor = '#d9c01c'; // client cancel
-                    break;
-                case Schedule::CAREGIVER_CANCELED:
-                    $backgroundColor = '#d91c4e'; // CG cancel
-                    break;
-                case Schedule::UNCONFIRMED:
-                    $backgroundColor = '#D0C3D3';
-                    break;
-                case Schedule::CONFIRMED:
-                    $backgroundColor = '#849290'; // past
-                    break;
-                default:
-                    $backgroundColor = '#1c81d9'; // ok / future
-            }
-
 
             return array_merge([
                 'id' => $schedule->id,
@@ -149,7 +87,7 @@ class ScheduleEvents implements Responsable
                 // Needs to add 1 extra second to end time for FullCalendar support
                 'end' => $schedule->starts_at->copy()->addSeconds($schedule->duration * 60 + 1)->format(\DateTime::ISO8601),
                 'duration' => $schedule->duration,
-                'backgroundColor' => $backgroundColor,
+                'backgroundColor' => $this->getBackgroundColor($schedule),
                 'care_plan' => $schedule->carePlan,
                 'client' => $schedule->client->nameLastFirst(),
                 'client_id' => $schedule->client->id,
@@ -159,7 +97,8 @@ class ScheduleEvents implements Responsable
                 'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
 //                'unassigned' => empty($schedule->caregiver),
-                'status' => $status,
+                'status' => $schedule->status,
+                'shift_status' => $schedule->shift_status,
             ], $additionalOptions);
         });
     }
@@ -182,21 +121,45 @@ class ScheduleEvents implements Responsable
     }
 
     /**
-     * Select a color from the background color series array based on the title
-     * Every event with the same title should be the same color
+     * Determine the background color of the event, this should be synced with the css colors of BusinessSchedule
      *
-     * @param $series
-     * @param $title
-     *
-     * @return mixed
+     * @param \App\Schedule $schedule
+     * @return string
      */
-    protected function getBackgroundColor($series, $title)
+    protected function getBackgroundColor(Schedule $schedule)
     {
-        $bgs = $this->backgroundColors[$series];
-        $title = preg_replace('/[^a-zA-Z0-9]/', '', $title);
-        $title = substr($title, 0, 6) . substr($title, -6);
-        $id = base_convert($title, 36, 10) % (count($bgs)-1);
-        return $bgs[$id];
+        $status = $schedule->status;
+        $shift = $schedule->shift_status;
+
+        if ($status === Schedule::ATTENTION_REQUIRED) {
+            return '#C30000';
+        }
+
+        if ($shift === Schedule::CLOCKED_IN) {
+            return '#27c11e';
+        }
+
+        if ($shift === Schedule::MISSED_CLOCK_IN) {
+            return '#E468B2';
+        }
+
+        if ($shift === Schedule::CONFIRMED) {
+            return '#849290';
+        }
+
+        if ($shift === Schedule::UNCONFIRMED) {
+            return '#D0C3D3';
+        }
+
+        if ($status === Schedule::CAREGIVER_CANCELED) {
+            return '#ff8c00';
+        }
+
+        if ($status === Schedule::CLIENT_CANCELED) {
+            return '#730073';
+        }
+
+        return '#1c81d9';
     }
 
     /**

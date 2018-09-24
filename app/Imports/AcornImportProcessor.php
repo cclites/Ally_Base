@@ -154,6 +154,6 @@ END;
      */
     function skipRow($rowNo)
     {
-        return false;
+        return empty(trim($this->worksheet->getValue('Client Name', $rowNo)));
     }
 }

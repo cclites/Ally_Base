@@ -20,6 +20,8 @@ use App\Listeners\UpdatePaymentOnFailedTransaction;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\TimesheetCreated;
 use App\Listeners\CreateTimesheetException;
+use App\Events\TaskAssigned;
+use App\Listeners\SendAssignedTaskEmail;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        TaskAssigned::class => [
+            SendAssignedTaskEmail::class,
+        ],
         UnverifiedShiftLocation::class   => [
             UnverifiedLocationException::class,
         ],

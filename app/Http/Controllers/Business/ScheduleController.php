@@ -26,7 +26,12 @@ class ScheduleController extends BaseController
 {
     public function index()
     {
-        return view('business.schedule', ['business' => $this->business()]);
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.schedule', ['business' => $this->business(), 'multiLocation' => $multiLocation]);
     }
 
     public function events(Request $request, ScheduleAggregator $aggregator)
@@ -101,7 +106,7 @@ class ScheduleController extends BaseController
         $creator->startsAt($startsAt)
             ->duration($request->duration)
             ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
-            ->rates($request->caregiver_rate, $request->provider_fee);
+            ->rates($request->caregiver_rate, $request->provider_fee, $request->daily_rates);
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
@@ -251,16 +256,7 @@ class ScheduleController extends BaseController
         }
 
         // set status
-        $status = request()->status;
-        if (!in_array($status, [
-            Schedule::OK,
-            Schedule::CAREGIVER_CANCELED,
-            Schedule::CLIENT_CANCELED,
-            Schedule::CONFIRMED,
-        ])) {
-            $status = Schedule::OK;
-        }
-        $schedule->update(['status' => $status]);
+        $schedule->update(['status' => request()->status]);
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });

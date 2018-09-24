@@ -50,4 +50,25 @@ class OfficeUser extends Model implements UserRole, Auditable
     {
         return $this->belongsToMany(Business::class, 'business_office_users');
     }
+
+    /**
+     * Get the user's created tasks relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'creator_id');
+    }
+
+    /**
+     * Get the user's assigned tasks that are not completed.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dueTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id')
+            ->whereNull('completed_at');
+    }
 }

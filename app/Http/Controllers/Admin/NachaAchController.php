@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use ClassesWithParents\D;
 use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -24,33 +25,29 @@ class NachaAchController extends Controller
 
     public function generate(Request $request) {
         $request->validate([
-            'fh_immediate_destination' => 'required|digits:9|numeric',
-            'fh_immediate_origin' => 'required|max:9',
+            'fh_immediate_destination' => 'required|digits:9|alpha_num',
+            'fh_immediate_origin' => 'required|digits:9|alpha_num',
             'fh_immediate_destination_name' => 'required',
             'fh_immediate_origin_name' => 'required',
-            'bh_service_class_code' => 'required',
-            'bh_company_name' => 'required',
-            'bh_company_entry_description' => 'required',
         ]);
 
-        $this->setup($request->all());
-        $batch = $this->getBatch($request->all());
+        $data = $request->all();
+        $this->createFileHeader($data);
+        $this->createBatches($data);
 
-        $this->file->addBatch($batch);
         $output = (string)$this->file;
+        $data = [ 'message' => 'Something went wrong' ];
+        $code = 500;
 
         if(!empty($output)) {
             $data = [ 'data' => $output ];
             $code = 200;
-        } else {
-            $data = [ 'message' => 'Something went wrong' ];
-            $code = 500;
         }
 
         return response()->json($data, $code);
     }
 
-    private function setup($data) {
+    private function createFileHeader($data) {
         $this->file = new File();
         $this->file->getHeader()
             ->setPriorityCode('01')
@@ -67,45 +64,63 @@ class NachaAchController extends Controller
             ->setReferenceCode('ACH');
     }
 
-    private function getBatch($data, $addendum = true) {
-        $batch = new Batch();
-        $batch->getHeader()
-            ->setServiceClassCode($data['bh_service_class_code'])
-            ->setCompanyName($data['bh_company_name'])
-            ->setCompanyDiscretionaryData('')
-            ->setCompanyId($data['fh_immediate_origin'])
-            ->setStandardEntryClassCode('PPD')
-            ->setCompanyEntryDescription($data['bh_company_entry_description'])
-            ->setCompanyDescriptiveDate(date('ymd'))
-            ->setEffectiveEntryDate(date('ymd'))
-            ->setOriginatorStatusCode('1')
-            ->setOriginatingDFiId($data['bh_originating_DFI_ID'])
-            ->setBatchNumber('');
+    private function createBatches($data) {
+        if(!empty($data['batches'])) {
+            foreach($data['batches'] as $batchData) {
+                $batch = new Batch();
+                $batch->getHeader()
+                    ->setServiceClassCode($batchData['bh_service_class_code'])
+                    ->setCompanyName($batchData['bh_company_name'])
+                    ->setCompanyDiscretionaryData('')
+                    ->setCompanyId($data['fh_immediate_origin'])
+                    ->setStandardEntryClassCode('PPD')
+                    ->setCompanyEntryDescription($batchData['bh_company_entry_description'])
+                    ->setCompanyDescriptiveDate(date('ymd'))
+                    ->setEffectiveEntryDate(date('ymd'))
+                    ->setOriginatorStatusCode('1')
+                    ->setOriginatingDFiId($batchData['bh_originating_DFI_ID'])
+                    ->setBatchNumber('');
 
-        if(isset($data['details']) && !empty($data['details'])) {
-            foreach($data['details'] as $detail) {
-                $entry = (new DebitEntry)
-                    ->setTransactionCode(TransactionCode::CHECKING_DEBIT)
-                    ->setReceivingDfiId(substr($data['fh_immediate_destination'], 0, 8))
-                    ->setCheckDigit(substr($data['fh_immediate_destination'], -1))
-                    ->setDFiAccountNumber($detail['ppded_DFI_account_number'])
-                    ->setAmount($detail['ppded_amount'])
-                    ->setIndividualId($detail['ppded_individual_identification_number'])
-                    ->setDiscretionaryData('')
-                    ->setIdividualName($detail['ppded_individual_name'])
-                    ->setAddendaRecordIndicator(1)
-                    ->setTraceNumber('99936340', 1);
-
-                if ($addendum) {
-                    $entry->addAddenda((new Addenda)
-                        ->setPaymentRelatedInformation(''));
+                if(!empty($batchData['entry_details'])) {
+                    foreach($batchData['entry_details'] as $key => $detail) {
+                        if($batchData['bh_service_class_code'] == '200') {
+                            $batch->addEntry($this->createEntryDetail($detail, '220', $data['fh_immediate_destination'], $key));
+                            $batch->addEntry($this->createEntryDetail($detail, '225', $data['fh_immediate_destination'], $key));
+                        } else {
+                            $batch->addEntry($this->createEntryDetail($detail, $batchData['bh_service_class_code'], $data['fh_immediate_destination'], $key));
+                        }
+                    }
                 }
 
-                $batch->addEntry($entry);
+                $this->file->addBatch($batch);
             }
+        }
+    }
 
+    private function createEntryDetail($detail, $status, $immediateDestination, $key) {
+        $entryType = $status == '220' ? new CcdEntry() : new DebitEntry();
+        $transactionCode = $status == '220' ? TransactionCode::CHECKING_DEPOSIT : TransactionCode::CHECKING_DEBIT;
+        $entry = ($entryType)
+            ->setTransactionCode($transactionCode)
+            ->setReceivingDfiId(substr($immediateDestination, 0, 8))
+            ->setCheckDigit(substr($immediateDestination, -1))
+            ->setAmount($detail['ppded_amount']);
+
+        if($status == '220') {
+            $entry->setReceivingDFiAccountNumber($detail['ppded_DFI_account_number'])
+                ->setReceivingCompanyId($detail['ppded_individual_identification_number'])
+                ->setReceivingCompanyName($detail['ppded_individual_name']);
+
+        } else {
+            $entry->setDFiAccountNumber($detail['ppded_DFI_account_number'])
+                ->setIndividualId($detail['ppded_individual_identification_number'])
+                ->setIdividualName($detail['ppded_individual_name']);
         }
 
-        return $batch;
+        $entry->setDiscretionaryData('')
+            ->setAddendaRecordIndicator(1)
+            ->setTraceNumber(substr($immediateDestination, 0, 7) . '0', $key);
+
+        return $entry;
     }
 }

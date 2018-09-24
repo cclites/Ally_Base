@@ -24,7 +24,7 @@
                         >
                             <option value="">--Select a Caregiver--</option>
                             <option value="">All Caregivers</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                         </b-form-select>
                         <b-form-select
                                 id="client_id"
@@ -33,7 +33,7 @@
                         >
                             <option value="">--Select a Client--</option>
                             <option value="">All Clients</option>
-                            <option v-for="client in clients" :value="client.id">{{ client.nameLastFirst }}</option>
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
                         </b-form-select>
                         <b-form-select
                                 id="method"

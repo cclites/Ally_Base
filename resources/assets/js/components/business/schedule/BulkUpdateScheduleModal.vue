@@ -102,6 +102,17 @@
                                 </div>
                             </b-col>
                         </b-row>
+                        <b-row>
+                            <b-col>
+                                <div class="form-check">
+                                    <input-help :form="form" field="daily_rates" text="Select the shift type you wish to match against."/>
+                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_hourly_rates" :value="0">
+                                    <label for="update_hourly_rates" class="rate-label">Hourly Shifts Only</label>
+                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_daily_rates" :value="1">
+                                    <label for="update_daily_rates" class="rate-label">Daily Shifts Only</label>
+                                </div>
+                            </b-col>
+                        </b-row>
                     </b-card>
                 </b-col>
             </b-row>
@@ -221,7 +232,7 @@
                         </b-row>
                         <b-row>
                             <b-col>
-                                <b-form-group label="Caregiver Rate" label-for="new_caregiver_rate">
+                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="new_caregiver_rate">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" v-model="lockCaregiverRate" :value="true">
                                         <span class="custom-control-indicator"></span>
@@ -238,7 +249,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col>
-                                <b-form-group label="Provider Fee" label-for="new_provider_fee">
+                                <b-form-group :label="`Provider ${rateType} Fee`" label-for="new_provider_fee">
                                     <label class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" v-model="lockProviderFee" :value="true">
                                         <span class="custom-control-indicator"></span>
@@ -253,6 +264,15 @@
                                     />
                                     <input-help :form="form" field="new_provider_fee" text=""/>
                                 </b-form-group>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col>
+                                <small class="form-text text-muted with-padding-bottom">
+                                    <span v-if="form.daily_rates" class="text-danger">Notice: You are updating DAILY shifts only.</span>
+                                    <span v-else-if="form.daily_rates === 0" class="text-info">Notice: You are updating HOURLY shifts only.</span>
+                                    <span v-else class="text-warning">You must select the rate structure to match against.</span>
+                                </small>
                             </b-col>
                         </b-row>
                         <b-row>
@@ -283,7 +303,7 @@
             </b-row>
         </b-container>
         <div slot="modal-footer">
-           <b-btn variant="default" @click="showModal=false">Close</b-btn>
+            <b-btn variant="default" @click="showModal=false">Close</b-btn>
             <b-btn variant="info" @click="save()" :disabled="submitting">
                 <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
                 Update Schedules
@@ -347,6 +367,15 @@
                     label = label + ' (' + this.numberFormat(this.form.new_duration / 60) + ' Hours)';
                 }
                 return label;
+            },
+            rateType() {
+                if (this.form.daily_rates === 0) {
+                    return 'Hourly';
+                }
+                if (this.form.daily_rates === 1) {
+                    return 'Daily';
+                }
+                return '';
             }
         },
 
@@ -378,6 +407,7 @@
                     'client_id': (this.clientId > 0) ? this.clientId : '-',
                     'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
                     'bydays': [],
+                    'daily_rates': null,
 
                     'new_start_time': '',
                     'new_duration': null,
@@ -429,11 +459,11 @@
             },
 
             save() {
-                let message = 'Are you sure you wish to update all schedules between ' + this.form.start_date +
+                let message = 'Are you sure you wish to update all ' + this.rateType.toUpperCase() + ' schedules between ' + this.form.start_date +
                     ' and ' + this.form.end_date + ' matching the given criteria?';
 
                 if (this.form.end_date === '01/01/2100') {
-                    message = 'Are you sure you wish to update all schedules after ' + this.form.start_date +
+                    message = 'Are you sure you wish to update all ' + this.rateType.toUpperCase() + ' schedules after ' + this.form.start_date +
                             ' matching the given criteria?';
                 }
 
@@ -571,3 +601,12 @@
         }
     }
 </script>
+
+<style>
+    .rate-label {
+        padding-right: 30px;
+    }
+    [type="radio"]:not(:checked) + label {
+        font-size: 14px;
+    }
+</style>

@@ -14,8 +14,16 @@ class QuickSearchController extends BaseController
             return new SuccessResponse(null, []);
         }
 
+        $roles = ['client', 'caregiver'];
+        
+        if (request()->role == 'caregiver') {
+            $roles = ['caregiver'];
+        } else if (request()->role == 'client') {
+            $roles = ['client'];
+        }
+
         $query = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
-            ->whereIn('role_type', ['client', 'caregiver'])
+            ->whereIn('role_type', $roles)
             ->where('active', 1)
             ->orderBy('firstname')
             ->orderBy('lastname');
@@ -44,9 +52,30 @@ class QuickSearchController extends BaseController
             $query->orWhere('email', 'LIKE', "%$q%");
         });
 
-        $keys = ['id', 'name', 'role_type'];
+        switch(request('type')) {
+            case 'sms':
+            case 'phone':
+                $query->whereHas('phoneNumbers');
+                $query->with('phoneNumbers');
+                $keys = ['id', 'name', 'role_type', 'phone'];
+                break;
+            default:
+                $keys = ['id', 'name', 'role_type', 'email'];
+        }
 
         $users = $query->get()->map(function($user) use ($keys) {
+            if ($user->relationLoaded('phoneNumbers')) {
+
+                if ($user->phoneNumbers->where('type', 'primary')->count()) {
+                    $phone = $user->phoneNumbers->where('type', 'primary')->first();
+                } elseif ($user->phoneNumbers->where('type', 'mobile')->count()) {
+                    $phone = $user->phoneNumbers->where('type', 'mobile')->first();
+                } else {
+                    $phone = $user->phoneNumbers->first();
+                }
+
+                $user->phone = $phone->number;
+            }
             return $user->only($keys);
         });
 

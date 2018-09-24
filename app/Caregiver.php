@@ -76,7 +76,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'bank_account_id',
         'title',
         'hire_date',
-        'gender',
         'onboarded',
         'misc',
         'preferences',
@@ -169,6 +168,16 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Note::class);
     }
 
+    public function availability()
+    {
+        return $this->hasOne(CaregiverAvailability::class, 'id');
+    }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Activity::class, 'caregiver_skills');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -216,6 +225,18 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Set the caregiver's availability data
+     *
+     * @param array $data
+     * @return \App\CaregiverAvailability|false
+     */
+    public function setAvailability(array $data) {
+        $availability = $this->availability()->firstOrNew([]);
+        $availability->fill($data);
+        return $availability->save() ? $availability : false;
+    }
 
     /**
      * Retrieve the fake email address for a caregiver that does not have an email address.

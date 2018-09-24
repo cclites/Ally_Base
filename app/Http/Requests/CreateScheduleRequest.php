@@ -20,6 +20,7 @@ class CreateScheduleRequest extends FormRequest
             'duration' => 'required|numeric|min:1',
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'nullable|exists:caregivers,id',
+            'daily_rates' => 'required|boolean',
             'caregiver_rate' => 'required_with:caregiver_id|nullable|numeric',
             'provider_fee' => 'required_with:caregiver_id|nullable|numeric',
             'notes' => 'nullable|max:1024',
@@ -41,7 +42,8 @@ class CreateScheduleRequest extends FormRequest
             'recurring_end_date.min' => 'Your recurring end date cannot be before the start date.',
             'starts_at.min' => 'You cannot create past schedules.  The starting date must be today or later.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
-            'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.'
+            'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
+            'daily_rates.*' => 'You must select whether the shift is hourly or daily.',
         ];
     }
 }

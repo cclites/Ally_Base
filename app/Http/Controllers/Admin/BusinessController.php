@@ -54,6 +54,7 @@ class BusinessController extends Controller
             'state' => 'string|nullable',
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
+            'multi_location_registry' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
         $businessData['country'] = 'US';
@@ -116,6 +117,7 @@ class BusinessController extends Controller
             'state' => 'string|nullable',
             'zip' => 'string|nullable',
             'phone1' => 'string|nullable',
+            'multi_location_registry' => 'string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
         ]);
 
@@ -175,5 +177,23 @@ class BusinessController extends Controller
         $activeBusiness = app()->make(\App\ActiveBusiness::class);
         $activeBusiness->set(Business::find($request->business_id));
         return new SuccessResponse('The active business has been switched.');
+    }
+
+    /**
+     * Update the providers SMS settings.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Business  $business
+     * @return \Illuminate\Http\Response
+     */
+    public function updateSmsSettings(Request $request, Business $business)
+    {
+        $data = $request->validate([
+            'outgoing_sms_number' => 'string|nullable',
+        ]);
+
+        if ($business->update($data)) {
+            return new SuccessResponse('The business has been saved.');
+        }
     }
 }
