@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
@@ -30,12 +31,15 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])->get();
-
-        $clients = $clients->sort(function(Client $clientA, Client $clientB) {
-            $strcmp = strcmp($clientA->lastname, $clientB->lastname);
-            return ($strcmp !== 0) ? $strcmp : strcmp($clientA->firstname, $clientB->firstname);
-        })
+        $clients = $this->business()->clients()->with(['user', 'addresses', 'phoneNumbers'])
+            ->when($request->filled('client_type'), function($query) use ($request) {
+                $query->where('client_type', $request->input('client_type'));
+            })
+            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
+                $query->where('active', $request->input('active', 1));
+            })
+            ->orderByName()
+            ->get()
             ->map(function ($client) {
                 if ($client->addresses->count() == 1) {
                     $client->county = $client->addresses->first()->county;
@@ -50,7 +54,12 @@ class ClientController extends BaseController
             return $clients;
         }
 
-        return view('business.clients.index', compact('clients'));
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.clients.index', compact('clients', 'multiLocation'));
     }
 
     public function listNames()
@@ -109,6 +118,7 @@ class ClientController extends BaseController
                 'client_type' => 'required',
                 'ssn' => ['nullable', new ValidSSN()],
                 'onboard_status' => 'required',
+                'gender' => 'nullable|in:M,F',
             ]
         );
 
@@ -134,6 +144,12 @@ class ClientController extends BaseController
                 'status' => $data['onboard_status']
             ]);
             $client->onboardStatusHistory()->save($history);
+
+            // Provider pay
+            if ($request->provider_pay) {
+                $client->setPaymentMethod($this->business());
+            }
+
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
         }
 
@@ -156,6 +172,7 @@ class ClientController extends BaseController
             'user',
             'addresses',
             'phoneNumbers',
+            'preferences',
             'bankAccounts',
             'creditCards',
             'payments',
@@ -170,7 +187,7 @@ class ClientController extends BaseController
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
-        $business = $this->business();
+        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -223,6 +240,10 @@ class ClientController extends BaseController
         $addOnboardRecord = false;
         if ($client->onboard_status != $data['onboard_status']) {
             $addOnboardRecord = true;
+        }
+
+        if ($request->input('no_email')) {
+            $data['email'] = $client->getAutoEmail();
         }
 
         if ($client->update($data)) {
@@ -416,7 +437,11 @@ class ClientController extends BaseController
             'ltci_state',
             'ltci_zip',
             'ltci_policy',
-            'ltci_claim'
+            'ltci_claim',
+            'ltci_phone',
+            'ltci_fax',
+            'medicaid_id',
+            'medicaid_diagnosis_codes'
         ]);
 
         if($client->update($data)) {
@@ -424,5 +449,12 @@ class ClientController extends BaseController
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }
+    }
+
+    public function preferences(UpdateClientPreferencesRequest $request, Client $client) {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+        $client->setPreferences($request->validated());
     }
 }

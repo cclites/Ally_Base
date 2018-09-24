@@ -7,6 +7,7 @@ use App\CaregiverApplication;
 use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -33,18 +34,23 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         $caregivers = $this->business()->caregivers()
+            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
+                $query->where('active', $request->input('active', 1));
+            })
+            ->orderByName()
             ->with(['user', 'addresses', 'phoneNumbers'])
             ->get();
-
-        $caregivers = $caregivers->sort(function (Caregiver $caregiverA, Caregiver $caregiverB) {
-            $strcmp = strcmp($caregiverA->lastname, $caregiverB->lastname);
-            return ($strcmp !== 0) ? $strcmp : strcmp($caregiverA->firstname, $caregiverB->firstname);
-        })->values();
 
         if ($request->expectsJson()) {
             return $caregivers;
         }
-        return view('business.caregivers.index', compact('caregivers'));
+
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.caregivers.index', compact('caregivers', 'multiLocation'));
     }
 
     /**
@@ -54,16 +60,7 @@ class CaregiverController extends BaseController
      */
     public function create()
     {
-        $application = null;
-
-        if (request()->filled('app_id')) {
-            $application = CaregiverApplication::find(request('app_id'));
-            if ($application->business_id != $this->business()->id) {
-                return new ErrorResponse(403, 'You do not have access to this application');
-            }
-        }
-
-        return view('business.caregivers.create', compact('application'));
+        return view('business.caregivers.create');
     }
 
     /**
@@ -84,6 +81,8 @@ class CaregiverController extends BaseController
             'ssn' => 'nullable',
             'password' => 'nullable|confirmed',
             'title' => 'required',
+            'medicaid_id' => 'nullable',
+            'gender' => 'nullable|in:M,F',
         ]);
 
         // Look for duplicates in the current business
@@ -134,6 +133,8 @@ class CaregiverController extends BaseController
             'phoneNumbers',
             'user.documents',
             'bankAccount',
+            'availability',
+            'skills',
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
@@ -141,7 +142,7 @@ class CaregiverController extends BaseController
         ]);
         $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
-        $business = $this->business();
+        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -186,6 +187,8 @@ class CaregiverController extends BaseController
             'date_of_birth' => 'nullable|date',
             'title' => 'required',
             'misc' => 'nullable|string',
+            'medicaid_id' => 'nullable',
+            'gender' => 'nullable|in:M,F',
         ];
 
         if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
@@ -348,13 +351,28 @@ class CaregiverController extends BaseController
         return new SuccessResponse('Caregiver updated');
     }
 
-    public function preferences(Request $request, Caregiver $caregiver)
+    public function preferences(UpdateCaregiverAvailabilityRequest $request, Caregiver $caregiver)
     {
         if (!$this->businessHasCaregiver($caregiver)) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
-        $data = $request->validate(['preferences' => 'required|string']);
-        $caregiver->update($data);
-        return new SuccessResponse('Caregiver updated');
+        $caregiver->update(['preferences' => $request->input('preferences')]);
+        $caregiver->setAvailability($request->validated());
+        return new SuccessResponse('Caregiver availability preferences updated');
+    }
+
+    public function skills(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->businessHasCaregiver($caregiver)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $request->validate([
+            'skills' => 'array',
+            'skills.*' => 'integer',
+        ]);
+
+        $caregiver->skills()->sync($request->skills);
+        return new SuccessResponse('Caregiver skills updated');
     }
 }

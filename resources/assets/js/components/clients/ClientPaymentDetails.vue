@@ -36,7 +36,7 @@
                     <td>{{ shift.hours }}</td>
                     <td>{{ shift.caregiver_name }}</td>
                     <td>
-                        <div v-for="activity in shift.activities" :key="activity">{{ activity }}</div>
+                        <div v-for="activity in shift.activities" :key="activity.id">{{ activity.name }}</div>
                     </td>
                     <td>
                         {{ moneyFormat(shift.shift_total) }}

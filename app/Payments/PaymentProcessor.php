@@ -2,6 +2,7 @@
 namespace App\Payments;
 
 use App\Business;
+use App\Contracts\PaymentAggregatorInterface;
 use App\Exceptions\PaymentMethodError;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
@@ -61,34 +62,37 @@ class PaymentProcessor
     /**
      * Process all the payments relating to the business (returns an integer of successful transactions)
      *
-     * @return int
+     * @return array
      */
     public function process()
     {
         $aggregators = $this->getAggregators();
 
-        $count = 0;
+        $charges = [];
+        $failures = [];
+
         foreach($aggregators as $aggregator) {
             try {
                 $transaction = $aggregator->charge();
-                if (!$transaction) throw new PaymentMethodError("Unknown");
-                $count++;
+                if (!$transaction || !$transaction->success) {
+                    throw new \Exception('Catch');
+                }
+                $charges[] = $this->getChargeDetails($aggregator, $transaction);
             }
             catch (\Exception $e) {
-                $payment = $aggregator->getPayment();
-                if ($payment->client) {
-                    $type = 'client';
-                    $name = $payment->client->name();
-                }
-                else {
-                    $type = 'business';
-                    $name = $payment->business->name;
-                }
-                $this->logger->warning('Failed charging ' . $payment->amount . ' to ' . $type . ' ' . $name);
+                $failures[] = $this->getChargeDetails($aggregator, $transaction);
             }
         }
 
-        return $count;
+        return compact('charges', 'failures');
+    }
+
+    protected function getChargeDetails(PaymentAggregatorInterface $aggregator, $transaction) {
+        return [
+            'entity' => $aggregator->getEntity(),
+            'payment' => $aggregator->getPayment(),
+            'transaction' => $transaction,
+        ];
     }
 
     /**

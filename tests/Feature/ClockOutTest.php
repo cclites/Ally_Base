@@ -220,6 +220,58 @@ class ClockOutTest extends TestCase
         $this->assertEquals(Shift::WAITING_FOR_CONFIRMATION, $shift->status);
     }
 
+    /** @test */
+    public function clocking_out_should_attach_all_custom_questions_to_the_shift()
+    {
+        $this->withoutExceptionHandling();
+        
+        $shift = $this->createShift();
+
+        $this->actingAs($this->caregiver->user);
+
+        $activity = factory(Activity::class)->create();
+
+        $question = factory(\App\Question::class)->create(['business_id' => $this->business->id, 'client_type' => $this->client->client_type]);
+
+        $this->assertCount(1, $this->business->fresh()->questions()->forType($this->client->client_type)->get());
+
+        $data = [
+            'signature' => 'test',
+            'caregiver_comments' => 'test',
+            'activities' => [$activity->id],
+            'questions' => [$question->id => 'answer'],
+            'goals' => [],
+        ];
+
+        $this->postJson(route('clock_out'), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $shift->fresh()->questions);
+    }
+
+    /** @test */
+    public function clocking_out_should_throw_validation_errors_if_there_are_unanswered_custom_questions()
+    {
+        $shift = $this->createShift();
+
+        $this->actingAs($this->caregiver->user);
+
+        $activity = factory(Activity::class)->create();
+
+        $question = factory(\App\Question::class)->create(['required' => 1, 'business_id' => $this->business->id, 'client_type' => $this->client->client_type]);
+
+        $data = [
+            'signature' => 'test',
+            'caregiver_comments' => 'test',
+            'activities' => [$activity->id],
+            'questions' => [$question->id => ''],
+            'goals' => [],
+        ];
+
+        $this->postJson(route('clock_out'), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('questions.1');
+    }
 
     /**
      * @param array $attributes

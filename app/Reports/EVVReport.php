@@ -5,6 +5,7 @@ namespace App\Reports;
 
 use App\Shift;
 use UAParser\Parser;
+use UAParser\Result\UserAgent;
 
 class EVVReport extends ShiftsReport
 {
@@ -58,7 +59,14 @@ class EVVReport extends ShiftsReport
                 $userAgent = $shift->checked_in_agent ?? $shift->checked_out_agent;
                 $parser = Parser::create();
                 $parsed = $parser->parse($userAgent);
+                if (is_mobile_app($userAgent)) {
+                    $parts = explode(' ', $userAgent);
+                    $parsed->ua = new UserAgent();
+                    $parsed->ua->family = 'AllyMS Mobile';
+                    $parsed->ua->major = end($parts);
+                }
                 $shift->user_agent = json_decode(json_encode($parsed), true);
+
                 return $shift;
             });
         }

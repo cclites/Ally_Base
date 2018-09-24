@@ -6,8 +6,12 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-simplexml": "*",
         "barryvdh/laravel-snappy": "^0.4.0",
         "bizhub/impersonate": "^0.2.0",
+        "doctrine/dbal": "^2.5",
         "fideloper/proxy": "~3.3",
         "giggsey/libphonenumber-for-php": "^8.8",
         "h4cc/wkhtmltoimage-amd64": "0.12.x",
@@ -16,7 +20,9 @@
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "^2.1",
+        "nacha/file-generator": "1.9.*",
         "owen-it/laravel-auditing": "^6.1",
+        "quickbooks/v3-php-sdk": "^5.0",
         "rlanvin/php-rrule": "^1.6",
         "s-ichikawa/laravel-sendgrid-driver": "^2.0",
         "tplaner/when": "^2.1",
@@ -70,6 +76,9 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "7.0.30"
+        }
     }
 }

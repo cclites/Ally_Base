@@ -16,6 +16,9 @@ class ClockOut extends ClockBase
     protected $otherExpenses = 0;
     protected $otherExpensesDesc;
     protected $mileage = 0;
+    protected $goals = [];
+    protected $questions = [];
+    protected $answers = [];
 
     public function setComments($comments)
     {
@@ -32,7 +35,18 @@ class ClockOut extends ClockBase
 
     public function setMileage($miles)
     {
-        $this->mileage = round($miles);
+        $this->mileage = round($miles, 2);
+    }
+
+    public function setGoals($goals)
+    {
+        $this->goals = $goals;   
+    }
+
+    public function setQuestions($answers, $questions)
+    {
+        $this->answers = $answers;   
+        $this->questions = $questions;   
     }
 
     /**
@@ -82,6 +96,10 @@ class ClockOut extends ClockBase
             'verified' => $verified,
         ]);
 
+        $shift->syncGoals($this->goals);
+        
+        $shift->syncQuestions($this->questions, $this->answers);
+        
         $shift->statusManager()->ackClockOut($verified);
 
         if (!$verified) {

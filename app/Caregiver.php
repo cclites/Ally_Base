@@ -36,13 +36,12 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
- * @property-read mixed $date_of_birth
- * @property-read mixed $email
- * @property-read mixed $first_name
- * @property-read mixed $last_name
- * @property-read mixed $name
- * @property-read mixed $name_last_first
- * @property-read mixed $username
+ * @property mixed $date_of_birth  Proxied
+ * @property mixed $email  Proxied
+ * @property mixed $first_name  Proxied
+ * @property mixed $last_name  Proxied
+ * @property mixed $name  Proxied
+ * @property mixed $username  Proxied
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverLicense[] $licenses
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
@@ -77,7 +76,6 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'bank_account_id',
         'title',
         'hire_date',
-        'gender',
         'onboarded',
         'misc',
         'preferences',
@@ -92,7 +90,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_address',
         'w9_city_state_zip',
         'w9_account_numbers',
-        'w9_employer_id_number'
+        'w9_employer_id_number',
+        'medicaid_id',
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
@@ -169,6 +168,16 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Note::class);
     }
 
+    public function availability()
+    {
+        return $this->hasOne(CaregiverAvailability::class, 'id');
+    }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Activity::class, 'caregiver_skills');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -216,6 +225,18 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Set the caregiver's availability data
+     *
+     * @param array $data
+     * @return \App\CaregiverAvailability|false
+     */
+    public function setAvailability(array $data) {
+        $availability = $this->availability()->firstOrNew([]);
+        $availability->fill($data);
+        return $availability->save() ? $availability : false;
+    }
 
     /**
      * Retrieve the fake email address for a caregiver that does not have an email address.

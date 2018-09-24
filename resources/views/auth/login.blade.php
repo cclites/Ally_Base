@@ -41,17 +41,22 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="col-md-8">
-                                <div class="form-check">
-                                    <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                                        <span class="custom-control-indicator"></span>
-                                        <span class="custom-control-description">Remember Me</span>
-                                    </label>
+                        @if(is_mobile_app())
+                            {{-- Automatically enable remember me on the mobile app --}}
+                            <input type="hidden" name="remember" value="on" />
+                        @else
+                            <div class="form-group">
+                                <div class="col-md-8">
+                                    <div class="form-check">
+                                        <label class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">Remember Me</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="form-group">
                             <div class="col-md-8 col-md-offset-4">

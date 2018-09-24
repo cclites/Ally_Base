@@ -11,6 +11,13 @@ function interpol_escape($value)
     return preg_replace('/({|}|&#123;|&#125;|&#x7b;|&#x7d;)(?=\S)/', '$1 ', $value);
 }
 
+function is_mobile_app($agent = null)
+{
+    if (!$agent) $agent = request()->userAgent();
+    $match = ' AllyMS Mobile ';
+    return strpos($agent, $match) !== false;
+}
+
 function collection_only_values($collection, $values = []) {
     return $collection->map(function($item) use ($values)
     {
@@ -100,4 +107,24 @@ function is_admin_now() {
  */
 function is_office_user() {
     return Auth::user()->role_type === 'office_user';
+}
+
+/**
+ * Get the active business object or return null.
+ * 
+ * @return string
+ */
+if (! function_exists('activeBusiness')) {
+    function activeBusiness() {
+        if (Auth::check() && Auth::user()->role_type === 'caregiver') {
+            return Auth::user()->role->businesses->first();
+        }
+
+        $activeBusiness = app()->make(\App\ActiveBusiness::class);
+        if (!$business = $activeBusiness->get()) {
+            return null;
+        }
+
+        return $business;
+    }
 }

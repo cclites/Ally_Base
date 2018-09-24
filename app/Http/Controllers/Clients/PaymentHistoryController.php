@@ -6,6 +6,7 @@ use App\Client;
 use App\Http\Controllers\Controller;
 use App\Payment;
 use App\Reports\ShiftsReport;
+use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Carbon;
 
@@ -37,7 +38,7 @@ class PaymentHistoryController extends Controller
     public function printDetails($id)
     {
         $compactedDetails = $this->getPaymentDetails($id);
-        //return view('clients.print.payment_details', $compactedDetails);
+//        return view('clients.print.payment_details', $compactedDetails);
 
         $pdf = PDF::setOption('margin-left', '2mm')->setOrientation('landscape')->setOption('margin-right', '2mm')->loadView('clients.print.payment_details', $compactedDetails);//->setOrientation('landscape');
         return $pdf->download('payment_details.pdf');
@@ -54,12 +55,7 @@ class PaymentHistoryController extends Controller
 
         $shifts = $report->rows()->values()->map(function ($value) use ($payment) {
             $value = (object) $value;
-            $value->activities = optional($payment->shifts->where('id', $value->id)->first())
-                ->activities
-                ->pluck('name')
-                ->unique()
-                ->sortBy('name')
-                ->values();
+            $value->activities = optional($payment->shifts->where('id', $value->id)->first())->activities;
             $value->checked_in_time = Carbon::parse($value->checked_in_time);
             $value->checked_out_time = Carbon::parse($value->checked_out_time);
             return $value;

@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
+    <form @submit.prevent="submit()" @keydown="formKeyDown($event)">
         <b-form-group label="Nickname" label-for="nickname">
             <b-form-input
                     id="nickname"
@@ -117,7 +117,9 @@
             </b-col>
         </b-row>
         <b-form-group>
-            <b-button variant="success" type="submit" size="">Save Bank Account</b-button>
+            <b-button :variant="buttonVariant" type="submit" size="" :disabled="submitting">
+                <i class="fa fa-spin fa-spinner" v-show="submitting"></i> {{ buttonText }}
+            </b-button>
         </b-form-group>
     </form>
 </template>
@@ -145,11 +147,16 @@
                     account_number_confirmation: '',
                     account_type: this.account.account_type,
                     account_holder_type: this.account.account_holder_type,
+                    ignore_validation: false,
                 }),
+                submitting: false,
+                buttonText: '',
+                buttonVariant: '',
             }
         },
 
         mounted() {
+            this.resetButtonText();
             this.year = parseInt(moment().format('Y'));
             this.years = _.range(this.year, this.year+11);
             this.months = _.range(1,13).map(function(value) {
@@ -158,15 +165,36 @@
         },
 
         methods: {
-            submit() {
-                this.form.post(this.submitUrl)
-                    .then((response) => {
-                        this.form.account_number = '*****' + this.form.account_number.slice(-4);
-                        this.form.account_number_confirmation = '';
-                        this.form.routing_number = '*********';
-                        this.form.routing_number_confirmation = '';
-                        this.$parent.typeMessage = response.data;
-                    });
+            async submit() {
+                this.buttonText = 'Verifying Account...';
+                this.submitting = true;
+                try {
+                    const response = await this.form.post(this.submitUrl);
+                    this.form.account_number = '*****' + this.form.account_number.slice(-4);
+                    this.form.account_number_confirmation = '';
+                    this.form.routing_number = '*********';
+                    this.form.routing_number_confirmation = '';
+                    this.$parent.typeMessage = response.data;
+                }
+                catch (e) {
+                    let errors = e.response.data.errors;
+                    if (errors && Object.keys(errors)[0] === 'account_number') {
+                        this.form.ignore_validation = true;
+                        alert('Please double check your routing number and account number.  If you are sure your numbers are correct, press Save again.');
+                    }
+                }
+                this.resetButtonText();
+                this.submitting = false;
+            },
+
+            resetButtonText() {
+                this.buttonText = 'Save Bank Account';
+                this.buttonVariant = 'success';
+            },
+
+            formKeyDown(event) {
+                this.resetButtonText();
+                this.form.clearError(event.target.name);
             }
         }
     }

@@ -59,7 +59,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Mileage" label-for="mileage">
+                    <b-form-group v-if="businessSettings().co_mileage" label="Mileage" label-for="mileage">
                         <b-form-input
                                 id="mileage"
                                 name="mileage"
@@ -70,7 +70,7 @@
                         </b-form-input>
                         <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
                     </b-form-group>
-                    <b-form-group label="Other Expenses" label-for="other_expenses">
+                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses" label-for="other_expenses">
                         <b-form-input
                                 id="other_expenses"
                                 name="other_expenses"
@@ -162,9 +162,21 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
+                    <b-form-group label="Shift Designation" label-for="hours_type">
+                        <b-form-select
+                                id="hours_type"
+                                name="hours_type"
+                                v-model="form.hours_type"
+                        >
+                            <option value="default">Regular Shift</option>
+                            <option value="holiday">Holiday</option>
+                            <option value="overtime">Overtime</option>
+                        </b-form-select>
+                        <input-help :form="form" field="hours_type" text=""></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col md="7" sm="6">
-                    <b-form-group label="Other Expenses Description" label-for="other_expenses_desc">
+                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
                         <b-textarea
                                 id="other_expenses_desc"
                                 name="other_expenses_desc"
@@ -174,7 +186,7 @@
                         </b-textarea>
                         <input-help :form="form" field="other_expenses_desc" text=""></input-help>
                     </b-form-group>
-                    <b-form-group label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
+                    <b-form-group v-if="businessSettings().co_comments" label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                         <b-textarea
                                 id="caregiver_comments"
                                 name="caregiver_comments"
@@ -211,13 +223,34 @@
                     </b-row>
                 </b-col>
             </b-row>
-            <b-row class="with-padding-top" v-if="!is_modal">
+            <b-row v-if="shift.questions && shift.questions.length" class="with-padding-top">
+                <b-col lg="12">
+                    <b-form-group v-for="q in shift.questions"
+                        :key="q.id"
+                        :label="q.question + (q.required ? ' *' : '')">
+                        <textarea v-model="form.questions[q.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                        <input-help :form="form" :field="`questions.${q.id}`"></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
+                <b-col lg="12">
+                    <h4>Goals:</h4>
+                    <b-form-group v-for="goal in shift.client.goals"
+                        :key="goal.id"
+                        :label="goal.question">
+                        <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                        <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="with-padding-top" v-if="(businessSettings().co_issues || businessSettings().co_injuries) && !is_modal">
                 <b-col lg="12">
                     <h5>
                         Shift Issues
                         <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
                     </h5>
-                    <div class="table-responsive" v-if="localIssues.length">
+                    <div class="table-responsive" v-if="form.issues.length">
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -228,11 +261,25 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="issue in localIssues" :key="issue.id">
-                                <td>{{ +issue.caregiver_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ +issue.client_injury ? 'Yes' : 'No' }}</td>
-                                <td>{{ issue.comments }}</td>
-                                <td><b-btn size="sm" @click="editIssue(issue)">Edit</b-btn></td>
+                            <tr v-for="(issue, index) in form.issues" :key="issue.id">
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].caregiver_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.issues[index].client_injury">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">Yes</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <b-textarea :rows="2" v-model="form.issues[index].comments" />
+                                </td>
+                                <td><b-btn size="sm" variant="danger" @click="removeIssue(index)"><i class="fa fa-times"></i></b-btn></td>
                             </tr>
                             </tbody>
                         </table>
@@ -305,23 +352,7 @@
                 </b-col>
             </b-row>
             <b-row v-if="!is_modal">
-                <b-col lg="6" v-if="!shift.readOnly">
-                    <span v-if="!deleted">
-                        <b-button variant="success" type="button" @click="saveAndConfirm()" v-if="!confirmed">Save &amp; Confirm</b-button>
-                        <submit-button variant="success" type="submit" :submitting="submitting" v-else>Save Shift</submit-button>
-                        <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                        <b-button variant="danger" type="button" @click="unconfirm()" v-if="!confirmed">Unconfirm</b-button>
-                        <b-button variant="danger" type="button" @click="deleteShift()" v-if="shift.id"><i class="fa fa-times"></i> Delete Shift</b-button>
-                    </span>
-                    <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
-                </b-col>
-                <b-col lg="6" v-else>
-                    <b-button variant="info" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                    <b-button variant="success" @click="adminOverride()" v-if="admin">Admin Override: Save Anyways</b-button>
-                    <b-button variant="primary" type="button" :href="'/business/shifts/' + shift.id + '/duplicate'" v-if="shift.id"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-button>
-                    <b-button variant="secondary" href="/business/reports/shifts"><i class="fa fa-backward"></i> Return to Shift History</b-button>
-                </b-col>
-                <b-col lg="6">
+                <b-col lg="4">
                     <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
                     <b-row>
                         <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
@@ -332,19 +363,47 @@
                         <span v-else><strong>Not Charged</strong></span>
                     </b-row>
                 </b-col>
+                <b-col lg="8" class="text-right" v-if="!shift.readOnly">
+                    <div v-if="!deleted">
+                        <b-button variant="info" type="submit" @click="saveShift(false)">
+                            <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
+                        </b-button>
+                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
+                        <b-dropdown variant="light" v-if="shift.id">
+                            <template slot="button-content">
+                                <i class='fa fa-list'></i> Actions
+                            </template>
+                            <b-dropdown-item @click="unconfirm()" v-if="confirmed"><i class="fa fa-backward"></i> Unconfirm Shift</b-dropdown-item>
+                            <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
+                            <b-dropdown-divider></b-dropdown-divider>
+                            <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+                </b-col>
+                <b-col lg="8" class="text-right" v-else>
+                    <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                    <b-dropdown variant="light">
+                        <template slot="button-content">
+                            <i class='fa fa-list'></i> Actions
+                        </template>
+                        <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
+                        <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
+                        <b-dropdown-divider></b-dropdown-divider>
+                        <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
+                    </b-dropdown>
+                </b-col>
             </b-row>
         </form>
-
-        <business-issue-modal v-model="issueModal" :shift-id="shift.id" :selectedItem="selectedIssue" :items.sync="localIssues"></business-issue-modal>
     </div>
 </template>
 
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
+    import BusinessSettings from '../mixins/BusinessSettings';
 
     export default {
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, BusinessSettings],
 
         props: {
             'shift': {
@@ -357,11 +416,6 @@
             'in_distance': {},
             'out_distance': {},
             'activities': Array,
-            'issues': {
-                default() {
-                    return [];
-                }
-            },
             'admin': Number,
             'is_modal': 0,
         },
@@ -373,9 +427,6 @@
                 checked_in_date: '',
                 checked_out_time: '',
                 checked_out_date: '',
-                localIssues: this.issues,
-                issueModal: false,
-                selectedIssue: null,
                 deleted: false,
                 clients: [],
                 caregivers: [],
@@ -387,19 +438,7 @@
         mounted() {
             this.loadClientCaregiverData();
             this.loadAllyPctFromClient();
-            // Do not check against id below to allow for shift duplication
-            if (this.shift.checked_in_time) {
-                let checkin = moment.utc(this.shift.checked_in_time).local();
-                let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
-                this.checked_in_date = checkin.format('MM/DD/YYYY');
-                this.checked_in_time = checkin.format('HH:mm');
-                this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
-                this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
-                this.form.activities = this.getShiftActivityList();
-            }
-            else {
-                this.setDefaultDateTimes();
-            }
+            this.fixDateTimes();
         },
         computed: {
             leftHalfActivities() {
@@ -444,8 +483,10 @@
         },
         methods: {
             resetForm() {
+                this.deleted = false;
                 this.form = new Form(this.initForm());
-                this.setDefaultDateTimes();
+                this.status = (this.shift) ? this.shift.status : null;
+                this.fixDateTimes();
             },
 
             setDefaultDateTimes() {
@@ -453,6 +494,21 @@
                 this.checked_out_date = moment().format('MM/DD/YYYY');
                 this.checked_in_time = '09:00';
                 this.checked_out_time = '10:00';
+            },
+
+            fixDateTimes() {
+                // Do not check against id below to allow for shift duplication
+                if (this.shift.checked_in_time) {
+                    let checkin = moment.utc(this.shift.checked_in_time).local();
+                    let checkout = (this.shift.checked_out_time) ? moment.utc(this.shift.checked_out_time).local() : null;
+                    this.checked_in_date = checkin.format('MM/DD/YYYY');
+                    this.checked_in_time = checkin.format('HH:mm');
+                    this.checked_out_date = (checkout) ? checkout.format('MM/DD/YYYY') : null;
+                    this.checked_out_time = (checkout) ? checkout.format('HH:mm') : null;
+                }
+                else {
+                    this.setDefaultDateTimes();
+                }
             },
 
             initForm() {
@@ -470,19 +526,24 @@
                     daily_rates: ('daily_rates' in this.shift) ? this.shift.daily_rates : 0,
                     caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
-                    activities: [],
-                    issues: [], // only used for creating shifts, modifying a shift's issues is handled immediately in the modal
+                    activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
+                    issues: ('issues' in this.shift) ? this.shift.issues : [],
                     override: false,
                     modal: this.is_modal,
+                    goals: this.setupGoalsForm(),
+                    questions: this.setupQuestionsForm(),
                 };
             },
             createIssue() {
-                this.selectedIssue = null;
-                this.issueModal = true;
+                this.form.issues.push({
+                    caregiver_injury: 0,
+                    client_injury: 0,
+                    comments: '',
+                    shift_id: this.shift.id,
+                })
             },
-            editIssue(issue) {
-                this.selectedIssue = issue;
-                this.issueModal = true;
+            removeIssue(index) {
+                this.form.issues.splice(index, 1);
             },
             getClockedInMoment() {
                 return moment(this.checked_in_date + ' ' + this.checked_in_time, 'MM/DD/YYYY HH:mm');
@@ -498,6 +559,10 @@
                 return (leftHalf) ? left : clone;
             },
             getShiftActivityList() {
+                if (! ('activities' in this.shift)) {
+                    return [];
+                }
+
                 let list = [];
                 for (let activity of this.shift.activities) {
                     list.push(activity.id);
@@ -508,26 +573,42 @@
                 if (confirm('Are you sure you wish to delete this shift?')) {
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + this.shift.id)
-                        .then(response => this.deleted = true);
+                        .then(response => {
+                            this.deleted = true;
+                            this.$emit('shift-deleted', this.shift.id);
+                        });
                 }
             },
-            saveShift(callback) {
+            async saveShift(confirm = false) {
                 this.submitting = true;
                 this.form.checked_in_time = this.getClockedInMoment().format();
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
-                    this.form.patch('/business/shifts/' + this.shift.id).then(callback);
+                    try {
+                        let response = await this.form.patch('/business/shifts/' + this.shift.id);
+                        if (confirm) {
+                            try {
+                                let form = new Form();
+                                let confirmResponse = await form.post('/business/shifts/' + this.shift.id + '/confirm');
+                            }
+                            catch (e) {
+                                console.log(e);
+                            }
+                        }
+                        this.$emit('shift-updated', this.shift.id);
+                        this.submitting = false;
+
+                    } catch (e) {
+                        console.log(e);
+                        this.submitting = false;
+                    }
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.issues = this.localIssues;
                     this.form.post('/business/shifts').then(response => {
-                        this.$emit('shiftCreated', response.data.data.shift);
+                        this.$emit('shift-created', response.data.data.shift.id);
                         this.status = response.data.data.status;
                         this.submitting = false;
-                        if(callback) {
-                            callback();
-                        }
                     }).catch(error => {
                         this.submitting = false;
                     });
@@ -536,17 +617,6 @@
             adminOverride() {
                 this.form.override = 1;
                 return this.saveShift();
-            },
-            saveAndConfirm() {
-                this.saveShift(() => {
-                    if (this.shift.id) {
-                        let form = new Form();
-                        form.post('/business/shifts/' + this.shift.id + '/confirm')
-                            .then(response => {
-                                this.status = response.data.data.status;
-                            });
-                    }
-                });
             },
             unconfirm() {
                 if (this.shift.id) {
@@ -562,16 +632,27 @@
                     let clockin = this.getClockedInMoment();
                     let clockout = this.getClockedOutMoment();
                     if (clockin.isValid() && clockout.isValid()) {
+                        let newVal = field === 'checked_in_time' ?  clockin : clockout;
+                        let diffFromShift = newVal.diff(moment.utc(this.shift[field]), 'minutes');
+                        // debugger;
                         let diffInMinutes = clockout.diff(clockin, 'minutes');
-                        console.log(diffInMinutes);
+
+                        this.form.clearError(field);
+
+                        if (diffFromShift === 0) {
+                            return;
+                        }
                         if (diffInMinutes < 0) {
                             this.form.addError(field, 'The clocked out time cannot be less than the clocked in time.');
                         }
-                        else if (diffInMinutes > 600) {
-                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 10 hours.');
+                        if (diffInMinutes === 0) {
+                            this.form.addError(field, 'Warning: This shift is set to a duration of 0 minutes.');
                         }
-                        else {
-                            this.form.clearError(field);
+                        else if (diffInMinutes > 1440) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 24 hours.');
+                        }
+                        else if (diffInMinutes > 720) {
+                            this.form.addError(field, 'Warning: This shift change exceeds a duration of 12 hours.');
                         }
                     }
                     else {
@@ -600,19 +681,45 @@
                     this.paymentType = response.data.payment_type;
                 });
             },
+            /**
+             * Initialize goals object/array form values with the actual ones
+             * attached to the shift (if any).
+             */
+            setupGoalsForm() {
+                let goals = {};
+                if (this.shift.client) {
+                    this.shift.client.goals.forEach(item => {
+                        let val = '';
+                        let index = this.shift.goals.findIndex(obj => obj.pivot.client_goal_id == item.id);
+                        if (index >= 0) {
+                            val = this.shift.goals[index].pivot.comments;
+                        }
+                        goals[item.id] = val;
+                    });
+                }
+                return goals;
+            },
+            /**
+             * Initialize questions object/array form values with the actual ones
+             * attached to the shift (if any).
+             */
+            setupQuestionsForm() {
+                let questions = {};
+                if (this.shift.questions) {
+                    this.shift.questions.forEach(item => {
+                        questions[item.id] = item.pivot.answer;
+                    });
+                }
+                return questions;
+            },
         },
         watch: {
+            shift(newVal, oldVal) {
+                this.resetForm();
+            },
             checked_in_date(val, old) {
                 if (old) {
                     this.validateTimeDifference('checked_in_time');
-                    if (!this.checked_out_date || this.checked_out_date < this.checked_in_date) {
-                        this.checked_out_date = val;
-                    }
-                    else {
-                        if (this.getClockedOutMoment().diff(this.getClockedInMoment(), 'hours') > 12) {
-                            this.checked_out_date = val;
-                        }
-                    }
                 }
             },
             checked_in_time(val, old) {

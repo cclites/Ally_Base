@@ -167,6 +167,6 @@ END;
      */
     function skipRow($rowNo)
     {
-        return false;
+        return empty(trim($this->worksheet->getValue('ClientLast', $rowNo)));
     }
 }

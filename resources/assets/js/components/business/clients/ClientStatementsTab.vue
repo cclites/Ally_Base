@@ -1,9 +1,16 @@
 <template>
-    <b-card title="Client Payment Statements">
+    <b-card header="Payment Statements"
+            header-bg-variant="info"
+            header-text-variant="white"
+    >
         <div class="table-responsive">
             <b-table :items="items" :fields="fields">
                 <template slot="for_care_week" scope="data">
                     {{ weekStart(data.item) }} - {{ weekEnd(data.item) }}
+                </template>
+                <template slot="success" scope="data">
+                    <span style="color: green;" v-if="data.value">Complete</span>
+                    <span style="color: darkred;" v-else>Failed</span>
                 </template>
                 <template slot="actions" scope="data">
                     <b-btn :href="'/business/clients/payments/'+data.item.id">View Details</b-btn>
@@ -35,6 +42,10 @@
                     {
                         key: 'amount',
                         formatter: (value) => { return this.moneyFormat(value) }
+                    },
+                    {
+                        key: 'success',
+                        label: 'Payment Status',
                     },
                     {
                         key: 'actions',

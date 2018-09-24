@@ -41,6 +41,10 @@
                             <option value="charged">Charged</option>
                             <option value="uncharged">Un-Charged</option>
                         </b-form-select>
+                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
+                            <option value="all">All Locations</option>
+                            <option :value="multi_location.name">{{ multi_location.name }}</option>
+                        </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
                     </b-form>
@@ -84,13 +88,24 @@
                     </b-row>
                     <shift-history-table :fields="fields" :items="shiftHistoryItems">
                         <template slot="actions" scope="row">
-                            <b-btn size="sm" :href="'/business/shifts/' + row.item.id" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                            <span>
-                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
-                            </span>
-                            <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                            <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
+                            <div v-if="row.item.id">
+                                <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                                <span>
+                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                                </span>
+                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+
+                                <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
+                                    <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
+                                    <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                                    <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                                    <!--<b-dropdown-divider></b-dropdown-divider>-->
+                                    <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
+                                <!--</b-dropdown>-->
+                            </div>
                         </template>
                     </shift-history-table>
                 </b-card>
@@ -120,8 +135,17 @@
             :caregiver="caregiver_id" 
             :client="client_id"
             :no-close-on-backdrop="true"
-            @shiftCreated="onShiftCreated()"
+            @shift-created="onShiftCreate"
         ></add-shift-modal>
+
+        <edit-shift-modal
+            v-model="editShiftModal"
+            :shift_id="editingShiftId"
+            :no-close-on-backdrop="true"
+            :activities="activities"
+            @shift-updated="onShiftUpdate"
+            @shift-deleted="onShiftDelete"
+        />
     </div>
 </template>
 
@@ -133,7 +157,9 @@
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
     import AddShiftModal from "./modals/AddShiftModal";
+    import EditShiftModal from "./modals/EditShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
+    import LocalStorage from "../mixins/LocalStorage";
 
     export default {
         components: {
@@ -141,15 +167,21 @@
             ShiftDetailsModal,
             FilterColumnsModal,
             AddShiftModal,
+            EditShiftModal,
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, BusinessSettings],
+        mixins: [FormatsDates, FormatsNumbers, BusinessSettings, LocalStorage],
 
         props: {
             admin: Number,
             autoload: Number,
-            imports: Array
+            imports: Array,
+            multi_location: Object,
+            activities: {
+                type: Array,
+                default: [],
+            },
         },
 
         data() {
@@ -171,12 +203,34 @@
                 sortBy: 'Day',
                 sortDesc: false,
                 addShiftModal: false,
+                editShiftModal: false,
                 detailsModal: false,
+                editingShiftId: null,
                 selectedItem: {
                     client: {}
                 },
                 columnsModal: false,
-                availableFields: [
+                filteredFields: [],
+                urlPrefix: '/business/reports/data/',
+                loaded: -1,
+                charge_status: '',
+                localStoragePrefix: 'shift_report_',
+                location: 'all'
+            }
+        },
+
+        mounted() {
+            this.loadFiltersFromStorage();
+            this.setInitialFields();
+            this.loadFiltersData();
+            if (this.autoload) {
+                this.loadData();
+            }
+        },
+
+        computed: {
+            availableFields() {
+                let fields = [
                     'Day',
                     'Time',
                     'Hours',
@@ -197,24 +251,20 @@
                     'Type',
                     'Confirmed',
                     'Charged',
-                ],
-                filteredFields: [],
-                urlPrefix: '/business/reports/data/',
-                loaded: -1,
-                charge_status: '',
-            }
-        },
+                ];
 
-        mounted() {
-            this.loadFiltersFromStorage();
-            this.setInitialFields();
-            this.loadFiltersData();
-            if (this.autoload) {
-                this.loadData();
-            }
-        },
+                // remove certain fields completely based on business settings
+                if (! this.businessSettings().co_mileage) {
+                    fields.splice(fields.indexOf('Mileage'), 1);
+                    fields.splice(fields.indexOf('Mileage Costs'), 1);
+                }
+                if (! this.businessSettings().co_expenses) {
+                    fields.splice(fields.indexOf('Other Expenses'), 1);
+                }
 
-        computed: {
+                return fields;
+            },
+
             fields() {
                 let fields = [];
                 for (let field of this.availableFields) {
@@ -333,14 +383,23 @@
                     if (showSummary === false || showSummary === true) this.showSummary = showSummary;
                 }
             },
-            reloadData() {
-                this.setLocalStorage('sortBy', 'Day');
-                this.setLocalStorage('sortDesc', 'false');
-                return this.loadData();
-            },
-            loadData() {
-                this.loaded = 0;
 
+            async reloadShift(id) {
+                const response = await axios.get(this.urlPrefix + 'shifts' + this.queryString + '&shift_id=' + id);
+
+                let shift = response.data[0];
+                if (!shift) return;
+
+                let index = this.items.shifts.findIndex(item => shift.id === item.id);
+                if (index !== -1) {
+                    this.items.shifts[index] = shift;
+                    this.items.shifts.push(); // needed for Vue to detect change
+                }
+
+                this.loadSummaries();
+            },
+
+            loadSummaries() {
                 axios.get(this.urlPrefix + 'caregiver_payments' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -361,6 +420,18 @@
                         }
                         this.loaded++;
                     });
+            },
+
+            reloadData() {
+                this.setLocalStorage('sortBy', 'Day');
+                this.setLocalStorage('sortDesc', 'false');
+                return this.loadData();
+            },
+
+            loadData() {
+                this.loaded = 0;
+                this.loadSummaries();
+
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
                         if (Array.isArray(response.data)) {
@@ -400,9 +471,7 @@
                     let form = new Form();
                     form.submit('delete', '/business/shifts/' + item.id)
                         .then(response => {
-                            this.items.shifts = this.items.shifts.filter(function(shift) {
-                                return (shift.id !== item.id);
-                            });
+                            this.onShiftDelete(item.id);
                         })
                 }
             },
@@ -477,22 +546,6 @@
                 return parseFloat(float);
             },
 
-            getLocalStorage(item) {
-                let val = localStorage.getItem('shift_report_' + item);
-                if (typeof(val) === 'string') {
-                    if (val.toLowerCase() === 'null' || val.toLowerCase() === '') return null;
-                    if (val.toLowerCase() === 'false') return false;
-                    if (val.toLowerCase() === 'true') return true;
-                }
-                return val;
-            },
-
-            setLocalStorage(item, value) {
-                if (typeof(Storage) !== "undefined") {
-                    localStorage.setItem('shift_report_' + item, value);
-                }
-            },
-
             setInitialFields() {
                 if (this.getLocalStorage('fields')) {
                     let fields = JSON.parse(this.getLocalStorage('fields'));
@@ -515,13 +568,29 @@
                 this.showSummary = !this.showSummary;
             },
 
-            onShiftCreated() {
+            onShiftUpdate(id) {
+                console.log('Updating shift ' + id);
+                this.editShiftModal = false;
+                this.addShiftModal = false;
+                this.reloadShift(id, false);
+            },
+
+            onShiftCreate() {
+                this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();
             },
 
             hourlyFormat(item, amount) {
                 return (item.daily_rates) ? '---' : this.moneyFormat(amount);
+            },
+
+            onShiftDelete(id) {
+                console.log('Deleting shift ' + id);
+                this.editShiftModal = false;
+                this.addShiftModal = false;
+                this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
+                this.loadSummaries();
             }
         },
 

@@ -29,11 +29,15 @@ class UpdateBusinessRequest extends FormRequest
             'scheduling' => 'required|bool',
             'auto_confirm' => 'required|bool',
             'ask_on_confirm' => 'required|bool',
+            'allows_manual_shifts' => 'required|bool',
             'location_exceptions' => 'required|bool',
             'timesheet_exceptions' => 'required|bool',
+            'require_signatures' => 'required|bool',
             'mileage_rate' => 'required|numeric',
             'calendar_default_view' => 'required',
             'calendar_caregiver_filter' => 'required|in:all,unassigned',
+            'calendar_remember_filters' => 'required|bool',
+            'calendar_next_day_threshold' => 'required|date_format:H:i:s',
             'phone1' => 'nullable|string',
             'phone2' => 'nullable|string',
             'address1' => 'nullable|string',
@@ -43,6 +47,22 @@ class UpdateBusinessRequest extends FormRequest
             'zip' => 'nullable|string',
             'country' => 'nullable|string',
             'timezone' => ['required', new ValidTimezoneOrOffset()],
+            'co_mileage' => 'required|bool',
+            'co_injuries' => 'required|bool',
+            'co_comments' => 'required|bool',
+            'co_expenses' => 'required|bool',
+            'co_issues' => 'required|bool',
+            'co_signature' => 'required|bool',
+            'ein' => 'nullable',
+            'medicaid_id' => 'nullable',
+            'medicaid_npi_number' => 'nullable',
+            'medicaid_npi_taxonomy' => 'nullable',
+        ];
+    }
+
+    public function messages() {
+        return [
+            'calendar_next_day_threshold.date_format' => 'The next day threshold must be in 24-hour format as HH:MM:SS',
         ];
     }
 }

@@ -159,6 +159,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     public function client()
     {
         return $this->belongsTo(Client::class)
+                    ->with('goals')
                     ->withTrashed();
     }
 
@@ -218,6 +219,28 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     public function statusHistory()
     {
         return $this->hasMany(ShiftStatusHistory::class);
+    }
+
+    /**
+     * A Shift can have many ClientGoals.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function goals()
+    {
+        return $this->belongsToMany(ClientGoal::class, 'shift_goals')
+            ->withPivot('comments');
+    }
+
+    /**
+     * A Shift can have many Questions.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function questions()
+    {
+        return $this->belongsToMany(Question::class, 'shift_questions')
+            ->withPivot('answer');
     }
 
     ///////////////////////////////////////////
@@ -367,6 +390,47 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     }
 
     /**
+     * Handles adding and deleting issues based on an array of issues.
+     *
+     * @param array $issues
+     * @return void
+     */
+    public function syncIssues($issues)
+    {
+        $new = collect($issues)->filter(function($item) {
+            return !isset($item['id']);
+        });
+
+        $existing = collect($issues)->filter(function($item) {
+            return isset($item['id']);
+        });
+
+        $ids = $existing->pluck('id');
+        if (count($ids)) {
+            // remove all issues with ids that aren't in the current array
+            ShiftIssue::where('shift_id', $this->id)
+                ->whereNotIn('id', $ids)
+                ->delete();
+
+            // update the existing issues in case they changed
+            foreach($existing as $item) {
+                $issue = ShiftIssue::where('id', $item['id'])->first();
+                if ($issue) {
+                    $issue->update($item);
+                }
+            }
+        } else {
+            // clear
+            ShiftIssue::where('shift_id', $this->id)->delete();
+        }
+
+        // create new issues from the issues that have no id
+        foreach($new as $item) {
+            ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
+        }
+    }
+
+    /**
      * Get the ally fee percentage for this entity
      *
      * @return float
@@ -398,6 +462,47 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $caregiverRate = $caregiverRate ?: $this->caregiver_rate;
         $amount = bcadd($providerFee, $caregiverRate, 2);
         return $this->getAllyFee($amount);
+    }
+
+    /**
+     * Sync client goals data with the current shift.
+     *
+     * @param array $goals
+     * @return Shift
+     */
+    public function syncGoals($goals)
+    {
+        // first reformat array to work with sync
+        // and drop any values with empty comments.
+        $data = [];
+        foreach($goals as $goalId => $comments) {
+            if (empty($comments)) {
+                continue;
+            }
+
+            $data[$goalId] = ['comments' => $comments];
+        }
+
+        $this->goals()->sync($data);
+
+        return $this;
+    }
+
+    /**
+     * Sync question answers to the shift.
+     *
+     * @param array $questions
+     * @param array $answers
+     * @return void
+     */
+    public function syncQuestions($questions, $answers)
+    {
+        $items = [];
+        foreach($questions as $q) {
+            $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
+            $items[$q->id] = ['answer' => $answer];
+        }
+        $this->questions()->sync($items);
     }
 
     ///////////////////////////////////////////
@@ -449,5 +554,57 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
+    }
+
+    /**
+     * Gets shifts that belong to the given caregiver id, ignoring an empty value.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param mixed $caregiver
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForCaregiver($query, $caregiver)
+    {
+        if (empty($caregiver)) {
+            return $query;
+        }
+
+        return $query->where('caregiver_id', $caregiver);
+    }
+
+    /**
+     * Gets shifts that belong to the given client id, ignoring an empty value.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param mixed $client
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClient($query, $client)
+    {
+        if (empty($client)) {
+            return $query;
+        }
+
+        return $query->where('client_id', $client);
+    }
+
+    /**
+     * Gets shifts that are checked in between given given start and end dates.
+     * Automatically applies timezone transformation.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $start
+     * @param string $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeBetweenDates($query, $start, $end)
+    {
+        if (empty($start) || empty($end)) {
+            return $query;
+        }
+
+        $startDate = (new Carbon($start . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
+        return $query->whereBetween('checked_in_time', [$startDate, $endDate]);
     }
 }

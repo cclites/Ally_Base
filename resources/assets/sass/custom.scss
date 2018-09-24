@@ -29,9 +29,23 @@
   }
 }
 
+/* Show header with preloader */
+.preloader {
+  margin-top: 70px;
+}
+
 /* Logo */
 .light-logo, .dark-logo {
   max-height: 50px;
+}
+
+/* Reduce page title padding */
+.page-titles {
+  padding: 0 15px 8px !important;
+  margin-bottom: 20px;
+}
+.container-fluid {
+  padding: 0 20px 20px 20px;
 }
 
 .nav-link .mdi-account-circle, .nav-link .mdi-briefcase {
@@ -123,7 +137,7 @@
 
 /* Schedule padding */
 td .fc-event-container {
-  padding: 0 2px;
+  padding: 1px 2px;
 }
 
 .active-business {
@@ -248,4 +262,42 @@ td .fc-event-container {
   stroke: $primary;
 }
 
+/* Zoomed checkbox */
+label.large-checkbox {
+  clear: left;
+  float: left;
+}
+.large-checkbox [type=checkbox] {
+  zoom: 1.25;
+  vertical-align: middle;
+}
 
+/* Menu Badge (exceptions) */
+.menu-badge {
+  margin-left: .5rem!important;
+  font-size: 14px;
+  min-width: 25px;
+}
+
+.btn-light {
+  border-color: #ddd;
+}
+
+.scroll-sidebar {
+  overflow: unset;
+  overflow-y: auto!important;
+}
+
+.user-pills .badge-pill {
+  font-size: 12pt;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  margin-right: .5em;
+  margin-bottom: .5em;
+}
+.delete-btn {
+  color: red;
+  padding-left: 10px;
+}

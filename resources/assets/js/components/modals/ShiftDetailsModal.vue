@@ -34,16 +34,16 @@
                     {{ selectedItem.schedule.notes }}
                 </b-col>
             </b-row>
-            <b-row class="with-padding-bottom">
+            <b-row v-if="businessSettings().co_comments" class="with-padding-bottom">
                 <b-col sm="12">
                     <strong>Caregiver Comments</strong><br />
                     {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
                 </b-col>
             </b-row>
 
-            <strong>Issues on Shift</strong>
-            <b-row>
+            <b-row v-if="businessSettings().co_issues || businessSettings().co_injuries">
                 <b-col sm="12">
+                    <strong>Issues on Shift</strong>
                     <p v-if="!selectedItem.issues || !selectedItem.issues.length">
                         No issues reported
                     </p>
@@ -54,7 +54,15 @@
                 </b-col>
             </b-row>
 
-            <b-row class="with-padding-bottom" v-if="selectedItem.client.client_type == 'LTCI' && selectedItem.signature != null">
+            <b-row v-if="selectedItem.questions && selectedItem.questions.length > 0">
+                <b-col sm="12" v-for="q in selectedItem.questions" :key="q.id">
+                    <strong>{{ q.question }}</strong>
+                    <p v-if="q.pivot.answer == ''" class="text-muted">(Unanswered)</p>
+                    <p v-else>{{ q.pivot.answer }}</p>
+                </b-col>
+            </b-row>
+
+            <b-row class="with-padding-bottom" v-if="businessSettings().co_signature && selectedItem.signature != null">
                 <b-col>
                     <strong>Client Signature</strong>
                     <div v-html="selectedItem.signature.content" class="signature"></div>
@@ -84,6 +92,15 @@
                 </b-col>
             </b-row>
 
+            <b-row v-if="selectedItem.goals && selectedItem.goals.length" class="with-padding-bottom">
+                <b-col sm="12">
+                    <strong>Goals</strong>
+                    <div v-for="goal in selectedItem.goals" :key="goal.id" class="mb-2">
+                        <strong>{{ goal.question }}:</strong> {{ goal.pivot.comments }}
+                    </div>
+                </b-col>
+            </b-row>
+            
             <strong>Was this Shift Electronically Verified?</strong>
             <b-row class="with-padding-bottom">
                 <b-col sm="6">
@@ -168,7 +185,11 @@
 </template>
 
 <script>
+    import BusinessSettings from "../../mixins/BusinessSettings";
+
     export default {
+        mixins: [BusinessSettings],
+
         props: {
             value: {},
             selectedItem: {},
@@ -200,12 +221,10 @@
             },
 
             evvMethod(shift) {
-                if (shift.verified) {
-                    if (shift.checked_in_number) {
-                        return 'Telephony';
-                    } else if (shift.checked_in_latitude) {
-                        return 'GPS Location via Mobile App';
-                    }
+                if (shift.checked_in_number) {
+                    return 'Telephony';
+                } else if (shift.checked_in_latitude) {
+                    return 'GPS Location via Mobile App';
                 }
                 return 'None';
             }

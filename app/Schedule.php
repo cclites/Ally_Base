@@ -85,8 +85,19 @@ class Schedule extends Model implements Auditable
     ///////////////////////////////////////
 
     const OK = 'OK';
+    const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+
+    ///////////////////////////////////////////
+    /// Related Shift Statuses
+    ///////////////////////////////////////////
+
+    const SCHEDULED = 'SCHEDULED';
+    const MISSED_CLOCK_IN = 'MISSED_CLOCK_IN';
+    const CLOCKED_IN = 'CLOCKED_IN';
+    const CONFIRMED = 'CONFIRMED';
+    const UNCONFIRMED = 'UNCONFIRMED';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -169,9 +180,37 @@ class Schedule extends Model implements Auditable
         return null;
     }
 
+    public function getShiftStatusAttribute()
+    {
+        return $this->getShiftStatus();
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
+
+    /**
+     * Return the related shift status
+     *
+     * @return string
+     */
+    public function getShiftStatus()
+    {
+        if ($this->shifts->count()) {
+            if ($this->isClockedIn()) {
+                return self::CLOCKED_IN;
+            }
+
+            if ($this->isConfirmed()) {
+                return self::CONFIRMED;
+            }
+
+            return self::UNCONFIRMED;
+        }
+        // Suppress missed clock in status for now
+//        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        return self::SCHEDULED;
+    }
 
     /**
      * Attach a schedule note to the schedule
@@ -209,6 +248,18 @@ class Schedule extends Model implements Auditable
         foreach($this->shifts as $shift)
         {
             if ($shift->statusManager()->isClockedIn()) return true;
+        }
+        return false;
+    }
+
+    /*
+     * @return bool
+     */
+    public function isConfirmed()
+    {
+        foreach($this->shifts as $shift)
+        {
+            if ($shift->statusManager()->isConfirmed()) return true;
         }
         return false;
     }

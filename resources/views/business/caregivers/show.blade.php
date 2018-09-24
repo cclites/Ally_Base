@@ -41,19 +41,16 @@
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
+            <a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
+            <a class="nav-link" data-toggle="tab" href="#payment_statement" role="tab">Pay Statements</a>
         </li>
-        {{--<li class="nav-item">--}}
-            {{--<a class="nav-link" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>--}}
-        {{--</li>--}}
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#payment_statement" role="tab">Payment Statements</a>
+            <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
         </li>
     </ul>
 
@@ -73,11 +70,10 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
-                <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
+                <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment_statement" role="tab">Pay Statements</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
-                {{--<a class="dropdown-item" data-toggle="tab" href="#payment_history" role="tab">Payment History</a>--}}
-                <a class="dropdown-item" data-toggle="tab" href="#payment_statement" role="tab">Payment Statements</a>
             </div>
         </li>
     </ul>
@@ -115,11 +111,11 @@
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
-                <business-schedule :caregiver="{{ $caregiver }}"></business-schedule>
+                <business-schedule :caregiver="{{ $caregiver }}" :business="{{ activeBusiness() }}"></business-schedule>
             </div>
         @endif
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
-            <notes-tab :notes="{{ $caregiver->notes }}"></notes-tab>
+            <notes-tab :notes="{{ $caregiver->notes }}" :business="{{ $business }}" :caregiver="{{ $caregiver }}"></notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
@@ -134,25 +130,20 @@
             ></caregiver-license-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
-            <!-- Availability Placeholder -->
-            <h4>Availability coming soon</h4>
-            <p>This will be where caregivers can set their days and hours of availability.</p>
+            <business-caregiver-availability-tab :caregiver="{{ $caregiver }}"></business-caregiver-availability-tab>
         </div>
-        <div class="tab-pane" id="preferences" role="tabpanel">
-            <business-caregiver-preferences-tab :caregiver="{{ $caregiver }}"></business-caregiver-preferences-tab>
+        <div class="tab-pane" id="skills" role="tabpanel">
+            <business-caregiver-skills-tab :caregiver="{{ $caregiver }}"></business-caregiver-skills-tab>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $caregiver->user->emergencyContacts }}"
                                     :user-id="{{ $caregiver->id }}"></emergency-contacts-tab>
         </div>
-        <div class="tab-pane" id="misc" role="tabpanel">
-            <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
-        </div>
-        {{--<div class="tab-pane" id="payment_history" role="tabpanel">--}}
-            {{--<business-caregiver-payment-history :caregiver="{{ $caregiver }}"></business-caregiver-payment-history>--}}
-        {{--</div>--}}
         <div class="tab-pane" id="payment_statement" role="tabpanel">
             <business-caregiver-pay-statements :caregiver="{{ $caregiver }}" :deposits="{{ $caregiver->deposits }}"></business-caregiver-pay-statements>
+        </div>
+        <div class="tab-pane" id="misc" role="tabpanel">
+            <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
         </div>
     </div>
 @endsection
@@ -169,9 +160,13 @@
             // activate tab-pane for active section
             $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
         });
+
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
-            $('#calendar').fullCalendar('render');
+            if (e.target.hash === '#schedule') {
+                $('#calendar').fullCalendar('render');
+                $('#calendar').fullCalendar('refetchResources');
+            }
         });
 
         // Javascript to enable link to tab

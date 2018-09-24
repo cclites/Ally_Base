@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Client;
-use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,7 +15,8 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        $clients = User::whereRoleType('client')->whereActive(1)->orderBy('lastname')->orderBy('firstname')->get();
+        $clients = Client::active()->orderByName()->get();
+
         return response($clients);
     }
 

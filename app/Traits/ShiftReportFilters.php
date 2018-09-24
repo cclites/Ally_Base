@@ -2,9 +2,14 @@
 namespace App\Traits;
 
 use App\GatewayTransaction;
+use App\Shift;
 
 trait ShiftReportFilters
 {
+    public function forShift(Shift $shift) {
+        $this->query()->where('id', $shift->id);
+    }
+
     public function forTransaction(GatewayTransaction $transaction) {
         if ($transaction->payment) {
             $this->query()->whereHas('payment', function($q) use ($transaction) {

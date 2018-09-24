@@ -25,7 +25,7 @@ class Microbilt {
      * @param string $account_no
      * @param string $routing_no
      * 
-     * @return bool
+     * @return array
      */
     public function verifyBankAccount($first_last, $account_number, $routing_number)
     {
@@ -128,7 +128,10 @@ XML;
             }
         }
         catch (\Exception $ex) {
-            $response['exception'] = $ex->getMessage();
+            $response += [
+                'exception' => $ex->getMessage(),
+                'valid' => false,
+            ];
         }
 
         return $response;

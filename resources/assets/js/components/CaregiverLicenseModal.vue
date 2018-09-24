@@ -41,13 +41,20 @@
     export default {
         props: {
             value: {},
-            selectedItem: {},
+            selectedItem: {
+                type: Object,
+                default() {
+                    return {};
+                }
+            },
             items: {},
             caregiverId: {},
         },
 
         data() {
-            return {}
+            return {
+                form: new Form(),
+            }
         },
 
         computed: {
@@ -59,44 +66,50 @@
                     this.$emit('input', value);
                 }
             },
-            form() {
-                return new Form({
-                    name: (this.selectedItem) ? this.selectedItem.name : '',
-                    description: (this.selectedItem) ? this.selectedItem.description : '',
-                    expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
-                });
-            },
             title() {
                 return (this.selectedItem) ? 'Edit Certification' : 'Create Certification';
             }
         },
 
         methods: {
+            makeForm() {
+                this.form = new Form({
+                    name: (this.selectedItem) ? this.selectedItem.name : '',
+                    description: (this.selectedItem) ? this.selectedItem.description : '',
+                    expires_at: (this.selectedItem) ? this.selectedItem.expires_at : '',
+                });
+            },
+
             save() {
-                let component = this;
                 let method = 'post';
                 let url = '/business/caregivers/' + this.caregiverId + '/licenses';
-                if (component.selectedItem) {
+                if (this.selectedItem.id) {
                     method = 'patch';
-                    url = url + '/' + component.selectedItem.id;
+                    url = url + '/' + this.selectedItem.id;
                 }
-                component.form.submit(method, url)
-                    .then(function (response) {
+                this.form.submit(method, url)
+                    .then(response => {
                         // Push the newly created item without mutating the prop, requires the sync modifier
-                        let newItems = component.items;
-                        if (component.selectedItem) {
-                            let index = newItems.findIndex(item => item.id === component.selectedItem.id);
+                        let newItems = this.items;
+                        if (this.selectedItem.id) {
+                            let index = newItems.findIndex(item => item.id === this.selectedItem.id);
                             newItems[index] = response.data.data;
                         }
                         else {
                             newItems.push(response.data.data);
                         }
-                        component.$emit('update:items', newItems);
-                        component.$parent.$forceUpdate();
+                        this.$emit('update:items', newItems);
+                        this.$parent.$forceUpdate();
 
-                        component.showModal = false;
+                        this.showModal = false;
                     });
             }
         },
+
+        watch: {
+            selectedItem() {
+                this.makeForm();
+            }
+        }
     }
 </script>

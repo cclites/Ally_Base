@@ -97,5 +97,13 @@ class BusinessTest extends TestCase
         $this->business->setBankAccount('bankAccount', $account);
     }
 
+    /** @test */
+    public function it_can_have_custom_questions()
+    {
+        factory(\App\Question::class, 3)->create(['business_id' => $this->business->id]);
+        
+        $this->assertCount(3, $this->business->fresh()->questions);
 
+        $this->assertInstanceOf(\App\Question::class, $this->business->questions[0]);
+    }
 }

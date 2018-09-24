@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Responses\SuccessResponse;
-use App\Client;
-use App\Caregiver;
+use App\User;
 use DB;
 
 class QuickSearchController extends BaseController
@@ -15,46 +14,71 @@ class QuickSearchController extends BaseController
             return new SuccessResponse(null, []);
         }
 
-        $q = request('q');
+        $roles = ['client', 'caregiver'];
         
-        if (empty($this->business()->id)) {
-            // admin -> show all
-            $clients = Client::with('user');
-            $caregivers = Caregiver::with('user');
-        } else {
-            // only show for current business
-            $clients = $this->business()->clients()->with('user');
-            $caregivers = $this->business()->caregivers()->with('user');
+        if (request()->role == 'caregiver') {
+            $roles = ['caregiver'];
+        } else if (request()->role == 'client') {
+            $roles = ['client'];
         }
 
-        $nameQuery = "CONCAT(firstname, ' ', lastname) like '%$q%'";
+        $query = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
+            ->whereIn('role_type', $roles)
+            ->where('active', 1)
+            ->orderBy('firstname')
+            ->orderBy('lastname');
 
-        // check if testing enviornment because sqlite doesn't have CONCAT function
-        if (\App::runningUnitTests()) {
-            $nameQuery = "printf('%s %s', firstname, lastname) like '%$q%'";
+        if (!is_admin_now()) {
+            $query->leftJoin('clients', 'clients.id', '=', 'users.id')
+                ->leftJoin('business_caregivers', function($join) {
+                    $join->on('business_caregivers.business_id', '=', DB::raw((int) $this->business()->id));
+                    $join->on('business_caregivers.caregiver_id', '=', 'users.id');
+                })
+                ->where(function($query) {
+                    $query->where('business_caregivers.business_id', $this->business()->id)
+                        ->orWhere('clients.business_id', $this->business()->id);
+                });
         }
 
-        $clients = $clients->whereHas('user', function ($query) use($q, $nameQuery) {
-                $query->where('active', true)
-                    ->whereRaw($nameQuery);
-            })
-            ->get();
+        $query->where(function($query) {
+            $q = request('q');
+            if (\App::runningUnitTests()) {
+                // check if testing enviornment because sqlite doesn't have CONCAT function
+                $query->whereRaw("printf('%s %s', firstname, lastname) like ?", ["%$q%"]);
+            }
+            else {
+                $query->whereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%$q%"]);
+            }
+            $query->orWhere('email', 'LIKE', "%$q%");
+        });
 
-        $caregivers = $caregivers->whereHas('user', function ($query) use($q, $nameQuery) {
-                $query->where('active', true)
-                    ->whereRaw($nameQuery);
-            })
-            ->get();
+        switch(request('type')) {
+            case 'sms':
+            case 'phone':
+                $query->whereHas('phoneNumbers');
+                $query->with('phoneNumbers');
+                $keys = ['id', 'name', 'role_type', 'phone'];
+                break;
+            default:
+                $keys = ['id', 'name', 'role_type', 'email'];
+        }
 
-        $data = $clients->concat($caregivers)
-            ->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->user->firstname . ' ' . $item->user->lastname,
-                    'role_type' => $item->user->role_type,
-                ];
-            })->sortBy('name')->values()->all();
+        $users = $query->get()->map(function($user) use ($keys) {
+            if ($user->relationLoaded('phoneNumbers')) {
 
-        return new SuccessResponse(null, $data);
+                if ($user->phoneNumbers->where('type', 'primary')->count()) {
+                    $phone = $user->phoneNumbers->where('type', 'primary')->first();
+                } elseif ($user->phoneNumbers->where('type', 'mobile')->count()) {
+                    $phone = $user->phoneNumbers->where('type', 'mobile')->first();
+                } else {
+                    $phone = $user->phoneNumbers->first();
+                }
+
+                $user->phone = $phone->number;
+            }
+            return $user->only($keys);
+        });
+
+        return new SuccessResponse(null, $users);
     }
 }

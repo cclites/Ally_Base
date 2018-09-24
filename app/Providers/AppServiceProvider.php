@@ -46,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
             $business = $this->app->make(ActiveBusiness::class);
             $view->with('active_business', $business->get());
         });
+
+        // force rool url if using ngrok
+        $appUrl = config('app.url');
+        if (str_contains($appUrl, 'ngrok.io')) {
+            \URL::forceRootUrl(config('app.url'));
+            if (str_contains(config('app.url'), 'https://')) {
+                \URL::forceScheme('https');
+            }
+        }
     }
 
     /**

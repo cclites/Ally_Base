@@ -81,7 +81,8 @@ $(function () {
     });
     $(".sidebartoggler").on('click', function () {
         //$(".sidebartoggler i").toggleClass("ti-menu");
-    }); 
+    });
+
     $(".search-box a, .search-box .app-search .srh-btn").on('click', function () {
         $(".app-search").toggle(200);
     });
@@ -235,5 +236,18 @@ $(function () {
             barColor: '#7460ee'
         });
     var sparkResize;
+
+});
+
+/**
+ * Ally Specific Custom JS
+ */
+
+$(document).ready(function() {
+
+    // Hide the mobile side bar when clicking anywhere on the page
+    $('.page-wrapper').on('click', function() {
+        $("body").removeClass("show-sidebar");
+    });
 
 });

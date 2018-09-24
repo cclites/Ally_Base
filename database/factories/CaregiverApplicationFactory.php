@@ -22,12 +22,6 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'emergency_contact_phone' => $faker->phoneNumber,
         'worked_here_before' => $faker->boolean,
         'worked_before_location' => '',
-        'caregiver_position_id' => function () {
-            return factory('App\CaregiverPosition')->create()->id;
-        },
-        'caregiver_application_status_id' => function () {
-            return factory('App\CaregiverApplicationStatus')->create()->id;
-        },
         'preferred_start_date' => $faker->date(),
         'preferred_days' => 'Mon,Tues,Wed,Thurs,Fri',
         'preferred_times' => 'Mornings,Afternoons,Evenings,Nights',

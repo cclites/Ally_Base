@@ -13,5 +13,9 @@ let mix = require('laravel-mix');
 
 mix.js('resources/assets/js/app.js', 'public/js')
    .sass('resources/assets/sass/style.scss', 'public/css')
-    .sourceMaps()
-    .version();
+    .sourceMaps();
+
+// do not run versioning when built using hot reloading
+if (process.env.npm_lifecycle_event !== 'hot') {
+    mix.version()
+}

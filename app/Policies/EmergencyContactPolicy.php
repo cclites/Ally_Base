@@ -6,9 +6,8 @@ use App\User;
 use App\EmergencyContact;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class EmergencyContactPolicy
+class EmergencyContactPolicy extends BasePolicy
 {
-    use HandlesAuthorization;
 
     /**
      * Determine whether the user can view the emergencyContact.
@@ -19,10 +18,7 @@ class EmergencyContactPolicy
      */
     public function view(User $user, EmergencyContact $emergencyContact)
     {
-        $owner = $user->id === $emergencyContact->user_id;
-        $office_user = $user->role_type == 'office_user';
-
-        return $owner || $office_user;
+        return $this->check($user, $emergencyContact);
     }
 
     /**
@@ -34,9 +30,17 @@ class EmergencyContactPolicy
      */
     public function delete(User $user, EmergencyContact $emergencyContact)
     {
-        $owner = $user->id === $emergencyContact->user_id;
-        $office_user = $user->role_type == 'office_user';
+        return $this->check($user, $emergencyContact);
+    }
 
-        return $owner || $office_user;
+    protected function check(User $user, EmergencyContact $emergencyContact)
+    {
+        if ($emergencyContact->user_id != $user->id) {
+            if (!$this->isAdmin() && !$this->businessHasUser($emergencyContact->user)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

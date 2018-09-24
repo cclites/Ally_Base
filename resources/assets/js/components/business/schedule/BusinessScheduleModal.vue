@@ -10,7 +10,7 @@
         >
             <b-card no-body>
                 <b-tabs card v-model="activeTab">
-                    <b-tab title="Initial Shift" id="schedule-main">
+                    <b-tab title="Shift Details" id="schedule-main">
                         <b-row>
                             <b-col sm="6">
                                 <b-form-group label="Client" label-for="client_id">
@@ -33,7 +33,7 @@
                                             {{ toggleCaregiversLabel }}
                                         </b-btn>
                                     </div>
-                                    <label for="caregiver_id">Assigned Caregiver</label>
+                                    <label for="caregiver_id">Referred Caregiver</label>
                                     <b-form-select
                                             id="caregiver_id"
                                             name="caregiver_id"
@@ -42,7 +42,7 @@
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                                     </b-form-select>
-                                    <small v-if="cgMode == 'all'" class="form-text text-muted">
+                                    <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
                                         <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
@@ -85,12 +85,14 @@
                                     <input-help :form="form" field="provider_fee" text="Enter the hourly fee charged by the provider." />
                                 </b-form-group>
                             </b-col>
-                            <b-col sm="12">
-                                Payment Type: {{ paymentType }} ({{ displayAllyPct }}% Processing Fee)
-                            </b-col>
                             <b-col sm="6">
-                                <b-form-group :label="`Ally ${rateType} Fee`" label-for="ally_fee">
-                                    {{ allyFee }}
+                                <b-form-group label="Ally Fee" label-for="ally_fee">
+                                    <div v-if="allyFee">
+                                        {{ allyFee }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
+                                    </div>
+                                    <div v-else>
+                                        Enter Caregiver and Provider Rates
+                                    </div>
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
@@ -100,10 +102,16 @@
                             </b-col>
                         </b-row>
                         <b-row>
-                            <b-col lg="12">
+                            <b-col lg="6">
                                 <b-form-group label="Start Date" label-for="startDate">
                                     <date-picker v-model="startDate" />
                                     <input-help :form="form" field="starts_at" text="Confirm the starting date." />
+                                </b-form-group>
+                            </b-col>
+                            <b-col lg="6">
+                                <b-form-group label="End Date" label-for="startDate" v-if="firstShiftEndDate !== startDate">
+                                    <date-picker v-model="firstShiftEndDate" disabled />
+                                    <input-help :form="form" field="zzzz" text="The end date is shown when it differs from the start date." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -119,7 +127,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="End Time" label-for="endTime">
+                                <b-form-group :label="`End Time - ${scheduledHours} Hours`" label-for="endTime">
                                     <time-picker
                                             id="endTime"
                                             name="endTime"
@@ -133,24 +141,21 @@
                         </b-row>
                         <b-row>
                             <b-col sm="6">
-                                <b-form-group label="Special Shift Designation" label-for="hours_type">
-                                    <b-form-select
-                                            id="hours_type"
-                                            name="hours_type"
-                                            v-model="form.hours_type"
-                                    >
-                                        <option value="default">Regular Shift</option>
-                                        <option value="holiday">Holiday</option>
-                                        <option value="overtime">Overtime</option>
-                                    </b-form-select>
+                                <b-form-group label="Shift Designation" label-for="hours_type">
+                                    <b-form-radio-group id="hours_type" v-model="form.hours_type" name="hours_type">
+                                        <b-form-radio value="default">Regular</b-form-radio>
+                                        <b-form-radio value="holiday">Holiday</b-form-radio>
+                                        <b-form-radio value="overtime">Overtime</b-form-radio>
+                                    </b-form-radio-group>
+                                    
                                     <input-help :form="form" field="hours_type" text="" />
                                     <small class="form-text text-info" v-if="specialHoursChange">
-                                        Be sure to update the caregiver's rates to reflect this special designation.
+                                        Be sure to update the caregiver's rates to reflect this designation.
                                     </small>
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Care Plan" label-for="care_plan_id">
+                                <b-form-group label="Care Plan Requested by Client" label-for="care_plan_id">
                                     <b-form-select
                                             id="care_plan_id"
                                             name="care_plan_id"
@@ -164,7 +169,7 @@
                             </b-col>
                         </b-row>
                     </b-tab>
-                    <b-tab title="Recurrence" id="schedule-recurrence" v-if="!selectedSchedule.id">
+                    <b-tab title="Recurrence" id="schedule-recurrence" v-if="!schedule.id">
                         <b-row>
                             <b-col lg="12">
                                 <b-form-group label="Recurring Period" label-for="interval_type">
@@ -203,6 +208,18 @@
                     <b-tab title="Notes" id="schedule-notes">
                         <b-row>
                             <b-col lg="12">
+                                <b-form-group label="Schedule Status" label-for="status" v-if="schedule.id">
+                                    <b-form-select
+                                            id="status"
+                                            name="status"
+                                            v-model="form.status"
+                                    >
+                                        <option value="OK">No Status</option>
+                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
+                                        <option value="CLIENT_CANCELED">Client Canceled</option>
+                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                    </b-form-select>
+                                </b-form-group>
                                 <b-form-group label="Schedule Notes" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
@@ -225,9 +242,9 @@
                     <i class="fa fa-save" v-show="!submitting"></i>
                     {{ submitText }}
                 </b-btn>
-                <b-btn variant="primary" @click="copySchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
-                <b-btn v-show="selectedSchedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
-                <b-btn variant="danger" @click="deleteSchedule()" v-show="selectedSchedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
+                <b-btn variant="primary" @click="copySchedule()" v-show="schedule.id" class="mr-auto"><i class="fa fa-copy"></i> Copy</b-btn>
+                <b-btn v-show="schedule.clocked_in_shift" variant="warning" @click="clockOut()">Clock Out Shift</b-btn>
+                <b-btn variant="danger" @click="deleteSchedule()" v-show="schedule.id" class="mr-auto"><i class="fa fa-times"></i> Delete</b-btn>
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
         </b-modal>
@@ -247,21 +264,14 @@
 </template>
 
 <script>
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
             model: Boolean,
-            initialValues: {
-                type: Object,
-                default() {
-                    return {};
-                }
-            },
-            selectedEvent: {
-                type: Object,
-                default() {
-                    return moment();
-                }
-            },
+
             selectedSchedule: {
                 type: Object,
                 default() {
@@ -309,11 +319,11 @@
 
         computed: {
             title() {
+                if (this.copiedSchedule.starts_at) {
+                    return 'Copying Schedule';
+                }
                 if (this.selectedSchedule.id) {
                     return 'Editing a Scheduled Shift';
-                }
-                if (!_.isEmpty(this.copiedSchedule)) {
-                    return 'Copying Schedule';
                 }
                 return 'Schedule Shift';
             },
@@ -325,28 +335,17 @@
                 return 'Create Schedule';
             },
 
-            defaultValues() {
-                if (this.copiedSchedule.starts_at) {
-                    return {
-                        'starts_at': this.copiedSchedule.starts_at,
-                        'duration': this.copiedSchedule.duration,
-                        'caregiver_id': this.copiedSchedule.caregiver_id,
-                        'client_id': this.copiedSchedule.client_id,
-                        'caregiver_rate': this.copiedSchedule.caregiver_rate,
-                        'provider_fee': this.copiedSchedule.provider_fee,
-                        'notes': this.copiedSchedule.notes,
-                        'hours_type': this.copiedSchedule.hours_type,
-                        'overtime_duration': this.copiedSchedule.overtime_duration,
-                        'care_plan_id': this.copiedSchedule.care_plan_id || '',
-                    }
-                }
-                return this.initialValues;
+            schedule() {
+                if (this.copiedSchedule.starts_at) return this.copiedSchedule;
+                return this.selectedSchedule;
             },
 
             allyFee() {
-                if (!parseFloat(this.form.caregiver_rate)) return null;
                 let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
+                    return false;
+                }
                 let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
                 return allyFee.toFixed(2);
             },
@@ -356,17 +355,19 @@
             },
 
             totalRate() {
-                if (this.allyFee === null) return null;
                 let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
                 let providerHourlyFloat = parseFloat(this.form.provider_fee);
+                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
+                    return 'Enter Caregiver and Provider Rates'
+                }
                 let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
                 return totalRate.toFixed(2);
             },
 
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
-                    for(let index in this.caregivers) {
-                        let caregiver = this.caregivers[index];
+                    for(let index in this.clientCaregivers) {
+                        let caregiver = this.clientCaregivers[index];
                         if (caregiver.id == this.form.caregiver_id) {
                             return caregiver;
                         }
@@ -399,70 +400,53 @@
                     return 'Daily';
                 }
                 return '';
+            },
+
+            firstShiftEndDate() {
+                let duration = this.getDuration();
+                return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm')
+                    .add(duration, 'minutes')
+                    .format('MM/DD/YYYY');
+            },
+
+            scheduledHours() {
+                if (this.form.duration) {
+                    return this.numberFormat(parseInt(this.form.duration) / 60);
+                }
+                return 0;
             }
         },
 
         methods: {
-            makeForm() {
-                if (this.selectedSchedule.id) {
-                    return this.makeEditForm();
-                }
-                return this.makeCreateForm();
-            },
 
-            makeCreateForm() {
+            makeForm() {
                 this.form = new Form({
-                    'starts_at':  "",
-                    'duration': 0,
-                    'caregiver_id': "",
-                    'client_id': "",
-                    'daily_rates': null,
-                    'caregiver_rate': "",
-                    'provider_fee': "",
-                    'notes': "",
-                    'hours_type': "default",
-                    'overtime_duration': 0,
+                    'starts_at': this.schedule.starts_at || "",
+                    'duration': this.schedule.duration || 0,
+                    'caregiver_id': this.schedule.caregiver_id || "",
+                    'client_id': this.schedule.client_id || "",
+                    'daily_rates': this.schedule.daily_rates || 0,
+                    'caregiver_rate': this.schedule.caregiver_rate || "",
+                    'provider_fee': this.schedule.provider_fee || "",
+                    'notes': this.schedule.notes || "",
+                    'hours_type': this.schedule.hours_type || "default",
+                    'overtime_duration': this.schedule.overtime_duration || 0,
+                    'care_plan_id': this.schedule.care_plan_id || '',
+                    'status': this.schedule.status || 'OK',
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
                     'care_plan_id': "",
-                    ...this.defaultValues
                 });
-                if (this.form.starts_at) {
-                    this.setDateTimeFromEvent(moment(this.form.starts_at, 'X'));
-                }
+                this.setDateTimeFromSchedule();
             },
 
-            makeEditForm() {
-                this.form = new Form({
-                    'starts_at': this.selectedSchedule.starts_at,
-                    'duration': this.selectedSchedule.duration,
-                    'caregiver_id': this.selectedSchedule.caregiver_id,
-                    'client_id': this.selectedSchedule.client_id,
-                    'daily_rates': this.selectedSchedule.daily_rates,
-                    'caregiver_rate': this.selectedSchedule.caregiver_rate,
-                    'provider_fee': this.selectedSchedule.provider_fee,
-                    'notes': this.selectedSchedule.notes,
-                    'hours_type': this.selectedSchedule.hours_type,
-                    'overtime_duration': this.selectedSchedule.overtime_duration,
-                    'care_plan_id': this.selectedSchedule.care_plan_id || '',
-                });
-                this.setDateTimeFromEvent(moment(this.selectedSchedule.starts_at, 'X'));
-            },
-
-            setDateTimeFromEvent(event = null) {
-                if (!event) {
-                    event = this.selectedEvent;
-                }
-                if (!this.form.duration) {
-                    this.form.duration = 60;
-                }
-                if (event) {
-                    event = moment(event);
-                    this.startDate = event.format('MM/DD/YYYY');
-                    this.startTime = (event._ambigTime) ? '09:00' : event.format('HH:mm');
-                    this.endTime = (event._ambigTime) ? '10:00' : moment(event).add(this.form.duration, 'minutes').format('HH:mm');
-                }
+            setDateTimeFromSchedule() {
+                let start = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
+                this.startDate = start.format('MM/DD/YYYY');
+                this.startTime = (start._ambigTime) ? '09:00' : start.format('HH:mm');
+                let end = moment(start).add(this.form.duration || 60, 'minutes');
+                this.endTime = (end._ambigTime) ? '10:00' : end.format('HH:mm');
             },
 
             submitForm() {
@@ -486,9 +470,9 @@
                 // Submit form
                 let url = '/business/schedule';
                 let method = 'post';
-                if (this.selectedSchedule.id) {
+                if (this.schedule.id) {
                     method = 'patch';
-                    url = url + '/' + this.selectedSchedule.id;
+                    url = url + '/' + this.schedule.id;
                 }
                 this.form.submit(method, url)
                     .then(response => {
@@ -504,8 +488,8 @@
             copySchedule() {
                 if (this.selectedSchedule.id) {
                     this.copiedSchedule = Object.assign({}, this.selectedSchedule);
-                    this.selectedSchedule = {};
-                    this.makeCreateForm();
+                    Vue.delete(this.copiedSchedule, 'id');
+                    this.makeForm();
                 }
             },
 
@@ -515,9 +499,9 @@
             },
 
             deleteSchedule() {
-                if (this.selectedSchedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                if (this.schedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
                     let form = new Form();
-                    form.submit('delete', '/business/schedule/' + this.selectedSchedule.id)
+                    form.submit('delete', '/business/schedule/' + this.schedule.id)
                         .then(response => {
                             this.refreshEvents();
                         });
@@ -651,11 +635,11 @@
 
             prefillRates()
             {
-                if (this.selectedSchedule) {
+                if (this.schedule.id) {
                     // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.selectedSchedule.caregiver_id == this.selectedCaregiver.id) {
-                        this.form.caregiver_rate = this.selectedSchedule.caregiver_rate;
-                        this.form.provider_fee = this.selectedSchedule.provider_fee
+                    if (this.schedule.caregiver_id == this.selectedCaregiver.id) {
+                        this.form.caregiver_rate = this.schedule.caregiver_rate;
+                        this.form.provider_fee = this.schedule.provider_fee
                         return;
                     }
                 }
@@ -684,9 +668,8 @@
                 // Re-create the form object
                 this.makeForm();
 
-                // reset cg mode
-                if (this.initialValues.caregiver_id) {
-                    console.log('has cargiver');
+                // Use cg all mode if an caregiver is pre-selected
+                if (this.schedule.caregiver_id) {
                     this.cgMode = 'all';
                 } else {
                     this.cgMode = 'client';
@@ -701,8 +684,12 @@
                 }
             },
 
-            selectedEvent() {
-                this.setDateTimeFromEvent();
+            startTime() {
+                this.form.duration = this.getDuration();
+            },
+
+            endTime() {
+                this.form.duration = this.getDuration();
             },
 
             startTime(val) {
@@ -722,10 +709,8 @@
 
             'form.client_id': function(val, old_val) {
                 this.loadCarePlans(val, old_val);
-                if (this.cgMode == 'client') {
-                    this.loadAllyPctFromClient(val);
-                    this.loadCaregivers();
-                }
+                this.loadAllyPctFromClient(val);
+                this.loadCaregivers();
             },
 
             'form.caregiver_id': function(val, old_val) {

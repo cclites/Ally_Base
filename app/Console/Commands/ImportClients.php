@@ -6,6 +6,8 @@ use App\Address;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\EmergencyContact;
+use App\Note;
 use App\PhoneNumber;
 use App\User;
 
@@ -40,7 +42,9 @@ class ImportClients extends BaseImport
 
         $lastRow = $this->getRowCount($objPHPExcel);
 
-        for($row=2; $row<$lastRow; $row++) {
+        \DB::beginTransaction();
+
+        for($row=2; $row<=$lastRow; $row++) {
 
             $name = $this->getValue($objPHPExcel, 'First Name', $row);
             if ($name) {
@@ -56,7 +60,7 @@ class ImportClients extends BaseImport
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);
                 $addressData['state'] = $this->getValue($objPHPExcel, 'State', $row);
-                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row);
+                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row) ?: $this->getValue($objPHPExcel, 'PostalCode', $row);
                 $addressData['country'] = 'US';
                 $addressData['type'] = 'evv';
 
@@ -111,7 +115,31 @@ class ImportClients extends BaseImport
                 catch(\Exception $e) {
 
                 }
+
+                // Create Emergency Contacts
+                for($i = 1; $i <= 3; $i++) {
+                    if ($emergencyName = $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Name", $row)) {
+                        EmergencyContact::create([
+                            'user_id' => $client->id,
+                            'name' => $emergencyName,
+                            'phone_number' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Phone", $row) ?? '',
+                            'relationship' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Relationship", $row) ?? '',
+                        ]);
+                    }
+                }
+
+                // Create Note
+                if ($officeNote = $this->getValue($objPHPExcel, "OfficeNote", $row)) {
+                    $officeUser = $business->users()->first();
+                    $client->notes()->save(new Note([
+                        'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
+                        'created_by' => $officeUser->id,
+                        'business_id' => $business->id,
+                    ]));
+                }
             }
+
+            \DB::commit();
 
         }
 

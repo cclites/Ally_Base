@@ -14,39 +14,35 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="carePlanActivities().length > 0">
-                    <b-col lg="12" class="with-padding-bottom">
+                <b-row v-if="carePlanActivities().length > 0" class="with-padding-bottom-top blue-box">
+                    <b-col lg="12">
                         <h5>Recommended Care Plan Activities</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in carePlanActivities()" :key="activity.id" style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
+                            <label class="large-checkbox" v-for="activity in carePlanActivities()" :key="activity.id">
+                                <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
                     </b-col>
-                </b-row>
-                <b-row v-if="carePlanNotes">
-                    <b-col lg="12" class="with-padding-bottom">
+                    <b-col lg="12" class="with-padding-top" v-if="carePlanNotes">
                         <h5>Care Plan Notes</h5>
                         <p v-html="carePlanNotes"></p>
                     </b-col>
                 </b-row>
                 <b-row>
-                    <b-col lg="12">
+                    <b-col lg="12" class="with-padding-top">
                         <h5>Additional Activities Performed</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off any additional activities of daily living performed."></input-help>
-                            <label class="custom-control custom-checkbox" v-for="activity in additionalActivities()" :key="activity.id"  style="clear: left; float: left;">
-                                <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                <span class="custom-control-indicator"></span>
+                            <label class="large-checkbox" v-for="activity in additionalActivities()" :key="activity.id">
+                                <input type="checkbox" v-model="form.activities" :value="activity.id">
                                 <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
                             </label>
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_mileage">
                     <b-col lg="6">
                         <b-form-group label="Recorded Mileage" label-for="mileage">
                             <b-form-input
@@ -64,7 +60,7 @@
 
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_expenses">
                     <b-col lg-6>
                         <b-form-group label="Other Expenses" label-for="other_expenses">
                             <b-form-input
@@ -86,7 +82,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_injuries">
                     <b-col lg="12">
                         <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
                             <b-form-select
@@ -101,6 +97,10 @@
                             </b-form-select>
                             <input-help :form="form" field="caregiver_injury" text="Indicate if you suffered an injury."></input-help>
                         </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="business.co_issues">
+                    <b-col lg="12">
                         <b-form-group label="Were there any other issues on your shift?" label-for="issue_text">
                             <b-textarea
                                     id="issue_text"
@@ -113,7 +113,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row>
+                <b-row v-if="business.co_comments">
                     <b-col lg="12">
                         <b-form-group label="Comments / Notes" label-for="caregiver_comments">
                             <b-form-textarea id="caregiver_comments"
@@ -125,7 +125,28 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="shift.client.client_type == 'LTCI' ">
+                <b-row v-if="questions.length">
+                    <b-col lg="12">
+                        <b-form-group v-for="question in questions"
+                            :key="question.id"
+                            :label="question.question + (question.required ? ' *' : '')">
+                            <textarea v-model="form.questions[question.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                            <input-help :form="form" :field="`questions.${question.id}`"></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="shift.client.goals.length">
+                    <b-col lg="12">
+                        <h4>Goals:</h4>
+                        <b-form-group v-for="goal in shift.client.goals"
+                            :key="goal.id"
+                            :label="goal.question">
+                            <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                            <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row v-if="business.co_signature">
                     <b-col lg="12">
                         <b-form-group>
                             <signature-pad
@@ -163,21 +184,25 @@
             'shift': {},
             'activities': Array,
             'carePlanActivityIds': Array,
+            'business': {},
+            'questions': Array,
         },
 
         data() {
             return {
                 form: new Form({
                     caregiver_comments: null,
-                    mileage: 0,
-                    other_expenses: 0.00,
+                    mileage: "",
+                    other_expenses: "",
                     latitude: null,
                     longitude: null,
                     activities: [],
                     caregiver_injury: 0,
                     issue_text: null,
                     other_expenses_desc: null,
-                    signature: null
+                    signature: null,
+                    goals: {},
+                    questions: {},
                 }),
                 showManual: false,
                 time: null,
@@ -188,6 +213,8 @@
 
         mounted() {
             this.setTimes();
+            this.setupGoalsForm();
+            this.setupQuestions();
         },
 
         methods: {
@@ -261,8 +288,22 @@
             setTimes() {
                 this.time = this.formatTime();
                 this.clockInTime = this.formatTimeFromUTC(this.shift.checked_in_time);
-                setInterval(() => this.time = this.formatTime(), 1000 * 60)
-            }
+                setInterval(() => this.time = this.formatTime(), 1000 * 15)
+            },
+
+            setupGoalsForm() {
+                this.form.goals = {};
+                this.shift.client.goals.forEach(item => {
+                    this.form.goals[item.id] = '';
+                });
+            },
+
+            setupQuestions() {
+                this.form.questions = {};
+                this.questions.forEach(item => {
+                    this.form.questions[item.id] = '';
+                });
+            },
         },
 
         computed: {
@@ -273,7 +314,7 @@
 
                 return this.nl2br(this.shift.schedule.care_plan.notes);
             }
-        }
+        },
     }
 </script>
 
@@ -290,5 +331,10 @@
 
     .translucent {
         opacity: .5;
+    }
+
+    .blue-box {
+        background-color: #e8f2fa;
+        border: 1px solid #c8e6f4;
     }
 </style>

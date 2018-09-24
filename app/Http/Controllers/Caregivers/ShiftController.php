@@ -30,26 +30,7 @@ class ShiftController extends BaseController
             return redirect()->route('shift.index');
         }
 
-        // Get the active shift
-        $shift = $this->caregiver()->getActiveShift();
-
-        // Load the client relationship
-        $shift->load('client');
-
-        // Load the available activities
-        $activities = $shift->business->allActivities();
-
-        // Load care plan and notes from the schedule (if one exists)
-        $carePlanActivityIds = [];
-        $notes =  '';
-        if ($shift && $shift->schedule) {
-            $notes = $shift->schedule->notes;
-            if ($shift->schedule->carePlan) {
-                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
-            }
-        }
-
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds'));
+        return view('caregivers.clocked_in');
     }
 
     public function clockIn(Request $request)
@@ -143,6 +124,40 @@ class ShiftController extends BaseController
         throw new \Exception('ShiftController: Missing client or schedule to clock into.');
     }
 
+    public function showClockOut()
+    {
+        if (!$this->caregiver()->isClockedIn()) {
+            return redirect()->route('shift.index');
+        }
+
+        // Get the active shift
+        $shift = $this->caregiver()->getActiveShift();
+
+        // Load the client relationship
+        $shift->load('client');
+
+        // Load the business model because we need the settings
+        $business = $shift->business;
+
+        // Load the available activities
+        $activities = $business->allActivities();
+
+        // load questions related to the current client
+        $questions = $business->questions()->forType($shift->client->client_type)->get();
+
+        // Load care plan and notes from the schedule (if one exists)
+        $carePlanActivityIds = [];
+        $notes =  '';
+        if ($shift && $shift->schedule) {
+            $notes = $shift->schedule->notes;
+            if ($shift->schedule->carePlan) {
+                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
+            }
+        }
+
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions'));
+    }
+
     public function clockOut(Request $request)
     {
         if (!$this->caregiver()->isClockedIn()) {
@@ -157,6 +172,8 @@ class ShiftController extends BaseController
             'other_expenses_desc' => 'nullable',
             'latitude' => 'numeric|nullable',
             'longitude' => 'numeric|nullable',
+            'goals' => 'nullable|array',
+            'questions' => 'nullable|array',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -168,12 +185,11 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'Could not find an active shift.');
         }
 
-        /* Signature Requirement Disabled For Now
-        // LTCI Clients Required Signature
-        $request->validate([
-            'signature' => [new SignedLTCI($shift->client->client_type)]
-        ]);
-        */
+        if ($shift->business->require_signatures) {
+            $request->validate([
+                'signature' => 'required'
+            ]);
+        }
 
         // If not private pay, ADL and comments are required
         if ($shift->client->client_type != 'private_pay') {
@@ -189,11 +205,25 @@ class ShiftController extends BaseController
             );
         }
 
+        $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
+        if ($allQuestions->count() > 0) {
+            $fields = [];
+            foreach($allQuestions as $q) {
+                if ($q->required == 1) {
+                    $fields['questions.' . $q->id] = 'required';
+                }
+            }
+
+            $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+        }
+
         try {
             $clockOut = new ClockOut($this->caregiver());
             if ($data['other_expenses']) $clockOut->setOtherExpenses($data['other_expenses'], $data['other_expenses_desc']);
             if ($data['mileage']) $clockOut->setMileage($data['mileage']);
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
+            $clockOut->setGoals($data['goals']);
+            $clockOut->setQuestions($data['questions'], $allQuestions);
             $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues

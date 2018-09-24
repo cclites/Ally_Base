@@ -37,6 +37,17 @@
                 </b-form-select>
                 <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
             </b-form-group>
+            <b-form-group>
+                <div class="form-check">
+                    <label class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input"
+                               v-model="form.provider_pay" value="1">
+                        <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description">Use Provider Pay</span>
+                    </label>
+                </div>
+                <input-help :form="form" field="provider_pay" text="Set the payment method to the registry's bank account."></input-help>
+            </b-form-group>
             <b-form-group label="Ally Onboard Status" label-for="onboard_status">
                 <b-form-select
                         id="onboard_status"
@@ -122,6 +133,7 @@
                     ssn: this.value.ssn || null,
                     onboard_status: this.value.onboard_status || "",
                     override: false,
+                    provider_pay: 0,
                 }),
             }
         },
@@ -141,6 +153,17 @@
             form: {
                 handler(obj){
                     this.$emit('input', obj);
+                },
+                deep: true
+            },
+
+            value: {
+                handler(obj){
+                    for (let key in obj.data()) {
+                        if (this.form[key] !== obj[key]) {
+                            this.form[key] = obj[key];
+                        }
+                    }
                 },
                 deep: true
             }

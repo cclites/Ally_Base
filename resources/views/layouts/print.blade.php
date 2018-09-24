@@ -39,7 +39,19 @@
             left: 0 !important;
             text-align: center;
         }
+        div.page
+        {
+            margin: 2mm;
+            page-break-after: always;
+            page-break-inside: avoid;
+        }
+        div.page:last-of-type
+        {
+            page-break-after: avoid;
+        }
     </style>
+
+    @stack('head')
 </head>
 
 <body>

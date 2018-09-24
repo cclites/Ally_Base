@@ -44,21 +44,37 @@
                     </b-form-group>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
-                            <b-form-radio value="m">Male</b-form-radio>
-                            <b-form-radio value="f">Female</b-form-radio>
+                            <b-form-radio value="M">Male</b-form-radio>
+                            <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
-                        <b-form-input
-                            id="email"
-                            name="email"
-                            type="email"
-                            v-model="form.email"
-                            >
-                        </b-form-input>
-                        <input-help :form="form" field="email" text="Enter their email address.  Ex: user@domain.com"></input-help>
+                        <b-row>
+                            <b-col cols="8">
+                                <b-form-input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="form.email"
+                                        :disabled="form.no_email"
+                                >
+                                </b-form-input>
+                            </b-col>
+                            <b-col cols="4">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="no_email"
+                                               v-model="form.no_email" value="1">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">No Email</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                        <input-help :form="form" field="email"
+                                    text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
                     <b-form-group label="Username" label-for="username">
                         <b-form-input
@@ -165,6 +181,60 @@
             </b-row>
 
             <b-row>
+                <b-col>
+                    <p class="h6">Preferences</p>
+                    <hr>
+                </b-col>
+            </b-row>
+
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Caregiver Gender" label-for="gender">
+                        <b-form-select id="gender"
+                                       v-model="preferences.gender"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="F">Female</option>
+                            <option value="M">Male</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="gender" text="" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver License/Certification" label-for="license">
+                        <b-form-select id="license"
+                                       v-model="preferences.license"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="CNA">CNA</option>
+                            <option value="HHA">HHA</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="license" text="" />
+                    </b-form-group>
+                    <b-form-group label="Caregiver's Spoken Language" label-for="language">
+                        <b-form-select id="language"
+                                       v-model="preferences.language"
+                        >
+                            <option :value="null">No Preference</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </b-form-select>
+                        <input-help :form="preferences" field="language" text="" />
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Preferred Hospital">
+                        <b-form-input id="hospital_name"
+                                      v-model="form.hospital_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Hospital Phone Number">
+                        <b-form-input id="hospital_number"
+                                      v-model="form.hospital_number"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
                 <b-col lg="12">
                     <hr />
                 </b-col>
@@ -216,8 +286,6 @@
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
         
-        <confirm-modal v-model="deactivateModal"></confirm-modal>
-
         <b-modal id="deactivateModal"
                  title="Are you sure?"
                  v-model="deactivateModal"
@@ -283,6 +351,7 @@
                     firstname: this.client.firstname,
                     lastname: this.client.lastname,
                     email: this.client.email,
+                    no_email: false,
                     username: this.client.username,
                     date_of_birth: (this.client.date_of_birth) ? this.formatDate(this.client.date_of_birth) : null,
                     client_type: this.client.client_type,
@@ -301,7 +370,14 @@
                     dr_first_name: this.client.dr_first_name,
                     dr_last_name: this.client.dr_last_name,
                     dr_phone: this.client.dr_phone,
-                    dr_fax: this.client.dr_fax
+                    dr_fax: this.client.dr_fax,
+                    hospital_name: this.client.hospital_name,
+                    hospital_number: this.client.hospital_number,
+                }),
+                preferences: new Form({
+                    gender: this.client.preferences ? this.client.preferences.gender : null,
+                    license: this.client.preferences ? this.client.preferences.license : null,
+                    language: this.client.preferences ? this.client.preferences.language : null,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -312,26 +388,20 @@
         },
 
         mounted() {
-            if (!this.client) {
-                this.form = new Form({
-                    firstname: null,
-                    lastname: null,
-                    email: null,
-                    username: null,
-                    date_of_birth: null,
-                    ssn: null,
-                    onboard_status: null,
-                    inquiry_date: '',
-                    service_start_date: '',
-                    referral: null,
-                    diagnosis: null,
-                    ambulatory: false,
-                    gender: null
-                })
-            }
+            this.checkForNoEmailDomain();
         },
 
         methods: {
+
+            checkForNoEmailDomain() {
+                let domain = 'noemail.allyms.com';
+                if (this.form.email) {
+                    if (this.form.email.substr(domain.length * -1) === domain) {
+                        this.form.no_email = true;
+                        this.form.email = null;
+                    }
+                }
+            },
 
             archiveClient() {
                 let form = new Form();
@@ -344,16 +414,14 @@
                     .then(response => this.active = 1);
             },
 
-            saveProfile() {
-                let component = this;
-                this.form.patch('/business/clients/' + this.client.id)
-                    .then(function(response) {
-                        if (component.form.ssn) component.form.ssn = '***-**-****';
-                        if (component.form.wasModified('onboard_status')) {
-                            component.client.onboard_status = component.form.onboard_status;
-                            component.lastStatusDate = moment.utc().format();
-                        }
-                    })
+            async saveProfile() {
+                await this.form.patch('/business/clients/' + this.client.id)
+                this.preferences.post('/business/clients/' + this.client.id + '/preferences');
+                if (this.form.ssn) this.form.ssn = '***-**-****';
+                if (this.form.wasModified('onboard_status')) {
+                    this.client.onboard_status = this.form.onboard_status;
+                    this.lastStatusDate = moment.utc().format();
+                }
             },
 
             sendConfirmation() {

@@ -20,13 +20,25 @@
                 </template>
             </b-table>
         </div>
+
+        <b-row>
+            <b-col lg="6" >
+                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+            </b-col>
+            <b-col lg="6" class="text-right">
+                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
 <script>
     import Form from "../classes/Form";
+    import FormatsDates from "../mixins/FormatsDates";
 
     export default {
+        mixins: [FormatsDates],
+
         props: {
             'exceptions': {
                 default() {
@@ -40,16 +52,18 @@
         data() {
             return {
                 totalRows: 0,
-                perPage: 15,
+                perPage: 25,
                 currentPage: 1,
-                sortBy: null,
-                sortDesc: false,
+                sortBy: 'created_at',
+                sortDesc: true,
                 filter: null,
                 selectedItem: {},
                 fields: [
                     {
-                        key: 'date',
+                        key: 'created_at',
+                        label: 'Date',
                         sortable: true,
+                        formatter: (val) => this.formatDateTimeFromUTC(val),
                     },
                     {
                         key: 'reference_type',
@@ -65,17 +79,14 @@
                         key: 'acknowledged_at',
                         label: 'Acknowledged',
                         sortable: true,
+                        formatter: (val) => val ? this.formatDateTimeFromUTC(val) : null,
                     },
                     {
                         key: 'actions',
                         class: 'hidden-print'
                     }
                 ],
-                items: this.exceptions.map(function(exception) {
-                    exception.date = moment.utc(exception.created_at).local().format('L LT');
-                    exception.acknowledged_at = (exception.acknowledged_at) ? moment.utc(exception.acknowledged_at).local().format('L LT') : '';
-                    return exception;
-                }),
+                items: this.exceptions,
 
             }
         },

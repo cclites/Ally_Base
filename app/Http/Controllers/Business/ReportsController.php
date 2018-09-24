@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use Auth;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
@@ -26,9 +27,17 @@ use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use App\Reports\EVVReport;
 
 class ReportsController extends BaseController
 {
+
+    public function index()
+    {
+        $role = json_encode(['role_type' => Auth::user()->role_type]);
+        return view('business.reports.index', ['role' => $role]);
+    }
+
     public function medicaidReport(Request $request)
     {
         return view('business.reports.medicaid', $this->medicaidData($request));
@@ -275,7 +284,7 @@ class ReportsController extends BaseController
                     'date' => $payment->created_at->format(\DateTime::ISO8601),
                 ];
             });
-        return view('business.reports.payments', compact('payments'));
+        return view('business.reports.payment-history', compact('payments'));
     }
 
     public function scheduled()
@@ -341,7 +350,13 @@ class ReportsController extends BaseController
 
     public function shiftsReport()
     {
-        return view('business.reports.shifts');
+        $activities = $this->business()->allActivities();
+        $multiLocation = [
+            'multiLocationRegistry' => $this->business()->multi_location_registry,
+            'name' => $this->business()->name
+        ];
+
+        return view('business.reports.shifts', compact('activities', 'multiLocation'));
     }
 
     public function certificationExpirations(Request $request)
@@ -417,7 +432,7 @@ class ReportsController extends BaseController
             return $report->rows();
         }
 
-        return view('business.reports.client_caregivers');
+        return view('business.reports.client-caregiver-rates');
     }
 
     /**
@@ -434,7 +449,7 @@ class ReportsController extends BaseController
 
     public function creditCardExpiration()
     {
-        return view('business.reports.cc_expiration', compact('cards'));
+        return view('business.reports.credit-card-expiration', compact('cards'));
     }
 
     public function creditCards()
@@ -455,28 +470,11 @@ class ReportsController extends BaseController
         return response()->json($cards);
     }
 
-    public function clientOnboardedReport()
-    {
-        return view('business.reports.client_onboarded');
-    }
-
-    public function clientOnboardedData()
-    {
-        return response()->json($this->business()->clients);
-    }
-
-    public function caregiverOnboardedReport()
-    {
-        return view('business.reports.caregiver_onboarded');
-    }
-
-    public function caregiverOnboardedData()
-    {
-        $caregivers = $this->business()->caregivers;
-
-        return response()->json($caregivers);
-    }
-
+    /**
+     * Shows all caregivers missing bank accounts.
+     *
+     * @return Response
+     */
     public function caregiversMissingBankAccounts()
     {
         $caregivers = $this->business()
@@ -486,12 +484,31 @@ class ReportsController extends BaseController
             }])
             ->doesntHave('bankAccount')
             ->get();
+
         return view('business.reports.caregivers_missing_bank_accounts', compact('caregivers'));
+    }
+
+    /**
+     * Shows all clients missing a payment method.
+     *
+     * @return Response
+     */
+    public function clientsMissingPaymentMethods()
+    {
+        $clients = $this->business()
+            ->clients()
+            ->with(['shifts' => function ($query) {
+                $query->where('status', 'WAITING_FOR_CHARGE');
+            }])
+            ->whereNull('default_payment_id')
+            ->get();
+
+        return view('business.reports.clients-missing-payment-methods', compact('clients'));
     }
 
     public function printableSchedule()
     {
-        return view('business.reports.printable_schedule');
+        return view('business.reports.printable-schedules');
     }
 
     protected function addShiftReportFilters($report, Request $request)
@@ -504,6 +521,10 @@ class ReportsController extends BaseController
 
         if ($request->input('import_id')) {
             $report->where('import_id', $request->import_id);
+        }
+
+        if ($request->input('shift_id')) {
+            $report->where('id', $request->shift_id);
         }
 
         if ($request->input('transaction_id')) {
@@ -566,15 +587,17 @@ class ReportsController extends BaseController
 
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
+        $timezone = $this->business()->timezone;
 
         $client_shift_groups = $this->clientShiftGroups($data);
+        $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
 
         switch ($data['export_type']) {
             case 'pdf':
-                $pdf = PDF::loadView('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                $pdf = PDF::loadView('business.reports.print.timesheets', $viewData);
                 return $pdf->download('timesheet_export.pdf');
             default:
-                return view('business.reports.print.timesheets', compact('client_shift_groups', 'start_date', 'end_date'));
+                return view('business.reports.print.timesheets', $viewData);
         }
     }
 
@@ -658,102 +681,6 @@ class ReportsController extends BaseController
         return $shifts;
     }
 
-    public function ltciClaims()
-    {
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
-        return view('business.reports.ltci_claims', compact('caregivers', 'clients'));
-    }
-
-    public function ltciClaimsData(Request $request)
-    {
-        $request->validate([
-            'client_id' => 'required|int',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'export_type' => 'required|string'
-        ]);
-
-        $client = Client::with([
-                'addresses',
-                'shifts' => function ($query) use ($request) {
-                    $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)]);
-                }
-            ])
-            ->find($request->client_id);
-
-        $summary = [];
-        foreach ($client->shifts as $shift) {
-            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-            $summary[] = [
-                'date' => $shift->checked_in_time->format('Y-m-d'),
-                'total' => (float) $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2),
-                'hours' => $shift->duration,
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
-            ];
-        }
-
-        return response()->json(compact('client', 'summary'));
-    }
-
-    public function ltciClaimsPrint(Request $request)
-    {
-        $data = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'export_type' => 'nullable|string'
-        ]);
-
-        $data['export_type'] = (!isset($data['export_type'])) ? '' : $data['export_type'];
-        $data['client_id'] = $request->client_id;
-        $data['caregiver_id'] = null;
-        $data['client_type'] = null;
-        $data['timesheets'] = $request->timesheets ? true : false;
-
-        $client = Client::find($request->client_id);
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
-
-        $start_date = Carbon::parse($request->start_date);
-        $end_date = Carbon::parse($request->end_date);
-
-        $client->load([
-            'addresses',
-            'shifts' => function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('checked_in_time', [Carbon::parse($start_date), Carbon::parse($end_date)]);
-            }
-        ]);
-
-        $summary = $this->ltciClaimsSummary($client);
-
-        $client_shift_groups = $this->clientShiftGroups($data);
-
-        switch ($data['export_type']) {
-            case 'pdf':
-                $pdf = PDF::loadView('business.clients.print.ltci_claim', compact('client', 'summary', 'data', 'client_shift_groups', 'start_date', 'end_date'));
-                return $pdf->download(str_slug($client->name.' export').'.pdf');
-            default:
-                return view('business.clients.print.ltci_claim', compact('client', 'summary', 'data', 'client_shift_groups', 'start_date', 'end_date'));
-        }
-    }
-
-    private function ltciClaimsSummary(Client $client)
-    {
-        $summary = collect([]);
-        foreach ($client->shifts as $shift) {
-            $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate, $shift->provider_fee);
-            $summary->push([
-                'date' => $shift->checked_in_time->format('Y-m-d'),
-                'total' => (float) $shift->shift_total = number_format($shift->costs()->getTotalCost(), 2),
-                'hours' => $shift->duration,
-                'hourly_total' => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee, 2)
-            ]);
-        }
-
-        return $summary;
-    }
-
     private function clientShiftGroups(array $data)
     {
         return $this->business()->shifts()
@@ -789,5 +716,177 @@ class ReportsController extends BaseController
             })
             ->groupBy('client_id');
     }
-}
+    
+    /**
+     * List of referral sources and how many clients have been referred by each
+     *
+     * @return Response
+     */
+    public function referralSources()
+    {
+        return view('business.reports.referral_sources');
+    }
 
+    /**
+     * Shows the list of prospective clients
+     *
+     * @return Response
+     */
+    public function prospects()
+    {
+        return view('business.reports.prospects');
+    }
+
+    /**
+     * See how many shifts have been worked by a caregiver
+     *
+     * @return Response
+     */
+    public function caregiverShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('caregiver_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forCaregiver(request()->user_id)
+                ->groupBy('caregiver_id')
+                ->with('caregiver')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->caregiver->name,
+                        'user_id' => $item->caregiver->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        $type = 'caregiver';
+        $users = $this->business()->caregiverList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
+
+    /**
+     * See how many shifts a client has received
+     *
+     * @return Response
+     */
+    public function clientShifts()
+    {
+        if (request()->has('fetch')) {
+            $report = $this->business()->shifts()
+                ->selectRaw('client_id, count(*) as total')
+                ->betweenDates(request()->start_date, request()->end_date)
+                ->forClient(request()->user_id)
+                ->groupBy('client_id')
+                ->with('client')
+                ->get()
+                ->map(function ($item) {
+                    return array_merge($item->toArray(), [
+                        'name' => $item->client->name,
+                        'user_id' => $item->client->id,
+                    ]);
+                });
+            
+            return response()->json($report);
+        }
+
+        
+        $type = 'client';
+        $users = $this->business()->clientList();
+
+        return view('business.reports.shift_summary', compact(['type', 'users']));
+    }
+
+    /**
+     * See the onboard status for clients and caregivers and send electronic signup link
+     *
+     * @return Response
+     */
+    public function onboardStatus()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboard_status,
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email_sent_at' => $item->user->email_sent_at,
+                        'onboard_status' => $item->onboarded ? 'Onboarded' : 'Not Onboarded',
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.onboard-status', compact('type'));
+    }
+
+    /**
+     * Details on each attempted clock in and clock out
+     *
+     * @return Response
+     */
+    public function evv()
+    {
+        if (request()->expectsJson() && request()->input('json')) {
+            $report = new EVVReport();
+            $report->where('business_id', $this->business()->id);
+
+            if ($method = request()->input('method')) {
+                if ($method === 'geolocation') $report->geolocationOnly();
+                if ($method === 'telephony') $report->telephonyOnly();
+            }
+            if (strlen(request()->input('verified'))) {
+                $report->where('verified', request()->input('verified'));
+            }
+            $this->addShiftReportFilters($report, request());
+            return $report->rows();
+        }
+
+        return view('business.reports.evv');
+    }
+
+    public function contacts()
+    {
+        $type = request()->type == 'client' ? 'client' : 'caregiver';
+
+        if (request()->has('fetch')) {
+            if ($type == 'client') {
+                return response()->json($this->business()->clients->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'evv')->first(),
+                    ];
+                }));
+            } else {
+                return response()->json($this->business()->caregivers->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nameLastFirst,
+                        'email' => $item->user->email,
+                        'numbers' => $item->user->phoneNumbers,
+                        'address' => $item->user->addresses()->where('type', 'home')->first(),
+                    ];
+                }));
+            }
+        }
+
+        return view('business.reports.contacts', compact('type'));
+    }
+}

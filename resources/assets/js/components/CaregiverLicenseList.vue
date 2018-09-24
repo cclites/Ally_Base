@@ -104,7 +104,7 @@
                 this.licenseModal = true;
             },
             createLicense() {
-                this.selectedLicense = null;
+                this.selectedLicense = {};
                 this.licenseModal = true;
             },
             deleteLicense(license) {

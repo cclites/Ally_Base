@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Address;
 use App\Business;
 use App\Caregiver;
+use App\EmergencyContact;
+use App\Note;
 use App\PhoneNumber;
 use App\User;
 
@@ -37,33 +39,37 @@ class ImportGenerationsCaregivers extends BaseImport
 
         $objPHPExcel = $this->loadSheet();
 
+        \DB::beginTransaction();
+
         $lastRow = $this->getRowCount($objPHPExcel);
 
-        for($row=2; $row<$lastRow; $row++) {
+        for($row=2; $row<=$lastRow; $row++) {
 
-            $name = $this->getValue($objPHPExcel, 'Caregiver Name', $row);
-            if ($name) {
+            $name = $this->getValue($objPHPExcel, 'First Name', $row) . ' ' . $this->getValue($objPHPExcel, 'Last Name', $row);
+            if (trim($name)) {
                 $this->output->writeln('Found caregiver: ' . $name);
 
                 $data['firstname'] = $this->getValue($objPHPExcel, 'First Name', $row);
                 $data['lastname'] = $this->getValue($objPHPExcel, 'Last Name', $row);
-                $data['ssn'] = str_pad($this->getValue($objPHPExcel, 'SSN', $row), 9, '0', STR_PAD_LEFT);
+                $data['ssn'] = str_pad(str_replace('-', '', $this->getValue($objPHPExcel, 'SSN', $row)), 9, '0', STR_PAD_LEFT);
                 $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
                 $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
                 $data['password'] = bcrypt(str_random(12));
                 $data['hire_date'] = filter_date($this->getValue($objPHPExcel, 'Hire Date', $row));
-                $data['gender'] = $this->getValue($objPHPExcel, 'Gender', $row);
+                $data['gender'] = strtoupper(substr($this->getValue($objPHPExcel, 'Gender', $row), 0, 1));
                 $addressData['address1'] = $this->getValue($objPHPExcel, 'Address1', $row);
                 $addressData['address2'] = $this->getValue($objPHPExcel, 'Address2', $row);
                 $addressData['city'] = $this->getValue($objPHPExcel, 'City', $row);
                 $addressData['state'] = $this->getValue($objPHPExcel, 'State', $row);
-                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row);
+                $addressData['zip'] = $this->getValue($objPHPExcel, 'Zip', $row) ?: $this->getValue($objPHPExcel, 'PostalCode', $row);
                 $addressData['country'] = 'US';
                 $addressData['type'] = 'home';
 
                 $phone1 = $this->getValue($objPHPExcel, 'Phone1', $row);
                 $phone2 = $this->getValue($objPHPExcel, 'Phone2', $row);
                 $email = trim($this->getValue($objPHPExcel, 'Email', $row));
+
+                // Emergency contact columns defined at bottom
 
                 // Prevent Duplicates
                 if ($email && User::where('email', $email)->exists()) {
@@ -111,7 +117,31 @@ class ImportGenerationsCaregivers extends BaseImport
                 catch(\Exception $e) {
 
                 }
+
+                // Create Emergency Contacts
+                for($i = 1; $i <= 3; $i++) {
+                    if ($emergencyName = $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Name", $row)) {
+                        EmergencyContact::create([
+                            'user_id' => $caregiver->id,
+                            'name' => $emergencyName,
+                            'phone_number' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Phone", $row) ?? '',
+                            'relationship' => $this->getValue($objPHPExcel, "Emerg. Contact #${i}: Relationship", $row) ?? '',
+                        ]);
+                    }
+                }
+
+                // Create Note
+                if ($officeNote = $this->getValue($objPHPExcel, "OfficeNote", $row)) {
+                    $officeUser = $business->users()->first();
+                    $caregiver->notes()->save(new Note([
+                        'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
+                        'created_by' => $officeUser->id,
+                        'business_id' => $business->id,
+                    ]));
+                }
             }
+
+            \DB::commit();
 
         }
 

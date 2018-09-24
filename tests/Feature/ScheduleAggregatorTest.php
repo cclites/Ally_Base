@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature;
 
+use App\Business;
 use App\Caregiver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Scheduling\ScheduleCreator;
@@ -39,11 +40,12 @@ class ScheduleAggregatorTest extends TestCase
 
         $this->aggregator = new ScheduleAggregator();
 
+        $this->business = factory(Business::class)->create(['timezone' => 'UTC']);
+
         $this->client = factory('App\Client')->create([
             'max_weekly_hours' => 40,
+            'business_id' => $this->business->id,
         ]);
-
-        $this->business = $this->client->business;
 
         $this->caregiver = factory('App\Caregiver')->create();
     }

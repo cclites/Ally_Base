@@ -28,13 +28,13 @@ class UpdateClientRequest extends FormRequest
         return [
             'firstname' => 'required',
             'lastname' => 'required',
-            'email' => 'required|email',
-            'username' => ['required', 'email', Rule::unique('users')->ignore($this->client->id)],
+            'email' => 'required_unless:no_email,1|nullable|email',
+            'username' => ['required', Rule::unique('users')->ignore($this->client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
             'ssn' => ['nullable', new ValidSSN()],
-            'gender' => 'nullable|string',
+            'gender' => 'nullable|in:M,F',
             'onboard_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
@@ -48,7 +48,9 @@ class UpdateClientRequest extends FormRequest
             'dr_first_name' => 'nullable|string',
             'dr_last_name' => 'nullable|string',
             'dr_phone' => 'nullable|string',
-            'dr_fax' => 'nullable|string'
+            'dr_fax' => 'nullable|string',
+            'hospital_name' => 'nullable|string',
+            'hospital_number' => 'nullable|string',
         ];
     }
 }

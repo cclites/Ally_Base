@@ -8,6 +8,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>@yield('title', 'Dashboard') | {{ config('app.name', 'Ally Management System') }}</title>
     @include('layouts.partials.head')
+
+    @if(is_mobile_app())
+        <style>
+            #header-desktop { display: none; }
+            #header-mobile { display: block; }
+            #logo-text { display: none; }
+        </style>
+    @endif
+
+    <script>window.fcsKey = '{{ config('services.fullcalendar.key') }}';</script>
+
     @stack('head')
 </head>
 

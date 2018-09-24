@@ -14,6 +14,7 @@ trait IsUserRole
 {
     use SoftDeletes;
     use HiddenIdTrait;
+    use HasAddressesAndNumbers;
 
     /**
      * IsUserRole constructor.
@@ -255,12 +256,8 @@ trait IsUserRole
 
     ///////////////////////////////////////////
     /// Forwarded Relationship Methods
+    /// (Phone numbers and addresses are in HasAddressesAndNumbers)
     ///////////////////////////////////////////
-
-    public function addresses()
-    {
-        return $this->hasMany(Address::class, 'user_id', 'id');
-    }
 
     public function bankAccounts()
     {
@@ -272,13 +269,37 @@ trait IsUserRole
         return $this->hasMany(CreditCard::class, 'user_id', 'id');
     }
 
-    public function phoneNumbers()
-    {
-        return $this->hasMany(PhoneNumber::class, 'user_id', 'id');
-    }
-
     public function documents()
     {
         return $this->hasMany(Document::class, 'user_id', 'id');
+    }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * Returns only active Clients.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($builder)
+    {
+        return $builder->whereHas('user', function($q) { $q->where('active', 1); });
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByName($builder, $direction = 'ASC')
+    {
+        $builder->join('users', 'users.id', '=', $this->table . '.id')
+            ->orderBy('users.lastname', $direction)
+            ->orderBy('users.firstname', $direction);
+
+        return $builder;
     }
 }

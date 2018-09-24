@@ -26,13 +26,13 @@
             <a class="nav-link" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
+            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Plans &amp; Goals</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
@@ -54,9 +54,12 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
-        @if($client->client_type == 'LTCI')
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
+        </li>
+        @if($client->client_type === 'medicaid')
             <li class="nav-item">
-                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">LTC Insurance</a>
+                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
             </li>
         @endif
     </ul>
@@ -69,18 +72,16 @@
                 <a class="dropdown-item" data-toggle="tab" href="#profile" role="tab">Profile</a>
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
-                <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
-                @if($client->client_type == 'LTCI')
-                    <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">LTC Insurance</a>
-                @endif
+                <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
             </div>
         </li>
     </ul>
@@ -99,15 +100,6 @@
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
             <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>
-        </div>
-        <div class="tab-pane" id="caregivers" role="tabpanel">
-            <business-client-caregivers :client_id="{{ $client->id }}"
-                                        :ally-fee="{{ floatval($client->allyFee) }}"
-                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
-            ></business-client-caregivers>
-        </div>
-        <div class="tab-pane" id="care_plans" role="tabpanel">
-            <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
         </div>
         <div class="tab-pane" id="payment" role="tabpanel">
             <div class="row">
@@ -133,16 +125,26 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane" id="caregivers" role="tabpanel">
+            <business-client-caregivers :client_id="{{ $client->id }}"
+                                        :ally-rate="{{ floatval($client->allyFee) }}"
+                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
+            ></business-client-caregivers>
+        </div>
+        <div class="tab-pane" id="care_plans" role="tabpanel">
+            <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
+            <business-client-goals :client="{{ $client }}" :goals="[]" />
+        </div>
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
-                <business-schedule :client="{{ $client }}"></business-schedule>
+                <business-schedule :client="{{ $client }}" :business="{{ activeBusiness() }}"></business-schedule>
             </div>
         @endif
         <div class="tab-pane" id="client_notes" role="tabpanel">
-            <notes-tab :notes="{{ $client->notes }}"></notes-tab>
+            <notes-tab :notes="{{ $client->notes }}" :business="{{ $business }}" :client="{{ $client }}"></notes-tab>
         </div>
         <div class="tab-pane" id="documents" role="tabpanel">
             <document-list
@@ -175,9 +177,13 @@
             // activate tab-pane for active section
             $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
         });
+
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
-            $('#calendar').fullCalendar('render');
+            if (e.target.hash === '#schedule') {
+                $('#calendar').fullCalendar('render');
+                $('#calendar').fullCalendar('refetchResources');
+            }
         });
 
         // Javascript to enable link to tab

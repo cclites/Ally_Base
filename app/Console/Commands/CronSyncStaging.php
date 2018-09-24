@@ -57,14 +57,14 @@ class CronSyncStaging extends Command
         if ($stagingDb == 'ally') exit(); // extra check
 
         $this->output->writeln('Backing up staging database to ' . $backupPathStag);
-        passthru(sprintf('mysqldump %s | gzip > %s', escapeshellarg($stagingDb), escapeshellarg($backupPathStag)), $exit);
+        passthru(sprintf('mysqldump --single-transaction %s | gzip > %s', escapeshellarg($stagingDb), escapeshellarg($backupPathStag)), $exit);
         if ($exit) {
             $this->output->error('Error backing up staging database.');
             exit();
         }
 
         $this->output->writeln('Backing up production database to ' . $backupPathProd);
-        passthru(sprintf('mysqldump %s | gzip > %s', escapeshellarg($productionDb), escapeshellarg($backupPathProd)), $exit);
+        passthru(sprintf('mysqldump --single-transaction %s | gzip > %s', escapeshellarg($productionDb), escapeshellarg($backupPathProd)), $exit);
         if ($exit) {
             $this->output->error('Error backing up staging database.');
             exit();
@@ -73,9 +73,13 @@ class CronSyncStaging extends Command
         $this->output->writeln('Syncing production database to staging database');
         passthru(sprintf('echo DROP DATABASE %s | mysql', escapeshellarg($stagingDb)));
         passthru(sprintf('echo CREATE DATABASE %s | mysql', escapeshellarg($stagingDb)));
-        passthru(sprintf('mysqldump %s | mysql %s', escapeshellarg($productionDb), escapeshellarg($stagingDb)), $exit);
+        passthru(sprintf('mysqldump --no-data %s | mysql %s', escapeshellarg($productionDb), escapeshellarg($stagingDb)), $exit);
+        passthru(sprintf('mysqldump --single-transaction --no-create-info --ignore-table=%s.audits %s | mysql %s',
+            escapeshellarg($productionDb), escapeshellarg($productionDb), escapeshellarg($stagingDb)
+        ), $exit);
         if ($exit) {
             $this->output->error('Error syncing production database to staging database.');
+            return;
         }
 
         // Update admin password

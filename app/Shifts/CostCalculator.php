@@ -242,6 +242,21 @@ class CostCalculator
     }
 
     /**
+     *  Get the total cost per hour of this shift
+     */
+    public function getTotalHourlyCost()
+    {
+        $allyFee = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
+        return round(
+            bcadd(
+                bcadd($this->shift->caregiver_rate, $this->shift->provider_fee, 4),
+                $allyFee,
+                4
+            ), 2
+        );
+    }
+
+    /**
      * @return bool
      */
     public function hasPersistedCosts()

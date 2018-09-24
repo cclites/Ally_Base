@@ -3,7 +3,7 @@
         <div class="p-3">
             <h5>Status:</h5>
             <b-form-radio-group v-model="form.status" name="status">
-                <div><b-form-radio value="OK">OK</b-form-radio></div>
+                <div><b-form-radio value="OK">No Status Change</b-form-radio></div>
                 <div><b-form-radio value="CLIENT_CANCELED">Client Canceled</b-form-radio></div>
                 <div><b-form-radio value="CAREGIVER_CANCELED">Caregiver Canceled</b-form-radio></div>
             </b-form-radio-group>
@@ -74,7 +74,7 @@
                 this.busy = true;
                 this.form.patch(url)
                     .then(response => {
-                        this.$emit('refresh');
+                        this.$emit('updateEvent', this.form.id, response.data.data);
                         this.showModal = false;
                         this.busy = false;
                     })

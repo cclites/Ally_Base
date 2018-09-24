@@ -45,7 +45,9 @@ return [
     ],
 
     'twilio' => [
+        'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_APP_TOKEN'),
+        'default_number' => env('TWILIO_DEFAULT_NUMBER'),
     ],
 
     'slack' => [
@@ -60,6 +62,16 @@ return [
     'microbilt' => [
         'id' => env('MICROBILT_ID'),
         'password' => env('MICROBILT_PASSWORD'),
-    ]
+    ],
+
+    'tellus' => [
+        'endpoint' => env('TELLUS_ENDPOINT', 'https://integration.pilot.4tellus.com/v1.0/ALLY'),
+        'username' => env('TELLUS_USERNAME'),
+        'password' => env('TELLUS_PASSWORD'),
+    ],
+
+    'fullcalendar' => [
+        'key' => env('FULLCALENDAR_KEY'),
+    ],
 
 ];

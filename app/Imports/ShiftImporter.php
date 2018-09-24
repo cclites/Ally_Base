@@ -97,8 +97,17 @@ class ShiftImporter
         $checkIn = $this->sheet->getValue('checked_in_time', $row);
         $timezone = Timezone::getTimezone($data['business_id']);
         $duration = floatval($this->sheet->getValue('duration', $row));
-        $data['checked_in_time'] = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
-        $data['checked_out_time'] = $data['checked_in_time']->copy()->addMinutes(round($duration * 60));
+
+        if ($checkIn) {
+            $data['checked_in_time'] = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
+            $data['checked_out_time'] = $data['checked_in_time']->copy()->addMinutes(round($duration * 60));
+        }
+        else {
+            // Allow for an expense only record, set in/out time equal to midnight, 0 duration
+            $data['checked_in_time'] = (new Carbon('now', $timezone))->setTime(0,0,0)->setTimezone('UTC');
+            $data['checked_out_time'] = $data['checked_in_time']->copy();
+            $data['caregiver_comments'] = 'Individual expense record imported on ' . (new Carbon('now', $timezone))->format('m/d/Y');
+        }
 
         return $data;
     }

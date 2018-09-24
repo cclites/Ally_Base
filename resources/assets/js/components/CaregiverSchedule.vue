@@ -29,7 +29,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="viewModal=false">Close</b-btn>
-                <b-btn variant="info" @click="clockIn()" v-if="canClockIn">Clock In</b-btn>
+                <b-btn variant="info" @click="clockIn()" v-if="canClockIn">Go to Clock In</b-btn>
             </div>
         </b-modal>
     </div>

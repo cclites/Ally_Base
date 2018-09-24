@@ -6,7 +6,7 @@
                 :caregiver="caregiver"
                 :client="client"
                 ref="businessShift"
-                @shiftCreated="$emit('shiftCreated')"
+                @shift-created="$emit('shift-created')"
                 is_modal="1"
             ></business-shift>
         </b-container>

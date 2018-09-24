@@ -4,13 +4,6 @@
 
 @section('content')
     <div class="row">
-        <div class="col-lg-6">
-            <div class="alert alert-success" role="alert">
-                You are currently clocked-in.  Clock out below.
-            </div>
-        </div>
-    </div>
-    <div class="row">
         @if ($shift->schedule_id)
             <div class="col-12 hidden-sm-up">
                 <div class="card">
@@ -26,7 +19,13 @@
             </div>
         @endif
         <div class="col-lg-6">
-            <clock-out :shift="{{ $shift }}" :activities="{{ $activities }}" :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"></clock-out>
+            <clock-out 
+                :shift="{{ $shift }}" 
+                :activities="{{ $activities }}" 
+                :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" 
+                :business="{{ $business }}" 
+                :questions="{{ $questions }}"
+            />
         </div>
         <div class="col-lg-6">
             @if ($shift->schedule_id)

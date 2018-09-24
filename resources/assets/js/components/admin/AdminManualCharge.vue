@@ -21,7 +21,7 @@
                                        v-model="form.client_id"
                         >
                             <option value="">--Business Transaction--</option>
-                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
+                            <option v-for="client in filteredClients" :value="client.id" :key="client.id">{{ client.nameLastFirst }} ({{ client.id }})</option>
                         </b-form-select>
                         <input-help :form="form" field="client_id" text="Select a client or run a business transaction" />
                     </b-form-group>
@@ -77,7 +77,13 @@
         },
 
         computed: {
+            filteredClients() {
+                if (this.form.business_id) {
+                    return this.clients.filter(obj => obj.business_id == this.form.business_id);
+                }
 
+                return this.clients;
+            },
         },
 
         mounted() {
@@ -87,7 +93,6 @@
         },
 
         methods: {
-
             makeForm() {
                 this.form = new Form({
                     'business_id': "",
@@ -120,6 +125,15 @@
 
             loadClients() {
                 axios.get('/admin/clients?json=1').then(response => this.clients = response.data);
+            },
+        },
+
+        watch: {
+            business_id(newVal, oldVal) {
+                if (this.clients.find(obj => obj.id == this.form.client_id && obj.business_id == newVal)) {
+                    return;
+                }
+                this.form.client_id = '';
             },
         },
     }

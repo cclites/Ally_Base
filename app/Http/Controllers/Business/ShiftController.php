@@ -12,6 +12,7 @@ use App\ShiftIssue;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Arr;
 
 class ShiftController extends BaseController
 {
@@ -42,6 +43,10 @@ class ShiftController extends BaseController
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
+                'issues.id' => 'nullable|numeric',
+                'issues.caregiver_injury' => 'boolean',
+                'issues.client_injury' => 'boolean',
+                'issues.comments' => 'nullable',
             ],
             [
                 'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
@@ -57,16 +62,9 @@ class ShiftController extends BaseController
         $data['other_expenses'] = request('other_expenses', 0);
         $data['verified'] = false;
 
-        if ($shift = Shift::create($data)) {
+        if ($shift = Shift::create(Arr::except($data, 'issues'))) {
             $shift->activities()->sync($request->input('activities', []));
-            foreach ($request->input('issues', []) as $issue) {
-                $issue = new ShiftIssue([
-                    'caregiver_injury' => $issue['caregiver_injury'] ?? 0,
-                    'client_injury' => $issue['client_injury'] ?? 0,
-                    'comments' => $issue['comments'] ?? ''
-                ]);
-                $shift->issues()->save($issue);
-            }
+            $shift->syncIssues($data['issues']);
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -81,8 +79,8 @@ class ShiftController extends BaseController
         }
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'signature', 'statusHistory']);
-        $shift->append(['ally_pct']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
         $data = $shift->toArray();
@@ -99,7 +97,6 @@ class ShiftController extends BaseController
             }
         }
 
-
         if ($request->expectsJson()) {
             $data += [
                 'checked_in_distance' => $checked_in_distance,
@@ -108,13 +105,11 @@ class ShiftController extends BaseController
                 'caregiver_name' => $shift->caregiver->name(),
             ];
 
-            return $data;
+            return response()->json($data);
         }
-        
-        // // Map additional data
-        $shift->append(['charged_at', 'confirmed_at']);
 
         $activities = $shift->business->allActivities();
+
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
     }
 
@@ -145,6 +140,11 @@ class ShiftController extends BaseController
                 'caregiver_rate' => 'required|numeric|max:1000|min:0',
                 'provider_fee' => 'required|numeric|max:1000|min:0',
                 'hours_type' => 'required|in:default,overtime,holiday',
+                'issues.id' => 'nullable|numeric',
+                'issues.caregiver_injury' => 'boolean',
+                'issues.client_injury' => 'boolean',
+                'issues.comments' => 'nullable',
+                'questions' => 'nullable|array',
             ],
             [
                 'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
@@ -152,17 +152,34 @@ class ShiftController extends BaseController
             ]
         );
 
+        $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
+        if ($allQuestions->count() > 0) {
+            $fields = [];
+            foreach($allQuestions as $q) {
+                if ($q->required == 1) {
+                    $fields['questions.' . $q->id] = 'required';
+                }
+            }
+
+            $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+        }
+
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['mileage'] = request('mileage', 0);
         $data['other_expenses'] = request('other_expenses', 0);
 
-        if ($shift->update($data)) {
+        if ($shift->update(Arr::except($data, ['issues', 'questions']))) {
             if (isset($adminOverride)) {
                 // Update persisted costs
                 $shift->costs()->persist();
             }
+
             $shift->activities()->sync($request->input('activities', []));
+            $shift->syncIssues($data['issues']);
+            $shift->syncGoals($request->goals);
+            $shift->syncQuestions($allQuestions, $data['questions']);
+
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -227,18 +244,6 @@ class ShiftController extends BaseController
         // Load needed relationships
         $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
 
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $shift->checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $shift->checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
-
         $timezone = $this->business()->timezone;
 
         if (request()->filled('type') && strtolower(request('type')) == 'pdf') {
@@ -248,47 +253,6 @@ class ShiftController extends BaseController
         }
 
         return view('business.shifts.print', compact('shift', 'timezone'));
-    }
-
-    public function storeIssue(Request $request, Shift $shift)
-    {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        // Load needed relationships
-        $shift->load(['activities', 'issues']);
-
-        $data = $request->validate([
-            'caregiver_injury' => 'boolean',
-            'client_injury' => 'boolean',
-            'comments' => 'nullable',
-        ]);
-
-        $issue = new ShiftIssue($data);
-        if ($shift->issues()->save($issue)) {
-            return new CreatedResponse('The issue has been created successfully.', $issue->toArray());
-        }
-        return new ErrorResponse(500, 'Unable to create issue.');
-    }
-
-    public function updateIssue(Request $request, Shift $shift, $issue_id)
-    {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        $issue = $shift->issues()->where('id', $issue_id)->firstOrFail();
-        $data = $request->validate([
-            'caregiver_injury' => 'boolean',
-            'client_injury' => 'boolean',
-            'comments' => 'nullable',
-        ]);
-
-        if ($issue->update($data)) {
-            return new SuccessResponse('The issue has been updated successfully.', $issue->toArray());
-        }
-        return new ErrorResponse(500, 'Unable to update issue.');
     }
 
     public function convertSchedule(Request $request, Schedule $schedule)

@@ -29,7 +29,7 @@
                     </template>
                     <template slot="actions" scope="data">
                         <b-btn :href="'/reports/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">View Details</b-btn>
-                        <b-btn :href="'/reports/payment-history/' + data.item.id + '/print?type=pdf'" class="btn btn-secondary">Download</b-btn>
+                        <b-btn :href="'/reports/payment-history/' + data.item.id + '/print?type=pdf'" class="btn btn-secondary" v-if="!isMobileApp">Download</b-btn>
                     </template>
                     <template slot="FOOT_created_at" scope="data">
                         Total YTD
@@ -44,7 +44,7 @@
                         {{ total }}
                     </template>
                     <template slot="FOOT_actions" scope="data">
-                        <b-btn @click="printSummary()">Print Year Summary</b-btn>
+                        <b-btn @click="printSummary()" v-if="!isMobileApp">Print Year Summary</b-btn>
                     </template>
                 </b-table>
             </div>
@@ -57,6 +57,7 @@
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     import moment from 'moment';
+    import MobileApp from "../../mixins/MobileApp";
     export default {
         props: ['caregiver', 'deposits'],
 
@@ -64,7 +65,7 @@
             DashboardMetric
         },
 
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, MobileApp],
 
         data() {
             return {

@@ -5,9 +5,18 @@
 </template>
 
 <script>
+    import fullcalendar from 'fullcalendar';
+    import fullcalendarScheduler from 'fullcalendar-scheduler';
+
     export default {
         props: {
             loading: false,
+
+            resources: {
+                default() {
+                    return []
+                },
+            },
 
             events: {
                 default() {
@@ -71,6 +80,7 @@
 
         data() {
             return {
+                currentView: this.defaultView,
             }
         },
 
@@ -79,7 +89,7 @@
                 const self = this;
                 return {
                     header: this.header,
-                    defaultView: this.defaultView,
+                    defaultView: this.currentView,
                     editable: this.editable,
                     selectable: this.selectable,
                     selectHelper: this.selectHelper,
@@ -91,6 +101,12 @@
                     allDaySlot: false,
                     weekNumberCalculation: 'iso',
                     renderHtml: false,
+                    height: 'auto',
+                    schedulerLicenseKey: window.fcsKey,
+
+                    resources(callback, start, end, timezone) {
+                        callback(self.resources);
+                    },
 
                     eventRender(...args) {
                         if (this.sync) {
@@ -109,6 +125,14 @@
                         self.$emit('event-selected', ...args)
                     },
 
+                    eventMouseover(...args) {
+                        self.$emit('event-mouseover', ...args)
+                    },
+
+                    eventMouseout(...args) {
+                        self.$emit('event-mouseout', ...args)
+                    },
+
                     eventDrop(...args) {
                         self.$emit('event-drop', ...args)
                     },
@@ -118,6 +142,7 @@
                     },
 
                     viewRender(...args) {
+                        this.currentView = args[0].name;
                         self.$emit('view-render', ...args)
                     },
 
@@ -136,16 +161,13 @@
                     },
 
                     loading(isLoading) {
-                        self.loading = isLoading;
+                        self.$emit('update:loading', isLoading);
                     }
                 }
             },
         },
 
         mounted() {
-            const cal = $(this.$el),
-                self = this
-
             this.$on('remove-event', (event) => {
                 if(event && event.hasOwnProperty('id')){
                     $(this.$el).fullCalendar('removeEvents', event.id);
@@ -155,7 +177,8 @@
             })
 
             this.$on('rerender-events', () => {
-                $(this.$el).fullCalendar('rerenderEvents')
+                $(this.$el).fullCalendar('rerenderEvents');
+                this.hideWeekButtonOnSmallDevices();
             })
 
             this.$on('refetch-events', () => {
@@ -169,6 +192,7 @@
             this.$on('reload-events', () => {
                 $(this.$el).fullCalendar('removeEvents')
                 $(this.$el).fullCalendar('addEventSource', this.events)
+                this.$emit('events-reloaded');
             })
 
             this.$on('rebuild-sources', () => {
@@ -178,22 +202,43 @@
                 })
             })
 
-            cal.fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
-
+            this.createCalendar();
         },
 
         methods: {
             fireMethod(...options) {
                 $(this.$el).fullCalendar(...options)
             },
+
+            createCalendar() {
+                $(this.$el).fullCalendar(_.defaultsDeep(this.config, this.defaultConfig));
+                this.hideWeekButtonOnSmallDevices();
+            },
+
+            destroyCalendar() {
+                $(this.$el).fullCalendar('destroy');
+            },
+
+            printCalendar() {
+                $(this.$refs.calendar).print();
+            },
+
+            setOption(option, value) {
+                $(this.$el).fullCalendar('option', option, value);
+            },
+
+            hideWeekButtonOnSmallDevices()
+            {
+                let $button = $('.fc-agendaWeek-button');
+                $button.addClass('hidden-sm-down');
+            }
         },
 
         watch: {
             events: {
                 deep: true,
                 handler(val) {
-                    $(this.$el).fullCalendar('removeEventSources')
-                    $(this.$el).fullCalendar('addEventSource', this.events)
+                    this.$emit('reload-events');
                 },
             },
             eventSources: {
@@ -202,6 +247,9 @@
                     this.$emit('rebuild-sources')
                 },
             },
+            resources() {
+                $(this.$el).fullCalendar('refetchResources');
+            }
         },
 
         beforeDestroy() {
@@ -214,3 +262,15 @@
         },
     }
 </script>
+
+<style src="fullcalendar/dist/fullcalendar.css"></style>
+<style src="fullcalendar-scheduler/dist/scheduler.css"></style>
+<style>
+    .fc-now-indicator {
+        border-color: blue;
+    }
+    .fc-now-indicator-line {
+        border-style: dotted;
+        border-left-width: 2px !important;
+    }
+</style>

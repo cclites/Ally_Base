@@ -6,52 +6,28 @@
             </b-col>
         </b-row>
         <b-row class="mb-3">
-            <b-col lg="2">
-                <b-form-input
-                        type="text"
-                        id="from-date"
-                        class="datepicker"
-                        v-model="searchForm.from_date"
-                        placeholder="From"
-                        @change="filter"
-                >
-                </b-form-input>
+            <b-col lg="3">
+                From: <date-picker v-model="searchForm.from_date" placeholder="From" />
             </b-col>
 
-            <b-col lg="2">
-                <b-form-input
-                        type="text"
-                        id="to-date"
-                        class="datepicker"
-                        v-model="searchForm.to_date"
-                        placeholder="To"
-                >
-                </b-form-input>
+            <b-col lg="3">
+                To: <date-picker v-model="searchForm.to_date" placeholder="To" />
             </b-col>
 
-            <b-col lg="2" class="text-right">
-                <b-form-select v-model="searchForm.position" class="mb-3">
-                    <template slot="first">
-                        <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null">-- Position --</option>
-                    </template>
-                    <option :value="position.id" v-for="position in positions" :key="position.id">{{ position.name }}</option>
-                </b-form-select>
-            </b-col>
-
-            <b-col lg="2" class="text-right">
-                <b-form-select v-model="searchForm.status" class="mb-3">
+            <b-col lg="3">
+                Status: <b-form-select v-model="searchForm.status" class="mb-3">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Status --</option>
                     </template>
-                    <option :value="status.id" v-for="status in statuses" :key="status.id">{{ status.name }}</option>
+                    <option v-for="status in statuses" :key="status">{{ status }}</option>
                 </b-form-select>
             </b-col>
 
             <b-col lg="2">
+                Filter:<br />
                 <b-button @click="filter" variant="info">
-                    Filter
+                    Update
                 </b-button>
             </b-col>
         </b-row>
@@ -77,16 +53,10 @@
                     <template slot="city" scope="data">
                         {{ data.item.city }} {{ data.item.zip }}
                     </template>
-                    <template slot="position" scope="data">
-                        <span v-if="data.item.position">{{ data.item.position.name }}</span>
-                    </template>
-                    <template slot="status" scope="data">
-                        <span v-if="data.item.status">{{ data.item.status.name }}</span>
-                    </template>
                     <template slot="action" scope="data">
                         <a :href="'/business/caregivers/applications/' + data.item.id" class="btn btn-secondary"><i class="fa fa-eye"></i></a>
                         <a :href="'/business/caregivers/applications/' + data.item.id + '/edit'" class="btn btn-secondary"><i class="fa fa-edit"></i></a>
-                        <a :href="'/business/caregivers/create?app_id=' + data.item.id" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</a>
+                        <button @click="convertApplication(data.item.id)" class="btn btn-info"><i class="fa fa-plus mr-1"></i>Convert</button>
                     </template>
                 </b-table>
             </div>
@@ -111,15 +81,15 @@
         props: {
             'business': Object,
             'applications': Array,
-            'positions': Array,
-            'statuses': Array
         },
 
         data() {
             return {
                 items: this.applications,
+                statuses: ['New', 'Open', 'Converted'],
                 searchForm: {
-                    position: null,
+                    from_date: null,
+                    to_date: null,
                     status: null
                 },
                 totalRows: 0,
@@ -152,7 +122,7 @@
                     {
                         key: 'status',
                         label: 'Status',
-                        soratable: true
+                        sortable: true
                     },
                     'action'
                 ]
@@ -161,25 +131,6 @@
 
         mounted() {
             this.totalRows = this.items.length;
-
-            let fromDate = jQuery('#from-date');
-            let toDate = jQuery('#to-date');
-            let component = this;
-            fromDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.from_date = fromDate.val();
-            });
-            toDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.to_date = toDate.val();
-            });
-
         },
 
         computed: {
@@ -208,6 +159,13 @@
                         this.loading = false;
                         console.error(error.response);
                     });
+            },
+            convertApplication(id) {
+                if (confirm('Are you sure you wish to convert this application into an active caregiver?')) {
+                    let url = `/business/caregivers/applications/${id}/convert`;
+                    let form = new Form({});
+                    form.post(url);
+                }
             }
         }
     }
