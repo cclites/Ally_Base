@@ -14,42 +14,50 @@
             </b-col>
         </b-row>
         <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="client-cg-table">
                 <thead>
-                <tr class="top-row">
-                    <th rowspan="2">Referred Caregiver</th>
-                    <th colspan="4" class="text-center hourly">Hourly</th>
-                    <!-- <th colspan="4" class="text-center daily">Daily</th> -->
-                    <th rowspan="2"></th>
-                </tr>
                 <tr>
-                    <th class="hourly">Caregiver Rate</th>
-                    <th class="hourly">Provider Fee</th>
-                    <th class="hourly">Ally Fee</th>
-                    <th class="hourly">Total</th>
-                    <!-- <th class="daily">Caregiver Rate</th> -->
-                    <!-- <th class="daily">Provider Fee</th> -->
-                    <!-- <th class="daily">Ally Fee</th> -->
+                    <th>Referred Caregiver</th>
+                    <th :class="getTdClass(1)">Rate Type</th>
+                    <th :class="getTdClass(1)">Caregiver Rate</th>
+                    <th :class="getTdClass(1)">Provider Fee</th>
+                    <th :class="getTdClass(1)">Ally Fee</th>
+                    <th :class="getTdClass(1)">Total</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in items" :key="item.id">
-                    <td>{{ item.firstname }} {{ item.lastname }}</td>
-                    <td class="hourly">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
-                    <td class="hourly">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
-                    <td class="hourly">{{ moneyFormat(item.pivot.ally_hourly_fee) }}</td>
-                    <td class="hourly">{{ moneyFormat(item.pivot.total_hourly_fee) }}</td>
-                    <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
-                    <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
-                    <!--<td class="hourly">{{ item.pivot.ally_daily_fee }}</td>-->
-                    <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
-                    <td>
-                        <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
-                        <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
-                            <!--<i class="fa fa-times"></i>-->
-                        <!--</b-btn>-->
-                    </td>
-                </tr>
+                <template v-for="(item,index) in items">
+                    <tr>
+                        <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
+                        <td :class="getTdClass(index)">Hourly</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.ally_hourly_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.total_hourly_fee) }}</td>
+                        <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
+                        <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
+                        <!--<td :class=getTdClass(index)>{{ item.pivot.ally_daily_fee }}</td>-->
+                        <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
+                        <td rowspan="2">
+                            <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
+                            <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
+                                <!--<i class="fa fa-times"></i>-->
+                            <!--</b-btn>-->
+                        </td>
+                    </tr>
+                    <tr v-if="item.pivot.total_daily_fee > 0">
+                        <td :class="getTdClass(index)">Daily</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.caregiver_daily_rate) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.provider_daily_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.ally_daily_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.total_daily_fee) }}</td>
+                    </tr>
+                    <tr v-else>
+                        <td :class="getTdClass(index)">Daily</td>
+                        <td colspan="4" :class="getTdClass(index)"></td>
+                    </tr>
+                </template>
                 </tbody>
             </table>
             <hr>
@@ -128,61 +136,119 @@
                         <hr />
                     </b-col>
                     <b-col lg="12">
-                        <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">
-                            <b-form-input
-                                id="caregiver_hourly_rate"
-                                name="caregiver_hourly_rate"
-                                type="number"
-                                v-model="form.caregiver_hourly_rate"
-                                min="0"
-                                @change="updateRatesFromCaregiverHourly"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>
-                        </b-form-group>
 
-                        <b-form-group label="Registry Hourly Fee" label-for="provider_hourly_fee">
-                            <b-form-input
-                                id="provider_hourly_fee"
-                                name="provider_hourly_fee"
-                                type="number"
-                                v-model="form.provider_hourly_fee"
-                                min="0"
-                                @change="updateRatesFromCaregiverHourly"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="provider_hourly_fee" text="Enter the registry hourly fee."></input-help>
-                        </b-form-group>
+                        <b-tabs>
+                            <b-tab title="Hourly Rates" active>
+                                <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">
+                                    <b-form-input
+                                            id="caregiver_hourly_rate"
+                                            name="caregiver_hourly_rate"
+                                            type="number"
+                                            v-model="form.caregiver_hourly_rate"
+                                            min="0"
+                                            @change="updateRatesFromCaregiverHourly"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>
+                                </b-form-group>
 
-                        <b-form-group label="Ally Hourly Fee" label-for="ally_hourly_fee">
-                            <b-form-input
-                                    id="ally_hourly_fee"
-                                    name="ally_hourly_fee"
-                                    type="number"
-                                    :value="ally_hourly_fee"
-                                    min="0"
-                                    disabled
-                            >
-                            </b-form-input>
-                        </b-form-group>
+                                <b-form-group label="Registry Hourly Fee" label-for="provider_hourly_fee">
+                                    <b-form-input
+                                            id="provider_hourly_fee"
+                                            name="provider_hourly_fee"
+                                            type="number"
+                                            v-model="form.provider_hourly_fee"
+                                            min="0"
+                                            @change="updateRatesFromCaregiverHourly"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="provider_hourly_fee" text="Enter the registry hourly fee."></input-help>
+                                </b-form-group>
 
-                        <b-form-group label="Total Hourly Rate" label-for="total_hourly_rate">
-                            <b-form-input
-                                id="total_hourly_rate"
-                                name="total_hourly_rate"
-                                type="number"
-                                v-model="total_hourly_rate"
-                                min="0"
-                                @change="updateRatesFromTotalHourly"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>
-                        </b-form-group>
+                                <b-form-group label="Ally Hourly Fee" label-for="ally_hourly_fee">
+                                    <b-form-input
+                                            id="ally_hourly_fee"
+                                            name="ally_hourly_fee"
+                                            type="number"
+                                            :value="ally_hourly_fee"
+                                            min="0"
+                                            disabled
+                                    >
+                                    </b-form-input>
+                                </b-form-group>
+
+                                <b-form-group label="Total Hourly Rate" label-for="total_hourly_rate">
+                                    <b-form-input
+                                            id="total_hourly_rate"
+                                            name="total_hourly_rate"
+                                            type="number"
+                                            v-model="total_hourly_rate"
+                                            min="0"
+                                            @change="updateRatesFromTotalHourly"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>
+                                </b-form-group>
+                            </b-tab>
+                            <b-tab title="Daily Rates (Live-in)" >
+                                <b-form-group label="Caregiver Daily Rate" label-for="caregiver_hourly_rate">
+                                    <b-form-input
+                                            id="caregiver_daily_rate"
+                                            name="caregiver_daily_rate"
+                                            type="number"
+                                            v-model="form.caregiver_daily_rate"
+                                            min="0"
+                                            @change="updateRatesFromCaregiverDaily"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="caregiver_daily_rate" text="Enter the daily earnings for this caregiver."></input-help>
+                                </b-form-group>
+
+                                <b-form-group label="Registry Daily Fee" label-for="provider_daily_fee">
+                                    <b-form-input
+                                            id="provider_daily_fee"
+                                            name="provider_daily_fee"
+                                            type="number"
+                                            v-model="form.provider_daily_fee"
+                                            min="0"
+                                            @change="updateRatesFromCaregiverDaily"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="provider_daily_fee" text="Enter the registry daily fee."></input-help>
+                                </b-form-group>
+
+                                <b-form-group label="Ally Daily Fee" label-for="ally_daily_fee">
+                                    <b-form-input
+                                            id="ally_daily_fee"
+                                            name="ally_daily_fee"
+                                            type="number"
+                                            :value="ally_daily_fee"
+                                            min="0"
+                                            disabled
+                                    >
+                                    </b-form-input>
+                                </b-form-group>
+
+                                <b-form-group label="Total Daily Rate" label-for="total_daily_rate">
+                                    <b-form-input
+                                            id="total_daily_rate"
+                                            name="total_daily_rate"
+                                            type="number"
+                                            v-model="total_daily_rate"
+                                            min="0"
+                                            @change="updateRatesFromTotalDaily"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="total_daily_rate" text="The total daily rate charged to the client."></input-help>
+                                </b-form-group>
+                            </b-tab>
+                        </b-tabs>
 
                     </b-col>
                </b-row>
                 <b-row v-if="this.selectedCaregiver.id">
                     <b-col>
+                        <hr />
                         <b-form-group>
                             <b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">
                                 Remove from Client
@@ -230,6 +296,8 @@
                 excludedCaregivers: [],
                 ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
+                ally_daily_fee: 0.00,
+                total_daily_rate: 0.00,
             }
         },
 
@@ -255,11 +323,13 @@
                 this.form = new Form({
                     caregiver_id: null,
                     caregiver_hourly_rate: 0.00,
-                    // caregiver_daily_rate: null,
+                    caregiver_daily_rate: 0.00,
                     provider_hourly_fee: 0.00,
-                    // provider_daily_fee: null,
+                    provider_daily_fee: 0.00,
                 });
                 this.clientCaregiverModal = true;
+                this.updateRatesFromCaregiverHourly();
+                this.updateRatesFromCaregiverDaily();
             },
 
             editCaregiver(item) {
@@ -272,6 +342,8 @@
                     provider_daily_fee: item.pivot.provider_daily_fee,
                 });
                 this.clientCaregiverModal = true;
+                this.updateRatesFromCaregiverHourly();
+                this.updateRatesFromCaregiverDaily();
             },
 
             confirmUpdateSchedule(item) {
@@ -367,7 +439,7 @@
                     });
             },
 
-            updateAllyFee() {
+            updateAllyHourlyFee() {
                 let cgRate = parseFloat(this.form.caregiver_hourly_rate);
                 let provFee = parseFloat(this.form.provider_hourly_fee);
                 if (isNaN(cgRate) || isNaN(provFee)) {
@@ -379,7 +451,7 @@
             },
 
             updateRatesFromCaregiverHourly() {
-                this.updateAllyFee();
+                this.updateAllyHourlyFee();
                 let cgRate = parseFloat(this.form.caregiver_hourly_rate);
                 let provFee = parseFloat(this.form.provider_hourly_fee);
                 let allyFee = parseFloat(this.ally_hourly_fee);
@@ -401,7 +473,44 @@
                 let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
                 this.form.provider_hourly_fee = computed.toFixed(2);
                 this.highlightInput('#provider_hourly_fee');
-                this.updateAllyFee();
+                this.updateAllyHourlyFee();
+            },
+
+            updateAllyDailyFee() {
+                let cgRate = parseFloat(this.form.caregiver_daily_rate);
+                let provFee = parseFloat(this.form.provider_daily_fee);
+                if (isNaN(cgRate) || isNaN(provFee)) {
+                    this.ally_daily_fee = 0;
+                    return;
+                }
+                let computed = (cgRate + provFee) * this.allyRate;
+                this.ally_daily_fee = computed.toFixed(2);
+            },
+
+            updateRatesFromCaregiverDaily() {
+                this.updateAllyDailyFee();
+                let cgRate = parseFloat(this.form.caregiver_daily_rate);
+                let provFee = parseFloat(this.form.provider_daily_fee);
+                let allyFee = parseFloat(this.ally_daily_fee);
+                if (isNaN(cgRate) || isNaN(provFee)) {
+                    return;
+                }
+                let computed = cgRate + provFee + allyFee;
+                this.total_daily_rate = computed.toFixed(2);
+                this.highlightInput('#total_daily_rate');
+            },
+
+            updateRatesFromTotalDaily() {
+                let cgRate = parseFloat(this.form.caregiver_daily_rate);
+                let totalRate = parseFloat(this.total_daily_rate);
+                if (isNaN(cgRate) || isNaN(totalRate)) {
+                    return;
+                }
+                console.log(totalRate, 1+parseFloat(this.allyRate), cgRate);
+                let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
+                this.form.provider_daily_fee = computed.toFixed(2);
+                this.highlightInput('#provider_daily_fee');
+                this.updateAllyDailyFee();
             },
 
             highlightInput(selector) {
@@ -409,6 +518,10 @@
                 setInterval(function() {
                     $(selector).removeClass('highlight-input');
                 }, 300);
+            },
+
+            getTdClass(index) {
+                return index % 2 === 0 ? 'darker' : 'lighter';
             }
         },
 
@@ -416,17 +529,16 @@
 </script>
 
 <style>
-    th.hourly, td.hourly {
+    th.darker, td.darker {
         background-color: #eee;
+        text-align: center;
     }
-    th.daily, td.daily {
+    th.lighter, td.lighter {
         background-color: #f5f5f5;
+        text-align: center;
     }
     thead th {
         padding: .4rem .75rem !important;
-    }
-    tr td.hourly, tr th.hourly {
-        text-align: center;
     }
     .highlight-input {
         border: 1px solid blue;

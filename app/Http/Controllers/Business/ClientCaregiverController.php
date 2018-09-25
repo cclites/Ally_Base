@@ -23,9 +23,9 @@ class ClientCaregiverController extends BaseController
 
         $data = $request->validate([
             'caregiver_hourly_rate' => 'required|numeric',
-            // 'caregiver_daily_rate' => 'nullable|numeric',
+            'caregiver_daily_rate' => 'nullable|numeric',
             'provider_hourly_fee' => 'required|numeric',
-            // 'provider_daily_fee' => 'nullable|numeric',
+            'provider_daily_fee' => 'nullable|numeric',
         ]);
 
         // Force rates/fees to floats
