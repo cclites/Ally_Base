@@ -46,11 +46,12 @@ class ClientExcludedCaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
 
-        $data = $request->validate(['caregiver_id' => 'required|int']);
+        $data = $request->validate(['caregiver_id' => 'required|int', 'note' => 'string']);
 
         $caregiver = ClientExcludedCaregiver::create([
             'client_id' => $client,
-            'caregiver_id' => $data['caregiver_id']
+            'caregiver_id' => $data['caregiver_id'],
+            'note' => $data['note']
         ]);
 
         if ($caregiver) {

@@ -62,9 +62,22 @@
             </table>
             <hr>
             <div class="h6">Excluded Caregivers</div>
-            <b-form-field v-for="exGiver in excludedCaregivers" :key="exGiver.id">
-                <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
-            </b-form-field>
+            <table class="excluded-caregivers" v-if="excludedCaregivers.length">
+                <tr v-for="exGiver in excludedCaregivers">
+                    <td class="sized">
+                        <b-form-field  :key="exGiver.id">
+                            <b-btn class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
+                        </b-form-field>
+                    </td>
+                    <td>{{ exGiver.note }}</td>
+                    <td class="sized">
+                        <b-form-field :key="exGiver.id" class="text-right" v-if="loading != exGiver.id">
+                            <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1" :variant="'primary'">Remove From Excluded List</b-btn>
+                        </b-form-field>
+                        <div class="c-loader" v-if="loading == exGiver.id"></div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <b-modal id="clientCargiverSchedule"
@@ -102,6 +115,13 @@
                             >
                                 <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Note" label-for="note">
+                            <b-form-textarea id="textarea1"
+                                v-model="excludeNote"
+                                :rows="3"
+                                :max-rows="6">
+                            </b-form-textarea>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -294,10 +314,10 @@
                 form: new Form(),
                 excludeForm: {},
                 excludedCaregivers: [],
+                excludeNote: '',
                 ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
-                ally_daily_fee: 0.00,
-                total_daily_rate: 0.00,
+                loading: '',
             }
         },
 
@@ -408,21 +428,27 @@
 
             excludeCaregiver() {
                 console.log('Excluding ' + this.excludeForm.caregiver_id);
+                this.excludeForm.note = this.excludeNote;
+
                 axios.post('/business/clients/'+this.client_id+'/exclude-caregiver', this.excludeForm)
                     .then(response => {
                         this.fetchExcludedCaregivers();
                         this.fetchCaregivers();
+                        this.excludeNote = '';
                     }).catch(error => {
                         console.error(error.response);
                     });
             },
 
             removeExcludedCaregiver(id) {
+                this.loading = id;
                 axios.delete('/business/clients/excluded-caregiver/'+id)
                     .then(response => {
+                        this.loading = '';
                         this.fetchExcludedCaregivers();
                         this.fetchCaregivers();
                     }).catch(error => {
+                    this.loading = '';
                         console.error(error.response);
                     });
             },
@@ -528,7 +554,7 @@
     }
 </script>
 
-<style>
+<style lang="scss">
     th.darker, td.darker {
         background-color: #eee;
         text-align: center;
@@ -543,5 +569,27 @@
     .highlight-input {
         border: 1px solid blue;
         outline: 2px solid #ddd;
+    }
+
+    .excluded-caregivers {
+        border: 0;
+        width: 100%;
+
+        td {
+            vertical-align: top;
+
+            &.sized {
+                min-width: 80px;
+                max-width: 240px;
+                width: 150px;
+            }
+        }
+    }
+
+    .c-loader {
+        width: 30px;
+        height: 30px;
+        border-width: 5px !important;
+        margin: 0 auto;
     }
 </style>
