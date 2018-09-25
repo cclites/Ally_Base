@@ -34,6 +34,14 @@
     <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
 <li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-usd"></i><span class="hide-menu">Accounting</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.accounting.apply-payment.index') }}">Apply Payment</a></li>
+        <li><a href="#">Receivables</a></li>
+        <li><a href="#">Export to Quickbooks</a></li>
+    </ul>
+</li>
+<li>
     <a href="{{ route('business.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
     {{--<a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>--}}
     {{--<ul aria-expanded="false" class="collapse">--}}

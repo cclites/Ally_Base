@@ -243,6 +243,8 @@ Vue.component('quickbooks-rate-mapping', require('./components/business/quickboo
 Vue.component('quickbooks-client-mapping', require('./components/business/quickbooks/tabs/ClientMapping'));
 Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
 
+Vue.component('business-apply-payment', require('./components/business/accounting/ApplyPayment'));
+
 /* Quickbooks API */
 Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
