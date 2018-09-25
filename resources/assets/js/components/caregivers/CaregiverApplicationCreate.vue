@@ -278,7 +278,7 @@
             <!-- Crimal History -->
             <b-row>
                 <b-col>
-                    <div class="h5">Crimnal History</div>
+                    <div class="h5">Criminal History</div>
                     <em>{{ business.name }} will be reviewing your criminal history. Untruthfulness will cause your application to be immediately rejected.</em>
                 </b-col>
             </b-row>
