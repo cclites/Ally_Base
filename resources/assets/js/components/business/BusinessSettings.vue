@@ -318,6 +318,9 @@
                     </b-col>
                 </b-row>
             </b-tab>
+            <b-tab title="Payroll Policy" v-if="business.type == 'Agency'">
+                <payroll-policy :business="business"></payroll-policy>
+            </b-tab>
         </b-tabs>
     </b-card>
 </template>

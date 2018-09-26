@@ -105,6 +105,7 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
