@@ -62,19 +62,15 @@
             </table>
             <hr>
             <div class="h6">Excluded Caregivers</div>
-            <table class="excluded-caregivers" v-if="excludedCaregivers.length">
+            <table class="table table-bordered excluded-caregivers" v-if="excludedCaregivers.length">
                 <tr v-for="exGiver in excludedCaregivers">
                     <td class="sized">
-                        <b-form-field  :key="exGiver.id">
-                            <b-btn class="sized">{{ exGiver.caregiver.name }}</b-btn>
-                        </b-form-field>
+                        {{ exGiver.caregiver.name }}
                     </td>
-                    <td>{{ exGiver.note }}</td>
-                    <td class="sized">
-                        <b-form-field :key="exGiver.id" class="text-right" v-if="loading != exGiver.id">
-                            <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1" :variant="'primary'">Remove From Excluded List</b-btn>
-                        </b-form-field>
-                        <div class="c-loader" v-if="loading == exGiver.id"></div>
+                    <td class="sized">{{ exGiver.note }}</td>
+                    <td class="sized" style="white-space: nowrap">
+                        <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1" :variant="'primary'" v-if="loading !== exGiver.id">Remove From Excluded List</b-btn>
+                        <div class="c-loader" v-if="loading === exGiver.id"></div>
                     </td>
                 </tr>
             </table>
@@ -113,12 +109,13 @@
                                     name="exclude_caregiver_id"
                                     v-model="excludeForm.caregiver_id"
                             >
+                                <option value="">--Select a Caregiver--</option>
                                 <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Note" label-for="note">
                             <b-form-textarea id="textarea1"
-                                v-model="excludeNote"
+                                v-model="excludeForm.note"
                                 :rows="3"
                                 :max-rows="6">
                             </b-form-textarea>
@@ -126,6 +123,10 @@
                     </b-col>
                 </b-row>
             </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="clientExcludeCaregiverModal=false">Close</b-btn>
+                <b-btn variant="info" @click="excludeCaregiver()" v-if="excludeForm.caregiver_id">Exclude</b-btn>
+            </div>
         </b-modal>
 
         <b-modal id="clientCaregiverModal" :title="modalTitle" v-model="clientCaregiverModal" ref="clientCaregiverModal">
@@ -312,9 +313,8 @@
                 clientCargiverScheduleModal: false,
                 selectedCaregiver: {},
                 form: new Form(),
-                excludeForm: {},
+                excludeForm: this.makeExcludeForm(),
                 excludedCaregivers: [],
-                excludeNote: '',
                 ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
                 loading: '',
@@ -426,27 +426,19 @@
                     });
             },
 
-            excludeCaregiver() {
-                console.log('Excluding ' + this.excludeForm.caregiver_id);
-                this.excludeForm.note = this.excludeNote;
+            makeExcludeForm() {
+                return new Form({
+                    caregiver_id: "",
+                    note: "",
+                });
+            },
 
-                axios.post('/business/clients/'+this.client_id+'/exclude-caregiver', this.excludeForm)
-                    .then(response => {
-                        this.fetchExcludedCaregivers();
-                        this.fetchCaregivers();
-                        this.excludeNote = '';
-                    }).catch(error => {
-                        if(error.response.data && error.response.data.errors) {
-                            let errors = error.response.data.errors;
-                            for(let i in errors) {
-                                if(i == 'caregiver_id') {
-                                    alerts.addMessage('error', errors[i][0].replace('caregiver id', 'caregiver'));
-                                } else {
-                                    alerts.addMessage('error', errors[i][0]);
-                                }
-                            }
-                        }
-                    });
+            async excludeCaregiver() {
+                const response = await this.excludeForm.post('/business/clients/'+this.client_id+'/exclude-caregiver');
+                this.fetchExcludedCaregivers();
+                this.fetchCaregivers();
+                this.excludeForm = this.makeExcludeForm();
+                this.clientExcludeCaregiverModal = false;
             },
 
             removeExcludedCaregiver(id) {
