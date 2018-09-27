@@ -66,7 +66,7 @@
                 <tr v-for="exGiver in excludedCaregivers">
                     <td class="sized">
                         <b-form-field  :key="exGiver.id">
-                            <b-btn class="mx-1">{{ exGiver.caregiver.name }}</b-btn>
+                            <b-btn class="sized">{{ exGiver.caregiver.name }}</b-btn>
                         </b-form-field>
                     </td>
                     <td>{{ exGiver.note }}</td>
@@ -107,7 +107,7 @@
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
-                        <b-form-group label="Caregiver" label-for="exclude_caregiver_id">
+                        <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
                             <b-form-select
                                     id="exclude_caregiver_id"
                                     name="exclude_caregiver_id"
@@ -378,7 +378,7 @@
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
                     .then((response) => {
-                        this.fetchCaregivers()
+                        this.fetchCaregivers();
                         component.items = component.items.filter(caregiver => {
                             return caregiver.id != response.data.data.id;
                         });
@@ -436,7 +436,16 @@
                         this.fetchCaregivers();
                         this.excludeNote = '';
                     }).catch(error => {
-                        console.error(error.response);
+                        if(error.response.data && error.response.data.errors) {
+                            let errors = error.response.data.errors;
+                            for(let i in errors) {
+                                if(i == 'caregiver_id') {
+                                    alerts.addMessage('error', errors[i][0].replace('caregiver id', 'caregiver'));
+                                } else {
+                                    alerts.addMessage('error', errors[i][0]);
+                                }
+                            }
+                        }
                     });
             },
 
@@ -582,6 +591,12 @@
                 min-width: 80px;
                 max-width: 240px;
                 width: 150px;
+            }
+
+            button.sized {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                max-width: 85%;
             }
         }
     }
