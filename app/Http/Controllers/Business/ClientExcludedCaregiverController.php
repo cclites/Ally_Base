@@ -50,7 +50,8 @@ class ClientExcludedCaregiverController extends BaseController
 
         $caregiver = ClientExcludedCaregiver::create([
             'client_id' => $client,
-            'caregiver_id' => $data['caregiver_id']
+            'caregiver_id' => $data['caregiver_id'],
+            'note' => $request->input('note', null)
         ]);
 
         if ($caregiver) {
