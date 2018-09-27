@@ -34,8 +34,10 @@ class ReportsController extends BaseController
 
     public function index()
     {
-        $role = json_encode(['role_type' => Auth::user()->role_type]);
-        return view('business.reports.index', ['role' => $role]);
+        $data['type'] = $this->business()->type;
+        $data['role'] = ['role_type' => Auth::user()->role_type];
+
+        return view('business.reports.index', ['data' => json_encode($data)]);
     }
 
     public function medicaidReport(Request $request)
