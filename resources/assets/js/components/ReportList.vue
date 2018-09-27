@@ -36,7 +36,10 @@
 <script>
 export default {
     props: {
-        role: Object
+        data: {
+            type: '',
+            role: Object
+        }
     },
 
     data() {
@@ -68,7 +71,7 @@ export default {
 
     computed: {
         items() {
-            if(this.role['role_type'] == 'admin') {
+            if(this.data.role['role_type'] == 'admin') {
                 return [
                     { name: 'Unsettled Report', url: 'reports/unsettled', description: '' },
                     { name: 'Reconciliation Report', url: 'reports/reconciliation', description: 'See detailed breakdown of each transaction with your bank' },
@@ -87,8 +90,8 @@ export default {
                     { name: 'Emails Report', url: 'reports/emails', description: '' },
                     { name: 'Audit Log', url: 'audit-log', description: '' },
                 ];
-            } else if(this.role['role_type'] == 'office_user') {
-                return [
+            } else if(this.data.role['role_type'] == 'office_user') {
+                let data = [
                     { name: 'EVV Report', url: 'reports/evv', description: 'Details on each attempted clock in and clock out' },
                     { name: 'Reconciliation Report', url: 'reports/reconciliation', description: 'See detailed breakdown of each transaction with your bank' },
                     // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
@@ -120,6 +123,12 @@ export default {
                     // { name: 'Client Online Setup', url: 'reports/clients-onboarded', description: '' },
                     // { name: 'Caregiver Online Setup', url: 'reports/caregivers-onboarded', description: '' },
                 ];
+
+                if(this.data.type == 'Agency') {
+                    data.push({ name: 'ADP and Paychex', url: 'javascript:;', description: '' });
+                }
+
+                return data;
             } else {
                 return [];
             }
