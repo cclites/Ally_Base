@@ -32,7 +32,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         TaskAssigned::class => [
-            SendAssignedTaskEmail::class,
+//            SendAssignedTaskEmail::class,
         ],
         UnverifiedShiftLocation::class   => [
             UnverifiedLocationException::class,
