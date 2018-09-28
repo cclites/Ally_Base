@@ -36,10 +36,10 @@ class CreateCarematchTables extends Migration
             $table->boolean('afternoon')->default(1);
             $table->boolean('evening')->default(1);
             $table->boolean('night')->default(1);
-            $table->boolean('live_in')->default(0);
+            $table->boolean('live_in')->default(1);
             $table->unsignedInteger('minimum_shift_hours')->default(0);
-            $table->unsignedInteger('maximum_shift_hours')->default(24);
-            $table->unsignedInteger('maximum_miles')->default(20);
+            $table->unsignedInteger('maximum_shift_hours')->default(100);
+            $table->unsignedInteger('maximum_miles')->default(100);
 
             $table->foreign('id')->references('id')->on('caregivers')->onDelete('cascade');
         });
@@ -53,6 +53,12 @@ class CreateCarematchTables extends Migration
             $table->foreign('caregiver_id')->references('id')->on('caregivers')->onDelete('cascade');
             $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
         });
+
+        if (app()->environment() !== 'testing') {
+            \App\Caregiver::all()->each(function (\App\Caregiver $caregiver) {
+                $caregiver->setAvailability([]); // create default availability for all existing cg's
+            });
+        }
     }
 
     /**
@@ -63,5 +69,7 @@ class CreateCarematchTables extends Migration
     public function down()
     {
         Schema::dropIfExists('client_preferences');
+        Schema::dropIfExists('caregiver_availability');
+        Schema::dropIfExists('caregiver_skills');
     }
 }

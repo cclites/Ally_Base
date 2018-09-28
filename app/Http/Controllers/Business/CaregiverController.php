@@ -103,6 +103,7 @@ class CaregiverController extends BaseController
             $caregiver->setAutoEmail();
         }
         if ($this->business()->caregivers()->save($caregiver)) {
+            $caregiver->setAvailability([]); // sets default availability
             return new CreatedResponse('The caregiver has been created.', ['id' => $caregiver->id, 'url' => route('business.caregivers.show', [$caregiver->id])]);
         }
 
