@@ -141,7 +141,8 @@
                 </div>
                 <div class="ml-auto" v-if="hoverShift.client_address">
                     <a v-if="! hoverShift.caregiver_name" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
-                    <a :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
+                    <a v-if="! hoverShift.caregiver_address" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
+                    <a v-else :href="`https://www.google.com/maps/dir/${encodeURI(hoverShift.caregiver_address)}/${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                 </div>
             </div>
             <div>
