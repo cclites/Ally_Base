@@ -2,8 +2,8 @@
     <div>
         <form v-show="showForm" @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
-                <b-col>
-                    <b-form-group label="Client" label-for="client_id" required>
+                <b-col lg="6">
+                    <b-form-group label="Select a Client" label-for="client_id" required>
                         <b-form-select
                                 id="client_id"
                                 name="client_id"
@@ -13,49 +13,71 @@
                             <option value="">--Select a Client--</option>
                             <option v-for="item in localClients" :value="item.id" :key="item.id">{{ item.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="client_id" text="Select the client for this schedule." />
+                        <input-help :form="form" field="client_id" text="" />
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="6">
+                    <h5>Find caregivers who...</h5>
+
+                    <legend class="col-form-legend pt-0">Are available on (matches availability and existing schedules)</legend>
                     <b-form-group label="Start Date" label-for="startDate">
                         <date-picker v-model="startDate" />
                         <input-help :form="form" field="starts_at" text="" />
                     </b-form-group>
-                    <b-form-group label="Start Time" label-for="startTime">
-                        <time-picker
-                                id="startTime"
-                                name="startTime"
-                                v-model="startTime"
-                        />
-                        <input-help :form="form" field="starts_at" text="" />
-                    </b-form-group>
-                    <b-form-group label="End Time" label-for="endTime">
-                        <time-picker
-                                id="endTime"
-                                name="endTime"
-                                v-model="endTime"
-                        />
-                        <input-help :form="form" field="duration" text="" />
+                    <b-row>
+                        <b-col lg="6">
+                            <b-form-group label="Start Time" label-for="startTime">
+                                <time-picker
+                                        id="startTime"
+                                        name="startTime"
+                                        v-model="startTime"
+                                />
+                                <input-help :form="form" field="starts_at" text="" />
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="End Time" label-for="endTime">
+                                <time-picker
+                                        id="endTime"
+                                        name="endTime"
+                                        v-model="endTime"
+                                />
+                                <input-help :form="form" field="duration" text="" />
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-form-group label="Are also available on the following days of the week:">
+                        <label class="custom-control custom-checkbox" v-for="day in daysOfWeek" :key="day">
+                            <input type="checkbox" class="custom-control-input" v-model="days" :value="day">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">{{ day | capitalize }}</span>
+                        </label>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <h5>Criteria</h5>
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="activities" :value="1">
+                            <input type="checkbox" class="custom-control-input" v-model="activities" :true-value="1" :false-value="null">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver's skills match the client's ADL requirements</span>
+                            <span class="custom-control-description">Caregiver's skills match ALL of the client's ADL requirements (care plans)</span>
                         </label>
                     </div>
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="preferences" :value="1">
+                            <input type="checkbox" class="custom-control-input" v-model="activities" :true-value=".01" :false-value="null">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver matches the client's preferences</span>
+                            <span class="custom-control-description">Caregiver's skills matches at least 1 of the client's ADL requirements</span>
                         </label>
                     </div>
+                    <!--<div class="form-check">-->
+                        <!--<label class="custom-control custom-checkbox">-->
+                            <!--<input type="checkbox" class="custom-control-input" v-model="preferences" :value="1">-->
+                            <!--<span class="custom-control-indicator"></span>-->
+                            <!--<span class="custom-control-description">Caregiver matches the client's preferences</span>-->
+                        <!--</label>-->
+                    <!--</div>-->
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="excludesOvertime" :value="1">
@@ -77,6 +99,47 @@
                             <span class="custom-control-description">Located within a <input type="number" step="1" v-model="radius" :disabled="!radiusEnabled" class="form-control-sm col-2"/> mile radius of service address</span>
                         </label>
                     </div>
+                    <b-row>
+                        <b-col lg="4">
+                            <b-form-group label="Caregiver Gender" label-for="gender">
+                                <b-form-select id="gender"
+                                               v-model="gender"
+                                >
+                                    <option value="">No Preference</option>
+                                    <option value="client">Match Client Preference</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                </b-form-select>
+                                <input-help :form="form" field="matches_gender" text="" />
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="4">
+                            <b-form-group label="Caregiver License" label-for="license">
+                                <b-form-select id="license"
+                                               v-model="license"
+                                >
+                                    <option value="">No Preference</option>
+                                    <option value="client">Match Client Preference</option>
+                                    <option value="CNA">CNA</option>
+                                    <option value="HHA">HHA</option>
+                                </b-form-select>
+                                <input-help :form="form" field="matches_license" text="" />
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="4">
+                            <b-form-group label="Spoken Language" label-for="language">
+                                <b-form-select id="language"
+                                               v-model="language"
+                                >
+                                    <option value="">No Preference</option>
+                                    <option value="client">Match Client Preference</option>
+                                    <option v-for="lang in languages.getOptions()" :value="lang.value">{{ lang.text }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="matches_language" text="" />
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+
                     <!--<div class="form-check">-->
                         <!--<label class="custom-control custom-checkbox">-->
                             <!--<input type="checkbox" class="custom-control-input" v-model="ratingEnabled">-->
@@ -125,6 +188,7 @@
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import Languages from "../../classes/Languages";
 
     export default {
         mixins: [FormatsNumbers],
@@ -142,8 +206,8 @@
                 showForm: true,
                 form: new Form({}),
                 localClients: this.clients || [],
-                clientId: null,
-                activities: false,
+                clientId: "",
+                activities: null,
                 preferences: false,
                 existing: false,
                 excludesOvertime: false,
@@ -154,6 +218,13 @@
                 rating: 3,
                 radiusEnabled: false,
                 ratingEnabled: false,
+                gender: "",
+                license: "",
+                language: "",
+                days: [],
+
+                languages: new Languages(),
+                daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
 
                 matches: [],
                 fields: [
@@ -214,7 +285,11 @@
                     starts_at: this.getStartsAt(),
                     duration: this.getDuration(),
                     matches_activities: this.activities,
-                    matches_preferences: this.preferences,
+                    // matches_preferences: this.preferences,
+                    matches_gender: this.gender,
+                    matches_license: this.license,
+                    matches_language: this.language,
+                    matches_days: this.days,
                     matches_existing_assignments: this.existing,
                     exclude_overtime: this.excludesOvertime,
                     radius: this.radiusEnabled ? this.radius : null,

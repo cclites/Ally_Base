@@ -25,7 +25,7 @@ class CareMatch
     protected $minimumMatch = 0;
 
     /**
-     * @var array
+     * @var array  An array of english days,  ex: monday, tuesday
      */
     protected $preferences = [];
 
@@ -33,6 +33,11 @@ class CareMatch
      * @var Carbon
      */
     protected $startsAt;
+
+    /**
+     * @var array
+     */
+    protected $daysOfWeek = [];
 
     /**
      * @var float[]
@@ -99,6 +104,11 @@ class CareMatch
     function matchesTime(Carbon $starts_at, int $duration) {
         $this->startsAt = $starts_at;
         $this->duration = $duration;
+        return $this;
+    }
+
+    function matchesDaysOfTheWeek(array $days) {
+        $this->daysOfWeek = $days;
         return $this;
     }
 
@@ -180,7 +190,11 @@ class CareMatch
                         $q->where($this->getTimeOfDay($this->startsAt->hour), 1)
                           ->orWhere($this->getTimeOfDay($end->hour), 1);
                     });
-                    $q->where($this->startsAt->format('l'), 1);
+                    // Add start date to daysOfWeek
+                    $this->daysOfWeek = array_merge($this->daysOfWeek, [$this->startsAt->format('l')]);
+                }
+                foreach($this->daysOfWeek as $day) {
+                    $q->where($day , 1);
                 }
                 if ($this->duration) {
                     $hours = $this->duration / 60;
@@ -225,11 +239,11 @@ class CareMatch
     protected function queryPreferences($builder)
     {
         if ($license = array_get($this->preferences, 'license')) {
-            $builder->where('title', $license);
+            $builder->where('title', 'LIKE', '%'.$license.'%');
         }
 
         if ($gender = array_get($this->preferences, 'gender')) {
-            $builder->where('gender', $gender);
+            $this->queryCaregiverUser($builder, 'gender', $gender);
         }
     }
 
@@ -242,6 +256,14 @@ class CareMatch
             $overtimeDuration = 60 * 40 - $this->duration;
             $q->whereBetween('starts_at', [$weekStart, $weekEnd])
                 ->whereRaw('SUM(duration) < ?', [$overtimeDuration]);
+        });
+    }
+
+    protected function queryCaregiverUser($builder, $field, $operator, $value = null)
+    {
+        // This can be optimized later if we need to query the user table on multiple fields
+        $builder->whereHas('user', function($q) use ($field, $operator, $value) {
+            $q->where($field, $operator, $value);
         });
     }
 
