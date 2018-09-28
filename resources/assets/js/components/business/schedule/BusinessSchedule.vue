@@ -363,13 +363,17 @@
             },
 
             getResources() {
-                let items = this.clients;
-                this.resourceIdField = 'client_id';
+                let items;
 
                 if (this.caregiverView) {
                     items = this.caregivers;
                     this.resourceIdField = 'caregiver_id';
                 }
+                else {
+                    items = this.clients;
+                    this.resourceIdField = 'client_id';
+                }
+
 
                 let resources = items.map(item => {
                     let kpis = this.getKpis(this.resourceIdField, item.id);
@@ -393,12 +397,12 @@
                     });
                 }
 
+                if (this.filterCaregiverId > -1 || this.filterClientId > -1) {
+                    return resources.filter(resource => {
+                        return this.events.findIndex(event => event[this.resourceIdField] == resource.id) !== -1;
+                    });
+                }
                 return resources;
-
-                // Filtering freezes browser, debug later
-                return resources.filter(resource => {
-                    return this.events.findIndex(event => event[this.resourceIdField] == resource.id) !== -1;
-                });
             },
 
             getKpis(matchColumn=null, matchValue=null) {
