@@ -114,6 +114,23 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         'updated' => ShiftModified::class,
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+        self::recalculateDurationOnChange();
+    }
+
+    public static function recalculateDurationOnChange()
+    {
+        self::saving(function(Shift $shift) {
+            if ($shift->checked_out_time &&
+                ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
+            ) {
+                $shift->hours = $shift->duration(true);
+            }
+        });
+    }
+
     ///////////////////////////////////////
     /// Shift Statuses
     ///////////////////////////////////////
@@ -295,11 +312,12 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     /**
      * Return the number of hours worked, calculate if not persisted
      *
+     * @param bool $forceRecalculation
      * @return float
      */
-    public function duration()
+    public function duration($forceRecalculation = false)
     {
-        if ($this->hours) {
+        if (!$forceRecalculation && $this->hours) {
             return $this->hours;
         }
 
