@@ -428,6 +428,7 @@
                     };
 
                     calc(event.status);
+                    calc(event.shift_status);
                     if (event.caregiver_id == 0) {
                         calc('OPEN');
                     }
