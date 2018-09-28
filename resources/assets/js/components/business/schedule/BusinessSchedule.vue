@@ -50,24 +50,26 @@
         <b-row>
             <b-col lg="6">
                 <b-row>
-                    <b-col cols="4" class="ml-auto" v-if="caregivers.length">
+                    <b-col class="ml-auto" v-if="!caregiver">
                         <b-form-group>
                             <b-form-select v-model="filterCaregiverId" id="calendar_caregiver_filter">
-                                <option :value="-1">All Caregivers</option>
+                                <option :value="-1" v-if="!client">All Caregivers</option>
+                                <option :value="-1" v-else>All Referred Caregivers</option>
                                 <option :value="0">Open Shifts</option>
                                 <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="4" class="ml-auto" v-if="clients.length">
+                    <b-col class="ml-auto" v-if="!client">
                         <b-form-group>
                             <b-form-select v-model="filterClientId" id="calendar_client_filter">
                                 <option :value="-1">All Clients</option>
+                                <option :value="-2" v-if="caregiver">Clients With Shifts</option>
                                 <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col cols="4">
+                    <b-col>
                         <b-form-select v-model="location" class="mb-1" v-if="business.multi_location_registry == 'yes'">
                             <option value="all">All Locations</option>
                             <option :value="business.name">{{ business.name }}</option>
@@ -208,8 +210,8 @@
                     center: 'title',
                     right:  'timelineDay,timelineWeek,month caregiverView print fullscreen'
                 },
-                clients: [],
-                caregivers: [],
+                clients: [this.client],
+                caregivers: [this.caregiver],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
                 notesModal: false,
@@ -338,6 +340,13 @@
 
             resources() { return this.getResources(); },
 
+            filteredCaregiverResources() {
+                return (this.filterCaregiverId > -1 && !this.caregiver);
+            },
+
+            filteredClientResources() {
+                return (this.filterClientId > -1 && !this.client) || this.filterClientId === -2;
+            }
         },
 
         methods: {
@@ -398,9 +407,10 @@
                     });
                 }
 
-                if (this.filterCaregiverId > -1 || this.filterClientId > -1) {
+                if ( this.filteredClientResources || this.filteredCaregiverResources ) {
+                    let filtered = [this.filterClientId, this.filterCaregiverId];
                     return resources.filter(resource => {
-                        return this.events.findIndex(event => event[this.resourceIdField] == resource.id) !== -1;
+                        return filtered.includes(resource.id) || this.events.findIndex(event => event[this.resourceIdField] == resource.id) !== -1;
                     });
                 }
                 return resources;
