@@ -179,8 +179,10 @@
 
             </template>
             <template slot="actions" scope="row">
-                <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
-                <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
+                <slot :item="row.item">
+                    <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
+                    <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
+                </slot>
             </template>
         </b-table>
     </div>
@@ -261,6 +263,7 @@
             if (!this.clients) {
                 this.loadClients();
             }
+            this.setDataFromSchedule();
         },
 
         methods: {
@@ -278,6 +281,19 @@
                 if (callback) {
                     callback();
                 }
+            },
+
+            setDataFromSchedule()
+            {
+                if (!this.schedule) return;
+
+                let startsAt = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
+                console.log(startsAt);
+
+                this.clientId = this.schedule.client_id;
+                this.startDate = startsAt.format('MM/DD/YYYY');
+                this.startTime = startsAt.format('HH:mm');
+                this.endTime = moment(startsAt).add(this.schedule.duration, 'minutes').format('HH:mm');
             },
 
             makeForm() {
@@ -330,7 +346,14 @@
         watch: {
             clientId() {
                 this.matches = [];
-            }
+            },
+            schedule: {
+                deep: true,
+                handler() { this.setDataFromSchedule(); }
+            },
+            clients(val) {
+                this.localClients = val;
+            },
         }
     }
 </script>
