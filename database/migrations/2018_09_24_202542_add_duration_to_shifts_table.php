@@ -18,13 +18,13 @@ class AddDurationToShiftsTable extends Migration
         });
 
         // Persist all existing shift hours
-        \DB::beginTransaction();
-        \App\Shift::chunk(100, function($shifts) {
-            $shifts->each(function (\App\Shift $shift) {
-                $shift->update(['hours' => $shift->duration()]);
-            });
-        });
-        \DB::commit();
+//        \DB::beginTransaction();
+//        \App\Shift::chunk(100, function($shifts) {
+//            $shifts->each(function (\App\Shift $shift) {
+//                $shift->update(['hours' => $shift->duration()]);
+//            });
+//        });
+//        \DB::commit();
     }
 
     /**
