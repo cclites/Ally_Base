@@ -16,6 +16,9 @@ class ApplyPaymentController extends Controller
     public function index()
     {
         if (request()->wantsJson()) {
+            if (app()->environment() !== 'demo') {
+                return ['message' => 'Coming soon'];
+            }
             $shifts = Shift::limit(8)->get()->load(['client', 'caregiver'])->map(function ($item) {
                 return array_merge($item->toArray(), [
                     'caregiver_name' => $item->caregiver->name,
