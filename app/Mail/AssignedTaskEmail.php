@@ -33,7 +33,8 @@ class AssignedTaskEmail extends Mailable
     public function __construct($task)
     {
         $this->task = $task;
-        $this->url = route('business.tasks.show', ['task' => $task->id]);
+//        $this->url = route('business.tasks.show', ['task' => $task->id]);
+        $this->url = route('business.tasks.index');
     }
 
     /**

@@ -38,12 +38,12 @@ export default {
     props: {
         data: {
             type: '',
-            role: Object
         }
     },
 
     data() {
         return {
+            role: window.AuthUser,
             totalRows: 0,
             // perPage: 25,
             // currentPage: 1,
@@ -71,7 +71,7 @@ export default {
 
     computed: {
         items() {
-            if(this.data.role['role_type'] == 'admin') {
+            if(this.role.role_type === 'admin') {
                 return [
                     { name: 'Unsettled Report', url: 'reports/unsettled', description: '' },
                     { name: 'Reconciliation Report', url: 'reports/reconciliation', description: 'See detailed breakdown of each transaction with your bank' },
@@ -90,7 +90,7 @@ export default {
                     { name: 'Emails Report', url: 'reports/emails', description: '' },
                     { name: 'Audit Log', url: 'audit-log', description: '' },
                 ];
-            } else if(this.data.role['role_type'] == 'office_user') {
+            } else if(this.role.role_type === 'office_user') {
                 let data = [
                     { name: 'EVV Report', url: 'reports/evv', description: 'Details on each attempted clock in and clock out' },
                     { name: 'Reconciliation Report', url: 'reports/reconciliation', description: 'See detailed breakdown of each transaction with your bank' },
@@ -124,7 +124,7 @@ export default {
                     // { name: 'Caregiver Online Setup', url: 'reports/caregivers-onboarded', description: '' },
                 ];
 
-                if(this.data.type == 'Agency') {
+                if(this.data.type === 'Agency') {
                     data.push({ name: 'ADP and Paychex', url: 'javascript:;', description: '' });
                 }
 

@@ -92,6 +92,7 @@
                                         id="daily_rates"
                                         name="daily_rates"
                                         v-model="form.daily_rates"
+                                        @change="changedDailyRates()"
                                 >
                                     <option :value="0">Hourly Shift</option>
                                     <option :value="1">Daily Shift</option>
@@ -669,6 +670,12 @@
                     this.paymentType = response.data.payment_type;
                 });
             },
+            changedDailyRates() {
+                if (this.form.caregiver_id) {
+                    this.loadCaregiverRates();
+                    alert('You have just changed the shift type.  Please verify the caregiver and provider rates match what is expected for billing purposes.');
+                }
+            },
             /**
              * Initialize goals object/array form values with the actual ones
              * attached to the shift (if any).
@@ -730,12 +737,6 @@
                     this.loadCaregiverRates();
                 }
             },
-            'form.daily_rates': function() {
-                if (this.form.caregiver_id) {
-                    this.loadCaregiverRates();
-                    alert('You have just changed the shift type.  Please verify the caregiver and provider rates match what is expected for billing purposes.');
-                }
-            }
         },
     }
 </script>
