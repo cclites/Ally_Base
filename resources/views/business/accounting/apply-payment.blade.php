@@ -9,5 +9,11 @@
 @endsection
 
 @section('content')
+    @if(app()->environment() !== 'demo')
+        <div class="alert alert-warning">
+            <strong>Coming soon: </strong> This feature is not yet active on your account.
+        </div>
+    @endif
+
     <business-apply-payment :clients="{{ $clients }}" />
 @endsection

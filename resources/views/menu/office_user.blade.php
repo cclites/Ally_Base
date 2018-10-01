@@ -37,8 +37,10 @@
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-usd"></i><span class="hide-menu">Accounting</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.accounting.apply-payment.index') }}">Apply Payment</a></li>
-        <li><a href="#">Receivables</a></li>
-        <li><a href="#">Export to Quickbooks</a></li>
+        @if(app()->environment() === 'demo')
+            <li><a href="#">Receivables</a></li>
+            <li><a href="#">Export to Quickbooks</a></li>
+        @endif
     </ul>
 </li>
 <li>
