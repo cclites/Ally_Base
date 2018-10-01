@@ -11,8 +11,14 @@ export default {
         createSchedule({start, end, jsEvent, view, resource} = {}) {
             this.hidePreview();
 
+            const acceptableTimeViews = ['timelineDay', 'agendaWeek'];
+            if (!acceptableTimeViews.includes(view.name)) {
+                // timelineWeek and month always show 12am-12am, ignore the times for those views (always use 8am start)
+                start = start.hour(8); end = null;
+            }
+
             if (!start) {
-                start = moment('0900', 'HHmm');
+                start = moment('0800', 'HHmm');
             }
 
             start = start.local();
@@ -20,7 +26,7 @@ export default {
 
             this.selectedSchedule = {
                 'starts_at': start.format('YYYY-MM-DD HH:mm:ss'),
-                'duration': end ? end.diff(start, 'minutes') : 60,
+                'duration': end ? end.diff(start, 'minutes') : 120,
                 'client_id': (this.filterClientId > 0) ? this.filterClientId : this.getInitialFromResource(resource, 'client_id'),
                 'caregiver_id': (this.filterCaregiverId > 0) ? this.filterCaregiverId : this.getInitialFromResource(resource, 'caregiver_id'),
             };
