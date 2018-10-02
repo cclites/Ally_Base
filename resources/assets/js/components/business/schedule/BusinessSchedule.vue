@@ -186,6 +186,7 @@
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
         props: {
@@ -210,8 +211,8 @@
                     center: 'title',
                     right:  'timelineDay,timelineWeek,month caregiverView print fullscreen'
                 },
-                clients: [this.client],
-                caregivers: [this.caregiver],
+                clients: this.client ? [this.client] : [],
+                caregivers: this.caregiver ? [this.caregiver] : [],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
                 notesModal: false,
@@ -311,6 +312,7 @@
                             width: '30px',
                         }
                     ],
+                    resourceRender: this.resourceRender,
                     views: {
                         timelineWeek: {
                             slotLabelFormat: 'ddd D',
@@ -715,13 +717,13 @@
                 // Fill the caregiver and client drop downs
                 let count = 0;
                 if (clientIsFilterable) {
-                    axios.get('/business/clients').then(response => {
+                    axios.get('/business/clients?address=1&phone_number=1').then(response => {
                         this.clients = response.data;
                         this.clientsLoaded = true;
                     });
                 }
                 if (caregiverIsFilterable) {
-                    let url = '/business/caregivers';
+                    let url = '/business/caregivers?address=1&phone_number=1';
                     if (this.client) url = '/business/clients/' + this.client.id + '/caregivers';
                     axios.get(url).then(response => {
                         this.caregivers = response.data;
@@ -822,6 +824,49 @@
                 content.parent().prepend(note);
             },
 
+            resourceRender(resource, $td)  {
+                $td.closest('tr').popover({
+                    content: this.getPhoneAndAddress(resource.id),
+                    placement: function(context, src) {
+                        $(context).addClass('resource-popover');
+                        return 'right';
+                    },
+                    title: resource.title,
+                    trigger: 'manual',
+                }).on('mouseenter', function () {
+                    let $this = $(this);
+                    $this.popover('show');
+                    $('.popover').on('mouseleave', function () {
+                        $this.popover('hide');
+                    });
+                }).on('mouseleave', function () {
+                    let $this = $(this);
+                    setTimeout(function () {
+                        if (!$('.popover:hover').length) {
+                            $this.popover('hide');
+                        }
+                    }, 250);
+                });
+            },
+
+            getPhoneAndAddress(id) {
+                let resource;
+                if (this.caregiverView) {
+                    resource = this.caregivers.find(caregiver => caregiver.id == id);
+                } else {
+                    resource = this.clients.find(client => client.id == id);
+                }
+
+                let str = '';
+                try {
+                    if (resource.phone_number) {
+                        str = resource.phone_number.number  + "\n";
+                    }
+                    str = str + this.addressFormat(resource.address);
+                } catch (e) { console.log(e); }
+                return str;
+            },
+
             fullscreenToggle() {
                 let $element = $(this.$el);
                 $element.toggleClass('fullscreen-calendar');
@@ -885,7 +930,7 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings],
     }
 </script>
 
@@ -978,6 +1023,10 @@
   border: 1px solid #456789;
   width: 420px;
 }
+.resource-popover {
+    margin-right: 12px !important;
+    white-space: pre-line;
+}
 </style>
 
 <style scoped>
@@ -985,5 +1034,4 @@
     .statusFilters input {
         display: none;
     }
-    
 </style>
