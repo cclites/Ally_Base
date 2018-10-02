@@ -100,6 +100,12 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function address()
+    {
+        return $this->hasOne(Address::class, 'user_id')
+                    ->where('type', 'home');
+    }
+
     public function bankAccount()
     {
         return $this->belongsTo(BankAccount::class);
@@ -137,9 +143,10 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->hasMany(Payment::class);
     }
 
-    public function upcomingPayments()
+    public function phoneNumber()
     {
-        return $this->hasMany(PaymentQueue::class);
+        return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
+                    ->where('type', 'primary');
     }
 
     public function schedules()

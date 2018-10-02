@@ -160,24 +160,15 @@
         methods: {
             getAddress(caregiver)
             {
-                if (caregiver.addresses && caregiver.addresses.length > 0) {
-                    let index = caregiver.addresses.findIndex(function(address) {
-                        return address.type === 'home';
-                    });
-                    if (index !== -1) {
-                        return caregiver.addresses[index];
-                    }
+                if (caregiver.address) {
+                    return caregiver.address;
                 }
                 return {};
             },
             getPhone(caregiver)
             {
-                if (caregiver.phone_numbers && caregiver.phone_numbers.length > 0) {
-                    let index = caregiver.phone_numbers.findIndex(function(phone) {
-                        return phone.type === 'primary';
-                    });
-                    if (index === -1) index = 0; // use first number found if no primary
-                    return caregiver.phone_numbers[index];
+                if (caregiver.phone_number) {
+                    return caregiver.phone_number;
                 }
                 return {};
             },

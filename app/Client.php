@@ -162,15 +162,20 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasMany(Payment::class);
     }
 
-    public function upcomingPayments()
+    public function address()
     {
-        return $this->hasMany(PaymentQueue::class);
+        return $this->evvAddress(); // shortcut to evvAddress
     }
 
     public function evvAddress()
     {
         return $this->hasOne(Address::class, 'user_id', 'id')
                     ->where('type', 'evv');
+    }
+
+    public function phoneNumber()
+    {
+        return $this->evvPhone();
     }
 
     public function evvPhone()
