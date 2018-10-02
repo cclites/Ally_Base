@@ -1030,7 +1030,7 @@
 </style>
 
 <style scoped>
-    :checked + span { border: 2px solid black; }
+    :checked + span { border: 3px solid black; }
     .statusFilters input {
         display: none;
     }
