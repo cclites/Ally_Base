@@ -40,6 +40,7 @@ class CaregiverController extends BaseController
             ->orderByName();
 
         if ($request->expectsJson()) {
+            // Use query string ?address=1&phone_number=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
