@@ -64,17 +64,17 @@ export default {
                 creator_id: '',
                 denied_at: null,
                 entries: [],
-                id: '',
+                id: null,
                 updated_at: '',
             };
         },
 
         isApproved() {
-            return this.form.id && this.form.approved_at;
+            return !!(this.form.id && this.form.approved_at);
         },
 
         isDenied() {
-            return this.form.id && this.form.denied_at;
+            return !!(this.form.id && this.form.denied_at);
         },
 
         hasClients() {
