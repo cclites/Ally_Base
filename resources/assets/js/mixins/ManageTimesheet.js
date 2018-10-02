@@ -174,9 +174,9 @@ export default {
                 date.add(7, 'days');
             }
 
-            for (var i = 0; i < 4; i++) {
+            for (var i = 0; i < 6; i++) {
                 if (i > 0) {
-                    date =  date.subtract(i * 7, 'days');
+                    date =  date.subtract(7, 'days');
                 }
 
                 let w = this.getWeekObject(i, date);
