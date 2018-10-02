@@ -33,22 +33,28 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
-        $caregivers = $this->business()->caregivers()
+        $query = $this->business()->caregivers()
             ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
                 $query->where('active', $request->input('active', 1));
             })
-            ->orderByName()
-            ->with(['user', 'addresses', 'phoneNumbers'])
-            ->get();
+            ->orderByName();
 
         if ($request->expectsJson()) {
-            return $caregivers;
+            if ($request->input('address')) {
+                $query->with('address');
+            }
+            if ($request->input('phone_number')) {
+                $query->with('phoneNumber');
+            }
+
+            return $query->get();
         }
 
         $multiLocation = [
             'multiLocationRegistry' => $this->business()->multi_location_registry,
             'name' => $this->business()->name
         ];
+        $caregivers = $query->with(['address', 'phoneNumber'])->get();
 
         return view('business.caregivers.index', compact('caregivers', 'multiLocation'));
     }
