@@ -864,7 +864,7 @@
                     }
                     str = str + this.addressFormat(resource.address);
                 } catch (e) { console.log(e); }
-                return str;
+                return str || 'No address on file.';
             },
 
             fullscreenToggle() {
