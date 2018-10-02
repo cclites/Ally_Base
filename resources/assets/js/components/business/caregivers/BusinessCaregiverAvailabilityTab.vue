@@ -8,7 +8,7 @@
             >
                 <b-row>
                     <b-col lg="12">
-                        <b-form-group label="Preferred Days">
+                        <b-form-group label="Available Days">
                             <label class="custom-control custom-checkbox" v-for="day in daysOfWeek" :key="day">
                                 <input type="checkbox" class="custom-control-input" v-model="form[day]" :true-value="1" :false-value="0">
                                 <span class="custom-control-indicator"></span>
@@ -17,7 +17,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
-                        <b-form-group label="Preferred Times">
+                        <b-form-group label="Available Times">
                             <label class="custom-control custom-checkbox" v-for="time in timesOfDay" :key="time">
                                 <input type="checkbox" class="custom-control-input" v-model="form[time]" :true-value="1" :false-value="0">
                                 <span class="custom-control-indicator"></span>
