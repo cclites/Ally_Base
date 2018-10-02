@@ -13,7 +13,7 @@ class CreateScheduleRequest extends FormRequest
     }
 
     public function rules() {
-        $minDate = Carbon::now()->setTime(0, 0, 0);
+        $minDate = Carbon::parse('2017-01-01');
         $maxDate = Carbon::now()->addDays(735); // A little over 2 years
         return [
             'starts_at' => 'required|integer|min:' . $minDate->getTimestamp() . '|max:' . $maxDate->getTimestamp(),
@@ -40,7 +40,7 @@ class CreateScheduleRequest extends FormRequest
             'recurring_end_date.required_if' => 'You must select an end date for a recurring schedule.',
             'recurring_end_date.max' => 'Schedules can are restricted to a 2 year range.  Lower your recurring end date.',
             'recurring_end_date.min' => 'Your recurring end date cannot be before the start date.',
-            'starts_at.min' => 'You cannot create past schedules.  The starting date must be today or later.',
+            'starts_at.min' => 'You cannot create schedule entries prior to 2017.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
             'daily_rates.*' => 'You must select whether the shift is hourly or daily.',

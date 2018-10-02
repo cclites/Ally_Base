@@ -13,7 +13,7 @@ class UpdateScheduleRequest extends FormRequest
     }
 
     public function rules() {
-        $minDate = Carbon::now()->setTime(0, 0, 0);
+        $minDate = Carbon::parse('2017-01-01');
         $maxDate = Carbon::now()->addDays(735); // A little over 2 years
         return [
             'starts_at' => 'required|integer|min:' . $minDate->getTimestamp() . '|max:' . $maxDate->getTimestamp(),
@@ -34,7 +34,7 @@ class UpdateScheduleRequest extends FormRequest
     public function messages()
     {
         return [
-            'starts_at.min' => 'You cannot edit past schedules.  The starting date must be today or later.',
+            'starts_at.min' => 'You cannot edit schedules prior to 2017.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
             'daily_rates.*' => 'You must select whether the shift is hourly or daily.',

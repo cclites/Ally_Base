@@ -163,14 +163,6 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
-            return new ErrorResponse(400, 'Past schedules are unable to be modified.');
-        }
-
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
-        }
-
         $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
         $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
         $client = Client::find($schedule->client_id);

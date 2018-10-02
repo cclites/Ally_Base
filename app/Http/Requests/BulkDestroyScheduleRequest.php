@@ -81,7 +81,7 @@ class BulkDestroyScheduleRequest extends FormRequest
 
     public function rules()
     {
-        $minDate = Carbon::now()->subHours(8)->setTime(0, 0, 0);
+        $minDate = Carbon::parse('2017-01-01');
         $maxDate = Carbon::now()->addYears(2);
         return [
             // query items
