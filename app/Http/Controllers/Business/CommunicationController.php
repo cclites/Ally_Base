@@ -12,6 +12,12 @@ use App\Responses\ErrorResponse;
 use App\Shift;
 use App\Schedule;
 use App\Traits\ActiveBusiness;
+use Illuminate\Validation\Validator;
+use App\Business;
+use App\SmsThread;
+use App\PhoneNumber;
+use App\SmsThreadReply;
+use Carbon\Carbon;
 
 class CommunicationController extends Controller
 {
@@ -81,20 +87,83 @@ class CommunicationController extends Controller
             }
         }
 
-        // if empty, will automatically use twilio default
-        $from = activeBusiness()->outgoing_sms_number;
+        $business = activeBusiness();
+        $from = $business->outgoing_sms_number;
+        if (empty($from)) {
+            // TODO: if set to reply mode and business has no sms number -> fail with error
+            $from = PhoneNumber::formatNational(config('services.twilio.default_number'));
+        }
+
+        $thread = SmsThread::create([
+            'business_id' => $business->id,
+            'from_number' => $from,
+            'message' => $request->message,
+            'can_reply' => true, // TODO: set as setting on form 
+            'sent_at' => Carbon::now(),
+        ]);
 
         // send txt to all primary AND mobile numbers
         foreach($recipients as $recipient) {
             if ($number = $recipient->phoneNumbers->where('type', 'primary')->first()) {
-                dispatch(new SendTextMessage($number->national_number, $request->message, $from));
+                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
+                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
             }
 
             if ($number = $recipient->phoneNumbers->where('type', 'mobile')->first()) {
-                dispatch(new SendTextMessage($number->national_number, $request->message, $from));
+                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
+                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
             }
         }
 
         return new SuccessResponse('Text messages were successfully dispatched.');
+    }
+
+    /**
+     * Handle incoming SMS messages from Twilio webhooks.
+     *
+     * @return Response
+     */
+    public function incoming(Request $request)
+    {
+        $twilioSid = config('services.twilio.sid');
+
+        if (\Validator::make($request->all(), [
+            'MessageSid' => 'required|string|max:34|min:34',
+            'AccountSid' => "required|string|max:34|min:34|in:$twilioSid",
+            // 'MessagingServiceSid' => 'required|string|max:34|min:34',
+            'To' => 'required|string',
+            'From' => 'required|string',
+            'Body' => 'required|string',
+        ])->fails()) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+    
+        $to = PhoneNumber::formatNational($request->To);
+        $from = PhoneNumber::formatNational($request->From);
+
+        $thread = SmsThread::where('from_number', $to)->latest()->first();
+        $business_id = optional($thread)->business_id;
+
+        $matchingPhone = PhoneNumber::where('national_number', $from)->first();
+ 
+        if (empty($thread)) {
+            $business = Business::where('outgoing_sms_number', $to)->first();
+            $business_id = optional($business)->id;
+        } else {
+            if (! $thread->isAcceptingReplies()) {
+                $thread = null;
+            }
+        }
+
+        $reply = SmsThreadReply::create([
+            'business_id' => $business_id,
+            'sms_thread_id' => optional($thread)->id,
+            'user_id' => optional($matchingPhone)->user_id,
+            'from_number' => $from,
+            'to_number' => $to,
+            'message' => $request->Body,
+        ]);
+
+        return response()->json(['status' => 200]);
     }
 }

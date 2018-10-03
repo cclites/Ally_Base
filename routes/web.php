@@ -30,6 +30,7 @@ Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->na
 Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
 Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
 Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
+Route::post('/twilio/incoming', 'Business\CommunicationController@incoming')->name('twilio.incoming');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
