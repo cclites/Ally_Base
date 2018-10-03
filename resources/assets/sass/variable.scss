@@ -8,6 +8,7 @@ File: scss
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700');
 
 $bodyfont:'Poppins', sans-serif;
+$bodyweight:'400';
 $headingfont:'Poppins', sans-serif; 
 
 
@@ -19,9 +20,11 @@ $sidebar-white: #e5edef;
 $sidebar-alt:#f2f6f8;
 $bodycolor: #eef5f9;
 $headingtext: #455a64;
-$bodytext: #67757c; 
-$sidebar-text: #607d8b;
-$sidebar-icons: #99abb4 ;
+//$bodytext: #67757c;
+$bodytext: #4d575d;
+//$sidebar-text: #607d8b;
+$sidebar-text: #5e6d76;
+$sidebar-icons: #81a2b6;
 
 $light-text: #a6b7bf;
 $themecolor: #009efb;
@@ -35,7 +38,7 @@ $warning: #ffb22b;
 $primary: #7460ee;
 $info: #1e88e5;
 $inverse: #2f3d4a;
-$muted: #99abb4;
+$muted: #868e96;
 $dark: #263238;
 $light: #f2f4f8;
 $extra-light: #ebf3f5;
