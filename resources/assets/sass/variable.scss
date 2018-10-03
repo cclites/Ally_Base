@@ -7,13 +7,17 @@ File: scss
 // Variables
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700');
 
+/* Body defaults */
 $bodyfont:'Poppins', sans-serif;
-$bodyweight:'400';
+$bodyweight:400;
+$lineheight:1.25;
+$bodyzoom:0.9;
+
+/* Heading font */
 $headingfont:'Poppins', sans-serif; 
 
 
 /*Theme Colors*/
-
 $topbar: #2196f3;
 $sidebar: #fff;
 $sidebar-white: #e5edef;
