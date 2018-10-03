@@ -18,7 +18,7 @@ class CreateSmsThreadsTable extends Migration
             $table->unsignedInteger('business_id');
             $table->string('from_number', 25);
             $table->string('message', 1000);
-            $table->boolean('can_reply');
+            $table->boolean('can_reply')->default(false);
             $table->timestamp('sent_at');
             
             $table->timestamps();

@@ -108,6 +108,7 @@ class SmsRepliesTest extends TestCase
         $this->actingAs($this->officeUser->user);
 
         $data = [
+            'can_reply' => true,
             'message' => 'testing',
             'recipients' => Caregiver::all()->pluck('id')->toArray(),
         ];

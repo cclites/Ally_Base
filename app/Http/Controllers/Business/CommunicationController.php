@@ -18,6 +18,7 @@ use App\SmsThread;
 use App\PhoneNumber;
 use App\SmsThreadReply;
 use Carbon\Carbon;
+use App\SmsThreadRecipient;
 
 class CommunicationController extends Controller
 {
@@ -68,6 +69,7 @@ class CommunicationController extends Controller
             'message' => 'required|string|min:5',
             'recipients' => 'array',
             'recipients.*' => 'integer',
+            'can_reply' => 'boolean',
         ]);
 
         if ($request->all) {
@@ -90,7 +92,10 @@ class CommunicationController extends Controller
         $business = activeBusiness();
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
-            // TODO: if set to reply mode and business has no sms number -> fail with error
+            if ($request->can_reply) {
+                return new ErrorResponse(422, 'You cannot receive SMS replies at this time because you have not been assigned a unique outgoing SMS number, please contact Ally.');
+            }
+
             $from = PhoneNumber::formatNational(config('services.twilio.default_number'));
         }
 
@@ -98,7 +103,7 @@ class CommunicationController extends Controller
             'business_id' => $business->id,
             'from_number' => $from,
             'message' => $request->message,
-            'can_reply' => true, // TODO: set as setting on form 
+            'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
         ]);
 
@@ -145,11 +150,17 @@ class CommunicationController extends Controller
         $business_id = optional($thread)->business_id;
 
         $matchingPhone = PhoneNumber::where('national_number', $from)->first();
+        $user_id = optional($matchingPhone)->user_id;
  
         if (empty($thread)) {
             $business = Business::where('outgoing_sms_number', $to)->first();
             $business_id = optional($business)->id;
         } else {
+            $matchingRecipient = SmsThreadRecipient::where('sms_thread_id', $thread->id)->first();
+            if (! empty($matchingRecipient)) {
+                $user_id = $matchingRecipient->user->id;
+            }
+
             if (! $thread->isAcceptingReplies()) {
                 $thread = null;
             }
@@ -158,7 +169,7 @@ class CommunicationController extends Controller
         $reply = SmsThreadReply::create([
             'business_id' => $business_id,
             'sms_thread_id' => optional($thread)->id,
-            'user_id' => optional($matchingPhone)->user_id,
+            'user_id' => $user_id,
             'from_number' => $from,
             'to_number' => $to,
             'message' => $request->Body,
