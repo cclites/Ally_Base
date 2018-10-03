@@ -18,7 +18,7 @@ class AlterShiftsAddAddressId extends Migration
             $table->foreign('address_id')->references('id')->on('addresses')->onUpdate('RESTRICT')->onDelete('RESTRICT');
         });
 
-        // if (app()->environment() === 'production') {
+        if (app()->environment() === 'production') {
             \App\Shift::all()->each(function (\App\Shift $shift) {
                 if ($client = $shift->client) {
                     if ($address = $client->addresses()->where('type', 'evv')->first()) {
@@ -26,7 +26,7 @@ class AlterShiftsAddAddressId extends Migration
                     }
                 }
             });
-        // }
+        }
     }
 
     /**
