@@ -103,6 +103,7 @@ class ShiftController extends BaseController
                 'checked_out_distance' => $checked_out_distance,
                 'client_name' => $shift->client->name(),
                 'caregiver_name' => $shift->caregiver->name(),
+                'address' => optional($shift->address)->only(['latitude', 'longitude']),
             ];
 
             return response()->json($data);

@@ -164,6 +164,16 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     /// Relationship Methods
     //////////////////////////////////////
 
+    /**
+     * Get the shift's address relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function address()
+    {
+        return $this->belongsTo(Address::class, 'address_id');
+    }
+
     public function payment()
     {
         return $this->belongsTo(Payment::class);
