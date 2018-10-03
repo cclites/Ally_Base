@@ -123,25 +123,30 @@
                         </tr>
                         </thead>
                         <tbody v-if="selectedItem.checked_in_latitude || selectedItem.checked_in_longitude">
-                        <tr>
-                            <th>Geocode</th>
-                            <td>{{ selectedItem.checked_in_latitude.slice(0,8) }}, {{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Distance</th>
-                            <td>{{ selectedItem.checked_in_distance }}m</td>
-                        </tr>
+                            <tr>
+                                <th>Geocode</th>
+                                <td>{{ selectedItem.checked_in_latitude.slice(0,8) }}, {{ selectedItem.checked_in_longitude.slice(0,8) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ selectedItem.checked_in_distance }}m</td>
+                            </tr>
+                            <tr v-if="selectedItem.address">
+                                <td colspan="2">
+                                    <shift-map :address="selectedItem.address" :lat="selectedItem.checked_in_latitude" :lng="selectedItem.checked_in_longitude" class="shift-map" />
+                                </td>
+                            </tr>
                         </tbody>
                         <tbody v-else-if="selectedItem.checked_in_number">
-                        <tr>
-                            <th>Phone Number</th>
-                            <td>{{ selectedItem.checked_in_number }}</td>
-                        </tr>
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ selectedItem.checked_in_number }}</td>
+                            </tr>
                         </tbody>
                         <tbody v-else>
-                        <tr>
-                            <td colspan="2">No EVV data</td>
-                        </tr>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
                         </tbody>
                     </table>
                 </b-col>
@@ -153,26 +158,30 @@
                         </tr>
                         </thead>
                         <tbody v-if="selectedItem.checked_out_latitude || selectedItem.checked_out_longitude">
-                        <tr>
-                            <th>Geocode</th>
-                            <td>{{ selectedItem.checked_out_latitude.slice(0,8) }}, {{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Distance</th>
-                            <td>{{ selectedItem.checked_out_distance }}m</td>
-                        </tr>
+                            <tr>
+                                <th>Geocode</th>
+                                <td>{{ selectedItem.checked_out_latitude.slice(0,8) }}, {{ selectedItem.checked_out_longitude.slice(0,8) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Distance</th>
+                                <td>{{ selectedItem.checked_out_distance }}m</td>
+                            </tr>
+                            <tr v-if="selectedItem.address">
+                                <td colspan="2">
+                                    <shift-map :address="selectedItem.address" :lat="selectedItem.checked_out_latitude" :lng="selectedItem.checked_out_longitude" class="shift-map" />
+                                </td>
+                            </tr>
                         </tbody>
                         <tbody v-else-if="selectedItem.checked_out_number">
-                        <tr>
-                            <th>Phone Number</th>
-                            <td>{{ selectedItem.checked_out_number }}</td>
-                        </tr>
+                            <tr>
+                                <th>Phone Number</th>
+                                <td>{{ selectedItem.checked_out_number }}</td>
+                            </tr>
                         </tbody>
                         <tbody v-else>
-                        <tr>
-                            <td colspan="2">No EVV data</td>
-                        </tr>
+                            <tr>
+                                <td colspan="2">No EVV data</td>
+                            </tr>
                         </tbody>
                     </table>
                 </b-col>
@@ -232,3 +241,10 @@
         }
     }
 </script>
+
+<style>
+    .shift-map {
+        width: 100%;
+        height: 200px;
+    }
+</style>
