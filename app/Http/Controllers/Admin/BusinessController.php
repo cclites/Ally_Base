@@ -10,6 +10,7 @@ use App\Responses\SuccessResponse;
 use App\Rules\ValidTimezoneOrOffset;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\PhoneNumber;
 
 class BusinessController extends Controller
 {
@@ -188,13 +189,16 @@ class BusinessController extends Controller
      * @param  \App\Business  $business
      * @return \Illuminate\Http\Response
      */
-    public function updateSmsSettings(Request $request, Business $business)
+    public function updateSmsSettings(Request $request, Business $business, PhoneNumber $phone)
     {
         $data = $request->validate([
             'outgoing_sms_number' => 'string|nullable',
         ]);
 
-        if ($business->update($data)) {
+        // always formats phone to national number
+        $phone->input($data['outgoing_sms_number']);
+
+        if ($business->update(['outgoing_sms_number' => $phone->national_number])) {
             return new SuccessResponse('The business has been saved.');
         }
     }
