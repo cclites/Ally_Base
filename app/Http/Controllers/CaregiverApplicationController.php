@@ -76,7 +76,7 @@ class CaregiverApplicationController extends Controller
             abort(403);
         }
 
-        $this->updateStatus($application);
+        $application->updateStatus();
 
         return view('caregivers.applications.show', compact('application'));
     }
@@ -94,7 +94,7 @@ class CaregiverApplicationController extends Controller
             abort(403);
         }
 
-        $this->updateStatus($application);
+        $application->updateStatus();
 
         $business = $this->business();
         $application->preferred_days = explode(',', $application->preferred_days);
@@ -194,15 +194,7 @@ class CaregiverApplicationController extends Controller
         }
 
         if ($caregiver = $application->convertToCaregiver()) {
-            $this->updateStatus($application, CaregiverApplication::STATUS_CONVERTED);
             return new CreatedResponse('The application has been converted into an active caregiver.', null, route('business.caregivers.show', [$caregiver]));
-        }
-    }
-
-    protected function updateStatus(CaregiverApplication $application, $status = CaregiverApplication::STATUS_OPEN)
-    {
-        if ($status !== CaregiverApplication::STATUS_CONVERTED) {
-            $application->update(['status' => $status]);
         }
     }
 }
