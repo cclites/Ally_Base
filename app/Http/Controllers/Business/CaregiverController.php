@@ -365,7 +365,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
         $caregiver->update(['preferences' => $request->input('preferences')]);
-        $caregiver->setAvailability($request->validated());
+        $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
         return new SuccessResponse('Caregiver availability preferences updated');
     }
 

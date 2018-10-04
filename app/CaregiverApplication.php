@@ -254,31 +254,39 @@ class CaregiverApplication extends Model implements Auditable
     //// Instance Methods
     ////////////////////////////////////
 
+    public function updateStatus($status = self::STATUS_OPEN)
+    {
+        if ($this->status !== self::STATUS_CONVERTED) {
+            return $this->update(['status' => $status]);
+        }
+        return false;
+    }
+
     public function convertToCaregiver()
     {
-        // Business
-        $business = Business::findOrFail($this->business_id);
+        return \DB::transaction(function() {
+            // Business
+            $business = Business::findOrFail($this->business_id);
 
-        // Check if username exists
-        $userExists = User::where('username', $this->email)->exists();
-        if ($userExists) {
-            $alternativeUsername = str_slug($this->first_name . ' ' . $this->last_name);
-            if (User::where('username', $alternativeUsername)->exists()) {
-                $alternativeUsername .= mt_rand(1000,9999);
+            // Check if username exists
+            $userExists = User::where('username', $this->email)->exists();
+            if ($userExists) {
+                $alternativeUsername = str_slug($this->first_name . ' ' . $this->last_name);
+                if (User::where('username', $alternativeUsername)->exists()) {
+                    $alternativeUsername .= mt_rand(1000,9999);
+                }
             }
-        }
 
-        $caregiver = new Caregiver([
-            'firstname' => $this->first_name,
-            'lastname' => $this->last_name,
-            'ssn' => $this->ssn,
-            'email' => $this->email,
-            'username' => $alternativeUsername ?? $this->email,
-            'date_of_birth' => $this->date_of_birth,
-            'password' => bcrypt(random_bytes(32)),
-        ]);
+            $caregiver = Caregiver::create([
+                'firstname' => $this->first_name,
+                'lastname' => $this->last_name,
+                'ssn' => $this->ssn,
+                'email' => $this->email,
+                'username' => $alternativeUsername ?? $this->email,
+                'date_of_birth' => $this->date_of_birth,
+                'password' => bcrypt(random_bytes(32)),
+            ]);
 
-        if ($caregiver->save()) {
             $business->caregivers()->attach($caregiver);
 
             $address = new Address([
@@ -302,9 +310,9 @@ class CaregiverApplication extends Model implements Auditable
                 $caregiver->phoneNumbers()->save($homePhone);
             }
 
-            return $caregiver;
-        }
+            $this->updateStatus(self::STATUS_CONVERTED);
 
-        return false;
+            return $caregiver;
+        });
     }
 }

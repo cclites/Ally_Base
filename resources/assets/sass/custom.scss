@@ -29,6 +29,18 @@
   }
 }
 
+/* Navbar bullets */
+.sidebar-nav ul li ul li a {
+  padding: 10px 30px 10px 20px;
+}
+.sidebar-nav ul li ul li a:before {
+  content: "\f111 ";
+  font: 6px FontAwesome;
+  position: relative;
+  top: -3px;
+  left: -4px;
+}
+
 /* Show header with preloader */
 .preloader {
   margin-top: 70px;
@@ -46,6 +58,9 @@
 }
 .container-fluid {
   padding: 0 20px 20px 20px;
+}
+.sidebar-nav {
+  padding: 15px 10px;
 }
 
 .nav-link .mdi-account-circle, .nav-link .mdi-briefcase {

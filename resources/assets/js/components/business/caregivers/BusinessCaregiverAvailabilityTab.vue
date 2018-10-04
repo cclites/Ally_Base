@@ -1,6 +1,6 @@
 <template>
     <b-row>
-        <b-col>
+        <b-col lg="12">
             <b-card header="Availability"
                     header-bg-variant="info"
                     header-text-variant="white"
@@ -66,12 +66,21 @@
                 </b-form-group>
             </b-card>
         </b-col>
+        <b-col lg="12" v-if="updatedBy">
+            <b-card>
+                Last updated {{ formatDateFromUTC(caregiver.availability.updated_at) }} by {{ updatedBy }}
+            </b-card>
+        </b-col>
     </b-row>
 </template>
 
 <script>
+    import FormatsDates from "../../../mixins/FormatsDates";
+
     export default {
-        props: ['caregiver'],
+        props: ['caregiver', 'updatedBy'],
+
+        mixins: [FormatsDates],
 
         data() {
             return{
