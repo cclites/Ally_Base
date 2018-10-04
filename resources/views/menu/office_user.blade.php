@@ -77,6 +77,7 @@
     </a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.communication.text-caregivers') }}">Text Caregivers</a></li>
+        <li><a href="{{ route('business.communication.sms-threads') }}">Sent Texts</a></li>
     </ul>
 </li>
 

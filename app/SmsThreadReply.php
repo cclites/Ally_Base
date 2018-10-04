@@ -14,6 +14,13 @@ class SmsThreadReply extends Model
     protected $guarded = ['id'];
 
     /**
+     * The relations that should be loaded automatically.
+     *
+     * @var array
+     */
+    protected $with = ['user'];
+
+    /**
      * Get the business relation.
      *
      * @return Illuminate\Database\Eloquent\Relations\BelongsTo

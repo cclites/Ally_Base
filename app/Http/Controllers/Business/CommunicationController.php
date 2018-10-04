@@ -177,4 +177,45 @@ class CommunicationController extends Controller
 
         return response()->json(['status' => 200]);
     }
+
+    /**
+     * Get a list of the businesses sms threads.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function threadIndex()
+    {
+        $threads = activeBusiness()
+            ->smsThreads()
+            ->withCount(['recipients', 'replies'])
+            ->latest()
+            ->get();
+
+        if (request()->wantsJson()) {
+            return response()->json($threads);
+        }
+
+        return view('business.communication.sms-thread-list', compact(['threads']));
+    }
+
+    /**
+     * Get details of an individual sms thread.
+     *
+     * @param SmsThread $thread
+     * @return \Illuminate\Http\Response
+     */
+    public function threadShow(SmsThread $thread)
+    {
+        if (activeBusiness()->id != $thread->business_id) {
+            return new ErrorResponse(401, 'You do not have access to this thread.');
+        }
+
+        $thread->load(['recipients', 'replies']);
+
+        if (request()->wantsJson()) {
+            return response()->json($thread);
+        }
+
+        return view('business.communication.sms-thread', compact(['thread']));
+    }
 }

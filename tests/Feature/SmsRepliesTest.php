@@ -229,4 +229,60 @@ class SmsRepliesTest extends TestCase
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
     }
+
+    /** @test */
+    public function an_office_user_can_see_a_list_of_only_thier_businesses_sms_threads()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->generateThread();
+        }
+        $otherBusiness = factory('App\Business')->create();
+        $this->generateThread(['business_id' => $otherBusiness->id]);
+
+        $this->assertCount(6, SmsThread::all());
+
+        $this->getJson(route('business.communication.sms-threads'))
+            ->assertStatus(200)
+            ->assertJsonCount(5);
+    }
+
+    /** @test */
+    public function an_office_user_can_get_the_replies_to_a_sms_threads()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $thread = $this->generateThread();
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->fakeWebook($this->business->outgoing_sms_number);
+    
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'id' => $thread->id,
+            ])->assertJsonCount(1, 'replies');
+    }
+
+    /** @test */
+    public function an_office_user_cannot_see_details_of_another_businesses_sms_thread()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $otherBusiness = factory('App\Business')->create();
+        $thread = $this->generateThread(['business_id' => $otherBusiness->id]);
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+            ->assertStatus(401);
+    }
 }

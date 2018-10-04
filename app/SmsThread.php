@@ -23,6 +23,13 @@ class SmsThread extends Model
     protected $dates = ['sent_at'];
 
     /**
+     * The attributes that should be automatically append to the model.
+     *
+     * @var array
+     */
+    protected $appends = ['unique_recipient_count'];
+
+    /**
      * Get the business relation.
      *
      * @return Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -40,6 +47,29 @@ class SmsThread extends Model
     public function recipients()
     {
         return $this->hasMany(SmsThreadRecipient::class);
+    }
+
+    /**
+     * Get the thread recipients.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function getUniqueRecipientCountAttribute()
+    {
+        return $this->recipients()
+            ->select('user_id')
+            ->distinct()
+            ->get()->count();
+    }
+
+    /**
+     * Get the thread replies relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function replies()
+    {
+        return $this->hasMany(SmsThreadReply::class);
     }
 
     /**
