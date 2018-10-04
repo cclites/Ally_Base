@@ -21,6 +21,7 @@ class CreateSmsThreadRepliesTable extends Migration
             $table->string('from_number', 25);
             $table->string('to_number', 25);
             $table->string('message');
+            $table->string('twilio_message_id', 34)->unique();
 
             $table->timestamps();
 

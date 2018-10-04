@@ -5,20 +5,18 @@ namespace App\Http\Controllers\Business;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
-use App\Caregiver;
 use App\Jobs\SendTextMessage;
 use App\User;
 use App\Responses\ErrorResponse;
-use App\Shift;
 use App\Schedule;
 use App\Traits\ActiveBusiness;
-use Illuminate\Validation\Validator;
 use App\Business;
 use App\SmsThread;
 use App\PhoneNumber;
 use App\SmsThreadReply;
 use Carbon\Carbon;
 use App\SmsThreadRecipient;
+use Twilio\Security\RequestValidator;
 
 class CommunicationController extends Controller
 {
@@ -43,14 +41,14 @@ class CommunicationController extends Controller
             $clientName = $shift->client->name;
             $date = $shift->starts_at->format('m/d/y');
             $time = $shift->starts_at->format('g:i A');
-            
+
             $location = '';
             if ($shift->client->evvAddress) {
                 $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
             }
             $registryName = $shift->business->name;
             $phone = $shift->business->phone1;
-            
+
             $message = "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
         }
 
@@ -108,7 +106,7 @@ class CommunicationController extends Controller
         ]);
 
         // send txt to all primary AND mobile numbers
-        foreach($recipients as $recipient) {
+        foreach ($recipients as $recipient) {
             if ($number = $recipient->phoneNumbers->where('type', 'primary')->first()) {
                 dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
                 $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
@@ -131,6 +129,16 @@ class CommunicationController extends Controller
     public function incoming(Request $request)
     {
         $twilioSid = config('services.twilio.sid');
+        $twilioToken = config('services.twilio.token');
+
+        $requestValidator = new RequestValidator($twilioToken);
+        if (config('app.env') == 'production' && ! $requestValidator->validate(
+          $request->header('X-Twilio-Signature'),
+          $request->fullUrl(),
+          $request->toArray()
+        )) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
 
         if (\Validator::make($request->all(), [
             'MessageSid' => 'required|string|max:34|min:34',
@@ -142,7 +150,12 @@ class CommunicationController extends Controller
         ])->fails()) {
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
-    
+
+        // ignore duplicate requests
+        if (SmsThreadReply::where('twilio_message_id', $request->MessageSid)->exists()) {
+            return response()->json(['status' => 200]);
+        }
+
         $to = PhoneNumber::formatNational($request->To);
         $from = PhoneNumber::formatNational($request->From);
 
@@ -151,7 +164,7 @@ class CommunicationController extends Controller
 
         $matchingPhone = PhoneNumber::where('national_number', $from)->first();
         $user_id = optional($matchingPhone)->user_id;
- 
+
         if (empty($thread)) {
             $business = Business::where('outgoing_sms_number', $to)->first();
             $business_id = optional($business)->id;
@@ -173,6 +186,7 @@ class CommunicationController extends Controller
             'from_number' => $from,
             'to_number' => $to,
             'message' => $request->Body,
+            'twilio_message_id' => $request->MessageSid,
         ]);
 
         return response()->json(['status' => 200]);
