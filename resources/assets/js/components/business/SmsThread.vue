@@ -36,21 +36,7 @@
         <b-row>
             <b-col>
                 <h4>Replies</h4>
-                <div v-if="thread.replies.length == 0" class="text-muted">This message has no replies</div>
-                <div v-else>
-                    <b-table :items="thread.replies" :fields="replyFields">
-                        <template slot="created_at" scope="row">
-                            {{ formatDateTimeFromUTC(row.item.created_at) }}
-                        </template>
-                        <template slot="user" scope="row">
-                            <span v-if="! row.item.user" class="text-muted">Unknown</span>
-                            <span v-else><a :href="userLink(row.item.user)">{{ row.item.user.name }}</a></span>
-                        </template>
-                        <template slot="from_number" scope="row">
-                            {{ formatPhone(row.item.from_number) }}
-                        </template>
-                    </b-table>
-                </div>
+                <business-sms-reply-table :replies="thread.replies" />
             </b-col>
         </b-row>
     </b-card>
@@ -75,7 +61,6 @@ export default {
         busy: true,
         showRecipients: false,
 
-        items: [],
         perPage: 25,
         currentPage: 1,
         sortBy: 'created_at',
@@ -122,18 +107,6 @@ export default {
     },
 
     methods: {
-        messagePreview(message) {
-            if (message.length <= 20) {
-                return message;
-            }
-
-            return message.substr(0, 20) + '...';
-        },
-
-        openThread(thread) {
-            window.location = `/business/communication/sms-threads/${thread.id}`;
-        },
-
         formatPhone(phone) {
             if (! phone) {
                 return '';
@@ -159,7 +132,6 @@ export default {
     },
 
     mounted() {
-        this.items = this.threads;
         this.busy = false;
     },
 }

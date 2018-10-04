@@ -4,6 +4,10 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
+        <div class="d-flex mb-3">
+            <b-btn variant="success" href="/business/communication/sms-other-replies" class="ml-auto">View Other Replies</b-btn>
+        </div>
+
         <b-table bordered striped hover show-empty
             :items="items"
             :fields="fields"

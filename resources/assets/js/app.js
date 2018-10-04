@@ -224,6 +224,7 @@ Vue.component('question-form', require('./components/business/QuestionForm'));
 Vue.component('business-text-caregivers', require('./components/business/TextCaregivers'));
 Vue.component('business-sms-thread-list', require('./components/business/SmsThreadList'));
 Vue.component('business-sms-thread', require('./components/business/SmsThread'));
+Vue.component('business-sms-reply-table', require('./components/business/SmsReplyTable'));
 Vue.component('business-task-list', require('./components/business/tasks/TaskList'));
 Vue.component('business-task-form', require('./components/business/tasks/TaskForm'));
 Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));

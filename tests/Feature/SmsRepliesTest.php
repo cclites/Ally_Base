@@ -285,4 +285,27 @@ class SmsRepliesTest extends TestCase
         $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
             ->assertStatus(401);
     }
+
+    /** @test */
+    public function an_office_user_can_get_a_list_of_replies_not_belonging_to_a_thread()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $this->fakeWebook($this->business->outgoing_sms_number);
+    
+        $thread = $this->generateThread();
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->fakeWebook($this->business->outgoing_sms_number);
+    
+        $this->assertCount(2, SmsThreadReply::all());
+
+        $this->getJson(route('business.communication.sms-other-replies'))
+            ->assertStatus(200)
+            ->assertJsonCount(1);
+    }
+
 }

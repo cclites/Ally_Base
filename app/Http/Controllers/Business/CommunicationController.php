@@ -218,4 +218,23 @@ class CommunicationController extends Controller
 
         return view('business.communication.sms-thread', compact(['thread']));
     }
+
+    /**
+     * Get list of SMS replies that do not belong to a thread.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function otherReplies()
+    {
+        $replies = SmsThreadReply::where('business_id', activeBusiness()->id)
+            ->whereNull('sms_thread_id')
+            ->latest()
+            ->get();
+
+        if (request()->wantsJson()) {
+            return response()->json($replies);
+        }
+
+        return view('business.communication.sms-replies', compact(['replies']));
+    }
 }
