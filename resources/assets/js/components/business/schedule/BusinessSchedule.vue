@@ -359,7 +359,8 @@
                     events = events.filter(event => {
                         return this.statusFilters.includes(event.status)
                                 || this.statusFilters.includes(event.shift_status)
-                                || (this.statusFilters.includes('OPEN') && event.caregiver_id == 0);
+                                // Open shifts are calculated from the cg canceled status or a missing cg assignment
+                                || (this.statusFilters.includes('OPEN') && (event.caregiver_id == 0 || event.status === 'CAREGIVER_CANCELED'))
                     });
                 }
 
@@ -667,6 +668,7 @@
                     .then( ({ data }) => {
                         this.events = data.events.map(event => {
                             event.resourceId = event[this.resourceIdField];
+                            event.backgroundColor = this.getEventBackground(event);
                             return event;
                         });
                         // this.kpis = data.kpis;
@@ -686,10 +688,15 @@
                     return item.id === id;
                 });
                 if (event) {
-                    event.backgroundColor = data.backgroundColor;
+                    event.backgroundColor = this.getEventBackground(data);
                     event.note = data.note;
                     event.status = data.status;
                 }
+            },
+
+            getEventBackground(event) {
+                // Todo:  Remove this logic from the backend events response
+                return event.caregiver_id == 0 ? '#d9c01c' : event.backgroundColor;
             },
 
             loadFiltersData() {
