@@ -248,6 +248,16 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * Get the businesses SMS threads relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function smsThreads()
+    {
+        return $this->hasMany(SmsThread::class);
+    }
+    
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

@@ -190,4 +190,29 @@ class PhoneNumber extends Model implements Auditable
         return $this->phoneNumberUtil->isValidNumber($parsed);
     }
 
+    /**
+     * Return phone number formatted as e164 format.
+     *
+     * @param string $number
+     * @return string
+     */
+    public static function formatE164($number)
+    {
+        $phone = new self();
+        $phone->input($number);
+        return '+1' . $phone->national_number;
+    }
+
+    /**
+     * Return phone number formatted as e164 format.
+     *
+     * @param string $number
+     * @return string
+     */
+    public static function formatNational($number)
+    {
+        $phone = new self();
+        $phone->input($number);
+        return $phone->national_number;
+    }
 }

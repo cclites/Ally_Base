@@ -30,6 +30,7 @@ Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->na
 Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
 Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
 Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
+Route::post('/twilio/incoming', 'Business\CommunicationController@incoming')->name('twilio.incoming');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
@@ -246,6 +247,9 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
     Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
+    Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
+    Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');
+    Route::get('communication/sms-other-replies', 'Business\CommunicationController@otherReplies')->name('communication.sms-other-replies');
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');

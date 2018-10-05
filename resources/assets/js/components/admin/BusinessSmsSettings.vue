@@ -7,14 +7,15 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Outgoing SMS Number" label-for="outgoing_sms_number">
-                        <b-form-input
+                        <mask-input v-model="form.outgoing_sms_number" name="number"></mask-input>
+                        <!-- <b-form-input
                             id="outgoing_sms_number"
                             name="outgoing_sms_number"
                             type="text"
                             v-model="form.outgoing_sms_number"
                             required
                         >
-                        </b-form-input>
+                        </b-form-input> -->
                         <input-help :form="form" field="outgoing_sms_number" text="The number used to dispatch text messages."></input-help>
                     </b-form-group>
                 </b-col>
