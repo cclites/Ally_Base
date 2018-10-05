@@ -38,7 +38,8 @@ class ClockIn extends ClockBase
             'daily_rates' => false,
             'status' => Shift::CLOCKED_IN,
             'caregiver_rate' => $schedule->getCaregiverRate(),
-            'provider_fee' => $schedule->getProviderFee()
+            'provider_fee' => $schedule->getProviderFee(),
+            'address_id' => $schedule->address ? $schedule->address->id : null,
         ]);
 
         // Attempt to verify EVV regardless of previous status,
@@ -80,6 +81,9 @@ class ClockIn extends ClockBase
             $rates->provider_hourly_fee = 0;
         }
 
+        // Get address information
+        $address = $client->addresses()->where('type', 'evv')->first();
+
         $shift = new Shift([
             'business_id' => $business->id,
             'client_id' => $client->id,
@@ -95,7 +99,8 @@ class ClockIn extends ClockBase
             'daily_rates' => false,
             'status' => Shift::CLOCKED_IN,
             'caregiver_rate' => $rates->caregiver_hourly_rate,
-            'provider_fee' => $rates->provider_hourly_fee
+            'provider_fee' => $rates->provider_hourly_fee,
+            'address_id' => $address ? $address->id : null,
         ]);
 
         // Attempt to verify EVV regardless of previous status,

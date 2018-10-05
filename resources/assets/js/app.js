@@ -28,6 +28,25 @@ Vue.use(VueTheMask);
 import VeeValidate from 'vee-validate'
 Vue.use(VeeValidate, {fieldsBagName: '_fields'});
 
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps, {
+    load: {
+        key: window.gmapsKey,
+    },
+
+    //// If you intend to programmatically custom event listener code
+    //// (e.g. `this.$refs.gmap.$on('zoom_changed', someFunc)`)
+    //// instead of going through Vue templates (e.g. `<GmapMap @zoom_changed="someFunc">`)
+    //// you might need to turn this on.
+    // autobindAllEvents: false,
+
+    //// If you want to manually install components, e.g.
+    //// import {GmapMarker} from 'vue2-google-maps/src/components/marker'
+    //// Vue.component('GmapMarker', GmapMarker)
+    //// then disable the following:
+    installComponents: true,
+});
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -45,6 +64,7 @@ Vue.component('select2', require('./components/Select2'));
 Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
 Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
+Vue.component('shift-map', require('./components/ShiftMap'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
