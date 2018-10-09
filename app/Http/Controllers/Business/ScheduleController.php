@@ -421,7 +421,7 @@ class ScheduleController extends BaseController
     public function bulkDestroy(BulkDestroyScheduleRequest $request)
     {
         $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
-        $schedules = $query->get();
+        $schedules = $query->doesntHave('shifts')->get();
 
         if (!$schedules->count()) {
             return new ErrorResponse(400, 'No matching schedules could be found.');
