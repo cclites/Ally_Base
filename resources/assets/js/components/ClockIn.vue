@@ -51,12 +51,21 @@
                         <div class="alert alert-warning" v-show="!!locationWarning">
                             <strong>Warning: </strong> {{ locationWarning }}
                         </div>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col md="6">
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
                             <b-button variant="info" @click="clockIn(schedule)">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
                         </div>
                         <div class="form-group" v-if="form.client_id">
                             <b-button variant="success" @click="clockInWithoutSchedule()" v-if="schedules.length >= 1">Clock in to an unscheduled shift</b-button>
                             <b-button variant="success" @click="clockInWithoutSchedule()" v-else>Clock in</b-button>
+                        </div>
+                    </b-col>
+                    <b-col md="6">
+                        <div class="d-flex">
+                            <user-avatar v-if="form.client_id" :value="avatar" size="75" class="ml-auto" />
                         </div>
                     </b-col>
                 </b-row>
@@ -108,6 +117,16 @@
                     timeout: 30000,
                 },
             }
+        },
+
+        computed: {
+            avatar() {
+                let client = this.clients.find(e => e.id == this.form.client_id);
+                if (client) {
+                    return client.avatar; 
+                }
+                return '';
+            },
         },
 
         mounted() {
