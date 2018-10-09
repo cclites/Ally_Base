@@ -46,7 +46,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'gender', 'active', 'inactive_at']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'gender', 'active', 'inactive_at', 'avatar']);
     }
 
     ///////////////////////////////////////////
@@ -196,6 +196,36 @@ trait IsUserRole
     public function getDateOfBirthAttribute()
     {
         return $this->user->date_of_birth;
+    }
+
+    public function getAvatarAttribute()
+    {
+        if ($this->user->avatar) {
+            return \Storage::disk('public')->url($this->user->avatar);
+        } else {
+            return '/images/default-avatar.png';
+        }
+    }
+
+    public function setAvatarAttribute($value)
+    {
+        if (empty($value) || $value == '/images/default-avatar.png') {
+            $this->attributes['avatar'] = null;
+            return;
+        }
+
+        if (starts_with($value, config('app.url'))) {
+            return;
+        }
+           
+        $base64Data = str_replace('data:image/png;base64,', '', $value);
+        $base64Data = str_replace(' ', '+', $base64Data);
+
+        $filename = 'avatars/' . md5($this->id . uniqid() . microtime()) . '.png';
+        
+        if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
+            $this->attributes['avatar'] = $filename;
+        }
     }
 
     ///////////////////////////////////////////
