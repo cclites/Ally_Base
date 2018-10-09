@@ -148,9 +148,16 @@
                 </div>
             </div>
             <div>
-                <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
-                <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
-                <span>{{ hoverShift.caregiver_email }}</span>
+                <div class="d-flex">
+                    <div class="f-1">
+                        <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
+                        <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
+                        <span>{{ hoverShift.caregiver_email }}</span>
+                    </div>
+                    <div class="ml-auto">
+                        <user-avatar v-if="hoverShift.caregiver" v-model="hoverShift.caregiver.avatar" size="50" />
+                    </div>
+                </div>
             </div>
             <div class="my-2">
                 <b-btn variant="success" @click="editFromPreview()" size="xs"><i class="fa fa-edit"></i> Edit</b-btn>
