@@ -416,6 +416,7 @@
 
             async saveProfile() {
                 await this.form.patch('/business/clients/' + this.client.id)
+                this.preferences.alertOnResponse = false;
                 this.preferences.post('/business/clients/' + this.client.id + '/preferences');
                 if (this.form.ssn) this.form.ssn = '***-**-****';
                 if (this.form.wasModified('onboard_status')) {

@@ -463,5 +463,7 @@ class ClientController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this client.');
         }
         $client->setPreferences($request->validated());
+
+        return new SuccessResponse('Client preferences updated.');
     }
 }
