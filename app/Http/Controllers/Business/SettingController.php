@@ -79,4 +79,46 @@ class SettingController extends BaseController
         return new SuccessResponse('Business settings updated.');
     }
 
+    public function updatePayrollPolicy(Request $request, $id) {
+        $data = $request->all();
+        $business = $this->business();
+        $business->pay_cycle = $data['pay_cycle'];
+        $business->last_day_of_cycle = $data['last_day_of_cycle'];
+        $business->last_day_of_first_period = $data['last_day_of_first_period'];
+        $business->mileage_reimbursement_rate = $data['mileage_reimbursement_rate'];
+        $business->overtime_method = $data['overtime_method'];
+
+        if(!empty($data['unpaired_pay_rates'])) {
+            $business->unpaired_pay_rates = json_encode($data['unpaired_pay_rates']);
+        }
+
+        if(!empty($data['overtime'])) {
+            if(in_array('overtime_hours_day', $data['overtime'])) {
+                $business->overtime_hours_day = $data['overtime_hours_day'];
+            }
+
+            if(in_array('overtime_hours_week', $data['overtime'])) {
+                $business->overtime_hours_week = $data['overtime_hours_week'];
+            }
+
+            if(in_array('overtime_consecutive_days', $data['overtime'])) {
+                $business->overtime_consecutive_days = $data['overtime_consecutive_days'];
+            }
+        }
+
+        if(!empty($data['dbl_overtime'])) {
+            if(in_array('dbl_overtime_hours_day', $data['dbl_overtime'])) {
+                $business->dbl_overtime_hours_day = $data['dbl_overtime_hours_day'];
+            }
+
+            if(in_array('dbl_overtime_consecutive_days', $data['dbl_overtime'])) {
+                $business->dbl_overtime_consecutive_days = $data['dbl_overtime_consecutive_days'];
+            }
+        }
+
+        $business->save();
+
+        return new SuccessResponse('Payroll Policy successfully saved.');
+    }
+
 }

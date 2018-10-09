@@ -12,7 +12,7 @@ export default {
             this.hidePreview();
 
             const acceptableTimeViews = ['timelineDay', 'agendaWeek'];
-            if (!acceptableTimeViews.includes(view.name)) {
+            if (view && !acceptableTimeViews.includes(view.name)) {
                 // timelineWeek and month always show 12am-12am, ignore the times for those views (always use 8am start)
                 start = start.hour(8); end = null;
             }
