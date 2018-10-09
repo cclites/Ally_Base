@@ -63,6 +63,7 @@
                             <option value="Registry">Registry</option>
                             <option value="Agency">Agency</option>
                             <option value="DRA">DRA</option>
+                            <option value="Franchisor">Franchisor</option>
                         </b-form-select>
                         <input-help :form="form" field="type" text="Select provider type"></input-help>
                     </b-form-group>

@@ -92,6 +92,7 @@
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
+
             <div class="row page-titles">
                 <div class="col-md-6 col-lg-8 align-self-center">
                     <h3 class="text-themecolor">@yield('title', 'Dashboard')</h3>
