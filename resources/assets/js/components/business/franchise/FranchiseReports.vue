@@ -2,7 +2,7 @@
     <b-card>
         <b-row>
             <b-table striped hover :items="items" :fields="fields">
-                <template slot="report_name"scope="data">
+                <template slot="report_name" scope="data">
                     <a :href="'#'">
                         {{ data.item.report_name }}
                     </a>
