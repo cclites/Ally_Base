@@ -152,6 +152,10 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
+Vue.component('business-franchisor-dashboard', require('./components/business/franchise/FranchisorDashboard.vue'));
+Vue.component('business-franchisees', require('./components/business/franchise/Franchisees.vue'));
+Vue.component('business-franchise-reports', require('./components/business/franchise/FranchiseReports.vue'));
+Vue.component('business-franchise-payments', require('./components/business/franchise/FranchisePayments.vue'));
 Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
