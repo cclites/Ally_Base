@@ -147,7 +147,7 @@
                     last_day_of_cycle: this.business.last_day_of_cycle ? this.business.last_day_of_cycle : 'last day of every month',
                     last_day_of_first_period: this.business.last_day_of_first_period ? this.business.last_day_of_first_period : '',
                     mileage_reimbursement_rate: this.business.mileage_reimbursement_rate ? this.business.mileage_reimbursement_rate : '',
-                    unpaired_pay_rates: this.business.unpaired_pay_rates ? JSON.parse(this.business.unpaired_pay_rates) : [],
+                    unpaired_pay_rates: this.business.unpaired_pay_rates ? this.business.unpaired_pay_rates : [],
                     overtime: [],
                     overtime_hours_day: '',
                     overtime_hours_week: '',

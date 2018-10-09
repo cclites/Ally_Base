@@ -88,6 +88,10 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     protected $table = 'businesses';
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'unpaired_pay_rates' => 'json',
+    ];
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
