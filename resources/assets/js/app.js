@@ -271,6 +271,9 @@ Vue.component('business-apply-payment', require('./components/business/accountin
 /* Quickbooks API */
 Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
+/* Payroll Policy */
+Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));
+
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
 });
