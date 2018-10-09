@@ -74,11 +74,13 @@
                     this.isEditing = false;
                     this.$emit('input', resp);
                     this.cropBox.hide();
+                    $('#upload').val('');
                 });
             },
 
             clear() {
                 this.$emit('input', '/images/default-avatar.png');
+                $('#upload').val('');
             },
 
             cancel() {

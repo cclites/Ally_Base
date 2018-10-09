@@ -48,11 +48,12 @@
                             <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
+                    <b-form-group label="Date of Birth" label-for="date_of_birth">
+                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
+                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Photo">
-                        <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
-                    </b-form-group>
                     <b-form-group label="Email Address" label-for="email">
                         <b-row>
                             <b-col cols="8">
@@ -89,13 +90,12 @@
                         </b-form-input>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
-                    <b-form-group label="Date of Birth" label-for="date_of_birth">
-                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
-                    </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Photo">
+                        <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
                 </b-col>
             </b-row>
