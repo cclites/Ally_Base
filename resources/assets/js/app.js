@@ -65,6 +65,7 @@ Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
 Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
 Vue.component('shift-map', require('./components/ShiftMap'));
+Vue.component('edit-avatar', require('./components/EditAvatar'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));

@@ -19,6 +19,7 @@ use App\Traits\Request\PaymentMethodRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
 
 class ClientController extends BaseController
 {
@@ -261,7 +262,7 @@ class ClientController extends BaseController
                 $client->onboardStatusHistory()->save($history);
             }
 
-            return new SuccessResponse('The client has been updated.');
+            return new SuccessResponse('The client has been updated.', $client);
         }
         return new ErrorResponse(500, 'The client could not be updated.');
     }
