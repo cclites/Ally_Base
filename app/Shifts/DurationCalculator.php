@@ -43,7 +43,9 @@ class DurationCalculator
     {
         list($in, $out) = $this->getTimes($shift);
         $in->minute(floor(round($in->minute / 60 * 4)) * 15);
+        $in->second(0);
         $out->minute(floor(round($out->minute / 60 * 4)) * 15);
+        $out->second(0);
         return round($in->diffInMinutes($out) / 60, 2);
     }
 
