@@ -256,9 +256,9 @@ Route::group([
     // Route::get('accounting/receivables', 'Business\ReceivablesController@index')->name('accounting.receivables.index');
     // Route::get('accounting/export', 'Business\AccountingExportController@index')->name('accounting.export.index');
 
-    Route::get('franchisees', 'Business\FranchiseController@franchisees')->name('business.franchisees');
-    Route::get('franchise/repots', 'Business\FranchiseController@reports')->name('business.franchise.reports');
-    Route::get('franchise/payments', 'Business\FranchiseController@payments')->name('business.franchise.payments');
+    Route::get('franchisees', 'Business\FranchiseController@franchisees')->name('franchisees');
+    Route::get('franchise/reports', 'Business\FranchiseController@reports')->name('franchise.reports');
+    Route::get('franchise/payments', 'Business\FranchiseController@payments')->name('franchise.payments');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');

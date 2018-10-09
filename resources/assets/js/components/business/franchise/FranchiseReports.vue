@@ -22,11 +22,11 @@
             return {
                 fields: [ 'report_name', 'what_this_reports_show'],
                 items: [
-                    { report_name: 'Franchise Payments Suumay', what_this_reports_show: 'Suumary of payments per franchise'},
-                    { report_name: 'Royalties Suumary', what_this_reports_show: 'Royalties paid/owed'},
-                    { report_name: 'Payments Dispursed', what_this_reports_show: 'Payments Dispursed to franchises'},
+                    { report_name: 'Franchise Payments Summary', what_this_reports_show: 'Summary of payments per franchise'},
+                    { report_name: 'Royalties Summary', what_this_reports_show: 'Royalties paid/owed'},
+                    { report_name: 'Payments Dispersed', what_this_reports_show: 'Payments dispersed to franchises'},
                     { report_name: 'Payments Held', what_this_reports_show: 'Payments held'},
-                    { report_name: 'Franchise Health', what_this_reports_show: 'Visit suumary and growth over period of time'}
+                    { report_name: 'Franchise Health', what_this_reports_show: 'Visit summary and growth over period of time'}
                 ]
             }
         },
