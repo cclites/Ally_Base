@@ -2,6 +2,10 @@
 
 @section('title', $caregiver->name())
 
+@section('avatar')
+    <user-avatar src="{{ $caregiver->avatar }}" title="{{ $caregiver->name() }}" size="50"></user-avatar>
+@endsection
+
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="{{ route('business.caregivers.index') }}">Caregivers</a></li>

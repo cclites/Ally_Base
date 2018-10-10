@@ -155,7 +155,7 @@
                         <span>{{ hoverShift.caregiver_email }}</span>
                     </div>
                     <div class="ml-auto">
-                        <user-avatar v-if="hoverShift.caregiver" v-model="hoverShift.caregiver.avatar" size="50" />
+                        <user-avatar v-if="hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
                     </div>
                 </div>
             </div>

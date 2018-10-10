@@ -65,7 +65,7 @@
                     </b-col>
                     <b-col md="6">
                         <div class="d-flex">
-                            <user-avatar v-if="form.client_id" :value="avatar" size="75" class="ml-auto" />
+                            <user-avatar v-if="form.client_id" :src="avatar" size="75" class="ml-auto" />
                         </div>
                     </b-col>
                 </b-row>

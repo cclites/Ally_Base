@@ -1,13 +1,17 @@
 <template>
-    <div id="avatar-box" class="avatar mb-2" :style="styles">
-        <img :src="value" />
+    <div id="avatar-box" class="avatar" :style="styles">
+        <img :src="src" :title="title" alt="" />
     </div>
 </template>
 
 <script>
     export default {
         props: {
-            value: {
+            src: {
+                type: String,
+                default: '',
+            },
+            title: {
                 type: String,
                 default: '',
             },
