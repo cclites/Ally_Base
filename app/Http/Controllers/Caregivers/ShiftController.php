@@ -30,7 +30,32 @@ class ShiftController extends BaseController
             return redirect()->route('shift.index');
         }
 
-        return view('caregivers.clocked_in');
+        // Get the active shift
+        $shift = $this->caregiver()->getActiveShift();
+
+        // Load the client relationship
+        $shift->load('client');
+
+        // Load the business model because we need the settings
+        $business = $shift->business;
+
+        // Load the available activities
+        $activities = $business->allActivities();
+
+        // load questions related to the current client
+        //$questions = $business->questions()->forType($shift->client->client_type)->get();
+
+        // Load care plan and notes from the schedule (if one exists)
+        $carePlanActivityIds = [];
+        $notes =  '';
+        if ($shift && $shift->schedule) {
+            $notes = $shift->schedule->notes;
+            if ($shift->schedule->carePlan) {
+                $carePlanActivityIds = $shift->schedule->carePlan->activities->pluck('id')->toArray();
+            }
+        }
+
+        return view('caregivers.clocked_in', compact('shift', 'carePlanActivityIds', 'activities'));
     }
 
     public function clockIn(Request $request)
