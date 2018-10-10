@@ -39,6 +39,7 @@ class CreateProspectsTable extends Migration
             $table->boolean('ready_to_schedule')->default(0);
             $table->boolean('closed_loss')->default(0);
             $table->boolean('closed_win')->default(0);
+            $table->unsignedInteger('business_id');
             $table->unsignedInteger('client_id')->nullable();
             $table->timestamps();
         });

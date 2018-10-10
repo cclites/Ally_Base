@@ -4,6 +4,7 @@ namespace App\Traits;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\Prospect;
 use App\Schedule;
 use App\Shift;
 use App\Timesheet;
@@ -46,6 +47,28 @@ trait ActiveBusiness
             return $client->business_id == $this->business()->id;
         }
         return $this->business()->clients()->where('id', $client)->exists();
+    }
+
+    /**
+     * Return true if a business has access to the specified prospect or prospect id
+     *
+     * @param int|\App\Prospect $prospect
+     * @return bool
+     */
+    protected function businessHasProspect($prospect)
+    {
+        if (is_admin()) {
+            // Set active business to prospect's related business and return true for admins
+            if (!$prospect instanceof Prospect) {
+                $prospect = Prospect::find($prospect);
+            }
+            $this->setBusinessAs($prospect->business);
+            return true;
+        }
+        if ($prospect instanceof Prospect) {
+            return $prospect->business_id == $this->business()->id;
+        }
+        return $this->business()->prospects()->where('id', $prospect)->exists();
     }
 
     /**

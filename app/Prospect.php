@@ -17,7 +17,7 @@ class Prospect extends Model
     public static function boot()
     {
         // Add global scope to remove revised shifts from results
-        static::addGlobalScope('ignore_clients', function (Builder $builder) {
+        static::addGlobalScope('ignore_clients', function ($builder) {
             $builder->whereNull('client_id');
         });
     }
@@ -26,14 +26,43 @@ class Prospect extends Model
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);
     }
 
     ///////////////////////////////////////////
+    /// Mutators
+    ///////////////////////////////////////////
+
+    public function getNameAttribute()
+    {
+        return $this->name();
+    }
+
+    public function getNameLastFirstAttribute()
+    {
+        return $this->nameLastFirst();
+    }
+
+    ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
+
+    public function name()
+    {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
+    public function nameLastFirst()
+    {
+        return $this->lastname . ', ' . $this->firstname;
+    }
 
     public function convert($username)
     {
@@ -42,13 +71,14 @@ class Prospect extends Model
         }
 
         return \DB::transaction(function () use ($username) {
-            $client = Client::create([
+            $client = $this->business->clients()->create([
                 'firstname' => $this->firstname,
                 'lastname' => $this->lastname,
                 'username' => $username,
                 'email' => $this->email,
                 'date_of_birth' => $this->date_of_birth,
                 'client_type' => $this->client_type,
+                'password' => bcrypt(str_random(32)),
             ]);
 
             if (!$this->email) {
