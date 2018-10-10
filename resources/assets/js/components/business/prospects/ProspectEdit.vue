@@ -155,7 +155,7 @@
                         <date-picker v-model="form.initial_call_date"></date-picker>
                     </div>
                 </b-col>
-                <b-col lg="4" v-for="(status,text) in statuses">
+                <b-col lg="4" v-for="(status,text) in statuses" :key="status">
                     <label class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input"
                                v-model="form[status]" :true-value="1" :false-value="0">
