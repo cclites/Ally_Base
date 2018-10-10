@@ -30,6 +30,7 @@ Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->na
 Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
 Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
 Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
+Route::post('/twilio/incoming', 'Business\CommunicationController@incoming')->name('twilio.incoming');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
@@ -105,6 +106,7 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
+    Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
@@ -246,12 +248,19 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
     Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
+    Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
+    Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');
+    Route::get('communication/sms-other-replies', 'Business\CommunicationController@otherReplies')->name('communication.sms-other-replies');
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');
     // Route::get('accounting/receivables', 'Business\ReceivablesController@index')->name('accounting.receivables.index');
     // Route::get('accounting/export', 'Business\AccountingExportController@index')->name('accounting.export.index');
-    
+
+    Route::get('franchisees', 'Business\FranchiseController@franchisees')->name('franchisees');
+    Route::get('franchise/reports', 'Business\FranchiseController@reports')->name('franchise.reports');
+    Route::get('franchise/payments', 'Business\FranchiseController@payments')->name('franchise.payments');
+
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
 });

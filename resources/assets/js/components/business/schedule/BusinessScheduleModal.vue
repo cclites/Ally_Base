@@ -9,7 +9,7 @@
                  v-if="!maxHoursWarning"
         >
             <b-card no-body>
-                <b-tabs card v-model="activeTab">
+                <b-tabs card v-model="activeTab" ref="tabs">
                     <b-tab title="Shift Details" id="schedule-main">
                         <b-row>
                             <b-col sm="6">
@@ -31,9 +31,12 @@
                                     <div class="float-right">
                                         <b-btn variant="link" size="sm" @click="toggleCaregivers()">
                                             {{ toggleCaregiversLabel }}
+                                        </b-btn> |
+                                        <b-btn variant="link" size="sm" @click="openCareMatchTab()">
+                                            Find Caregivers
                                         </b-btn>
                                     </div>
-                                    <label for="caregiver_id">Referred Caregiver</label>
+                                    <label for="caregiver_id">Caregiver</label>
                                     <b-form-select
                                             id="caregiver_id"
                                             name="caregiver_id"
@@ -233,6 +236,13 @@
                             </b-col>
                         </b-row>
                     </b-tab>
+                    <b-tab title="Care Match" button-id="care-match-tab">
+                        <business-care-match :clients="clients" :schedule="careMatchSchedule">
+                            <template scope="row">
+                                <b-button size="sm" variant="info" @click="selectCaregiver(row.item.id)">Select Caregiver</b-button>
+                            </template>
+                        </business-care-match>
+                    </b-tab>
                 </b-tabs>
             </b-card>
 
@@ -414,10 +424,28 @@
                     return this.numberFormat(parseInt(this.form.duration) / 60);
                 }
                 return 0;
-            }
+            },
+
+            careMatchSchedule() {
+                return {
+                    starts_at: moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format('YYYY-MM-DD HH:mm:ss'),
+                    duration: this.form.duration,
+                    client_id: this.form.client_id,
+                }
+            },
         },
 
         methods: {
+
+            selectCaregiver(id) {
+                this.cgMode = 'all';
+                this.form.caregiver_id = id;
+                this.activeTab = 0;
+            },
+
+            openCareMatchTab() {
+               this.activeTab = this.$refs.tabs.tabs.length - 1;
+            },
 
             makeForm() {
                 this.form = new Form({
@@ -561,7 +589,6 @@
                     }
                     let start = moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm');
                     let end = moment(this.startDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
-                    console.log(start, end);
                     if (start && end) {
                         if (end.isBefore(start)) {
                             end = end.add(1, 'days');
@@ -684,19 +711,16 @@
                 }
             },
 
-            startTime() {
-                this.form.duration = this.getDuration();
-            },
-
-            endTime() {
-                this.form.duration = this.getDuration();
-            },
-
             startTime(val) {
+                this.form.duration = this.getDuration();
                 if (this.form.daily_rates) {
                     // Lock end time to start time for daily rates
                     this.endTime = val;
                 }
+            },
+
+            endTime() {
+                this.form.duration = this.getDuration();
             },
 
             'form.daily_rates': function(val, old_val) {

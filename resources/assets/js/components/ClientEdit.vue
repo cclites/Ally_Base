@@ -48,6 +48,10 @@
                             <b-form-radio value="F">Female</b-form-radio>
                         </b-form-radio-group>
                     </b-form-group>
+                    <b-form-group label="Date of Birth" label-for="date_of_birth">
+                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
+                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -86,13 +90,12 @@
                         </b-form-input>
                         <input-help :form="form" field="username" text="Enter their username to be used for logins."></input-help>
                     </b-form-group>
-                    <b-form-group label="Date of Birth" label-for="date_of_birth">
-                        <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
-                        <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
-                    </b-form-group>
                     <b-form-group label="Social Security Number" label-for="ssn">
                         <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                         <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Photo">
+                        <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -331,7 +334,8 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
-    
+    window.croppie = require('croppie');
+
     export default {
         props: {
             'client': {},
@@ -373,6 +377,7 @@
                     dr_fax: this.client.dr_fax,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
+                    avatar: this.client.avatar,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
@@ -392,7 +397,6 @@
         },
 
         methods: {
-
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -415,7 +419,10 @@
             },
 
             async saveProfile() {
-                await this.form.patch('/business/clients/' + this.client.id)
+                let response = await this.form.patch('/business/clients/' + this.client.id)
+                this.form.avatar = response.data.data.avatar;
+
+                this.preferences.alertOnResponse = false;
                 this.preferences.post('/business/clients/' + this.client.id + '/preferences');
                 if (this.form.ssn) this.form.ssn = '***-**-****';
                 if (this.form.wasModified('onboard_status')) {

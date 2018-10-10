@@ -5,16 +5,32 @@
         header-bg-variant="info"
     >
         <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
-            <b-form-group>
-                <div class="form-check">
-                    <label class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
-                        <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description">Send to all active Caregivers</span>
-                    </label>
-                    <input-help :form="form" field="accepted_terms" text=""></input-help>
-                </div>
-            </b-form-group>
+            <b-row>
+                <b-col md="6">
+                    <b-form-group>
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Send to all active Caregivers</span>
+                            </label>
+                            <input-help :form="form" field="accepted_terms" text=""></input-help>
+                        </div>
+                    </b-form-group>
+                </b-col>
+                <b-col md="6" class="d-flex">
+                    <b-form-group class="ml-auto">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="can_reply" v-model="form.can_reply" value="1">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Accept Replies</span>
+                            </label>
+                            <input-help :form="form" field="accepted_terms" text=""></input-help>
+                        </div>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-form-group label="Recipients" v-if="! form.all">
                 <user-search-dropdown placeholder="Add Recipient" icon="fa-plus" :formatter="searchDisplay" @selectUser="addUser" type="sms" role="caregiver" :disabled="submitting" />
 
@@ -136,6 +152,7 @@ export default {
         resetForm()
         {
             this.form = new Form({
+                can_reply: 1,
                 all: 0,
                 message: '',
                 recipients: [],

@@ -130,7 +130,7 @@
             ></caregiver-license-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
-            <business-caregiver-availability-tab :caregiver="{{ $caregiver }}"></business-caregiver-availability-tab>
+            <business-caregiver-availability-tab :caregiver="{{ $caregiver }}" updated-by="{{ optional($caregiver->availability->updatedByUser)->name }}"></business-caregiver-availability-tab>
         </div>
         <div class="tab-pane" id="skills" role="tabpanel">
             <business-caregiver-skills-tab :caregiver="{{ $caregiver }}"></business-caregiver-skills-tab>

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
+use App\Rules\Avatar;
 
 class UpdateClientRequest extends FormRequest
 {
@@ -51,6 +52,7 @@ class UpdateClientRequest extends FormRequest
             'dr_fax' => 'nullable|string',
             'hospital_name' => 'nullable|string',
             'hospital_number' => 'nullable|string',
+            'avatar' => ['nullable', new Avatar()],
         ];
     }
 }

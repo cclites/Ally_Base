@@ -6,8 +6,6 @@ use App\Contracts\ChargeableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
-use App\Scheduling\ScheduleAggregator;
-use App\Traits\HasAllyFeeTrait;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -82,11 +80,24 @@ use OwenIt\Auditing\Contracts\Auditable;
 class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, Auditable
 {
     use \App\Traits\HasPaymentHold;
-    use HasAllyFeeTrait;
+    use \App\Traits\HasAllyFeeTrait;
     use \OwenIt\Auditing\Auditable;
 
     protected $table = 'businesses';
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'unpaired_pay_rates' => 'json',
+    ];
+
+    ///////////////////////////////////////////
+    /// Business type constants
+    ///////////////////////////////////////////
+
+    const TYPE_AGENCY = 'Agency';
+    const TYPE_DRA = 'DRA';
+    const TYPE_FRANCHISOR = 'Franchisor';
+    const TYPE_REGISTRY = 'Registry';
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -248,6 +259,16 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Task::class);
     }
 
+    /**
+     * Get the businesses SMS threads relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function smsThreads()
+    {
+        return $this->hasMany(SmsThread::class);
+    }
+    
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

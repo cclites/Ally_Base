@@ -184,4 +184,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     {
         return $this->update(['password' => bcrypt($password)]);
     }
+
+    public function officeUser()
+    {
+        return $this->hasOne('App\OfficeUser', 'id', 'id');
+    }
 }

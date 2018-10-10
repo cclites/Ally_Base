@@ -28,6 +28,25 @@ Vue.use(VueTheMask);
 import VeeValidate from 'vee-validate'
 Vue.use(VeeValidate, {fieldsBagName: '_fields'});
 
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps, {
+    load: {
+        key: window.gmapsKey,
+    },
+
+    //// If you intend to programmatically custom event listener code
+    //// (e.g. `this.$refs.gmap.$on('zoom_changed', someFunc)`)
+    //// instead of going through Vue templates (e.g. `<GmapMap @zoom_changed="someFunc">`)
+    //// you might need to turn this on.
+    // autobindAllEvents: false,
+
+    //// If you want to manually install components, e.g.
+    //// import {GmapMarker} from 'vue2-google-maps/src/components/marker'
+    //// Vue.component('GmapMarker', GmapMarker)
+    //// then disable the following:
+    installComponents: true,
+});
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -45,6 +64,9 @@ Vue.component('select2', require('./components/Select2'));
 Vue.component('submit-button', require('./components/SubmitButton'));
 Vue.component('quick-search', require('./components/QuickSearch'));
 Vue.component('user-search-dropdown', require('./components/UserSearchDropdown'));
+Vue.component('shift-map', require('./components/ShiftMap'));
+Vue.component('edit-avatar', require('./components/EditAvatar'));
+Vue.component('user-avatar', require('./components/UserAvatar'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -132,6 +154,10 @@ Vue.component('business-settings', require('./components/business/BusinessSettin
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
+Vue.component('business-franchisor-dashboard', require('./components/business/franchise/FranchisorDashboard.vue'));
+Vue.component('business-franchisees', require('./components/business/franchise/Franchisees.vue'));
+Vue.component('business-franchise-reports', require('./components/business/franchise/FranchiseReports.vue'));
+Vue.component('business-franchise-payments', require('./components/business/franchise/FranchisePayments.vue'));
 Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
@@ -222,6 +248,9 @@ Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
 Vue.component('business-text-caregivers', require('./components/business/TextCaregivers'));
+Vue.component('business-sms-thread-list', require('./components/business/SmsThreadList'));
+Vue.component('business-sms-thread', require('./components/business/SmsThread'));
+Vue.component('business-sms-reply-table', require('./components/business/SmsReplyTable'));
 Vue.component('business-task-list', require('./components/business/tasks/TaskList'));
 Vue.component('business-task-form', require('./components/business/tasks/TaskForm'));
 Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
@@ -247,6 +276,9 @@ Vue.component('business-apply-payment', require('./components/business/accountin
 
 /* Quickbooks API */
 Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
+
+/* Payroll Policy */
+Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

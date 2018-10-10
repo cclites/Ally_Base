@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Business;
+use App\Caregiver;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,15 +25,34 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->role_type == 'office_user') return redirect()->route('business.schedule.index');
-        if (auth()->user()->role_type == 'client') return redirect()->route('payment-history.index');
-        if (auth()->user()->role_type == 'caregiver') {
-            $caregiver = auth()->user()->role;
-            if ($caregiver->isClockedIn()) {
-                return redirect()->route('clocked_in');
-            }
-            return redirect()->route('schedule');
+        $method = camel_case(auth()->user()->role_type) . 'Dashboard';
+        if (method_exists($this, $method)) {
+            $role = auth()->user()->role;
+            return $this->$method($role);
         }
+
         return view('home');
+    }
+
+    public function officeUserDashboard()
+    {
+        if (activeBusiness()->type === Business::TYPE_FRANCHISOR) {
+            return view('business.dashboard.franchisor');
+        }
+
+        return redirect()->route('business.schedule.index');
+    }
+
+    public function clientDashboard()
+    {
+        return redirect()->route('payment-history.index');
+    }
+
+    public function caregiverDashboard(Caregiver $caregiver)
+    {
+        if ($caregiver->isClockedIn()) {
+            return redirect()->route('clocked_in');
+        }
+        return redirect()->route('schedule');
     }
 }

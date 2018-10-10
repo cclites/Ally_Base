@@ -19,6 +19,7 @@ use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Rules\Avatar;
 
 class CaregiverController extends BaseController
 {
@@ -197,6 +198,7 @@ class CaregiverController extends BaseController
             'misc' => 'nullable|string',
             'medicaid_id' => 'nullable',
             'gender' => 'nullable|in:M,F',
+            'avatar' => ['nullable', new Avatar()],
         ];
 
         if ($request->filled('ssn') && !str_contains($request->ssn, '*')) {
@@ -214,7 +216,7 @@ class CaregiverController extends BaseController
         }
 
         if ($caregiver->update($data)) {
-            return new SuccessResponse('The caregiver has been updated.');
+            return new SuccessResponse('The caregiver has been updated.', $caregiver);
         }
         return new ErrorResponse(500, 'The caregiver could not be updated.');
     }
@@ -365,7 +367,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
         $caregiver->update(['preferences' => $request->input('preferences')]);
-        $caregiver->setAvailability($request->validated());
+        $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
         return new SuccessResponse('Caregiver availability preferences updated');
     }
 

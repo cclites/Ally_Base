@@ -1,0 +1,13 @@
+@extends('layouts.app')
+
+@section('title', 'Franchises')
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active">Reports</li>
+@endsection
+
+@section('content')
+    <business-franchise-reports>
+
+    </business-franchise-reports>
+@endsection

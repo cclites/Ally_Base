@@ -17,13 +17,15 @@
     "browser-sync-webpack-plugin": "^1.2.0",
     "cross-env": "^5.2.0",
     "laravel-mix": "^1.0",
-    "vue-select": "^2.5.1"
+    "vue-select": "^2.5.1",
+    "vue2-google-maps": "0.8.9"
   },
   "dependencies": {
     "axios": "^0.16.2",
     "bootstrap": "4.0.0-beta.2",
     "bootstrap-datepicker": "^1.8.0",
     "bootstrap-vue": "~1.5.1",
+    "croppie": "^2.6.2",
     "fullcalendar": "^3.9.0",
     "fullcalendar-scheduler": "^1.9.4",
     "jquery": "^3.1.1",

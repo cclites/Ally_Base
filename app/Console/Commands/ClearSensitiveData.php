@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\BankAccount;
 use App\Caregiver;
+use App\CaregiverApplication;
 use App\Client;
 use App\CreditCard;
 use App\User;
@@ -58,6 +59,11 @@ class ClearSensitiveData extends Command
                 $this->clearPersonalData($user);
             });
         });
+        CaregiverApplication::chunk(200, function($collection) {
+            $collection->each(function($user) {
+                $this->clearPersonalData($user);
+            });
+        });
 
         // Reset all credit card numbers
         CreditCard::chunk(200, function($collection) {
@@ -78,9 +84,9 @@ class ClearSensitiveData extends Command
         });
     }
 
-    protected function clearPersonalData(Model $user) {
-        $attributes = $user->getAttributes();
-        if (!empty($attributes['ssn'])) {
+    protected function clearPersonalData(Model $user)
+    {
+        if ($user->getOriginal('ssn')) {
             $user->ssn = mt_rand(100,999) . '-' . mt_rand(10,99) . '-' . mt_rand(1000,9999);
         }
         if ($user->date_of_birth) {
@@ -89,10 +95,17 @@ class ClearSensitiveData extends Command
         if ($user->lastname) {
             $user->lastname = $this->faker->lastName;
         }
-        foreach($user->addresses as $address) {
-            $address->address1 = $this->faker->streetAddress;
-            $address->save();
+        else if ($user->last_name) {
+            // for applications
+            $user->last_name = $this->faker->lastName;
         }
+        if ($user->addresses) {
+            foreach($user->addresses as $address) {
+                $address->address1 = $this->faker->streetAddress;
+                $address->save();
+            }
+        }
+
         $user->save();
     }
 }

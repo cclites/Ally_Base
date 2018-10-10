@@ -148,9 +148,16 @@
                 </div>
             </div>
             <div>
-                <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
-                <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
-                <span>{{ hoverShift.caregiver_email }}</span>
+                <div class="d-flex">
+                    <div class="f-1">
+                        <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
+                        <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
+                        <span>{{ hoverShift.caregiver_email }}</span>
+                    </div>
+                    <div class="ml-auto">
+                        <user-avatar v-if="hoverShift.caregiver" v-model="hoverShift.caregiver.avatar" size="50" />
+                    </div>
+                </div>
             </div>
             <div class="my-2">
                 <b-btn variant="success" @click="editFromPreview()" size="xs"><i class="fa fa-edit"></i> Edit</b-btn>
@@ -359,7 +366,8 @@
                     events = events.filter(event => {
                         return this.statusFilters.includes(event.status)
                                 || this.statusFilters.includes(event.shift_status)
-                                || (this.statusFilters.includes('OPEN') && event.caregiver_id == 0);
+                                // Open shifts are calculated from the cg canceled status or a missing cg assignment
+                                || (this.statusFilters.includes('OPEN') && (event.caregiver_id == 0 || event.status === 'CAREGIVER_CANCELED'))
                     });
                 }
 
@@ -667,6 +675,7 @@
                     .then( ({ data }) => {
                         this.events = data.events.map(event => {
                             event.resourceId = event[this.resourceIdField];
+                            event.backgroundColor = this.getEventBackground(event);
                             return event;
                         });
                         // this.kpis = data.kpis;
@@ -686,10 +695,15 @@
                     return item.id === id;
                 });
                 if (event) {
-                    event.backgroundColor = data.backgroundColor;
+                    event.backgroundColor = this.getEventBackground(data);
                     event.note = data.note;
                     event.status = data.status;
                 }
+            },
+
+            getEventBackground(event) {
+                // Todo:  Remove this logic from the backend events response
+                return event.caregiver_id == 0 ? '#d9c01c' : event.backgroundColor;
             },
 
             loadFiltersData() {
