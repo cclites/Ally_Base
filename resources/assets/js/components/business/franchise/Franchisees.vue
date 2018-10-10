@@ -2,7 +2,7 @@
     <b-card>
         <b-row>
             <b-col md="12" class="mb-2">
-                <h3 class="">Latest Payments</h3>
+                <h3 class="">Offices</h3>
             </b-col>
             <b-table striped hover :items="items" :fields="fields">
 
@@ -12,6 +12,8 @@
 </template>
 
 <script>
+    import DemoFranchisor from "../../../classes/DemoFranchisor";
+
     export default {
         props: {
 
@@ -19,12 +21,8 @@
 
         data() {
             return {
-                fields: [ 'name', 'location', 'address', 'phone_number', 'owner', 'last_active'],
-                items: [
-                    { name: 'Test', location: 'address', phone_number: '551285142', owner: 'xxx', last_active: '?'},
-                    { name: 'Test', location: 'address', phone_number: '551285142', owner: 'xxx', last_active: '?'},
-                    { name: 'Test', location: 'address', phone_number: '551285142', owner: 'xxx', last_active: '?'}
-                ]
+                fields: [ 'name', 'address', 'phone_number', 'owner', 'last_active'],
+                items: DemoFranchisor.getFranchises(),
             }
         },
 

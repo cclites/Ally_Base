@@ -109,6 +109,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ProspectSeeder::class,
+            FranchisorSeeder::class,
         ]);
     }
 }
