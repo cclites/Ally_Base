@@ -261,6 +261,9 @@ Route::group([
     Route::get('franchise/reports', 'Business\FranchiseController@reports')->name('franchise.reports');
     Route::get('franchise/payments', 'Business\FranchiseController@payments')->name('franchise.payments');
 
+    Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
+    Route::resource('prospects', 'Business\ProspectController');
+
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
 });

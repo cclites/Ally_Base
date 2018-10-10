@@ -180,16 +180,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasOne(PaymentHold::class, 'business_id');
     }
 
-    public function upcomingPayments()
+    public function prospects()
     {
-        return $this->hasMany(PaymentQueue::class);
+        return $this->hasMany(Prospect::class, 'business_id');
     }
 
-    /**
-     * Get the office users relation.
-     *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function users()
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');
