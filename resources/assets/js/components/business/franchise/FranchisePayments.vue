@@ -37,6 +37,9 @@
         <b-row>
             <b-table striped hover :items="items" :fields="fields">
                 <template scope="row" slot="action">
+                    <b-button  size="sm" class="mr-2">
+                        View Details
+                    </b-button>
                     <b-button variant="success" size="sm" class="mr-2">
                         Disperse
                     </b-button>
