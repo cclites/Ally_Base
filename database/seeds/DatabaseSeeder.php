@@ -106,5 +106,10 @@ class DatabaseSeeder extends Seeder
             $shift->save();
             $deposits->shuffle()->first()->shifts()->attach($shift);
         });
+
+        $this->call([
+            ProspectSeeder::class,
+            FranchisorSeeder::class,
+        ]);
     }
 }

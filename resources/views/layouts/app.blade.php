@@ -95,10 +95,18 @@
 
             <div class="row page-titles">
                 <div class="col-md-6 col-lg-8 align-self-center">
-                    <h3 class="text-themecolor">@yield('title', 'Dashboard')</h3>
-                    <ol class="breadcrumb">
-                        @yield('breadcrumbs')
-                    </ol>
+                    @hasSection('avatar')
+                        <div class="row">
+                            <div class="col-lg-1 mt-2">
+                                @yield('avatar')
+                            </div>
+                            <div class="col-lg-11">
+                                @include('layouts.partials.breadcrumbs')
+                            </div>
+                        </div>
+                    @else
+                        @include('layouts.partials.breadcrumbs')
+                    @endif
                 </div>
                 <div class="col-md-6 col-lg-4 hidden-xs-down pt-3">
                     @if (in_array(auth()->user()->role_type, ['admin', 'office_user']))

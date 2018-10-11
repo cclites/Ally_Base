@@ -2,6 +2,10 @@
 
 @section('title', $caregiver->name())
 
+@section('avatar')
+    <user-avatar src="{{ $caregiver->avatar }}" title="{{ $caregiver->name() }}" size="50"></user-avatar>
+@endsection
+
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="{{ route('business.caregivers.index') }}">Caregivers</a></li>
@@ -130,7 +134,7 @@
             ></caregiver-license-list>
         </div>
         <div class="tab-pane" id="availability" role="tabpanel">
-            <business-caregiver-availability-tab :caregiver="{{ $caregiver }}" @if($caregiver->availability) updated-by="{{ optional($caregiver->availability->updatedByUser)->name }}" @endif></business-caregiver-availability-tab>
+            <business-caregiver-availability-tab :caregiver="{{ $caregiver }}" updated-by="{{ $caregiver->availability->updatedByUser->name ?? '' }}"></business-caregiver-availability-tab>
         </div>
         <div class="tab-pane" id="skills" role="tabpanel">
             <business-caregiver-skills-tab :caregiver="{{ $caregiver }}"></business-caregiver-skills-tab>

@@ -1,6 +1,6 @@
 <template>
     <b-card class="mt-5">
-        <b-row class="pt-5">
+        <b-row class="pt-5" v-if="false">
             <b-col md="3">
                 <b-form-group label="Start Date">
                     <date-picker></date-picker>
@@ -51,7 +51,12 @@
 
 <script>
 
+    import DemoFranchisor from "../../../classes/DemoFranchisor";
+    import FormatsNumbers from "../../../mixins/FormatsNumbers";
+
     export default {
+        mixins: [FormatsNumbers],
+
         props: {
 
         },
@@ -60,12 +65,20 @@
             return {
                 filterFranchise: null,
                 filterFranchiseLoc: null,
-                fields: [ 'date', 'franchise', 'total_amount', 'royalty_owed', 'action'],
-                items: [
-                    { date: '10/1/18', franchise: 'Griswold Broward Fl', total_amount: '$10,350.00', royalty_owed: '$517.50'},
-                    { date: '10/1/18', franchise: 'Griswold Broward Fl', total_amount: '$10,350.00', royalty_owed: '$517.50'},
-                    { date: '10/1/18', franchise: 'Griswold Broward Fl', total_amount: '$10,350.00', royalty_owed: '$517.50'}
-                ]
+                fields: [
+                    'date',
+                    'office',
+                    {
+                        key: 'total_amount',
+                        formatter: val => this.moneyFormat(val),
+                    },
+                    {
+                        key: 'royalty_owed',
+                        formatter: val => this.moneyFormat(val),
+                    },
+                    'action'
+                ],
+                items: DemoFranchisor.getPayments(),
             }
         },
 
