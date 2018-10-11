@@ -143,6 +143,8 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <hr />
+            <h4>Prospect Status</h4>
             <b-row>
                 <b-col lg="12">
                     <div class="form-check form-inline">
