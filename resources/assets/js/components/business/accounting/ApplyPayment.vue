@@ -60,16 +60,13 @@
 
             <div class="mb-3">
                 <b-row>
-                    <b-col lg="4" class="mb-2">
-                        <label for="check_total">Total Check Amount: $</label>
-                        <input id="check_total" type="text" class="form-control" value="0.00" style="width: auto!important" />
-                    </b-col>
-                    <b-col lg="4" class="mb-2">
-                        <input type="text" class="form-control" value="" placeholder="Check ID" />
-                        <!-- <h3>Total Check Amount: $2,350.20</h3> -->
-                    </b-col>
-                    <b-col lg="4">
-                        <b-btn variant="success">Apply Payment</b-btn>
+                    <b-col lg="12" class="mb-2">
+                        <div class="form-inline">
+                            <label for="check_total">Total Check Amount: $</label>
+                            <input id="check_total" type="text" class="form-control mr-1" value="0.00" style="width: auto!important" />
+                            <input type="text" class="form-control mr-1" value="" placeholder="Check ID" />
+                            <b-btn variant="success">Apply Payment</b-btn>
+                        </div>
                     </b-col>
                 </b-row>
             </div>
