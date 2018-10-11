@@ -506,8 +506,8 @@ class ScheduleController extends BaseController
 
         $data['start_date'] = $schedule->starts_at->toDateTimeString();
         $data['end_date'] = $schedule->starts_at->addMinutes($schedule->duration)->toDateTimeString();
-        $data['client_address'] = optional($schedule->client->evvAddress)->fullAddress;
-        $data['caregiver_address'] = optional($schedule->caregiver->address)->fullAddress;
+        $data['client_address'] = $schedule->client->evvAddress->fullAddress ?? null;
+        $data['caregiver_address'] = $schedule->caregiver->address->fullAddress ?? null;
 
         return response()->json($data);
     }
