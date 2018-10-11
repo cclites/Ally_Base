@@ -20,6 +20,8 @@
             <clocked-in
                     :shift="{{ $shift }}"
                     :activities="{{ $activities }}"
+                    :schedule="{{ $schedule ?? '{}' }}"
+                    :care-plan="{{ $carePlan ?? '{}' }}"
                     :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"
             />
         </div>
