@@ -71,11 +71,11 @@ class Prospect extends Model
         }
 
         return \DB::transaction(function () use ($username) {
-            $client = $this->business->clients()->create([
+            $client = $this->business->clients()->make([
                 'firstname' => $this->firstname,
                 'lastname' => $this->lastname,
                 'username' => $username,
-                'email' => $this->email,
+                'email' => $this->email ?: (new Client)->getAutoEmail(),  // temporary until we have their ID below
                 'date_of_birth' => $this->date_of_birth,
                 'client_type' => $this->client_type,
                 'password' => bcrypt(str_random(32)),
