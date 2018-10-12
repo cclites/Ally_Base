@@ -26,6 +26,10 @@
                     <th>Notes</th>
                     <td>{{ transaction.deposit.notes }}</td>
                 </tr>
+                <tr v-if="transaction.payment && transaction.payment.notes">
+                    <th>Notes</th>
+                    <td>{{ transaction.payment.notes }}</td>
+                </tr>
             </table>
         </b-card>
 
