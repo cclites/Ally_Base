@@ -131,13 +131,17 @@
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
 
-        <div v-show="preview" 
-            id="preview" 
-            class="preview-window" 
+        <div v-show="preview"
+            id="preview"
+            class="preview-window"
             :style="{ top: previewTop, left: previewLeft }"
         >
             <div class="d-flex">
-                <div class="f-1">
+                <div class="f-1" v-if="userRolType == 'caregiver'">
+                    <h4 v-if="hoverShift.client"><a :href="`/business/clients/${hoverShift.client.id}`">{{ hoverShift.client.name }}</a></h4>
+                    <h4 v-else>OPEN</h4>
+                </div>
+                <div class="f-1" v-else>
                     <h4 v-if="hoverShift.caregiver_name"><a :href="`/business/caregivers/${hoverShift.caregiver_id}`">{{ hoverShift.caregiver_name }}</a></h4>
                     <h4 v-else>OPEN</h4>
                 </div>
@@ -149,7 +153,11 @@
             </div>
             <div>
                 <div class="d-flex">
-                    <div class="f-1">
+                    <div class="f-1"  v-if="userRolType == 'caregiver'">
+                        <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
+                        <span  v-if=" hoverShift.client">{{ hoverShift.client.email }}</span>
+                    </div>
+                    <div class="f-1" v-else>
                         <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
                         <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
                         <span>{{ hoverShift.caregiver_email }}</span>
@@ -200,6 +208,7 @@
             'business': Object,
             'caregiver': Object,
             'client': Object,
+            'userRolType': String,
             'defaultView': {
                 default() {
                     return 'timelineWeek';
@@ -565,7 +574,7 @@
 
                     let availableWidth = document.documentElement.clientWidth - $('#schedule-card').offset().left;
                     let availableHeight = document.documentElement.clientHeight - $('#schedule-card').offset().top + document.documentElement.scrollTop;
-                  
+
                     if (left + $('#preview').outerWidth() > availableWidth) {
                         left = left - $('#preview').outerWidth() + target.width();
                     }
@@ -590,14 +599,14 @@
                                 if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
                                     e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
                                         return;
-                                } 
+                                }
 
                                 if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
                                     e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
                                         return;
                                 }
                             }
-                            
+
                             this.preview = false;
                             document.body.removeEventListener('mousemove', handler);
                         }.bind(this);
@@ -632,7 +641,6 @@
 
             setScrollPosition() {
                 if (this.scroll.top !== null) {
-                    console.log('setScrollPosition called');
                     this.scrollSelector().scrollTop(this.scroll.top);
                     this.scrollSelector().scrollLeft(this.scroll.left);
                 }

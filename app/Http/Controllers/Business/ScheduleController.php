@@ -21,6 +21,7 @@ use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends BaseController
 {
