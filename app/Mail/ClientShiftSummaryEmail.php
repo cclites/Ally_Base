@@ -41,8 +41,8 @@ class ClientShiftSummaryEmail extends Mailable
         $this->shifts = $shifts;
         $this->total = $total;
         $this->business = $business;
-        $this->confirmUrl = 'http://ally.test';
-        $this->modifyUrl = 'http://ally.test';
+        $this->confirmUrl = config('app.url') . '/confirm-shifts';
+        $this->modifyUrl = config('app.url') . '/modify-shifts';
     }
 
     /**

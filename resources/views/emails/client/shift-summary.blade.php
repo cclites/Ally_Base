@@ -10,7 +10,7 @@ Your home care service week is finished. Please review and confirm your pending 
 @endforeach
 @endcomponent
 
-## Total pending charge:  ${{ number_format($total, 2) }}   
+## Total pending charge:  ${{ $total }}   
 
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>
