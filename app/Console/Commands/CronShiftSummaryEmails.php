@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Mail\ClientShiftSummaryEmail;
 use App\Shift;
+use Illuminate\Support\Str;
+use App\ShiftConfirmationToken;
+use App\ShiftConfirmation;
 
 class CronShiftSummaryEmails extends Command
 {
@@ -86,17 +89,22 @@ class CronShiftSummaryEmails extends Command
                     'total' => number_format($total, 2),
                 ]);
             }
-            
-            $runningTotal = number_format($runningTotal, 2);
-            $this->dispatchEmail($client, $report, $runningTotal, $business);
 
+            $confirmToken = ShiftConfirmation::create([
+                'client_id' => $client->id,
+                'token' => Str::random(64),
+            ]);
+            $confirmToken->shifts()->sync(collect($report)->pluck('id'));
+
+            \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
+                $client, 
+                $report, 
+                number_format($runningTotal, 2), 
+                $business, 
+                $confirmToken->token
+            ));
+            
             // break; // <----------------- for testing
         }
-    }
-
-    public function dispatchEmail($client, $shifts, $total, $business)
-    {
-        \Mail::to($client->email)
-            ->send(new ClientShiftSummaryEmail($client, $shifts, $total, $business));
     }
 }
