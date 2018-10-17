@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::view('check-my-time', 'check-my-time');
-
+Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken');
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
 Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');

@@ -33,11 +33,11 @@ class ClientShiftSummaryEmail extends Mailable
     public $total;
 
     /**
-     * The business of the client.
+     * The business name of the client.
      *
      * @var App\Business
      */
-    public $business;
+    public $businessName;
 
     /**
      * The shift confirmation token.
@@ -65,12 +65,12 @@ class ClientShiftSummaryEmail extends Mailable
      *
      * @return void
      */
-    public function __construct($client, $shifts, $total, $business, $token)
+    public function __construct($client, $shifts, $total, $businessName, $token)
     {
         $this->client = $client;
         $this->shifts = $shifts;
         $this->total = $total;
-        $this->business = $business;
+        $this->businessName = $businessName;
         $this->token = $token;
         $this->confirmUrl = config('app.url') . "/confirm-shifts/$token";
         $this->modifyUrl = config('app.url') . '/modify-shifts';

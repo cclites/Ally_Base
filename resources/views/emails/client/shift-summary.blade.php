@@ -1,4 +1,4 @@
-@component('mail::message', ['header' => $business->name . ' - Powered by Ally'])
+@component('mail::message', ['header' => $businessName . ' - Powered by Ally'])
 ## Hello {{ $client->firstname }},
 
 Your home care service week is finished. Please review and confirm your pending charge for home care visits. These visits will be charged to your account on file in 24 hours.
@@ -6,11 +6,12 @@ Your home care service week is finished. Please review and confirm your pending 
 @component('mail::table')
 | Date            | Caregiver            | Hours            | Rate             | Total             |
 |-----------------|----------------------|------------------|------------------|-------------------|
-@foreach ($shifts as $s)  | {{$s['date']}}  | {{ str_replace('*', '\*', $s['caregiver']) }}  | {{$s['hours']}}  | ${{$s['rate']}}  | ${{$s['total']}}  |
+@foreach ($shifts as $s)  | {{$s->date->format('m/d/Y')}}  | {{ str_replace('*', '\*', $s->caregiver) }}  | {{$s->hours}}  | ${{number_format($s->rate, 2)}}  | ${{number_format($s->total, 2)}}  |
 @endforeach
 @endcomponent
 
-## Total pending charge:  ${{ $total }}   
+
+## <center>Total pending charge:  ${{ number_format($total, 2) }}</center>
 
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>

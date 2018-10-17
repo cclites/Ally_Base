@@ -8,6 +8,7 @@ use App\Shift;
 use Illuminate\Support\Str;
 use App\ShiftConfirmationToken;
 use App\ShiftConfirmation;
+use App\Reports\UnconfirmedShiftsReport;
 
 class CronShiftSummaryEmails extends Command
 {
@@ -40,68 +41,30 @@ class CronShiftSummaryEmails extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(UnconfirmedShiftsReport $report)
     {
-        $unconfirmedShifts = Shift::with(['client', 'caregiver', 'business'])
-            ->whereUnconfirmed()
-            ->orderBy('checked_in_time', 'asc')
-            ->get();
+        $unconfirmedShifts = $report->includeClockedIn()
+            ->forEmail()
+            ->rows()
+            ->groupBy('client_id');
 
-        $shiftsByClient = [];
+        foreach ($unconfirmedShifts as $client_id => $shifts) {
+            $client = $shifts->first()->client;
+            $businessName = $shifts->first()->business_name;
+            $total = $shifts->sum('total');
 
-        foreach ($unconfirmedShifts as $shift) {
-            if (! $shift->business->shift_confirmation_email) {
-                // if business doesn't choose to send these emails, skip
-                continue;
-            }
-
-            if ($shift->status == Shift::CLOCKED_IN && ! $shift->business->sce_shifts_in_progress) {
-                // if business does not choose to include in progress shifts, skip
-                continue;
-            }
-
-            if (array_key_exists($shift->client_id, $shiftsByClient)) {
-                array_push($shiftsByClient[$shift->client_id], $shift);
-            } else {
-                $shiftsByClient[$shift->client_id] = [$shift];
-            }
-        }
-
-        $runningTotal = 0.0;
-        foreach ($shiftsByClient as $client_id => $shifts) {
-            $client = null;
-            $business = null;
-            $report = [];
-
-            foreach ($shifts as $s) {
-                $client = $s->client;
-                $business = $s->business;
-
-                $total = floatval($s->hours) * floatval($s->caregiver_rate);
-                $runningTotal += $total;
-
-                array_push($report, [
-                    'id' => $s->id,
-                    'date' => $s->checked_in_time->format('m/d/Y'),
-                    'caregiver' => $s->caregiver->user->maskedName,
-                    'hours' => $s->hours,
-                    'rate' => number_format($s->caregiver_rate, 2),
-                    'total' => number_format($total, 2),
-                ]);
-            }
-
-            $confirmToken = ShiftConfirmation::create([
+            $confirmation = ShiftConfirmation::create([
                 'client_id' => $client->id,
                 'token' => Str::random(64),
             ]);
-            $confirmToken->shifts()->sync(collect($report)->pluck('id'));
+            $confirmation->shifts()->sync($shifts->pluck('id'));
 
             \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
-                $client, 
-                $report, 
-                number_format($runningTotal, 2), 
-                $business, 
-                $confirmToken->token
+                $client,
+                $shifts,
+                $total,
+                $businessName,
+                $confirmation->token
             ));
             
             // break; // <----------------- for testing
