@@ -62,7 +62,7 @@ class UpdateBusinessRequest extends FormRequest
             'allow_client_confirmations' => 'required|bool',
             'auto_confirm_modified' => 'required|bool',
             'shift_confirmation_email' => 'required|bool',
-            'sce_shift_progress' => 'required|bool',
+            'sce_shifts_in_progress' => 'required|bool',
             'charge_diff_email' => 'required|bool',
             'auto_append_hours' => 'required|bool',
             'auto_confirm_unmodified_shifts' => 'required|bool',

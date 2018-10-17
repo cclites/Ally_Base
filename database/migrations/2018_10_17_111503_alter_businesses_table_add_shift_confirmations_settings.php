@@ -17,7 +17,7 @@ class AlterBusinessesTableAddShiftConfirmationsSettings extends Migration
             $table->boolean('allow_client_confirmations')->default(1);
             $table->boolean('auto_confirm_modified')->default(1);
             $table->boolean('shift_confirmation_email')->default(1);
-            $table->boolean('sce_shift_progress')->default(1);
+            $table->boolean('sce_shifts_in_progress')->default(1);
             $table->boolean('charge_diff_email')->default(0);
             $table->boolean('auto_append_hours')->default(1);
             $table->boolean('auto_confirm_unmodified_shifts')->default(0);
@@ -37,7 +37,7 @@ class AlterBusinessesTableAddShiftConfirmationsSettings extends Migration
                 'allow_client_confirmations',
                 'auto_confirm_modified',
                 'shift_confirmation_email',
-                'sce_shift_progress',
+                'sce_shifts_in_progress',
                 'charge_diff_email',
                 'auto_append_hours',
                 'auto_confirm_unmodified_shifts',

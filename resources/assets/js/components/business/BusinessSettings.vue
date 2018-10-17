@@ -323,7 +323,7 @@
             <b-tab title="Shift Confirmations">
                 <b-row>
                     <b-col lg="6">
-                        <b-form-group label="Allow clients to confirm and modify shifts" label-for="allow_client_confirmations">
+                        <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
                             <b-form-select id="allow_client_confirmations"
                                 v-model="businessSettings.allow_client_confirmations"
                             >
@@ -331,7 +331,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Automatically confirm shifts that clients modify" label-for="auto_confirm_modified">
+                        <b-form-group label="Automatically confirm visits that clients modify" label-for="auto_confirm_modified">
                             <b-form-select id="auto_confirm_modified"
                                 v-model="businessSettings.auto_confirm_modified"
                             >
@@ -339,7 +339,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Send client summary shifts confirmation and pending charge email Monday of each week" label-for="shift_confirmation_email">
+                        <b-form-group label="Send client summary visits confirmation and pending charge email Monday of each week" label-for="shift_confirmation_email">
                             <b-form-select id="shift_confirmation_email"
                                 v-model="businessSettings.shift_confirmation_email"
                             >
@@ -348,9 +348,9 @@
                             </b-form-select>
                         </b-form-group>
                         <div class="pl-5">
-                            <b-form-group label="Include shifts progress" label-for="sce_shift_progress">
-                                <b-form-select id="sce_shift_progress"
-                                    v-model="businessSettings.sce_shift_progress"
+                            <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
+                                <b-form-select id="sce_shifts_in_progress"
+                                    v-model="businessSettings.sce_shifts_in_progress"
                                 >
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
@@ -363,7 +363,7 @@
                         </div>
                     </b-col>
                     <b-col lg="6">
-                        <b-form-group label="Send follow up email to client if total charge differs after modifying and/or adding shifts" label-for="charge_diff_email">
+                        <b-form-group label="Send follow up email to client if total charge differs after modifying and/or adding visits" label-for="charge_diff_email">
                             <b-form-select id="charge_diff_email"
                                 v-model="businessSettings.charge_diff_email"
                             >
@@ -371,7 +371,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Automatically append hours to shifts in progress even after client confirms" label-for="auto_append_hours">
+                        <b-form-group label="Automatically append hours to visits in progress even after client confirms" label-for="auto_append_hours">
                             <b-form-select id="auto_append_hours"
                                 v-model="businessSettings.auto_append_hours"
                             >
@@ -379,7 +379,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Automatically confirm all shifts if clients do not modify" label-for="auto_confirm_unmodified_shifts">
+                        <b-form-group label="Automatically confirm all visits if clients do not modify" label-for="auto_confirm_unmodified_shifts">
                             <b-form-select id="auto_confirm_unmodified_shifts"
                                 v-model="businessSettings.auto_confirm_unmodified_shifts"
                             >
@@ -387,7 +387,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Automatically confirm shifts that are successfully verified via GPS or telephony" label-for="auto_confirm_verified_shifts">
+                        <b-form-group label="Automatically confirm visits that are successfully verified via GPS or telephony" label-for="auto_confirm_verified_shifts">
                             <b-form-select id="auto_confirm_verified_shifts"
                                 v-model="businessSettings.auto_confirm_verified_shifts"
                             >
@@ -395,7 +395,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                         </b-form-group>
-                        <b-form-group label="Automatically confirm all shifts" label-for="auto_confirm">
+                        <b-form-group label="Automatically confirm all visits" label-for="auto_confirm">
                             <b-form-select id="auto_confirm"
                                 v-model="businessSettings.auto_confirm"
                             >
@@ -477,7 +477,7 @@
                     allow_client_confirmations: this.business.allow_client_confirmations,
                     auto_confirm_modified: this.business.auto_confirm_modified,
                     shift_confirmation_email: this.business.shift_confirmation_email,
-                    sce_shift_progress: this.business.sce_shift_progress,
+                    sce_shifts_in_progress: this.business.sce_shifts_in_progress,
                     charge_diff_email: this.business.charge_diff_email,
                     auto_append_hours: this.business.auto_append_hours,
                     auto_confirm_unmodified_shifts: this.business.auto_confirm_unmodified_shifts,
