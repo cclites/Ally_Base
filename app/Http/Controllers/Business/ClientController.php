@@ -186,8 +186,6 @@ class ClientController extends BaseController
 
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
-        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -207,6 +205,9 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
+
+        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $business = $this->business();
 
         return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
     }
