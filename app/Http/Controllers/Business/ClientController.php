@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
+use App\ReferralSource;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -215,8 +216,10 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
+        $client->referralSource;
 
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
+        $referralsources = ReferralSource::all();
+        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business', 'referralsources'));
     }
 
     public function edit(Client $client)

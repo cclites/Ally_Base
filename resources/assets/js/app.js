@@ -277,6 +277,8 @@ Vue.component('quickbooks-client-mapping', require('./components/business/quickb
 Vue.component('quickbooks-caregiver-mapping', require('./components/business/quickbooks/tabs/CaregiverMapping'));
 
 Vue.component('business-apply-payment', require('./components/business/accounting/ApplyPayment'));
+Vue.component('client-referal', require('./components/business/referal/ClientReferal'));
+Vue.component('add-client-referal', require('./components/business/referal/AddClientReferal'));
 
 /* Quickbooks API */
 Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));

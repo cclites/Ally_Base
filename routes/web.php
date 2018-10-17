@@ -266,6 +266,10 @@ Route::group([
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
+
+    Route::get('client-referal', 'Business\ClientReferralController@clientReferal')->name('clientReferal');
+    Route::get('add/client-referal', 'Business\ClientReferralController@addClientReferal')->name('addClientReferal');
+    Route::post('add/client-referal', 'Business\ClientReferralController@createReferralSource');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

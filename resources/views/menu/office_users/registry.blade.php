@@ -120,8 +120,8 @@
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="#">List Sources</a></li>
-        <li><a href="#">Add Source</a></li>
+        <li><a href="{{ route('business.clientReferal') }}">List Sources</a></li>
+        <li><a href="{{ route('business.addClientReferal') }}">Add Source</a></li>
     </ul>
 </li>
 <li>

@@ -104,9 +104,22 @@
                     <b-form-group label="Date inquired about Service">
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
-                    <b-form-group label="How were they referred?">
-                        <b-form-input id="referral" v-model="form.referral"></b-form-input>
-                    </b-form-group>
+                    <b-row>
+                        <b-col md="9">
+                            <b-form-group label="How were they referred?" label-for="referral">
+                                <b-form-select id="referral"
+                                               v-model="form.referral_source_id"
+                                >
+                                    <option :value="referralsource.id" v-for="referralsource in referralsources">{{ referralsource.organization }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="3" class="pad-top">
+                            <div class="pt-3">
+                                <b-btn  @click="show = true">Add Referral Source</b-btn>
+                            </div>
+                        </b-col>
+                    </b-row>
                     <b-form-group>
                         <b-form-checkbox id="ambulatory"
                                          v-model="form.ambulatory"
@@ -327,6 +340,10 @@
             v-model="activateModal">
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
+
+        <b-modal v-model="show" id="addreferralsource" hide-footer>
+            <add-client-referal @refsource="newrefsourcedata" :show-status="true" @closemodal="closemodal"></add-client-referal>
+        </b-modal>
     </b-card>
 </template>
 
@@ -341,6 +358,7 @@
             'client': {},
             'lastStatusDate' : {},
             'confirmUrl': {},
+            'referralsources': {}
         },
 
         mixins: [ClientForm, FormatsDates],
@@ -363,7 +381,7 @@
                     onboard_status: this.client.onboard_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
-                    referral: this.client.referral,
+                    referral_source_id: this.client.referral_source ? this.client.referral_source.id : null,
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
@@ -389,6 +407,7 @@
                 deactivateModal: false,
                 activateModal: false,
                 inactive_at: '',
+                show: false,
             }
         },
 
@@ -397,6 +416,18 @@
         },
 
         methods: {
+            newrefsourcedata(data) {
+                if(data) {
+                    this.show = false;
+                    this.referralsources.push(data);
+                    this.form.referral_source_id = data.id;
+                }
+            },
+
+            closemodal(status) {
+                this.show = status;
+            },
+
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -465,3 +496,9 @@
 
     }
 </script>
+
+<style scoped>
+    .pad-top {
+        padding-top: 16px;
+    }
+</style>
