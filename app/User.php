@@ -146,6 +146,20 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         return $this->nameLastFirst();
     }
 
+    public function getMaskedNameAttribute()
+    {
+        $first = $this->firstname;
+        if (strlen($first) > 1) {
+            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        }
+
+        $last = $this->lastname;
+        if (strlen($last) > 1) {
+            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        }
+        return "$first $last";
+    }
+    
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
