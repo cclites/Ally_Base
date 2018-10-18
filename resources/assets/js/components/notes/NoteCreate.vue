@@ -10,7 +10,7 @@
                                 v-model="form.caregiver_id"
                         >
                             <option value="">--Select--</option>
-                            <option :value="caregiver.id" v-for="caregiver in business.caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
+                            <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                     </b-form-group>
@@ -21,7 +21,7 @@
                                 v-model="form.client_id"
                         >
                             <option value="">--Select--</option>
-                            <option :value="client.id" v-for="client in business.clients" :key="client.id">{{ client.name }}</option>
+                            <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.name }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_id" text="Select a client."></input-help>
                     </b-form-group>
@@ -64,6 +64,8 @@
 
         data() {
             return {
+                clients: this.business.clients || [],
+                caregivers: this.business.caregivers || [],
                 form: new Form({
                     business_id: this.business.id,
                     caregiver_id: '',
@@ -75,7 +77,22 @@
             }
         },
 
+        mounted() {
+            if (!this.clients.length) this.loadClients();
+            if (!this.caregivers.length) this.loadCaregivers();
+        },
+
         methods: {
+            async loadClients() {
+                const response = await axios.get('/business/clients?json=1');
+                this.clients = response.data;
+            },
+
+            async loadCaregivers() {
+                const response = await axios.get('/business/caregivers?json=1');
+                this.caregivers = response.data;
+            },
+
             async saveNote() {
                 this.submitting = true;
                 try {
