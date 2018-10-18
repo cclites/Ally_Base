@@ -80,6 +80,16 @@
                                           v-model="form.poa_relationship"></b-form-input>
                         </b-form-group>
                     </b-col>
+                    <b-col lg="12">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="receive_summary_email" v-model="form.receive_summary_email" :true-value="1" :false-value="0">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Receive the weekly shift summary email</span>
+                            </label>
+                            <input-help :form="form" field="receive_summary_email" text=""></input-help>
+                        </div>
+                    </b-col>
                 </b-row>
             </template>
             <b-row>
@@ -112,7 +122,8 @@
                     poa_first_name: this.client.poa_first_name,
                     poa_last_name: this.client.poa_last_name,
                     poa_phone: this.client.poa_phone,
-                    poa_relationship: this.client.poa_relationship
+                    poa_relationship: this.client.poa_relationship,
+                    receive_summary_email: this.client.receive_summary_email,
                 })
             }
         },

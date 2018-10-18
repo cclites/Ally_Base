@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddClientTypeDescriptorToClients extends Migration
+class AddReceiveSummaryEmailToClients extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddClientTypeDescriptorToClients extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('client_type_descriptor')->nullable();
+            $table->boolean('receive_summary_email')->default(1);
         });
     }
 
@@ -26,7 +26,7 @@ class AddClientTypeDescriptorToClients extends Migration
     public function down()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->dropColumn('client_type_descriptor');
+            $table->boolean('receive_summary_email')->default(1);
         });
     }
 }

@@ -51,15 +51,17 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
-        $poa_fields = ['poa_first_name', 'poa_last_name', 'poa_phone', 'poa_relationship'];
-        $data = $request->except($poa_fields);
+        $data = $request->validated();
 
         if(auth()->user()->role_type == 'client') {
-            $client_data = $request->only($poa_fields);
-            if(!empty($client_data)) {
-                $client = Client::find(auth()->id());
-                $client->update($client_data);
-            }
+            $client_data = request()->validate([
+                'poa_first_name' => 'nullable|string',
+                'poa_last_name' => 'nullable|string',
+                'poa_phone' => 'nullable|string',
+                'poa_relationship' => 'nullable|string',
+                'receive_summary_email' => 'boolean',
+            ]);
+            auth()->user()->role->update($client_data);
         }
 
         $data['date_of_birth'] = filter_date($data['date_of_birth']);
