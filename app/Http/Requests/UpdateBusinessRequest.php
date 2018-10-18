@@ -59,6 +59,14 @@ class UpdateBusinessRequest extends FormRequest
             'medicaid_id' => 'nullable',
             'medicaid_npi_number' => 'nullable',
             'medicaid_npi_taxonomy' => 'nullable',
+            'allow_client_confirmations' => 'required|bool',
+            'auto_confirm_modified' => 'required|bool',
+            'shift_confirmation_email' => 'required|bool',
+//            'sce_shifts_in_progress' => 'required|bool',
+//            'charge_diff_email' => 'required|bool',
+//            'auto_append_hours' => 'required|bool',
+//            'auto_confirm_unmodified_shifts' => 'required|bool',
+//            'auto_confirm_verified_shifts' => 'required|bool',
         ];
     }
 

@@ -20,7 +20,7 @@
                             </b-form-input>
                             <input-help :form="businessSettings" field="mileageRate" text="Enter the amount reimbursed for each mile, 0 will disable mileage reimbursements"></input-help>
                         </b-form-group>
-                        <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
+                        <!-- <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
                             <b-form-select id="auto_confirm"
                                            v-model="businessSettings.auto_confirm"
                             >
@@ -28,8 +28,8 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
-                        </b-form-group>
-                        <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
+                        </b-form-group> -->
+                        <!-- <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
                             <b-form-select id="ask_on_confirm"
                                            v-model="businessSettings.ask_on_confirm"
                             >
@@ -37,7 +37,7 @@
                                 <option value="1">Yes</option>
                             </b-form-select>
                             <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
-                        </b-form-group>
+                        </b-form-group> -->
 
                         <b-form-group label="Allow Manual Timesheets" label-for="allows_manual_shifts">
                             <b-form-select id="allows_manual_shifts"
@@ -69,8 +69,6 @@
                             <input-help :form="businessSettings" field="location_exceptions" text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
                         </b-form-group>
 
-                    </b-col>
-                    <b-col lg="6">
                         <b-form-group label="Shift Rounding Method" label-for="shift_rounding_method">
                             <b-form-select id="shift_rounding_method"
                                            v-model="businessSettings.shift_rounding_method"
@@ -81,7 +79,8 @@
                             </b-form-select>
                             <input-help :form="businessSettings" field="shift_rounding_method" text="Select the methodology used to round the number of hours worked on each shift."></input-help>
                         </b-form-group>
-
+                    </b-col>
+                    <b-col lg="6">
                         <b-form-group label="Scheduling" label-for="scheduling">
                             <b-form-select id="scheduling"
                                            v-model="businessSettings.scheduling"
@@ -321,6 +320,132 @@
             <b-tab title="Payroll Policy" v-if="business.type == 'Agency'">
                 <payroll-policy :business="business"></payroll-policy>
             </b-tab>
+            <b-tab title="Shift Confirmations">
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
+                            <b-form-select id="allow_client_confirmations"
+                                v-model="businessSettings.allow_client_confirmations"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Automatically confirm visits that clients modify" label-for="auto_confirm_modified">
+                            <b-form-select id="auto_confirm_modified"
+                                v-model="businessSettings.auto_confirm_modified"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Send client summary visits confirmation and pending charge email Monday of each week" label-for="shift_confirmation_email">
+                            <b-form-select id="shift_confirmation_email"
+                                v-model="businessSettings.shift_confirmation_email"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <!--<div class="pl-5">-->
+                            <!--<b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">-->
+                                <!--<b-form-select id="sce_shifts_in_progress"-->
+                                    <!--v-model="businessSettings.sce_shifts_in_progress"-->
+                                <!--&gt;-->
+                                    <!--<option value="0">No</option>-->
+                                    <!--<option value="1">Yes</option>-->
+                                <!--</b-form-select>-->
+                            <!--</b-form-group>-->
+                        <!--</div>-->
+                        <!--<div>-->
+                            <!--<small class="form-text text-muted">Shift Confirmation Email Example:</small>-->
+                            <!--<img src="/images/shift-confirmation-email-example.png" style="max-width: 100%" />-->
+                        <!--</div>-->
+                    </b-col>
+
+                    <!-- Temporary:  Remove this column and uncomment the one below once 563 is completed -->
+                    <b-col lg="6">
+                        <b-form-group label="Auto-Confirm Shifts" label-for="auto_confirm">
+                            <b-form-select id="auto_confirm"
+                                           v-model="businessSettings.auto_confirm"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
+                        </b-form-group>
+                        <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
+                            <b-form-select id="ask_on_confirm"
+                                           v-model="businessSettings.ask_on_confirm"
+                            >
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </b-form-select>
+                            <input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>
+                        </b-form-group>
+                    </b-col>
+
+                    <!--<b-col lg="6">-->
+                        <!--<b-form-group label="Send follow up email to client if total charge differs after modifying and/or adding visits" label-for="charge_diff_email">-->
+                            <!--<b-form-select id="charge_diff_email"-->
+                                <!--v-model="businessSettings.charge_diff_email"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                        <!--</b-form-group>-->
+                        <!--<b-form-group label="Automatically append hours to visits in progress even after client confirms" label-for="auto_append_hours">-->
+                            <!--<b-form-select id="auto_append_hours"-->
+                                <!--v-model="businessSettings.auto_append_hours"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                        <!--</b-form-group>-->
+                        <!--<b-form-group label="Automatically confirm all visits if clients do not modify" label-for="auto_confirm_unmodified_shifts">-->
+                            <!--<b-form-select id="auto_confirm_unmodified_shifts"-->
+                                <!--v-model="businessSettings.auto_confirm_unmodified_shifts"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                        <!--</b-form-group>-->
+                        <!--<b-form-group label="Automatically confirm visits that are successfully verified via GPS or telephony" label-for="auto_confirm_verified_shifts">-->
+                            <!--<b-form-select id="auto_confirm_verified_shifts"-->
+                                <!--v-model="businessSettings.auto_confirm_verified_shifts"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                        <!--</b-form-group>-->
+                        <!--<b-form-group label="Automatically confirm all visits" label-for="auto_confirm">-->
+                            <!--<b-form-select id="auto_confirm"-->
+                                <!--v-model="businessSettings.auto_confirm"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                            <!--<input-help :form="businessSettings" field="auto_confirm" class="text-warning" text="Note: This may lead to billing errors and unhappy clients."></input-help>-->
+                        <!--</b-form-group>-->
+                        <!--<b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">-->
+                            <!--<b-form-select id="ask_on_confirm"-->
+                                           <!--v-model="businessSettings.ask_on_confirm"-->
+                            <!--&gt;-->
+                                <!--<option value="0">No</option>-->
+                                <!--<option value="1">Yes</option>-->
+                            <!--</b-form-select>-->
+                            <!--<input-help :form="businessSettings" field="ask_on_confirm" text="Display a confirmation box before confirming or unconfirming a shift."></input-help>-->
+                        <!--</b-form-group>-->
+                    <!--</b-col>-->
+                </b-row>
+                <b-row>
+                    <b-col>
+                        <b-btn @click="update" variant="info">
+                            Save
+                        </b-btn>
+                    </b-col>
+                </b-row>
+            </b-tab>
         </b-tabs>
     </b-card>
 </template>
@@ -372,6 +497,14 @@
                     medicaid_id: this.business.medicaid_id,
                     medicaid_npi_number: this.business.medicaid_npi_number,
                     medicaid_npi_taxonomy: this.business.medicaid_npi_taxonomy,
+                    allow_client_confirmations: this.business.allow_client_confirmations,
+                    auto_confirm_modified: this.business.auto_confirm_modified,
+                    shift_confirmation_email: this.business.shift_confirmation_email,
+                    sce_shifts_in_progress: this.business.sce_shifts_in_progress,
+                    charge_diff_email: this.business.charge_diff_email,
+                    auto_append_hours: this.business.auto_append_hours,
+                    auto_confirm_unmodified_shifts: this.business.auto_confirm_unmodified_shifts,
+                    auto_confirm_verified_shifts: this.business.auto_confirm_verified_shifts,
                 }),
                 timezones: [
                     "America/New_York",
