@@ -131,7 +131,7 @@ class ImportCaregivers extends BaseImport
      */
     protected function warningMessage()
     {
-        return 'Importing clients into ' . $this->business()->name . '..';
+        return 'Importing caregivers into ' . $this->business()->name . '..';
     }
 
     /**
