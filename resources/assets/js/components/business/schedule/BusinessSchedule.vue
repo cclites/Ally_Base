@@ -163,8 +163,8 @@
                         <span>{{ hoverShift.caregiver.email }}</span>
                     </div>
                     <div class="ml-auto">
-                        <user-avatar v-if="caregiverView && hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
-                        <user-avatar v-else-if="!caregiverView && hoverShift.client" :src="hoverShift.client.avatar" size="50" />
+                        <user-avatar v-if="caregiverView && hoverShift.client" :src="hoverShift.client.avatar" size="50" />
+                        <user-avatar v-else-if="!caregiverView && hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
                     </div>
                 </div>
             </div>
