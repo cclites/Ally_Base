@@ -40,7 +40,7 @@
                 
                 <div class="m-5 text-center"><h3>Total Pending Charge: ${{ number_format($total, 2) }}</h3></div>
                 <div class="text-center">
-                    <b-btn variant="success" size="lg">Confirm These Shifts Now</b-btn>
+                    <b-btn variant="success" size="lg" href="/confirm-shifts/all/{{ $token->token }}">Confirm These Shifts Now</b-btn>
                 </div>
             </b-card>
         @endif

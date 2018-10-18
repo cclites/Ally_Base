@@ -20,9 +20,7 @@ class ConfirmShiftsController extends Controller
      */
     public function confirmToken(Request $request, $token, UnconfirmedShiftsReport $report)
     {
-        $token = ShiftConfirmation::where('token', $token)->first();
-
-        if (empty($token)) {
+        if (! $token = ShiftConfirmation::findToken($token)) {
             throw new ModelNotFoundException("Invalid Confirmation Token");
         }
 
@@ -44,6 +42,30 @@ class ConfirmShiftsController extends Controller
             ->rows();
 
         $total = $unconfirmedShifts->sum('total');
+        return view('shift-confirmation.thank-you', compact(['token', 'confirmed', 'unconfirmedShifts', 'total']));
+    }
+
+    /**
+     * Confirm all unconfirmed shifts related to the client who owns the token.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function confirmAllWithToken(Request $request, $token, UnconfirmedShiftsReport $report)
+    {
+        if (! $token = ShiftConfirmation::findToken($token)) {
+            throw new ModelNotFoundException("Invalid Confirmation Token");
+        }
+
+        $shifts = $token->client->shifts()
+            ->where('status', Shift::WAITING_FOR_CONFIRMATION)
+            ->get()
+            ->each(function ($shift) {
+                $shift->update(['status' => Shift::WAITING_FOR_AUTHORIZATION]);
+            });
+
+        $confirmed = true;
+        $unconfirmedShifts = [];
+        $total = 0;
         return view('shift-confirmation.thank-you', compact(['token', 'confirmed', 'unconfirmedShifts', 'total']));
     }
 }

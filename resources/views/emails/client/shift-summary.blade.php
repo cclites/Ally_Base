@@ -21,12 +21,12 @@ Your home care service week is finished. Please review and confirm your pending 
                     <td align="center">
                         <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td style="padding-right: 50px">
+                                <td>
                                     <a href="{{ $confirmUrl }}" class="button button-green" target="_blank">Confirm</a>
                                 </td>
-                                <td style="padding-left: 50px">
+                                {{-- <td style="padding-left: 50px">
                                     <a href="{{ $modifyUrl }}" class="button button-blue" target="_blank">Modify</a>
-                                </td>
+                                </td> --}}
                             </tr>
                         </table>
                     </td>

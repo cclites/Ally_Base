@@ -5,6 +5,7 @@ namespace App\Reports;
 use App\Shift;
 use Carbon\Carbon;
 use App\Shifts\ShiftStatusManager;
+use App\Business;
 
 class UnconfirmedShiftsReport extends BaseReport
 {
@@ -85,6 +86,23 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
+     * Get the businesses that are set up to send shift confirmation emails.
+     * Returns an empty array if report is not for email.
+     *
+     * @return array
+     */
+    public function getIncludedBusinessIds()
+    {
+        if ($this->for_email) {
+            return Business::where('shift_confirmation_email', true)
+                ->get()
+                ->pluck('id');
+        }
+
+        return [];
+    }
+
+    /**
      * Get the statuses classified as unconfirmed according to the report settings.
      *
      * @return array
@@ -102,16 +120,12 @@ class UnconfirmedShiftsReport extends BaseReport
     protected function results()
     {
         return $this->query()
+            ->forBusinesses($this->getIncludedBusinessIds())
             ->forClient($this->client)
             ->whereIn('status', $this->getUnconfirmedStatuses())
             ->get()
             ->filter(function (Shift $s) {
                 if ($this->for_email) {
-                    if (! $s->business->shift_confirmation_email) {
-                        // if business doesn't choose to send these emails, skip
-                        return false;
-                    }
-
                     if ($s->status == Shift::CLOCKED_IN && ! $s->business->sce_shifts_in_progress) {
                         // if business does not choose to include in progress shifts, skip
                         return false;
@@ -130,8 +144,8 @@ class UnconfirmedShiftsReport extends BaseReport
                     'business_name' => $s->business->name,
                     'caregiver' => $s->caregiver->user->maskedName,
                     'hours' => $s->hours,
-                    'rate' => $s->caregiver_rate,
-                    'total' => $total,
+                    'rate' => $s->costs()->getTotalHourlyCost(),
+                    'total' => $s->costs()->getTotalCost(),
                 ];
             });
     }

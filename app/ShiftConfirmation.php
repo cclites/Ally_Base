@@ -29,4 +29,27 @@ class ShiftConfirmation extends Model
     {
         return $this->belongsToMany(Shift::class, 'shift_confirmation_shifts');
     }
+
+    /**
+     * Get the client relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+    */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get ShiftConfirmation by token.
+     *
+     * @param string $token
+     * @return \App\ShiftConfirmation|null
+     */
+    public static function findToken($token)
+    {
+        return self::with('shifts', 'client')
+            ->where('token', $token)
+            ->first();
+    }
 }
