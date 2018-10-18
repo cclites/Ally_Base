@@ -4,27 +4,27 @@ namespace App\Console\Commands;
 
 use App\Address;
 use App\Business;
-use App\Client;
+use App\Caregiver;
 use App\EmergencyContact;
 use App\Note;
 use App\PhoneNumber;
 use App\User;
 
-class ImportClients extends BaseImport
+class ImportCaregivers extends BaseImport
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'import:clients {business_id} {file}';
+    protected $signature = 'import:caregivers {business_id} {file}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import an excel export of clients into the system.';
+    protected $description = 'Import an excel export of caregivers into the system.';
 
     /**
      * @var \App\Business
@@ -55,14 +55,15 @@ class ImportClients extends BaseImport
         $data = [
             'firstname' => $this->resolve('First Name', $row),
             'lastname' => $this->resolve('Last Name', $row),
+            'title' => $this->resolve('Classification', $row),
             'ssn' => $this->resolve('SSN', $row),
             'date_of_birth' => $this->resolve('Date of Birth', $row),
-            'client_type' => $this->resolve('Client Type', $row),
             'username' => $this->resolve('Email', $row),
             'email' => $this->resolve('Email', $row),
-            'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),
-            'password' => bcrypt(str_random(12)),
+            'hire_date' => $this->resolve('Hire Date', $row),
+            'gender' => $this->resolve('Gender', $row),
             'active' => $this->resolve('Active', $row) ?? 1,
+            'password' => bcrypt(str_random(12)),
         ];
 
         // Prevent Duplicates
@@ -76,11 +77,11 @@ class ImportClients extends BaseImport
             $noemail = true;
         }
 
-        /** @var Client $client */
-        $client = $this->business()->clients()->create($data);
-        if ($client) {
+        /** @var Caregiver $caregiver */
+        $caregiver = $this->business()->caregivers()->create($data);
+        if ($caregiver) {
             // Replace placeholder email
-            if (isset($noemail)) $client->setAutoEmail()->save();
+            if (isset($noemail)) $caregiver->setAutoEmail()->save();
 
             // Create Address
             $addressData = [
@@ -93,7 +94,7 @@ class ImportClients extends BaseImport
                 'type' => 'evv',
             ];
             $address = new Address($addressData);
-            $client->addresses()->save($address);
+            $caregiver->addresses()->save($address);
 
             // Create Phone Numbers
             try {
@@ -102,7 +103,7 @@ class ImportClients extends BaseImport
                     $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
                     $phone = new PhoneNumber(['type' => $type]);
                     $phone->input($number);
-                    $client->phoneNumbers()->save($phone);
+                    $caregiver->phoneNumbers()->save($phone);
                 }
             }
             catch (\Exception $e) {}
@@ -111,7 +112,7 @@ class ImportClients extends BaseImport
             for($i = 1; $i <= 3; $i++) {
                 if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
                     EmergencyContact::create([
-                        'user_id' => $client->id,
+                        'user_id' => $caregiver->id,
                         'name' => $emergencyName,
                         'phone_number' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
                         'relationship' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
@@ -122,14 +123,14 @@ class ImportClients extends BaseImport
             // Create Note
             if ($officeNote = $this->resolve("OfficeNote", $row)) {
                 $officeUser = $this->business()->users()->first();
-                $client->notes()->save(new Note([
+                $caregiver->notes()->save(new Note([
                     'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
                     'created_by' => $officeUser->id,
                     'business_id' => $this->business()->id,
                 ]));
             }
 
-            return $client;
+            return $caregiver;
         }
 
         return false;
@@ -178,15 +179,19 @@ class ImportClients extends BaseImport
         return null;
     }
 
-    protected function resolveClientType(int $row, $cellValue)
+    protected function resolveClassification(int $row, $cellValue)
     {
-        if (ends_with($cellValue, ['LTC', 'LTCI'])) {
-            return 'LTCI';
+        if (starts_with($cellValue, 'Home Health')) {
+            return 'HHA';
         }
-        if (ends_with($cellValue, 'Private Pay')) {
-            return 'private_pay';
+        if (starts_with($cellValue, 'Certified Nurs')) {
+            return 'CNA';
         }
-        return strtolower($cellValue);
+        if (strlen($cellValue) > 4) {
+            // too long to be a normal title, ignore
+            return '';
+        }
+        return strtoupper($cellValue);
     }
 
     protected function resolveFirstName(int $row, $cellValue)
