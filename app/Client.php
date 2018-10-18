@@ -151,6 +151,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'ltci_fax',
         'medicaid_id',
         'medicaid_diagnosis_codes',
+        'client_type_descriptor',
     ];
 
     ///////////////////////////////////////////
