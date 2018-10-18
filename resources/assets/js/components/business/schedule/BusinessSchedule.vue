@@ -137,25 +137,34 @@
             :style="{ top: previewTop, left: previewLeft }"
         >
             <div class="d-flex">
-                <div class="f-1">
-                    <h4 v-if="hoverShift.caregiver_name"><a :href="`/business/caregivers/${hoverShift.caregiver_id}`">{{ hoverShift.caregiver_name }}</a></h4>
+                <div class="f-1" v-if="caregiverView">
+                    <h4 v-if="hoverShift.client"><a :href="`/business/clients/${hoverShift.client.id}`">{{ hoverShift.client.nameLastFirst }}</a></h4>
+                </div>
+                <div class="f-1" v-else>
+                    <h4 v-if="hoverShift.caregiver"><a :href="`/business/caregivers/${hoverShift.caregiver.id}`">{{ hoverShift.caregiver.nameLastFirst }}</a></h4>
                     <h4 v-else>OPEN</h4>
                 </div>
                 <div class="ml-auto" v-if="hoverShift.client_address">
-                    <a v-if="! hoverShift.caregiver_name" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
+                    <a v-if="! hoverShift.caregiver" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
                     <a v-if="! hoverShift.caregiver_address" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                     <a v-else :href="`https://www.google.com/maps/dir/${encodeURI(hoverShift.caregiver_address)}/${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                 </div>
             </div>
             <div>
                 <div class="d-flex">
-                    <div class="f-1">
+                    <div class="f-1" v-if="caregiverView && hoverShift.client">
+                        <span v-if="hoverShift.client_phone">{{ hoverShift.client_phone }}</span>
+                        <br v-if="hoverShift.client_phone && hoverShift.client.email" />
+                        <span>{{ hoverShift.client.email }}</span>
+                    </div>
+                    <div class="f-1" v-else-if="hoverShift.caregiver">
                         <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
-                        <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
-                        <span>{{ hoverShift.caregiver_email }}</span>
+                        <br v-if="hoverShift.caregiver_phone && hoverShift.caregiver.email" />
+                        <span>{{ hoverShift.caregiver.email }}</span>
                     </div>
                     <div class="ml-auto">
-                        <user-avatar v-if="hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
+                        <user-avatar v-if="caregiverView && hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
+                        <user-avatar v-else-if="!caregiverView && hoverShift.client" :src="hoverShift.client.avatar" size="50" />
                     </div>
                 </div>
             </div>
