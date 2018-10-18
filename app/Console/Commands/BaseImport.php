@@ -65,7 +65,6 @@ abstract class BaseImport extends Command
     {
         $this->output->writeln($this->warningMessage() . ' (Hit CTRL+C to cancel)..');
         sleep(3);
-        die("test");
 
         $this->loadSheet();
         $lastRow = (int) $this->getRowCount($this->sheet);

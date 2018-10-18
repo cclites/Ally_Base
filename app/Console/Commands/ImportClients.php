@@ -189,6 +189,13 @@ class ImportClients extends BaseImport
         return strtolower($cellValue);
     }
 
+    protected function resolveEmail(int $row, $cellValue) {
+        if (filter_var($cellValue, FILTER_VALIDATE_EMAIL)) {
+            return $cellValue;
+        }
+        return null;
+    }
+
     protected function resolveFirstName(int $row, $cellValue)
     {
         if ($cellValue) return $cellValue;

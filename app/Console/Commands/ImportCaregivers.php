@@ -91,7 +91,7 @@ class ImportCaregivers extends BaseImport
                 'state' => $this->resolve('State', $row),
                 'zip' => $this->resolve('Zip', $row) ?: $this->resolve('PostalCode', $row),
                 'country' => 'US',
-                'type' => 'evv',
+                'type' => 'home',
             ];
             $address = new Address($addressData);
             $caregiver->addresses()->save($address);
@@ -107,18 +107,6 @@ class ImportCaregivers extends BaseImport
                 }
             }
             catch (\Exception $e) {}
-
-            // Create Emergency Contacts
-            for($i = 1; $i <= 3; $i++) {
-                if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
-                    EmergencyContact::create([
-                        'user_id' => $caregiver->id,
-                        'name' => $emergencyName,
-                        'phone_number' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
-                        'relationship' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
-                    ]);
-                }
-            }
 
             // Create Note
             if ($officeNote = $this->resolve("OfficeNote", $row)) {
@@ -192,6 +180,13 @@ class ImportCaregivers extends BaseImport
             return '';
         }
         return strtoupper($cellValue);
+    }
+
+    protected function resolveEmail(int $row, $cellValue) {
+        if (filter_var($cellValue, FILTER_VALIDATE_EMAIL)) {
+            return $cellValue;
+        }
+        return null;
     }
 
     protected function resolveFirstName(int $row, $cellValue)
