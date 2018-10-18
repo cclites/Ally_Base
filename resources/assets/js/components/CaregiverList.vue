@@ -6,9 +6,9 @@
             </b-col>
             <b-col lg="3">
                 <b-form-select v-model="active">
-                    <option value="all">All Caregivers</option>
-                    <option value="active">Active Caregivers</option>
-                    <option value="inactive">Inactive Caregivers</option>
+                    <option :value="null">All Caregivers</option>
+                    <option :value="1">Active Caregivers</option>
+                    <option :value="0">Inactive Caregivers</option>
                 </b-form-select>
             </b-col>
             <b-col lg="3" v-if="multi_location.multiLocationRegistry == 'yes'">
@@ -22,47 +22,54 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
-            >
-                <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <b-btn size="sm" :href="'/business/caregivers/' + row.item.id">
-                        <i class="fa fa-edit"></i>
-                    </b-btn>
-                </template>
-            </b-table>
+        <loading-card v-show="loading"></loading-card>
+        <div v-if="!loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                         :items="caregivers"
+                         :fields="fields"
+                         :current-page="currentPage"
+                         :per-page="perPage"
+                         :filter="filter"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                         @filtered="onFiltered"
+                >
+                    <template slot="actions" scope="row">
+                        <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
+                        <b-btn size="sm" :href="'/business/caregivers/' + row.item.id">
+                            <i class="fa fa-edit"></i>
+                        </b-btn>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
         </div>
 
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
     </b-card>
 </template>
 
 <script>
+    import FormatsListData from "../mixins/FormatsListData";
+
     export default {
+        mixins: [FormatsListData],
+
         props: {
-            'caregivers': Array,
             'multi_location': Object,
         },
 
         data() {
             return {
-                active: 'active',
+                active: 1,
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -73,6 +80,7 @@
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 location: 'all',
+                caregivers: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -88,6 +96,7 @@
                         key: 'email',
                         label: 'Email Address',
                         sortable: true,
+                        formatter: this.formatEmail,
                     },
                     {
                         key: 'primaryphone',
@@ -114,12 +123,13 @@
                         key: 'actions',
                         class: 'hidden-print'
                     }
-                ]
+                ],
+                loading: false,
             }
         },
 
         mounted() {
-            this.totalRows = this.items.length;
+            this.loadCaregivers();
             if(this.multi_location.multiLocationRegistry == 'yes') {
                 document.querySelectorAll('.location').forEach(elem => {
                     elem.classList.remove('d-none');
@@ -128,36 +138,25 @@
         },
 
         computed: {
-            items() {
-                let component = this;
-                let caregivers = this.caregivers.map(function(caregiver) {
-                    return {
-                        id: caregiver.id,
-                        firstname: caregiver.user.firstname,
-                        lastname: caregiver.user.lastname,
-                        email: caregiver.user.email,
-                        primaryphone: component.getPhone(caregiver).number,
-                        zipcode: component.getAddress(caregiver).zip,
-                        city: component.getAddress(caregiver).city,
-                        location: component.multi_location.name,
-                        active: caregiver.user.active
-                    }
-                })
-
-                return _.filter(caregivers, function (caregiver) {
-                    switch (component.active) {
-                        case 'all':
-                            return true;
-                        case 'active':
-                            return caregiver.active;
-                        case 'inactive':
-                            return !caregiver.active;
-                    }
-                })
+            listUrl() {
+                let active = (this.active !== null) ? this.active : '';
+                return '/business/caregivers?json=1&address=1&phone_number=1&active=' + active;
             },
         },
 
         methods: {
+            async loadCaregivers() {
+                this.loading = true;
+                const response = await axios.get(this.listUrl);
+                this.caregivers = response.data.map(caregiver => {
+                    caregiver.primaryphone = this.getPhone(caregiver).number;
+                    caregiver.zipcode = this.getAddress(caregiver).zip;
+                    caregiver.city = this.getAddress(caregiver).city;
+                    caregiver.location = this.multi_location.name;
+                    return caregiver;
+                });
+                this.loading = false;
+            },
             getAddress(caregiver)
             {
                 if (caregiver.address) {
@@ -188,6 +187,12 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            }
+        },
+
+        watch: {
+            listUrl() {
+                this.loadCaregivers();
             }
         }
     }
