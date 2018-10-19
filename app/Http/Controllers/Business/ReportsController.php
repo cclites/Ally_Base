@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\ReferralSource;
+use App\Shifts\ShiftStatusManager;
 use Auth;
 use App\BankAccount;
 use App\Business;
@@ -567,6 +569,7 @@ class ReportsController extends BaseController
                 $report->query()->wherePending();
             }
         }
+
     }
 
     public function exportTimesheets()
@@ -726,7 +729,40 @@ class ReportsController extends BaseController
      */
     public function referralSources()
     {
-        return view('business.reports.referral_sources');
+        $business = $this->business();
+        $reports = [];
+
+        $shiftstatuses = ShiftStatusManager::getPendingStatuses();
+
+        if($business) {
+            $referralsources = ReferralSource::where('business_id', $business->id)
+                ->withCount('client', 'prospect')->with(['client.shifts' => function($query) use($shiftstatuses){
+                    $query->whereNotIn('status', $shiftstatuses)->get();
+                }])->get();
+
+            if($referralsources) {
+                foreach($referralsources as $referralsource) {
+                    $reports[] = [
+                        "id" => $referralsource->id,
+                        "business_id" => $referralsource->business_id,
+                        "organization" => $referralsource->organization,
+                        "contact_name" => $referralsource->contact_name,
+                        "phone" => $referralsource->phone,
+                        "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
+                        "client_count" => $referralsource->client_count,
+                        "prospect_count" => $referralsource->prospect_count,
+                        "shift_total" => ($referralsource->client->map(function($item) {
+                               return $item->shifts->map(function($shift) {
+                                   return number_format($shift->costs()->getTotalCost(), 2);
+                               })->sum();
+                        }))->sum()
+                    ];
+                }
+            }
+        }
+
+        $reports = collect($reports);
+        return view('business.reports.referral_sources', compact('reports'));
     }
 
     /**

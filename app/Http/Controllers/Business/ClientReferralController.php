@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\ReferralSource;
 use Validator;
 
-class ClientReferralController extends Controller
+class ClientReferralController extends BaseController
 {
     public function clientReferal() {
         $referralsources = ReferralSource::all();
@@ -29,10 +29,14 @@ class ClientReferralController extends Controller
         if($validatedData->fails()) {
             return response()->json(['errors'=> $validatedData->errors()]);
         }
-        $refsourc = ReferralSource::create($request->all());
 
-        if($refsourc) {
-            return response()->json(['status' => 1, 'refsourc' => $refsourc]);
+        if($this->business()) {
+            $refsourc = new ReferralSource();
+            $refsourc->fill(['business_id' => $this->business()->id]);
+            $refsourc->fill($request->all());
+            if($refsourc->save()) {
+                return response()->json(['status' => 1, 'refsourc' => $refsourc]);
+            }
         }
     }
 }
