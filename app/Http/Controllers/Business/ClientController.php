@@ -186,8 +186,6 @@ class ClientController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             },
         ]);
-        $schedules = $client->schedules()->get();
-
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
@@ -213,7 +211,7 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
     }
 
     public function edit(Client $client)
