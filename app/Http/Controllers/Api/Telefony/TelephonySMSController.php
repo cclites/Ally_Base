@@ -64,7 +64,8 @@ class TelephonySMSController extends BaseTelefonyController
             return $this->xmlResponse('<error>Failed to record reply</error>', 500);
         }
 
-        return $this->xmlResponse('<success>Reply recorded.</success>', 201);
+        // Empty twiml response for now
+        return $this->telefony->response();
     }
 
 }
