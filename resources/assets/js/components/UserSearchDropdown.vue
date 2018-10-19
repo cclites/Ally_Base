@@ -14,7 +14,7 @@
 
         <div v-show="isSearching" class="search-results">
             <b-dropdown-item v-if="options.length == 0">{{ noResultsText }}</b-dropdown-item>
-            <b-dropdown-item v-else v-for="item in options" :key="item.id" @click.prevent="onClick(item)">
+            <b-dropdown-item v-else v-for="item in options" :key="item.id" @click.prevent="onClick(item)" @focus.prevent="onClick(item)">
                 {{ formatter(item) }}
             </b-dropdown-item>
         </div>
@@ -48,7 +48,7 @@ export default {
         },
         clearOnSubmit: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         formatter: {
             type: Function,
