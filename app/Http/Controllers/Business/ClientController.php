@@ -43,12 +43,15 @@ class ClientController extends BaseController
             if ($request->input('active', 1) !== null) {
                 $query->where('active', $request->input('active', 1));
             }
-            // Use query string ?address=1&phone_number=1 if data is needed
+            // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
             if ($request->input('phone_number')) {
                 $query->with('phoneNumber');
+            }
+            if ($request->input('care_plans')) {
+                $query->with('carePlans');
             }
 
             return $query->get();
@@ -80,6 +83,7 @@ class ClientController extends BaseController
                     'firstname' => $client->user->firstname,
                     'lastname' => $client->user->lastname,
                     'name' => $client->nameLastFirst(),
+                    'nameLastFirst' => $client->nameLastFirst(),
                     'care_plans' => (request()->care_plans) ? $client->carePlans : null,
                 ];
             })

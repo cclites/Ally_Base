@@ -109,20 +109,26 @@
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
-                               :selected-schedule="selectedSchedule"
-                               @refresh-events="fetchEvents(true)"
-                               @clock-out="showClockOutModal()"
+                                   :selected-schedule="selectedSchedule"
+                                   :pass-clients="clients"
+                                   :pass-caregivers="caregivers"
+                                   @refresh-events="fetchEvents(true)"
+                                   @clock-out="showClockOutModal()"
         />
 
         <bulk-update-schedule-modal v-model="bulkUpdateModal"
-                                  :caregiver-id="filterCaregiverId"
-                                  :client-id="filterClientId"
-                                  @refresh-events="fetchEvents(true)"
+                                    :caregiver-id="filterCaregiverId"
+                                    :client-id="filterClientId"
+                                    :pass-clients="clients"
+                                    :pass-caregivers="caregivers"
+                                    @refresh-events="fetchEvents(true)"
         />
 
         <bulk-delete-schedule-modal v-model="bulkDeleteModal"
                                     :caregiver-id="filterCaregiverId"
                                     :client-id="filterClientId"
+                                    :pass-clients="clients"
+                                    :pass-caregivers="caregivers"
                                     @refresh-events="fetchEvents(true)"
         />
 
@@ -740,13 +746,13 @@
                 // Fill the caregiver and client drop downs
                 let count = 0;
                 if (clientIsFilterable) {
-                    axios.get('/business/clients?address=1&phone_number=1').then(response => {
+                    axios.get('/business/clients?json=1&address=1&phone_number=1&care_plans=1').then(response => {
                         this.clients = response.data;
                         this.clientsLoaded = true;
                     });
                 }
                 if (caregiverIsFilterable) {
-                    let url = '/business/caregivers?address=1&phone_number=1';
+                    let url = '/business/caregivers?json=1&address=1&phone_number=1';
                     if (this.client) url = '/business/clients/' + this.client.id + '/caregivers';
                     axios.get(url).then(response => {
                         this.caregivers = response.data;
