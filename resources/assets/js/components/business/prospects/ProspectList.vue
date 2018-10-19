@@ -6,7 +6,8 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
+        <loading-card v-show="loading"></loading-card>
+        <div class="table-responsive" v-if="!loading">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -92,7 +93,8 @@
                         key: 'actions',
                         class: 'hidden-print'
                     }
-                ]
+                ],
+                loading: false,
             }
         },
 
@@ -106,9 +108,11 @@
 
         methods: {
             async loadProspects() {
+                this.loading = true;
                 const response = await axios.get('/business/prospects?json=1');
                 this.items = response.data;
                 this.totalRows = this.items.length;
+                this.loading = false;
             },
             convert(item) {
                 if (!confirm(`Are you sure you wish to convert ${item.firstname} ${item.lastname} to a client?`)) return;

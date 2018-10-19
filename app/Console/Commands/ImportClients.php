@@ -57,7 +57,7 @@ class ImportClients extends BaseImport
             'lastname' => $this->resolve('Last Name', $row),
             'ssn' => $this->resolve('SSN', $row),
             'date_of_birth' => $this->resolve('Date of Birth', $row),
-            'client_type' => $this->resolve('Client Type', $row),
+            'client_type' => $this->resolve('Client Type', $row) ?: 'private_pay',
             'username' => $this->resolve('Email', $row),
             'email' => $this->resolve('Email', $row),
             'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),

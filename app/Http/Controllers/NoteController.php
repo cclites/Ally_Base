@@ -20,7 +20,12 @@ class NoteController extends Controller
      */
     public function index()
     {
-        $business = OfficeUser::find(auth()->id())->businesses()->with('caregivers', 'clients', 'notes.caregiver', 'notes.client')->first();
+        $business = OfficeUser::find(auth()->id())
+            ->businesses()
+            ->withActiveClients()
+            ->withActiveCaregivers()
+            ->with('notes', 'notes.caregiver', 'notes.client')
+            ->first();
         $business->notes = $business->notes->map(function ($note) {
             $note->body = str_limit($note->body, 70);
             return $note;
@@ -35,10 +40,14 @@ class NoteController extends Controller
      */
     public function create()
     {
+        \DB::enableQueryLog();
+
         $business = OfficeUser::find(auth()->id())
             ->businesses()
-            ->with('caregivers', 'clients')
+            ->withActiveClients()
+            ->withActiveCaregivers()
             ->first();
+
         return view('notes.create', compact('business'));
     }
 

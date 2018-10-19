@@ -32,22 +32,26 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = $this->business()->clients()
-            ->when($request->filled('client_type'), function($query) use ($request) {
-                $query->where('client_type', $request->input('client_type'));
-            })
-            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
-                $query->where('active', $request->input('active', 1));
-            })
-            ->orderByName();
-
         if ($request->expectsJson()) {
-            // Use query string ?address=1&phone_number=1 if data is needed
+            $query = $this->business()->clients()
+                ->when($request->filled('client_type'), function($query) use ($request) {
+                    $query->where('client_type', $request->input('client_type'));
+                })
+                ->orderByName();
+
+            // Default to active only, unless active is provided in the query string
+            if ($request->input('active', 1) !== null) {
+                $query->where('active', $request->input('active', 1));
+            }
+            // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
             if ($request->input('phone_number')) {
                 $query->with('phoneNumber');
+            }
+            if ($request->input('care_plans')) {
+                $query->with('carePlans');
             }
 
             return $query->get();
@@ -57,17 +61,8 @@ class ClientController extends BaseController
             'multiLocationRegistry' => $this->business()->multi_location_registry,
             'name' => $this->business()->name
         ];
-        $clients = $query->with(['address', 'phoneNumber'])->get()
-            ->map(function ($client) {
-                if ($client->address) {
-                    $client->county = $client->address->county;
-                }
-                return $client;
-            })
-            ->values();
 
-
-        return view('business.clients.index', compact('clients', 'multiLocation'));
+        return view('business.clients.index', compact('multiLocation'));
     }
 
     public function listNames()
@@ -88,6 +83,7 @@ class ClientController extends BaseController
                     'firstname' => $client->user->firstname,
                     'lastname' => $client->user->lastname,
                     'name' => $client->nameLastFirst(),
+                    'nameLastFirst' => $client->nameLastFirst(),
                     'care_plans' => (request()->care_plans) ? $client->carePlans : null,
                 ];
             })
@@ -190,8 +186,6 @@ class ClientController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             },
         ]);
-        $schedules = $client->schedules()->get();
-
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
@@ -217,7 +211,7 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
     }
 
     public function edit(Client $client)

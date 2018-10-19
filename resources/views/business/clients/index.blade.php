@@ -13,7 +13,6 @@
     @endif
     @if($active_business)
         <client-list
-            :clients="{{ $clients }}"
             :multi_location="{{ json_encode($multiLocation) }}">
         </client-list>
     @endif

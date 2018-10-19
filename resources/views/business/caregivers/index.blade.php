@@ -13,7 +13,6 @@
     @endif
     @if($active_business)
         <caregiver-list
-            :caregivers="{{ $caregivers }}"
             :multi_location="{{ json_encode($multiLocation) }}">
         </caregiver-list>
     @endif
