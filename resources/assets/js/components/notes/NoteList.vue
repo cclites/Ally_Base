@@ -25,7 +25,7 @@
                     <!-- this slot appears above the options from 'options' prop -->
                     <option :value="null">-- Caregiver --</option>
                 </template>
-                <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
+                <option :value="caregiver.id" v-for="caregiver in business.caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
             </b-form-select>
 
             <b-form-select v-model="searchForm.client" class="mr-2 mb-2">
@@ -33,7 +33,7 @@
                     <!-- this slot appears above the options from 'options' prop -->
                     <option :value="null">-- Client --</option>
                 </template>
-                <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.name }}</option>
+                <option :value="client.id" v-for="client in business.clients" :key="client.id">{{ client.nameLastFirst }}</option>
             </b-form-select>
 
             <b-form-input
@@ -180,12 +180,6 @@
         },
 
         computed: {
-            caregivers() {
-                return _.sortBy(this.business.caregivers, ['name']);
-            },
-            clients() {
-                return _.sortBy(this.business.clients, ['name']);
-            },
             noteModalTitle() {
                 return this.note.id ? 'Edit Note' : 'Add Note';
             },

@@ -9,7 +9,7 @@
                             v-model="form.client_id"
                     >
                         <option value="">--Select--</option>
-                        <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.name }}</option>
+                        <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
                     </b-form-select>
                     <input-help :form="form" field="client_id" text="Select a client."></input-help>
                 </b-form-group>
@@ -20,7 +20,7 @@
                             v-model="form.caregiver_id"
                     >
                         <option value="">--Select--</option>
-                        <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
+                        <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>

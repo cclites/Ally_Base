@@ -547,4 +547,18 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
                 ];
         })->values();
     }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    public function scopeWithActiveClients($builder)
+    {
+        return $builder->with(['clients' => function($q) { $q->active()->orderByName(); }]);
+    }
+
+    public function scopeWithActiveCaregivers($builder)
+    {
+        return $builder->with(['caregivers' => function($q) { $q->active()->orderByName(); }]);
+    }
 }
