@@ -323,6 +323,7 @@ Route::group([
     Route::get('shifts/data', 'Admin\ShiftsController@data')->name('shifts.data');
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
     Route::get('transactions/report', 'Admin\TransactionsController@report')->name('transactions.report');
+    Route::post('transactions/refund/{transaction}', 'Admin\TransactionsController@refund')->name('transactions.refund');
     Route::get('transactions/{transaction}', 'Admin\TransactionsController@show')->name('transactions.show');
     Route::get('missing_transactions', 'Admin\MissingTransactionsController@index')->name('missing_transactions');
 //    Route::redirect('reports', 'reports/unsettled');
