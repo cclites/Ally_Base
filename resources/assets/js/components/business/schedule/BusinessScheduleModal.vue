@@ -203,7 +203,7 @@
                                     </p>
                                     <b-form-group label="End date" label-for="endDate">
                                         <date-picker v-model="endDate" />
-                                        <input-help :form="form" field="recurring_end_date" text="Repeat the schedule until this date." />
+                                        <input-help :form="form" field="recurring_end_date" text="Repeat the schedule until this date.  If left blank, the schedule will repeat for 2 years." />
                                     </b-form-group>
                                 </div>
                             </b-col>
