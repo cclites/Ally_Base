@@ -717,8 +717,7 @@
             },
 
             getEventBackground(event) {
-                // Todo:  Remove this logic from the backend events response
-                return event.caregiver_id == 0 ? '#d9c01c' : event.backgroundColor;
+                return event.backgroundColor || '#1c81d9';
             },
 
             loadFiltersData() {
