@@ -134,14 +134,13 @@
                 <b-row v-if="!selectedCaregiver.id">
                     <b-col lg="12">
                         <b-form-group label="Caregiver" label-for="caregiver_id">
-                            <b-form-select
-                                id="caregiver_id"
-                                name="caregiver_id"
+                            <select2
                                 v-model="form.caregiver_id"
+                                class="form-control"
                                 >
                                 <option value="">-- Select Caregiver --</option>
                                 <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
-                            </b-form-select>
+                            </select2>
                             <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
                     </b-col>
