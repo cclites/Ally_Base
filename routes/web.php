@@ -51,6 +51,8 @@ Route::group(['middleware' => 'auth'], function() {
     Route::put('emergency-contacts/{user}/{contact}', 'EmergencyContactController@update');
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
     Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
+
+    Route::get('business-settings', 'Business\SettingController@index')->name('business-settings');
 });
 
 Route::group([

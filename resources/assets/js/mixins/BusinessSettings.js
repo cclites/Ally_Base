@@ -6,7 +6,7 @@ export default {
     },
 
     async mounted() {
-        await axios.get('/business/settings?json=1')
+        await axios.get('/business-settings?json=1')
             .then(response => {
                 this.businessSettingsStore = response.data;
             })
