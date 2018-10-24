@@ -527,7 +527,11 @@
             },
 
             deleteSchedule() {
-                if (this.schedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                let confirmMessage = 'Are you sure you wish to delete this scheduled shift?';
+                if (moment(this.schedule.starts_at).isBefore(moment())) {
+                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: This will not affect any shift already in the Shift History.";
+                }
+                if (this.schedule.id && confirm(confirmMessage)) {
                     let form = new Form();
                     form.submit('delete', '/business/schedule/' + this.schedule.id)
                         .then(response => {

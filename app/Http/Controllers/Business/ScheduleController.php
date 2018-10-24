@@ -270,14 +270,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
-            return new ErrorResponse(400, 'Past schedules are unable to be deleted.');
-        }
-
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be deleted because it already has an active shift.');
-        }
-
+        // Schedules are soft deleted now so we do not have to worry about related shifts
         $schedule->delete();
         return new SuccessResponse('The scheduled shift has been deleted.');
     }
@@ -413,7 +406,8 @@ class ScheduleController extends BaseController
     public function bulkDestroy(BulkDestroyScheduleRequest $request)
     {
         $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
-        $schedules = $query->doesntHave('shifts')->get();
+        // Schedules are soft deleted now so we do not have to worry about related shifts
+        $schedules = $query->get();
 
         if (!$schedules->count()) {
             return new ErrorResponse(400, 'No matching schedules could be found.');
