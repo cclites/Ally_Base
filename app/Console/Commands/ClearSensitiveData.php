@@ -7,6 +7,7 @@ use App\Caregiver;
 use App\CaregiverApplication;
 use App\Client;
 use App\CreditCard;
+use App\EmergencyContact;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
@@ -65,6 +66,13 @@ class ClearSensitiveData extends Command
             });
         });
 
+        // Clear emergency contact name and numbers
+        EmergencyContact::chunk(200, function($collection) {
+            $collection->each(function($contact) {
+                $contact->update(['name' => $this->faker->name, 'phone_number' => mt_rand(3000000000,9999999999)]);
+            });
+        });
+
         // Reset all credit card numbers
         CreditCard::chunk(200, function($collection) {
             $collection->each(function(CreditCard $card) {
@@ -103,6 +111,11 @@ class ClearSensitiveData extends Command
             foreach($user->addresses as $address) {
                 $address->address1 = $this->faker->streetAddress;
                 $address->save();
+            }
+        }
+        if ($user->phoneNumbers) {
+            foreach($user->phoneNumbers as $number) {
+                $number->update(['national_number' => mt_rand(3000000000,9999999999)]);
             }
         }
 
