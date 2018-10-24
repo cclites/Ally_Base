@@ -24,7 +24,7 @@
                         <i class="fa fa-edit"></i> Edit
                     </b-btn>
                     <b-btn size="sm" @click="convert(row.item)">
-                        <i class="fa fa-arrow-right"></i> Convert
+                        <i class="fa fa-arrow-right"></i> Convert to client
                     </b-btn>
                 </template>
             </b-table>
