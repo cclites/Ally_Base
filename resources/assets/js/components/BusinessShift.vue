@@ -7,7 +7,13 @@
             <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
         </div>
         <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)" :class="formClass">
-            <b-row>
+            <b-row v-if="role == 'client'">
+                <b-col lg="6">
+                    <label>Caregiver</label>
+                    <!-- <p>{{ }}</p> -->
+                </b-col>
+            </b-row>
+            <b-row v-else>
                 <b-col lg="6">
                     <b-form-group label="Client" label-for="client_id">
                         <b-form-select
@@ -407,6 +413,7 @@
             'activities': Array,
             'admin': Number,
             'is_modal': 0,
+            'role': String,
         },
         data() {
             return {

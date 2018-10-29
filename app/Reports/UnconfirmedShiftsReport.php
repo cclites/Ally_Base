@@ -30,6 +30,13 @@ class UnconfirmedShiftsReport extends BaseReport
     protected $for_email;
 
     /**
+     * Optionally mask the caregiver names in the report.
+     *
+     * @var bool
+     */
+    protected $mask_names;
+
+    /**
      *  Constructor.
      */
     public function __construct()
@@ -57,6 +64,18 @@ class UnconfirmedShiftsReport extends BaseReport
     public function forClient($client_id)
     {
         $this->client = $client_id;
+
+        return $this;
+    }
+
+    /**
+     * Turn on name masking.
+     *
+     * @return UnconfirmedShiftsReport
+     */
+    public function maskNames()
+    {
+        $this->mask_names = true;
 
         return $this;
     }
@@ -142,7 +161,7 @@ class UnconfirmedShiftsReport extends BaseReport
                     'client_id' => $s->client_id,
                     'client' => $s->client,
                     'business_name' => $s->business->name,
-                    'caregiver' => $s->caregiver->user->maskedName,
+                    'caregiver' => $this->mask_names ? $s->caregiver->user->maskedName : $s->caregiver->user->name,
                     'hours' => $s->hours,
                     'rate' => $s->costs()->getTotalHourlyCost(),
                     'total' => $s->costs()->getTotalCost(),

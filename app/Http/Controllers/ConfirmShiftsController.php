@@ -16,6 +16,9 @@ class ConfirmShiftsController extends Controller
     /**
      * Confirm shifts from shift confirmation token.
      *
+     * @param Request $request
+     * @param string $token
+     * @param UnconfirmedShiftsReport $report
      * @return \Illuminate\Http\Response
      */
     public function confirmToken(Request $request, $token, UnconfirmedShiftsReport $report)
@@ -39,6 +42,7 @@ class ConfirmShiftsController extends Controller
 
         $unconfirmedShifts = $report
             ->forClient($token->client_id)
+            ->maskNames()
             ->rows();
 
         $total = $unconfirmedShifts->sum('total');
@@ -48,9 +52,11 @@ class ConfirmShiftsController extends Controller
     /**
      * Confirm all unconfirmed shifts related to the client who owns the token.
      *
+     * @param Request $request
+     * @param string $token
      * @return \Illuminate\Http\Response
      */
-    public function confirmAllWithToken(Request $request, $token, UnconfirmedShiftsReport $report)
+    public function confirmAllWithToken(Request $request, $token)
     {
         if (! $token = ShiftConfirmation::findToken($token)) {
             throw new ModelNotFoundException("Invalid Confirmation Token");

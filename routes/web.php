@@ -57,12 +57,16 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
 ], function () {
+    Route::get('unconfirmed-shifts', 'Clients\UnconfirmedShiftsController@index')->name('client.unconfirmed-shifts');
+    Route::post('unconfirmed-shifts/{shift}/confirm', 'Clients\UnconfirmedShiftsController@confirm')->name('client.unconfirmed-shifts.confirm');
+    Route::patch('unconfirmed-shifts/{shift}/update', 'Clients\UnconfirmedShiftsController@update')->name('client.unconfirmed-shifts.update');
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
     Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
+    Route::get('/shift/{shift}', 'ShiftController@show')->name('client.shifts.show');
 });
 
 Route::group([

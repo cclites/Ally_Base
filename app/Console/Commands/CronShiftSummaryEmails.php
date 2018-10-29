@@ -44,6 +44,7 @@ class CronShiftSummaryEmails extends Command
     public function handle(UnconfirmedShiftsReport $report)
     {
         $unconfirmedShifts = $report->includeClockedIn()
+            ->maskNames()
             ->forEmail()
             ->rows()
             ->groupBy('client_id');
