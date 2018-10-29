@@ -22,7 +22,19 @@ class SettingController extends BaseController
         if ($request->expectsJson() && $request->input('json')) {
             // this endpoint is accessible to all logged in users, so this
             // is an attempt to hide any potentail sensitive data.
-            return collect(auth()->user()->role->businesses()->first()->toArray())
+            switch(auth()->user()->role_type) {
+                case 'client':
+                    $business = auth()->user()->role->business;
+                    break;
+                case 'caregiver':
+                    $business = auth()->user()->role->businesses()->first();
+                    break;
+                default:
+                    $business = activeBusiness();
+                    break;
+            }
+
+            return collect($business->toArray())
                 ->except(['bank_account_id', 'address1', 'address2', 'phone1', 'phone2', 'default_commission_rate', 'created_at', 'updated_at', 'payment_account_id', 'contact_email', 'contact_phone', 'ein', 'outgoing_sms_number']);
         }
 

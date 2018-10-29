@@ -48,42 +48,6 @@ class ShiftController extends Controller
         return view('clients.shift_history', compact('shifts', 'week_start_date', 'week_end_date', 'shifts_verified'));
     }
 
-    public function show(Request $request, Shift $shift)
-    {
-        if ($shift->client_id != auth()->id()) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
-
-        // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
-        $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
-
-        // Load shift data into array before loading client info
-        $data = $shift->toArray();
-
-        // Calculate distances
-        $checked_in_distance = null;
-        $checked_out_distance = null;
-        if ($address = $shift->client->evvAddress) {
-            if ($shift->checked_in_latitude || $shift->checked_in_longitude) {
-                $checked_in_distance = $address->distanceTo($shift->checked_in_latitude, $shift->checked_in_longitude);
-            }
-            if ($shift->checked_out_latitude || $shift->checked_out_longitude) {
-                $checked_out_distance = $address->distanceTo($shift->checked_out_latitude, $shift->checked_out_longitude);
-            }
-        }
-
-        $data += [
-            'checked_in_distance' => $checked_in_distance,
-            'checked_out_distance' => $checked_out_distance,
-            'client_name' => $shift->client->name(),
-            'caregiver_name' => $shift->caregiver->name(),
-            'address' => optional($shift->address)->only(['latitude', 'longitude']),
-        ];
-
-        return response()->json($data);
-    }
-
     public function approveWeek(Request $request)
     {
         $request->validate([

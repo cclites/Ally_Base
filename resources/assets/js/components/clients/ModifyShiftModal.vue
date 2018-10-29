@@ -11,6 +11,8 @@
                 :admin="0"
                 :caregiver="shift.caregiver"
                 :client="shift.client"
+                :payment_type="payment_type"
+                @shift-updated="$emit('shift-updated', shift.id)"
             ></business-shift>
         </b-container>
     </b-modal>
@@ -20,7 +22,8 @@
     export default {
         data() { 
             return {
-                shift: {},
+                shift: {caregiver: {}},
+                payment_type: {},
             }
         },
 
@@ -46,10 +49,16 @@
 
         methods: {
             async load() {
-                await axios.get(`/shifts/${this.shift_id}`)
+                await axios.get(`/unconfirmed-shifts/${this.shift_id}`)
                     .then( ({ data }) => {
                         this.shift = data;
                     });
+            },
+
+            loadClientPaymentType() {
+                axios.get('/payment-type').then(response => {
+                    this.payment_type = response.data;
+                });
             },
         },
 
@@ -59,6 +68,10 @@
                     await this.load();
                 }
             }
+        },
+
+        mounted() {
+            this.loadClientPaymentType();
         }
     }
 </script>

@@ -1,6 +1,7 @@
 <template>
     <b-card title="Unconfirmed Shifts">
-        <div class="table-responsive">
+        <loading-card v-if="loading" />
+        <div class="table-responsive" v-else>
             <b-table show-empty :items="items" :fields="fields">
                 <template scope="data" slot="actions">
                     <div v-if="data.item.is_confirmed" class="text-muted">
@@ -16,7 +17,9 @@
 
         <client-modify-shift-modal v-model="showModifyModal" 
             :shift_id="current.id"
-            :activities="activities" />
+            :activities="activities" 
+            @shift-updated="shiftWasUpdated()"
+        />
     </b-card>
 </template>
 
@@ -30,8 +33,9 @@
 
         data() {
             return {
+                loading: false,
                 showModifyModal: false,
-                current: {},
+                current: {caregiver: {}},
                 items: [],
                 fields: [
                     {
@@ -68,27 +72,41 @@
         },
 
         methods: {
+            shiftWasUpdated() {
+                this.showModifyModal = false;
+                this.fetch();
+            },
+
             modify(shift) {
+                this.current = shift;
                 this.showModifyModal = true;
             },
 
             confirm(shift) {
                 axios.post(`/unconfirmed-shifts/${shift.id}/confirm`, { confirmed: true })
                     .then( ({ data }) => {
-                        console.log('id: ', shift.id);
                         let index = this.items.findIndex(obj => obj.id == shift.id);
-                        console.log('index: ', index);
                         if (index >= 0) {
-                            console.log('item: ', this.items[index]);
-                            this.items[index].is_confirmed = true;
+                            let updated = this.items[index];
+                            updated.is_confirmed = true;
+                            this.items.splice(index, 1, updated);
                         }
                     })
                     .catch(e => {
                     })
             },
-        },
 
-        computed: {
+            fetch() {
+                this.loading = true;
+                axios.get('/unconfirmed-shifts?json=1')
+                    .then( ({ data }) => {
+                        this.items = data;
+                        this.loading = false;
+                    })
+                    .catch(e => {
+                        this.loading = false;
+                    })
+            },
         },
 
         mounted() {
