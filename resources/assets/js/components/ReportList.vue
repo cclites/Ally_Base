@@ -63,13 +63,13 @@
                     {
                         id: 2,
                         name: 'Clients',
-                        icons: ['fas fa-user'],
+                        icons: ['fa fa-user'],
                         col: 1
                     },
                     {
                         id: 3,
                         name: 'Caregivers',
-                        icons: ['fas fa-user-md'],
+                        icons: ['fa fa-user-md'],
                         col: 1
                     },
                     {
@@ -93,7 +93,7 @@
                     {
                         id: 7,
                         name: 'Other Reports',
-                        icons: ['fas fa-paper-plane'],
+                        icons: ['fa fa-paper-plane'],
                         col: 2
                     }
                 ]
