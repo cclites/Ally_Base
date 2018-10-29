@@ -24,9 +24,9 @@ Your home care service week is finished. Please review and confirm your pending 
                                 <td>
                                     <a href="{{ $confirmUrl }}" class="button button-green" target="_blank">Confirm</a>
                                 </td>
-                                {{-- <td style="padding-left: 50px">
+                                <td style="padding-left: 50px">
                                     <a href="{{ $modifyUrl }}" class="button button-blue" target="_blank">Modify</a>
-                                </td> --}}
+                                </td>
                             </tr>
                         </table>
                     </td>
@@ -35,6 +35,10 @@ Your home care service week is finished. Please review and confirm your pending 
         </td>
     </tr>
 </table>
+
+Your payment method on file will be charged within 24 hours. To see a full list of visits including ones already confirmed <a href="{{ route('client.shift-history') }}">click here</a>.
+
+Please do not reply to this email.
 
 <br/>
 

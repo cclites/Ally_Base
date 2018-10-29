@@ -58,7 +58,7 @@ Route::group([
     'roles' => ['client'],
 ], function () {
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
-    Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
+    Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
     Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
