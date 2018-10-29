@@ -259,8 +259,9 @@
 
                 this.form.submit(method, url)
                     .then( ({ data }) => {
-                        this.updatePlans(data.data);
-                        this.clientPlanModal = false;
+                        // Do nothing, care plan creations will refresh the page.
+                        // this.updatePlans(data.data);
+                        // this.clientPlanModal = false;
                     });
             },
 

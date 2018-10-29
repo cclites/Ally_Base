@@ -75,7 +75,6 @@
                                 id="address1"
                                 name="address1"
                                 type="text"
-                                required
                                 v-model="form.address1"
                         >
                         </b-form-input>

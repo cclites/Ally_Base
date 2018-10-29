@@ -63,10 +63,59 @@
                     <b-btn size="sm" :href="'/admin/transactions/' + row.item.transaction_id"  v-if="row.item.transaction_id">View Transaction</b-btn>
                     <b-btn size="sm" @click="markFailed(row.item)" variant="success" v-if="row.item.success">Mark Failed</b-btn>
                     <b-btn size="sm" @click="markSuccessful(row.item)" variant="danger" v-else>Mark Successful</b-btn>
+                    <b-btn size="sm" @click="refundInit(row.item)" variant="primary" v-if="row.item.success">Refund</b-btn>
                 </template>
             </b-table>
         </div>
+
+        <b-modal id="refundModal" :title="`Refund ${refundCharge.name}`" v-model="refundModal">
+            <b-container fluid>
+                <form @keydown="refundForm.clearError($event.target.name)">
+                    <b-row>
+                        <b-col lg="12">
+                            <b-form-group label="Original Amount" label-for="amount">
+                                <b-form-input
+                                        type="number"
+                                        step="any"
+                                        :value="refundCharge.amount"
+                                        disabled
+                                >
+                                </b-form-input>
+                                <input-help :form="refundForm" field="aaaaaaa" text="The original transaction amount for reference."></input-help>
+                            </b-form-group>
+                            <b-form-group label="Refund Amount" label-for="amount">
+                                <b-form-input
+                                        id="amount"
+                                        type="number"
+                                        step="any"
+                                        name="amount"
+                                        v-model="refundForm.amount"
+                                >
+                                </b-form-input>
+                                <input-help :form="refundForm" field="amount" text="Enter the amount of the refund. (Required)"></input-help>
+                            </b-form-group>
+                            <b-form-group label="Refund Notes" label-for="notes">
+                                <b-form-textarea
+                                        id="notes"
+                                        name="notes"
+                                        :rows="3"
+                                        v-model="refundForm.notes"
+                                >
+                                </b-form-textarea>
+                                <input-help :form="refundForm" field="notes" text="Enter the adjustment notes to display to the recipient. (Required)"></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                </form>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="refundModal = false">Close</b-btn>
+                <b-btn variant="info" @click="submitRefund()">Refund</b-btn>
+            </div>
+        </b-modal>
     </b-card>
+
+
 </template>
 
 <script>
@@ -135,7 +184,10 @@
                         sortable: true,
                     },
                     'actions'
-                ]
+                ],
+                refundModal: false,
+                refundForm: new Form({}),
+                refundCharge: {},
             }
         },
 
@@ -160,6 +212,7 @@
         },
 
         mounted() {
+            this.refundInit(); // initialize
             this.loadBusinesses();
             this.loadItems();
         },
@@ -205,6 +258,27 @@
                     .then(response => {
                         charge.success = false;
                     });
+            },
+            refundInit(charge = null) {
+                this.refundCharge = charge ? charge : {};
+                this.refundForm = new Form({
+                    amount: '0.00',
+                    notes: '',
+                });
+                if (charge) {
+                    this.refundModal = true;
+                }
+            },
+            async submitRefund() {
+                let url = '/admin/transactions/refund/' + this.refundCharge.transaction_id;
+                try {
+                    await this.refundForm.post(url);
+                    this.refundModal = false;
+                }
+                catch (e) {
+                    console.log(e);
+                    if (e.status === 500) this.refundModal = false;
+                }
             }
         }
     }

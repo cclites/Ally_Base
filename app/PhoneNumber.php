@@ -124,6 +124,7 @@ class PhoneNumber extends Model implements Auditable
      * @param null $extension
      *
      * @return $this
+     * @throws \Exception
      */
     public function input($number, $extension = null)
     {
@@ -131,6 +132,7 @@ class PhoneNumber extends Model implements Auditable
         $this->country_code = $parsed->getCountryCode();
         $this->national_number = $parsed->getNationalNumber();
         $this->extension = $parsed->getExtension();
+        if (!$this->national_number) throw new \Exception('Invalid phone number input: ' . $number);
         return $this;
     }
 

@@ -51,8 +51,9 @@ class CommunicationController extends Controller
 
             $message = "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
         }
+        $business = $this->business();
 
-        return view('business.communication.text-caregivers', compact(['message']));
+        return view('business.communication.text-caregivers', compact('message', 'business'));
     }
 
     /**
@@ -199,8 +200,8 @@ class CommunicationController extends Controller
      */
     public function threadIndex()
     {
-        $threads = activeBusiness()
-            ->smsThreads()
+        $business = $this->business();
+        $threads = $business->smsThreads()
             ->withCount(['recipients', 'replies'])
             ->latest()
             ->get();
@@ -209,7 +210,7 @@ class CommunicationController extends Controller
             return response()->json($threads);
         }
 
-        return view('business.communication.sms-thread-list', compact(['threads']));
+        return view('business.communication.sms-thread-list', compact('threads', 'business'));
     }
 
     /**

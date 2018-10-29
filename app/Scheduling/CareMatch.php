@@ -150,11 +150,11 @@ class CareMatch
 
     function get(Business $business)
     {
-        $query = $business->caregivers();
+        $query = $business->caregivers()->active();
 
         if ($this->forClient) {
             // Query only client caregivers
-            $query = $this->forClient->caregivers();
+            $query = $this->forClient->caregivers()->active();
         }
 
         $this->queryActivities($query);

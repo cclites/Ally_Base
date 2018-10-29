@@ -34,13 +34,13 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = $this->business()->caregivers()
-            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
-                $query->where('active', $request->input('active', 1));
-            })
-            ->orderByName();
-
         if ($request->expectsJson()) {
+            $query = $this->business()->caregivers()->orderByName();
+
+            // Default to active only, unless active is provided in the query string
+            if ($request->input('active', 1) !== null) {
+                $query->where('active', $request->input('active', 1));
+            }
             // Use query string ?address=1&phone_number=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
@@ -56,9 +56,8 @@ class CaregiverController extends BaseController
             'multiLocationRegistry' => $this->business()->multi_location_registry,
             'name' => $this->business()->name
         ];
-        $caregivers = $query->with(['address', 'phoneNumber'])->get();
 
-        return view('business.caregivers.index', compact('caregivers', 'multiLocation'));
+        return view('business.caregivers.index', compact('multiLocation'));
     }
 
     /**
@@ -151,7 +150,7 @@ class CaregiverController extends BaseController
         ]);
         $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
-        $business = $this->business()->load(['clients', 'caregivers']);
+        $business = $this->business();
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($caregiver->phoneNumbers->where('type', 'primary')->count() == 0) {

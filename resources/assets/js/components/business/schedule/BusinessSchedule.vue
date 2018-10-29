@@ -109,20 +109,26 @@
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
-                               :selected-schedule="selectedSchedule"
-                               @refresh-events="fetchEvents(true)"
-                               @clock-out="showClockOutModal()"
+                                   :selected-schedule="selectedSchedule"
+                                   :pass-clients="clients"
+                                   :pass-caregivers="caregivers"
+                                   @refresh-events="fetchEvents(true)"
+                                   @clock-out="showClockOutModal()"
         />
 
         <bulk-update-schedule-modal v-model="bulkUpdateModal"
-                                  :caregiver-id="filterCaregiverId"
-                                  :client-id="filterClientId"
-                                  @refresh-events="fetchEvents(true)"
+                                    :caregiver-id="filterCaregiverId"
+                                    :client-id="filterClientId"
+                                    :pass-clients="clients"
+                                    :pass-caregivers="caregivers"
+                                    @refresh-events="fetchEvents(true)"
         />
 
         <bulk-delete-schedule-modal v-model="bulkDeleteModal"
                                     :caregiver-id="filterCaregiverId"
                                     :client-id="filterClientId"
+                                    :pass-clients="clients"
+                                    :pass-caregivers="caregivers"
                                     @refresh-events="fetchEvents(true)"
         />
 
@@ -137,25 +143,34 @@
             :style="{ top: previewTop, left: previewLeft }"
         >
             <div class="d-flex">
-                <div class="f-1">
-                    <h4 v-if="hoverShift.caregiver_name"><a :href="`/business/caregivers/${hoverShift.caregiver_id}`">{{ hoverShift.caregiver_name }}</a></h4>
+                <div class="f-1" v-if="caregiverView">
+                    <h4 v-if="hoverShift.client"><a :href="`/business/clients/${hoverShift.client.id}`">{{ hoverShift.client.nameLastFirst }}</a></h4>
+                </div>
+                <div class="f-1" v-else>
+                    <h4 v-if="hoverShift.caregiver"><a :href="`/business/caregivers/${hoverShift.caregiver.id}`">{{ hoverShift.caregiver.nameLastFirst }}</a></h4>
                     <h4 v-else>OPEN</h4>
                 </div>
                 <div class="ml-auto" v-if="hoverShift.client_address">
-                    <a v-if="! hoverShift.caregiver_name" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
+                    <a v-if="! hoverShift.caregiver" :href="`/business/communication/text-caregivers?preset=open-shift&shift_id=${hoverShift.id}`" class="mr-2"><i class="fa fa-envelope-o"></i> Text Caregivers</a>
                     <a v-if="! hoverShift.caregiver_address" :href="`https://www.google.com/maps/search/?api=1&query=${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                     <a v-else :href="`https://www.google.com/maps/dir/${encodeURI(hoverShift.caregiver_address)}/${encodeURI(hoverShift.client_address)}`" target="_blank"><i class="fa fa-map-marker"></i> Map</a>
                 </div>
             </div>
             <div>
                 <div class="d-flex">
-                    <div class="f-1">
+                    <div class="f-1" v-if="caregiverView && hoverShift.client">
+                        <span v-if="hoverShift.client_phone">{{ hoverShift.client_phone }}</span>
+                        <br v-if="hoverShift.client_phone && hoverShift.client.email" />
+                        <span>{{ hoverShift.client.email }}</span>
+                    </div>
+                    <div class="f-1" v-else-if="hoverShift.caregiver">
                         <span v-if="hoverShift.caregiver_phone">{{ hoverShift.caregiver_phone }} ({{ hoverShift.caregiver_phone_type }})</span>
-                        <span v-if="hoverShift.caregiver_phone && hoverShift.caregiver_email">, </span>
-                        <span>{{ hoverShift.caregiver_email }}</span>
+                        <br v-if="hoverShift.caregiver_phone && hoverShift.caregiver.email" />
+                        <span>{{ hoverShift.caregiver.email }}</span>
                     </div>
                     <div class="ml-auto">
-                        <user-avatar v-if="hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
+                        <user-avatar v-if="caregiverView && hoverShift.client" :src="hoverShift.client.avatar" size="50" />
+                        <user-avatar v-else-if="!caregiverView && hoverShift.caregiver" :src="hoverShift.caregiver.avatar" size="50" />
                     </div>
                 </div>
             </div>
@@ -702,8 +717,7 @@
             },
 
             getEventBackground(event) {
-                // Todo:  Remove this logic from the backend events response
-                return event.caregiver_id == 0 ? '#d9c01c' : event.backgroundColor;
+                return event.backgroundColor || '#1c81d9';
             },
 
             loadFiltersData() {
@@ -731,13 +745,13 @@
                 // Fill the caregiver and client drop downs
                 let count = 0;
                 if (clientIsFilterable) {
-                    axios.get('/business/clients?address=1&phone_number=1').then(response => {
+                    axios.get('/business/clients?json=1&address=1&phone_number=1&care_plans=1').then(response => {
                         this.clients = response.data;
                         this.clientsLoaded = true;
                     });
                 }
                 if (caregiverIsFilterable) {
-                    let url = '/business/caregivers?address=1&phone_number=1';
+                    let url = '/business/caregivers?json=1&address=1&phone_number=1';
                     if (this.client) url = '/business/clients/' + this.client.id + '/caregivers';
                     axios.get(url).then(response => {
                         this.caregivers = response.data;

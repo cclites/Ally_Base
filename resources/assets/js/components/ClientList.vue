@@ -6,9 +6,9 @@
             </b-col>
             <b-col lg="3">
                 <b-form-select v-model="active">
-                    <option value="all">All Clients</option>
-                    <option value="active">Active Clients</option>
-                    <option value="inactive">Inactive Clients</option>
+                    <option :value="null">All Clients</option>
+                    <option :value="1">Active Clients</option>
+                    <option :value="0">Inactive Clients</option>
                 </b-form-select>
             </b-col>
             <b-col lg="3" v-if="multi_location.multiLocationRegistry == 'yes'">
@@ -22,47 +22,54 @@
             </b-col>
         </b-row>
 
-        <div class="table-responsive">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
-            >
-                <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <b-btn size="sm" :href="'/business/clients/' + row.item.id">
-                        <i class="fa fa-edit"></i>
-                    </b-btn>
-                </template>
-            </b-table>
+        <loading-card v-show="loading"></loading-card>
+        <div v-if="!loading">
+            <div class="table-responsive">
+                <b-table bordered striped hover show-empty
+                         :items="clients"
+                         :fields="fields"
+                         :current-page="currentPage"
+                         :per-page="perPage"
+                         :filter="filter"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                         @filtered="onFiltered"
+                >
+                    <template slot="actions" scope="row">
+                        <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
+                        <b-btn size="sm" :href="'/business/clients/' + row.item.id">
+                            <i class="fa fa-edit"></i>
+                        </b-btn>
+                    </template>
+                </b-table>
+            </div>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
         </div>
 
-        <b-row>
-            <b-col lg="6" >
-                <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-            </b-col>
-            <b-col lg="6" class="text-right">
-                Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-            </b-col>
-        </b-row>
     </b-card>
 </template>
 
 <script>
+    import FormatsListData from "../mixins/FormatsListData";
+
     export default {
+        mixins: [FormatsListData],
+
         props: {
-            'clients': Array,
             'multi_location': Object,
         },
 
         data() {
             return {
-                active: 'active',
+                active: 1,
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -73,6 +80,7 @@
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 location: 'all',
+                clients: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -87,7 +95,8 @@
                     {
                         key: 'email',
                         label: 'Email Address',
-                        sortable: true
+                        sortable: true,
+                        formatter: this.formatEmail,
                     },
                     {
                         key: 'county',
@@ -96,7 +105,8 @@
                     {
                         key: 'client_type',
                         label: 'Type',
-                        sortable: true
+                        sortable: true,
+                        formatter: this.formatUppercase,
                     },
                     {
                         key: 'location',
@@ -108,12 +118,13 @@
                         key: 'actions',
                         class: 'hidden-print'
                     }
-                ]
+                ],
+                loading: false,
             }
         },
 
         mounted() {
-            this.totalRows = this.items.length;
+            this.loadClients();
             if(this.multi_location.multiLocationRegistry == 'yes') {
                 document.querySelectorAll('.location').forEach(elem => {
                     elem.classList.remove('d-none');
@@ -122,35 +133,22 @@
         },
 
         computed: {
-            items() {
-                let component = this;
-                let clients = this.clients.map(function(client) {
-                    return {
-                        id: client.id,
-                        firstname: client.user.firstname,
-                        lastname: client.user.lastname,
-                        email: client.user.email,
-                        client_type: _.upperFirst(_.replace(client.client_type, '_', ' ')),
-                        active: client.user.active,
-                        location: component.multi_location.name,
-                        county: client.county
-                    }
-                });
-
-                return _.filter(clients, (client) => {
-                    switch (this.active) {
-                        case 'all':
-                            return true;
-                        case 'active':
-                            return client.active;
-                        case 'inactive':
-                            return !client.active;
-                    }
-                })
-            },
+            listUrl() {
+                let active = (this.active !== null) ? this.active : '';
+                return '/business/clients?json=1&address=1&active=' + active;
+            }
         },
 
         methods: {
+            async loadClients() {
+                this.loading = true;
+                const response = await axios.get(this.listUrl);
+                this.clients = response.data.map(client => {
+                    client.county = client.address ? client.address.county : '';
+                    return client;
+                });
+                this.loading = false;
+            },
             details(item, index, button) {
                 this.selectedItem = item;
                 this.modalDetails.data = JSON.stringify(item, null, 2);
@@ -166,6 +164,12 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            }
+        },
+
+        watch: {
+            listUrl() {
+                this.loadClients();
             }
         }
     }

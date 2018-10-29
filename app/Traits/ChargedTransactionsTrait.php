@@ -7,6 +7,7 @@ use App\GatewayTransaction;
 
 trait ChargedTransactionsTrait
 {
+    private $chargeMetrics;
 
     /**
      * Relationship for all charged transactions for this payment method
@@ -25,7 +26,9 @@ trait ChargedTransactionsTrait
      */
     public function getChargeMetrics()
     {
-        return $this->chargedTransactions()
+        if ($this->chargeMetrics) return $this->chargeMetrics;
+
+        return $this->chargeMetrics = $this->chargedTransactions()
             ->where('success', 1)
             ->select(\DB::raw('COUNT(*) as successful_charge_count, MIN(gateway_transactions.created_at) as first_charge_date, MAX(gateway_transactions.created_at) as last_charge_date'))
             ->first();
