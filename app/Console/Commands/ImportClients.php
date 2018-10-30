@@ -6,8 +6,6 @@ use App\Address;
 use App\Business;
 use App\Client;
 use App\EmergencyContact;
-use App\Note;
-use App\PhoneNumber;
 use App\User;
 
 class ImportClients extends BaseImport
@@ -17,7 +15,7 @@ class ImportClients extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:clients {business_id} {file}';
+    protected $signature = 'import:clients {--meta=:A comma separated list of fields to import into meta data} {business_id} {file}';
 
     /**
      * The console command description.
@@ -82,6 +80,7 @@ class ImportClients extends BaseImport
             // Replace placeholder email
             if (isset($noemail)) $client->setAutoEmail()->save();
 
+            $this->importMeta($client, $row);
             $this->importAddresses($client, $row);
             $this->importPhoneNumbers($client, $row);
             $this->importEmergencyContacts($client, $row);
@@ -110,40 +109,6 @@ class ImportClients extends BaseImport
         ];
         $address = new Address($addressData);
         $client->addresses()->save($address);
-    }
-
-    /**
-     * @param Client $client
-     * @param int $row
-     */
-    protected function importPhoneNumbers(Client $client, int $row)
-    {
-        try {
-            $phoneFields = ['primary' => 'Phone1', 'home' => 'Phone2'];
-            foreach ($phoneFields as $type => $phoneField) {
-                $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
-                $phone = new PhoneNumber(['type' => $type]);
-                $phone->input($number);
-                $client->phoneNumbers()->save($phone);
-            }
-        } catch (\Exception $e) {
-        }
-    }
-
-    /**
-     * @param int $row
-     * @param Client $client
-     */
-    protected function importNotes(Client $client, int $row)
-    {
-        if ($officeNote = $this->resolve("OfficeNote", $row)) {
-            $officeUser = $this->business()->users()->first();
-            $client->notes()->save(new Note([
-                'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
-                'created_by' => $officeUser->id,
-                'business_id' => $this->business()->id,
-            ]));
-        }
     }
 
     /**
@@ -186,27 +151,12 @@ class ImportClients extends BaseImport
     }
 
     /**
-     * Allows values like: 0, 1, 'I', 'A', 'FALSE', 'TRUE'
+     * Resolves the client type
      *
      * @param int $row
      * @param $cellValue
-     * @return int|null
+     * @return string
      */
-    protected function resolveActive(int $row, $cellValue)
-    {
-        if (is_numeric($cellValue)) return (int) $cellValue;
-
-        if (strlen($cellValue)) {
-            $validStrings = ['A', 'TRUE'];
-            if (in_array(strtoupper($cellValue), $validStrings)) {
-                return 1;
-            }
-            return 0;
-        }
-
-        return null;
-    }
-
     protected function resolveClientType(int $row, $cellValue)
     {
         if (ends_with($cellValue, ['LTC', 'LTCI'])) {
@@ -218,127 +168,5 @@ class ImportClients extends BaseImport
         return strtolower($cellValue);
     }
 
-    protected function resolveEmail(int $row, $cellValue) {
-        if (filter_var($cellValue, FILTER_VALIDATE_EMAIL)) {
-            return $cellValue;
-        }
-        return null;
-    }
 
-    protected function resolveFirstName(int $row, $cellValue)
-    {
-        if ($cellValue) return $cellValue;
-
-        if ($name = $this->getNameArray($row)) {
-            return $name['first'];
-        }
-    }
-
-    protected function resolveLastName(int $row, $cellValue)
-    {
-        if ($cellValue) return $cellValue;
-
-        if ($name = $this->getNameArray($row)) {
-            return $name['last'];
-        }
-    }
-
-    protected function getNameArray(int $row)
-    {
-        if ($name = $this->resolve('Name', $row)) {
-            if (strpos($name, ',') !== false) {
-                // Last, First format
-                $name = explode(',', $name);
-                return [
-                    'first' => trim($name[1] ?? ''),
-                    'last' => trim($name[0] ?? ''),
-                ];
-            }
-            else {
-                // First Last format, put potential middle name with first
-                $name = explode(' ', $name);
-                $last = array_pop($name);
-                return [
-                    'first' => implode(' ', $name),
-                    'last' => $last,
-                ];
-            }
-        }
-
-        return false;
-    }
-
-    protected function resolveState(int $row, $cellValue)
-    {
-        if (strlen($cellValue) > 2) {
-            $states = [
-                'AL'=>'ALABAMA',
-                'AK'=>'ALASKA',
-                'AS'=>'AMERICAN SAMOA',
-                'AZ'=>'ARIZONA',
-                'AR'=>'ARKANSAS',
-                'CA'=>'CALIFORNIA',
-                'CO'=>'COLORADO',
-                'CT'=>'CONNECTICUT',
-                'DE'=>'DELAWARE',
-                'DC'=>'DISTRICT OF COLUMBIA',
-                'FM'=>'FEDERATED STATES OF MICRONESIA',
-                'FL'=>'FLORIDA',
-                'GA'=>'GEORGIA',
-                'GU'=>'GUAM GU',
-                'HI'=>'HAWAII',
-                'ID'=>'IDAHO',
-                'IL'=>'ILLINOIS',
-                'IN'=>'INDIANA',
-                'IA'=>'IOWA',
-                'KS'=>'KANSAS',
-                'KY'=>'KENTUCKY',
-                'LA'=>'LOUISIANA',
-                'ME'=>'MAINE',
-                'MH'=>'MARSHALL ISLANDS',
-                'MD'=>'MARYLAND',
-                'MA'=>'MASSACHUSETTS',
-                'MI'=>'MICHIGAN',
-                'MN'=>'MINNESOTA',
-                'MS'=>'MISSISSIPPI',
-                'MO'=>'MISSOURI',
-                'MT'=>'MONTANA',
-                'NE'=>'NEBRASKA',
-                'NV'=>'NEVADA',
-                'NH'=>'NEW HAMPSHIRE',
-                'NJ'=>'NEW JERSEY',
-                'NM'=>'NEW MEXICO',
-                'NY'=>'NEW YORK',
-                'NC'=>'NORTH CAROLINA',
-                'ND'=>'NORTH DAKOTA',
-                'MP'=>'NORTHERN MARIANA ISLANDS',
-                'OH'=>'OHIO',
-                'OK'=>'OKLAHOMA',
-                'OR'=>'OREGON',
-                'PW'=>'PALAU',
-                'PA'=>'PENNSYLVANIA',
-                'PR'=>'PUERTO RICO',
-                'RI'=>'RHODE ISLAND',
-                'SC'=>'SOUTH CAROLINA',
-                'SD'=>'SOUTH DAKOTA',
-                'TN'=>'TENNESSEE',
-                'TX'=>'TEXAS',
-                'UT'=>'UTAH',
-                'VT'=>'VERMONT',
-                'VI'=>'VIRGIN ISLANDS',
-                'VA'=>'VIRGINIA',
-                'WA'=>'WASHINGTON',
-                'WV'=>'WEST VIRGINIA',
-                'WI'=>'WISCONSIN',
-                'WY'=>'WYOMING',
-                'AE'=>'ARMED FORCES AFRICA \ CANADA \ EUROPE \ MIDDLE EAST',
-                'AA'=>'ARMED FORCES AMERICA (EXCEPT CANADA)',
-                'AP'=>'ARMED FORCES PACIFIC'
-            ];
-
-            return (string) array_search(strtoupper($cellValue), $states);
-        }
-
-        return strtoupper($cellValue);
-    }
 }

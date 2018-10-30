@@ -5,9 +5,6 @@ namespace App\Console\Commands;
 use App\Address;
 use App\Business;
 use App\Caregiver;
-use App\EmergencyContact;
-use App\Note;
-use App\PhoneNumber;
 use App\User;
 
 class ImportCaregivers extends BaseImport
@@ -17,7 +14,7 @@ class ImportCaregivers extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:caregivers {business_id} {file}';
+    protected $signature = 'import:caregivers {--meta=:A comma separated list of fields to import into meta data} {business_id} {file}';
 
     /**
      * The console command description.
@@ -88,6 +85,7 @@ class ImportCaregivers extends BaseImport
                 $caregiver->setAutoEmail()->save();
             }
 
+            $this->importMeta($caregiver, $row);
             $this->importAddresses($caregiver, $row);
             $this->importPhoneNumbers($caregiver, $row);
             $this->importNotes($caregiver, $row);
@@ -118,41 +116,6 @@ class ImportCaregivers extends BaseImport
     }
 
     /**
-     * @param Caregiver $caregiver
-     * @param int $row
-     */
-    protected function importPhoneNumbers(Caregiver $caregiver, int $row)
-    {
-        try {
-            $phoneFields = ['primary' => 'Phone1', 'home' => 'Phone2'];
-            foreach ($phoneFields as $type => $phoneField) {
-                $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
-                $phone = new PhoneNumber(['type' => $type]);
-                $phone->input($number);
-                $caregiver->phoneNumbers()->save($phone);
-            }
-        } catch (\Exception $e) {
-        }
-    }
-
-    /**
-     * @param int $row
-     * @param Caregiver $caregiver
-     */
-    protected function importNotes(Caregiver $caregiver, int $row)
-    {
-        if ($officeNote = $this->resolve("OfficeNote", $row)) {
-            $officeUser = $this->business()->users()->first();
-            $caregiver->notes()->save(new Note([
-                'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
-                'created_by' => $officeUser->id,
-                'business_id' => $this->business()->id,
-            ]));
-        }
-    }
-
-
-    /**
      * The message to show before executing the import
      *
      * @return string
@@ -174,29 +137,12 @@ class ImportCaregivers extends BaseImport
     }
 
     /**
-     * Allows values like: false, true, 0, 1, 'I', 'A', 'FALSE', 'TRUE'
+     * Resolves the Classification (Title), transform full licenses to abbreviations
      *
      * @param int $row
      * @param $cellValue
-     * @return int|null
+     * @return string
      */
-    protected function resolveActive(int $row, $cellValue)
-    {
-        if (is_numeric($cellValue) || is_bool($cellValue)) {
-            return (int)$cellValue;
-        }
-
-        if (strlen($cellValue)) {
-            $validStrings = ['A', 'TRUE'];
-            if (in_array(strtoupper($cellValue), $validStrings)) {
-                return 1;
-            }
-            return 0;
-        }
-
-        return null;
-    }
-
     protected function resolveClassification(int $row, $cellValue)
     {
         if (starts_with($cellValue, 'Home Health')) {
@@ -212,132 +158,18 @@ class ImportCaregivers extends BaseImport
         return strtoupper($cellValue);
     }
 
-    protected function resolveEmail(int $row, $cellValue)
+    /**
+     * Resolve the Hire Date in YYYY-MM-DD or MM/DD/YYYY formats.
+     *
+     * @param int $row
+     * @param $cellValue
+     * @return null|string
+     */
+    protected function resolveHireDate(int $row, $cellValue)
     {
-        if (filter_var($cellValue, FILTER_VALIDATE_EMAIL)) {
-            return $cellValue;
-        }
-        return null;
+        return $this->transformDateValue($cellValue);
     }
 
-    protected function resolveFirstName(int $row, $cellValue)
-    {
-        if ($cellValue) {
-            return $cellValue;
-        }
 
-        if ($name = $this->getNameArray($row)) {
-            return $name['first'];
-        }
-    }
-
-    protected function resolveLastName(int $row, $cellValue)
-    {
-        if ($cellValue) {
-            return $cellValue;
-        }
-
-        if ($name = $this->getNameArray($row)) {
-            return $name['last'];
-        }
-    }
-
-    protected function getNameArray(int $row)
-    {
-        if ($name = $this->resolve('Name', $row)) {
-            if (strpos($name, ',') !== false) {
-                // Last, First format
-                $name = explode(',', $name);
-                return [
-                    'first' => trim($name[1] ?? ''),
-                    'last' => trim($name[0] ?? ''),
-                ];
-            } else {
-                // First Last format, put potential middle name with first
-                $name = explode(' ', $name);
-                $last = array_pop($name);
-                return [
-                    'first' => implode(' ', $name),
-                    'last' => $last,
-                ];
-            }
-        }
-
-        return false;
-    }
-
-    protected function resolveState(int $row, $cellValue)
-    {
-        if (strlen($cellValue) > 2) {
-            $states = [
-                'AL' => 'ALABAMA',
-                'AK' => 'ALASKA',
-                'AS' => 'AMERICAN SAMOA',
-                'AZ' => 'ARIZONA',
-                'AR' => 'ARKANSAS',
-                'CA' => 'CALIFORNIA',
-                'CO' => 'COLORADO',
-                'CT' => 'CONNECTICUT',
-                'DE' => 'DELAWARE',
-                'DC' => 'DISTRICT OF COLUMBIA',
-                'FM' => 'FEDERATED STATES OF MICRONESIA',
-                'FL' => 'FLORIDA',
-                'GA' => 'GEORGIA',
-                'GU' => 'GUAM GU',
-                'HI' => 'HAWAII',
-                'ID' => 'IDAHO',
-                'IL' => 'ILLINOIS',
-                'IN' => 'INDIANA',
-                'IA' => 'IOWA',
-                'KS' => 'KANSAS',
-                'KY' => 'KENTUCKY',
-                'LA' => 'LOUISIANA',
-                'ME' => 'MAINE',
-                'MH' => 'MARSHALL ISLANDS',
-                'MD' => 'MARYLAND',
-                'MA' => 'MASSACHUSETTS',
-                'MI' => 'MICHIGAN',
-                'MN' => 'MINNESOTA',
-                'MS' => 'MISSISSIPPI',
-                'MO' => 'MISSOURI',
-                'MT' => 'MONTANA',
-                'NE' => 'NEBRASKA',
-                'NV' => 'NEVADA',
-                'NH' => 'NEW HAMPSHIRE',
-                'NJ' => 'NEW JERSEY',
-                'NM' => 'NEW MEXICO',
-                'NY' => 'NEW YORK',
-                'NC' => 'NORTH CAROLINA',
-                'ND' => 'NORTH DAKOTA',
-                'MP' => 'NORTHERN MARIANA ISLANDS',
-                'OH' => 'OHIO',
-                'OK' => 'OKLAHOMA',
-                'OR' => 'OREGON',
-                'PW' => 'PALAU',
-                'PA' => 'PENNSYLVANIA',
-                'PR' => 'PUERTO RICO',
-                'RI' => 'RHODE ISLAND',
-                'SC' => 'SOUTH CAROLINA',
-                'SD' => 'SOUTH DAKOTA',
-                'TN' => 'TENNESSEE',
-                'TX' => 'TEXAS',
-                'UT' => 'UTAH',
-                'VT' => 'VERMONT',
-                'VI' => 'VIRGIN ISLANDS',
-                'VA' => 'VIRGINIA',
-                'WA' => 'WASHINGTON',
-                'WV' => 'WEST VIRGINIA',
-                'WI' => 'WISCONSIN',
-                'WY' => 'WYOMING',
-                'AE' => 'ARMED FORCES AFRICA \ CANADA \ EUROPE \ MIDDLE EAST',
-                'AA' => 'ARMED FORCES AMERICA (EXCEPT CANADA)',
-                'AP' => 'ARMED FORCES PACIFIC'
-            ];
-
-            return (string)array_search(strtoupper($cellValue), $states);
-        }
-
-        return strtoupper($cellValue);
-    }
 
 }
