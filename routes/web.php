@@ -70,7 +70,6 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
-    Route::get('shifts', 'Clients\ShiftHistoryReport@index')->name('client.shr');
 });
 
 Route::group([

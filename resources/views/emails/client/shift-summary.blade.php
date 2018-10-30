@@ -38,7 +38,7 @@ Your home care service week is finished. Please review and confirm your pending 
 </table>
 @endif
 
-Your payment method on file will be charged within 24 hours. To see a full list of visits including ones already confirmed <a href="{{ route('client.shr') }}">click here</a>.
+Your payment method on file will be charged within 24 hours.
 
 Please do not reply to this email.
 
