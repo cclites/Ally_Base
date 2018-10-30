@@ -13,6 +13,7 @@ Your home care service week is finished. Please review and confirm your pending 
 
 ## <center>Total pending charge:  ${{ number_format($total, 2) }}</center>
 
+@if ($client->business->allow_client_confirmations)
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>
         <td align="center">
@@ -22,10 +23,10 @@ Your home care service week is finished. Please review and confirm your pending 
                         <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <a href="{{ $confirmUrl }}" class="button button-green" target="_blank">Confirm</a>
+                                    <a href="{{ route('token-confirm-shifts', ['token' => $confirmToken]) }}" class="button button-green" target="_blank">Confirm</a>
                                 </td>
                                 <td style="padding-left: 50px">
-                                    <a href="{{ $modifyUrl }}" class="button button-blue" target="_blank">Modify</a>
+                                    <a href="{{ route('client.unconfirmed-shifts') }}" class="button button-blue" target="_blank">Modify</a>
                                 </td>
                             </tr>
                         </table>
@@ -35,8 +36,9 @@ Your home care service week is finished. Please review and confirm your pending 
         </td>
     </tr>
 </table>
+@endif
 
-Your payment method on file will be charged within 24 hours. To see a full list of visits including ones already confirmed <a href="{{ route('client.shift-history') }}">click here</a>.
+Your payment method on file will be charged within 24 hours. To see a full list of visits including ones already confirmed <a href="{{ route('client.shr') }}">click here</a>.
 
 Please do not reply to this email.
 

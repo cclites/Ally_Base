@@ -18,8 +18,8 @@ Route::get('/', function () {
 });
 
 Route::view('check-my-time', 'check-my-time');
-Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken');
-Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken');
+Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
+Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
 Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
 Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
@@ -70,6 +70,7 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
+    Route::get('shifts', 'Clients\ShiftHistoryReport@index')->name('client.shr');
 });
 
 Route::group([

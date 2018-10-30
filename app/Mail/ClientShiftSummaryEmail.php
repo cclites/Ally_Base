@@ -47,18 +47,11 @@ class ClientShiftSummaryEmail extends Mailable
     public $token;
 
     /**
-     * The URL to confirm the shifts.
+     * The confirmation token used to confirm the shifts.
      *
      * @var string
      */
-    public $confirmUrl;
-
-    /**
-     * The URL to modify the shifts.
-     *
-     * @var string
-     */
-    public $modifyUrl;
+    public $confirmToken;
 
     /**
      * Create a new message instance.
@@ -72,8 +65,7 @@ class ClientShiftSummaryEmail extends Mailable
         $this->total = $total;
         $this->businessName = $businessName;
         $this->token = $token;
-        $this->confirmUrl = config('app.url') . "/confirm-shifts/$token";
-        $this->modifyUrl = config('app.url') . '/modify-shifts';
+        $this->confirmToken = $token;
     }
 
     /**
