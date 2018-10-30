@@ -212,7 +212,7 @@ abstract class BaseImport extends Command
 
         foreach($range as $column) {
             $value = $PHPExcel->getActiveSheet()->getCell($column . '1')->getValue();
-            if (strcasecmp($value, $header) === 0) {
+            if (strcasecmp(trim($value), $header) === 0) {
                 return $column;
             }
         }
