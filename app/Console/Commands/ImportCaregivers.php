@@ -158,6 +158,18 @@ class ImportCaregivers extends BaseImport
         return strtoupper($cellValue);
     }
 
+    /**
+     * Resolve the Hire Date in YYYY-MM-DD or MM/DD/YYYY formats.
+     *
+     * @param int $row
+     * @param $cellValue
+     * @return null|string
+     */
+    protected function resolveHireDate(int $row, $cellValue)
+    {
+        return $this->transformDateValue($cellValue);
+    }
+
 
 
 }

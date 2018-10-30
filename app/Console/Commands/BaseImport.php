@@ -412,16 +412,34 @@ abstract class BaseImport extends Command
         return strtoupper($cellValue);
     }
 
+    /**
+     * Resolve the date of birth in YYYY-MM-DD or MM/DD/YYYY formats.
+     *
+     * @param int $row
+     * @param $cellValue
+     * @return null|string
+     */
     protected function resolveDateOfBirth(int $row, $cellValue)
     {
+        return $this->transformDateValue($cellValue);
+    }
+
+    /**
+     * Transform dates to YYYY-MM-DD
+     *
+     * @param string $value
+     * @return null|string
+     */
+    protected function transformDateValue($value)
+    {
         try {
-            if (Carbon::createFromFormat('Y-m-d', $cellValue) !== false) {
-                return $cellValue;
+            if (Carbon::createFromFormat('Y-m-d', $value) !== false) {
+                return $value;
             }
         } catch (\Exception $e) {}
 
         try {
-            if ($parsed = Carbon::parse($cellValue)) {
+            if ($parsed = Carbon::parse($value)) {
                 return $parsed->format('Y-m-d');
             }
         } catch (\Exception $e) {}
