@@ -1,5 +1,7 @@
 <?php
-namespace App\GMaps;
+namespace Packages\GMaps;
+
+use Packages\GMaps\Exceptions\NoGeocodeFoundException;
 
 /**
  * Class Geocode
@@ -7,13 +9,13 @@ namespace App\GMaps;
  */
 class Geocode {
 
-	/**
-	 * Base Geocode Result for an Address
-	 *
-	 * @param $address
-	 *
-	 * @return array|bool
-	 */
+    /**
+     * Base Geocode Result for an Address
+     *
+     * @param $address
+     * @return array|bool
+     * @throws \Packages\GMaps\Exceptions\NoGeocodeFoundException
+     */
 	public static function getResult($address) {
 
 		$arguments = [ 'address' => $address ];
@@ -24,11 +26,12 @@ class Geocode {
 		return $array['results'][0];
 	}
 
-	/**
-	 * @param $address
-	 *
-	 * @return \App\GMaps\GeocodeCoordinates|bool
-	 */
+    /**
+     * @param $address
+     *
+     * @return \Packages\GMaps\GeocodeCoordinates|bool
+     * @throws \Packages\GMaps\Exceptions\NoGeocodeFoundException
+     */
 	public static function getCoordinates($address) {
 		if ($result = self::getResult($address)) {
 			if (!empty($result['geometry']['location']['lat'])) {
@@ -41,6 +44,13 @@ class Geocode {
 		return false;
 	}
 
+    /**
+     * @param $latitude
+     * @param $longitude
+     * @param string $language
+     * @return mixed
+     * @throws \Packages\GMaps\Exceptions\NoGeocodeFoundException
+     */
 	public static function reverseGeocode($latitude, $longitude, $language='en') {
 		$arguments = [
 			'latlng' => "$latitude,$longitude",

@@ -1,5 +1,5 @@
 <?php
-namespace App\GMaps;
+namespace Packages\GMaps;
 
 /**
  * Class Autocomplete

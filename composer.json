@@ -47,7 +47,8 @@
             "bootstrap/functions.php"
         ],
         "psr-4": {
-            "App\\": "app/"
+            "App\\": "app/",
+            "Packages\\": "packages/"
         }
     },
     "autoload-dev": {
