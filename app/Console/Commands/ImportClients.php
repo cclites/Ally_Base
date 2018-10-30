@@ -71,7 +71,7 @@ class ImportClients extends BaseImport
             return false;
         }
         else if (!$data['email']) {
-            $data['username'] = $data['firstname'] . $data['lastname'] . mt_rand(100,9999);
+            $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100,9999));
             $data['email'] = 'placeholder' . uniqid();
             $noemail = true;
         }
@@ -82,57 +82,86 @@ class ImportClients extends BaseImport
             // Replace placeholder email
             if (isset($noemail)) $client->setAutoEmail()->save();
 
-            // Create Address
-            $addressData = [
-                'address1' => $this->resolve('Address1', $row),
-                'address2' => $this->resolve('Address2', $row),
-                'city' => $this->resolve('City', $row),
-                'state' => $this->resolve('State', $row),
-                'zip' => $this->resolve('Zip', $row) ?: $this->resolve('PostalCode', $row),
-                'country' => 'US',
-                'type' => 'evv',
-            ];
-            $address = new Address($addressData);
-            $client->addresses()->save($address);
-
-            // Create Phone Numbers
-            try {
-                $phoneFields = ['primary' => 'Phone1', 'home' => 'Phone2'];
-                foreach ($phoneFields as $type => $phoneField) {
-                    $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
-                    $phone = new PhoneNumber(['type' => $type]);
-                    $phone->input($number);
-                    $client->phoneNumbers()->save($phone);
-                }
-            }
-            catch (\Exception $e) {}
-
-            // Create Emergency Contacts
-            for($i = 1; $i <= 3; $i++) {
-                if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
-                    EmergencyContact::create([
-                        'user_id' => $client->id,
-                        'name' => $emergencyName,
-                        'phone_number' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
-                        'relationship' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
-                    ]);
-                }
-            }
-
-            // Create Note
-            if ($officeNote = $this->resolve("OfficeNote", $row)) {
-                $officeUser = $this->business()->users()->first();
-                $client->notes()->save(new Note([
-                    'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
-                    'created_by' => $officeUser->id,
-                    'business_id' => $this->business()->id,
-                ]));
-            }
+            $this->importAddresses($client, $row);
+            $this->importPhoneNumbers($client, $row);
+            $this->importEmergencyContacts($client, $row);
+            $this->importNotes($client, $row);
 
             return $client;
         }
 
         return false;
+    }
+
+    /**
+     * @param int $row
+     * @param Client $client
+     */
+    protected function importAddresses(Client $client, int $row)
+    {
+        $addressData = [
+            'address1' => $this->resolve('Address1', $row),
+            'address2' => $this->resolve('Address2', $row),
+            'city' => $this->resolve('City', $row),
+            'state' => $this->resolve('State', $row),
+            'zip' => $this->resolve('Zip', $row) ?: $this->resolve('PostalCode', $row),
+            'country' => 'US',
+            'type' => 'evv',
+        ];
+        $address = new Address($addressData);
+        $client->addresses()->save($address);
+    }
+
+    /**
+     * @param Client $client
+     * @param int $row
+     */
+    protected function importPhoneNumbers(Client $client, int $row)
+    {
+        try {
+            $phoneFields = ['primary' => 'Phone1', 'home' => 'Phone2'];
+            foreach ($phoneFields as $type => $phoneField) {
+                $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
+                $phone = new PhoneNumber(['type' => $type]);
+                $phone->input($number);
+                $client->phoneNumbers()->save($phone);
+            }
+        } catch (\Exception $e) {
+        }
+    }
+
+    /**
+     * @param int $row
+     * @param Client $client
+     */
+    protected function importNotes(Client $client, int $row)
+    {
+        if ($officeNote = $this->resolve("OfficeNote", $row)) {
+            $officeUser = $this->business()->users()->first();
+            $client->notes()->save(new Note([
+                'body' => $officeNote . "\n\nImported on " . date('F j, Y'),
+                'created_by' => $officeUser->id,
+                'business_id' => $this->business()->id,
+            ]));
+        }
+    }
+
+    /**
+     * @param $client
+     * @param int $row
+     */
+    protected function importEmergencyContacts($client, int $row)
+    {
+        for ($i = 1; $i <= 3; $i++) {
+            if ($emergencyName = $this->resolve("Emerg. Contact #${i}: Name", $row)) {
+                EmergencyContact::create([
+                    'user_id' => $client->id,
+                    'name' => $emergencyName,
+                    'phone_number' => $this->resolve("Emerg. Contact #${i}: Phone", $row) ?? '',
+                    'relationship' => $this->resolve("Emerg. Contact #${i}: Relationship", $row) ?? '',
+                ]);
+            }
+        }
     }
 
     /**
