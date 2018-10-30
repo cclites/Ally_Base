@@ -10,6 +10,7 @@ use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasMetaData;
 
 /**
  * App\User
@@ -64,6 +65,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
     use HasAddressesAndNumbers;
+    use HasMetaData;
 
     /**
      * The attributes that are mass assignable.
