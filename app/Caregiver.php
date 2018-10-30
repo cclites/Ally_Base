@@ -15,6 +15,7 @@ use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasOwnMetaData;
 
 /**
  * App\Caregiver
@@ -67,6 +68,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     use IsUserRole;
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
+    use HasOwnMetaData;
 
     protected $table = 'caregivers';
     public $timestamps = false;

@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \App\GMaps\API::setKey(config('services.gmaps.key'));
+        \Packages\GMaps\API::setKey(config('services.gmaps.key'));
 
         $this->app->bind(CreditCardPaymentInterface::class, ECSPayment::class);
         $this->app->bind(ACHDepositInterface::class, ECSPayment::class);
