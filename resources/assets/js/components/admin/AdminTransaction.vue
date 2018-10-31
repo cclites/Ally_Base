@@ -75,6 +75,31 @@
             </b-col>
         </b-row>
 
+        <b-row v-if="transaction.refunds">
+            <b-col lg="12">
+                <b-card
+                        header="This Transaction Has Refunds"
+                        header-text-variant="white"
+                        header-bg-variant="danger"
+                >
+                    <table class="table table-bordered">
+                        <thead>
+                        <th>Refund Date</th>
+                        <th>Refund Amount</th>
+                        <th>Refund Note</th>
+                        </thead>
+                        <tbody>
+                        <tr v-for="refund in transaction.refunds">
+                            <td>{{ refund.created_at }}</td>
+                            <td>{{ refund.amount }}</td>
+                            <td>{{ refund.issued_payment ? refund.issued_payment.notes : '' }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </b-card>
+            </b-col>
+        </b-row>
+
 
         <loading-card v-show="loading"></loading-card>
         <b-row v-show="!loading">

@@ -94,7 +94,7 @@
         <div class="tab-pane" id="addresses" role="tabpanel">
             <div class="row">
                 <div class="col-md-6 col-sm-12">
-                    <user-address title="Home Address" type="evv" action="{{ route('business.caregivers.address', [$caregiver->id, 'home']) }}" :address="{{ $caregiver->addresses->where('type', 'home')->first() ?? '{}' }}"></user-address>
+                    <user-address title="Home Address" type="home" action="{{ route('business.caregivers.address', [$caregiver->id, 'home']) }}" :address="{{ $caregiver->addresses->where('type', 'home')->first() ?? '{}' }}"></user-address>
                 </div>
             </div>
         </div>

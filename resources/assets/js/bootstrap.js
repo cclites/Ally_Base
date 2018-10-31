@@ -14,6 +14,7 @@ try {
     window.$ = window.jQuery = require('jquery');
     require('bootstrap');
     require('bootstrap-datepicker');
+    require('select2');
 } catch (e) {}
 
 /**

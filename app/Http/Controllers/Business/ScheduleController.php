@@ -491,9 +491,6 @@ class ScheduleController extends BaseController
         $data = $schedule->load(['caregiver', 'client'])->toArray();
 
         if ($schedule->caregiver) {
-            $data['caregiver_name'] = $schedule->caregiver->nameLastFirst();
-            $data['caregiver_email'] = $schedule->caregiver->email;
-
             $phone = $schedule->caregiver->phoneNumbers()->where('type', 'primary')->first();
             if (!$phone) {
                 $phone = $schedule->caregiver->phoneNumbers()->first();
@@ -503,12 +500,14 @@ class ScheduleController extends BaseController
                 $data['caregiver_phone'] = $phone->number(true);
                 $data['caregiver_phone_type'] = $phone->type;
             }
+
+            $data['caregiver_address'] = $schedule->caregiver->address->fullAddress ?? null;
         }
 
         $data['start_date'] = $schedule->starts_at->toDateTimeString();
         $data['end_date'] = $schedule->starts_at->addMinutes($schedule->duration)->toDateTimeString();
         $data['client_address'] = $schedule->client->evvAddress->fullAddress ?? null;
-        $data['caregiver_address'] = $schedule->caregiver->address->fullAddress ?? null;
+        $data['client_phone'] = $schedule->client->evvPhone->number ?? null;
 
         return response()->json($data);
     }

@@ -68,6 +68,11 @@ class GatewayTransaction extends Model implements Auditable
         return $this->hasOne(Deposit::class, 'transaction_id');
     }
 
+    public function refunds()
+    {
+        return $this->hasMany(TransactionRefund::class, 'refunded_transaction_id');
+    }
+
     public function history()
     {
         return $this->hasMany(GatewayTransactionHistory::class, 'internal_transaction_id');

@@ -65,7 +65,7 @@
                                     >
                                         <option value="-">--Please Select--</option>
                                         <option value="">All Clients</option>
-                                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.name }}</option>
+                                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text=""/>
                                 </b-form-group>
@@ -324,6 +324,14 @@
             'items': Object,
             'caregiverId': {},
             'clientId': {},
+            'passClients': {
+                type: Array,
+                required: true,
+            },
+            'passCaregivers': {
+                type: Array,
+                required: true,
+            },
         },
 
         data() {
@@ -339,8 +347,6 @@
                 lockOvertimeHours: true,
                 lockCaregiverRate: true,
                 lockProviderFee: true,
-                clients: [],
-                caregivers: [],
                 clientCaregivers: [],
                 submitting: false,
                 form: new Form(),
@@ -361,6 +367,12 @@
                     this.$emit('input', value);
                 }
             },
+            clients() {
+                return this.passClients;
+            },
+            caregivers() {
+                return this.passCaregivers;
+            },
             endTimeLabel() {
                 let label = 'End Time';
                 if (this.form.new_duration) {
@@ -376,11 +388,11 @@
                     return 'Daily';
                 }
                 return '';
-            }
+            },
         },
 
         mounted() {
-            this.loadData();
+
         },
 
         methods: {
@@ -481,17 +493,6 @@
                     })
                     .catch(error => {
                         this.submitting = false;
-                    });
-            },
-
-            loadData() {
-                axios.get('/business/clients/list?care_plans=1')
-                    .then(response => {
-                        this.clients = response.data;
-                    });
-                axios.get('/business/caregivers?json=1')
-                    .then(response => {
-                        this.caregivers = response.data;
                     });
             },
 

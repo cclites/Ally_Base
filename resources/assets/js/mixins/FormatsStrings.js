@@ -1,7 +1,10 @@
 export default {
     methods: {
-        stringFormat(str) {
+        uppercaseWords(str) {
             return _.startCase(_.camelCase(str));
+        },
+        stringFormat(str) {
+            return this.uppercaseWords(str);
         },
         boolToYesNo(bool) {
             return bool ? 'Yes' : 'No';

@@ -82,8 +82,10 @@ class ClientCaregiverController extends BaseController
         $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
         $caregivers = $this->business()
             ->caregivers()
+            ->active()
             ->whereNotIn('caregivers.id', $excluded_caregivers->values())
             ->select('caregivers.id')
+            ->orderByName()
             ->get()
             ->map(function ($caregiver) {
                 return [
@@ -91,9 +93,7 @@ class ClientCaregiverController extends BaseController
                     'name' => $caregiver->nameLastFirst
                 ];
             })
-            ->sortBy('name')
-            ->values()
-            ->all();
+            ->values();
 
         return response()->json($caregivers);
     }

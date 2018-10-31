@@ -11,7 +11,7 @@
                                 required
                         >
                             <option value="">--Select a Client--</option>
-                            <option v-for="item in localClients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            <option v-for="item in localClients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
                         <input-help :form="form" field="client_id" text="" />
                     </b-form-group>

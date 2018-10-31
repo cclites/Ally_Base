@@ -146,4 +146,47 @@ class ImportGenerationsCaregivers extends BaseImport
         }
 
     }
+
+    /**
+     * The message to show before executing the import
+     *
+     * @return string
+     */
+    protected function warningMessage()
+    {
+        // TODO: Implement warningMessage() method.
+    }
+
+    /**
+     * Return the current business model for who the data should be imported in to
+     *
+     * @return \App\Business
+     */
+    protected function business()
+    {
+        // TODO: Implement business() method.
+    }
+
+    /**
+     * Import the specified row of data from the sheet and return the related model
+     *
+     * @param int $row
+     * @return \Illuminate\Database\Eloquent\Model|false
+     * @throws \Exception
+     */
+    protected function importRow(int $row)
+    {
+        // TODO: Implement importRow() method.
+    }
+
+    /**
+     * Return true if the row is empty or should be skipped
+     *
+     * @param int $row
+     * @return bool
+     */
+    protected function emptyRow(int $row)
+    {
+        // TODO: Implement emptyRow() method.
+    }
 }

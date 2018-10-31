@@ -114,7 +114,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public $appends = ['payment_type', 'ally_percentage'];
     public $fillable = [
         'business_id',
-        'qb_customer_id',
         'business_fee',
         'client_type',
         'default_payment_type',
@@ -152,7 +151,10 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'ltci_fax',
         'medicaid_id',
         'medicaid_diagnosis_codes',
+        'client_type_descriptor',
+        'receive_summary_email',
         'referral_source_id',
+        'qb_customer_id',
     ];
 
     ///////////////////////////////////////////
@@ -258,6 +260,10 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public function preferences()
     {
         return $this->hasOne(ClientPreferences::class, 'id');
+    }
+
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
     }
 
 
@@ -414,10 +420,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
-    }
-
-    public function referralSource() {
-        return $this->belongsTo('App\ReferralSource');
     }
 
     /**

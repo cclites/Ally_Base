@@ -9,5 +9,11 @@
 @endsection
 
 @section('content')
-    <business-text-caregivers fill-message="{{ $message }}" />
+    @if($business->outgoing_sms_number)
+        <business-text-caregivers fill-message="{{ $message }}" />
+    @else
+        <div class="alert alert-warning">
+            Please contact Ally to enable SMS messages on your account.
+        </div>
+    @endif
 @endsection

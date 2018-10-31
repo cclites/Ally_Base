@@ -9,7 +9,7 @@
                             v-model="form.client_id"
                     >
                         <option value="">--Select--</option>
-                        <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.name }}</option>
+                        <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
                     </b-form-select>
                     <input-help :form="form" field="client_id" text="Select a client."></input-help>
                 </b-form-group>
@@ -20,7 +20,7 @@
                             v-model="form.caregiver_id"
                     >
                         <option value="">--Select--</option>
-                        <option :value="caregiver.id" v-for="caregiver in business.caregivers" :key="caregiver.id">{{ caregiver.name }}</option>
+                        <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>
@@ -57,25 +57,33 @@
 
         data() {
             return {
+                clients: this.business.clients || [],
+                caregivers: this.business.caregivers || [],
                 form: new Form({}),
                 busy: false,
             }
         },
 
-        computed: {
-            clients() {
-                return this.business.clients.sort(function(a, b) {
-                    return a.name > b.name ? 1 : -1;
-                });
-            },
-            caregivers() {
-                return this.business.caregivers.sort(function(a, b) {
-                    return a.name > b.name ? 1 : -1;
-                });
-            },
+        mounted() {
+            if (!this.clients.length) this.loadClients();
+            if (!this.caregivers.length) this.loadCaregivers();
+            this.fillForm({});
+            console.log('NoteForm mounted');
         },
 
         methods: {
+            async loadClients() {
+                console.log('loadClients called');
+                const response = await axios.get('/business/clients?json=1');
+                this.clients = response.data;
+            },
+
+            async loadCaregivers() {
+                console.log('loadCaregivers called');
+                const response = await axios.get('/business/caregivers?json=1');
+                this.caregivers = response.data;
+            },
+
             submit() {
                 let path = '/notes';
                 let method = 'post';
@@ -116,10 +124,6 @@
                 console.log('note changed');
                 this.fillForm(newVal);
             },
-        },
-
-        mounted() {
-            this.fillForm({});
         },
     }
 </script>

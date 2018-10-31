@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
 use App\OnboardStatusHistory;
-use App\ReferralSource;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -19,8 +18,6 @@ use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Arr;
 
 class ClientController extends BaseController
 {
@@ -33,22 +30,26 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = $this->business()->clients()
-            ->when($request->filled('client_type'), function($query) use ($request) {
-                $query->where('client_type', $request->input('client_type'));
-            })
-            ->when($request->filled('active') || $request->expectsJson(), function($query) use ($request) {
-                $query->where('active', $request->input('active', 1));
-            })
-            ->orderByName();
-
         if ($request->expectsJson()) {
-            // Use query string ?address=1&phone_number=1 if data is needed
+            $query = $this->business()->clients()
+                ->when($request->filled('client_type'), function($query) use ($request) {
+                    $query->where('client_type', $request->input('client_type'));
+                })
+                ->orderByName();
+
+            // Default to active only, unless active is provided in the query string
+            if ($request->input('active', 1) !== null) {
+                $query->where('active', $request->input('active', 1));
+            }
+            // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
             if ($request->input('phone_number')) {
                 $query->with('phoneNumber');
+            }
+            if ($request->input('care_plans')) {
+                $query->with('carePlans');
             }
 
             return $query->get();
@@ -58,17 +59,8 @@ class ClientController extends BaseController
             'multiLocationRegistry' => $this->business()->multi_location_registry,
             'name' => $this->business()->name
         ];
-        $clients = $query->with(['address', 'phoneNumber'])->get()
-            ->map(function ($client) {
-                if ($client->address) {
-                    $client->county = $client->address->county;
-                }
-                return $client;
-            })
-            ->values();
 
-
-        return view('business.clients.index', compact('clients', 'multiLocation'));
+        return view('business.clients.index', compact('multiLocation'));
     }
 
     public function listNames()
@@ -89,6 +81,7 @@ class ClientController extends BaseController
                     'firstname' => $client->user->firstname,
                     'lastname' => $client->user->lastname,
                     'name' => $client->nameLastFirst(),
+                    'nameLastFirst' => $client->nameLastFirst(),
                     'care_plans' => (request()->care_plans) ? $client->carePlans : null,
                 ];
             })
@@ -186,17 +179,14 @@ class ClientController extends BaseController
             'creditCards',
             'payments',
             'user.documents',
+            'referralSource',
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
         ]);
-        $schedules = $client->schedules()->get();
-
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
-        $business = $this->business()->load(['clients', 'caregivers']);
 
         // include a placeholder for the primary number if one doesn't already exist
         if ($client->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -216,10 +206,12 @@ class ClientController extends BaseController
             $client->backupPayment->charge_metrics = $client->backupPayment->charge_metrics;
         }
         $client->future_schedules = $client->futureSchedules()->count();
-        $client->referralSource;
 
-        $referralsources = ReferralSource::all();
-        return view('business.clients.show', compact('client', 'schedules', 'caregivers', 'lastStatusDate', 'business', 'referralsources'));
+        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
+        $business = $this->business();
+        $referralsources = $this->business->referralSources;
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'referralsources'));
     }
 
     public function edit(Client $client)

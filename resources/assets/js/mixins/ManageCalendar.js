@@ -40,16 +40,18 @@ export default {
             return "";
         },
 
-        editSchedule(event, jsEvent, view) {
+        async editSchedule(event, jsEvent, view) {
             this.hidePreview();
-            axios.get('/business/schedule/' + event.id)
-                .then(response => {
-                    this.selectedSchedule = response.data;
-                    this.scheduleModal = true;
-                })
-                .catch(function(error) {
-                    alert('Error loading schedule details');
-                });
+            this.selectedSchedule = {};
+            this.scheduleModal = true;
+            try {
+                const response = await axios.get('/business/schedule/' + event.id);
+                this.selectedSchedule = response.data;
+            }
+            catch (error) {
+                alert('Error loading schedule details');
+                this.scheduleModal = false;
+            }
         },
 
         refreshEvents() {

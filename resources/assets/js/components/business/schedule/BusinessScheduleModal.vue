@@ -8,7 +8,8 @@
                  v-model="scheduleModal"
                  v-if="!maxHoursWarning"
         >
-            <b-card no-body>
+            <loading-card text="Loading details" v-show="isLoading"></loading-card>
+            <b-card no-body v-if="!isLoading">
                 <b-tabs card v-model="activeTab" ref="tabs">
                     <b-tab title="Shift Details" id="schedule-main">
                         <b-row>
@@ -21,7 +22,7 @@
                                             required
                                     >
                                         <option value="">--Select a Client--</option>
-                                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="client_id" text="Select the client for this schedule." />
                                 </b-form-group>
@@ -43,7 +44,7 @@
                                             v-model="form.caregiver_id"
                                     >
                                         <option value="">--Not Assigned--</option>
-                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
+                                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
                                         <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
@@ -202,7 +203,7 @@
                                     </p>
                                     <b-form-group label="End date" label-for="endDate">
                                         <date-picker v-model="endDate" />
-                                        <input-help :form="form" field="recurring_end_date" text="Repeat the schedule until this date." />
+                                        <input-help :form="form" field="recurring_end_date" text="Repeat the schedule until this date.  If left blank, the schedule will repeat for 2 years." />
                                     </b-form-group>
                                 </div>
                             </b-col>
@@ -246,7 +247,7 @@
                 </b-tabs>
             </b-card>
 
-            <div slot="modal-footer">
+            <div slot="modal-footer" v-if="!isLoading">
                 <b-btn variant="info" @click="submitForm()" :disabled="submitting">
                     <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
                     <i class="fa fa-save" v-show="!submitting"></i>
@@ -281,13 +282,20 @@
 
         props: {
             model: Boolean,
-
+            passClients: {
+                type: Array,
+                required: true,
+            },
+            passCaregivers: {
+                type: Array,
+                required: true,
+            },
             selectedSchedule: {
                 type: Object,
                 default() {
                     return {};
                 }
-            }
+            },
         },
         
         data() {
@@ -305,8 +313,6 @@
                 paymentType: 'NONE',
                 clientCaregivers: [],
                 cgMode: 'client',
-                allCaregivers: [],
-                clients: [],
                 care_plans: [],
                 daysOfWeek: {
                     'Sunday': 'su',
@@ -324,7 +330,6 @@
 
         mounted() {
             this.loadClientData();
-            this.loadAllCaregivers();
         },
 
         computed: {
@@ -343,6 +348,10 @@
                     return 'Save';
                 }
                 return 'Create Schedule';
+            },
+
+            isLoading() {
+                return _.isEmpty(this.selectedSchedule);
             },
 
             schedule() {
@@ -390,9 +399,13 @@
 
             caregivers() {
                 if (this.cgMode === 'all') {
-                    return this.allCaregivers;
+                    return this.passCaregivers;
                 }
                 return this.clientCaregivers;
+            },
+
+            clients() {
+                return this.passClients;
             },
 
             toggleCaregiversLabel() {
@@ -559,23 +572,8 @@
                 }
             },
 
-            loadAllCaregivers() {
-                axios.get('/business/caregivers?json=1')
-                    .then(response => {
-                        this.allCaregivers = response.data;
-                    });
-            },
-
             loadClientData() {
-                if (!this.client_id) {
-                    let component = this;
-                    axios.get('/business/clients/list?care_plans=1')
-                        .then(response => {
-                            component.clients = response.data;
-                            this.loadCaregivers();
-                        });
-                }
-                else {
+                if (this.client_id) {
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers();
                     this.loadAllyPctFromClient(this.client_id);
@@ -683,14 +681,16 @@
                     this.hideMaxHoursWarning();
                 }
 
+                // Update local modal bool
+                this.scheduleModal = val;
+            },
+
+            selectedSchedule(val) {
                 // Force back to first tab
                 this.resetTabs();
 
                 // Clear copied values
                 this.copiedSchedule = {};
-
-                // Update local modal bool
-                this.scheduleModal = val;
 
                 // Re-create the form object
                 this.makeForm();
