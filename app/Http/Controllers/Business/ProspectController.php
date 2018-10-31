@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Requests\UpdateProspectRequest;
 use App\Prospect;
+use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -34,7 +35,8 @@ class ProspectController extends BaseController
      */
     public function create()
     {
-        return view('business.prospects.show');
+        $referralsources = ReferralSource::all();
+        return view('business.prospects.show', compact('referralsources'));
     }
 
 
@@ -64,8 +66,9 @@ class ProspectController extends BaseController
         if (!$this->businessHasProspect($prospect)) {
             abort(403);
         }
-
-        return view('business.prospects.show', compact('prospect'));
+        $prospect->referralSource;
+        $referralsources = ReferralSource::all();
+        return view('business.prospects.show', compact('prospect', 'referralsources'));
     }
 
     /**

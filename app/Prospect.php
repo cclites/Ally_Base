@@ -119,4 +119,8 @@ class Prospect extends Model
     {
         return $builder->withoutGlobalScope('ignore_clients');
     }
+
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
+    }
 }

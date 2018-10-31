@@ -153,6 +153,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'medicaid_diagnosis_codes',
         'client_type_descriptor',
         'receive_summary_email',
+        'referral_source_id',
+        'qb_customer_id',
     ];
 
     ///////////////////////////////////////////
@@ -258,6 +260,10 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     public function preferences()
     {
         return $this->hasOne(ClientPreferences::class, 'id');
+    }
+
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
     }
 
 

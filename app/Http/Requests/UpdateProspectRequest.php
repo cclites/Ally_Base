@@ -53,6 +53,7 @@ class UpdateProspectRequest extends FormRequest
             'ready_to_schedule' => 'boolean',
             'closed_loss' => 'boolean',
             'closed_win' => 'boolean',
+            'referral_source_id' => 'nullable|numeric',
         ];
     }
 
