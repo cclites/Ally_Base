@@ -1,5 +1,4 @@
 <?php
-
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,11 +12,15 @@ class ReferralSource extends Model
         'phone'
     ];
 
+    public function business() {
+        return $this->belongsTo(Business::class);
+    }
+
     public function client() {
-        return $this->hasMany('App\Client');
+        return $this->hasMany(Client::class);
     }
 
     public function prospect() {
-        return $this->hasMany('App\Prospect');
+        return $this->hasMany(Prospect::class);
     }
 }

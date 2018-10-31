@@ -1,20 +1,13 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="2">
-                <a href="add/client-referal" class="btn btn-secondary ">Add Referral Sources</a>
-            </b-col>
             <b-col lg="3">
-                <b-form-group horizontal label="Search:" class="mb-0">
-                    <b-input-group>
-                        <b-form-input v-model="search"/>
-                    </b-input-group>
-                </b-form-group>
+                <b-btn variant="info" @click="showModal=true">Add Referral Sources</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="referralSources"
+                     :items="items"
                      :fields="fields"
                      :current-page="currentPage"
                      :per-page="perPage"
@@ -23,8 +16,7 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                    <b-btn size="sm" :href="'/business/clients/' + row.item.id">
+                    <b-btn size="sm" @click="edit(row.item.id)">
                         <i class="fa fa-edit"></i>
                     </b-btn>
                 </template>
@@ -39,19 +31,28 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <client-referral-modal v-model="showModal" :source="editSource" @saved="updateList"></client-referral-modal>
     </b-card>
 </template>
 
 <script>
+    import FormatsDates from "../../../mixins/FormatsDates";
+
     export default {
-        props: ['referralSources'],
+        mixins: [FormatsDates],
+
+        props: ['referralSources', 'editSourceId', 'createSource'],
 
         data() {
             return {
+                items: this.referralSources || [],
+                showModal: !!this.editSourceId || !!this.createSource,
+                editSource: this.find(this.editSourceId, this.referralSources) || {},
                 active: 'active',
                 totalRows: 0,
                 currentPage: 1,
-                perPage: 15,
+                perPage: 25,
                 filter: null,
                 search: null,
                 sortBy: 'organization',
@@ -75,8 +76,10 @@
                     {
                         key: 'created_at',
                         label: 'Created At',
-                        sortable: true
-                    }
+                        sortable: true,
+                        formatter: val => this.formatDateFromUTC(val),
+                    },
+                    'actions'
                 ]
             }
         },
@@ -85,31 +88,29 @@
             this.totalRows = this.items.length;
         },
 
-        computed: {
-            items() {
-                let component = this;
-                let referralSources = this.referralSources.map(function(referralSource) {
-                    return {
-                        organization: referralSource.organization,
-                        contact_name: referralSource.contact_name,
-                        phone: referralSource.phone,
-                        created_at: referralSource.created_at,
-
-                    }
-                });
-
-                return _.filter(referralSources, (client) => {
-                    switch (this.active) {
-                        case 'all':
-                            return true;
-                        case 'active':
-                            return client.active;
-                        case 'inactive':
-                            return !client.active;
-                    }
-                })
+        methods: {
+            edit(id) {
+                this.editSource = this.find(id);
+                this.showModal = true;
             },
-        },
+            create() {
+                this.editSource = {};
+                this.showModal = true;
+            },
+            find(id, list=null) {
+                if (!list) list = this.items;
+                return list.find(item => item.id == id);
+            },
+            updateList(source) {
+                let index = this.items.findIndex(item => item.id == source.id);
+                if (index === -1) {
+                    this.items.push(source);
+                }
+                else {
+                    Vue.set(this.items, index, source);
+                }
+            }
+        }
     }
 </script>
 

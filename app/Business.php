@@ -185,6 +185,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->hasMany(Prospect::class, 'business_id');
     }
 
+    public function referralSources()
+    {
+        return $this->hasMany(ReferralSource::class, 'business_id');
+    }
+
     public function users()
     {
         return $this->belongsToMany(OfficeUser::class, 'business_office_users');

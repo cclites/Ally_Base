@@ -15,10 +15,13 @@ class CreateReferralSourcesTable extends Migration
     {
         Schema::create('referral_sources', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('business_id');
             $table->string('organization');
             $table->string('contact_name');
-            $table->bigInteger('phone');
+            $table->string('phone');
             $table->timestamps();
+
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
         });
     }
 
@@ -29,6 +32,6 @@ class CreateReferralSourcesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('referal_sources');
+        Schema::dropIfExists('referral_sources');
     }
 }

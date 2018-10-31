@@ -140,7 +140,7 @@
                         </b-col>
                         <b-col md="3" class="pad-top">
                             <div class="pt-3">
-                                <b-btn  @click="show = true">Add Referral Source</b-btn>
+                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
                             </div>
                         </b-col>
                     </b-row>
@@ -188,9 +188,7 @@
                 </b-col>
             </b-row>
         </form>
-        <b-modal v-model="show" id="addreferralsource" hide-footer>
-            <add-client-referal @refsource="newrefsourcedata" :show-status="true" @closemodal="closemodal"></add-client-referal>
-        </b-modal>
+        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
     </b-card>
 </template>
 
@@ -242,7 +240,7 @@
                 submitting: false,
                 countries: new Countries(),
                 states: new States(),
-                show: false,
+                showReferralModal: false,
             }
         },
 

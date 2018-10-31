@@ -116,7 +116,7 @@
                         </b-col>
                         <b-col md="3" class="pad-top">
                             <div class="pt-3">
-                                <b-btn  @click="show = true">Add Referral Source</b-btn>
+                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
                             </div>
                         </b-col>
                     </b-row>
@@ -341,9 +341,7 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <b-modal v-model="show" id="addreferralsource" hide-footer>
-            <add-client-referal @refsource="newrefsourcedata" :show-status="true" @closemodal="closemodal"></add-client-referal>
-        </b-modal>
+        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
     </b-card>
 </template>
 
@@ -407,7 +405,7 @@
                 deactivateModal: false,
                 activateModal: false,
                 inactive_at: '',
-                show: false,
+                showReferralModal: false,
             }
         },
 
