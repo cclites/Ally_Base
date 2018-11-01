@@ -7,6 +7,7 @@ use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 
@@ -57,6 +58,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class Schedule extends Model implements Auditable
 {
+    use SoftDeletes;
     use \OwenIt\Auditing\Auditable;
 
     protected $table = 'schedules';

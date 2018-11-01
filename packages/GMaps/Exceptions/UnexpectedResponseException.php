@@ -1,6 +1,6 @@
 <?php
 
-namespace App\GMaps;
+namespace Packages\GMaps\Exceptions;
 
 class UnexpectedResponseException extends \Exception
 {

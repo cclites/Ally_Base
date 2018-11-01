@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\GMaps\GeocodeCoordinates;
+use Packages\GMaps\GeocodeCoordinates;
 use Tests\TestCase;
 
 class GeocodeTest extends TestCase
