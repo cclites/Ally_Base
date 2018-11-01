@@ -346,7 +346,7 @@
                 </b-col>
             </b-row>
             <b-row class="mb-2" v-if="onboarding.transportation">
-                <b-col></b-col>
+                <b-col>Will the client need assistance with transportation?</b-col>
                 <b-col>
                     <span v-if="onboarding.transportation">Yes</span>
                     <span v-else>No</span>

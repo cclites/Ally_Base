@@ -1,4 +1,7 @@
 <template>
+    <div>
+        <object class="w-100" style="height: 40rem;" :data="`/business/clients/onboarding/${onboardingData.id}/intake-pdf`"></object>
+    </div>
 </template>
 
 <script>
@@ -21,7 +24,9 @@
 
         computed: {},
 
-        methods: {}
+        methods: {
+
+        }
     }
 </script>
 

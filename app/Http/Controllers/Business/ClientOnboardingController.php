@@ -12,6 +12,7 @@ use App\Signature;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ClientOnboardingController extends Controller
 {
@@ -40,7 +41,7 @@ class ClientOnboardingController extends Controller
         ]);
 
         $onboarding = null;
-        $query = ClientOnboarding::with('activities', 'signature')->where('client_id', $client->id);
+        $query = ClientOnboarding::with('activities', 'signature', 'client')->where('client_id', $client->id);
         if ($query->exists()) {
             $onboarding = $query->first();
         }
@@ -141,6 +142,8 @@ class ClientOnboardingController extends Controller
 
         $clientOnboarding->client->update(['onboarding_step' => 3]);
         $clientOnboarding->load('signature');
+        // todo generate onboarding pdf here
+        $clientOnboarding->createIntakePdf();
         return new SuccessResponse('Success', ['onboarding' => $clientOnboarding]);
     }
 
@@ -153,5 +156,10 @@ class ClientOnboardingController extends Controller
     public function destroy(ClientOnboarding $clientOnboarding)
     {
         //
+    }
+
+    public function intakePdf(ClientOnboarding $clientOnboarding)
+    {
+        return response()->file(storage_path($clientOnboarding->intake_pdf));
     }
 }

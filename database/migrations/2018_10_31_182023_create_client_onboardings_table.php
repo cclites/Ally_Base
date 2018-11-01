@@ -71,7 +71,7 @@ class CreateClientOnboardingsTable extends Migration
             $table->date('requested_start_at')->nullable();
             $table->text('requested_schedule')->nullable();
             $table->string('relation_to_intake_party')->nullable();
-            $table->string('signature')->nullable();
+            $table->string('intake_pdf')->nullable();
 
             $table->timestamps();
 
