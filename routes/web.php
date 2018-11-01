@@ -135,6 +135,9 @@ Route::group([
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
 
+    Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
+    Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
+    Route::put('clients/onboarding/{clientOnboarding}', 'Business\ClientOnboardingController@update')->name('clients.onboarding.update');
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
@@ -147,8 +150,6 @@ Route::group([
     Route::post('clients/{client}/reactivate', 'Business\ClientController@reactivate')->name('clients.reactivate');
     Route::post('clients/{client}/service_orders', 'Business\ClientController@serviceOrders')->name('clients.service_orders');
     Route::post('clients/{client}/preferences', 'Business\ClientController@preferences')->name('clients.preferences');
-    Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
-    Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
 
     Route::get('clients/{client}/addresses', 'Business\ClientAddressController@index')->name('clients.addresses');
     Route::post('clients/{client}/address/{type}', 'Business\ClientController@address')->name('clients.address');

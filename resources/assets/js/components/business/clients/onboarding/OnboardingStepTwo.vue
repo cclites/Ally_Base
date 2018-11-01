@@ -372,12 +372,12 @@
             </b-row>
         </b-card>
 
-        <signature-pad v-model="onboarding.signature"></signature-pad>
+        <signature-pad v-model="form.signature"></signature-pad>
 
-        <b-row>
+        <b-row class="mt-3">
             <b-col>
                 <b-btn variant="secondary" @click="previousStep">Previous Step</b-btn>
-                <b-btn>Next Step</b-btn>
+                <b-btn :disabled="!form.signature" @click="nextStep">Next Step</b-btn>
             </b-col>
         </b-row>
 
@@ -393,7 +393,11 @@
         components: {},
 
         data() {
-            return {}
+            return {
+                form: new Form({
+                    signature: null
+                })
+            }
         },
 
         created() {
@@ -405,6 +409,11 @@
         computed: {},
 
         methods: {
+            async nextStep() {
+                let response = await this.form.put(`/business/clients/onboarding/${this.onboarding.id}`);
+                this.$emit('next', response.data);
+            },
+
             previousStep() {
                 this.$emit('previous');
             }

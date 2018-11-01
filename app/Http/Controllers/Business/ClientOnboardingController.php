@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\OnboardingActivity;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\Signature;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +40,7 @@ class ClientOnboardingController extends Controller
         ]);
 
         $onboarding = null;
-        $query = ClientOnboarding::with('activities')->where('client_id', $client->id);
+        $query = ClientOnboarding::with('activities', 'signature')->where('client_id', $client->id);
         if ($query->exists()) {
             $onboarding = $query->first();
         }
@@ -136,7 +137,11 @@ class ClientOnboardingController extends Controller
      */
     public function update(Request $request, ClientOnboarding $clientOnboarding)
     {
-        //
+        Signature::onModelInstance($clientOnboarding, $request->signature);
+
+        $clientOnboarding->client->update(['onboarding_step' => 3]);
+        $clientOnboarding->load('signature');
+        return new SuccessResponse('Success', ['onboarding' => $clientOnboarding]);
     }
 
     /**
