@@ -336,7 +336,7 @@
                 </b-form-radio-group>
             </b-form-group>
             <b-form-group label="Who will be responsible for the client during an evacuation?">
-                <b-form-input v-model="form.emp_evacuation_reponsible_party"></b-form-input>
+                <b-form-input v-model="form.emp_evacuation_responsible_party"></b-form-input>
             </b-form-group>
             <b-form-group label="Will the client need a caregiver during this period?" horizontal :label-cols="8"
                           breakpoint="md">
@@ -350,13 +350,13 @@
         <!-- Preferences & Other Information -->
         <b-card border-variant="secondary" header="Preferences & Other Information">
             <b-form-group label="Caregiver Gender Preference" horizontal :label-cols="6" breakpoint="md">
-                <b-form-radio-group v-model="form.gc_gender_pref">
+                <b-form-radio-group v-model="form.cg_gender_pref">
                     <b-form-radio value="male">Male</b-form-radio>
                     <b-form-radio value="female">Female</b-form-radio>
                 </b-form-radio-group>
             </b-form-group>
             <b-form-group label="Caregiver Attire Preference" horizontal :label-cols="6" breakpoint="md">
-                <b-form-radio-group v-model="form.gc_attire_pref">
+                <b-form-radio-group v-model="form.cg_attire_pref">
                     <b-form-radio value="scrubs">Scrubs</b-form-radio>
                     <b-form-radio value="business_casual">Business Casual</b-form-radio>
                 </b-form-radio-group>
@@ -414,10 +414,6 @@
     export default {
         props: ['clientData', 'activities'],
 
-        mixins: [],
-
-        components: {},
-
         data() {
             return {
                 form: {}
@@ -468,30 +464,25 @@
                 emp_shelter_type: '',
                 emp_shelter_address: '',
                 emp_shelter_registration_assistance: '',
-                emp_evacuation_reponsible_party: '',
+                emp_evacuation_responsible_party: '',
                 emp_caregiver_required: '',
-                gc_gender_pref: '',
-                gc_attire_pref: '',
+                cg_gender_pref: '',
+                cg_attire_pref: '',
                 pets: '',
                 pets_description: '',
                 cg_pet_assistance: '',
                 transportation: '',
                 transportation_vehicle: '',
                 requested_start_at: '',
-                requested_shedule: '',
+                requested_schedule: '',
                 activities: []
             })
         },
 
-        mounted() {
-        },
-
-        computed: {},
-
         methods: {
             async submitStepOne() {
                 let response = await this.form.post(`/business/clients/${this.clientData.id}/onboarding`)
-                console.log(response);
+                this.$emit('next', response.data);
             }
         }
     }

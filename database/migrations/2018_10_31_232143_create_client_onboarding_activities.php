@@ -17,6 +17,8 @@ class CreateClientOnboardingActivities extends Migration
             $table->unsignedInteger('client_onboarding_id');
             $table->unsignedInteger('onboarding_activity_id');
             $table->string('assistance_level');
+
+            $table->primary(['client_onboarding_id', 'onboarding_activity_id'], 'onboarding_act_idx');
         });
     }
 

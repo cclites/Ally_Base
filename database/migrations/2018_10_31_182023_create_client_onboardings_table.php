@@ -15,7 +15,10 @@ class CreateClientOnboardingsTable extends Migration
     {
         Schema::create('client_onboardings', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('client_id');
+            $table->unsignedInteger('client_id')->unique();
+            $table->string('middle_initial', 5)->nullable();
+            $table->string('address')->nullable();
+            $table->string('phone_number')->nullable();
             $table->boolean('facility')->nullable();
             $table->text('facility_instructions')->nullable();
             $table->text('primary_conditions')->nullable();
@@ -41,13 +44,13 @@ class CreateClientOnboardingsTable extends Migration
             $table->string('ec_address')->nullable();
             $table->string('ec_phone_number')->nullable();
             $table->string('ec_email')->nullable();
-            $table->string('ec_relation_ship')->nullable();
+            $table->string('ec_relationship')->nullable();
             $table->boolean('ec_poa')->nullable();
             $table->string('secondary_ec_name')->nullable();
             $table->string('secondary_ec_address')->nullable();
             $table->string('secondary_ec_phone_number')->nullable();
             $table->string('secondary_ec_email')->nullable();
-            $table->string('secondary_ec_relation_ship')->nullable();
+            $table->string('secondary_ec_relationship')->nullable();
             $table->boolean('secondary_ec_poa')->nullable();
             $table->boolean('emp_leave_region')->nullable();
             $table->text('emp_with_who_where')->nullable();

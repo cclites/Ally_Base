@@ -10,6 +10,7 @@ class ClientOnboarding extends Model
 
     public function activities()
     {
-        return $this->belongsToMany(OnboardingActivity::class, 'client_onboarding_activities');
+        return $this->belongsToMany(OnboardingActivity::class, 'client_onboarding_activities')
+            ->withPivot('assistance_level');
     }
 }
