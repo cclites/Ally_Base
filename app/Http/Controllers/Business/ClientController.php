@@ -69,7 +69,7 @@ class ClientController extends BaseController
     {
         $query = $this->business()
             ->clients();
-            
+
         if (request()->care_plans) {
             $query->with('carePlans');
         }

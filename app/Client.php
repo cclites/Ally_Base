@@ -153,6 +153,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'medicaid_diagnosis_codes',
         'client_type_descriptor',
         'receive_summary_email',
+        'onboarding_step'
     ];
 
     ///////////////////////////////////////////

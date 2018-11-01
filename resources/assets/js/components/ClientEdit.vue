@@ -241,9 +241,9 @@
                 <b-col lg="12">
                     <hr />
                 </b-col>
-                <b-col lg="6">
+                <b-col lg="8">
                     <b-row>
-                        <b-col xlg="8" lg="6" sm="12">
+                        <b-col lg="6" sm="12">
                             <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
                                 <b-form-select
                                         id="onboard_status"
@@ -258,19 +258,29 @@
                                 <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
                             </b-form-group>
                         </b-col>
-                        <b-col xlg="4" lg="6" sm="12">
+                        <b-col lg="6" sm="12">
                             <b-form-group v-if="client.onboard_status == 'needs_agreement'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Send Client Agreement via Email</b-button>
+                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <br>
+                                <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
+                                    Email
+                                </b-button>
+                            </b-form-group>
+                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
+                                <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
+                                <br>
+                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
                             <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Resend Client Agreement via Email</b-button>
+                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button variant="info" @click="sendConfirmation()" size="sm">Resend Client Agreement via
+                                    Email
+                                </b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
                 </b-col>
-                <b-col lg="6">
+                <b-col lg="4">
                     <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
                         <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
                         <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
@@ -288,7 +298,7 @@
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
-        
+
         <b-modal id="deactivateModal"
                  title="Are you sure?"
                  v-model="deactivateModal"
@@ -300,7 +310,7 @@
                         <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
                         <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
                         <div v-else>They have no future scheduled shifts.</div>
-                                    
+
                         <b-form-group slabel-for="inactive_at" class="mt-4">
                             <date-picker
                                 class="w-50 mx-auto"
@@ -310,7 +320,7 @@
                             </date-picker>
                             <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
                         </b-form-group>
-                        
+
                     </b-col>
                 </b-row>
             </b-container>

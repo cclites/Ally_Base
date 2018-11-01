@@ -205,6 +205,7 @@ Vue.component('client-statements-tab', require('./components/business/clients/Cl
 Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
+Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
