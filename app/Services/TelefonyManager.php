@@ -124,11 +124,17 @@ class TelefonyManager
         return $object->redirect($url, $options);
     }
 
-    public function getTwilioResponse() {
+    public function twiml()
+    {
         if (!$this->twilioResponse) {
             $this->twilioResponse = new Twiml;
         }
         return $this->twilioResponse;
+    }
+
+    public function getTwilioResponse()
+    {
+        return $this->twiml();
     }
 
     /**

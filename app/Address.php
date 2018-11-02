@@ -2,9 +2,9 @@
 
 namespace App;
 
-use App\GMaps\Geocode;
-use App\GMaps\GeocodeCoordinates;
-use App\GMaps\NoGeocodeFoundException;
+use Packages\GMaps\Geocode;
+use Packages\GMaps\GeocodeCoordinates;
+use Packages\GMaps\NoGeocodeFoundException;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -65,7 +65,7 @@ class Address extends Model implements Auditable
     /**
      * Get the geocode for the address
      *
-     * @return \App\GMaps\GeocodeCoordinates|false
+     * @return \Packages\GMaps\GeocodeCoordinates|false
      */
     public function getGeocode($forceUpdate = false)
     {

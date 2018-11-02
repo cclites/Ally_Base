@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasOwnMetaData;
 
 /**
  * App\Client
@@ -106,6 +107,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     use \App\Traits\HasPaymentHold;
     use HasAllyFeeTrait;
     use \OwenIt\Auditing\Auditable;
+    use HasOwnMetaData;
 
     protected $table = 'clients';
     public $timestamps = false;

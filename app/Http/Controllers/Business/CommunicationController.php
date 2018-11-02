@@ -125,6 +125,7 @@ class CommunicationController extends Controller
     /**
      * Handle incoming SMS messages from Twilio webhooks.
      *
+     * @deprecated Moved to api
      * @return Response
      */
     public function incoming(Request $request)
