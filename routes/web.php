@@ -254,6 +254,9 @@ Route::group([
     Route::resource('tasks', 'Business\TasksController');
 
     Route::get('accounting/apply-payment', 'Business\ApplyPaymentController@index')->name('accounting.apply-payment.index');
+    Route::get('accounting/claims', function() {
+        return view('business.accounting.claims');
+    })->name('accounting.claims');
     // Route::get('accounting/receivables', 'Business\ReceivablesController@index')->name('accounting.receivables.index');
     // Route::get('accounting/export', 'Business\AccountingExportController@index')->name('accounting.export.index');
 
