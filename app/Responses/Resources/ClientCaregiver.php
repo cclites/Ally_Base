@@ -46,14 +46,14 @@ class ClientCaregiver implements Responsable
             $caregiver->pivot->ally_daily_fee = number_format(AllyFeeCalculator::getFee(
                 $client,
                 $client->getPaymentMethod(),
-                $caregiver->pivot->caregiver_daily_rate + $caregiver->pivot->provider_daily_fee
+                $caregiver->pivot->caregiver_fixed_rate + $caregiver->pivot->provider_fixed_fee
             ), 2);
             $caregiver->pivot->total_hourly_fee = number_format(
                 round($caregiver->pivot->caregiver_hourly_rate + $caregiver->pivot->provider_hourly_fee + $caregiver->pivot->ally_hourly_fee, 2),
                 2
             );
             $caregiver->pivot->total_daily_fee = number_format(
-                round($caregiver->pivot->caregiver_daily_rate + $caregiver->pivot->provider_daily_fee + $caregiver->pivot->ally_daily_fee, 2),
+                round($caregiver->pivot->caregiver_fixed_rate + $caregiver->pivot->provider_fixed_fee + $caregiver->pivot->ally_daily_fee, 2),
                 2
             );
         }

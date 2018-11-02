@@ -105,11 +105,11 @@
                         <b-row>
                             <b-col>
                                 <div class="form-check">
-                                    <input-help :form="form" field="daily_rates" text="Select the shift type you wish to match against."/>
-                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_hourly_rates" :value="0">
+                                    <input-help :form="form" field="fixed_rates" text="Select the shift type you wish to match against."/>
+                                    <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="update_hourly_rates" :value="0">
                                     <label for="update_hourly_rates" class="rate-label">Hourly Shifts Only</label>
-                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="update_daily_rates" :value="1">
-                                    <label for="update_daily_rates" class="rate-label">Daily Shifts Only</label>
+                                    <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="update_fixed_rates" :value="1">
+                                    <label for="update_fixed_rates" class="rate-label">Daily Shifts Only</label>
                                 </div>
                             </b-col>
                         </b-row>
@@ -269,8 +269,8 @@
                         <b-row>
                             <b-col>
                                 <small class="form-text text-muted with-padding-bottom">
-                                    <span v-if="form.daily_rates" class="text-danger">Notice: You are updating DAILY shifts only.</span>
-                                    <span v-else-if="form.daily_rates === 0" class="text-info">Notice: You are updating HOURLY shifts only.</span>
+                                    <span v-if="form.fixed_rates" class="text-danger">Notice: You are updating DAILY shifts only.</span>
+                                    <span v-else-if="form.fixed_rates === 0" class="text-info">Notice: You are updating HOURLY shifts only.</span>
                                     <span v-else class="text-warning">You must select the rate structure to match against.</span>
                                 </small>
                             </b-col>
@@ -381,10 +381,10 @@
                 return label;
             },
             rateType() {
-                if (this.form.daily_rates === 0) {
+                if (this.form.fixed_rates === 0) {
                     return 'Hourly';
                 }
-                if (this.form.daily_rates === 1) {
+                if (this.form.fixed_rates === 1) {
                     return 'Daily';
                 }
                 return '';
@@ -419,7 +419,7 @@
                     'client_id': (this.clientId > 0) ? this.clientId : '-',
                     'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
                     'bydays': [],
-                    'daily_rates': null,
+                    'fixed_rates': null,
 
                     'new_start_time': '',
                     'new_duration': null,

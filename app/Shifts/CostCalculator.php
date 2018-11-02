@@ -74,7 +74,7 @@ class CostCalculator
 
         $hourlyRate = AllyFeeCalculator::getHourlyRate($this->client, $this->paymentType, $this->shift->caregiver_rate, $this->shift->provider_fee);
 
-        if ($this->shift->daily_rates) {
+        if ($this->shift->fixed_rates) {
             // Still use getHourlyRate method for ease of use, but don't do any multiplication
             $shiftFee = $hourlyRate;
         }
@@ -104,7 +104,7 @@ class CostCalculator
             return $this->getPersistedCosts()->provider_fee;
         }
 
-        if ($this->shift->daily_rates) {
+        if ($this->shift->fixed_rates) {
             return $this->shift->provider_fee;
         }
 
@@ -129,7 +129,7 @@ class CostCalculator
             return $this->getPersistedCosts()->caregiver_shift;
         }
 
-        if ($this->shift->daily_rates) {
+        if ($this->shift->fixed_rates) {
             $shift = $this->shift->caregiver_rate;
         }
         else {

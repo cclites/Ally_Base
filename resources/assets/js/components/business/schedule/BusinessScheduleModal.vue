@@ -56,13 +56,13 @@
                         <b-row>
                             <b-col>
                                 <strong>Shift Type: </strong>
-                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
+                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
                                 <label for="create_hourly_rates" class="rate-label">Hourly</label>
-                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_daily_rates" :value="1">
-                                <label for="create_daily_rates" class="rate-label">Daily</label>
+                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_fixed_rates" :value="1">
+                                <label for="create_fixed_rates" class="rate-label">Daily</label>
                             </b-col>
                         </b-row>
-                        <b-row v-show="form.daily_rates !== null">
+                        <b-row v-show="form.fixed_rates !== null">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
@@ -136,9 +136,9 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
-                                            :readonly="!!form.daily_rates"
+                                            :readonly="!!form.fixed_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.daily_rates" />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.fixed_rates" />
                                     <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
                                 </b-form-group>
                             </b-col>
@@ -416,10 +416,10 @@
             },
 
             rateType() {
-                if (this.form.daily_rates === 0) {
+                if (this.form.fixed_rates === 0) {
                     return 'Hourly';
                 }
-                if (this.form.daily_rates === 1) {
+                if (this.form.fixed_rates === 1) {
                     return 'Daily';
                 }
                 return '';
@@ -466,7 +466,7 @@
                     'duration': this.schedule.duration || 0,
                     'caregiver_id': this.schedule.caregiver_id || "",
                     'client_id': this.schedule.client_id || "",
-                    'daily_rates': this.schedule.daily_rates || 0,
+                    'fixed_rates': this.schedule.fixed_rates || 0,
                     'caregiver_rate': this.schedule.caregiver_rate || "",
                     'provider_fee': this.schedule.provider_fee || "",
                     'notes': this.schedule.notes || "",
@@ -717,7 +717,7 @@
 
             startTime(val) {
                 this.form.duration = this.getDuration();
-                if (this.form.daily_rates) {
+                if (this.form.fixed_rates) {
                     // Lock end time to start time for daily rates
                     this.endTime = val;
                 }
@@ -727,7 +727,7 @@
                 this.form.duration = this.getDuration();
             },
 
-            'form.daily_rates': function(val, old_val) {
+            'form.fixed_rates': function(val, old_val) {
                 this.prefillRates();
                 if (val) {
                     // Lock end time to start time for daily rates

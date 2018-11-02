@@ -23,9 +23,9 @@ class ClientCaregiverController extends BaseController
 
         $data = $request->validate([
             'caregiver_hourly_rate' => 'required|numeric',
-            'caregiver_daily_rate' => 'nullable|numeric',
+            'caregiver_fixed_rate' => 'nullable|numeric',
             'provider_hourly_fee' => 'required|numeric',
-            'provider_daily_fee' => 'nullable|numeric',
+            'provider_fixed_fee' => 'nullable|numeric',
         ]);
 
         // Force rates/fees to floats
@@ -150,7 +150,7 @@ class ClientCaregiverController extends BaseController
 
         // Update hourly shifts
         $caregiver->schedules()
-            ->where('daily_rates', 0)
+            ->where('fixed_rates', 0)
             ->forClient($client)
             ->future($this->business()->timezone)
             ->update([
@@ -160,12 +160,12 @@ class ClientCaregiverController extends BaseController
 
         // Update daily shifts
         $caregiver->schedules()
-            ->where('daily_rates', 1)
+            ->where('fixed_rates', 1)
             ->forClient($client)
             ->future($this->business()->timezone)
             ->update([
-                'caregiver_rate' => $caregiver->pivot->caregiver_daily_rate,
-                'provider_fee' => $caregiver->pivot->provider_daily_fee,
+                'caregiver_rate' => $caregiver->pivot->caregiver_fixed_rate,
+                'provider_fee' => $caregiver->pivot->provider_fixed_fee,
             ]);
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);

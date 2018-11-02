@@ -13,6 +13,7 @@ use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\HasAllyFeeTrait;
+use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -108,6 +109,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     use HasAllyFeeTrait;
     use \OwenIt\Auditing\Auditable;
     use HasOwnMetaData;
+    use HasDefaultRates;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -157,6 +159,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'receive_summary_email',
         'referral_source_id',
         'qb_customer_id',
+        'hourly_rate_id',
+        'fixed_rate_id'
     ];
 
     ///////////////////////////////////////////
@@ -205,9 +209,9 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
                     ->withTimestamps()
                     ->withPivot([
                         'caregiver_hourly_rate',
-                        'caregiver_daily_rate',
+                        'caregiver_fixed_rate',
                         'provider_hourly_fee',
-                        'provider_daily_fee',
+                        'provider_fixed_fee',
                     ]);
     }
 

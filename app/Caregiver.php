@@ -10,6 +10,7 @@ use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
@@ -69,6 +70,7 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
     use HasOwnMetaData;
+    use HasDefaultRates;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -94,6 +96,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_account_numbers',
         'w9_employer_id_number',
         'medicaid_id',
+        'hourly_rate_id',
+        'fixed_rate_id'
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
@@ -124,9 +128,9 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
                     ->withTimestamps()
                     ->withPivot([
                         'caregiver_hourly_rate',
-                        'caregiver_daily_rate',
+                        'caregiver_fixed_rate',
                         'provider_hourly_fee',
-                        'provider_daily_fee',
+                        'provider_fixed_fee',
                     ]);
     }
 

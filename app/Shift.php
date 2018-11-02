@@ -37,7 +37,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float $other_expenses
  * @property int $verified
  * @property int|null $schedule_id
- * @property int $daily_rates
+ * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string|null $status

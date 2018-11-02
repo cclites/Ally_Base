@@ -175,7 +175,7 @@ class TelefonyManager
 
         foreach($schedules as $schedule) {
             if ($schedule->caregiver) {
-                if ($schedule->daily_rates) {
+                if ($schedule->fixed_rates) {
                     throw new TelefonyMessageException('This shift was set up as an all day shift.  
                     We do not allow clock ins to daily shifts.  
                     You may now hang up.  
