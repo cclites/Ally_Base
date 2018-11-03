@@ -927,4 +927,53 @@ class ReportsController extends BaseController
 
         return view('business.reports.contacts', compact('type'));
     }
+
+    /**
+     * Show the page to generate a revenue report
+     * 
+     * @return Response
+     */
+    public function revenuePage()
+    {
+        return view('business.reports.revenue');
+    }
+
+    /**
+     * Handle the request to generate a revenue report
+     * @param Request $request
+     * 
+     * @return Response
+     */
+    public function revenueReport(Request $request) {
+        
+        $current = [
+            '11/01/2018' => [
+                'revenue' => 3450.55,
+                'wages' => 450,
+                'profit' => 3000.55,
+            ],
+            '11/02/2018' => [
+                'revenue' => 700.55,
+                'wages' => 200,
+                'profit' => 500.55,
+            ],
+            '11/03/2018' => [
+                'revenue' => 2340.55,
+                'wages' => 340,
+                'profit' => 2000.55,
+            ],
+            '11/04/2018' => [
+                'revenue' => 2789.55,
+                'wages' => 2000,
+                'profit' => 789.55,
+            ],
+            '11/05/2018' => [
+                'revenue' => 4000.55,
+                'wages' => 2900,
+                'profit' => 1100.55,
+            ],
+        ];
+
+        return json_encode(compact('current'));
+    }
 }
