@@ -42,12 +42,7 @@
                         <b-col lg="3" class="form-checkbox">
                             <b-form-group>
                                 <b-form-checkbox-group>
-                                    <b-form-checkbox
-                                        v-model="form.compare_to_prior"  
-                                        :value="form.compare_to_prior"
-                                        v-bind:true-value="1"
-                                        v-bind:false-value="0"
-                                    >Compare to previous period</b-form-checkbox>
+                                    <b-form-checkbox v-model="form.compare_to_prior">Compare to previous period</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
@@ -95,7 +90,7 @@
                                         profit: calculateTotalOf('profit'),
                                     }]"
                                 ></b-table>
-                                <b-btn>Export to Excel</b-btn>
+                                <b-btn class="btn-center">Export to Excel</b-btn>
                             </b-col>
 
                             <b-col lg="6" v-if="priorTableData.length > 0">
@@ -120,7 +115,7 @@
                                         profit: calculateTotalOf('profit', 'prior'),
                                     }]"
                                 ></b-table>
-                                <b-btn>Export to Excel</b-btn>
+                                <b-btn class="btn-center">Export to Excel</b-btn>
                             </b-col>
                         </b-row>
                     </div>
@@ -206,16 +201,26 @@ export default {
         },
         priorTableData() {
             const inArray = [];
+            Object.keys(this.data.prior).forEach(date => {
+                const obj = {
+                    ...this.data.prior[date],
+                    date,
+                };
+
+                inArray.push(obj);
+                });
+            inArray.sort((a, b) => new Date(a) - new Date(b));
 
             return inArray;
-        }
+        },
     },
     methods: {
         fetchData() {
-            const {start_date, end_date} = this.form;
+            const {start_date, end_date, compare_to_prior} = this.form;
+            const compare = compare_to_prior[0] ? 1 : 0;
             this.loading = true;
 
-            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}`)
+            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}&compare_to_prior=${compare}`)
                 .then(({data}) => {
                     this.data = data;
                     this.loading = false;
@@ -250,5 +255,9 @@ export default {
 }
 .form-checkbox {
     align-self: flex-end;
+}
+.btn-center {
+    display: block;
+    margin: 0 auto;
 }
 </style>
