@@ -261,6 +261,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasOne(ClientPreferences::class, 'id');
     }
 
+    public function medications()
+    {
+        return $this->hasMany(ClientMedication::class);
+    }
+
 
     ///////////////////////////////////////////
     /// Mutators

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Client;
+use App\ClientMedication;
 use App\ClientOnboarding;
 use App\Http\Controllers\Controller;
 use App\OnboardingActivity;
@@ -41,7 +42,7 @@ class ClientOnboardingController extends Controller
         ]);
 
         $onboarding = null;
-        $query = ClientOnboarding::with('activities', 'signature', 'client')->where('client_id', $client->id);
+        $query = ClientOnboarding::with('activities', 'signature', 'client.medications')->where('client_id', $client->id);
         if ($query->exists()) {
             $onboarding = $query->first();
         }
@@ -59,31 +60,33 @@ class ClientOnboardingController extends Controller
      */
     public function store(Request $request, Client $client)
     {
-        $clientData = collect($request->only('id', 'firstname', 'lastname', 'email', 'date_of_birth', 'gender'))
-            ->filter()
-            ->toArray();
+        $onboarding = DB::transaction(function () use ($request, $client) {
 
-        if (!empty($clientData['date_of_birth'])) {
-            $clientData['date_of_birth'] = Carbon::parse($clientData['date_of_birth']);
-        }
-        $activities = collect($request->activities)->filter();
-        $data = collect($request->except(
-            'activities',
-            'id',
-            'firstname',
-            'lastname',
-            'email',
-            'date_of_birth',
-            'gender',
-            'onboarding_step'
-        ))
-            ->filter()
-            ->toArray();
-        if (!empty($data['requested_start_at'])) {
-            $data['requested_start_at'] = Carbon::parse($data['requested_start_at']);
-        }
+            $clientData = collect($request->only('id', 'firstname', 'lastname', 'email', 'date_of_birth', 'gender'))
+                ->filter()
+                ->toArray();
 
-        $onboarding = DB::transaction(function () use ($client, $clientData, $activities, $data) {
+            if (!empty($clientData['date_of_birth'])) {
+                $clientData['date_of_birth'] = Carbon::parse($clientData['date_of_birth']);
+            }
+            $activities = collect($request->activities)->filter();
+            $data = collect($request->except(
+                'activities',
+                'id',
+                'firstname',
+                'lastname',
+                'email',
+                'date_of_birth',
+                'gender',
+                'onboarding_step',
+                'medications'
+            ))
+                ->filter()
+                ->toArray();
+            if (!empty($data['requested_start_at'])) {
+                $data['requested_start_at'] = Carbon::parse($data['requested_start_at']);
+            }
+
             $clientData['onboarding_step'] = 2;
             $client->update($clientData);
             $onboarding = ClientOnboarding::updateOrCreate(
@@ -97,6 +100,12 @@ class ClientOnboardingController extends Controller
                     $onboarding->activities()->updateExistingPivot($key, ['assistance_level' => $value]);
                 }
             }
+
+            foreach($request->medications as $medication) {
+                $medication['client_id'] = $client->id;
+                ClientMedication::firstOrCreate($medication);
+            }
+
             $onboarding->load('activities');
             return $onboarding;
         });

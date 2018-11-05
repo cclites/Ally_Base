@@ -143,7 +143,31 @@
             </b-col>
         </b-row>
 
-        <!-- todo Prescription Medication List here -->
+        <!-- Prescription Medication List -->
+        <b-card border-variant="secondary" header="Prescription Medication List">
+            <b-row class="mb-3">
+                <b-col md="4">
+                    Type
+                </b-col>
+                <b-col md="4">
+                    Dose
+                </b-col>
+                <b-col md="4">
+                    Frequency
+                </b-col>
+            </b-row>
+            <b-row v-for="med in onboarding.client.medications" :key="med.id">
+                <b-col md="4">
+                    {{ med.type }}
+                </b-col>
+                <b-col md="4">
+                    {{ med.dose }}
+                </b-col>
+                <b-col md="4">
+                    {{ med.frequency }}
+                </b-col>
+            </b-row>
+        </b-card>
 
         <!-- Hospice Information -->
         <b-card border-variant="secondary" header="Hospice Information">

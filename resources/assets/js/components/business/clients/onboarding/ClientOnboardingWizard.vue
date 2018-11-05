@@ -3,6 +3,7 @@
         <onboarding-step-one v-if="step === 1 || !step" :client-data="clientData" :activities="activities" @next="nextStep($event, 2)"></onboarding-step-one>
         <onboarding-step-two v-if="step === 2" :client-data="clientData" :onboarding="onboarding" @previous="previousStep" @next="nextStep($event, 3)"></onboarding-step-two>
         <onboarding-step-three v-if="step === 3" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 4)"></onboarding-step-three>
+        <onboarding-step-four v-if="step === 4" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 5)"></onboarding-step-four>
     </b-card>
 </template>
 
@@ -10,6 +11,7 @@
     import OnboardingStepOne from './OnboardingStepOne'
     import OnboardingStepTwo from './OnboardingStepTwo'
     import OnboardingStepThree from './OnboardingStepThree'
+    import OnboardingStepFour from './OnboardingStepFour'
 
     export default {
         props: ['clientData', 'activities', 'onboardingData'],
@@ -19,7 +21,8 @@
         components: {
             OnboardingStepOne,
             OnboardingStepTwo,
-            OnboardingStepThree
+            OnboardingStepThree,
+            OnboardingStepFour
         },
 
         data() {

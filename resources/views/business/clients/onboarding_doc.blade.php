@@ -178,6 +178,28 @@
             </div>
         </div>
 
+        {{-- Prescription Medication List  --}}
+        <div class="panel panel-default">
+            <div class="panel-heading">Prescription Medication List</div>
+            <div class="panel-body">
+                <table class="table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Dose</th>
+                        <th>Frequency</th>
+                    </tr>
+                    @foreach($onboarding->client->medications as $medication)
+                        <tr>
+                            <td>{{ $medication->type }}</td>
+                            <td>{{ $medication->dose }}</td>
+                            <td>{{ $medication->frequency }}</td>
+                        </tr>
+                    @endforeach
+                </table>
+
+            </div>
+        </div>
+
         <!-- Hospice Information -->
         <div class="panel panel-default">
             <div class="panel-heading">Hospice Information</div>
@@ -208,8 +230,6 @@
                 @endif
             </div>
         </div>
-
-        <!-- todo Prescription Medication List here -->
 
         <!-- Do Not Resuscitate -->
         <div class="panel panel-default">

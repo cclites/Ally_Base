@@ -1,6 +1,9 @@
 <template>
-    <div>
+    <div class="d-flex flex-column">
         <object class="w-100" style="height: 40rem;" :data="`/business/clients/onboarding/${onboardingData.id}/intake-pdf`"></object>
+        <div class="mt-3">
+            <b-btn variant="secondary" @click="nextStep">Next Step</b-btn>
+        </div>
     </div>
 </template>
 
@@ -8,27 +11,10 @@
     export default {
         props: ['onboardingData'],
 
-        mixins: [],
-
-        components: {},
-
-        data() {
-            return {}
-        },
-
-        created() {
-        },
-
-        mounted() {
-        },
-
-        computed: {},
-
         methods: {
-
+            nextStep() {
+                this.$emit('next', {data: this.onboardingData});
+            }
         }
     }
 </script>
-
-<style lang="scss">
-</style>

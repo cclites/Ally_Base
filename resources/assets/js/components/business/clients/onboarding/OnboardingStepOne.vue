@@ -204,6 +204,58 @@
         </b-row>
 
         <!-- todo Prescription Medication List here -->
+        <b-card border-variant="secondary">
+            <div slot="header" class="d-flex justify-content-between">
+                <div>Presciption Medication List</div>
+                <div>
+                    <b-btn variant="info" @click="showAddMeds = true" size="sm">
+                        <i class="fa fa-plus"></i>
+                    </b-btn>
+                </div>
+            </div>
+            <b-row v-show="showAddMeds">
+                <b-col md="4">
+                    <b-form-group label="Name">
+                        <b-form-input v-model="med.type"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col md="4">
+                    <b-form-group label="Dose">
+                        <b-form-input v-model="med.dose"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col md="4">
+                    <b-form-group label="Frequency">
+                        <b-form-input v-model="med.frequency"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col md="4">
+                    <b-btn @click="addMedication" variant="info" size="sm">Add Medication</b-btn>
+                </b-col>
+            </b-row>
+            <b-row class="my-2">
+                <b-col md="4">
+                    Name
+                </b-col>
+                <b-col md="4">
+                    Dose
+                </b-col>
+                <b-col md="4">
+                    Frequency
+                </b-col>
+            </b-row>
+            <b-row v-for="(item, index) in form.medications" :key="index">
+                <b-col md="4">
+                    {{ item.name }}
+                </b-col>
+                <b-col md="4">
+                    {{ item.dose }}
+                </b-col>
+                <b-col md="4">
+                    {{ item.frequency }}
+                </b-col>
+            </b-row>
+        </b-card>
 
         <!-- Hospice Information -->
         <b-card border-variant="secondary" header="Hospice Information">
@@ -416,7 +468,9 @@
 
         data() {
             return {
-                form: {}
+                form: {},
+                showAddMeds: false,
+                med: {}
             }
         },
 
@@ -475,7 +529,8 @@
                 transportation_vehicle: '',
                 requested_start_at: '',
                 requested_schedule: '',
-                activities: []
+                activities: [],
+                medications: []
             })
         },
 
@@ -483,6 +538,12 @@
             async submitStepOne() {
                 let response = await this.form.post(`/business/clients/${this.clientData.id}/onboarding`)
                 this.$emit('next', response.data);
+            },
+
+            addMedication() {
+                this.form.medications.push(this.med);
+                this.med = {};
+                this.showAddMeds = false;
             }
         }
     }
