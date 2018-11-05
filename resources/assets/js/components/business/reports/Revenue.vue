@@ -43,9 +43,10 @@
                             <b-form-group>
                                 <b-form-checkbox-group>
                                     <b-form-checkbox
-                                        v-model="form.compare_to_prior"
-                                        :value="1"
-                                        :unchecked-value="0"
+                                        v-model="form.compare_to_prior"  
+                                        :value="form.compare_to_prior"
+                                        v-bind:true-value="1"
+                                        v-bind:false-value="0"
                                     >Compare to previous period</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
@@ -85,8 +86,42 @@
                                         {{formatPrice(data.value)}}
                                     </template>
                                 </b-table>
+                                <h3>Total</h3>
+                                <b-table 
+                                    :fields="tableFields" 
+                                    :items="[{
+                                        revenue: calculateTotalOf('revenue'),
+                                        wages: calculateTotalOf('wages'),
+                                        profit: calculateTotalOf('profit'),
+                                    }]"
+                                ></b-table>
+                                <b-btn>Export to Excel</b-btn>
                             </b-col>
-                            <b-col lg="6"></b-col>
+
+                            <b-col lg="6" v-if="priorTableData.length > 0">
+                                <h2>Prior date comparaison</h2>
+                                <p>This is the data for date period prior to the one currently selected.</p>
+                                <br/><br/>
+                                <b-table striped :fields="tableFields" :items="priorTableData">
+                                    <template 
+                                        v-for="key in ['revenue', 'wages', 'profit']"
+                                        :slot="key" 
+                                        scope="data"
+                                    >
+                                        {{formatPrice(data.value)}}
+                                    </template>
+                                </b-table>
+                                <h3>Total</h3>
+                                <b-table 
+                                    :fields="tableFields" 
+                                    :items="[{
+                                        revenue: calculateTotalOf('revenue', 'prior'),
+                                        wages: calculateTotalOf('wages', 'prior'),
+                                        profit: calculateTotalOf('profit', 'prior'),
+                                    }]"
+                                ></b-table>
+                                <b-btn>Export to Excel</b-btn>
+                            </b-col>
                         </b-row>
                     </div>
                 </b-card>
@@ -169,6 +204,11 @@ export default {
 
             return inArray;
         },
+        priorTableData() {
+            const inArray = [];
+
+            return inArray;
+        }
     },
     methods: {
         fetchData() {
@@ -187,11 +227,11 @@ export default {
                     this.loading = false;
                 })
         },
-        calculateTotalOf(metric) {
-            const {dataIsReady, data: {current}} = this;
+        calculateTotalOf(metric, period = 'current') {
+            const {dataIsReady, data} = this;
 
             if(dataIsReady) {
-                const total = Object.keys(current).map(date => current[date][metric]).reduce((total, value) => total + value, 0);
+                const total = Object.keys(data[period]).map(date => data[period][date][metric]).reduce((total, value) => total + value, 0);
                 return this.formatPrice(total);
             }
 
