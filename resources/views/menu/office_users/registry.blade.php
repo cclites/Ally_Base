@@ -46,6 +46,7 @@
     </a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li>
+        <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li>
         @if(app()->environment() === 'demo')
             <li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li>
         @endif
