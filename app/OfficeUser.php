@@ -60,15 +60,4 @@ class OfficeUser extends Model implements UserRole, Auditable
     {
         return $this->hasMany(Task::class, 'creator_id');
     }
-
-    /**
-     * Get the user's assigned tasks that are not completed.
-     *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function dueTasks()
-    {
-        return $this->hasMany(Task::class, 'assigned_user_id')
-            ->whereNull('completed_at');
-    }
 }

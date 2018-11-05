@@ -89,7 +89,6 @@
         <li><a href="{{ route('business.communication.sms-threads') }}">Sent Texts</a></li>
     </ul>
 </li>
-
 <li>
     <a href="{{ route('business.tasks.index') }}">
         <div class="row">
@@ -97,9 +96,7 @@
                 <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
             </div>
             <div class="col-4">
-                @if ($dueTasks = auth()->user()->role->dueTasks()->count())
-                    <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ $dueTasks }}</span>
-                @endif
+                <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ auth()->user()->dueTasks()->count() }}</span>
             </div>
         </div>
     </a>

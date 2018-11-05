@@ -78,6 +78,7 @@ Vue.component('client-phone-numbers-tab', require('./components/clients/profile/
 
 // Caregiver
 Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/profile/CaregiverPhoneNumbersTab'));
+Vue.component('caregiver-task-list', require('./components/caregivers/TaskList'));
 
 // Admin
 Vue.component('admin-tellus-component', require('./components/admin/AdminTellusComponent'));

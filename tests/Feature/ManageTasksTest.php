@@ -369,7 +369,7 @@ class ManageTasksTest extends TestCase
 
         $this->actingAs($this->officeUser->user);
 
-        $this->assertCount(7, $this->officeUser->dueTasks);
+        $this->assertCount(7, $this->officeUser->user->dueTasks);
 
         $this->getJson(route('business.tasks.index') . "?assigned=1")
             ->assertStatus(200)
@@ -397,7 +397,7 @@ class ManageTasksTest extends TestCase
 
         $this->actingAs($this->officeUser->user);
 
-        $this->officeUser->dueTasks()->first()->markComplete();
+        $this->officeUser->user->dueTasks()->first()->markComplete();
 
         $this->getJson(route('business.tasks.index') . '?pending=1')
             ->assertStatus(200)
@@ -414,7 +414,7 @@ class ManageTasksTest extends TestCase
 
         $this->actingAs($this->officeUser->user);
 
-        $this->officeUser->dueTasks()->first()->update(['due_date' => Carbon::yesterday()]);
+        $this->officeUser->user->dueTasks()->first()->update(['due_date' => Carbon::yesterday()]);
 
         $this->getJson(route('business.tasks.index') . '?overdue=1')
             ->assertStatus(200)
@@ -483,4 +483,26 @@ class ManageTasksTest extends TestCase
             ->assertStatus(403);
     }
 
+    /** @test */
+    public function a_caregiver_can_see_tasks_assigned_to_them()
+    {
+        $this->withoutExceptionHandling();
+
+        \Mail::fake();
+
+        factory(Task::class, 4)->create([
+            'creator_id' => $this->officeUser->id, 
+            'business_id' => $this->business->id, 
+            'assigned_user_id' => $this->caregiver->id
+        ]);
+        //$caregiver2 = factory(Caregiver::class)->create();
+
+        $this->assertCount(4, Task::all());
+
+        $this->actingAs($this->caregiver->user);
+
+        $this->getJson(route('caregivers.tasks'))
+            ->assertStatus(200)
+            ->assertJsonCount(4);
+    }
 }

@@ -26,9 +26,9 @@ class AlterTasksTableChangeAssignedUserIdForeignKey extends Migration
      */
     public function down()
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->dropForeign(['assigned_user_id']);
-            $table->foreign('assigned_user_id')->references('id')->on('office_users');
-        });
+       Schema::table('tasks', function (Blueprint $table) {
+           $table->dropForeign(['assigned_user_id']);
+           $table->foreign('assigned_user_id')->references('id')->on('office_users');
+       });
     }
 }
