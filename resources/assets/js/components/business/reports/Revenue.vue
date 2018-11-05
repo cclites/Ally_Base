@@ -90,7 +90,7 @@
                                         profit: calculateTotalOf('profit'),
                                     }]"
                                 ></b-table>
-                                <b-btn class="btn-center">Export to Excel</b-btn>
+                                <!--b-btn class="btn-center">Export to Excel</b-btn-->
                             </b-col>
 
                             <b-col lg="6" v-if="priorTableData.length > 0">
@@ -115,7 +115,7 @@
                                         profit: calculateTotalOf('profit', 'prior'),
                                     }]"
                                 ></b-table>
-                                <b-btn class="btn-center">Export to Excel</b-btn>
+                                <!--b-btn class="btn-center">Export to Excel</b-btn-->
                             </b-col>
                         </b-row>
                     </div>
