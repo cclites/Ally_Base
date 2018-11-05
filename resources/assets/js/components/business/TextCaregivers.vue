@@ -7,16 +7,14 @@
         <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col md="6">
-                    <b-form-group>
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Send to all active Caregivers</span>
-                            </label>
-                            <input-help :form="form" field="accepted_terms" text=""></input-help>
-                        </div>
-                    </b-form-group>
+                    <div class="form-check">
+                        <label class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Send to all active Caregivers</span>
+                        </label>
+                        <input-help :form="form" field="accepted_terms" text=""></input-help>
+                    </div>
                 </b-col>
                 <b-col md="6" class="d-flex">
                     <b-form-group class="ml-auto">
@@ -31,8 +29,18 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <b-form-group label="Recipients" v-if="! form.all">
-                <user-search-dropdown placeholder="Add Recipient" icon="fa-plus" :formatter="searchDisplay" @selectUser="addUser" type="sms" role="caregiver" :disabled="submitting" />
+            <b-form-group v-if="! form.all">
+                <div class="pb-2">
+                    <label>Recipients</label>
+                    <b-btn variant="success" class="ml-3" href="/business/care-match">Select Caregivers via CareMatch</b-btn>
+                </div>
+                <user-search-dropdown placeholder="Add Recipient"
+                    icon="fa-plus"
+                    :formatter="searchDisplay"
+                    @selectUser="addUser"
+                    type="sms"
+                    role="caregiver"
+                    :disabled="submitting" />
 
                 <div class="mt-2 user-pills">
                     <b-badge pill
@@ -68,6 +76,10 @@ export default {
     props: {
         subject: false,
         fillMessage: '',
+        fillRecipients: {
+            type: Array,
+            default: [],
+        },
     },
 
     data() {
@@ -84,23 +96,12 @@ export default {
         if (this.fillMessage) {
             this.form.message = this.fillMessage;
         }
+        if (this.fillRecipients) {
+            this.selectedUsers = this.fillRecipients;
+        }
     },
 
     computed: {
-        countPerSet() {
-            return Math.ceil(this.selectedUsers.length / this.numOfSets);
-        },
-
-        userSets() {
-            let userSets = [];
-            for (let i = 0; i < 3; i++) {
-                let set = this.selectedUsers.filter((item, index) => {
-                    return index % 3 === i;
-                });
-                userSets.push(set);
-            }
-            return userSets;
-        },
     },
 
     methods: {
