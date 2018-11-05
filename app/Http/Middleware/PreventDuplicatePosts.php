@@ -84,6 +84,10 @@ class PreventDuplicatePosts
     }
 
     function isExcluded() {
+        if (config('app.env') != 'production') {
+            return true;
+        }
+
         return in_array(\Request::path(), $this->excludedPaths)
         || in_array(\Route::currentRouteName(), $this->excludedRoutes);
     }
