@@ -148,6 +148,26 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         return $this->nameLastFirst();
     }
 
+    /**
+     * Get the default phone number for the user.
+     *
+     * @return string
+     */
+    public function getDefaultPhoneAttribute()
+    {
+        $phone = null;
+
+        if ($this->phoneNumbers->where('type', 'primary')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'primary')->first();
+        } elseif ($this->phoneNumbers->where('type', 'mobile')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'mobile')->first();
+        } else {
+            $phone = $this->phoneNumbers->first();
+        }
+
+        return empty($phone) ? '' : $phone->number;
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

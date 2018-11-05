@@ -37,8 +37,6 @@ class CommunicationController extends Controller
 
         // handle loading and setting recipient list (coming from care match results)
         if ($request->session()->has('sms.load-recipients')) {
-            $keys = ['id', 'name', 'role_type', 'phone'];
-
             $recipients = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
                 ->whereIn('id', $request->session()->get('sms.load-recipients'))
                 ->whereIn('role_type', ['caregiver'])
@@ -48,19 +46,9 @@ class CommunicationController extends Controller
                 ->whereHas('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get()
-                ->map(function ($user) use ($keys) {
-                    if ($user->relationLoaded('phoneNumbers')) {
-                        if ($user->phoneNumbers->where('type', 'primary')->count()) {
-                            $phone = $user->phoneNumbers->where('type', 'primary')->first();
-                        } elseif ($user->phoneNumbers->where('type', 'mobile')->count()) {
-                            $phone = $user->phoneNumbers->where('type', 'mobile')->first();
-                        } else {
-                            $phone = $user->phoneNumbers->first();
-                        }
-
-                        $user->phone = $phone->number;
-                    }
-                    return $user->only($keys);
+                ->map(function($user) {
+                    $user->phone = $user->default_phone;
+                    return $user->only(['id', 'name', 'role_type', 'phone']);
                 });
         }
 
