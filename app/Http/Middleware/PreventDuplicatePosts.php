@@ -84,7 +84,7 @@ class PreventDuplicatePosts
     }
 
     function isExcluded() {
-        if (config('app.env') != 'production') {
+        if (! config('ally.prevent_dupe_posts', true)) {
             return true;
         }
 
