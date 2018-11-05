@@ -945,35 +945,69 @@ class ReportsController extends BaseController
      * @return Response
      */
     public function revenueReport(Request $request) {
-        
-        $current = [
-            '11/01/2018' => [
-                'revenue' => 3450.55,
-                'wages' => 450,
-                'profit' => 3000.55,
-            ],
-            '11/02/2018' => [
-                'revenue' => 700.55,
-                'wages' => 200,
-                'profit' => 500.55,
-            ],
-            '11/03/2018' => [
-                'revenue' => 2340.55,
-                'wages' => 340,
-                'profit' => 2000.55,
-            ],
-            '11/04/2018' => [
-                'revenue' => 2789.55,
-                'wages' => 2000,
-                'profit' => 789.55,
-            ],
-            '11/05/2018' => [
-                'revenue' => 4000.55,
-                'wages' => 2900,
-                'profit' => 1100.55,
-            ],
-        ];
+        $report = new ShiftsReport();
+        $report->where('business_id', $this->business()->id)->orderBy('checked_in_time');
 
-        return json_encode(compact('current'));
+        $this->addShiftReportFilters($report, $request);
+        $currentData = $report->rows();
+        $prior = [];
+
+        if($request->compare_to_prior) {
+            $difference = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
+            $newStartDate = (new Carbon($request->start_date))->subDays($difference)->format('m/d/Y');
+            $newRequest = $request;
+            $newRequest->merge([
+                'start_date' => $newStartDate,
+                'end_date' => $request->start_date,
+            ]);
+
+            $priorReport = new ShiftsReport();
+            $priorReport->where('business_id', $this->business()->id)->orderBy('checked_in_time');
+            $this->addShiftReportFilters($priorReport, $newRequest);
+            $priorData = $priorReport->rows();
+            $prior = $this->organizeRevenueReport($priorData);
+        }
+
+        $current = $this->organizeRevenueReport($currentData);
+
+        return json_encode(compact('current', 'prior'));
+    }
+
+    /**
+     * Organize the shifts data into the required format for a full financial revenue report
+     * @param array $rows 
+     * 
+     * @return array
+     */    
+    private function organizeRevenueReport($rows) {
+        $groupedByDate = [];
+
+        foreach ($rows as $i => $shiftReport) {
+            $date = (new Carbon($shiftReport['checked_in_time']))->format('m/d/Y');
+
+            if(isset($groupedByDate[$date])) {
+                $groupedByDate[$date][] = $shiftReport;
+            }else {
+                $groupedByDate[$date] = [$shiftReport];
+            }
+        }
+
+        foreach ($groupedByDate as $date => $itemsArray) {
+            $total = [
+                'revenue' => 0.0,
+                'wages' => 0.0,
+                'profit' => 0.0,
+            ];
+
+            foreach ($itemsArray as $entry) {
+                $total['revenue'] += (float) $entry['provider_total'] + (float) $entry['caregiver_total'];
+                $total['wages'] += (float) $entry['caregiver_total'];
+                $total['profit'] += (float) $entry['provider_total'];
+            }
+            
+            $groupedByDate[$date] = $total;
+        }
+
+        return $groupedByDate;
     }
 }
