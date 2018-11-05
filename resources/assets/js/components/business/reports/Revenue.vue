@@ -31,15 +31,22 @@
                         </b-col>
                         <b-col lg="3" class="form-checkbox">
                             <b-form-group>
-                                <b-form-checkbox-group v-model="form.wages_as_cogs">
-                                    <b-form-checkbox value="wages">Include CG Waves as COGS</b-form-checkbox>
+                                <b-form-checkbox-group :checked="true" disabled>
+                                    <b-form-checkbox
+                                        :checked="true"
+                                        disabled
+                                    >Include CG Waves as COGS</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
                         <b-col lg="3" class="form-checkbox">
                             <b-form-group>
-                                <b-form-checkbox-group v-model="form.compare_to_prior">
-                                    <b-form-checkbox value="wages">Compare to previous period</b-form-checkbox>
+                                <b-form-checkbox-group>
+                                    <b-form-checkbox
+                                        v-model="form.compare_to_prior"
+                                        :value="1"
+                                        :unchecked-value="0"
+                                    >Compare to previous period</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
@@ -84,8 +91,8 @@ export default {
             form: new Form({
                 start_date: '09/01/2018',
                 end_date: '11/01/2018',
-                compare_to_prior: false,
-                wages_as_cogs: true,
+                compare_to_prior: 0,
+                wages_as_cogs: 1,
             }),
             data: {
                 current: {},
@@ -115,7 +122,7 @@ export default {
                     data: currentProfit
                     },
                     {
-                    label: 'Sales',
+                    label: 'Revenue',
                     borderColor: '#795bcb',
                     backgroundColor: '#795bcb',
                     data: currentSales,
@@ -126,9 +133,10 @@ export default {
     },
     methods: {
         fetchData() {
+            const {start_date, end_date} = this.form;
             this.loading = true;
 
-            this.form.post('/business/reports/revenue')
+            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}`)
                 .then(({data}) => {
                     this.data = data;
                     this.loading = false;
