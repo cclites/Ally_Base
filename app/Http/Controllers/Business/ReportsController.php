@@ -951,10 +951,11 @@ class ReportsController extends BaseController
         if($request->compare_to_prior) {
             $difference = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
             $newStartDate = (new Carbon($request->start_date))->subDays($difference+1)->format('m/d/Y');
+            $newEndDate = (new Carbon($request->end_date))->subDays(1)->format('m/d/Y');
             $newRequest = $request;
             $newRequest->merge([
                 'start_date' => $newStartDate,
-                'end_date' => $request->start_date,
+                'end_date' => $newEndDate,
             ]);
 
             $prior = $this->organizeRevenueReport($newRequest);
@@ -986,12 +987,14 @@ class ReportsController extends BaseController
             }
         }
 
-        // Add days with no shift worked
+        /* Add days with no shift worked
         $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
         for ($i=0; $i < $numberOfDays; $i++) { 
             $date = (new Carbon($request->start_date))->addDays($i+1);
             $formattedDate = $date->format('m/d/Y');
-            
+            if($formattedDate == '08/10/2018') {
+                echo 'i:'.$i;
+            }
             if($date->diffInDays((new Carbon($request->end_date))) < 0) {
                 break;
             }
@@ -999,7 +1002,7 @@ class ReportsController extends BaseController
             if(!isset($groupedByDate[$formattedDate])) {
                 $groupedByDate[$formattedDate] = [];
             }
-        }
+        }*/
 
         foreach ($groupedByDate as $date => $itemsArray) {
             $total = [
