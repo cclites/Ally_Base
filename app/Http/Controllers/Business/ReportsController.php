@@ -945,50 +945,59 @@ class ReportsController extends BaseController
      * @return Response
      */
     public function revenueReport(Request $request) {
-        $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)->orderBy('checked_in_time');
-
-        $this->addShiftReportFilters($report, $request);
-        $currentData = $report->rows();
+        $current = $this->organizeRevenueReport($request);
         $prior = [];
 
         if($request->compare_to_prior) {
             $difference = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
-            $newStartDate = (new Carbon($request->start_date))->subDays($difference)->format('m/d/Y');
+            $newStartDate = (new Carbon($request->start_date))->subDays($difference+1)->format('m/d/Y');
             $newRequest = $request;
             $newRequest->merge([
                 'start_date' => $newStartDate,
                 'end_date' => $request->start_date,
             ]);
 
-            $priorReport = new ShiftsReport();
-            $priorReport->where('business_id', $this->business()->id)->orderBy('checked_in_time');
-            $this->addShiftReportFilters($priorReport, $newRequest);
-            $priorData = $priorReport->rows();
-            $prior = $this->organizeRevenueReport($priorData);
+            $prior = $this->organizeRevenueReport($newRequest);
         }
-
-        $current = $this->organizeRevenueReport($currentData);
 
         return json_encode(compact('current', 'prior'));
     }
 
     /**
      * Organize the shifts data into the required format for a full financial revenue report
-     * @param array $rows 
+     * @param Request $request 
      * 
      * @return array
      */    
-    private function organizeRevenueReport($rows) {
+    private function organizeRevenueReport(Request $request) {
+        $report = new ShiftsReport();
+        $report->where('business_id', $this->business()->id)->orderBy('checked_in_time');
+        $this->addShiftReportFilters($report, $request);
+        $data = $report->rows();
         $groupedByDate = [];
 
-        foreach ($rows as $i => $shiftReport) {
+        foreach ($data as $i => $shiftReport) {
             $date = (new Carbon($shiftReport['checked_in_time']))->format('m/d/Y');
 
             if(isset($groupedByDate[$date])) {
                 $groupedByDate[$date][] = $shiftReport;
             }else {
                 $groupedByDate[$date] = [$shiftReport];
+            }
+        }
+
+        // Add days with no shift worked
+        $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
+        for ($i=0; $i < $numberOfDays; $i++) { 
+            $date = (new Carbon($request->start_date))->addDays($i+1);
+            $formattedDate = $date->format('m/d/Y');
+            
+            if($date->diffInDays((new Carbon($request->end_date))) < 0) {
+                break;
+            }
+            
+            if(!isset($groupedByDate[$formattedDate])) {
+                $groupedByDate[$formattedDate] = [];
             }
         }
 
