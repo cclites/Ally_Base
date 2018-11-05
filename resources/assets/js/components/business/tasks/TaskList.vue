@@ -42,7 +42,7 @@
                     :busy="busy"
                 >
                     <template slot="assigned_user" scope="row">
-                        <span v-if="row.item.assigned_user">{{ row.item.assigned_user.name }}</span>
+                        <span v-if="row.item.assigned_user">{{ row.item.assigned_user.name }} ({{ row.item.assigned_type }})</span>
                         <span v-else>-</span>
                     </template>
                     <template slot="created_at" scope="row">
@@ -75,7 +75,7 @@
         </b-row>
 
         <b-modal id="formModal" :title="modalTitle" v-model="formModal" size="lg">
-            <business-task-form :task="task" :office-users="officeUsers" ref="form" />
+            <business-task-form :task="task" :office-users="officeUsers" :caregivers="caregivers" ref="form" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="formModal = false" :disabled="busy">Close</b-btn>
@@ -101,6 +101,10 @@
 
         props: {
             officeUsers: {
+                type: Array,
+                default: [],
+            },
+            caregivers: {
                 type: Array,
                 default: [],
             },

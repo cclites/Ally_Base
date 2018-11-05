@@ -21,6 +21,7 @@ class TaskTest extends TestCase
     {
         parent::setUp();
 
+        $this->caregiver = factory('App\Caregiver')->create();
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
         $this->officeUser = factory('App\OfficeUser')->create();

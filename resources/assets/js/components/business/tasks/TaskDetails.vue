@@ -34,7 +34,7 @@
         <b-row class="with-padding-bottom">
             <b-col sm="6">
                 <strong>Assigned To</strong><br />
-                <span v-if="task.assigned_user_id">{{ task.assigned_user.name }}</span>
+                <span v-if="task.assigned_user_id">{{ task.assigned_user.name }} ({{ task.assigned_type }})</span>
                 <span v-else class="text-muted">Not Assigned</span>
             </b-col>
         </b-row>

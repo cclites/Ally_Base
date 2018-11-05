@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <business-task-list :office-users="{{ $users }}" />
+    <business-task-list :office-users="{{ $users }}" :caregivers="{{ $caregivers }}" />
 @endsection

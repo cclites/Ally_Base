@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Caregiver;
+use App\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,6 +25,7 @@ class ManageTasksTest extends TestCase
     {
         parent::setUp();
 
+        $this->caregiver = factory('App\Caregiver')->create();
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
         $this->officeUser = factory('App\OfficeUser')->create();
@@ -110,7 +113,7 @@ class ManageTasksTest extends TestCase
 
         $this->assertEquals($tomorrow->toDateTimeString(), Task::first()->due_date);
     }
-    
+
     /** @test */
     public function a_task_can_have_an_assigned_user()
     {
@@ -126,7 +129,29 @@ class ManageTasksTest extends TestCase
         $this->postJson(route('business.tasks.store'), $data)
             ->assertStatus(200);
 
-        $this->assertInstanceOf(OfficeUser::class, Task::first()->assignedUser);
+        $task = Task::first();
+        $this->assertInstanceOf(User::class, $task->assignedUser);
+        $this->assertEquals('Staff', $task->assignedType);
+    }
+
+    /** @test */
+    public function a_task_can_be_assigned_to_a_caregiver()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $data = [
+            'name' => 'test task',
+            'assigned_user_id' => $this->caregiver->user->id,
+        ];
+
+        $this->postJson(route('business.tasks.store'), $data)
+            ->assertStatus(200);
+
+        $task = Task::first();
+        $this->assertInstanceOf(User::class, $task->assignedUser);
+        $this->assertEquals('Caregiver', $task->assignedType);
     }
 
     /** @test */
@@ -457,4 +482,5 @@ class ManageTasksTest extends TestCase
         $this->patchJson(route('business.tasks.update', ['task' => $task->id]), $task->toArray())
             ->assertStatus(403);
     }
+
 }

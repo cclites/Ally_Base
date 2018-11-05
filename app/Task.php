@@ -32,7 +32,7 @@ class Task extends Model implements Auditable
      *
      * @var array
      */
-    protected $appends = ['last_edit'];
+    protected $appends = ['last_edit', 'assigned_type'];
     
     /**
      * The list of attributes that should be specifically cast.
@@ -81,13 +81,13 @@ class Task extends Model implements Auditable
     }
 
     /**
-     * The office user assigned to the task.
+     * The user assigned to the task.
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function assignedUser()
     {
-        return $this->belongsTo(OfficeUser::class, 'assigned_user_id', 'id');
+        return $this->belongsTo(User::class, 'assigned_user_id', 'id');
     }
 
     /**
@@ -186,5 +186,21 @@ class Task extends Model implements Auditable
         } else if (!empty($this->completed_at) && $val == 0) {
             $this->completed_at = null;
         }
+    }
+
+    public function getAssignedTypeAttribute()
+    {
+        if (! empty($this->assignedUser)) {
+            switch ($this->assignedUser->role_type) {
+                case 'office_user':
+                    return 'Staff';
+                case 'caregiver':
+                    return 'Caregiver';
+                default:
+                    return null;
+            }
+        }
+
+        return null;
     }
 }

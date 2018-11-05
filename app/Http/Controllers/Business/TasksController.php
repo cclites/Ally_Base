@@ -37,9 +37,9 @@ class TasksController extends Controller
             return response()->json($tasks->latest()->get());
         }
 
-        $users = activeBusiness()->officeUserList(false, true);
-
-        return view('business.tasks', compact('users'));
+        $users = activeBusiness()->officeUserList(true, true);
+        $caregivers = activeBusiness()->caregiverList(true, true);
+        return view('business.tasks', compact('users', 'caregivers'));
     }
 
     /**
