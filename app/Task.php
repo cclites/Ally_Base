@@ -93,7 +93,7 @@ class Task extends Model implements Auditable
     /**
      * The office user that created the task.
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function creator()
     {
@@ -103,7 +103,7 @@ class Task extends Model implements Auditable
     /**
      * Get the tasks edit history relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\hasMany
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
      */
     public function editHistory()
     {
@@ -124,7 +124,7 @@ class Task extends Model implements Auditable
     /**
      * Get the owning business relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function business()
     {

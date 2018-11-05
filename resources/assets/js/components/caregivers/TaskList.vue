@@ -2,15 +2,13 @@
     <b-card header="Tasks" header-bg-variant="info" header-text-variant="white">
         <b-row class="mb-3">
             <b-col lg="4">
-                <!-- <b-form-group label="Status" for="status-filter"> -->
-                    <label for="status-filter" class="mr-1">Status:</label>
-                    <b-form-select v-model="status" id="status-filter">
-                        <option value="all">All</option>
-                        <option value="pending">Open</option>
-                        <option value="overdue">Overdue</option>
-                        <option value="complete">Complete</option>
-                    </b-form-select>
-                <!-- </b-form-group> -->
+                <label for="status-filter" class="mr-1">Status:</label>
+                <b-form-select v-model="status" id="status-filter">
+                    <option value="all">All</option>
+                    <option value="pending">Open</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="complete">Complete</option>
+                </b-form-select>
             </b-col>
         </b-row>
         <b-row>

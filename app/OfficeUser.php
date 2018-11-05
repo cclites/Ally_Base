@@ -54,7 +54,7 @@ class OfficeUser extends Model implements UserRole, Auditable
     /**
      * Get the user's created tasks relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tasks()
     {

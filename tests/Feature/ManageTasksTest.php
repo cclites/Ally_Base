@@ -5,12 +5,10 @@ namespace Tests\Feature;
 use App\Caregiver;
 use App\User;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Task;
 use Carbon\Carbon;
 use App\OfficeUser;
-use App\Events\TaskAssigned;
 use App\Mail\AssignedTaskEmail;
 use App\Business;
 
@@ -20,7 +18,7 @@ class ManageTasksTest extends TestCase
 
     public $business;
     public $officeUser;
-    
+
     public function setUp()
     {
         parent::setUp();
@@ -187,7 +185,7 @@ class ManageTasksTest extends TestCase
 
         $this->assertEquals('NEW NAME', $task->fresh()->name);
     }
-    
+
     /** @test */
     public function an_office_user_can_mark_a_task_complete()
     {
@@ -212,7 +210,7 @@ class ManageTasksTest extends TestCase
 
         $this->assertNull($task->fresh()->completed_at);
     }
-    
+
     /** @test */
     public function a_task_should_track_edits_by_user()
     {
@@ -231,10 +229,10 @@ class ManageTasksTest extends TestCase
             ->assertStatus(200);
 
         $this->assertCount(2, $task->fresh()->editHistory);
-        
+
         $this->assertEquals($this->officeUser->id, $task->fresh()->editHistory()->latest()->get()->reverse()->first()->user_id);
     }
-    
+
     /** @test */
     public function an_office_user_can_view_a_task()
     {
@@ -258,9 +256,9 @@ class ManageTasksTest extends TestCase
             'creator_id' => $user2->id,
             'business_id' => $business2->id,
         ]);
-        
+
         $this->actingAs($this->officeUser->user);
-        
+
         $this->getJson(route('business.tasks.update', ['task' => $task->id]))
             ->assertStatus(403);
     }
@@ -269,7 +267,7 @@ class ManageTasksTest extends TestCase
     public function an_email_should_be_dispatched_when_the_assigned_user_is_set_or_changed()
     {
         \Mail::fake();
-        
+
         $business2 = factory('App\Business')->create();
         $user2 = factory('App\OfficeUser')->create();
         $user2->businesses()->attach($business2->id);
@@ -356,7 +354,7 @@ class ManageTasksTest extends TestCase
 
         $this->assertCount(4, $this->officeUser->tasks);
 
-        $this->getJson(route('business.tasks.index') . "?created=1")
+        $this->getJson(route('business.tasks.index') . '?created=1')
             ->assertStatus(200)
             ->assertJsonCount(4);
     }
@@ -371,7 +369,7 @@ class ManageTasksTest extends TestCase
 
         $this->assertCount(7, $this->officeUser->user->dueTasks);
 
-        $this->getJson(route('business.tasks.index') . "?assigned=1")
+        $this->getJson(route('business.tasks.index') . '?assigned=1')
             ->assertStatus(200)
             ->assertJsonCount(7);
     }
@@ -408,7 +406,7 @@ class ManageTasksTest extends TestCase
     public function an_office_user_can_get_a_list_of_overdue_tasks()
     {
         $this->withoutExceptionHandling();
-        
+
         $this->setupMultiBusinessTasks();
         $this->assertCount(9, Task::all());
 
@@ -440,7 +438,7 @@ class ManageTasksTest extends TestCase
         $this->actingAs($this->officeUser->user);
 
         $task = factory(Task::class)->create();
-        
+
         $this->deleteJson(route('business.tasks.destroy', ['task' => $task->id]))
             ->assertStatus(200);
 
@@ -458,9 +456,9 @@ class ManageTasksTest extends TestCase
             'creator_id' => $user2->id,
             'business_id' => $business2->id,
         ]);
-        
+
         $this->actingAs($this->officeUser->user);
-        
+
         $this->deleteJson(route('business.tasks.destroy', ['task' => $task->id]))
             ->assertStatus(403);
     }
@@ -473,10 +471,10 @@ class ManageTasksTest extends TestCase
         $user2->businesses()->attach($business2->id);
 
         $task = factory(Task::class)->create([
-            'creator_id' => $user2->id, 
+            'creator_id' => $user2->id,
             'business_id' => $business2->id,
         ]);
-        
+
         $this->actingAs($this->officeUser->user);
 
         $this->patchJson(route('business.tasks.update', ['task' => $task->id]), $task->toArray())
@@ -491,8 +489,8 @@ class ManageTasksTest extends TestCase
         \Mail::fake();
 
         factory(Task::class, 4)->create([
-            'creator_id' => $this->officeUser->id, 
-            'business_id' => $this->business->id, 
+            'creator_id' => $this->officeUser->id,
+            'business_id' => $this->business->id,
             'assigned_user_id' => $this->caregiver->id
         ]);
         //$caregiver2 = factory(Caregiver::class)->create();

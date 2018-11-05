@@ -3,10 +3,8 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Task;
-use App\OfficeUser;
 use App\TaskEditHistory;
 use App\Business;
 
@@ -16,7 +14,7 @@ class TaskTest extends TestCase
 
     public $business;
     public $officeUser;
-    
+
     public function setUp()
     {
         parent::setUp();

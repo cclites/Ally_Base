@@ -134,6 +134,31 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
             ->orderBy('priority');
     }
 
+    public function officeUser()
+    {
+        return $this->hasOne('App\OfficeUser', 'id', 'id');
+    }
+    /**
+     * A user can have many assigned tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id');
+    }
+
+    /**
+     * Get the user's assigned tasks that are not completed.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dueTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id')
+            ->whereNull('completed_at');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -185,31 +210,5 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function changePassword($password)
     {
         return $this->update(['password' => bcrypt($password)]);
-    }
-
-    public function officeUser()
-    {
-        return $this->hasOne('App\OfficeUser', 'id', 'id');
-    }
-
-    /**
-     * A user can have many assigned tasks.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
-    public function tasks()
-    {
-        return $this->hasMany(Task::class, 'assigned_user_id');
-    }
-
-    /**
-     * Get the user's assigned tasks that are not completed.
-     *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function dueTasks()
-    {
-        return $this->hasMany(Task::class, 'assigned_user_id')
-            ->whereNull('completed_at');
     }
 }
