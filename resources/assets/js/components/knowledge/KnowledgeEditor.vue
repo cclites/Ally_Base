@@ -3,6 +3,24 @@
         <b-row>
             <b-col lg="6">
                 <b-card>
+                    <b-form-group label="Visible To">
+                        <label class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="client">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Clients</span>
+                        </label>
+                        <label class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="caregiver">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Caregivers</span>
+                        </label>
+                        <label class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="office_user">
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description">Office Users</span>
+                        </label>
+                    </b-form-group>
+
                     <b-form-group label="Type" label-for="type">
                         <b-select name="type" id="type" v-model="form.type">
                             <option value="faq">FAQ</option>
@@ -102,6 +120,7 @@
             return {
                 files: [],
                 form: new Form({
+                    roles: [],
                     type: '',
                     title: '',
                     slug: '',

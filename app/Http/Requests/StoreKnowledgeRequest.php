@@ -25,6 +25,8 @@ class StoreKnowledgeRequest extends FormRequest
     public function rules()
     {
         return [
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'required|string|distinct|in:client,caregiver,office_user',
             'type' => 'required|in:faq,tutorial,resource',
             'title' => 'required|string|max:500',
             'slug' => [

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreKnowledgeRequest;
 use App\Responses\SuccessResponse;
 use App\Http\Requests\UpdateKnowledgeRequest;
 use App\Responses\ErrorResponse;
+use Illuminate\Support\Facades\DB;
 
 class KnowledgeManagerController extends Controller
 {
@@ -38,7 +39,7 @@ class KnowledgeManagerController extends Controller
      * Insert new Knowledge Item.
      *
      * @param StoreKnowledgeRequest $request
-     * @return SuccessResponse
+     * @return SuccessResponse|ErrorResponse
      */
     public function store(StoreKnowledgeRequest $request)
     {
@@ -46,9 +47,18 @@ class KnowledgeManagerController extends Controller
 
         $attachments = collect($data['attachments'])->pluck('id')->toArray();
 
-        $item = Knowledge::create(array_except($data, ['attachments']));
+        try {
+            DB::beginTransaction();
+            $item = Knowledge::create(array_except($data, ['attachments', 'roles']));
+            $item->attachments()->sync($attachments);
+            $item->syncRoles($data['roles']);
+        } catch (\Exception $ex) {
+//            dd($ex->getMessage());
+            DB::rollBack();
+            return new ErrorResponse(500, "An unexpected error occurred while creating the Knowledge Item, please try again.");
+        }
 
-        $item->attachments()->sync($attachments);
+        DB::commit();
 
         return new SuccessResponse(
             "\"{$item->title}\" has been published.",

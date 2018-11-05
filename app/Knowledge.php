@@ -10,7 +10,9 @@ class Knowledge extends Model
 
     public $guarded = ['id'];
 
-    public $with = ['attachments', 'video'];
+    public $with = ['attachments', 'video', 'roles'];
+
+    public $appends = ['assigned_roles'];
 
     public static function boot() {
 
@@ -78,5 +80,50 @@ class Knowledge extends Model
     public function video()
     {
         return $this->hasOne(Attachment::class, 'id', 'video_attachment_id');
+    }
+
+    /**
+     * Get the assigned roles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function roles()
+    {
+//        return $this->belongsToMany(KnowledgeRole::class, 'knowledge_roles', 'knowledge_id', 'role');
+        return $this->hasMany(KnowledgeRole::class);
+    }
+
+    /**
+     * Get the assigned roles as strings.
+     *
+     * @return array
+     */
+    public function getAssignedRolesAttribute()
+    {
+        return $this->roles->pluck('role')->toArray();    
+    }
+
+    /**
+     * Add the scope for a specific role.
+     *
+     * @param \Illuminate\Database\Query\Builder query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForRole($query, $role)
+    {
+        return $query->whereHas('roles', function ($q) use ($role) {
+            return $q->where('role', $role);
+        });
+    }
+
+    public function syncRoles($roles)
+    {
+        $this->roles()->delete();
+
+        foreach ($roles as $role) {
+            $this->roles()->create(['role' => $role]);
+        }
+
+        return true;
     }
 }
