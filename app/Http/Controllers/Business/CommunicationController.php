@@ -48,7 +48,7 @@ class CommunicationController extends Controller
                 ->whereHas('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get()
-                ->map(function($user) use ($keys) {
+                ->map(function ($user) use ($keys) {
                     if ($user->relationLoaded('phoneNumbers')) {
                         if ($user->phoneNumbers->where('type', 'primary')->count()) {
                             $phone = $user->phoneNumbers->where('type', 'primary')->first();
@@ -168,6 +168,7 @@ class CommunicationController extends Controller
      * Handle incoming SMS messages from Twilio webhooks.
      *
      * @deprecated Moved to api
+     * @param $request
      * @return Response
      */
     public function incoming(Request $request)
@@ -240,6 +241,7 @@ class CommunicationController extends Controller
      * Get a list of the businesses sms threads.
      *
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function threadIndex()
     {
@@ -309,5 +311,4 @@ class CommunicationController extends Controller
 
         return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
-
 }
