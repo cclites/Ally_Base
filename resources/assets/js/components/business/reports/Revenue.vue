@@ -59,17 +59,36 @@
                     </b-row>
 
                     <loading-card v-show="loading"></loading-card>
-
-                    <b-row v-if="dataIsReady && ! loading" class="space-above">
-                        <b-col lg="6">
-                            <p>Total revenue: {{calculateTotalOf('revenue')}}</p>
-                            <p>Total CG Wages as contractors: {{calculateTotalOf('wages')}}</p>
-                            <p>Total profits: {{calculateTotalOf('profit')}}</p>
-                        </b-col>
-                        <b-col lg="6">
-                            <line-chart :chart-data="chartData" :options="{}"></line-chart>
-                        </b-col>
-                    </b-row>
+                    <div v-if="dataIsReady && ! loading">
+                        <b-row class="space-above">
+                            <b-col lg="6">
+                                <p>Total revenue: {{calculateTotalOf('revenue')}}</p>
+                                <p>Total CG Wages as contractors: {{calculateTotalOf('wages')}}</p>
+                                <p>Total profits: {{calculateTotalOf('profit')}}</p>
+                            </b-col>
+                            <b-col lg="6">
+                                <line-chart :chart-data="chartData" :options="{}"></line-chart>
+                            </b-col>
+                        </b-row>
+                        <hr/>
+                        <b-row>
+                            <b-col lg="6">
+                                <h2>Primary date range</h2>
+                                <p>This is the table for each day as selected in the primary date range.</p>
+                                <br/><br/>
+                                <b-table striped :fields="tableFields" :items="currentTableData">
+                                    <template 
+                                        v-for="key in ['revenue', 'wages', 'profit']"
+                                        :slot="key" 
+                                        scope="data"
+                                    >
+                                        {{formatPrice(data.value)}}
+                                    </template>
+                                </b-table>
+                            </b-col>
+                            <b-col lg="6"></b-col>
+                        </b-row>
+                    </div>
                 </b-card>
             </b-col>
         </b-row>
@@ -98,6 +117,12 @@ export default {
                 current: {},
                 prior: {},
             },
+            tableFields: [
+                {key: 'date', label: 'Date'},
+                'revenue',
+                {key: 'wages', label: 'CG wages'},
+                'profit',
+            ],
         };
     },
     computed: {
@@ -130,6 +155,20 @@ export default {
                 ],
             };
         },
+        currentTableData() {
+            const inArray = [];
+            Object.keys(this.data.current).forEach(date => {
+                const obj = {
+                    ...this.data.current[date],
+                    date,
+                };
+
+                inArray.push(obj);
+                });
+            inArray.sort((a, b) => new Date(a) - new Date(b));
+
+            return inArray;
+        },
     },
     methods: {
         fetchData() {
@@ -153,10 +192,13 @@ export default {
 
             if(dataIsReady) {
                 const total = Object.keys(current).map(date => current[date][metric]).reduce((total, value) => total + value, 0);
-                return new Intl.NumberFormat('us-US', {style: 'currency', currency: 'USD'}).format(total);
+                return this.formatPrice(total);
             }
 
             return '$0.00';
+        },
+        formatPrice(value) {
+            return new Intl.NumberFormat('us-US', {style: 'currency', currency: 'USD'}).format(value);
         }
     }
 }
