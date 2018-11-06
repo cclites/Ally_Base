@@ -92,6 +92,9 @@ Route::group([
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 
     Route::post('/profile/bank-account', 'ProfileController@bankAccount');
+    Route::get('tasks', 'Caregivers\TasksController@index')->name('caregivers.tasks');
+    Route::get('tasks/{task}', 'Caregivers\TasksController@show');
+    Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
 });
 
 Route::group([
@@ -206,6 +209,9 @@ Route::group([
     Route::get('reports/prospects', 'Business\ReportsController@prospects')->name('reports.prospects');
     Route::get('reports/evv', 'Business\ReportsController@evv')->name('reports.evv');
     Route::get('reports/contacts', 'Business\ReportsController@contacts')->name('reports.contacts');
+    Route::get('reports/payroll', 'Business\ReportsController@payrollReport')->name('reports.payroll');
+    Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
+    Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
