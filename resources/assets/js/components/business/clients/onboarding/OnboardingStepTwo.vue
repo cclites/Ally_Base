@@ -388,7 +388,7 @@
         <b-card border-variant="secondary" header="Requested Start Date & Schedule">
             <b-row class="mb-2">
                 <b-col>Requested Start Date</b-col>
-                <b-col>{{ onboarding.requested_start_at }}</b-col>
+                <b-col>{{ requestedStartDate }}</b-col>
             </b-row>
             <b-row class="mb-2">
                 <b-col>Requested Schedule</b-col>
@@ -400,8 +400,9 @@
 
         <b-row class="mt-3">
             <b-col>
-                <b-btn variant="secondary" @click="previousStep">Previous Step</b-btn>
-                <b-btn :disabled="!form.signature" @click="nextStep">Next Step</b-btn>
+                <b-btn :disabled="state === 'updating'" variant="secondary" @click="previousStep">Previous Step</b-btn>
+                <b-btn :disabled="!form.signature || state === 'updating'" @click="nextStep">Next Step</b-btn>
+                <i class="ml-2 fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
         </b-row>
 
@@ -417,14 +418,24 @@
                 form: new Form({
                     signature: null,
                     onboarding_step: 3
-                })
+                }),
+                state: ''
             }
+        },
+
+        computed: {
+          requestedStartDate() {
+              let date = _.isObject(this.onboarding.requested_start_at) ? this.onboarding.requested_start_at.date : this.onboarding.requested_start_at;
+              return moment(date).format('L');
+          }
         },
 
         methods: {
             async nextStep() {
+                this.state = 'updating';
                 let response = await this.form.put(`/business/clients/onboarding/${this.onboarding.id}`);
                 this.$emit('next', response.data);
+                this.state = '';
             },
 
             previousStep() {

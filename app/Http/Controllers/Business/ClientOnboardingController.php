@@ -113,7 +113,12 @@ class ClientOnboardingController extends Controller
                 ClientMedication::firstOrCreate($medication);
             }
 
-            $onboarding->load('activities');
+            $onboarding->load(
+                'activities',
+                'signature',
+                'client.medications',
+                'client.business',
+                'client.referralServiceAgreement');
             return $onboarding;
         });
 
@@ -156,10 +161,15 @@ class ClientOnboardingController extends Controller
     {
         if ($request->onboarding_step == 3) {
             Signature::onModelInstance($clientOnboarding, $request->signature);
-            $clientOnboarding->load('signature');
             $clientOnboarding->createIntakePdf();
         }
         $clientOnboarding->client->update(['onboarding_step' => $request->onboarding_step]);
+        $clientOnboarding->load(
+            'activities',
+            'signature',
+            'client.medications',
+            'client.business',
+            'client.referralServiceAgreement');
 
         return new SuccessResponse('Success', ['onboarding' => $clientOnboarding]);
     }

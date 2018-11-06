@@ -246,7 +246,7 @@
             </b-row>
             <b-row v-for="(item, index) in form.medications" :key="index">
                 <b-col md="4">
-                    {{ item.name }}
+                    {{ item.type }}
                 </b-col>
                 <b-col md="4">
                     {{ item.dose }}
@@ -456,7 +456,10 @@
 
         <b-row>
             <b-col>
-                <b-btn type="submit" variant="primary">Next Step</b-btn>
+                <b-btn type="submit" variant="secondary" :disabled="state === 'updating'">
+                    Next Step
+                </b-btn>
+                <i class="ml-2 fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
         </b-row>
     </form>
@@ -470,7 +473,8 @@
             return {
                 form: {},
                 showAddMeds: false,
-                med: {}
+                med: {},
+                state: ''
             }
         },
 
@@ -536,8 +540,10 @@
 
         methods: {
             async submitStepOne() {
+                this.state = 'updating';
                 let response = await this.form.post(`/business/clients/${this.clientData.id}/onboarding`)
                 this.$emit('next', response.data);
+                this.state = '';
             },
 
             addMedication() {
