@@ -35,21 +35,23 @@ class CommunicationController extends Controller
         $message = '';
         $business = $this->business();
 
+        $request->session()->reflash();
+
         // handle loading and setting recipient list (coming from care match results)
         if ($request->session()->has('sms.load-recipients')) {
-            $recipients = User::select(['users.id', 'firstname', 'lastname', 'role_type', 'email'])
-                ->whereIn('id', $request->session()->get('sms.load-recipients'))
-                ->whereIn('role_type', ['caregiver'])
-                ->where('active', 1)
-                ->orderBy('firstname')
-                ->orderBy('lastname')
+            $recipients = $this->business()->caregivers()
+                ->active()
+                ->whereIn('caregivers.id', $request->session()->get('sms.load-recipients'))
                 ->whereHas('phoneNumbers')
-                ->with('phoneNumbers')
+                ->with(['phoneNumbers', 'user'])
                 ->get()
-                ->map(function($user) {
-                    $user->phone = $user->default_phone;
-                    return $user->only(['id', 'name', 'role_type', 'phone']);
-                });
+                ->map(function($caregiver) {
+                    $caregiver->phone = $caregiver->default_phone;
+                    $caregiver->role_type = $caregiver->user->role_type;
+                    return $caregiver->only(['id', 'name', 'role_type', 'phone']);
+                })
+                ->sortBy('name')
+                ->values();
         }
 
         // handle draft open shift message (coming from schedule)
