@@ -39,8 +39,7 @@
                 </b-col>
                 <b-col lg="3" sm="4" xs="12">
                     <b-form-group>
-                        <b-button id="save-profile"
-                                  variant="success"
+                        <b-button variant="success"
                                   type="submit"
                                   :disabled="submitting"
                                   v-if="buttonVisible"

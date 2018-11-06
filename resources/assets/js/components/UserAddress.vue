@@ -7,75 +7,38 @@
             <b-row>
                 <b-col lg="12">
                     <b-form-group label="Address Line 1" label-for="address1">
-                        <b-form-input
-                            id="address1"
-                            name="address1"
-                            type="text"
-                            required
-                            v-model="form.address1"
-                            >
-                        </b-form-input>
+                        <b-form-input v-model="form.address1" type="text" required />
                         <input-help :form="form" field="address1" text="Enter your street number and name here."></input-help>
                     </b-form-group>
                     <b-form-group label="Address Line 2" label-for="address2">
-                        <b-form-input
-                            id="address2"
-                            name="address2"
-                            type="text"
-                            v-model="form.address2"
-                            >
-                        </b-form-input>
+                        <b-form-input type="text" v-model="form.address2" />
                         <input-help :form="form" field="address2" text="Enter an apartment number or additional address info here. (Optional)"></input-help>
                     </b-form-group>
                     <b-form-group label="City" label-for="city">
-                        <b-form-input
-                            id="city"
-                            name="city"
-                            type="text"
-                            v-model="form.city"
-                            >
-                        </b-form-input>
+                        <b-form-input type="text" v-model="form.city" />
                         <input-help :form="form" field="city" text="Enter the city here."></input-help>
                     </b-form-group>
                     <b-form-group label="State" label-for="state">
-                        <b-form-input
-                            id="state"
-                            name="state"
-                            type="text"
-                            v-model="form.state"
-                            >
-                        </b-form-input>
+                        <b-form-input type="text" v-model="form.state" />
                         <input-help :form="form" field="state" text="Enter the state or province here."></input-help>
                     </b-form-group>
                     <b-form-group label="Zip Code" label-for="zip">
-                        <b-form-input
-                            id="zip"
-                            name="zip"
-                            type="text"
-                            v-model="form.zip"
-                            >
-                        </b-form-input>
+                        <b-form-input type="text" v-model="form.zip" />
                         <input-help :form="form" field="zip" text="Enter the zip code or postal code here."></input-help>
                     </b-form-group>
                     <b-form-group label="County" label-for="county">
-                        <b-form-input
-                                id="county"
-                                name="county"
-                                type="text"
-                                v-model="form.county">
-                        </b-form-input>
+                        <b-form-input type="text" v-model="form.county" />
                         <input-help :form="form" field="county" text="Enter the county here. (Optional)"></input-help>
                     </b-form-group>
                     <b-form-group label="Country" label-for="country">
-                        <b-form-select name="country" id="country" :options="countries.getOptions()" v-model="form.country">
-                        </b-form-select>
+                        <b-form-select :options="countries.getOptions()" v-model="form.country" />
                         <input-help :form="form" field="country" text="Select the country from the drop down."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Address</b-button>
+                    <b-button variant="success" type="submit">Save Address</b-button>
                 </b-col>
             </b-row>
         </form>
