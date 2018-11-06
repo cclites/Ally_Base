@@ -614,6 +614,22 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     }
 
     /**
+     * Get shifts that belong to the supplied business only.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $business
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForBusiness($query, $business)
+    {
+        if (empty($business)) {
+            return $query;
+        }
+
+        return $query->where('business_id', $business);
+    }
+
+    /**
      * Gets shifts that are checked in between given given start and end dates.
      * Automatically applies timezone transformation.
      *

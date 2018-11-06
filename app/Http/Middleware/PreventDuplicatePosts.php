@@ -84,6 +84,10 @@ class PreventDuplicatePosts
     }
 
     function isExcluded() {
+        if (! config('ally.prevent_dupe_posts', true)) {
+            return true;
+        }
+
         return in_array(\Request::path(), $this->excludedPaths)
         || in_array(\Route::currentRouteName(), $this->excludedRoutes);
     }

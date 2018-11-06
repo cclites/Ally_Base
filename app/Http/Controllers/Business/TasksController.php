@@ -9,7 +9,6 @@ use App\Task;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use Carbon\Carbon;
-use App\OfficeUser;
 
 class TasksController extends Controller
 {
@@ -37,9 +36,9 @@ class TasksController extends Controller
             return response()->json($tasks->latest()->get());
         }
 
-        $users = activeBusiness()->officeUserList(false, true);
-
-        return view('business.tasks', compact('users'));
+        $users = activeBusiness()->officeUserList(true, true);
+        $caregivers = activeBusiness()->caregiverList(true, true);
+        return view('business.tasks', compact('users', 'caregivers'));
     }
 
     /**
@@ -63,7 +62,7 @@ class TasksController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param Task $task
      * @return \Illuminate\Http\Response
      */
     public function show(Task $task)
@@ -71,7 +70,7 @@ class TasksController extends Controller
         if ($task->business_id != activeBusiness()->id) {
             return new ErrorResponse(403, 'You do not have access to this task.');
         }
-        
+
         if (request()->wantsJson()) {
             return response()->json($task);
         }
@@ -89,7 +88,7 @@ class TasksController extends Controller
         if ($task->business_id != activeBusiness()->id) {
             return new ErrorResponse(403, 'You do not have access to this task.');
         }
-        
+
         $data = $request->validated();
         $data['due_date'] = isset($data['due_date']) ? Carbon::parse($data['due_date']) : null;
 
@@ -103,15 +102,16 @@ class TasksController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Task $task
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
      */
     public function destroy(Task $task)
     {
         if ($task->business_id != activeBusiness()->id) {
             return new ErrorResponse(403, 'You do not have access to this task.');
         }
-        
+
         if ($task->delete()) {
             return new SuccessResponse('Task has been deleted.');
         }
