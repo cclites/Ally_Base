@@ -957,4 +957,99 @@ class ReportsController extends BaseController
 
         return view('business.reports.payroll', compact('caregivers'));
     }
+
+    /**
+     * Show the page to generate a revenue report
+     *
+     * @return Response
+     */
+    public function revenuePage()
+    {
+        return view('business.reports.revenue');
+    }
+
+    /**
+     * Handle the request to generate a revenue report
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function revenueReport(Request $request) {
+        $current = $this->organizeRevenueReport($request);
+        $prior = [];
+
+        if($request->compare_to_prior) {
+            $difference = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
+            $newStartDate = (new Carbon($request->start_date))->subDays($difference+1)->format('m/d/Y');
+            $newEndDate = (new Carbon($request->end_date))->subDays(1)->format('m/d/Y');
+            $newRequest = $request;
+            $newRequest->merge([
+                'start_date' => $newStartDate,
+                'end_date' => $newEndDate,
+            ]);
+
+            $prior = $this->organizeRevenueReport($newRequest);
+        }
+
+        return json_encode(compact('current', 'prior'));
+    }
+
+    /**
+     * Organize the shifts data into the required format for a full financial revenue report
+     * @param Request $request
+     *
+     * @return array
+     */
+    private function organizeRevenueReport(Request $request) {
+        $report = new ShiftsReport();
+        $report->where('business_id', $this->business()->id)->orderBy('checked_in_time');
+        $this->addShiftReportFilters($report, $request);
+        $data = $report->rows();
+        $groupedByDate = [];
+
+        foreach ($data as $i => $shiftReport) {
+            $date = (new Carbon($shiftReport['checked_in_time']))->format('m/d/Y');
+
+            if(isset($groupedByDate[$date])) {
+                $groupedByDate[$date][] = $shiftReport;
+            }else {
+                $groupedByDate[$date] = [$shiftReport];
+            }
+        }
+
+        /* Add days with no shift worked
+        $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
+        for ($i=0; $i < $numberOfDays; $i++) {
+            $date = (new Carbon($request->start_date))->addDays($i+1);
+            $formattedDate = $date->format('m/d/Y');
+            if($formattedDate == '08/10/2018') {
+                echo 'i:'.$i;
+            }
+            if($date->diffInDays((new Carbon($request->end_date))) < 0) {
+                break;
+            }
+
+            if(!isset($groupedByDate[$formattedDate])) {
+                $groupedByDate[$formattedDate] = [];
+            }
+        }*/
+
+        foreach ($groupedByDate as $date => $itemsArray) {
+            $total = [
+                'revenue' => 0.0,
+                'wages' => 0.0,
+                'profit' => 0.0,
+            ];
+
+            foreach ($itemsArray as $entry) {
+                $total['revenue'] += (float) $entry['provider_total'] + (float) $entry['caregiver_total'];
+                $total['wages'] += (float) $entry['caregiver_total'];
+                $total['profit'] += (float) $entry['provider_total'];
+            }
+
+            $groupedByDate[$date] = $total;
+        }
+
+        return $groupedByDate;
+    }
 }
