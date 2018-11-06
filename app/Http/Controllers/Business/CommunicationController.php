@@ -72,13 +72,12 @@ class CommunicationController extends Controller
         ]);
 
         if ($request->all) {
-            $recipients = User::where('role_type', 'caregiver')
-                ->where('active', 1)
+            $recipients = $this->business()->caregivers()->active()
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
         } else {
-            $recipients = User::whereIn('id', $request->recipients)
+            $recipients = $this->business()->caregivers()->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
