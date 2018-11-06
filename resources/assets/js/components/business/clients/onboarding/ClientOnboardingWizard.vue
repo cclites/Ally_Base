@@ -46,6 +46,8 @@
 
         methods: {
             nextStep(event, step) {
+                console.log('Next Step');
+                console.log(event);
                 this.onboarding = event.data.onboarding;
                 this.step = step;
             },

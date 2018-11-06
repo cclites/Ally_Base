@@ -42,7 +42,7 @@ class ClientOnboardingController extends Controller
         ]);
 
         $onboarding = null;
-        $query = ClientOnboarding::with('activities', 'signature', 'client.medications')->where('client_id', $client->id);
+        $query = ClientOnboarding::with('activities', 'signature', 'client.medications', 'client.business')->where('client_id', $client->id);
         if ($query->exists()) {
             $onboarding = $query->first();
         }

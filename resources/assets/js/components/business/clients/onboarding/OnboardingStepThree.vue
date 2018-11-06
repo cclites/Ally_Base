@@ -13,7 +13,8 @@
 
         methods: {
             nextStep() {
-                this.$emit('next', {data: this.onboardingData});
+                console.log(this.onboardingData);
+                this.$emit('next', {data: { onboarding: this.onboardingData }});
             }
         }
     }
