@@ -77,7 +77,7 @@ class CommunicationController extends Controller
                 ->with('phoneNumbers')
                 ->get();
         } else {
-            $recipients = $this->business()->caregivers()->whereIn('id', $request->recipients)
+            $recipients = $this->business()->caregivers()->whereIn('caregiver_id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
