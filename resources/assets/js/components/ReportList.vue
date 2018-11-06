@@ -368,6 +368,12 @@
                                 description: '',
                                 category: 7
                             },
+                            {
+                                name: 'Payroll Report',
+                                url: 'reports/payroll',
+                                description: '',
+                                category: 7
+                            },
                         );
                     }
 

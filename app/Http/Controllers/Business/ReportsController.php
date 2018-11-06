@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\ReferralSource;
+use App\Reports\PayrollReport;
 use App\Shifts\ShiftStatusManager;
 use Auth;
 use App\BankAccount;
@@ -926,5 +927,34 @@ class ReportsController extends BaseController
         }
 
         return view('business.reports.contacts', compact('type'));
+    }
+
+    /**
+     * Agency Payroll Report
+     *
+     * @param Request $request
+     * @param PayrollReport $report
+     * @return \Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function payrollReport(Request $request, PayrollReport $report)
+    {
+        if ($request->has('json') || $request->has('export')) {
+            $data = $report->forBusiness($this->business()->id)
+                ->forDates($request->start, $request->end)
+                ->forCaregiver($request->caregiver)
+                ->rows();
+
+            if ($request->has('export')) {
+                return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+                    ->download();
+            }
+
+            return response()->json($data);
+        }
+
+        $caregivers = $this->business()->caregiverList(true, true);
+
+        return view('business.reports.payroll', compact('caregivers'));
     }
 }

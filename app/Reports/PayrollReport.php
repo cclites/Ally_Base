@@ -1,0 +1,131 @@
+<?php
+namespace App\Reports;
+
+use App\Shift;
+
+class PayrollReport extends BaseReport
+{
+    /**
+     * The begin date.
+     *
+     * @var string
+     */
+    protected $start_date;
+
+    /**
+     * The end date.
+     *
+     * @var string
+     */
+    protected $end_date;
+
+    /**
+     * The caregiver ID.
+     *
+     * @var int
+     */
+    protected $caregiverId;
+
+    /**
+     * The business ID.
+     *
+     * @var int
+     */
+    protected $businessId;
+
+    /**
+     * constructor.
+     */
+    public function __construct()
+    {
+        $this->query = Shift::with(['caregiver', 'client'])
+            ->whereAwaitingCaregiverDeposit();
+    }
+
+    /**
+     * Return the instance of the query builder for additional manipulation
+     *
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     */
+    public function query()
+    {
+        return $this->query;
+    }
+
+    /**
+     * Filter the results to between two dates.
+     *
+     * @param string $start
+     * @param string $end
+     * @return $this
+     */
+    public function forDates($start, $end)
+    {
+        $this->start_date = $start;
+        $this->end_date = $end;
+
+        return $this;
+    }
+
+    /**
+     * Set filter for caregiver.
+     *
+     * @param $id
+     * @return $this
+     */
+    public function forCaregiver($id)
+    {
+        $this->caregiverId = $id;
+
+        return $this;
+    }
+
+    /**
+     * Set filter for business.
+     *
+     * @param $id
+     * @return $this
+     */
+    public function forBusiness($id)
+    {
+        $this->businessId = $id;
+
+        return $this;
+    }
+
+    /**
+     * Return the collection of rows matching report criteria
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    protected function results()
+    {
+        return $this->query()
+            ->forBusiness($this->businessId)
+            ->betweenDates($this->start_date, $this->end_date)
+            ->forCaregiver($this->caregiverId)
+            ->orderBy('checked_in_time')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'caregiver_name' => $item->caregiver->name,
+                    'caregiver_id' => $item->caregiver->id,
+                    'caregiver_rate' => $item->caregiver_rate,
+                    'client_name' => $item->client->name,
+                    'client_id' => $item->client->id,
+                    // TODO: verify that this is the correct way to determine pay method
+                    'pay_method' => $item->daily_rates ? 'Daily' : 'Hourly',
+                    // -------
+                    // TODO: implement overtime hours:
+                    'hours_regular' => $item->duration(),
+                    'hours_overtime' => 0,
+                    // -------
+                    'caregiver_total' => $item->costs()->getCaregiverCost(),
+                    'checked_in_time' => $item->checked_in_time->format('c'),
+                    'checked_out_time' => optional($item->checked_out_time)->format('c'),
+                    'total' => $item->costs()->getTotalCost(),
+                ];
+            });
+    }
+}
