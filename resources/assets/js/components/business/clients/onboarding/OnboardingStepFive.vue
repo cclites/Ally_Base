@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column">
-        <object class="w-100" style="height: 40rem;" :data="`/business/clients/onboarding/${onboardingData.id}/intake-pdf`"></object>
+        <object class="w-100" style="height: 40rem;" :data="`/business/clients/referral-service-agreement/${referralAgreementData.id}/agreement-pdf`"></object>
         <div class="mt-3">
             <b-btn variant="secondary" @click="nextStep">Next Step</b-btn>
         </div>
@@ -9,12 +9,12 @@
 
 <script>
     export default {
-        props: ['onboardingData'],
+        props: ['referralAgreementData'],
 
         data() {
             return {
                 form: new Form({
-                    onboarding_step: 4
+                    onboarding_step: 6
                 })
             }
         },

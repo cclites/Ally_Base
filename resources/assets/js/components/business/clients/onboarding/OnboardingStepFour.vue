@@ -225,21 +225,15 @@
               signature_one: '',
               signature_two: '',
               signature_client: '',
+              onboarding_step: 5
           })
       }
     },
 
-    created() {},
-
-    mounted() {},
-
-    computed: {
-    },
-
     methods: {
         async save() {
-            let response = await this.form.post('/business/clients/referral-service-agreement')
-            console.log(response);
+            let response = await this.form.post('/business/clients/referral-service-agreement');
+            this.$emit('next', response);
         }
     }
   }

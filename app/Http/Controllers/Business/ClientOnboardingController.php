@@ -42,7 +42,14 @@ class ClientOnboardingController extends Controller
         ]);
 
         $onboarding = null;
-        $query = ClientOnboarding::with('activities', 'signature', 'client.medications', 'client.business')->where('client_id', $client->id);
+        $query = ClientOnboarding::with(
+            'activities',
+            'signature',
+            'client.medications',
+            'client.business',
+            'client.referralServiceAgreement'
+        )
+            ->where('client_id', $client->id);
         if ($query->exists()) {
             $onboarding = $query->first();
         }
@@ -147,12 +154,13 @@ class ClientOnboardingController extends Controller
      */
     public function update(Request $request, ClientOnboarding $clientOnboarding)
     {
-        Signature::onModelInstance($clientOnboarding, $request->signature);
+        if ($request->onboarding_step == 3) {
+            Signature::onModelInstance($clientOnboarding, $request->signature);
+            $clientOnboarding->load('signature');
+            $clientOnboarding->createIntakePdf();
+        }
+        $clientOnboarding->client->update(['onboarding_step' => $request->onboarding_step]);
 
-        $clientOnboarding->client->update(['onboarding_step' => 3]);
-        $clientOnboarding->load('signature');
-        // todo generate onboarding pdf here
-        $clientOnboarding->createIntakePdf();
         return new SuccessResponse('Success', ['onboarding' => $clientOnboarding]);
     }
 

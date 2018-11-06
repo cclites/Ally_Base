@@ -412,25 +412,14 @@
     export default {
         props: ['onboarding', 'clientData'],
 
-        mixins: [],
-
-        components: {},
-
         data() {
             return {
                 form: new Form({
-                    signature: null
+                    signature: null,
+                    onboarding_step: 3
                 })
             }
         },
-
-        created() {
-        },
-
-        mounted() {
-        },
-
-        computed: {},
 
         methods: {
             async nextStep() {

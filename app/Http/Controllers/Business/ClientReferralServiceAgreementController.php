@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Client;
 use App\ClientReferralServiceAgreement;
 use App\Http\Controllers\Controller;
 use App\Signature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ClientReferralServiceAgreementController extends Controller
 {
@@ -22,9 +24,21 @@ class ClientReferralServiceAgreementController extends Controller
             'signature_one' => 'required',
             'signature_two' => 'required',
             'signature_client' => 'required',
+            'onboarding_step' => 'int'
         ]);
 
-        $referralServiceAgreement = ClientReferralServiceAgreement::create($data);
+        unset($data['onboarding_step']);
+        $referralServiceAgreement = DB::transaction(function () use ($data, $request) {
+            $client = Client::find($request->client_id);
+            $client->update(['onboarding_step' => $request->onboarding_step]);
+            return ClientReferralServiceAgreement::create($data);
+        });
+
         return response()->json($referralServiceAgreement);
+    }
+
+    public function agreementPdf(ClientReferralServiceAgreement $rsa)
+    {
+        return response()->file(storage_path($rsa->agreement_file));
     }
 }
