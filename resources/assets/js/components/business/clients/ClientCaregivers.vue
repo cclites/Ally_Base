@@ -4,6 +4,30 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
+        <b-card v-if="businessSettings().use_rate_codes">
+            <h3>
+                Default Client Rates
+                <b-btn variant="info" size="sm" @click="rateCodeModal = true">Add a New Rate Code</b-btn>
+            </h3>
+            <loading-card v-if="!rateCodes"></loading-card>
+            <b-form inline v-else>
+                <b-form-group label="Hourly Rate: " label-for="hourly_rate_id">
+                    <b-select v-model="rateForm.hourly_rate_id" class="ml-1 mr-2">
+                        <option value="">No Default Rate</option>
+                        <option v-for="code in hourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                    </b-select>
+                    <input-help :form="rateForm" field="hourly_rate_id"></input-help>
+                </b-form-group>
+                <b-form-group label="Fixed Rate: " label-for="fixed_rate_id" class="ml-1 mr-2">
+                    <b-select v-model="rateForm.fixed_rate_id">
+                        <option value="">No Default Rate</option>
+                        <option v-for="code in fixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                    </b-select>
+                    <input-help :form="rateForm" field="fixed_rate_id"></input-help>
+                </b-form-group>
+                <b-btn @click="saveDefaultRates()" variant="success">Save Default Rates</b-btn>
+            </b-form>
+        </b-card>
         <b-row class="mb-2">
             <b-col sm="6">
                 <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
@@ -284,15 +308,20 @@
             </div>
         </b-modal>
 
+        <rate-code-modal v-model="rateCodeModal" :code="{type: 'client'}" :type-locked="true" @saved="updateRateCode" />
+
     </b-card>
 </template>
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
+    import BusinessSettings from "../../../mixins/BusinessSettings";
+    import RateCodes from "../../../mixins/RateCodes";
+    import RateCodeModal from "../rate_codes/RateCodeModal";
 
     export default {
         props: {
-            'client_id': {},
+            'client': Object,
             'allyRate': Number,
             'paymentTypeMessage': {
                 default() {
@@ -301,10 +330,13 @@
             }
         },
 
-        mixins: [FormatsNumbers],
+        components: {RateCodeModal},
+
+        mixins: [FormatsNumbers, BusinessSettings, RateCodes],
 
         data() {
             return {
+                client_id: this.client.id,
                 caregiverList: [],
                 items: [],
                 clientCaregiverModal: false,
@@ -317,6 +349,11 @@
                 ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
                 loading: '',
+                rateCodeModal: false,
+                rateForm: new Form({
+                    'hourly_rate_id': this.client.hourly_rate_id || "",
+                    'fixed_rate_id': this.client.fixed_rate_id || "",
+                })
             }
         },
 
@@ -324,6 +361,7 @@
             this.fetchAssignedCaregivers();
             this.fetchCaregivers();
             this.fetchExcludedCaregivers();
+            this.fetchRateCodes('client');
         },
         
         computed: {
@@ -388,6 +426,10 @@
                             component.confirmUpdateSchedule(response.data.data)
                         }
                     });
+            },
+
+            saveDefaultRates() {
+                this.rateForm.put('/business/clients/' + this.client_id + '/default-rates');
             },
 
             updateSchedules() {

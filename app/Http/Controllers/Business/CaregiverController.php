@@ -384,4 +384,19 @@ class CaregiverController extends BaseController
         $caregiver->skills()->sync($request->skills);
         return new SuccessResponse('Caregiver skills updated');
     }
+
+    public function defaultRates(Request $request, Caregiver $caregiver)
+    {
+        if (!$this->businessHasCaregiver($caregiver)) {
+            return new ErrorResponse(403, 'You do not have access to this caregiver.');
+        }
+
+        $data = $request->validate([
+            'hourly_rate_id' => 'nullable|exists:rate_codes,id',
+            'fixed_rate_id' => 'nullable|exists:rate_codes,id',
+        ]);
+
+        $caregiver->update($data);
+        return new SuccessResponse('The default rates have been saved.');
+    }
 }

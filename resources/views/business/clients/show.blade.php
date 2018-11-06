@@ -130,7 +130,7 @@
             </div>
         </div>
         <div class="tab-pane" id="caregivers" role="tabpanel">
-            <business-client-caregivers :client_id="{{ $client->id }}"
+            <business-client-caregivers :client="{{ $client }}"
                                         :ally-rate="{{ floatval($client->allyFee) }}"
                                         payment-type-message="{{ $defaultPaymentTypeMessage }}"
             ></business-client-caregivers>

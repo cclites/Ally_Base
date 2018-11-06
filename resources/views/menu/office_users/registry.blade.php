@@ -37,6 +37,11 @@
         <li><a href="/notes/create">Add Notes</a></li>
     </ul>
 </li>
+@if(activeBusiness()->use_rate_codes)
+    <li>
+        <a href="{{ route('business.rate-codes.index') }}" aria-expanded="false"><i class="fa fa-list-alt"></i><span class="hide-menu">Rate Codes</span></a>
+    </li>
+@endif
 <li>
     <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>

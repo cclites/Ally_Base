@@ -13,7 +13,7 @@ class CreateRateCodesTable extends Migration
      */
     public function up()
     {
-        Schema::create('rates', function (Blueprint $table) {
+        Schema::create('rate_codes', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_id');
             $table->string('name');
@@ -27,16 +27,16 @@ class CreateRateCodesTable extends Migration
             $table->unsignedInteger('hourly_rate_id')->nullable();
             $table->unsignedInteger('fixed_rate_id')->nullable();
 
-            $table->foreign('hourly_rate_id')->references('id')->on('rates')->onUpdate('cascade')->onDelete('restrict');
-            $table->foreign('fixed_rate_id')->references('id')->on('rates')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('hourly_rate_id')->references('id')->on('rate_codes')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('fixed_rate_id')->references('id')->on('rate_codes')->onUpdate('cascade')->onDelete('restrict');
         });
 
         Schema::table('clients', function (Blueprint $table) {
             $table->unsignedInteger('hourly_rate_id')->nullable();
             $table->unsignedInteger('fixed_rate_id')->nullable();
 
-            $table->foreign('hourly_rate_id')->references('id')->on('rates')->onUpdate('cascade')->onDelete('restrict');
-            $table->foreign('fixed_rate_id')->references('id')->on('rates')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('hourly_rate_id')->references('id')->on('rate_codes')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('fixed_rate_id')->references('id')->on('rate_codes')->onUpdate('cascade')->onDelete('restrict');
         });
     }
 
@@ -48,5 +48,17 @@ class CreateRateCodesTable extends Migration
     public function down()
     {
         Schema::dropIfExists('rate_codes');
+
+        Schema::table('caregivers', function (Blueprint $table) {
+            $table->dropForeign(['hourly_rate_id']);
+            $table->dropForeign(['fixed_rate_id']);
+            $table->dropColumn(['hourly_rate_id', 'fixed_rate_id']);
+        });
+
+        Schema::table('clients', function (Blueprint $table) {
+            $table->dropForeign(['hourly_rate_id']);
+            $table->dropForeign(['fixed_rate_id']);
+            $table->dropColumn(['hourly_rate_id', 'fixed_rate_id']);
+        });
     }
 }
