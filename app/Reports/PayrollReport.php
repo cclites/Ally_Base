@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Reports;
 
 use App\Shift;
