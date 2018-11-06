@@ -10,10 +10,11 @@
 
 <script>
     export default {
-        props: ['referralAgreementData'],
+        props: ['onboardingData'],
 
         data() {
             return {
+                referralAgreementData: this.onboardingData.client.referral_service_agreement,
                 form: new Form({
                     onboarding_step: 6
                 }),

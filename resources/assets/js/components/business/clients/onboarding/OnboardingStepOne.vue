@@ -491,6 +491,8 @@
                 service_goals: '',
                 allergies: '',
                 medical_equipment: '',
+                height: '',
+                weight: '',
                 physician_name: '',
                 physician_phone: '',
                 physician_address: '',
@@ -554,6 +556,3 @@
         }
     }
 </script>
-
-<style lang="scss">
-</style>
