@@ -100,7 +100,7 @@ class PayrollReport extends BaseReport
      */
     protected function results()
     {
-        return $this->query()
+        $detail = $this->query()
             ->forBusiness($this->businessId)
             ->betweenDates($this->start_date, $this->end_date)
             ->forCaregiver($this->caregiverId)
@@ -121,11 +121,26 @@ class PayrollReport extends BaseReport
                     'hours_regular' => $item->duration(),
                     'hours_overtime' => 0,
                     // -------
-                    'caregiver_total' => $item->costs()->getCaregiverCost(),
+                    'caregiver_total' => $item->costs()->getCaregiverCost(true),
                     'checked_in_time' => $item->checked_in_time->format('c'),
                     'checked_out_time' => optional($item->checked_out_time)->format('c'),
                     'total' => $item->costs()->getTotalCost(),
                 ];
             });
+
+        $summary = $detail->groupBy('caregiver_id')
+            ->map(function ($item) {
+                return [
+                    'caregiver_id' => $item->first()['caregiver_id'],
+                    'caregiver_name' => $item->first()['caregiver_name'],
+                    'hours_regular' => $item->sum('hours_regular'),
+                    'hours_overtime' => $item->sum('hours_overtime'),
+                    'caregiver_total' => $item->sum('caregiver_total'),
+                    'checked_in_time' => $item->min('checked_in_time'),
+                    'checked_out_time' => $item->max('checked_out_time'),
+                ];
+            })->values();
+
+        return collect(compact(['summary', 'detail']));
     }
 }

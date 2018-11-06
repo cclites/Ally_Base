@@ -3,6 +3,7 @@
         <b-card header="Select Date Range"
             header-text-variant="white"
             header-bg-variant="info"
+            class="mb-3"
         >
             <div class="form-inline">
                 <date-picker
@@ -49,28 +50,54 @@
             </b-col>
         </b-row>
 
-        <b-card v-if="loaded && ! busy"
-            header="Results"
-            header-text-variant="white"
-            header-bg-variant="info"
-        >
-            <div class="table-responsive">
-                <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
+        <div v-if="loaded && ! busy">
+            <b-button type="button" variant="primary" class="mb-3" @click="toggleSummary()">
+                {{ toggleSummaryButton }}
+            </b-button>
+            <b-card v-if="summary"
+                 header="Summary"
+                header-text-variant="white"
+                header-bg-variant="info"
+            >
+                <div class="table-responsive">
+                    <b-table bordered striped hover show-empty
+                     :items="summaryItems"
+                     :fields="summaryFields"
+                     :sort-by.sync="summarySortBy"
+                     :sort-desc.sync="summarySortDesc"
                      :busy="busy"
-                >
-                    <template slot="caregiver_name" scope="row">
-                        <a :href="`/business/caregivers/${row.item.caregiver_id}`">{{ row.item.caregiver_name }}</a>
-                    </template>
-                    <template slot="client_name" scope="row">
-                        <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
-                    </template>
-                </b-table>
-            </div>
-        </b-card>
+                    >
+                        <template slot="caregiver_name" scope="row">
+                            <a :href="`/business/caregivers/${row.item.caregiver_id}`">{{ row.item.caregiver_name }}</a>
+                        </template>
+                        <template slot="date_range" scope="row">
+                            {{ formatDateFromUTC(row.item.checked_in_time) }} - {{ formatDateFromUTC(row.item.checked_out_time) }}
+                        </template>
+                    </b-table>
+                </div>
+            </b-card>
+            <b-card header="Detail"
+                header-text-variant="white"
+                header-bg-variant="info"
+            >
+                <div class="table-responsive">
+                    <b-table bordered striped hover show-empty
+                         :items="items"
+                         :fields="fields"
+                         :sort-by.sync="sortBy"
+                         :sort-desc.sync="sortDesc"
+                         :busy="busy"
+                    >
+                        <template slot="caregiver_name" scope="row">
+                            <a :href="`/business/caregivers/${row.item.caregiver_id}`">{{ row.item.caregiver_name }}</a>
+                        </template>
+                        <template slot="client_name" scope="row">
+                            <a :href="`/business/clients/${row.item.client_id}`">{{ row.item.client_name }}</a>
+                        </template>
+                    </b-table>
+                </div>
+            </b-card>
+        </div>
     </div>
 </template>
 
@@ -91,7 +118,29 @@
                 caregiver_id: '',
                 loaded: false,
                 busy: false,
+                summary: false,
+                summaryItems: [],
+                summarySortBy: 'caregiver_name',
+                summarySortDesc: false,
+                summaryFields: [
+                    { label: 'Caregiver', key: 'caregiver_name', sortable: true },
+                    { label: 'Total Regular Hours', key: 'hours_regular', sortable: true },
+                    { label: 'Total Overtime Hours', key: 'hours_overtime', sortable: true },
+                    {
+                        label: 'Total Pay',
+                        key: 'caregiver_total',
+                        formatter: (val) => this.moneyFormat(val),
+                        sortable: true
+                    },
+                    {
+                        label: 'Shift Date Range',
+                        key: 'date_range',
+                        sortable: true
+                    },
+                ],
                 items: [],
+                sortBy: 'checked_in_time',
+                sortDesc: false,
                 fields: [
                     { label: 'Caregiver', key: 'caregiver_name', sortable: true },
                     { label: 'Pay Method', key: 'pay_method', sortable: true },
@@ -129,8 +178,6 @@
                         sortable: true
                     },
                 ],
-                sortBy: 'checked_in_time',
-                sortDesc: false,
             };
         },
 
@@ -142,6 +189,9 @@
                     return `/business/reports/payroll?json=1&start=${this.start_date}&end=${this.end_date}&caregiver=${this.caregiver_id}`;
                 }
             },
+            toggleSummaryButton() {
+                return this.summary ? 'Hide Summary' : 'Show Summary';
+            },
         },
 
         methods: {
@@ -149,15 +199,18 @@
                 this.busy = true;
                 axios.get(this.url)
                     .then(response => {
-                        this.items = response.data.map(function (item) {
-                            return item;
-                        });
+                        this.items = response.data.detail;
+                        this.summaryItems = response.data.summary;
                         this.loaded = true;
                         this.busy = false;
                     })
                     .catch(e => {
                         this.busy = false;
                     });
+            },
+
+            toggleSummary() {
+                this.summary = ! this.summary;
             },
         }
     }
