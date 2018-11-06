@@ -2,7 +2,8 @@
     <div class="d-flex flex-column">
         <object class="w-100" style="height: 40rem;" :data="`/business/clients/referral-service-agreement/${referralAgreementData.id}/agreement-pdf`"></object>
         <div class="mt-3">
-            <b-btn variant="secondary" @click="nextStep">Next Step</b-btn>
+            <b-btn class="mr-2" variant="secondary" @click="nextStep" :disabled="state === 'updating'">Next Step</b-btn>
+            <i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
         </div>
     </div>
 </template>
@@ -15,14 +16,17 @@
             return {
                 form: new Form({
                     onboarding_step: 6
-                })
+                }),
+                state: ''
             }
         },
 
         methods: {
             async nextStep() {
+                this.state = 'updating';
                 await this.form.put(`/business/clients/onboarding/${this.onboardingData.id}`);
                 this.$emit('next', {data: { onboarding: this.onboardingData }});
+                this.state = '';
             }
         }
     }

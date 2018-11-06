@@ -196,7 +196,10 @@
                     </b-col>
                 </b-row>
 
-                <b-btn @click="save">Next Step</b-btn>
+                <div class="d-flex">
+                    <b-btn class="mr-2" @click="save" :disabled="state === 'updating'">Next Step</b-btn>
+                    <div class="d-flex flex-column align-items-center"><i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i></div>
+                </div>
             </b-col>
         </b-row>
     </div>
@@ -226,14 +229,20 @@
               signature_two: '',
               signature_client: '',
               onboarding_step: 5
-          })
+          }),
+          state: ''
       }
     },
 
     methods: {
         async save() {
-            let response = await this.form.post('/business/clients/referral-service-agreement');
+            this.state = 'updating';
+            let response = await this.form.post('/business/clients/referral-service-agreement')
+                .catch(error => {
+                    this.state = ''
+                });
             this.$emit('next', response);
+            this.state = '';
         }
     }
   }

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Business;
 
 use App\Client;
+use App\ClientOnboarding;
 use App\ClientReferralServiceAgreement;
 use App\Http\Controllers\Controller;
-use App\Signature;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +34,16 @@ class ClientReferralServiceAgreementController extends Controller
             return ClientReferralServiceAgreement::create($data);
         });
 
-        return response()->json($referralServiceAgreement);
+        $onboarding = ClientOnboarding::with(
+            'activities',
+            'signature',
+            'client.medications',
+            'client.business',
+            'client.referralServiceAgreement'
+        )
+            ->where('client_id', $request->client_id)
+            ->first();
+        return response()->json(compact('onboarding'));
     }
 
     public function agreementPdf(ClientReferralServiceAgreement $rsa)

@@ -456,10 +456,10 @@
 
         <b-row>
             <b-col>
-                <b-btn type="submit" variant="secondary" :disabled="state === 'updating'">
+                <b-btn class="mr-2" type="submit" variant="secondary" :disabled="state === 'updating'">
                     Next Step
                 </b-btn>
-                <i class="ml-2 fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
+                <i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
         </b-row>
     </form>

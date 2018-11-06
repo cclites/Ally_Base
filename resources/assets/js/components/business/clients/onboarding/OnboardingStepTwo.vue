@@ -401,8 +401,8 @@
         <b-row class="mt-3">
             <b-col>
                 <b-btn :disabled="state === 'updating'" variant="secondary" @click="previousStep">Previous Step</b-btn>
-                <b-btn :disabled="!form.signature || state === 'updating'" @click="nextStep">Next Step</b-btn>
-                <i class="ml-2 fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
+                <b-btn class="mr-2" :disabled="!form.signature || state === 'updating'" @click="nextStep">Next Step</b-btn>
+                <i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
         </b-row>
 
