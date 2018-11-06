@@ -24,11 +24,27 @@
                         <input-help :form="form" field="notes" text="" />
                     </b-form-group>
 
-                    <b-form-group label="Assigned To" label-for="assigned_user_id">
-                        <b-form-select v-model="form.assigned_user_id">
-                            <option value="">-- Select Assignee --</option>
-                            <option v-for="user in officeUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
-                        </b-form-select>
+                    <b-form-group>
+                        <label label-for="assigned_user_id">Assigned to
+                            <span v-if="assignedType == 'Caregiver'">
+                                <a href="#" @click.prevent="toggleType()">Staff</a> | <span>Caregiver</span>
+                            </span>
+                            <span v-else>
+                                <span>Staff</span> | <a href="#" @click.prevent="toggleType()">Caregiver</a>
+                            </span>
+                        </label>
+                        <div v-if="assignedType == 'Caregiver'">
+                            <b-form-select v-model="form.assigned_user_id">
+                                <option value="">-- Select Caregiver --</option>
+                                <option v-for="user in caregivers" :key="user.id" :value="user.id">{{ user.name }}</option>
+                            </b-form-select>
+                        </div>
+                        <div v-else>
+                            <b-form-select v-model="form.assigned_user_id">
+                                <option value="">-- Select Staff Member --</option>
+                                <option v-for="user in officeUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
+                            </b-form-select>
+                        </div>
                         <input-help :form="form" field="assigned_user_id" text="" />
                     </b-form-group>
 
@@ -73,12 +89,17 @@
                 type: Array,
                 default: [],
             },
+            caregivers: {
+                type: Array,
+                default: [],
+            },
         },
 
         data() {
             return {
                 form: new Form({}),
                 busy: false,
+                assignedType: 'staff',
             }
         },
 
@@ -110,15 +131,27 @@
                 this.form = new Form({
                     name: data.name,
                     due_date: data.due_date ? this.formatDateFromUTC(data.due_date) : '',
-                    assigned_user_id: data.assigned_user_id,
+                    assigned_user_id: data.assigned_user_id || '',
                     notes: data.notes,
                     completed: data.completed_at ? 1 : 0,
                 });
+                this.assignedType = data.assigned_type;
+            },
+
+            toggleType() {
+                if (this.assignedType == 'Caregiver') {
+                    this.assignedType = 'Staff';
+                    this.assigned_user_id = '';
+                } else {
+                    this.assignedType = 'Caregiver';
+                    this.assigned_user_id = '';
+                }
             },
         },
 
         watch: {
             task(newVal, oldVal) {
+                console.log(newVal);
                 this.fillForm(newVal);
             },
         },
