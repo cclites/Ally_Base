@@ -88,6 +88,7 @@ class ClientController extends BaseController
                     'firstname' => $client->user->firstname,
                     'lastname' => $client->user->lastname,
                     'name' => $client->nameLastFirst(),
+                    'nameLastFirst' => $client->nameLastFirst(),
                     'care_plans' => (request()->care_plans) ? $client->carePlans : null,
                 ];
             })
@@ -186,6 +187,7 @@ class ClientController extends BaseController
             'payments',
             'user.documents',
             'notes.creator',
+            'careDetails',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
