@@ -137,7 +137,9 @@
         </div>
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
-            <business-client-goals :client="{{ $client }}" :goals="[]" />
+            <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
+            <business-client-care-details
+                :client="{{ $client }}" />
         </div>
         <div class="tab-pane" id="service_orders" role="tabpanel">
             <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
