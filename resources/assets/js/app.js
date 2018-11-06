@@ -174,6 +174,7 @@ Vue.component('shift-summary-report', require('./components/business/reports/Shi
 Vue.component('onboard-status-report', require('./components/business/reports/OnboardStatus'));
 Vue.component('business-evv-report', require('./components/business/reports/Evv'));
 Vue.component('contacts-report', require('./components/business/reports/Contacts'));
+Vue.component('business-payroll-report', require('./components/business/reports/PayrollReport'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

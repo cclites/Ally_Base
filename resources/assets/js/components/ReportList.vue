@@ -355,12 +355,26 @@
                     ];
 
                     if (this.data.type === 'Agency') {
-                        data.push({
-                            name: 'ADP and Paychex',
-                            url: 'javascript:;',
-                            description: '',
-                            category: 7
-                        });
+                        data.push(
+                            {
+                                name: 'ADP Payroll Export',
+                                url: 'javascript:;',
+                                description: '',
+                                category: 7
+                            },
+                            {
+                                name: 'Paychex Payroll Export',
+                                url: 'javascript:;',
+                                description: '',
+                                category: 7
+                            },
+                            {
+                                name: 'Payroll Report',
+                                url: 'reports/payroll',
+                                description: '',
+                                category: 7
+                            },
+                        );
                     }
 
                     return _.groupBy(data, 'category');
