@@ -58,11 +58,11 @@ class ClientCarePlanController extends BaseController
 
             $plan->activities()->sync($data['activities']);
 
-            return new SuccessResponse('The care plan has been created.', $plan->load('activities')->toArray(), '.');
+            return new SuccessResponse('The group has been created.', $plan->load('activities')->toArray(), '.');
 
         }
 
-        return new ErrorResponse(500, 'Unable to create care plan.');
+        return new ErrorResponse(500, 'Unable to create group.');
     }
 
     /**
@@ -86,7 +86,7 @@ class ClientCarePlanController extends BaseController
     public function update(Request $request, Client $client, CarePlan $carePlan)
     {
         if ($carePlan->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this care plan.');
+            return new ErrorResponse(403, 'You do not have access to this group.');
         }
 
         $data = $request->validate(
@@ -110,11 +110,11 @@ class ClientCarePlanController extends BaseController
 
             $carePlan->activities()->sync($data['activities']);
 
-            return new SuccessResponse('The care plan has been updated.', $carePlan->load('activities')->toArray(), '.');
+            return new SuccessResponse('The group has been updated.', $carePlan->load('activities')->toArray(), '.');
 
         }
 
-        return new ErrorResponse(500, 'The care plan could not be saved.');
+        return new ErrorResponse(500, 'The group could not be saved.');
     }
 
     /**
@@ -126,14 +126,14 @@ class ClientCarePlanController extends BaseController
     public function destroy(Client $client, CarePlan $carePlan)
     {
         if ($carePlan->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this care plan.');
+            return new ErrorResponse(403, 'You do not have access to this group.');
         }
 
         if ($carePlan->delete()) {
             $carePlan->removeFromFutureSchedules();
 
-            return new SuccessResponse('The care plan has been archived.', [], '.');
+            return new SuccessResponse('The group has been archived.', [], '.');
         }
-        return new ErrorResponse(500, 'The care plan could not be archived.');
+        return new ErrorResponse(500, 'The group could not be archived.');
     }
 }

@@ -36,7 +36,7 @@
             <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Plans &amp; Goals</a>
+            <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
@@ -78,7 +78,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
-                <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Care Plans</a>
+                <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
                 <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
