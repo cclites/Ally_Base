@@ -181,6 +181,7 @@ Vue.component('revenue-report', require('./components/business/reports/Revenue')
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));

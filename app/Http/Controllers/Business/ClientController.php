@@ -182,11 +182,11 @@ class ClientController extends BaseController
             'referralSource',
             'notes.creator',
             'careDetails',
+            'carePlans',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
         ]);
-        $client->care_details = $client->careDetails->toArray();
         $client->allyFee = AllyFeeCalculator::getPercentage($client);
         $client->hasSsn = (strlen($client->ssn) == 11);
 
