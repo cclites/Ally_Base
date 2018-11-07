@@ -1,5 +1,8 @@
 export default {
     methods: {
+        uppercaseWords(str) {
+            return _.startCase(_.camelCase(str));
+        },
         stringFormat(str) {
             return _.startCase(_.camelCase(str));
         },
