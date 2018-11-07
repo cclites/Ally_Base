@@ -400,7 +400,7 @@
 
         <b-row class="mt-3">
             <b-col>
-                <b-btn :disabled="state === 'updating'" variant="secondary" @click="previousStep">Previous Step</b-btn>
+                <!--<b-btn :disabled="state === 'updating'" variant="secondary" @click="previousStep">Previous Step</b-btn>-->
                 <b-btn class="mr-2" :disabled="state === 'updating'" @click="nextStep">Next Step</b-btn>
                 <i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
