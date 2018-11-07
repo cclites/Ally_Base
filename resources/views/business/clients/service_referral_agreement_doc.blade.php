@@ -156,7 +156,8 @@
                                     $signatureOne = str_replace('width="800"', 'width="300"', $rsa->signature_one);
                                     $signatureOne = str_replace('height="300"', 'height="112"', $signatureOne);
                                 @endphp
-                                By <div class="signature">{!! $signatureOne !!}</div>
+                                <div>By {{ $rsa->signature_one_text }}</div>
+                                <div class="signature">{!! $signatureOne !!}</div>
                             </div>
                             <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                         </div>
@@ -166,7 +167,8 @@
                                     $signatureTwo = str_replace('width="800"', 'width="300"', $rsa->signature_two);
                                     $signatureTwo = str_replace('height="300"', 'height="112"', $signatureTwo);
                                 @endphp
-                                By <div class="signature">{!! $signatureTwo !!}</div>
+                                <div>By {{ $rsa->signature_two_text }}</div>
+                                <div class="signature">{!! $signatureTwo !!}</div>
                             </div>
                             <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                         </div>
@@ -195,12 +197,17 @@
                                             $clientSignature = str_replace('width="800"', 'width="300"', $rsa->signature_client);
                                             $clientSignature = str_replace('height="300"', 'height="112"', $clientSignature);
                                         @endphp
-                                        By <div class="signature">{!! $clientSignature !!}</div>
+                                        <div>By {{ $rsa->signature_client_text }}</div>
+                                        <div class="signature">{!! $clientSignature !!}</div>
                                     </div>
                                     <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row mt">
+                        {{ $rsa->created_at->format('m/d/Y') }} - {{ $rsa->executed_by_ip }}
                     </div>
                 </div>
             </div>

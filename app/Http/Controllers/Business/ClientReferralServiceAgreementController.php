@@ -26,8 +26,11 @@ class ClientReferralServiceAgreementController extends Controller
             'signature_two' => 'required',
             'signature_two_text' => 'required|string',
             'signature_client' => 'required',
+            'signature_client_text' => 'required|string',
             'onboarding_step' => 'int'
         ]);
+
+        $data['executed_by_ip'] = $request->ip();
 
         unset($data['onboarding_step']);
         $referralServiceAgreement = DB::transaction(function () use ($data, $request) {

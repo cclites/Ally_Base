@@ -186,9 +186,10 @@
                         <b-row>
                             <b-col>
                                 <b-form-group label="By">
-                                    <signature-pad v-model="form.signature_client"></signature-pad>
+                                    <b-form-input v-model="form.signature_client_text"></b-form-input>
                                 </b-form-group>
-                                <b-form-group label="Date">
+                                <signature-pad v-model="form.signature_client"></signature-pad>
+                                <b-form-group label="Date" class="mt-3">
                                     {{ moment.format('L') }}
                                 </b-form-group>
                             </b-col>
@@ -230,6 +231,7 @@
               signature_two: '',
               signature_two_text: '',
               signature_client: '',
+              signature_client_text: '',
               onboarding_step: 5
           }),
           state: ''
