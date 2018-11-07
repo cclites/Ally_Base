@@ -396,12 +396,12 @@
             </b-row>
         </b-card>
 
-        <signature-pad v-model="form.signature"></signature-pad>
+        <div v-html="onboarding.signature.content" class="img-responsive"></div>
 
         <b-row class="mt-3">
             <b-col>
                 <b-btn :disabled="state === 'updating'" variant="secondary" @click="previousStep">Previous Step</b-btn>
-                <b-btn class="mr-2" :disabled="!form.signature || state === 'updating'" @click="nextStep">Next Step</b-btn>
+                <b-btn class="mr-2" :disabled="state === 'updating'" @click="nextStep">Next Step</b-btn>
                 <i class="fa fa-spin fa-spinner" v-show="state === 'updating'"></i>
             </b-col>
         </b-row>
@@ -416,7 +416,6 @@
         data() {
             return {
                 form: new Form({
-                    signature: null,
                     onboarding_step: 3
                 }),
                 state: ''
@@ -447,7 +446,7 @@
 
 <style lang="scss">
     .img-responsive {
-        max-width: 400px;
+        max-width: 300px;
         display: flex;
     }
 </style>

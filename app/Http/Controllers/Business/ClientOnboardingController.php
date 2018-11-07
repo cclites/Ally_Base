@@ -85,7 +85,8 @@ class ClientOnboardingController extends Controller
                 'date_of_birth',
                 'gender',
                 'onboarding_step',
-                'medications'
+                'medications',
+                'signature'
             ))
                 ->filter()
                 ->toArray();
@@ -99,6 +100,9 @@ class ClientOnboardingController extends Controller
                 ['client_id' => $client->id],
                 $data
             );
+
+            Signature::onModelInstance($onboarding, $request->signature);
+
             foreach ($activities as $key => $value) {
                 if (!$onboarding->activities()->where('onboarding_activity_id', $key)->exists()) {
                     $onboarding->activities()->attach($key, ['assistance_level' => $value]);
@@ -118,6 +122,7 @@ class ClientOnboardingController extends Controller
                 'client.medications',
                 'client.business',
                 'client.referralServiceAgreement');
+
             return $onboarding;
         });
 
@@ -161,7 +166,6 @@ class ClientOnboardingController extends Controller
         $clientOnboarding->client->update(['onboarding_step' => $request->onboarding_step]);
         switch ($request->onboarding_step) {
             case 3:
-                Signature::onModelInstance($clientOnboarding, $request->signature);
                 $clientOnboarding->createIntakePdf();
                 break;
             case 6:

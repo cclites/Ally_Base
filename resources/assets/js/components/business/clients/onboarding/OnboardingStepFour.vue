@@ -249,3 +249,10 @@
     }
   }
 </script>
+
+<style lang="scss">
+    .img-responsive {
+        max-width: 300px;
+        display: flex;
+    }
+</style>

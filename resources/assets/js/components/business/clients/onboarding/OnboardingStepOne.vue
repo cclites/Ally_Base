@@ -454,6 +454,12 @@
             </b-form-group>
         </b-card>
 
+        <b-row class="mb-3">
+            <b-col>
+                <signature-pad v-model="form.signature"></signature-pad>
+            </b-col>
+        </b-row>
+
         <b-row>
             <b-col>
                 <b-btn class="mr-2" type="submit" variant="secondary" :disabled="state === 'updating'">
@@ -536,7 +542,8 @@
                 requested_start_at: '',
                 requested_schedule: '',
                 activities: [],
-                medications: []
+                medications: [],
+                signature: ''
             })
         },
 
@@ -556,3 +563,10 @@
         }
     }
 </script>
+
+<style lang="scss">
+    .img-responsive {
+        max-width: 300px;
+        display: flex;
+    }
+</style>
