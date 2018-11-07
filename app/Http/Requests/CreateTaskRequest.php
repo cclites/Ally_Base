@@ -27,7 +27,7 @@ class CreateTaskRequest extends FormRequest
             'name' => 'required|string|max:255',
             'notes' => 'nullable|string|max:65535',
             'due_date' => 'nullable|date',
-            'assigned_user_id' => 'nullable|exists:office_users,id',
+            'assigned_user_id' => 'nullable|exists:users,id',
             'completed' => 'nullable|boolean',
         ];
     }
