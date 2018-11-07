@@ -217,6 +217,15 @@ export default {
         };
     },
     computed: {
+        revenue() {
+            return this.calculateGrowth('revenue');
+        },
+        wages() {
+            return this.calculateGrowth('wages');
+        },
+        profit() {
+            return this.calculateGrowth('profit');
+        },
         chartData() {
             let date = Object.keys(this.data.current);
             const currentProfit = [];
