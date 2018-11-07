@@ -11,16 +11,34 @@ use Illuminate\Http\Request;
 
 class ClientController extends BaseController
 {
+    protected $includedRelations = ['evvAddress', 'evvPhone', 'careDetails'];
+
     /**
      * List all clients the caregiver is assigned to
      *
      * @return \App\Client[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->caregiver()->clients
-            ->sortBy('nameLastFirst')
-            ->values();
+        $query = $this->caregiver()->clients()
+            ->with($this->includedRelations)
+            ->orderByName();
+
+        $clients = $query->get();
+
+        if ($request->expectsJson()) {
+            return $clients;
+        }
+
+        return view('caregivers.client_list', compact('clients'));
+    }
+
+    public function show(Client $client)
+    {
+        if (!$this->caregiver()->clients()->where('client_id', $client->id)->exists()) abort(403);
+
+        $client->load($this->includedRelations);
+        return $client;
     }
 
     /**

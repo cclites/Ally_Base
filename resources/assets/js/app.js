@@ -67,6 +67,7 @@ Vue.component('user-search-dropdown', require('./components/UserSearchDropdown')
 Vue.component('shift-map', require('./components/ShiftMap'));
 Vue.component('edit-avatar', require('./components/EditAvatar'));
 Vue.component('user-avatar', require('./components/UserAvatar'));
+Vue.component('checkbox-group', require('./components/CheckboxGroup'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
@@ -129,6 +130,7 @@ Vue.component('business-caregiver-phone-numbers-tab', require('./components/busi
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));
 Vue.component('business-client-goals', require('./components/business/clients/ClientGoals'));
+Vue.component('business-client-care-details', require('./components/business/clients/ClientCareDetails'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));
 Vue.component('business-certification-expirations', require('./components/BusinessCertificationExpirations.vue'));
 Vue.component('cc-expiration-report', require('./components/business/reports/CreditCardExpirationReport'));
@@ -179,6 +181,7 @@ Vue.component('revenue-report', require('./components/business/reports/Revenue')
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
+Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));

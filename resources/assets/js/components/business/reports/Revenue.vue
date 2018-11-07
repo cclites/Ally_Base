@@ -59,22 +59,32 @@
                         <b-row class="space-above">
                             <b-col lg="6" class="text-section">
                                 <div class="text-container">
-                                    <p>Total revenue: <b :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</b></p>
-                                    <p>Total CG Wages as contractors: <b :style="`color: ${wagesColor}`">{{this.wages.total.current}}</b></p>
-                                    <p>Total profit: <b :style="`color: ${profitColor}`">{{this.profit.total.current}}</b></p>
+                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</span>
+                                    <span>Total revenue</span>
+                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.current}}</span>
+                                    <span>Total CG Wages as contractors</span>
+                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
+                                    <span>Total profit</span>
                                 </div>
                                 <hr/>
                                 <div v-if="priorTableData.length > 0" class="text-container">
                                     <h1>Prior Period</h1>
                                     <div class="space-above"></div>
-                                    <p>Total revenue: <b :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</b></p>
-                                    <p>Total CG Wages: <b :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</b></p>
-                                    <p>Total profit: <b :style="`color: ${profitColor}`">{{this.profit.total.prior}}</b></p>
+                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</span>
+                                    <span>Total revenue</span>
+                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</span>
+                                    <span>Total CG Wages as contractors</span>
+                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
+                                    <span>Total profit</span>
                                     <hr/>
                                     <h2>Comparison to prior period</h2>
                                     <b-row class="space-above text-container">
                                         <b-col v-for="(stat, i) in growthStats" :key="i" lg="4">
-                                            <p><b>{{stat.value}}%</b> {{stat.label}}</p>
+                                            <span><b>{{stat.value}}%</b> {{stat.label}}</span>
+                                            <b-progress :value="Math.abs(stat.value)"
+                                                        :variant="progressVariant(stat.value)"
+                                                        :key="stat.key"
+                                            ></b-progress>
                                         </b-col>
                                     </b-row>
                                 </div>
@@ -90,22 +100,22 @@
                                 <p>This is the table for each day as selected in the primary date range.</p>
                                 <br/><br/>
                                 <b-table striped :fields="tableFields" :items="currentTableData">
-                                    <template 
+                                    <template
                                         v-for="key in ['revenue', 'wages', 'profit']"
-                                        :slot="key" 
+                                        :slot="key"
                                         scope="data"
                                     >
                                         {{formatPrice(data.value)}}
                                     </template>
                                 </b-table>
                                 <h3>Total</h3>
-                                <b-table 
-                                    :fields="tableFields" 
+                                <b-table
+                                    :fields="tableFields"
                                     :items="[{
                                         date: '00/00/0000',
-                                        revenue: calculateTotalOf('revenue'),
-                                        wages: calculateTotalOf('wages'),
-                                        profit: calculateTotalOf('profit'),
+                                        revenue: revenue.total.current,
+                                        wages: wages.total.current,
+                                        profit: profit.total.current,
                                     }]"
                                 >
                                     <template slot="date" scope="data">
@@ -120,22 +130,22 @@
                                 <p>This is the data for date period prior to the one currently selected.</p>
                                 <br/><br/>
                                 <b-table striped :fields="tableFields" :items="priorTableData">
-                                    <template 
+                                    <template
                                         v-for="key in ['revenue', 'wages', 'profit']"
-                                        :slot="key" 
+                                        :slot="key"
                                         scope="data"
                                     >
                                         {{formatPrice(data.value)}}
                                     </template>
                                 </b-table>
                                 <h3>Total</h3>
-                                <b-table 
-                                    :fields="tableFields" 
+                                <b-table
+                                    :fields="tableFields"
                                     :items="[{
                                         date: '00/00/0000',
-                                        revenue: calculateTotalOf('revenue', 'prior'),
-                                        wages: calculateTotalOf('wages', 'prior'),
-                                        profit: calculateTotalOf('profit', 'prior'),
+                                        revenue: revenue.total.prior,
+                                        wages: wages.total.prior,
+                                        profit: profit.total.prior,
                                     }]"
                                 >
                                     <template slot="date" scope="data">
@@ -217,7 +227,7 @@ export default {
                 currentProfit.push(dayStats.profit)
                 currentSales.push(dayStats.revenue)
             });
-            
+
             return {
                 labels: date,
                 datasets: [
@@ -266,13 +276,16 @@ export default {
         },
         growthStats() {
             return [
-                { label: 'Sales Growth', value: this.revenue.growth },
-                { label: 'CG Wages Growth', value: this.wages.growth },
-                { label: 'Profit Growth', value: this.profit.growth },
+                { label: 'Sales Growth', value: this.revenue.growth, key: 'revenue' },
+                { label: 'CG Wages Growth', value: this.wages.growth, key: 'wages' },
+                { label: 'Profit Growth', value: this.profit.growth, key : 'profit' },
             ];
         }
     },
     methods: {
+        progressVariant(value) {
+            return (value > 0) ? 'success' : 'danger';
+        },
         fetchData() {
             const {start_date, end_date, compare_to_prior} = this.form;
             const compare = compare_to_prior[0] ? 1 : 0;
@@ -312,7 +325,7 @@ export default {
             const fromStringToNumber = (string) => Number(string.replace('$', '').replace(',', ''));
             const currentTotal = fromStringToNumber(this.calculateTotalOf(metric));
             const priorTotal = fromStringToNumber(this.calculateTotalOf(metric, 'prior'));
-            
+
             return (((currentTotal - priorTotal) / priorTotal)  * 100).toFixed(0);
         },
         formatPrice(value) {

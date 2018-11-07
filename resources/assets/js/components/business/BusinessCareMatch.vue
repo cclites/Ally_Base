@@ -159,7 +159,10 @@
         <div>
             <b-row>
                 <b-col lg="6">
-                    <h4>Matches</h4>
+                    <h4>
+                        Matches: {{ matches.length }}
+                        <b-btn v-if="matches.length > 0" variant="success" class="ml-3" @click="SmsMatches()">SMS All Matching Caregivers</b-btn>
+                    </h4>
                 </b-col>
                 <b-col lg="6" class="text-right">
                     <b-btn variant="info" @click="showForm = true" v-show="!showForm">Modify Search</b-btn>
@@ -267,6 +270,19 @@
         },
 
         methods: {
+            SmsMatches() {
+                let ids = _.map(this.matches, 'id');
+
+                let form = new Form({ids});
+                form.put(`/business/communication/text-caregivers`)
+                    .then(response => {
+                        console.log('response: ', response);
+                    })
+                    .catch(e => {
+                        console.log('error: ', e);
+                    })
+            },
+
             async loadClients() {
                 const response = await axios.get('/business/clients?json=1');
                 this.localClients = response.data;

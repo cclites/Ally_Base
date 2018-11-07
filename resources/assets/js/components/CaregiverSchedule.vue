@@ -11,20 +11,34 @@
         <b-modal id="view-event" title="View Scheduled Shift" v-model="viewModal">
             <b-container fluid>
                 <b-row>
-                    <table class="table">
-                        <tr>
-                            <th>Start:</th>
-                            <td>{{ viewStartTime }}</td>
-                        </tr>
-                        <tr>
-                            <th>End:</th>
-                            <td>{{ viewEndTime }}</td>
-                        </tr>
-                        <tr>
-                            <th>Client:</th>
-                            <th>{{ viewTitle }}</th>
-                        </tr>
-                    </table>
+                    <b-col>
+                        <table class="table">
+                            <tr>
+                                <th>Start:</th>
+                                <td>{{ viewStartTime }}</td>
+                            </tr>
+                            <tr>
+                                <th>End:</th>
+                                <td>{{ viewEndTime }}</td>
+                            </tr>
+                            <tr>
+                                <th>Client:</th>
+                                <th>
+                                    {{ viewTitle }}
+                                    <b-button size="sm" @click="fetchClient(selectedEvent.client_id)" v-if="!selectedClient.id">Show Details</b-button>
+                                    <b-button size="sm" @click="selectedClient = {}" v-else>Hide Details</b-button>
+                                </th>
+                            </tr>
+                        </table>
+                        <loading-card v-show="loadingClient"></loading-card>
+                        <caregiver-client-details v-if="selectedClient.id"
+                                                  :client="selectedClient"
+                                                  :care-plan="selectedEvent.care_plan || {}"
+                                                  :address="selectedClient.evv_address || {}"
+                                                  :phone="selectedClient.evv_phone ? selectedClient.evv_phone.number : ''"
+                                                  :care-details="selectedClient.care_details || {}"
+                        />
+                    </b-col>
                 </b-row>
             </b-container>
             <div slot="modal-footer">
@@ -36,7 +50,11 @@
 </template>
 
 <script>
+    import CaregiverClientDetails from "./caregivers/CaregiverClientDetails";
+
     export default {
+        components: {CaregiverClientDetails},
+
         props: {
             caregiver: {},
         },
@@ -46,6 +64,8 @@
                 viewModal: false,
                 selectedSchedule: null,
                 selectedEvent: null,
+                selectedClient: {},
+                loadingClient: false,
                 editForm: new Form(),
                 createForm: new Form(),
                 editType: null,
@@ -89,6 +109,14 @@
 
             clockIn() {
                 window.location = '/clock-in/' + this.selectedEvent.id;
+            },
+
+            fetchClient(id) {
+                this.selectedClient = {};
+                this.loadingClient = true;
+                axios.get('/caregiver/clients/' + id).then(response => {
+                    this.selectedClient = response.data;
+                }).finally(() => this.loadingClient = false);
             }
         },
 
@@ -133,7 +161,7 @@
                 }
 
                 return false;
-            }
+            },
 
         }
     }
