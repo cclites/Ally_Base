@@ -35,7 +35,7 @@
                                     <b-form-checkbox
                                         :checked="true"
                                         disabled
-                                    >Include CG Waves as COGS</b-form-checkbox>
+                                    >Include CG Wages as COGS</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
@@ -57,10 +57,24 @@
                     <loading-card v-show="loading"></loading-card>
                     <div v-if="dataIsReady && ! loading">
                         <b-row class="space-above">
-                            <b-col lg="6">
+                            <b-col lg="6" class="text-section">
                                 <p>Total revenue: {{calculateTotalOf('revenue')}}</p>
                                 <p>Total CG Wages as contractors: {{calculateTotalOf('wages')}}</p>
-                                <p>Total profits: {{calculateTotalOf('profit')}}</p>
+                                <p>Total profit: {{calculateTotalOf('profit')}}</p>
+                                <hr/>
+                                <div v-if="priorTableData.length > 0">
+                                    <h3>Prior Period</h3>
+                                    <p class="space-above">Total revenue: {{calculateTotalOf('revenue', 'prior')}}</p>
+                                    <p>Total CG Wages: {{calculateTotalOf('wages', 'prior')}}</p>
+                                    <p>Total profit: {{calculateTotalOf('profit', 'prior')}}</p>
+                                    <hr/>
+                                    <h3>Comparison to prior period</h3>
+                                    <b-row class="space-above">
+                                        <b-col lg="4"><b>{{calculateGrowth('revenue')}}%</b> Sales Growth</b-col>
+                                        <b-col lg="4"><b>{{calculateGrowth('wages')}}%</b> CG Wages Growth</b-col>
+                                        <b-col lg="4"><b>{{calculateGrowth('profit')}}%</b> Profit Growth</b-col>
+                                    </b-row>
+                                </div>
                             </b-col>
                             <b-col lg="6">
                                 <line-chart :chart-data="chartData" :options="{}"></line-chart>
@@ -85,11 +99,16 @@
                                 <b-table 
                                     :fields="tableFields" 
                                     :items="[{
+                                        date: '00/00/0000',
                                         revenue: calculateTotalOf('revenue'),
                                         wages: calculateTotalOf('wages'),
                                         profit: calculateTotalOf('profit'),
                                     }]"
-                                ></b-table>
+                                >
+                                    <template slot="date" scope="data">
+                                        <i class="hidden">{{data.value}}</i>
+                                    </template>
+                                </b-table>
                                 <!--b-btn class="btn-center">Export to Excel</b-btn-->
                             </b-col>
 
@@ -110,11 +129,16 @@
                                 <b-table 
                                     :fields="tableFields" 
                                     :items="[{
+                                        date: '00/00/0000',
                                         revenue: calculateTotalOf('revenue', 'prior'),
                                         wages: calculateTotalOf('wages', 'prior'),
                                         profit: calculateTotalOf('profit', 'prior'),
                                     }]"
-                                ></b-table>
+                                >
+                                    <template slot="date" scope="data">
+                                        <i class="hidden">{{data.value}}</i>
+                                    </template>
+                                </b-table>
                                 <!--b-btn class="btn-center">Export to Excel</b-btn-->
                             </b-col>
                         </b-row>
@@ -242,6 +266,13 @@ export default {
 
             return '$0.00';
         },
+        calculateGrowth(metric) {
+            const fromStringToNumber = (string) => Number(string.replace('$', '').replace(',', ''));
+            const currentTotal = fromStringToNumber(this.calculateTotalOf(metric));
+            const priorTotal = fromStringToNumber(this.calculateTotalOf(metric, 'prior'));
+            
+            return (((currentTotal - priorTotal) / priorTotal)  * 100).toFixed(0);
+        },
         formatPrice(value) {
             return new Intl.NumberFormat('us-US', {style: 'currency', currency: 'USD'}).format(value);
         }
@@ -259,5 +290,15 @@ export default {
 .btn-center {
     display: block;
     margin: 0 auto;
+}
+.text-section {
+    padding: 30px 60px;
+}
+.text-section p {    
+    margin-bottom: 22px;
+    font-size: 18px;
+}
+.hidden {
+    opacity: 0;
 }
 </style>
