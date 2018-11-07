@@ -7,13 +7,13 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row v-if="carePlan" class="with-padding-top">
+        <b-row v-if="carePlan.id" class="with-padding-top">
             <b-col lg="12">
                 <b-card title="Care Plan">
                     <div v-if="carePlanActivities.length > 0">
                         <h5>Recommended Activities</h5>
                         <ul>
-                            <li v-for="activity in carePlanActivities">
+                            <li v-for="activity in carePlanActivities" :key="activity.id">
                                 {{ activity.code }} - {{ activity.name }}
                             </li>
                         </ul>

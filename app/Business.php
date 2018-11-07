@@ -497,7 +497,7 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
      *
      * @param boolean $lastFirst
      * @param boolean $activeOnly
-     * @return void
+     * @return array
      */
     public function caregiverList($lastFirst = true, $activeOnly = false)
     {
