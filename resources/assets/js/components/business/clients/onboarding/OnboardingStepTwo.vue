@@ -425,7 +425,10 @@
         computed: {
           requestedStartDate() {
               let date = _.isObject(this.onboarding.requested_start_at) ? this.onboarding.requested_start_at.date : this.onboarding.requested_start_at;
-              return moment(date).format('L');
+              if (date) {
+                  return moment(date).format('L');
+              }
+              return '';
           }
         },
 

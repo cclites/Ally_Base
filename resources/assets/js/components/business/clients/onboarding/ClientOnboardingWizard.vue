@@ -1,16 +1,21 @@
 <template>
-    <b-card :title="`Onboarding Step ${step}`">
-        <onboarding-step-one v-if="step === 1 || !step" :client-data="clientData" :activities="activities" @next="nextStep($event, 2)"></onboarding-step-one>
-        <onboarding-step-two v-if="step === 2" :client-data="clientData" :onboarding="onboarding" @previous="previousStep" @next="nextStep($event, 3)"></onboarding-step-two>
-        <onboarding-step-three v-if="step === 3" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 4)"></onboarding-step-three>
-        <onboarding-step-four v-if="step === 4" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 5)"></onboarding-step-four>
-        <onboarding-step-five v-if="step === 5"
-                              :client-data="clientData"
-                              :onboarding-data="onboarding"
-                              @previous="previousStep"
-                              @next="nextStep($event, 6)">
-        </onboarding-step-five>
-    </b-card>
+    <div>
+        <b-card :title="`Onboarding Step ${step}`" v-if="step <= 5">
+            <onboarding-step-one v-if="step === 1 || !step" :client-data="clientData" :activities="activities" @next="nextStep($event, 2)"></onboarding-step-one>
+            <onboarding-step-two v-if="step === 2" :client-data="clientData" :onboarding="onboarding" @previous="previousStep" @next="nextStep($event, 3)"></onboarding-step-two>
+            <onboarding-step-three v-if="step === 3" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 4)"></onboarding-step-three>
+            <onboarding-step-four v-if="step === 4" :client-data="clientData" :onboarding-data="onboarding" @previous="previousStep" @next="nextStep($event, 5)"></onboarding-step-four>
+            <onboarding-step-five v-if="step === 5"
+                                  :client-data="clientData"
+                                  :onboarding-data="onboarding"
+                                  @previous="previousStep"
+                                  @next="nextStep($event, 6)">
+            </onboarding-step-five>
+        </b-card>
+        <b-alert v-else show>
+            Client onboarding has already been completed.
+        </b-alert>
+    </div>
 </template>
 
 <script>

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
@@ -32,11 +33,11 @@ class ClientReferralServiceAgreement extends Model
     {
         $this->load('client.business');
         $pdf = PDF::loadView('business.clients.service_referral_agreement_doc', ['rsa' => $this]);
-        $dir = storage_path('app/client/'.$this->client->id);
+        $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
-        $filename = str_slug($this->client->name.' Referral Service Agreement').'.pdf';
+        $filename = str_slug($this->client->id . ' ' . $this->client->name.' Referral Service Agreement').'.pdf';
         $filePath = $dir . '/' . $filename;
         if (config('app.env') == 'local') {
             if (File::exists($filePath)) {
@@ -46,7 +47,14 @@ class ClientReferralServiceAgreement extends Model
         $response = $pdf->save($filePath);
 
         if ($response) {
-            $this->update(['agreement_file' => str_after($filePath, 'storage/')]);
+            DB::transaction(function() use ($response, $filePath) {
+                $this->update(['agreement_file' => str_after($filePath, 'storage/')]);
+                $this->client->documents()->create([
+                    'filename' => File::basename($filePath),
+                    'original_filename' => File::basename($filePath),
+                    'description' => 'Client Referral Service Agreement'
+                ]);
+            });
         }
     }
 
