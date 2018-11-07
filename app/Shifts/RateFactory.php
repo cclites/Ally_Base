@@ -1,13 +1,59 @@
 <?php
 namespace App\Shifts;
 
+use App\Businesses\Settings;
 use App\Caregiver;
 use App\Client;
+use App\Contracts\HasAllyFeeInterface;
 use App\Schedule;
 use App\Shift;
 
 class RateFactory
 {
+
+    /**
+     * @var \App\Businesses\Settings
+     */
+    protected $settings;
+
+
+    public function __construct(Settings $settings)
+    {
+        $this->settings = $settings;
+    }
+
+    ////////////////////////////////////
+    //// TODO : Need a method to get the Charged Rate (using Client Rate or Caregiver Rate + Provider Fee)
+    ////////////////////////////////////
+
+    function getAllyFee(HasAllyFeeInterface $paymentMethod, float $chargedRate)
+    {
+        return (float) $paymentMethod->getAllyFee($chargedRate);
+    }
+
+    function getProviderFee(float $clientRate, float $caregiverRate, float $allyFee)
+    {
+        return (float) bcsub(
+            bcsub($clientRate, $caregiverRate, 2),
+            $allyFee,
+            2
+        );
+    }
+
+    function getClientRate(float $providerFee, float $caregiverRate, float $allyFee)
+    {
+        return (float) bcadd(
+            bcadd($providerFee, $caregiverRate, 2),
+            $allyFee,
+            2
+        );
+    }
+
+
+    ////////////////////////////////////
+    //// TODO: Re-work these using the above granular methods
+    ////////////////////////////////////
+
     /**
      * @param \App\Shift $shift
      * @return \App\Shifts\Rates
@@ -27,7 +73,6 @@ class RateFactory
      */
     public function getRatesForSchedule(Schedule $schedule)
     {
-        // @Todo Update schedule->fixed_rates to fixed_rates
         return new Rates($schedule->caregiver_rate, $schedule->provider_fee, $schedule->fixed_rates);
     }
 
@@ -39,7 +84,7 @@ class RateFactory
      */
     public function getRatesForClientCaregiver(Client $client, Caregiver $caregiver, $fixedRates = false)
     {
-        $clientCaregiverRow = DB::table('client_caregivers')->where('client_id', $client->id)->where('caregiver_id', $caregiver->id)->first();
+        $clientCaregiverRow = \DB::table('client_caregivers')->where('client_id', $client->id)->where('caregiver_id', $caregiver->id)->first();
 
         $caregiver_rate = $this->getCaregiverRateFromRow($clientCaregiverRow, $fixedRates)
             ?? $this->getDefaultCaregiverRate($caregiver, $fixedRates);
