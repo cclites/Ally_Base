@@ -12,7 +12,7 @@
     </style>
     <div class="container">
         <div>
-            <h3>Granny NANNIES Client Referral Service Agreement – Florida</h3>
+            <h3>{{ $rsa->client->business->name }} Client Referral Service Agreement</h3>
             <div class="row">
                 <div class="col">
                     <p>This Agreement, effective this {{ $rsa->created_at->format('jS') }} day of {{ $rsa->created_at->format('M') }}, {{ $rsa->created_at->format('Y') }} (the “Effective Date”), is between
@@ -123,9 +123,9 @@
 
                         <li>Client understands that Nurse Registry, as required by applicable law, has access to Registered
                             Nurses (RNs), who can provide an assessment of Client for an additional fee. Such RNs are available for
-                            referral at Client’s request. The RNs generally charge a fixed fee for an assessment of $ <span>{{ number_format($rsa->per_visit_assessment_fee, 2) }}</span>
+                            referral at Client’s request. The RNs generally charge a fixed fee for an assessment of $<span>{{ number_format($rsa->per_visit_assessment_fee, 2) }}</span>
                             per visit, although Client and a referred RN always remain free to negotiate a different fee. Nurse
-                            Registry’s referral fee for referring an RN is $ <span>{{ number_format($rsa->per_visit_referral_fee) }}</span> per visit. The RN’s fee is payable by
+                            Registry’s referral fee for referring an RN is $<span>{{ number_format($rsa->per_visit_referral_fee, 2) }}</span> per visit. The RN’s fee is payable by
                             Client to the RN directly; and the Nurse Registry’s fee is payable by Client to Nurse Registry directly.
                         </li>
 
@@ -152,13 +152,21 @@
                     <div class="row">
                         <div class="col">
                             <div>
-                                By <div class="signature">{!! $rsa->signature_one !!}</div>
+                                @php
+                                    $signatureOne = str_replace('width="800"', 'width="300"', $rsa->signature_one);
+                                    $signatureOne = str_replace('height="300"', 'height="112"', $signatureOne);
+                                @endphp
+                                By <div class="signature">{!! $signatureOne !!}</div>
                             </div>
                             <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                         </div>
                         <div class="col">
                             <div>
-                                By <div class="signature">{!! $rsa->signature_two !!}</div>
+                                @php
+                                    $signatureTwo = str_replace('width="800"', 'width="300"', $rsa->signature_two);
+                                    $signatureTwo = str_replace('height="300"', 'height="112"', $signatureTwo);
+                                @endphp
+                                By <div class="signature">{!! $signatureTwo !!}</div>
                             </div>
                             <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                         </div>
@@ -183,7 +191,11 @@
                             <div class="row">
                                 <div class="col">
                                     <div>
-                                        By <div class="signature">{!! $rsa->signature_client !!}</div>
+                                        @php
+                                            $clientSignature = str_replace('width="800"', 'width="300"', $rsa->signature_client);
+                                            $clientSignature = str_replace('height="300"', 'height="112"', $clientSignature);
+                                        @endphp
+                                        By <div class="signature">{!! $clientSignature !!}</div>
                                     </div>
                                     <div>{{ $rsa->created_at->format('m/d/Y') }}</div>
                                 </div>

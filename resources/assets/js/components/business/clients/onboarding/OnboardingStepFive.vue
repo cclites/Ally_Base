@@ -25,9 +25,9 @@
         methods: {
             async nextStep() {
                 this.state = 'updating';
-                await this.form.put(`/business/clients/onboarding/${this.onboardingData.id}`);
-                this.$emit('next', {data: { onboarding: this.onboardingData }});
+                let response = await this.form.put(`/business/clients/onboarding/${this.onboardingData.id}`);
                 this.state = '';
+                window.location = response.data.data.url;
             }
         }
     }

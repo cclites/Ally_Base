@@ -14,6 +14,9 @@
 @endsection
 
 @section('content')
-    <client-onboarding-wizard :client-data="{{ $clientData }}" :activities="{{ $activities }}" :onboarding-data="{{ json_encode($onboarding) }}"></client-onboarding-wizard>
+    <client-onboarding-wizard :client-data="{{ $clientData }}"
+                              :activities="{{ $activities }}"
+                              :onboarding-data="{{ json_encode($onboarding) }}">
+    </client-onboarding-wizard>
 @endsection
 

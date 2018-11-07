@@ -444,3 +444,10 @@
         }
     }
 </script>
+
+<style lang="scss">
+    .img-responsive {
+        max-width: 400px;
+        display: flex;
+    }
+</style>

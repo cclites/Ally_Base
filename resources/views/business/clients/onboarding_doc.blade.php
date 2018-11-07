@@ -5,6 +5,11 @@
         .mt {
             margin-top: 1.2rem;
         }
+
+        .img-signature > img {
+            max-width: 400px;
+            width: 400px;
+        }
     </style>
     <div class="container">
         <!-- Client Personal Data -->
@@ -501,7 +506,13 @@
             <div class="panel-body">
                 <div class="row mt">
                     <div class="col">
-                        {!! $onboarding->signature->content !!}
+                        <div class="img-signature">
+                            @php
+                                $content = str_replace('width="800"', 'width="300"', $onboarding->signature->content);
+                                $content = str_replace('height="300"', 'height="112"', $content);
+                            @endphp
+                            {!! $content !!}
+                        </div>
                     </div>
                 </div>
             </div>

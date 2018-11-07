@@ -266,7 +266,7 @@
                                     Email
                                 </b-button>
                             </b-form-group>
-                            <b-form-group v-if="client.onboard_status == 'needs_agreement'">
+                            <b-form-group v-if="client.onboarding_step < 6">
                                 <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
                                 <br>
                                 <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>

@@ -22,7 +22,9 @@ class ClientReferralServiceAgreementController extends Controller
             'executed_by' => 'required|string',
             'payment_options' => 'required|array',
             'signature_one' => 'required',
+            'signature_one_text' => 'required|string',
             'signature_two' => 'required',
+            'signature_two_text' => 'required|string',
             'signature_client' => 'required',
             'onboarding_step' => 'int'
         ]);

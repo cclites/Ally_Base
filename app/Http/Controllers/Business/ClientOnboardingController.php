@@ -13,7 +13,6 @@ use App\Signature;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 
 class ClientOnboardingController extends Controller
 {
@@ -159,11 +158,18 @@ class ClientOnboardingController extends Controller
      */
     public function update(Request $request, ClientOnboarding $clientOnboarding)
     {
-        if ($request->onboarding_step == 3) {
-            Signature::onModelInstance($clientOnboarding, $request->signature);
-            $clientOnboarding->createIntakePdf();
-        }
         $clientOnboarding->client->update(['onboarding_step' => $request->onboarding_step]);
+        switch ($request->onboarding_step) {
+            case 3:
+                Signature::onModelInstance($clientOnboarding, $request->signature);
+                $clientOnboarding->createIntakePdf();
+                break;
+            case 6:
+                $confirmUrl = route('reconfirm.encrypted_id', [$clientOnboarding->client->getEncryptedKey()]);
+                return new SuccessResponse('Success', ['url' => $confirmUrl]);
+                break;
+        }
+
         $clientOnboarding->load(
             'activities',
             'signature',

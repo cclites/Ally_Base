@@ -1,8 +1,7 @@
 <template>
     <div>
 
-        <h3>Granny NANNIES Client Referral Service Agreement – Florida</h3>
-
+        <h3>{{ onboarding.client.business.name }} Client Referral Service Agreement</h3>
 
         <b-row>
             <b-col>
@@ -150,17 +149,19 @@
                 <b-row>
                     <b-col md="6">
                         <b-form-group label="By">
-                            <signature-pad v-model="form.signature_one"></signature-pad>
+                            <b-form-input v-model="form.signature_one_text"></b-form-input>
                         </b-form-group>
-                        <b-form-group label="Date">
+                        <signature-pad v-model="form.signature_one"></signature-pad>
+                        <b-form-group label="Date" class="mt-3">
                             {{ moment.format('L') }}
                         </b-form-group>
                     </b-col>
                     <b-col md="6">
                         <b-form-group label="By">
-                            <signature-pad v-model="form.signature_two"></signature-pad>
+                            <b-form-input v-model="form.signature_two_text"></b-form-input>
                         </b-form-group>
-                        <b-form-group label="Date">
+                        <signature-pad v-model="form.signature_two"></signature-pad>
+                        <b-form-group label="Date" class="mt-3">
                             {{ moment.format('L') }}
                         </b-form-group>
                     </b-col>
@@ -180,8 +181,7 @@
                             </b-form-checkbox-group>
                         </b-form-group>
 
-                        <p>IN WITNESS THEREOF, the Client has executed this Exhibit 1on the day and year set forth
-                            below.
+                        <p>IN WITNESS THEREOF, the Client has executed this Exhibit 1 on the day and year set forth below.
                             CLIENT</p>
                         <b-row>
                             <b-col>
@@ -226,7 +226,9 @@
               executed_by: '',
               payment_options: [],
               signature_one: '',
+              signature_one_text: '',
               signature_two: '',
+              signature_two_text: '',
               signature_client: '',
               onboarding_step: 5
           }),
