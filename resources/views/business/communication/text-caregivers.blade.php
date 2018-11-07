@@ -10,7 +10,10 @@
 
 @section('content')
     @if($business->outgoing_sms_number)
-        <business-text-caregivers fill-message="{{ $message }}" />
+        <business-text-caregivers
+            fill-message="{{ $message }}"
+            :fill-recipients="{{ $recipients ?? '[]' }}"
+        />
     @else
         <div class="alert alert-warning">
             Please contact Ally to enable SMS messages on your account.

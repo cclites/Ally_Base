@@ -25,35 +25,67 @@ class CommunicationController extends Controller
     /**
      * Show text-caregivers form.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
-    public function createText()
+    public function createText(Request $request)
     {
+        $recipients = null;
         $message = '';
+        $business = $this->business();
 
+        $request->session()->reflash();
+
+        // handle loading and setting recipient list (coming from care match results)
+        if ($request->session()->has('sms.load-recipients')) {
+            $recipients = $this->business()->caregivers()
+                ->active()
+                ->whereIn('caregivers.id', $request->session()->get('sms.load-recipients'))
+                ->whereHas('phoneNumbers')
+                ->with(['phoneNumbers', 'user'])
+                ->get()
+                ->map(function($caregiver) {
+                    $caregiver->phone = $caregiver->default_phone;
+                    $caregiver->role_type = $caregiver->user->role_type;
+                    return $caregiver->only(['id', 'name', 'role_type', 'phone']);
+                })
+                ->sortBy('name')
+                ->values();
+        }
+
+        // handle draft open shift message (coming from schedule)
         if (request()->preset == 'open-shift' && request()->has('shift_id')) {
             $shift = Schedule::findOrFail(request()->shift_id);
-
             if (! $this->businessHasSchedule($shift)) {
                 return new ErrorResponse(403, 'You do not have access to this shift.');
             }
-
-            $clientName = $shift->client->name;
-            $date = $shift->starts_at->format('m/d/y');
-            $time = $shift->starts_at->format('g:i A');
-
-            $location = '';
-            if ($shift->client->evvAddress) {
-                $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
-            }
-            $registryName = $shift->business->name;
-            $phone = $shift->business->phone1;
-
-            $message = "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
+            $message = $this->draftOpenShiftMessage($shift);
         }
-        $business = $this->business();
 
-        return view('business.communication.text-caregivers', compact('message', 'business'));
+        return view('business.communication.text-caregivers', compact('message', 'recipients', 'business'));
+    }
+
+    /**
+     * Generate an open shift message using the supplied shift.
+     *
+     * @param $shift
+     * @return ErrorResponse|string
+     */
+    public function draftOpenShiftMessage($shift)
+    {
+        $clientName = $shift->client->name;
+        $date = $shift->starts_at->format('m/d/y');
+        $time = $shift->starts_at->format('g:i A');
+
+        $location = '';
+        if ($shift->client->evvAddress) {
+            $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
+        }
+        $registryName = $shift->business->name;
+        $phone = $shift->business->phone1;
+
+        return "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
     }
 
     /**
@@ -125,6 +157,7 @@ class CommunicationController extends Controller
      * Handle incoming SMS messages from Twilio webhooks.
      *
      * @deprecated Moved to api
+     * @param $request
      * @return Response
      */
     public function incoming(Request $request)
@@ -197,6 +230,7 @@ class CommunicationController extends Controller
      * Get a list of the businesses sms threads.
      *
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function threadIndex()
     {
@@ -251,5 +285,19 @@ class CommunicationController extends Controller
         }
 
         return view('business.communication.sms-replies', compact(['replies']));
+    }
+
+    /**
+     * Handles redirect to SMS Caregivers form with an
+     * ID list of recipients.
+     *
+     * @param Request $request
+     * @return SuccessResponse
+     */
+    public function saveRecipients(Request $request)
+    {
+        $request->session()->flash('sms.load-recipients', $request->ids);
+
+        return new SuccessResponse('', null, route('business.communication.text-caregivers'));
     }
 }
