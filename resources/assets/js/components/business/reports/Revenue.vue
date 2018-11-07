@@ -58,21 +58,24 @@
                     <div v-if="dataIsReady && ! loading">
                         <b-row class="space-above">
                             <b-col lg="6" class="text-section">
-                                <p>Total revenue: {{calculateTotalOf('revenue')}}</p>
-                                <p>Total CG Wages as contractors: {{calculateTotalOf('wages')}}</p>
-                                <p>Total profit: {{calculateTotalOf('profit')}}</p>
+                                <div class="text-container">
+                                    <p>Total revenue: <b :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</b></p>
+                                    <p>Total CG Wages as contractors: <b :style="`color: ${wagesColor}`">{{this.wages.total.current}}</b></p>
+                                    <p>Total profit: <b :style="`color: ${profitColor}`">{{this.profit.total.current}}</b></p>
+                                </div>
                                 <hr/>
-                                <div v-if="priorTableData.length > 0">
-                                    <h3>Prior Period</h3>
-                                    <p class="space-above">Total revenue: {{calculateTotalOf('revenue', 'prior')}}</p>
-                                    <p>Total CG Wages: {{calculateTotalOf('wages', 'prior')}}</p>
-                                    <p>Total profit: {{calculateTotalOf('profit', 'prior')}}</p>
+                                <div v-if="priorTableData.length > 0" class="text-container">
+                                    <h1>Prior Period</h1>
+                                    <div class="space-above"></div>
+                                    <p>Total revenue: <b :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</b></p>
+                                    <p>Total CG Wages: <b :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</b></p>
+                                    <p>Total profit: <b :style="`color: ${profitColor}`">{{this.profit.total.prior}}</b></p>
                                     <hr/>
-                                    <h3>Comparison to prior period</h3>
-                                    <b-row class="space-above">
-                                        <b-col lg="4"><b>{{calculateGrowth('revenue')}}%</b> Sales Growth</b-col>
-                                        <b-col lg="4"><b>{{calculateGrowth('wages')}}%</b> CG Wages Growth</b-col>
-                                        <b-col lg="4"><b>{{calculateGrowth('profit')}}%</b> Profit Growth</b-col>
+                                    <h2>Comparison to prior period</h2>
+                                    <b-row class="space-above text-container">
+                                        <b-col v-for="(stat, i) in growthStats" :key="i" lg="4">
+                                            <p><b>{{stat.value}}%</b> {{stat.label}}</p>
+                                        </b-col>
                                     </b-row>
                                 </div>
                             </b-col>
@@ -171,12 +174,36 @@ export default {
                 current: {},
                 prior: {},
             },
+            revenue: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
+            wages: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
+            profit: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
             tableFields: [
                 {key: 'date', label: 'Date'},
                 'revenue',
                 {key: 'wages', label: 'CG wages'},
                 'profit',
             ],
+            profitColor: '#00cde3',
+            revenueColor: '#795bcb',
+            wagesColor: '#f07730',
         };
     },
     computed: {
@@ -196,14 +223,14 @@ export default {
                 datasets: [
                     {
                     label: 'Profit',
-                    borderColor: '#00cde3',
-                    backgroundColor: '#00cde3',
+                    borderColor: this.profitColor,
+                    backgroundColor: this.profitColor,
                     data: currentProfit
                     },
                     {
                     label: 'Revenue',
-                    borderColor: '#795bcb',
-                    backgroundColor: '#795bcb',
+                    borderColor: this.revenueColor,
+                    backgroundColor: this.revenueColor,
                     data: currentSales,
                     },
                 ],
@@ -237,6 +264,13 @@ export default {
 
             return inArray;
         },
+        growthStats() {
+            return [
+                { label: 'Sales Growth', value: this.revenue.growth },
+                { label: 'CG Wages Growth', value: this.wages.growth },
+                { label: 'Profit Growth', value: this.profit.growth },
+            ];
+        }
     },
     methods: {
         fetchData() {
@@ -249,7 +283,15 @@ export default {
                     this.data = data;
                     this.loading = false;
                     this.dataIsReady = true;
-                    console.log(data)
+
+                    ['revenue', 'wages', 'profit'].forEach(prop => {
+                        this[prop].total.current = this.calculateTotalOf(prop);
+
+                        if(compare) {
+                            this[prop].total.prior = this.calculateTotalOf(prop, 'prior');
+                            this[prop].growth = this.calculateGrowth(prop);
+                        }
+                    });
                 })
                 .catch((err) => {
                     console.error(err);
@@ -282,7 +324,7 @@ export default {
 
 <style scoped>
 .space-above {
-    margin-top: 40px;
+    margin-top: 2.5rem;
 }
 .form-checkbox {
     align-self: flex-end;
@@ -294,11 +336,29 @@ export default {
 .text-section {
     padding: 30px 60px;
 }
-.text-section p {    
-    margin-bottom: 22px;
-    font-size: 18px;
+.text-container p {    
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
 }
 .hidden {
     opacity: 0;
+}
+
+@media only screen and (min-width: 2000px) {
+    .text-section hr {
+        margin: 3em 0;
+    }
+
+    .text-container  p {
+        margin-bottom: 3.5rem;
+        font-size: 2.3rem;
+    }
+    .space-above {
+        margin-top: 6.5rem;
+    }
+
+    .text-container h1, .text-container h2 {
+        font-size: 4rem;
+    }
 }
 </style>
