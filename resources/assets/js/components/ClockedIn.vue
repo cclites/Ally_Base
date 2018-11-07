@@ -7,21 +7,17 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row v-if="carePlan" class="with-padding-top">
+        <b-row v-if="carePlan.id" class="with-padding-top">
             <b-col lg="12">
-                <b-card title="Care Plan">
-                    <div v-if="carePlanActivities.length > 0">
-                        <h5>Recommended Activities</h5>
-                        <ul>
-                            <li v-for="activity in carePlanActivities">
-                                {{ activity.code }} - {{ activity.name }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div v-if="carePlan.notes">
-                        <h5>Notes</h5>
-                        <p class="notes">{{ carePlan.notes }}</p>
-                    </div>
+                <b-card>
+                    <caregiver-care-plan :care-plan="carePlan" :activities="carePlan.activities"></caregiver-care-plan>
+                </b-card>
+            </b-col>
+        </b-row>
+        <b-row v-if="careDetails.id" class="with-padding-top">
+            <b-col lg="12">
+                <b-card title="Detailed Client Care Needs">
+                    <care-details-display :care-details="careDetails"></care-details-display>
                 </b-card>
             </b-col>
         </b-row>
@@ -29,46 +25,15 @@
 </template>
 
 <script>
+    import CaregiverCarePlan from "./caregivers/CaregiverCarePlan";
+    import CareDetailsDisplay from "./CareDetailsDisplay";
     export default {
+        components: {CareDetailsDisplay, CaregiverCarePlan},
         props: {
-            'activities': Array,
-            'carePlanActivityIds': Array,
             'carePlan': Object,
+            'careDetails': Object,
             'schedule': Object,
         },
-
-        data() {
-            return {
-                carePlanActivities: []
-            }
-        },
-
-        mounted() {
-            let component = this;
-            let activities = this.activities.slice(0);
-
-            this.carePlanActivities = activities.filter(function(activity) {
-                return (component.carePlanActivityIds.findIndex(item => item === activity.id) !== -1);
-            });
-
-        },
-
-        method: {
-
-        },
-
-        carePlanNotes() {
-
-        }
-
     }
 </script>
 
-<style>
-    h5 {
-        text-decoration: underline;
-    }
-    p.notes {
-        white-space: pre-line;
-    }
-</style>

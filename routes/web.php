@@ -69,7 +69,8 @@ Route::group([
     'roles' => ['caregiver']
 ], function() {
 
-    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('clients');
+    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
+    Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
