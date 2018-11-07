@@ -272,6 +272,15 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->belongsTo('App\ReferralSource');
     }
 
+    /**
+     * Get the client's CareDetails relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function careDetails()
+    {
+        return $this->hasOne(CareDetails::class, 'client_id', 'id');
+    }    
 
     ///////////////////////////////////////////
     /// Mutators

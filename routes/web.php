@@ -69,7 +69,8 @@ Route::group([
     'roles' => ['caregiver']
 ], function() {
 
-    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('clients');
+    Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
+    Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
@@ -144,6 +145,7 @@ Route::group([
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
+    Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
     Route::get('clients/{client}/excluded-caregivers', 'Business\ClientExcludedCaregiverController@index')->name('clients.excluded-caregivers');
     Route::delete('clients/excluded-caregiver/{id}', 'Business\ClientExcludedCaregiverController@destroy')->name('clients.remove-excluded-caregiver');
@@ -258,6 +260,7 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
     Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
+    Route::put('communication/text-caregivers', 'Business\CommunicationController@saveRecipients')->name('communication.text-caregivers.recipients');
     Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
     Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');
     Route::get('communication/sms-other-replies', 'Business\CommunicationController@otherReplies')->name('communication.sms-other-replies');

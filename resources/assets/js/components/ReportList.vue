@@ -4,7 +4,7 @@
             <b-card v-for="category in categoryColumns[index]" :key="category.id">
                 <div slot="header">
                     <template v-for="icon in category.icons">
-                        <i :class="icon" class="mr-2"></i>
+                        <i :class="icon" :key="icon" class="mr-2"></i>
                     </template>
                     {{ category.name }}
                 </div>
@@ -295,6 +295,12 @@
                             name: 'Referral Sources',
                             url: 'reports/referral-sources',
                             description: 'List of referral sources and how many clients have been referred by each',
+                            category: 1
+                        },
+                        {
+                            name: 'Revenue',
+                            url: 'reports/revenue',
+                            description: 'Shows the total run down of the revenue and profit',
                             category: 1
                         },
                         {

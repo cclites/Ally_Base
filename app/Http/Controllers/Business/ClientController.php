@@ -181,6 +181,8 @@ class ClientController extends BaseController
             'user.documents',
             'referralSource',
             'notes.creator',
+            'careDetails',
+            'carePlans',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },

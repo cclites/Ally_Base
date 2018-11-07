@@ -1,10 +1,10 @@
 <template>
     <b-card
-        header="Care Plans"
+        header="Service Needs / ADL Groups"
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn variant="info" class="mb-2" @click="showModal()">Add Care Plan</b-btn>
+        <b-btn variant="info" class="mb-2" @click="showModal()">Add Group</b-btn>
 
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
@@ -31,7 +31,7 @@
                 <form @keydown="form.clearError($event.target.name)">
                     <b-row>
                         <b-col lg="12">
-                            <b-form-group label="Care Plan Name" label-for="name">
+                            <b-form-group label="Group Name" label-for="name">
                                 <b-form-input
                                     id="name"
                                     name="name"
@@ -39,14 +39,14 @@
                                     v-model="form.name"
                                     >
                                 </b-form-input>
-                                <input-help :form="form" field="name" text="Enter the name of the care plan."></input-help>
+                                <input-help :form="form" field="name" text="Enter the name of the ADL group."></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
                     <b-row class="mb-3">
                         <b-col lg="12">
                             <h5>Activities</h5>
-                            <input-help :form="form" field="activities" text="Check off the activities of daily living that are associated with this care plan."></input-help>
+                            <input-help :form="form" field="activities" text="Check off the activities of daily living that are associated with this ADL group."></input-help>
                             <b-row>
                                 <b-col cols="12" md="6">
                                     <div class="form-check">
@@ -87,18 +87,18 @@
             </b-container>
             <div slot="modal-footer">
                <b-btn variant="default" @click="clientPlanModal = false">Close</b-btn>
-               <b-btn variant="info" @click="submitForm" v-if="selectedPlan">Save Plan</b-btn>
-               <b-btn variant="info" @click="submitForm" v-else>Create Plan</b-btn>
+               <b-btn variant="info" @click="submitForm" v-if="selectedPlan">Save Group</b-btn>
+               <b-btn variant="info" @click="submitForm" v-else>Create Group</b-btn>
             </div>
         </b-modal>
 
-        <b-modal id="confirmDeleteModal" title="Delete Care Plan" v-model="confirmDeleteModal">
+        <b-modal id="confirmDeleteModal" title="Delete Group" v-model="confirmDeleteModal">
             <loading-card v-if="!selectedPlan" text=""></loading-card>
             <b-container fluid v-if="selectedPlan">
                 <h4 v-if="selectedPlan.future_schedules_count > 0">
-                    There are {{ selectedPlan.future_schedules_count }} schedules with the Care Plan "{{ selectedPlan.name }}" selected.<br/><br/>Deleting this Care Plan will remove it from the future schedules.  Do you want to continue?
+                    There are {{ selectedPlan.future_schedules_count }} schedules with the group "{{ selectedPlan.name }}" selected.<br/><br/>Deleting this group will remove it from the future schedules.  Do you want to continue?
                 </h4>
-                <h4 v-else>Are you sure you want to do delete the Care Plan "{{ selectedPlan.name }}"?</h4>
+                <h4 v-else>Are you sure you want to do delete the group "{{ selectedPlan.name }}"?</h4>
             </b-container>
             <div slot="modal-footer" v-if="selectedPlan">
                 <b-btn variant="default" @click="confirmDeleteModal = false">Cancel</b-btn>
@@ -148,7 +148,7 @@
                     {
                         key: 'notes',
                         sortable: false,
-                        formatter: (val) => { 
+                        formatter: (val) => {
                             if (! val || val.length == 0) {
                                 return '-';
                             } else if (val.length <= 20) {
@@ -156,7 +156,7 @@
                             } else {
                                 return val.substring(0, 20) + "...";
                             }
-                        }                        
+                        }
                     },
                     {
                         key: 'updated_at',
@@ -194,7 +194,7 @@
             },
 
             modalTitle() {
-                return (this.selectedPlan) ? 'Edit Care Plan' : 'Add a New Care Plan';
+                return (this.selectedPlan) ? 'Edit Group' : 'Add Group';
             },
 
             serverFutureScheduleModal() {
