@@ -178,6 +178,7 @@ Vue.component('business-evv-report', require('./components/business/reports/Evv'
 Vue.component('contacts-report', require('./components/business/reports/Contacts'));
 Vue.component('business-payroll-report', require('./components/business/reports/PayrollReport'));
 Vue.component('revenue-report', require('./components/business/reports/Revenue'));
+Vue.component('sales-pipeline-report', require('./components/business/reports/SalesPipeline'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
