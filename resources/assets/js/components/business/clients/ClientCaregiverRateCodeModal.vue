@@ -18,7 +18,7 @@
                         </b-form-group>
                     </div>
                     <b-tabs v-if="form.caregiver_id">
-                        <b-tab title="Hourly Rates" active>
+                        <b-tab title="Hourly RateFactory" active>
                             <b-form-group label="Override Client Rate: " label-for="client_hourly_id">
                                 <b-select v-model="form.client_hourly_id" class="ml-1 mr-2">
                                     <option value="">--Use Default--</option>
@@ -34,7 +34,7 @@
                                 <input-help :form="form" field="caregiver_hourly_id"></input-help>
                             </b-form-group>
                         </b-tab>
-                        <b-tab title="Fixed Rates (Per-Shift)">
+                        <b-tab title="Fixed RateFactory (Per-Shift)">
                             <b-form-group label="Override Client Rate: " label-for="client_fixed_id">
                                 <b-select v-model="form.client_fixed_id" class="ml-1 mr-2">
                                     <option value="">--Use Default--</option>

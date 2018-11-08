@@ -4,9 +4,9 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-card v-if="businessSettings().use_rate_codes">
+        <b-card v-if="usingRateCodes">
             <h3>
-                Default Caregiver Rates
+                Default Caregiver RateFactory
                 <b-btn variant="info" size="sm" @click="rateCodeModal = true">Add a New Rate Code</b-btn>
             </h3>
             <loading-card v-if="!rateCodes"></loading-card>
@@ -25,7 +25,7 @@
                     </b-select>
                     <input-help :form="rateForm" field="fixed_rate_id"></input-help>
                 </b-form-group>
-                <b-btn @click="saveDefaultRates()" variant="success">Save Default Rates</b-btn>
+                <b-btn @click="saveDefaultRates()" variant="success">Save Default RateFactory</b-btn>
             </b-form>
         </b-card>
 
@@ -102,7 +102,7 @@
             <!--</div>-->
         <!--</b-modal>-->
 
-        <!--<client-caregiver-rate-code-modal v-if="businessSettings().use_rate_codes"-->
+        <!--<client-caregiver-rate-code-modal v-if="usingRateCodes"-->
                  <!--v-model="clientCaregiverModal"-->
                  <!--:client="client"-->
                  <!--:caregiver="selectedCaregiver"-->
@@ -144,7 +144,7 @@
                     <!--<b-col lg="12">-->
 
                         <!--<b-tabs>-->
-                            <!--<b-tab title="Hourly Rates" active>-->
+                            <!--<b-tab title="Hourly RateFactory" active>-->
                                 <!--<b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">-->
                                     <!--<b-form-input-->
                                             <!--id="caregiver_hourly_rate"-->
@@ -196,7 +196,7 @@
                                     <!--<input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>-->
                                 <!--</b-form-group>-->
                             <!--</b-tab>-->
-                            <!--<b-tab title="Daily Rates (Live-in)" >-->
+                            <!--<b-tab title="Daily RateFactory (Live-in)" >-->
                                 <!--<b-form-group label="Caregiver Daily Rate" label-for="caregiver_hourly_rate">-->
                                     <!--<b-form-input-->
                                             <!--id="caregiver_fixed_rate"-->
@@ -324,9 +324,6 @@
             //     return 'Add Caregiver to Client';
             // },
 
-            clientRateStructure() {
-                return this.businessSettings().rate_structure === 'client_rate';
-            }
         },
         
 
