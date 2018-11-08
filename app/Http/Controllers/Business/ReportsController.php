@@ -9,6 +9,7 @@ use Auth;
 use App\BankAccount;
 use App\Business;
 use App\Caregiver;
+use App\Prospect;
 use App\Client;
 use App\CreditCard;
 use App\Deposit;
@@ -992,6 +993,57 @@ class ReportsController extends BaseController
         }
 
         return json_encode(compact('current', 'prior'));
+    }
+
+    /**
+     * Show the page to generate a sales pipeline report
+     * 
+     * @return Response
+     */
+    public function showSalesPipeline() {
+        return view('business.reports.sales-pipeline');
+    }
+
+    /**
+     * Handle the request to generate a report for the sales pipeline
+     * @param Request $request
+     * 
+     * @return array
+     */
+    public function salesPipelineReport(Request $request) {
+
+        $this->validate($request, [
+            'start_date' => 'required|string|date',
+            'end_date' => 'required|string|date',
+        ]);
+        
+        $startDate = new Carbon($request->start_date);
+        $endDate = new Carbon($request->end_date);
+        if($startDate->diffInMonths($endDate) > 6) {
+            return new ErrorResponse(422, 'The selected date range cannot be more than 6 months.');
+        }
+
+        $prospects = Prospect::select([
+                'id',
+                'business_id', 
+                'closed_loss', 
+                'closed_win', 
+                'referred_by',
+                'referral_source_id',
+                'had_assessment_scheduled',
+                'had_assessment_performed',
+                'needs_contract',
+                'expecting_client_signature',
+                'needs_payment_info',
+                'ready_to_schedule',
+                'created_at',
+            ])
+            ->where('business_id', 47)
+            ->whereBetween('created_at', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->with('referralSource')
+            ->get();
+
+            return $prospects;
     }
 
     /**

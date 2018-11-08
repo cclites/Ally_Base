@@ -304,6 +304,12 @@
                             category: 1
                         },
                         {
+                            name: 'Sales Pipeline',
+                            url: 'reports/sales-pipeline',
+                            description: 'Shows the current status of the sales pipelines',
+                            category: 1
+                        },
+                        {
                             name: 'Shifts by Caregiver',
                             url: 'reports/caregiver-shifts',
                             description: 'See how many shifts have been worked by a caregiver',
