@@ -91,10 +91,6 @@ export default {
                 ready_to_schedule: 0,
                 general: 0,
             },
-            chart: {
-                min: 0,
-                max: 80,
-            },
             hotOptions: {
                 width: '80%',
             },
@@ -139,8 +135,8 @@ export default {
                         bottom: 60,
                         width: '80%',
                         // height: {totalHeight} - y - y2,
-                        min: this.chart.min,
-                        max: this.chart.max,
+                        min: 0,
+                        max: 80,
                         minSize: '0%',
                         maxSize: '100%',
                         sort: 'descending',
