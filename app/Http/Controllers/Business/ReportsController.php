@@ -1038,7 +1038,7 @@ class ReportsController extends BaseController
                 'ready_to_schedule',
                 'created_at',
             ])
-            ->where('business_id', 47)
+            ->where('business_id', $this->business()->id)
             ->whereBetween('created_at', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->with('referralSource')
             ->get();
