@@ -21,7 +21,7 @@ class CreateScheduleRequest extends FormRequest
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'nullable|exists:caregivers,id',
             'fixed_rates' => 'required|boolean',
-            'caregiver_rate' => 'required_with:caregiver_id|nullable|numeric|min:0|max:999.99',
+            'caregiver_rate' => 'nullable|numeric|min:0|max:999.99',
             'client_rate' => 'nullable|numeric|min:0|max:999.99',
             'provider_fee' => 'nullable|numeric|min:0|max:999.99',
             'caregiver_rate_id' => 'nullable|exists:rate_codes,id',
