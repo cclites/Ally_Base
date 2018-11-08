@@ -14,8 +14,8 @@ class AlterClientRsaAddNameFields extends Migration
     public function up()
     {
         Schema::table('client_referral_service_agreements', function (Blueprint $table) {
-            $table->string('signature_one_text');
-            $table->string('signature_two_text');
+            $table->string('signature_one_text')->nullable();
+            $table->string('signature_two_text')->nullable();
         });
     }
 

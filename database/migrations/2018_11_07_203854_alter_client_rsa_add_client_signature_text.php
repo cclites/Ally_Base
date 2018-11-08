@@ -14,8 +14,8 @@ class AlterClientRsaAddClientSignatureText extends Migration
     public function up()
     {
         Schema::table('client_referral_service_agreements', function (Blueprint $table) {
-            $table->string('signature_client_text');
-            $table->ipAddress('executed_by_ip');
+            $table->string('signature_client_text')->nullable();
+            $table->ipAddress('executed_by_ip')->nullable();
         });
     }
 
