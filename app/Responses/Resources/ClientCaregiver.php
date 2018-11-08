@@ -3,20 +3,33 @@
 namespace App\Responses\Resources;
 
 use App\Shifts\AllyFeeCalculator;
+use App\Shifts\RateFactory;
 use Illuminate\Contracts\Support\Responsable;
 
 class ClientCaregiver implements Responsable
 {
+    /**
+     * @var \App\Client
+     */
     protected $client;
+
+    /**
+     * @var \App\Caregiver
+     */
     protected $caregiver;
+
+    /**
+     * @var array|null
+     */
+    protected $pivot;
 
     public function __construct($client, $caregiver)
     {
         $this->client = $client;
         $this->caregiver = $caregiver;
-        if (!$caregiver->pivot && $relation = $client->caregivers->where('id', $caregiver->id)->first()) {
-            $this->caregiver = $relation;
-        }
+
+        $pivot = $caregiver->pivot ?? $client->pivot ?? null;
+        if ($pivot) $this->pivot = $pivot->toArray();
     }
 
     /**
@@ -35,6 +48,13 @@ class ClientCaregiver implements Responsable
         $caregiver->firstname = $caregiver->user->firstname;
         $caregiver->lastname = $caregiver->user->lastname;
 
+        $caregiver->rates = [
+            'hourly' => app(RateFactory::class)->getRatesForClientCaregiver($client, $caregiver, false, $this->pivot),
+            'fixed' => app(RateFactory::class)->getRatesForClientCaregiver($client, $caregiver, true, $this->pivot),
+        ];
+
+        // TODO: Remove/remove all dependencies for changes to pivot, only kept for backwards compatibility
+        // TODO: Pivot should only contain fields from database
         // Add fee calculations to pivot object
         if ($caregiver->pivot) {
             $caregiver->pivot->ally_hourly_fee = number_format(AllyFeeCalculator::getHourlyRate(
@@ -46,14 +66,14 @@ class ClientCaregiver implements Responsable
             $caregiver->pivot->ally_daily_fee = number_format(AllyFeeCalculator::getFee(
                 $client,
                 $client->getPaymentMethod(),
-                $caregiver->pivot->caregiver_daily_rate + $caregiver->pivot->provider_daily_fee
+                $caregiver->pivot->caregiver_fixed_rate + $caregiver->pivot->provider_fixed_fee
             ), 2);
             $caregiver->pivot->total_hourly_fee = number_format(
                 round($caregiver->pivot->caregiver_hourly_rate + $caregiver->pivot->provider_hourly_fee + $caregiver->pivot->ally_hourly_fee, 2),
                 2
             );
             $caregiver->pivot->total_daily_fee = number_format(
-                round($caregiver->pivot->caregiver_daily_rate + $caregiver->pivot->provider_daily_fee + $caregiver->pivot->ally_daily_fee, 2),
+                round($caregiver->pivot->caregiver_fixed_rate + $caregiver->pivot->provider_fixed_fee + $caregiver->pivot->ally_daily_fee, 2),
                 2
             );
         }

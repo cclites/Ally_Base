@@ -37,6 +37,11 @@
         <li><a href="/notes/create">Add Notes</a></li>
     </ul>
 </li>
+@if(activeBusiness()->use_rate_codes)
+    <li>
+        <a href="{{ route('business.rate-codes.index') }}" aria-expanded="false"><i class="fa fa-list-alt"></i><span class="hide-menu">Rate Codes</span></a>
+    </li>
+@endif
 <li>
     <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
@@ -64,7 +69,7 @@
     {{--<li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime</a></li>--}}
     {{--<li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>--}}
     {{--<li><a href="{{ route('business.reports.cc_expiration') }}">Credit Card Expiration</a></li>--}}
-    {{--<li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver Rates</a></li>--}}
+    {{--<li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver RateFactory</a></li>--}}
     {{--<li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>--}}
     {{--<li><a href="{{ route('business.reports.client_onboarded') }}">Client Online Setup</a></li>--}}
     {{--<li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>--}}

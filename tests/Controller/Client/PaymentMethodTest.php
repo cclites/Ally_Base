@@ -13,6 +13,12 @@ class PaymentMethodTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->disableExceptionHandling();
+    }
+
     /**
      * @return void
      */

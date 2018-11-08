@@ -23,7 +23,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $duration
  * @property int $overtime_duration
  * @property int|null $note_id
- * @property int $daily_rates
+ * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string $hours_type
@@ -422,7 +422,7 @@ class Schedule extends Model implements Auditable
     {
         if (strlen($this->caregiver_rate)) return $this->caregiver_rate;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->daily_rates) ? $relation->pivot->caregiver_daily_rate : $relation->pivot->caregiver_hourly_rate;
+            return ($this->fixed_rates) ? $relation->pivot->caregiver_fixed_rate : $relation->pivot->caregiver_hourly_rate;
         }
         return 0;
     }
@@ -436,7 +436,7 @@ class Schedule extends Model implements Auditable
     {
         if (strlen($this->provider_fee)) return $this->provider_fee;
         if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->daily_rates) ? $relation->pivot->provider_daily_fee : $relation->pivot->provider_hourly_fee;
+            return ($this->fixed_rates) ? $relation->pivot->provider_fixed_fee : $relation->pivot->provider_hourly_fee;
         }
         return 0;
     }

@@ -464,4 +464,19 @@ class ClientController extends BaseController
 
         return new SuccessResponse('Client preferences updated.');
     }
+
+    public function defaultRates(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->validate([
+            'hourly_rate_id' => 'nullable|exists:rate_codes,id',
+            'fixed_rate_id' => 'nullable|exists:rate_codes,id',
+        ]);
+
+        $client->update($data);
+        return new SuccessResponse('The default rates have been saved.');
+    }
 }
