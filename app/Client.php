@@ -277,7 +277,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasOne(ClientPreferences::class, 'id');
     }
 
-<<<<<<< HEAD
     public function medications()
     {
         return $this->hasMany(ClientMedication::class);
@@ -288,7 +287,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasOne(ClientReferralServiceAgreement::class);
     }
 
-=======
     public function referralSource() {
         return $this->belongsTo('App\ReferralSource');
     }
@@ -302,7 +300,6 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     {
         return $this->hasOne(CareDetails::class, 'client_id', 'id');
     }    
->>>>>>> 609e9639dd4af3595d05405a52e61b898444389e
 
     ///////////////////////////////////////////
     /// Mutators
