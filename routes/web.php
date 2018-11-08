@@ -141,6 +141,12 @@ Route::group([
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
 
+    Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
+    Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
+    Route::put('clients/onboarding/{clientOnboarding}', 'Business\ClientOnboardingController@update')->name('clients.onboarding.update');
+    Route::get('clients/onboarding/{clientOnboarding}/intake-pdf', 'Business\ClientOnboardingController@intakePdf')->name('clients.onboarding.intake-pdf');
+    Route::get('clients/referral-service-agreement/{rsa}/agreement-pdf', 'Business\ClientReferralServiceAgreementController@agreementPdf')->name('clients.referral-service-agreement.pdf');
+    Route::post('clients/referral-service-agreement', 'Business\ClientReferralServiceAgreementController@store')->name('clients.referral-service-agreement.store');
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');

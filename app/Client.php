@@ -157,6 +157,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'medicaid_diagnosis_codes',
         'client_type_descriptor',
         'receive_summary_email',
+        'onboarding_step',
         'referral_source_id',
         'qb_customer_id',
         'hourly_rate_id',
@@ -276,6 +277,18 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasOne(ClientPreferences::class, 'id');
     }
 
+<<<<<<< HEAD
+    public function medications()
+    {
+        return $this->hasMany(ClientMedication::class);
+    }
+
+    public function referralServiceAgreement()
+    {
+        return $this->hasOne(ClientReferralServiceAgreement::class);
+    }
+
+=======
     public function referralSource() {
         return $this->belongsTo('App\ReferralSource');
     }
@@ -289,6 +302,7 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     {
         return $this->hasOne(CareDetails::class, 'client_id', 'id');
     }    
+>>>>>>> 609e9639dd4af3595d05405a52e61b898444389e
 
     ///////////////////////////////////////////
     /// Mutators
