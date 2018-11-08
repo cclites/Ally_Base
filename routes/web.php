@@ -12,7 +12,6 @@
 */
 
 //Auth::loginUsingId(2);
-\Debugbar::disable();
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
