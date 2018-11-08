@@ -62,7 +62,7 @@ export default {
         ECharts,
     },
     mounted() {
-        this.$refs.funnel.resize();
+        if(this.$refs.funnel) this.$refs.funnel.resize();
     },
     data() {
         return {
