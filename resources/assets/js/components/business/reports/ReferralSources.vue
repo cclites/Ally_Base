@@ -7,6 +7,22 @@
                     header-text-variant="white"
                     header-bg-variant="info"
                 >
+                    <b-row>
+                        <b-col md="2" class="float-left">
+                            <b-form-select v-model="filter" class="mb-3">
+                                <option :value="null">-- All Referral Sources --</option>
+                                <option :value="report.organization" v-for="report in reports">{{ report.organization }}</option>
+                            </b-form-select>
+                        </b-col>
+                        <b-col md="3" class="float-right">
+                            <b-button>
+                                <b-form-checkbox @change="show=!show" v-model="checked" class="mb-0">
+                                    <span v-if="false">Hide Summary Graphs </span>
+                                    <span v-else>Show Summary Graphs </span>
+                                </b-form-checkbox>
+                            </b-button>
+                        </b-col>
+                    </b-row>
                     <b-row class="mb-5" v-show="show">
                         <b-col md="4">
                             <div id="bar-chart">
@@ -22,22 +38,6 @@
                             <div id="revenue-chart">
                                 <canvas ref="revenuechart" height="300vh" width="600vw"></canvas>
                             </div>
-                        </b-col>
-                    </b-row>
-                    <b-row>
-                        <b-col md="2" class="float-left">
-                            <b-form-select v-model="filter" class="mb-3">
-                                <option :value="null">-- All Referral Sources --</option>
-                                <option :value="report.organization" v-for="report in reports">{{ report.organization }}</option>
-                            </b-form-select>
-                        </b-col>
-                        <b-col md="3" class="float-right">
-                            <b-button>
-                                <b-form-checkbox @change="show=!show" v-model="checked" class="mb-0">
-                                    <span v-if="show">Hide Summary Graphs </span>
-                                    <span v-else>Show Summary Graphs </span>
-                                </b-form-checkbox>
-                            </b-button>
                         </b-col>
                     </b-row>
                     <b-table striped hover
@@ -98,11 +98,6 @@
                         label: 'Revenue',
                         sortable: true
                     },
-                    {
-                        key: 'actions',
-                        label: 'Actions',
-                        sortable: false
-                    }
                 ],
                 show: true,
                 checked: true,
@@ -140,7 +135,7 @@
                 data: {
                     labels:  labels,
                     datasets: [{
-                        label: '#users count',
+                        label: 'Referred Count',
                         data: datasets,
                         backgroundColor: graphColors,
                         borderWidth: 2

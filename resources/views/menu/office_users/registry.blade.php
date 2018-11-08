@@ -125,7 +125,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
         <li><a href="{{ route('business.referral-sources.create') }}">Add Source</a></li>
-        <li><a href="{{ route('business.reports.referral_sources') }}">Reports Referral Sources</a></li>
+{{--        <li><a href="{{ route('business.reports.referral_sources') }}">Reports Referral Sources</a></li>--}}
     </ul>
 </li>
 <li>
