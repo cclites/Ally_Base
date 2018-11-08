@@ -1024,6 +1024,7 @@ class ReportsController extends BaseController
         }
 
         $prospects = Prospect::select([
+                'id',
                 'business_id', 
                 'closed_loss', 
                 'closed_win', 
@@ -1035,6 +1036,7 @@ class ReportsController extends BaseController
                 'expecting_client_signature',
                 'needs_payment_info',
                 'ready_to_schedule',
+                'created_at',
             ])
             ->where('business_id', 47)
             ->whereBetween('created_at', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
