@@ -58,53 +58,32 @@
                     <div v-if="dataIsReady && ! loading">
                         <b-row class="space-above">
                             <b-col lg="6" class="text-section">
-                                <div>
-                                    <span class="display-4 text-info">{{calculateTotalOf('revenue')}}</span> <span>Total revenue</span>
-                                </div>
-                                <div>
-                                    <span class="display-6 text-danger">{{calculateTotalOf('wages')}}</span>
+                                <div class="text-container">
+                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.current}}</span>
+                                    <span>Total revenue</span>
+                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.current}}</span>
                                     <span>Total CG Wages as contractors</span>
-                                </div>
-                                <div>
-                                    <span class="display-6 text-success">{{calculateTotalOf('profit')}}</span>
+                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.current}}</span>
                                     <span>Total profit</span>
                                 </div>
                                 <hr/>
-                                <div v-if="priorTableData.length > 0">
-                                    <h3>Prior Period</h3>
-                                    <div>
-                                        <span class="display-4 text-info">{{calculateTotalOf('revenue', 'prior')}}</span> <span>Total revenue</span>
-                                    </div>
-                                    <div>
-                                        <span class="display-6 text-danger">{{calculateTotalOf('wages', 'prior')}}</span>
-                                        <span>Total CG Wages as contractors</span>
-                                    </div>
-                                    <div>
-                                        <span class="display-6 text-success">{{calculateTotalOf('profit', 'prior')}}</span>
-                                        <span>Total profit</span>
-                                    </div>
+                                <div v-if="priorTableData.length > 0" class="text-container">
+                                    <h1>Prior Period</h1>
+                                    <div class="space-above"></div>
+                                    <span class="display-4 text-info" :style="`color: ${revenueColor}`">{{this.revenue.total.prior}}</span>
+                                    <span>Total revenue</span>
+                                    <span class="display-6 text-danger" :style="`color: ${wagesColor}`">{{this.wages.total.prior}}</span>
+                                    <span>Total CG Wages as contractors</span>
+                                    <span class="display-6 text-success" :style="`color: ${profitColor}`">{{this.profit.total.prior}}</span>
+                                    <span>Total profit</span>
                                     <hr/>
-                                    <h3>Comparison to prior period</h3>
-                                    <b-row class="space-above">
-                                        <b-col lg="4">
-                                            <b>{{calculateGrowth('revenue')}}%</b> Sales Growth
-                                            <b-progress :value="Math.abs(revenue)"
-                                                        :variant="progressVariant(revenue)"
-                                                        key="revenue"
-                                            ></b-progress>
-                                        </b-col>
-                                        <b-col lg="4">
-                                            <b>{{calculateGrowth('wages')}}%</b> CG Wages Growth
-                                            <b-progress :value="Math.abs(wages)"
-                                                        :variant="progressVariant(wages)"
-                                                        key="wages"
-                                            ></b-progress>
-                                        </b-col>
-                                        <b-col lg="4">
-                                            <b>{{calculateGrowth('profit')}}%</b> Profit Growth
-                                            <b-progress :value="Math.abs(profit)"
-                                                        :variant="progressVariant(profit)"
-                                                        key="profit"
+                                    <h2>Comparison to prior period</h2>
+                                    <b-row class="space-above text-container">
+                                        <b-col v-for="(stat, i) in growthStats" :key="i" lg="4">
+                                            <span><b>{{stat.value}}%</b> {{stat.label}}</span>
+                                            <b-progress :value="Math.abs(stat.value)"
+                                                        :variant="progressVariant(stat.value)"
+                                                        :key="stat.key"
                                             ></b-progress>
                                         </b-col>
                                     </b-row>
@@ -134,9 +113,9 @@
                                     :fields="tableFields"
                                     :items="[{
                                         date: '00/00/0000',
-                                        revenue: calculateTotalOf('revenue'),
-                                        wages: calculateTotalOf('wages'),
-                                        profit: calculateTotalOf('profit'),
+                                        revenue: revenue.total.current,
+                                        wages: wages.total.current,
+                                        profit: profit.total.current,
                                     }]"
                                 >
                                     <template slot="date" scope="data">
@@ -164,9 +143,9 @@
                                     :fields="tableFields"
                                     :items="[{
                                         date: '00/00/0000',
-                                        revenue: calculateTotalOf('revenue', 'prior'),
-                                        wages: calculateTotalOf('wages', 'prior'),
-                                        profit: calculateTotalOf('profit', 'prior'),
+                                        revenue: revenue.total.prior,
+                                        wages: wages.total.prior,
+                                        profit: profit.total.prior,
                                     }]"
                                 >
                                     <template slot="date" scope="data">
@@ -205,12 +184,36 @@ export default {
                 current: {},
                 prior: {},
             },
+            revenue: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
+            wages: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
+            profit: {
+                growth: null,
+                total: {
+                    current: null,
+                    prior: null,
+                },
+            },
             tableFields: [
                 {key: 'date', label: 'Date'},
                 'revenue',
                 {key: 'wages', label: 'CG wages'},
                 'profit',
             ],
+            profitColor: '#00cde3',
+            revenueColor: '#795bcb',
+            wagesColor: '#f07730',
         };
     },
     computed: {
@@ -239,14 +242,14 @@ export default {
                 datasets: [
                     {
                     label: 'Profit',
-                    borderColor: '#00cde3',
-                    backgroundColor: '#00cde3',
+                    borderColor: this.profitColor,
+                    backgroundColor: this.profitColor,
                     data: currentProfit
                     },
                     {
                     label: 'Revenue',
-                    borderColor: '#795bcb',
-                    backgroundColor: '#795bcb',
+                    borderColor: this.revenueColor,
+                    backgroundColor: this.revenueColor,
                     data: currentSales,
                     },
                 ],
@@ -280,6 +283,13 @@ export default {
 
             return inArray;
         },
+        growthStats() {
+            return [
+                { label: 'Sales Growth', value: this.revenue.growth, key: 'revenue' },
+                { label: 'CG Wages Growth', value: this.wages.growth, key: 'wages' },
+                { label: 'Profit Growth', value: this.profit.growth, key : 'profit' },
+            ];
+        }
     },
     methods: {
         progressVariant(value) {
@@ -295,7 +305,15 @@ export default {
                     this.data = data;
                     this.loading = false;
                     this.dataIsReady = true;
-                    console.log(data)
+
+                    ['revenue', 'wages', 'profit'].forEach(prop => {
+                        this[prop].total.current = this.calculateTotalOf(prop);
+
+                        if(compare) {
+                            this[prop].total.prior = this.calculateTotalOf(prop, 'prior');
+                            this[prop].growth = this.calculateGrowth(prop);
+                        }
+                    });
                 })
                 .catch((err) => {
                     console.error(err);
@@ -328,7 +346,7 @@ export default {
 
 <style scoped>
 .space-above {
-    margin-top: 40px;
+    margin-top: 2.5rem;
 }
 .form-checkbox {
     align-self: flex-end;
@@ -340,11 +358,29 @@ export default {
 .text-section {
     padding: 30px 60px;
 }
-.text-section p {
-    margin-bottom: 22px;
-    font-size: 18px;
+.text-container p {    
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
 }
 .hidden {
     opacity: 0;
+}
+
+@media only screen and (min-width: 2000px) {
+    .text-section hr {
+        margin: 3em 0;
+    }
+
+    .text-container  p {
+        margin-bottom: 3.5rem;
+        font-size: 2.3rem;
+    }
+    .space-above {
+        margin-top: 6.5rem;
+    }
+
+    .text-container h1, .text-container h2 {
+        font-size: 4rem;
+    }
 }
 </style>
