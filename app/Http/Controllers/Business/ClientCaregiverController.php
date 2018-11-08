@@ -22,14 +22,19 @@ class ClientCaregiverController extends BaseController
         $caregiver_id = $request->input('caregiver_id');
 
         $data = $request->validate([
-            'caregiver_hourly_rate' => 'required|numeric',
-            'caregiver_daily_rate' => 'nullable|numeric',
-            'provider_hourly_fee' => 'required|numeric',
-            'provider_daily_fee' => 'nullable|numeric',
+            'caregiver_hourly_id' => 'nullable|exists:rate_codes,id',
+            'caregiver_hourly_rate' => 'nullable|numeric|min:0.00|max:999.99',
+            'caregiver_fixed_id' => 'nullable|exists:rate_codes,id',
+            'caregiver_fixed_rate' => 'nullable|numeric|min:0.00|max:999.99',
+            'client_hourly_id' => 'nullable|exists:rate_codes,id',
+            'client_hourly_rate' => 'nullable|numeric|min:0.00|max:999.99',
+            'client_fixed_id' => 'nullable|exists:rate_codes,id',
+            'client_fixed_rate' => 'nullable|numeric|min:0.00|max:999.99',
+            'provider_hourly_id' => 'nullable|exists:rate_codes,id',
+            'provider_hourly_fee' => 'nullable|numeric|min:0.00|max:999.99',
+            'provider_fixed_id' => 'nullable|exists:rate_codes,id',
+            'provider_fixed_fee' => 'nullable|numeric|min:0.00|max:999.99',
         ]);
-
-        // Force rates/fees to floats
-        $data = array_map('floatval', $data);
 
         if ($client->caregivers()->syncWithoutDetaching([$caregiver_id => $data])) {
             $caregiver = $client->caregivers
@@ -150,7 +155,7 @@ class ClientCaregiverController extends BaseController
 
         // Update hourly shifts
         $caregiver->schedules()
-            ->where('daily_rates', 0)
+            ->where('fixed_rates', 0)
             ->forClient($client)
             ->future($this->business()->timezone)
             ->update([
@@ -160,12 +165,12 @@ class ClientCaregiverController extends BaseController
 
         // Update daily shifts
         $caregiver->schedules()
-            ->where('daily_rates', 1)
+            ->where('fixed_rates', 1)
             ->forClient($client)
             ->future($this->business()->timezone)
             ->update([
-                'caregiver_rate' => $caregiver->pivot->caregiver_daily_rate,
-                'provider_fee' => $caregiver->pivot->provider_daily_fee,
+                'caregiver_rate' => $caregiver->pivot->caregiver_fixed_rate,
+                'provider_fee' => $caregiver->pivot->provider_fixed_fee,
             ]);
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);

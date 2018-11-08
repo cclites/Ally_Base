@@ -1,49 +1,23 @@
 <template>
     <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
         <b-form-group label="Nickname" label-for="nickname">
-            <b-form-input
-                    id="nickname"
-                    name="nickname"
-                    type="text"
-                    v-model="form.nickname"
-            >
-            </b-form-input>
+            <b-form-input type="text" v-model="form.nickname" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this card."></input-help>
         </b-form-group>
         <b-form-group label="Name on Card" label-for="name_on_card">
-            <b-form-input
-                id="name_on_card"
-                name="name_on_card"
-                type="text"
-                v-model="form.name_on_card"
-                >
-            </b-form-input>
+            <b-form-input type="text" v-model="form.name_on_card" />
             <input-help :form="form" field="name_on_card" text="Please enter your name, as it appears on the card."></input-help>
         </b-form-group>
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Card Number" label-for="number">
-                    <b-form-input
-                            id="number"
-                            name="number"
-                            type="text"
-                            autocomplete="off"
-                            v-model="form.number"
-                    >
-                    </b-form-input>
+                    <b-form-input type="text" autocomplete="off" v-model="form.number" />
                     <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
                 </b-form-group>
             </b-col>
             <b-col lg="6" >
                 <b-form-group label="Confirm Card Number" label-for="number_confirmation">
-                    <b-form-input
-                            id="number_confirmation"
-                            name="number_confirmation"
-                            type="text"
-                            autocomplete="off"
-                            v-model="form.number_confirmation"
-                    >
-                    </b-form-input>
+                    <b-form-input type="text" autocomplete="off" v-model="form.number_confirmation" />
                     <input-help :form="form" field="number_confirmation" text="Re-enter your credit card number"></input-help>
                 </b-form-group>
             </b-col>
@@ -51,14 +25,7 @@
         <b-row>
             <b-col lg="5">
                 <b-form-group label="CVV" label-for="cvv">
-                    <b-form-input
-                            id="cvv"
-                            name="cvv"
-                            type="text"
-                            autocomplete="off"
-                            v-model="form.cvv"
-                    >
-                    </b-form-input>
+                    <b-form-input type="text" autocomplete="off" v-model="form.cvv" />
                     <input-help :form="form" field="cvv" text="The code on the back of the card"></input-help>
                 </b-form-group>
             </b-col>
@@ -66,19 +33,11 @@
         <b-form-group label="Card Expiration" label-for="">
             <b-row>
                 <b-col lg="6">
-                    <b-form-select
-                            v-model="form.expiration_month"
-                            :options="months"
-                    >
-                    </b-form-select>
+                    <b-form-select v-model="form.expiration_month" :options="months" />
                     <input-help :form="form" field="expiration_month" text="Expiration Month"></input-help>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-select
-                            v-model="form.expiration_year"
-                            :options="years"
-                    >
-                    </b-form-select>
+                    <b-form-select v-model="form.expiration_year" :options="years" />
                     <input-help :form="form" field="expiration_year" text="Expiration Year"></input-help>
                 </b-col>
             </b-row>

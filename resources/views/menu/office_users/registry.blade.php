@@ -37,6 +37,11 @@
         <li><a href="/notes/create">Add Notes</a></li>
     </ul>
 </li>
+@if(activeBusiness()->use_rate_codes)
+    <li>
+        <a href="{{ route('business.rate-codes.index') }}" aria-expanded="false"><i class="fa fa-list-alt"></i><span class="hide-menu">Rate Codes</span></a>
+    </li>
+@endif
 <li>
     <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
@@ -46,6 +51,7 @@
     </a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li>
+        <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li>
         @if(app()->environment() === 'demo')
             <li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li>
         @endif
@@ -63,7 +69,7 @@
     {{--<li><a href="{{ route('business.reports.overtime') }}">Caregiver Overtime</a></li>--}}
     {{--<li><a href="{{ route('business.reports.certification_expirations') }}">Certification Expirations</a></li>--}}
     {{--<li><a href="{{ route('business.reports.cc_expiration') }}">Credit Card Expiration</a></li>--}}
-    {{--<li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver Rates</a></li>--}}
+    {{--<li><a href="{{ route('business.reports.client_caregivers') }}">Client Caregiver RateFactory</a></li>--}}
     {{--<li><a href="{{ route('business.reports.client_email_missing') }}">Clients without Email</a></li>--}}
     {{--<li><a href="{{ route('business.reports.client_onboarded') }}">Client Online Setup</a></li>--}}
     {{--<li><a href="{{ route('business.reports.caregiver_onboarded') }}">Caregiver Online Setup</a></li>--}}
@@ -88,7 +94,6 @@
         <li><a href="{{ route('business.communication.sms-threads') }}">Sent Texts</a></li>
     </ul>
 </li>
-
 <li>
     <a href="{{ route('business.tasks.index') }}">
         <div class="row">
@@ -96,9 +101,7 @@
                 <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
             </div>
             <div class="col-4">
-                @if ($dueTasks = auth()->user()->role->dueTasks()->count())
-                    <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ $dueTasks }}</span>
-                @endif
+                <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ auth()->user()->dueTasks()->count() }}</span>
             </div>
         </div>
     </a>
@@ -117,13 +120,14 @@
         </div>
     </a>
 </li>
-{{--<li>--}}
-    {{--<a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>--}}
-    {{--<ul aria-expanded="false" class="collapse">--}}
-        {{--<li><a href="#">List Sources</a></li>--}}
-        {{--<li><a href="#">Add Source</a></li>--}}
-    {{--</ul>--}}
-{{--</li>--}}
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
+        <li><a href="{{ route('business.referral-sources.create') }}">Add Source</a></li>
+        <li><a href="{{ route('business.reports.referral_sources') }}">Reports Referral Sources</a></li>
+    </ul>
+</li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>
     <ul aria-expanded="false" class="collapse">

@@ -18,8 +18,6 @@ use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Arr;
 
 class ClientController extends BaseController
 {
@@ -181,7 +179,10 @@ class ClientController extends BaseController
             'creditCards',
             'payments',
             'user.documents',
+            'referralSource',
             'notes.creator',
+            'careDetails',
+            'carePlans',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
@@ -210,8 +211,9 @@ class ClientController extends BaseController
 
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
+        $referralsources = $this->business()->referralSources;
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'referralsources'));
     }
 
     public function edit(Client $client)
@@ -461,5 +463,20 @@ class ClientController extends BaseController
         $client->setPreferences($request->validated());
 
         return new SuccessResponse('Client preferences updated.');
+    }
+
+    public function defaultRates(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->validate([
+            'hourly_rate_id' => 'nullable|exists:rate_codes,id',
+            'fixed_rate_id' => 'nullable|exists:rate_codes,id',
+        ]);
+
+        $client->update($data);
+        return new SuccessResponse('The default rates have been saved.');
     }
 }

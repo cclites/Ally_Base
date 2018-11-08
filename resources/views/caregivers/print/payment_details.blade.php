@@ -88,7 +88,7 @@
                     <tbody>
                     <tr>
                         <th colspan="4"></th>
-                        <th colspan="4">Rates</th>
+                        <th colspan="4">RateFactory</th>
                         <th></th>
                     </tr>
                     <tr>

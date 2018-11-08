@@ -39,7 +39,6 @@ class UpdateClientRequest extends FormRequest
             'onboard_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
-            'referral' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'ambulatory' => 'nullable|boolean',
             'poa_first_name' => 'nullable|string',
@@ -53,6 +52,7 @@ class UpdateClientRequest extends FormRequest
             'hospital_name' => 'nullable|string',
             'hospital_number' => 'nullable|string',
             'avatar' => ['nullable', new Avatar()],
+            'referral_source_id' => 'nullable|numeric',
         ];
     }
 }

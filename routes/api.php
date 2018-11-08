@@ -40,5 +40,7 @@ Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::post('check-out/record-activity/{shift}/{activity}', 'Api\Telefony\TelefonyCheckOutController@recordActivity')->name('check-out.record-activity');
     Route::post('check-out/finalize/{shift}', 'Api\Telefony\TelefonyCheckOutController@finalizeCheckOut')->name('check-out.finalize');
     Route::post('check-out/{shift}', 'Api\Telefony\TelefonyCheckOutController@checkOut')->name('check-out');
+
+    Route::post('sms/incoming', 'Api\Telefony\TelephonySMSController@incoming')->name('sms.incoming');
 });
 

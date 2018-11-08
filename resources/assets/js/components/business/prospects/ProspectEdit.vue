@@ -127,13 +127,23 @@
             <hr />
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Referred By" label-for="referred_by">
-                        <b-form-input type="text"
-                                      id="referred_by"
-                                      v-model="form.referred_by"
-                        />
-                        <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
-                    </b-form-group>
+                    <b-row>
+                        <b-col md="9">
+                            <b-form-group label="Referred By" label-for="referred_by">
+                                <b-form-select id="referral"
+                                               v-model="form.referral_source_id"
+                                >
+                                    <option :value="referralsource.id" v-for="referralsource in referralsources">{{ referralsource.organization }}</option>
+                                </b-form-select>
+                                <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="3" class="pad-top">
+                            <div class="pt-3">
+                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
+                            </div>
+                        </b-col>
+                    </b-row>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Last Contacted" label-for="last_contacted">
@@ -178,6 +188,7 @@
                 </b-col>
             </b-row>
         </form>
+        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
     </b-card>
 </template>
 
@@ -186,7 +197,7 @@
     import States from "../../../classes/States";
 
     export default {
-        props: ['prospect'],
+        props: ['prospect', 'referralsources'],
 
         data() {
             return {
@@ -203,7 +214,7 @@
                     'state': this.getOriginal('state'),
                     'zip': this.getOriginal('zip'),
                     'country': this.getOriginal('country', 'US'),
-                    'referred_by': this.getOriginal('referred_by'),
+                    'referral_source_id': this.prospect && this.prospect.referral_source ? this.prospect.referral_source.id : null,
                     'last_contacted': this.getOriginalDate('last_contacted'),
                     'initial_call_date': this.getOriginalDate('initial_call_date'),
                     'had_initial_call': this.getOriginal('had_initial_call', 0),
@@ -229,6 +240,7 @@
                 submitting: false,
                 countries: new Countries(),
                 states: new States(),
+                showReferralModal: false,
             }
         },
 
@@ -278,7 +290,26 @@
                 form.submit('delete', `/business/prospects/${item.id}`);
             },
 
+            newrefsourcedata(data) {
+                if(data) {
+                    this.show = false;
+                    this.referralsources.push(data);
+                    this.form.referral_source_id = data.id;
+                }
+            },
+
+            closemodal(status) {
+                this.show = status;
+            }
         },
+
+
 
     }
 </script>
+
+<style scoped>
+    .pad-top {
+        padding-top: 16px;
+    }
+</style>

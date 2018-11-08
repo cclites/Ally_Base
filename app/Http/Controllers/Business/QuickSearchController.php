@@ -65,16 +65,7 @@ class QuickSearchController extends BaseController
 
         $users = $query->get()->map(function($user) use ($keys) {
             if ($user->relationLoaded('phoneNumbers')) {
-
-                if ($user->phoneNumbers->where('type', 'primary')->count()) {
-                    $phone = $user->phoneNumbers->where('type', 'primary')->first();
-                } elseif ($user->phoneNumbers->where('type', 'mobile')->count()) {
-                    $phone = $user->phoneNumbers->where('type', 'mobile')->first();
-                } else {
-                    $phone = $user->phoneNumbers->first();
-                }
-
-                $user->phone = $phone->number;
+                $user->phone = $user->default_phone;
             }
             return $user->only($keys);
         });

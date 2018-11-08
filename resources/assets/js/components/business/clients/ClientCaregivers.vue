@@ -4,6 +4,30 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
+        <b-card v-if="usingRateCodes">
+            <h3>
+                Default Client RateFactory
+                <b-btn variant="info" size="sm" @click="rateCodeModal = true">Add a New Rate Code</b-btn>
+            </h3>
+            <loading-card v-if="!rateCodes"></loading-card>
+            <b-form inline v-else>
+                <b-form-group label="Hourly Rate: " label-for="hourly_rate_id">
+                    <b-select v-model="rateForm.hourly_rate_id" class="ml-1 mr-2">
+                        <option value="">No Default Rate</option>
+                        <option v-for="code in hourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                    </b-select>
+                    <input-help :form="rateForm" field="hourly_rate_id"></input-help>
+                </b-form-group>
+                <b-form-group label="Fixed Rate: " label-for="fixed_rate_id" class="ml-1 mr-2">
+                    <b-select v-model="rateForm.fixed_rate_id">
+                        <option value="">No Default Rate</option>
+                        <option v-for="code in fixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                    </b-select>
+                    <input-help :form="rateForm" field="fixed_rate_id"></input-help>
+                </b-form-group>
+                <b-btn @click="saveDefaultRates()" variant="success">Save Default RateFactory</b-btn>
+            </b-form>
+        </b-card>
         <b-row class="mb-2">
             <b-col sm="6">
                 <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
@@ -20,7 +44,8 @@
                     <th>Referred Caregiver</th>
                     <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Caregiver Rate</th>
-                    <th :class="getTdClass(1)">Provider Fee</th>
+                    <th :class="getTdClass(1)" v-if="clientRateStructure">Client Rate</th>
+                    <th :class="getTdClass(1)" v-else>Provider Fee</th>
                     <th :class="getTdClass(1)">Ally Fee</th>
                     <th :class="getTdClass(1)">Total</th>
                     <th></th>
@@ -31,12 +56,13 @@
                     <tr>
                         <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
                         <td :class="getTdClass(index)">Hourly</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.caregiver_hourly_rate) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.provider_hourly_fee) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.ally_hourly_fee) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.total_hourly_fee) }}</td>
-                        <!-- <td class="daily">{{ item.pivot.caregiver_daily_rate }}</td> -->
-                        <!-- <td class="daily">{{ item.pivot.provider_daily_fee }}</td> -->
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.caregiver_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.hourly.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.hourly.provider_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.ally_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.total_rate) }}</td>
+                        <!-- <td class="daily">{{ item.pivot.caregiver_fixed_rate }}</td> -->
+                        <!-- <td class="daily">{{ item.pivot.provider_fixed_fee }}</td> -->
                         <!--<td :class=getTdClass(index)>{{ item.pivot.ally_daily_fee }}</td>-->
                         <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                         <td rowspan="2">
@@ -46,12 +72,13 @@
                             <!--</b-btn>-->
                         </td>
                     </tr>
-                    <tr v-if="item.pivot.total_daily_fee > 0">
+                    <tr v-if="item.rates.fixed.total_rate > 0">
                         <td :class="getTdClass(index)">Daily</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.caregiver_daily_rate) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.provider_daily_fee) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.ally_daily_fee) }}</td>
-                        <td :class="getTdClass(index)">{{ moneyFormat(item.pivot.total_daily_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.caregiver_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.fixed.provider_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.ally_fee) }}</td>
+                        <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.total_rate) }}</td>
                     </tr>
                     <tr v-else>
                         <td :class="getTdClass(index)">Daily</td>
@@ -75,6 +102,8 @@
                 </tr>
             </table>
         </div>
+
+        <rate-code-modal v-model="rateCodeModal" :code="{type: 'client'}" :type-locked="true" @saved="updateRateCode" />
 
         <b-modal id="clientCargiverSchedule"
                  title="Update Caregiver Schedule"
@@ -129,7 +158,20 @@
             </div>
         </b-modal>
 
-        <b-modal id="clientCaregiverModal" :title="modalTitle" v-model="clientCaregiverModal" ref="clientCaregiverModal">
+        <client-caregiver-rate-code-modal v-if="usingRateCodes"
+                 v-model="clientCaregiverModal"
+                 :client="client"
+                 :caregiver="selectedCaregiver"
+                 :caregiver-list="caregiverList"
+                 :rate-structure="businessSettings().rate_structure"
+                 :pivot="selectedCaregiver.pivot"
+                 @saved="handleSavedCaregiver"
+        />
+
+        <b-modal v-else
+                 :title="modalTitle"
+                 v-model="clientCaregiverModal"
+                 ref="clientCaregiverModal">
             <b-container fluid>
                 <b-row v-if="!selectedCaregiver.id">
                     <b-col lg="12">
@@ -158,7 +200,7 @@
                     <b-col lg="12">
 
                         <b-tabs>
-                            <b-tab title="Hourly Rates" active>
+                            <b-tab title="Hourly RateFactory" active>
                                 <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">
                                     <b-form-input
                                             id="caregiver_hourly_rate"
@@ -210,31 +252,31 @@
                                     <input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>
                                 </b-form-group>
                             </b-tab>
-                            <b-tab title="Daily Rates (Live-in)" >
+                            <b-tab title="Daily RateFactory (Live-in)" >
                                 <b-form-group label="Caregiver Daily Rate" label-for="caregiver_hourly_rate">
                                     <b-form-input
-                                            id="caregiver_daily_rate"
-                                            name="caregiver_daily_rate"
+                                            id="caregiver_fixed_rate"
+                                            name="caregiver_fixed_rate"
                                             type="number"
-                                            v-model="form.caregiver_daily_rate"
+                                            v-model="form.caregiver_fixed_rate"
                                             min="0"
                                             @change="updateRatesFromCaregiverDaily"
                                     >
                                     </b-form-input>
-                                    <input-help :form="form" field="caregiver_daily_rate" text="Enter the daily earnings for this caregiver."></input-help>
+                                    <input-help :form="form" field="caregiver_fixed_rate" text="Enter the daily earnings for this caregiver."></input-help>
                                 </b-form-group>
 
-                                <b-form-group label="Registry Daily Fee" label-for="provider_daily_fee">
+                                <b-form-group label="Registry Daily Fee" label-for="provider_fixed_fee">
                                     <b-form-input
-                                            id="provider_daily_fee"
-                                            name="provider_daily_fee"
+                                            id="provider_fixed_fee"
+                                            name="provider_fixed_fee"
                                             type="number"
-                                            v-model="form.provider_daily_fee"
+                                            v-model="form.provider_fixed_fee"
                                             min="0"
                                             @change="updateRatesFromCaregiverDaily"
                                     >
                                     </b-form-input>
-                                    <input-help :form="form" field="provider_daily_fee" text="Enter the registry daily fee."></input-help>
+                                    <input-help :form="form" field="provider_fixed_fee" text="Enter the registry daily fee."></input-help>
                                 </b-form-group>
 
                                 <b-form-group label="Ally Daily Fee" label-for="ally_daily_fee">
@@ -289,10 +331,14 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
+    import BusinessSettings from "../../../mixins/BusinessSettings";
+    import RateCodes from "../../../mixins/RateCodes";
+    import RateCodeModal from "../rate_codes/RateCodeModal";
+    import ClientCaregiverRateCodeModal from "./ClientCaregiverRateCodeModal";
 
     export default {
         props: {
-            'client_id': {},
+            'client': Object,
             'allyRate': Number,
             'paymentTypeMessage': {
                 default() {
@@ -301,22 +347,30 @@
             }
         },
 
-        mixins: [FormatsNumbers],
+        components: {ClientCaregiverRateCodeModal, RateCodeModal},
+
+        mixins: [FormatsNumbers, BusinessSettings, RateCodes],
 
         data() {
             return {
+                client_id: this.client.id,
                 caregiverList: [],
                 items: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
                 clientCargiverScheduleModal: false,
-                selectedCaregiver: {},
+                selectedCaregiver: {pivot: {}},
                 form: new Form(),
                 excludeForm: this.makeExcludeForm(),
                 excludedCaregivers: [],
                 ally_hourly_fee: 0.00,
                 total_hourly_rate: 0.00,
                 loading: '',
+                rateCodeModal: false,
+                rateForm: new Form({
+                    'hourly_rate_id': this.client.hourly_rate_id || "",
+                    'fixed_rate_id': this.client.fixed_rate_id || "",
+                })
             }
         },
 
@@ -324,6 +378,7 @@
             this.fetchAssignedCaregivers();
             this.fetchCaregivers();
             this.fetchExcludedCaregivers();
+            this.fetchRateCodes('client');
         },
         
         computed: {
@@ -338,13 +393,13 @@
 
         methods: {
             addCaregiver() {
-                this.selectedCaregiver = {};
+                this.selectedCaregiver = {pivot: {}};
                 this.form = new Form({
                     caregiver_id: null,
                     caregiver_hourly_rate: 0.00,
-                    caregiver_daily_rate: 0.00,
+                    caregiver_fixed_rate: 0.00,
                     provider_hourly_fee: 0.00,
-                    provider_daily_fee: 0.00,
+                    provider_fixed_fee: 0.00,
                 });
                 this.clientCaregiverModal = true;
                 this.updateRatesFromCaregiverHourly();
@@ -356,9 +411,9 @@
                 this.form = new Form({
                     caregiver_id: item.id,
                     caregiver_hourly_rate: item.pivot.caregiver_hourly_rate,
-                    caregiver_daily_rate: item.pivot.caregiver_daily_rate,
+                    caregiver_fixed_rate: item.pivot.caregiver_fixed_rate,
                     provider_hourly_fee: item.pivot.provider_hourly_fee,
-                    provider_daily_fee: item.pivot.provider_daily_fee,
+                    provider_fixed_fee: item.pivot.provider_fixed_fee,
                 });
                 this.clientCaregiverModal = true;
                 this.updateRatesFromCaregiverHourly();
@@ -377,17 +432,30 @@
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
                     .then((response) => {
-                        this.fetchCaregivers();
-                        component.items = component.items.filter(caregiver => {
-                            return caregiver.id != response.data.data.id;
-                        });
-                        component.items.unshift(response.data.data);
-                        component.clientCaregiverModal = false;
+                        component.handleSavedCaregiver(response.data.data);
 
                         if (updateSchedules && response.data.data.scheduled_shifts_count > 0) {
                             component.confirmUpdateSchedule(response.data.data)
                         }
                     });
+            },
+
+            handleSavedCaregiver(caregiver) {
+                this.fetchCaregivers();
+                let index = this.items.findIndex(item => {
+                    return caregiver.id == item.id;
+                });
+                if (index > -1) {
+                    Vue.set(this.items, index, caregiver);
+                }
+                else {
+                    this.items.unshift(caregiver);
+                }
+                this.clientCaregiverModal = false;
+            },
+
+            saveDefaultRates() {
+                this.rateForm.put('/business/clients/' + this.client_id + '/default-rates');
             },
 
             updateSchedules() {
@@ -503,8 +571,8 @@
             },
 
             updateAllyDailyFee() {
-                let cgRate = parseFloat(this.form.caregiver_daily_rate);
-                let provFee = parseFloat(this.form.provider_daily_fee);
+                let cgRate = parseFloat(this.form.caregiver_fixed_rate);
+                let provFee = parseFloat(this.form.provider_fixed_fee);
                 if (isNaN(cgRate) || isNaN(provFee)) {
                     this.ally_daily_fee = 0;
                     return;
@@ -515,8 +583,8 @@
 
             updateRatesFromCaregiverDaily() {
                 this.updateAllyDailyFee();
-                let cgRate = parseFloat(this.form.caregiver_daily_rate);
-                let provFee = parseFloat(this.form.provider_daily_fee);
+                let cgRate = parseFloat(this.form.caregiver_fixed_rate);
+                let provFee = parseFloat(this.form.provider_fixed_fee);
                 let allyFee = parseFloat(this.ally_daily_fee);
                 if (isNaN(cgRate) || isNaN(provFee)) {
                     return;
@@ -527,15 +595,15 @@
             },
 
             updateRatesFromTotalDaily() {
-                let cgRate = parseFloat(this.form.caregiver_daily_rate);
+                let cgRate = parseFloat(this.form.caregiver_fixed_rate);
                 let totalRate = parseFloat(this.total_daily_rate);
                 if (isNaN(cgRate) || isNaN(totalRate)) {
                     return;
                 }
                 console.log(totalRate, 1+parseFloat(this.allyRate), cgRate);
                 let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
-                this.form.provider_daily_fee = computed.toFixed(2);
-                this.highlightInput('#provider_daily_fee');
+                this.form.provider_fixed_fee = computed.toFixed(2);
+                this.highlightInput('#provider_fixed_fee');
                 this.updateAllyDailyFee();
             },
 

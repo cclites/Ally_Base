@@ -37,7 +37,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float $other_expenses
  * @property int $verified
  * @property int|null $schedule_id
- * @property int $daily_rates
+ * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string|null $status
@@ -611,6 +611,22 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         }
 
         return $query->where('client_id', $client);
+    }
+
+    /**
+     * Get shifts that belong to the supplied business only.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param int $business
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForBusiness($query, $business)
+    {
+        if (empty($business)) {
+            return $query;
+        }
+
+        return $query->where('business_id', $business);
     }
 
     /**

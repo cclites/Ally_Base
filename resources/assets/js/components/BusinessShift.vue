@@ -87,17 +87,17 @@
                 <b-col md="5" sm="6">
                     <b-row>
                         <b-col sm="6">
-                            <b-form-group label="Shift Type (Rate)" label-for="daily_rates">
+                            <b-form-group label="Shift Type (Rate)" label-for="fixed_rates">
                                 <b-form-select
-                                        id="daily_rates"
-                                        name="daily_rates"
-                                        v-model="form.daily_rates"
+                                        id="fixed_rates"
+                                        name="fixed_rates"
+                                        v-model="form.fixed_rates"
                                         @change="changedDailyRates()"
                                 >
                                     <option :value="0">Hourly Shift</option>
                                     <option :value="1">Daily Shift</option>
                                 </b-form-select>
-                                <input-help :form="form" field="daily_rates" text=""></input-help>
+                                <input-help :form="form" field="fixed_rates" text=""></input-help>
                             </b-form-group>
                         </b-col>
                         <b-col sm="6">
@@ -461,10 +461,10 @@
                 return this.status !== 'WAITING_FOR_CONFIRMATION' && this.status !== 'CLOCKED_IN'
             },
             rateType() {
-                if (this.form.daily_rates === 0) {
+                if (this.form.fixed_rates === 0) {
                     return 'Hourly';
                 }
-                if (this.form.daily_rates === 1) {
+                if (this.form.fixed_rates === 1) {
                     return 'Daily';
                 }
                 return '';
@@ -512,7 +512,7 @@
                     other_expenses_desc: ('other_expenses_desc' in this.shift) ? this.shift.other_expenses_desc : null,
                     hours_type: ('hours_type' in this.shift) ? this.shift.hours_type : 'default',
                     verified: ('verified' in this.shift) ? this.shift.verified : true,
-                    daily_rates: ('daily_rates' in this.shift) ? this.shift.daily_rates : 0,
+                    fixed_rates: ('fixed_rates' in this.shift) ? this.shift.fixed_rates : 0,
                     caregiver_rate: ('caregiver_rate' in this.shift) ? this.shift.caregiver_rate : '',
                     provider_fee: ('provider_fee' in this.shift) ? this.shift.provider_fee : '',
                     activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],

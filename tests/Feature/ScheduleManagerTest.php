@@ -76,7 +76,7 @@ class ScheduleManagerTest extends TestCase
             'notes',
             'overtime_duration',
         ]), [
-            'daily_rates' => 0,
+            'fixed_rates' => 0,
             'duration' => 6 * 60, // = 11 hours total
             'starts_at' => $shift->starts_at->timestamp
         ]);
@@ -108,7 +108,7 @@ class ScheduleManagerTest extends TestCase
             'overtime_duration',
             'provider_fee',
         ]), [
-            'daily_rates' => 0,
+            'fixed_rates' => 0,
             'duration' => 6 * 60, // = 11 hours total
             'starts_at' => $shift->starts_at->timestamp
         ]);
@@ -135,7 +135,7 @@ class ScheduleManagerTest extends TestCase
         $weekEnd = $date->copy()->endOfWeek();
 
         $data = [
-            'daily_rates' => 0,
+            'fixed_rates' => 0,
             'bydays' => ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
             'client_id' => $this->client->id,
             'start_date' => $weekStart->format('m/d/Y'), //'04/15/2018',
@@ -170,7 +170,7 @@ class ScheduleManagerTest extends TestCase
         $weekEnd = $date->copy()->endOfWeek();
 
         $data = [
-            'daily_rates' => 0,
+            'fixed_rates' => 0,
             'bydays' => ["MO", "TU", "WE", "TH", "FR", "SA", "SU"],
             'client_id' => $this->client->id,
             'start_date' => $weekStart->format('m/d/Y'), //'04/15/2018',

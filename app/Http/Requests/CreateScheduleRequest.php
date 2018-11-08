@@ -20,9 +20,12 @@ class CreateScheduleRequest extends FormRequest
             'duration' => 'required|numeric|min:1',
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'nullable|exists:caregivers,id',
-            'daily_rates' => 'required|boolean',
-            'caregiver_rate' => 'required_with:caregiver_id|nullable|numeric',
-            'provider_fee' => 'required_with:caregiver_id|nullable|numeric',
+            'fixed_rates' => 'required|boolean',
+            'caregiver_rate' => 'required_with:caregiver_id|nullable|numeric|min:0|max:999.99',
+            'client_rate' => 'nullable|numeric|min:0|max:999.99',
+            'provider_fee' => 'nullable|numeric|min:0|max:999.99',
+            'caregiver_rate_id' => 'nullable|exists:rate_codes,id',
+            'client_rate_id' => 'nullable|exists:rate_codes,id',
             'notes' => 'nullable|max:1024',
             'hours_type' => 'required|in:default,overtime,holiday',
             'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
@@ -43,7 +46,7 @@ class CreateScheduleRequest extends FormRequest
             'starts_at.min' => 'You cannot create schedule entries prior to 2017.',
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
-            'daily_rates.*' => 'You must select whether the shift is hourly or daily.',
+            'fixed_rates.*' => 'You must select whether the shift is hourly or daily.',
         ];
     }
 }
