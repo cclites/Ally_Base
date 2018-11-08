@@ -38,7 +38,14 @@
                     </b-row>
                     <loading-card v-show="loading"></loading-card>
                     <div v-if="dataIsReady && ! loading">
-                        <b-row class="space-above">
+                        <hr/>
+                        <b-row class="space-above space-evenly">
+                            <span class="display-6">Total Prospects: {{totalProspects}}</span>
+                            <span class="display-6">Closed Won: {{pipeline.closed_win}}</span>
+                            <span class="display-6">Closed Lost: {{pipeline.closed_loss}}</span>
+                        </b-row>
+                        <hr/>
+                        <b-row>
                             <b-col lg="6">
                                 <h1>Prospects Funnel</h1>
                                 <e-charts ref="funnel" :options="chartOptions" class="funnel-chart" auto-resize></e-charts>
@@ -72,6 +79,7 @@ export default {
                 start_date: '09/01/2018',
                 end_date: '12/01/2018',
             }),
+            totalProspects: 0,
             pipeline: {
                 closed_loss: 0,
                 closed_win: 0,
@@ -94,16 +102,7 @@ export default {
     },
     computed: {
         chartOptions() {
-            let pipelineTotal = 0;
-            const calculatePercentage = (status) => {
-                const result = (this.pipeline[status] / pipelineTotal * 100).toFixed(2)
-                console.log('total', pipelineTotal)
-                console.log('value', this.pipeline[status])
-                console.log('result', result)
-                return result
-                };
-            Object.keys(this.pipeline).forEach(status => pipelineTotal += this.pipeline[status]);
-
+            const calculatePercentage = (status) => (this.pipeline[status] / this.totalProspects * 100).toFixed(2);
             const data = [
                 {name: 'General', value: 70, count: this.pipeline.general, percentage: calculatePercentage('general') },
                 {name: 'Assessment Scheduled', value: 60, count: this.pipeline.had_assessment_scheduled, percentage: calculatePercentage('had_assessment_scheduled') },
@@ -207,7 +206,11 @@ export default {
                 });
 
                 if(!hasFoundCategory) this.pipeline.general++;
-            });            
+            });        
+            
+            let total = 0;
+            Object.keys(this.pipeline).forEach(status => total += this.pipeline[status]);
+            this.totalProspects = total;
         },
     }
 }
@@ -217,7 +220,9 @@ export default {
 .funnel-chart {
     width: 100%;
 }
-
+.space-evenly {
+    justify-content: space-evenly;
+}
 @media only screen and (min-width: 2000px) {
     .funnel-chart {
         height: 600px;
