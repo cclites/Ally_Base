@@ -46,7 +46,7 @@
         <b-card>
             <b-row>
                 <b-col md="12">
-                    <b-form-group label="Unpaired Pay RateFactory" label-for="unpaired_pay_rates">
+                    <b-form-group label="Unpaired Pay Rates" label-for="unpaired_pay_rates">
                         <input-help :form="form" text="These are pay rates that do not have a corresponding bill rate. Most agencies primarily use the Rates Schedule to specify billing and payroll rates."></input-help>
                         <b-form-checkbox class="d-block" id="unpaired_pay_rates_hourly" v-model="form.unpaired_pay_rates" value="Hourly">Hourly</b-form-checkbox>
                         <b-form-checkbox class="d-block" id="unpaired_pay_rates_per_visit" v-model="form.unpaired_pay_rates" value="Per Visit">Per Visit</b-form-checkbox>
