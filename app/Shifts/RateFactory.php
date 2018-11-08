@@ -205,12 +205,13 @@ class RateFactory
      */
     public function getRatesForSchedule(Schedule $schedule)
     {
+        // TODO: Optimize getRatesForClientCaregiver call
         $usingRateCodes = $this->usingRateCodes($schedule->business_id);
         $caregiverRate = $this->resolveRate($schedule->caregiver_rate, $schedule->caregiver_rate_id, $usingRateCodes)
-            ?? $this->getDefaultCaregiverRate($schedule->caregiver, $schedule->fixed_rates);
+            ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->caregiver_rate;
         $providerFee = $schedule->provider_fee;
         $clientRate = $this->resolveRate($schedule->client_rate, $schedule->client_rate_id, $usingRateCodes)
-            ?? $this->getDefaultClientRate($schedule->client, $schedule->fixed_rates);
+            ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->client_rate;
         $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
 
         return $this->getRateObject(
@@ -326,6 +327,6 @@ class RateFactory
 
     protected function resolveRate($freeTextValue, $rateCodeId, bool $usingRateCodes)
     {
-        return $usingRateCodes ? $this->getRateFromCode($rateCodeId) : $freeTextValue;
+        return $usingRateCodes ? $this->getRateFromCode((int) $rateCodeId) : $freeTextValue;
     }
 }
