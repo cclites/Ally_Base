@@ -48,7 +48,7 @@ class RateFactory
     function allyFeeIncluded(int $businessId)
     {
         return $this->getRateStructure($businessId) === 'client_rate'
-            && $this->settings->get($businessId, 'include_ally_fees', false);
+            && $this->settings->get($businessId, 'include_ally_fee', false);
     }
 
     /**
@@ -106,17 +106,11 @@ class RateFactory
      *
      * @param float $providerFee
      * @param float $caregiverRate
-     * @param float $allyFee
-     * @param bool $allyFeeIncluded
      * @return float
      */
-    function getClientRate(float $providerFee, float $caregiverRate, float $allyFee, bool $allyFeeIncluded = false)
+    function getClientRate(float $providerFee, float $caregiverRate)
     {
-        return (float) bcadd(
-            bcadd($providerFee, $caregiverRate, 2),
-            $allyFeeIncluded ? $allyFee : "0",
-            2
-        );
+        return (float) bcadd($providerFee, $caregiverRate, 2);
     }
 
     /**
@@ -138,11 +132,11 @@ class RateFactory
         $allyFeeIncluded = $this->allyFeeIncluded($businessId);
 
         if ($rateStructure === 'client_rate') {
-            $clientRate = $this->getClientRate(0.0, $chargedRate, $allyFee, $allyFeeIncluded);
+            $clientRate = $this->getClientRate(0.0, $chargedRate);
             $providerFee = $this->getProviderFee($clientRate, $caregiverRate, $allyFee, $allyFeeIncluded);
         }
         else {
-            $clientRate = $this->getClientRate($providerFee, $caregiverRate, $allyFee, $allyFeeIncluded);
+            $clientRate = $this->getClientRate($providerFee, $caregiverRate);
         }
 
         return new Rates(

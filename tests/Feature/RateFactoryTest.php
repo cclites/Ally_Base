@@ -174,4 +174,40 @@ class RateFactoryTest extends TestCase
         $this->assertEquals(12, $rates->caregiver_rate);
         $this->assertEquals(false, $rates->fixed_rates);
     }
+
+    public function test_default_setting_adds_ally_fee_to_total_rate()
+    {
+        $this->setSettings(['use_rate_codes' => 1, 'rate_structure' => 'client_rate', 'include_ally_fee' => 0]);
+
+
+        $hourlyClRateCode = $this->createRateCode($clientRate = 18, 'client');
+        $this->client->setDefaultHourlyRate($hourlyClRateCode);
+
+        $hourlyCgRateCode = $this->createRateCode($cgRate = 12, 'caregiver');
+        $this->caregiver->setDefaultHourlyRate($hourlyCgRateCode);
+
+        $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver, false);
+
+        $this->assertGreaterThan(0, $rates->ally_fee);
+        $this->assertEquals($clientRate + $rates->ally_fee, $rates->total_rate);
+        $this->assertEquals($clientRate - $cgRate, $rates->provider_fee);
+    }
+
+    public function test_include_ally_fee_setting_deducts_from_provider_fee()
+    {
+        $this->setSettings(['use_rate_codes' => 1, 'rate_structure' => 'client_rate', 'include_ally_fee' => 1]);
+
+
+        $hourlyClRateCode = $this->createRateCode($clientRate = 18, 'client');
+        $this->client->setDefaultHourlyRate($hourlyClRateCode);
+
+        $hourlyCgRateCode = $this->createRateCode($cgRate = 12, 'caregiver');
+        $this->caregiver->setDefaultHourlyRate($hourlyCgRateCode);
+
+        $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver, false);
+
+        $this->assertGreaterThan(0, $rates->ally_fee);
+        $this->assertEquals($clientRate, $rates->total_rate);
+        $this->assertEquals($clientRate - $cgRate - $rates->ally_fee, $rates->provider_fee);
+    }
 }
