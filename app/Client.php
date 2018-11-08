@@ -208,9 +208,17 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
                     ->with('user')
                     ->withTimestamps()
                     ->withPivot([
+                        'caregiver_hourly_id',
                         'caregiver_hourly_rate',
+                        'caregiver_fixed_id',
                         'caregiver_fixed_rate',
+                        'client_hourly_id',
+                        'client_hourly_rate',
+                        'client_fixed_id',
+                        'client_fixed_rate',
+                        'provider_hourly_id',
                         'provider_hourly_fee',
+                        'provider_fixed_id',
                         'provider_fixed_fee',
                     ]);
     }

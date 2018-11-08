@@ -13,11 +13,23 @@ export default {
         fixedRateCodes() {
             if (!this.rateCodes) return [];
             return this.rateCodes.filter(code => !!code.fixed);
-        }
+        },
+        clientHourlyRateCodes() {
+            return this.hourlyRateCodes.filter(code => code.type === 'client');
+        },
+        clientFixedRateCodes() {
+            return this.fixedRateCodes.filter(code => code.type === 'client');
+        },
+        caregiverHourlyRateCodes() {
+            return this.hourlyRateCodes.filter(code => code.type === 'caregiver');
+        },
+        caregiverFixedRateCodes() {
+            return this.fixedRateCodes.filter(code => code.type === 'caregiver');
+        },
     },
 
     methods: {
-        async fetchRateCodes(type = null) {
+        async fetchRateCodes(type = '') {
             const response = await axios.get('/business/rate-codes?type=' + type);
             this.rateCodes = response.data;
         },

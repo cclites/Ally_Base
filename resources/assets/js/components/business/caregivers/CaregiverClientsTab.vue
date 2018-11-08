@@ -1,12 +1,12 @@
 <template>
     <b-card
-        header="Caregivers"
+        header="Clients"
         header-text-variant="white"
         header-bg-variant="info"
         >
         <b-card v-if="businessSettings().use_rate_codes">
             <h3>
-                Default Client Rates
+                Default Caregiver Rates
                 <b-btn variant="info" size="sm" @click="rateCodeModal = true">Add a New Rate Code</b-btn>
             </h3>
             <loading-card v-if="!rateCodes"></loading-card>
@@ -28,20 +28,12 @@
                 <b-btn @click="saveDefaultRates()" variant="success">Save Default Rates</b-btn>
             </b-form>
         </b-card>
-        <b-row class="mb-2">
-            <b-col sm="6">
-                <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
-                <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
-            </b-col>
-            <b-col sm="6" class="text-right">
-                {{ paymentTypeMessage }}
-            </b-col>
-        </b-row>
+
         <div class="table-responsive">
             <table class="table table-bordered" id="client-cg-table">
                 <thead>
                 <tr>
-                    <th>Referred Caregiver</th>
+                    <th>Client</th>
                     <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Caregiver Rate</th>
                     <th :class="getTdClass(1)" v-if="clientRateStructure">Client Rate</th>
@@ -66,7 +58,7 @@
                         <!--<td :class=getTdClass(index)>{{ item.pivot.ally_daily_fee }}</td>-->
                         <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                         <td rowspan="2">
-                            <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
+                            <!--<b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>-->
                             <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
                                 <!--<i class="fa fa-times"></i>-->
                             <!--</b-btn>-->
@@ -87,244 +79,196 @@
                 </template>
                 </tbody>
             </table>
-            <hr>
-            <div class="h6">Excluded Caregivers</div>
-            <table class="table table-bordered excluded-caregivers" v-if="excludedCaregivers.length">
-                <tr v-for="exGiver in excludedCaregivers">
-                    <td class="sized">
-                        {{ exGiver.caregiver.name }}
-                    </td>
-                    <td class="sized">{{ exGiver.note }}</td>
-                    <td class="sized" style="white-space: nowrap">
-                        <b-btn @click="removeExcludedCaregiver(exGiver.id)" class="mx-1" :variant="'primary'" v-if="loading !== exGiver.id">Remove From Excluded List</b-btn>
-                        <div class="c-loader" v-if="loading === exGiver.id"></div>
-                    </td>
-                </tr>
-            </table>
         </div>
 
-        <rate-code-modal v-model="rateCodeModal" :code="{type: 'client'}" :type-locked="true" @saved="updateRateCode" />
+        <rate-code-modal v-model="rateCodeModal" :code="{type: 'caregiver'}" :type-locked="true" @saved="updateRateCode" />
 
-        <b-modal id="clientCargiverSchedule"
-                 title="Update Caregiver Schedule"
-                 v-model="clientCargiverScheduleModal"
-                 ok-title="OK">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12">
-                        <div>Are you sure you want to update all <strong>{{ this.selectedCaregiver.firstname }} {{ this.selectedCaregiver.lastname }}</strong>'s future scheduled shifts with the new rate information?  This will update <strong>{{ this.selectedCaregiver.scheduled_shifts_count }}</strong> total shifts.</div>
-                    </b-col>
-                    <b-col lg="12" class="text-center">
-                        <b-btn variant="danger" class="mt-4" @click.prevent="updateSchedules">Yes - Update all future shifts with this new rate</b-btn>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-               <b-btn variant="default" @click="clientCargiverScheduleModal = false">Cancel</b-btn>
-            </div>
-        </b-modal>
+        <!--<b-modal id="clientCargiverSchedule"-->
+                 <!--title="Update Caregiver Schedule"-->
+                 <!--v-model="clientCargiverScheduleModal"-->
+                 <!--ok-title="OK">-->
+            <!--<b-container fluid>-->
+                <!--<b-row>-->
+                    <!--<b-col lg="12">-->
+                        <!--<div>Are you sure you want to update all <strong>{{ this.selectedCaregiver.firstname }} {{ this.selectedCaregiver.lastname }}</strong>'s future scheduled shifts with the new rate information?  This will update <strong>{{ this.selectedCaregiver.scheduled_shifts_count }}</strong> total shifts.</div>-->
+                    <!--</b-col>-->
+                    <!--<b-col lg="12" class="text-center">-->
+                        <!--<b-btn variant="danger" class="mt-4" @click.prevent="updateSchedules">Yes - Update all future shifts with this new rate</b-btn>-->
+                    <!--</b-col>-->
+                <!--</b-row>-->
+            <!--</b-container>-->
+            <!--<div slot="modal-footer">-->
+               <!--<b-btn variant="default" @click="clientCargiverScheduleModal = false">Cancel</b-btn>-->
+            <!--</div>-->
+        <!--</b-modal>-->
 
-        <b-modal id="clientExcludeCargiver"
-                 title="Exclude Caregiver"
-                 v-model="clientExcludeCaregiverModal"
-                 ok-title="Exclude"
-                 @ok="excludeCaregiver">
-            <b-container fluid>
-                <b-row>
-                    <b-col lg="12">
-                        <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
-                            <b-form-select
-                                    id="exclude_caregiver_id"
-                                    name="exclude_caregiver_id"
-                                    v-model="excludeForm.caregiver_id"
-                            >
-                                <option value="">--Select a Caregiver--</option>
-                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
-                            </b-form-select>
-                        </b-form-group>
-                        <b-form-group label="Note" label-for="note">
-                            <b-form-textarea id="textarea1"
-                                v-model="excludeForm.note"
-                                :rows="3"
-                                :max-rows="6">
-                            </b-form-textarea>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn variant="default" @click="clientExcludeCaregiverModal=false">Close</b-btn>
-                <b-btn variant="info" @click="excludeCaregiver()" v-if="excludeForm.caregiver_id">Exclude</b-btn>
-            </div>
-        </b-modal>
+        <!--<client-caregiver-rate-code-modal v-if="businessSettings().use_rate_codes"-->
+                 <!--v-model="clientCaregiverModal"-->
+                 <!--:client="client"-->
+                 <!--:caregiver="selectedCaregiver"-->
+                 <!--:caregiver-list="caregiverList"-->
+                 <!--:rate-structure="businessSettings().rate_structure"-->
+                 <!--:pivot="selectedCaregiver.pivot"-->
+                 <!--@saved="handleSavedCaregiver"-->
+        <!--/>-->
 
-        <client-caregiver-rate-code-modal v-if="businessSettings().use_rate_codes"
-                 v-model="clientCaregiverModal"
-                 :client="client"
-                 :caregiver="selectedCaregiver"
-                 :caregiver-list="caregiverList"
-                 :rate-structure="businessSettings().rate_structure"
-                 :pivot="selectedCaregiver.pivot"
-                 @saved="handleSavedCaregiver"
-        />
+        <!--<b-modal v-else-->
+                 <!--:title="modalTitle"-->
+                 <!--v-model="clientCaregiverModal"-->
+                 <!--ref="clientCaregiverModal">-->
+            <!--<b-container fluid>-->
+                <!--<b-row v-if="!selectedCaregiver.id">-->
+                    <!--<b-col lg="12">-->
+                        <!--<b-form-group label="Caregiver" label-for="caregiver_id">-->
+                            <!--<select2-->
+                                <!--v-model="form.caregiver_id"-->
+                                <!--class="form-control"-->
+                                <!--&gt;-->
+                                <!--<option value="">&#45;&#45; Select Caregiver &#45;&#45;</option>-->
+                                <!--<option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>-->
+                            <!--</select2>-->
+                            <!--<input-help :form="form" field="caregiver_id" text=""></input-help>-->
+                        <!--</b-form-group>-->
+                    <!--</b-col>-->
+                <!--</b-row>-->
+                <!--<b-row v-if="!form.caregiver_id">-->
+                    <!--<b-col lg="12">-->
+                        <!--<strong>Select a caregiver from the above list.</strong>-->
+                    <!--</b-col>-->
+                <!--</b-row>-->
+                <!--<b-row v-if="form.caregiver_id">-->
+                    <!--<b-col lg="12">-->
+                        <!--<strong>Fill in two of the three fields below, our system will automatically calculate the third field and the Ally fee.</strong>-->
+                        <!--<hr />-->
+                    <!--</b-col>-->
+                    <!--<b-col lg="12">-->
 
-        <b-modal v-else
-                 :title="modalTitle"
-                 v-model="clientCaregiverModal"
-                 ref="clientCaregiverModal">
-            <b-container fluid>
-                <b-row v-if="!selectedCaregiver.id">
-                    <b-col lg="12">
-                        <b-form-group label="Caregiver" label-for="caregiver_id">
-                            <select2
-                                v-model="form.caregiver_id"
-                                class="form-control"
-                                >
-                                <option value="">-- Select Caregiver --</option>
-                                <option v-for="item in caregiverList" :value="item.id" :key="item.id">{{ item.name }}</option>
-                            </select2>
-                            <input-help :form="form" field="caregiver_id" text=""></input-help>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-                <b-row v-if="!form.caregiver_id">
-                    <b-col lg="12">
-                        <strong>Select a caregiver from the above list.</strong>
-                    </b-col>
-                </b-row>
-                <b-row v-if="form.caregiver_id">
-                    <b-col lg="12">
-                        <strong>Fill in two of the three fields below, our system will automatically calculate the third field and the Ally fee.</strong>
-                        <hr />
-                    </b-col>
-                    <b-col lg="12">
+                        <!--<b-tabs>-->
+                            <!--<b-tab title="Hourly Rates" active>-->
+                                <!--<b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">-->
+                                    <!--<b-form-input-->
+                                            <!--id="caregiver_hourly_rate"-->
+                                            <!--name="caregiver_hourly_rate"-->
+                                            <!--type="number"-->
+                                            <!--v-model="form.caregiver_hourly_rate"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromCaregiverHourly"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>-->
+                                <!--</b-form-group>-->
 
-                        <b-tabs>
-                            <b-tab title="Hourly Rates" active>
-                                <b-form-group label="Caregiver Hourly Rate" label-for="caregiver_hourly_rate">
-                                    <b-form-input
-                                            id="caregiver_hourly_rate"
-                                            name="caregiver_hourly_rate"
-                                            type="number"
-                                            v-model="form.caregiver_hourly_rate"
-                                            min="0"
-                                            @change="updateRatesFromCaregiverHourly"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="caregiver_hourly_rate" text="Enter the hourly earnings for this caregiver."></input-help>
-                                </b-form-group>
+                                <!--<b-form-group label="Registry Hourly Fee" label-for="provider_hourly_fee">-->
+                                    <!--<b-form-input-->
+                                            <!--id="provider_hourly_fee"-->
+                                            <!--name="provider_hourly_fee"-->
+                                            <!--type="number"-->
+                                            <!--v-model="form.provider_hourly_fee"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromCaregiverHourly"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="provider_hourly_fee" text="Enter the registry hourly fee."></input-help>-->
+                                <!--</b-form-group>-->
 
-                                <b-form-group label="Registry Hourly Fee" label-for="provider_hourly_fee">
-                                    <b-form-input
-                                            id="provider_hourly_fee"
-                                            name="provider_hourly_fee"
-                                            type="number"
-                                            v-model="form.provider_hourly_fee"
-                                            min="0"
-                                            @change="updateRatesFromCaregiverHourly"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="provider_hourly_fee" text="Enter the registry hourly fee."></input-help>
-                                </b-form-group>
+                                <!--<b-form-group label="Ally Hourly Fee" label-for="ally_hourly_fee">-->
+                                    <!--<b-form-input-->
+                                            <!--id="ally_hourly_fee"-->
+                                            <!--name="ally_hourly_fee"-->
+                                            <!--type="number"-->
+                                            <!--:value="ally_hourly_fee"-->
+                                            <!--min="0"-->
+                                            <!--disabled-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                <!--</b-form-group>-->
 
-                                <b-form-group label="Ally Hourly Fee" label-for="ally_hourly_fee">
-                                    <b-form-input
-                                            id="ally_hourly_fee"
-                                            name="ally_hourly_fee"
-                                            type="number"
-                                            :value="ally_hourly_fee"
-                                            min="0"
-                                            disabled
-                                    >
-                                    </b-form-input>
-                                </b-form-group>
+                                <!--<b-form-group label="Total Hourly Rate" label-for="total_hourly_rate">-->
+                                    <!--<b-form-input-->
+                                            <!--id="total_hourly_rate"-->
+                                            <!--name="total_hourly_rate"-->
+                                            <!--type="number"-->
+                                            <!--v-model="total_hourly_rate"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromTotalHourly"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>-->
+                                <!--</b-form-group>-->
+                            <!--</b-tab>-->
+                            <!--<b-tab title="Daily Rates (Live-in)" >-->
+                                <!--<b-form-group label="Caregiver Daily Rate" label-for="caregiver_hourly_rate">-->
+                                    <!--<b-form-input-->
+                                            <!--id="caregiver_fixed_rate"-->
+                                            <!--name="caregiver_fixed_rate"-->
+                                            <!--type="number"-->
+                                            <!--v-model="form.caregiver_fixed_rate"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromCaregiverDaily"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="caregiver_fixed_rate" text="Enter the daily earnings for this caregiver."></input-help>-->
+                                <!--</b-form-group>-->
 
-                                <b-form-group label="Total Hourly Rate" label-for="total_hourly_rate">
-                                    <b-form-input
-                                            id="total_hourly_rate"
-                                            name="total_hourly_rate"
-                                            type="number"
-                                            v-model="total_hourly_rate"
-                                            min="0"
-                                            @change="updateRatesFromTotalHourly"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="total_hourly_rate" text="The total hourly rate charged to the client."></input-help>
-                                </b-form-group>
-                            </b-tab>
-                            <b-tab title="Daily Rates (Live-in)" >
-                                <b-form-group label="Caregiver Daily Rate" label-for="caregiver_hourly_rate">
-                                    <b-form-input
-                                            id="caregiver_fixed_rate"
-                                            name="caregiver_fixed_rate"
-                                            type="number"
-                                            v-model="form.caregiver_fixed_rate"
-                                            min="0"
-                                            @change="updateRatesFromCaregiverDaily"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="caregiver_fixed_rate" text="Enter the daily earnings for this caregiver."></input-help>
-                                </b-form-group>
+                                <!--<b-form-group label="Registry Daily Fee" label-for="provider_fixed_fee">-->
+                                    <!--<b-form-input-->
+                                            <!--id="provider_fixed_fee"-->
+                                            <!--name="provider_fixed_fee"-->
+                                            <!--type="number"-->
+                                            <!--v-model="form.provider_fixed_fee"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromCaregiverDaily"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="provider_fixed_fee" text="Enter the registry daily fee."></input-help>-->
+                                <!--</b-form-group>-->
 
-                                <b-form-group label="Registry Daily Fee" label-for="provider_fixed_fee">
-                                    <b-form-input
-                                            id="provider_fixed_fee"
-                                            name="provider_fixed_fee"
-                                            type="number"
-                                            v-model="form.provider_fixed_fee"
-                                            min="0"
-                                            @change="updateRatesFromCaregiverDaily"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="provider_fixed_fee" text="Enter the registry daily fee."></input-help>
-                                </b-form-group>
+                                <!--<b-form-group label="Ally Daily Fee" label-for="ally_daily_fee">-->
+                                    <!--<b-form-input-->
+                                            <!--id="ally_daily_fee"-->
+                                            <!--name="ally_daily_fee"-->
+                                            <!--type="number"-->
+                                            <!--:value="ally_daily_fee"-->
+                                            <!--min="0"-->
+                                            <!--disabled-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                <!--</b-form-group>-->
 
-                                <b-form-group label="Ally Daily Fee" label-for="ally_daily_fee">
-                                    <b-form-input
-                                            id="ally_daily_fee"
-                                            name="ally_daily_fee"
-                                            type="number"
-                                            :value="ally_daily_fee"
-                                            min="0"
-                                            disabled
-                                    >
-                                    </b-form-input>
-                                </b-form-group>
+                                <!--<b-form-group label="Total Daily Rate" label-for="total_daily_rate">-->
+                                    <!--<b-form-input-->
+                                            <!--id="total_daily_rate"-->
+                                            <!--name="total_daily_rate"-->
+                                            <!--type="number"-->
+                                            <!--v-model="total_daily_rate"-->
+                                            <!--min="0"-->
+                                            <!--@change="updateRatesFromTotalDaily"-->
+                                    <!--&gt;-->
+                                    <!--</b-form-input>-->
+                                    <!--<input-help :form="form" field="total_daily_rate" text="The total daily rate charged to the client."></input-help>-->
+                                <!--</b-form-group>-->
+                            <!--</b-tab>-->
+                        <!--</b-tabs>-->
 
-                                <b-form-group label="Total Daily Rate" label-for="total_daily_rate">
-                                    <b-form-input
-                                            id="total_daily_rate"
-                                            name="total_daily_rate"
-                                            type="number"
-                                            v-model="total_daily_rate"
-                                            min="0"
-                                            @change="updateRatesFromTotalDaily"
-                                    >
-                                    </b-form-input>
-                                    <input-help :form="form" field="total_daily_rate" text="The total daily rate charged to the client."></input-help>
-                                </b-form-group>
-                            </b-tab>
-                        </b-tabs>
-
-                    </b-col>
-               </b-row>
-                <b-row v-if="this.selectedCaregiver.id">
-                    <b-col>
-                        <hr />
-                        <b-form-group>
-                            <b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">
-                                Remove from Client
-                            </b-btn>
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-               <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
-               <b-btn variant="warning" @click="saveCaregiver(true)" v-if="selectedCaregiver && selectedCaregiver.id">Save and Update Future Schedules</b-btn>
-               <b-btn variant="info" @click="saveCaregiver()" v-if="form.caregiver_id">Save</b-btn>
-            </div>
-        </b-modal>
+                    <!--</b-col>-->
+               <!--</b-row>-->
+                <!--<b-row v-if="this.selectedCaregiver.id">-->
+                    <!--<b-col>-->
+                        <!--<hr />-->
+                        <!--<b-form-group>-->
+                            <!--<b-btn variant="danger" @click="removeAssignedCaregiver(form.caregiver_id)">-->
+                                <!--Remove from Client-->
+                            <!--</b-btn>-->
+                        <!--</b-form-group>-->
+                    <!--</b-col>-->
+                <!--</b-row>-->
+            <!--</b-container>-->
+            <!--<div slot="modal-footer">-->
+               <!--<b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>-->
+               <!--<b-btn variant="warning" @click="saveCaregiver(true)" v-if="selectedCaregiver && selectedCaregiver.id">Save and Update Future Schedules</b-btn>-->
+               <!--<b-btn variant="info" @click="saveCaregiver()" v-if="form.caregiver_id">Save</b-btn>-->
+            <!--</div>-->
+        <!--</b-modal>-->
 
     </b-card>
 </template>
@@ -334,17 +278,11 @@
     import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateCodes from "../../../mixins/RateCodes";
     import RateCodeModal from "../rate_codes/RateCodeModal";
-    import ClientCaregiverRateCodeModal from "./ClientCaregiverRateCodeModal";
+    import ClientCaregiverRateCodeModal from "../clients/ClientCaregiverRateCodeModal";
 
     export default {
         props: {
-            'client': Object,
-            'allyRate': Number,
-            'paymentTypeMessage': {
-                default() {
-                    return '';
-                }
-            }
+            'caregiver': Object,
         },
 
         components: {ClientCaregiverRateCodeModal, RateCodeModal},
@@ -353,41 +291,38 @@
 
         data() {
             return {
-                client_id: this.client.id,
-                caregiverList: [],
+                // caregiverList: [],
                 items: [],
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
                 clientCargiverScheduleModal: false,
-                selectedCaregiver: {pivot: {}},
-                form: new Form(),
-                excludeForm: this.makeExcludeForm(),
-                excludedCaregivers: [],
-                ally_hourly_fee: 0.00,
-                total_hourly_rate: 0.00,
+                // selectedCaregiver: {pivot: {}},
+                // form: new Form(),
+                // excludeForm: this.makeExcludeForm(),
+                // excludedCaregivers: [],
                 loading: '',
                 rateCodeModal: false,
                 rateForm: new Form({
-                    'hourly_rate_id': this.client.hourly_rate_id || "",
-                    'fixed_rate_id': this.client.fixed_rate_id || "",
+                    'hourly_rate_id': this.caregiver.hourly_rate_id || "",
+                    'fixed_rate_id': this.caregiver.fixed_rate_id || "",
                 })
             }
         },
 
         mounted() {
-            this.fetchAssignedCaregivers();
-            this.fetchCaregivers();
-            this.fetchExcludedCaregivers();
-            this.fetchRateCodes('client');
+            this.fetchAssignedClients();
+            // this.fetchCaregivers();
+            // this.fetchExcludedCaregivers();
+            this.fetchRateCodes('caregiver');
         },
         
         computed: {
-            modalTitle() {
-                if (this.selectedCaregiver.id) {
-                    return 'Edit Caregiver Assignment';
-                }
-                return 'Add Caregiver to Client';
-            },
+            // modalTitle() {
+            //     if (this.selectedCaregiver.id) {
+            //         return 'Edit Caregiver Assignment';
+            //     }
+            //     return 'Add Caregiver to Client';
+            // },
 
             clientRateStructure() {
                 return this.businessSettings().rate_structure === 'client_rate';
@@ -459,7 +394,7 @@
             },
 
             saveDefaultRates() {
-                this.rateForm.put('/business/clients/' + this.client_id + '/default-rates');
+                this.rateForm.put('/business/caregivers/' + this.caregiver.id + '/default-rates');
             },
 
             updateSchedules() {
@@ -470,14 +405,10 @@
                     })
             },
 
-            fetchAssignedCaregivers() {
-                axios.get('/business/clients/' + this.client_id + '/caregivers')
+            fetchAssignedClients() {
+                axios.get('/business/caregivers/' + this.caregiver.id + '/clients')
                     .then(response => {
-                        if (Array.isArray(response.data)) {
-                            this.items = _.sortBy(response.data, ['lastname', 'firstname']);
-                        } else {
-                            this.items = [];
-                        }
+                        this.items = response.data || [];
                     });
             },
 

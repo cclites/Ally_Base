@@ -139,6 +139,7 @@ Route::group([
     Route::get('caregivers/{caregiver}/phones', 'Business\CaregiverPhoneController@index')->name('caregivers.phones');
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
+    Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
 
     Route::get('clients/list', 'Business\ClientController@listNames')->name('clients.list');
     Route::resource('clients', 'Business\ClientController');

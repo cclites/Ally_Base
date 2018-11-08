@@ -1,12 +1,11 @@
 <?php
-
-
 namespace App\Http\Controllers\Business;
 
-
 use App\Caregiver;
+use App\Responses\ErrorResponse;
+use App\Responses\Resources\CaregiverClient;
 
-class CaregiverClientController
+class CaregiverClientController extends BaseController
 {
     public function index(Caregiver $caregiver)
     {
@@ -15,7 +14,7 @@ class CaregiverClientController
         }
 
         $caregivers = $caregiver->clients->map(function ($client) use ($caregiver) {
-            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+            return (new CaregiverClient($client, $caregiver))->toResponse(null);
         });
 
         return $caregivers->sortBy('name')->values()->all();

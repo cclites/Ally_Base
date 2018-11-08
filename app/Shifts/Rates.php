@@ -24,6 +24,11 @@ class Rates
     public $ally_fee;
 
     /**
+     * @var float
+     */
+    public $total_rate;
+
+    /**
      * @var boolean
      */
     public $client_rate_includes_fee;
@@ -58,6 +63,13 @@ class Rates
         $this->ally_fee = $ally_fee;
         $this->client_rate_includes_fee = $client_rate_includes_fee;
         $this->fixed_rates = $fixed_rates;
+
+        if ($client_rate_includes_fee) {
+            $this->total_rate = $this->client_rate;
+        }
+        else {
+            $this->total_rate = (float) bcadd($this->client_rate, $this->ally_fee, 2);
+        }
     }
 
 }
