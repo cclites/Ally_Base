@@ -48,9 +48,11 @@
                         <b-row>
                             <b-col lg="6">
                                 <h1>Prospects Funnel</h1>
-                                <e-charts ref="funnel" :options="chartOptions" class="funnel-chart" auto-resize></e-charts>
+                                <e-charts ref="funnel" :options="chartOptions" class="chart" auto-resize></e-charts>
                             </b-col>
                             <b-col lg="6">
+                                <h1>Prospects by Referral Source</h1>
+                                <e-charts ref="bar" :options="barOptions" class="chart" auto-resize></e-charts>
                             </b-col>
                         </b-row>
                     </div>
@@ -63,6 +65,7 @@
 <script>
 import axios from 'axios';
 import ECharts from 'vue-echarts';
+import moment from 'moment';
 
 export default {
     components: {
@@ -94,6 +97,7 @@ export default {
             hotOptions: {
                 width: '80%',
             },
+            referralData: {},
         };
     },
     computed: {
@@ -167,9 +171,56 @@ export default {
                                 borderWidth: 1
                             }
                         },
-                        ...this.hotOptions,
                     }
                 ]
+            };
+        },
+        barOptions() {
+            let yAxisLabels = [];
+            const series = Object.keys(this.referralData).map((date, i) => {
+                const data = this.referralData[date].map(item => item.count).reverse();
+                const name = moment(date, 'MM/YYYY').format('MMM');
+
+                if(i == 0) {
+                    yAxisLabels = this.referralData[date].map(item => item.name).reverse();
+                }
+                
+                return {
+                    name,
+                    data,
+                    type: 'bar',
+                    stack: '总量',
+                    label: {
+                        normal: { show: true, position: 'insideRight' },
+                    },
+                };
+            });
+            
+            return {
+                series,
+                tooltip : {
+                    trigger: 'axis',
+                    axisPointer : {        
+                        type : 'shadow'        // 'line' | 'shadow'
+                    }
+                },
+                legend: {
+                    data: this.monthLabels,
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis:  {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: yAxisLabels,
+                },
+                ...this.hotOptions,
             };
         },
     },
@@ -177,11 +228,25 @@ export default {
         fetchData() {
             this.loading = true;
             this.dataIsReady = false;
+            this.totalProspects = 0;
+            this.monthLabels = [];
+            this.referralData = {};
+            Object.keys(this.pipeline).forEach(field => this.pipeline[field] = 0);
 
             this.form.post(`/business/reports/sales-pipeline`)
                 .then(({data}) => {
+                    const {start_date, end_date} = this.form;
                     this.loading = false;
                     this.dataIsReady = true;
+                    
+                    // Create months label array for the bar chart
+                    const monthGap = moment(end_date).diff((start_date), 'month');
+                    for (let i = 0; i < Math.abs(monthGap); i++) {
+                        const month = moment(start_date, 'MM/DD/YYYY').add({months: i});
+                        this.monthLabels.push(month.format('MMM'));
+                    }
+
+                    this.crunchDataForBar(data);
                     this.crunchDataForFunnel(data);
                 })
                 .catch((err) => {
@@ -208,19 +273,47 @@ export default {
             Object.keys(this.pipeline).forEach(status => total += this.pipeline[status]);
             this.totalProspects = total;
         },
+        crunchDataForBar(data) {
+            const groupedByDate= {};
+            data.forEach((prospect) => {
+                if(!prospect.referral_source) return;
+                const date = moment(prospect.created_at).format('M/YYYY');
+
+                groupedByDate[date] 
+                    ? groupedByDate[date].push(prospect)
+                    : groupedByDate[date] = [prospect];
+            });
+
+            const result = {};
+
+            // Combine prospects by their referral source
+            Object.keys(groupedByDate).forEach(date => {
+                const sortBySource = {};
+                groupedByDate[date].forEach(({referral_source: source}) => {
+                    const newSource = { id: source.id, name: source.organization, count: 1 };
+                    sortBySource[source.id]
+                        ? sortBySource[source.id].count++
+                        : sortBySource[source.id] = newSource;
+                });
+
+                result[date] = Object.keys(sortBySource).map(sourceId => sortBySource[sourceId]);
+            });
+
+            this.referralData = result;
+        },
     }
 }
 </script>
 
 <style scoped>
-.funnel-chart {
+.chart {
     width: 100%;
 }
 .space-evenly {
     justify-content: space-evenly;
 }
 @media only screen and (min-width: 2000px) {
-    .funnel-chart {
+    .chart {
         height: 600px;
     }
 }
