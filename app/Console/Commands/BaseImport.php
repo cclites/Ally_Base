@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Note;
 use App\PhoneNumber;
 use Carbon\Carbon;
 use DB;
