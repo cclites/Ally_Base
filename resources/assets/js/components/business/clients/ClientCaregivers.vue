@@ -316,7 +316,9 @@
                 excludeForm: this.makeExcludeForm(),
                 excludedCaregivers: [],
                 ally_hourly_fee: 0.00,
+                ally_daily_fee: 0.00,
                 total_hourly_rate: 0.00,
+                total_daily_rate: 0.00,
                 loading: '',
             }
         },
@@ -378,17 +380,26 @@
                 let component = this;
                 this.form.post('/business/clients/' + component.client_id + '/caregivers')
                     .then((response) => {
-                        this.fetchCaregivers();
-                        component.items = component.items.filter(caregiver => {
-                            return caregiver.id != response.data.data.id;
-                        });
-                        component.items.unshift(response.data.data);
-                        component.clientCaregiverModal = false;
+                        this.handleSavedCaregiver(response.data.data);
 
                         if (updateSchedules && response.data.data.scheduled_shifts_count > 0) {
                             component.confirmUpdateSchedule(response.data.data)
                         }
                     });
+            },
+
+            handleSavedCaregiver(caregiver) {
+                this.fetchCaregivers();
+                let index = this.items.findIndex(item => {
+                    return caregiver.id == item.id;
+                });
+                if (index > -1) {
+                    Vue.set(this.items, index, caregiver);
+                }
+                else {
+                    this.items.unshift(caregiver);
+                }
+                this.clientCaregiverModal = false;
             },
 
             updateSchedules() {
