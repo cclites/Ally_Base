@@ -364,7 +364,9 @@
                 excludeForm: this.makeExcludeForm(),
                 excludedCaregivers: [],
                 ally_hourly_fee: 0.00,
+                ally_daily_fee: 0.00,
                 total_hourly_rate: 0.00,
+                total_daily_rate: 0.00,
                 loading: '',
                 rateCodeModal: false,
                 rateForm: new Form({
