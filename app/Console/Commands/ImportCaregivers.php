@@ -61,7 +61,8 @@ class ImportCaregivers extends BaseImport
             'email' => $this->resolve('Email', $row),
             'hire_date' => $this->resolve('Hire Date', $row),
             'gender' => $this->resolve('Gender', $row),
-            'active' => $this->resolve('Active', $row) ?? 1,
+            'active' => $this->resolve('Active', $row),
+            'preferences' => $this->resolve('Preferences', $row),
             'password' => bcrypt(str_random(12)),
         ];
 
@@ -85,6 +86,7 @@ class ImportCaregivers extends BaseImport
                 $caregiver->setAutoEmail()->save();
             }
 
+            $this->importAvailability($caregiver, $row);
             $this->importMeta($caregiver, $row);
             $this->importAddresses($caregiver, $row);
             $this->importPhoneNumbers($caregiver, $row);
@@ -94,6 +96,26 @@ class ImportCaregivers extends BaseImport
         }
 
         return false;
+    }
+
+    protected function importAvailability(Caregiver $caregiver, int $row)
+    {
+        $availabilityData = [
+            'monday' => $this->resolveBoolean('Mondays', $row, null),
+            'tuesday' => $this->resolveBoolean('Tuesdays', $row, null),
+            'wednesday' => $this->resolveBoolean('Wednesdays', $row, null),
+            'thursday' => $this->resolveBoolean('Thursdays', $row, null),
+            'friday' => $this->resolveBoolean('Fridays', $row, null),
+            'saturday' => $this->resolveBoolean('Saturdays', $row, null),
+            'sunday' => $this->resolveBoolean('Sundays', $row, null),
+            'morning' => $this->resolveBoolean('Mornings', $row, null),
+            'afternoon' => $this->resolveBoolean('Afternoons', $row, null),
+            'evening' => $this->resolveBoolean('Evenings', $row, null),
+            'night' => $this->resolveBoolean('Overnight', $row, null),
+            'live_in' => $this->resolveBoolean('Live In', $row, null),
+        ];
+
+        $caregiver->setAvailability(array_filter($availabilityData, 'is_bool'));
     }
 
     /**

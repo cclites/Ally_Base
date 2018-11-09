@@ -220,6 +220,14 @@ abstract class BaseImport extends Command
         return false;
     }
 
+    /**
+     * Resolve a value matching the field header and row number
+     *
+     * @param string $field
+     * @param int $row
+     * @return false|mixed|null|string
+     * @throws \PHPExcel_Exception
+     */
     public function resolve(string $field, int $row)
     {
         $cellValue = $this->getValue($this->sheet, $field, $row);
@@ -233,6 +241,43 @@ abstract class BaseImport extends Command
     }
 
     /**
+     * Resolve a field that expects a boolean type, matches true as: true, 1, 'Y', 'Yes', 'True'
+     *
+     * @param string $field
+     * @param int $row
+     * @param bool $default
+     * @param array $additionalTrueStrings
+     * @param array $additionalFalseStrings
+     * @return bool
+     * @throws \PHPExcel_Exception
+     */
+    public function resolveBoolean(string $field, int $row, $default = false, array $additionalTrueStrings = [], array $additionalFalseStrings = [])
+    {
+        $cellValue = $this->getValue($this->sheet, $field, $row);
+
+        $trueStrings = array_merge(
+            ['Y', 'YES', 'TRUE'],
+            array_map('strtoupper', $additionalTrueStrings)
+        );
+        $falseStrings = array_merge(
+            ['N', 'NO', 'FALSE'],
+            array_map('strtoupper', $additionalFalseStrings)
+        );
+
+        if (is_numeric($cellValue) || is_bool($cellValue)) {
+            return (bool) $cellValue;
+        }
+        if (in_array(strtoupper($cellValue), $trueStrings)) {
+            return true;
+        }
+        if (in_array(strtoupper($cellValue), $falseStrings)) {
+            return false;
+        }
+
+        return $default;
+    }
+
+    /**
      * Allows values like: false, true, 0, 1, 'INACTIVE', 'ACTIVE', 'I', 'A', 'FALSE', 'TRUE'
      *
      * @param int $row
@@ -241,19 +286,13 @@ abstract class BaseImport extends Command
      */
     protected function resolveActive(int $row, $cellValue)
     {
-        if (is_numeric($cellValue) || is_bool($cellValue)) {
-            return (int)$cellValue;
-        }
-
-        if (strlen($cellValue)) {
-            $validStrings = ['A', 'ACTIVE', 'TRUE'];
-            if (in_array(strtoupper($cellValue), $validStrings)) {
-                return 1;
-            }
-            return 0;
-        }
-
-        return null;
+        return $this->resolveBoolean(
+            'Active',
+            $row,
+            true,
+            ['A', 'ACTIVE'],
+            ['I', 'INACTIVE']
+        );
     }
 
     /**
