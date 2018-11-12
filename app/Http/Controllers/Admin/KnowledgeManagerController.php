@@ -84,6 +84,7 @@ class KnowledgeManagerController extends Controller
      * @param UpdateKnowledgeRequest $request
      * @param Knowledge $knowledge
      * @return ErrorResponse|SuccessResponse
+     * @throws \Exception
      */
     public function update(UpdateKnowledgeRequest $request, Knowledge $knowledge)
     {

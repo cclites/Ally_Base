@@ -6,14 +6,39 @@ use Illuminate\Database\Eloquent\Model;
 
 class Knowledge extends Model
 {
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
     protected $table = 'knowledge';
 
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
     public $guarded = ['id'];
 
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
     public $with = ['attachments', 'video', 'roles'];
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
     public $appends = ['assigned_roles'];
 
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
     public static function boot()
     {
         // create the slug automatically
@@ -24,10 +49,14 @@ class Knowledge extends Model
         });
     }
 
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+    
     /**
      * Get the Knowledge Attachments relation.
      *
-     * @return HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function attachments()
     {
@@ -35,11 +64,49 @@ class Knowledge extends Model
     }
 
     /**
+     * Gets the related video file information.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function video()
+    {
+        return $this->hasOne(Attachment::class, 'id', 'video_attachment_id');
+    }
+
+    /**
+     * Get the assigned roles relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function roles()
+    {
+        return $this->hasMany(KnowledgeRole::class);
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+    
+    /**
+     * Get the assigned roles as strings.
+     *
+     * @return array
+     */
+    public function getAssignedRolesAttribute()
+    {
+        return $this->roles->pluck('role')->toArray();
+    }
+    
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    /**
      * Scope to add keyword search to title and body.
      *
-     * @param [type] $query
+     * @param \Illuminate\Database\Query\Builder query
      * @param string $keyword
-     * @return void
+     * @return \Illuminate\Database\Query\Builder
      */
     public function scopeWithKeyword($query, $keyword)
     {
@@ -50,9 +117,32 @@ class Knowledge extends Model
     }
 
     /**
+     * Add the scope for a specific role.
+     *
+     * @param \Illuminate\Database\Query\Builder query
+     * @param array|string $roles
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForRoles($query, $roles)
+    {
+        if (! is_array($roles)) {
+            $roles = [$roles];
+        }
+
+        return $query->whereHas('roles', function ($q) use ($roles) {
+            return $q->whereIn('role', $roles);
+        });
+    }
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
+
+    /**
      * Generates a unique slug from the given string.
      *
      * @param string $title
+     * @param int $ignoreId
      * @return string
      */
     public static function uniqueSlug($title, $ignoreId)
@@ -73,54 +163,11 @@ class Knowledge extends Model
     }
 
     /**
-     * Gets the related video file information.
+     * Update the roles from a string array.
      *
-     * @return void
-     */
-    public function video()
-    {
-        return $this->hasOne(Attachment::class, 'id', 'video_attachment_id');
-    }
-
-    /**
-     * Get the assigned roles relationship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
-    public function roles()
-    {
-//        return $this->belongsToMany(KnowledgeRole::class, 'knowledge_roles', 'knowledge_id', 'role');
-        return $this->hasMany(KnowledgeRole::class);
-    }
-
-    /**
-     * Get the assigned roles as strings.
-     *
-     * @return array
-     */
-    public function getAssignedRolesAttribute()
-    {
-        return $this->roles->pluck('role')->toArray();
-    }
-
-    /**
-     * Add the scope for a specific role.
-     *
-     * @param \Illuminate\Database\Query\Builder query
      * @param array $roles
-     * @return \Illuminate\Database\Query\Builder
+     * @return bool
      */
-    public function scopeForRoles($query, $roles)
-    {
-        if (! is_array($roles)) {
-            $roles = [$roles];
-        }
-
-        return $query->whereHas('roles', function ($q) use ($roles) {
-            return $q->whereIn('role', $roles);
-        });
-    }
-
     public function syncRoles($roles)
     {
         $this->roles()->delete();
