@@ -153,13 +153,11 @@
 
                 this.form.submit(method, url)
                     .then( ({ data }) => {
-                        console.log(data);
                         if (this.mode == 'edit') {
                             this.form = new Form(data.data);
                         }
                     })
                     .catch(e => {
-                        console.log(e);
                     })
             },
 
@@ -204,7 +202,6 @@
                         this.resetUpload(e.target);
                     })
                     .catch(e => {
-                        console.log(e);
                         this.resetUpload(e.target);
                     });
             },
@@ -229,7 +226,6 @@
                         this.resetUpload(e.target);
                     })
                     .catch(e => {
-                        console.log(e);
                         this.resetUpload(e.target);
                     });
             },

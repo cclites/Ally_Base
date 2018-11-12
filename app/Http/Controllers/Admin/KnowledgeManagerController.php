@@ -53,7 +53,6 @@ class KnowledgeManagerController extends Controller
             $item->attachments()->sync($attachments);
             $item->syncRoles($data['assigned_roles']);
         } catch (\Exception $ex) {
-//            dd($ex->getMessage());
             DB::rollBack();
             return new ErrorResponse(500, "An unexpected error occurred while creating the Knowledge Item, please try again.");
         }

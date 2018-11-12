@@ -45,9 +45,7 @@
                         <div class="d-sm-block d-md-block d-lg-none d-xl-none">
                             <a v-b-toggle="`${item.slug}`" href="" @click="e => e.preventDefault()">{{ item.title }}</a>
                             <b-collapse :id="item.slug" class="mt-3">
-                                <!-- <b-card> -->
                                 <knowledge-item :item="item" :hide-title="true" />
-                                <!-- </b-card> -->
                             </b-collapse>
                         </div>
                     </b-list-group-item>
@@ -62,9 +60,7 @@
                         <div class="d-sm-block d-md-block d-lg-none d-xl-none">
                             <a v-b-toggle="`${item.slug}`" href="" @click="e => e.preventDefault()">{{ item.title }}</a>
                             <b-collapse :id="item.slug" class="mt-3">
-                                <!-- <b-card> -->
                                 <knowledge-item :item="item" :hide-title="true" />
-                                <!-- </b-card> -->
                             </b-collapse>
                         </div>
                     </b-list-group-item>
@@ -79,9 +75,7 @@
                         <div class="d-sm-block d-md-block d-lg-none d-xl-none">
                             <a v-b-toggle="`${item.slug}`" href="" @click="e => e.preventDefault()">{{ item.title }}</a>
                             <b-collapse :id="item.slug" class="mt-3">
-                                <!-- <b-card> -->
                                 <knowledge-item :item="item" :hide-title="true" />
-                                <!-- </b-card> -->
                             </b-collapse>
                         </div>
                     </b-list-group-item>
