@@ -5,17 +5,17 @@
                 <b-card>
                     <b-form-group label="Visible To">
                         <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="client">
+                            <input type="checkbox" class="custom-control-input" v-model="form.assigned_roles" value="client">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Clients</span>
                         </label>
                         <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="caregiver">
+                            <input type="checkbox" class="custom-control-input" v-model="form.assigned_roles" value="caregiver">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Caregivers</span>
                         </label>
                         <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" v-model="form.roles" value="office_user">
+                            <input type="checkbox" class="custom-control-input" v-model="form.assigned_roles" value="office_user">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Office Users</span>
                         </label>
@@ -120,7 +120,7 @@
             return {
                 files: [],
                 form: new Form({
-                    roles: [],
+                    assigned_roles: [],
                     type: '',
                     title: '',
                     slug: '',

@@ -114,3 +114,8 @@
         <li><a href="{{ route('business.quickbooks.index') }}">Quickbooks</a></li>
     </ul>
 </li>
+<li>
+    <a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">
+        <i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>
+    </a>
+</li>

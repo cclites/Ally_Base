@@ -49,9 +49,9 @@ class KnowledgeManagerController extends Controller
 
         try {
             DB::beginTransaction();
-            $item = Knowledge::create(array_except($data, ['attachments', 'roles']));
+            $item = Knowledge::create(array_except($data, ['attachments', 'assigned_roles']));
             $item->attachments()->sync($attachments);
-            $item->syncRoles($data['roles']);
+            $item->syncRoles($data['assigned_roles']);
         } catch (\Exception $ex) {
 //            dd($ex->getMessage());
             DB::rollBack();
@@ -91,12 +91,16 @@ class KnowledgeManagerController extends Controller
 
         $attachments = collect($data['attachments'])->pluck('id')->toArray();
 
-        if ($knowledge->update(array_except($data, ['attachments']))) {
+        DB::beginTransaction();
+        if ($knowledge->update(array_except($data, ['attachments', 'assigned_roles']))) {
             $knowledge->attachments()->sync($attachments);
+            $knowledge->syncRoles($data['assigned_roles']);
 
+            DB::commit();
             return new SuccessResponse("\"{$knowledge->title}\" has been published.", $knowledge->fresh());
         }
 
+        DB::rollBack();
         return new ErrorResponse(500, 'An unexpected error occurred.');
     }
 

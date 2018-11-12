@@ -1,34 +1,40 @@
 <template>
     <div>
-        <portal to="page-title-right">
-            <div class="quick-search">
-                <div class="form-control icon-control">
-                    <i v-if="searching" class="fa fa-spinner fa-spin"></i>
-                    <i v-else class="fa fa-search"></i>
-                    <input type="text"
-                           placeholder="Search Knowledge Base"
-                           v-model="filter"
-                           @input="onSearch"
-                           @focus="showResults()"
-                           @blur="hideResults()"
-                    />
-                </div>
-                <div v-show="openSearch" class="search-results">
-                    <b-dropdown-item v-if="searchResults.length == 0">No Results</b-dropdown-item>
-                    <b-dropdown-item v-else
-                                     v-for="item in searchResults"
-                                     :key="item.id"
-                                     :href="`#${item.slug}`"
-                                     class="search-result"
-                    >
-                        {{ item.title }}
-                    </b-dropdown-item>
-                </div>
+        <div class="quick-search">
+            <div class="form-control icon-control">
+                <i v-if="searching" class="fa fa-spinner fa-spin"></i>
+                <i v-else class="fa fa-search"></i>
+                <input type="text"
+                       placeholder="Search Knowledge Base"
+                       v-model="filter"
+                       @input="onSearch"
+                       @focus="showResults()"
+                       @blur="hideResults()"
+                />
             </div>
-        </portal>
+            <div v-show="openSearch" class="search-results">
+                <b-dropdown-item v-if="searchResults.length == 0">No Results</b-dropdown-item>
+                <b-dropdown-item v-else
+                                 v-for="item in searchResults"
+                                 :key="item.id"
+                                 :href="`#${item.slug}`"
+                                 class="search-result"
+                >
+                    {{ item.title }}
+                </b-dropdown-item>
+            </div>
+        </div>
         <b-row class="mb-4">
             <b-col lg="4" md="12" class="mb-4">
                 <b-list-group>
+                    <b-list-group-item v-if="admin">
+                        <label for="role_filter" class="mr-2">View As:</label>
+                        <b-select v-model="role_filter" style="width:auto" id="role_filter">
+                            <option value="caregiver">Caregiver</option>
+                            <option value="client">Client</option>
+                            <option value="office_user">Office User</option>
+                        </b-select>
+                    </b-list-group-item>
                     <b-list-group-item><h3>FAQ</h3></b-list-group-item>
 
                     <b-list-group-item v-for="item in faq" :key="item.id">
@@ -99,10 +105,12 @@
 
 <script>
     export default {
-        props: ['knowledgeBase'],
+        props: ['knowledgeBase', 'admin'],
 
         data() {
             return {
+                items: [],
+                role_filter: '',
                 searchResults: [],
                 filter: '',
                 openSearch: false,
@@ -113,15 +121,15 @@
 
         computed: {
             faq() {
-                return this.knowledgeBase.filter(item => item.type == 'faq');
+                return this.items.filter(item => item.type == 'faq');
             },
 
             tutorials() {
-                return this.knowledgeBase.filter(item => item.type == 'tutorial');
+                return this.items.filter(item => item.type == 'tutorial');
             },
 
             resources() {
-                return this.knowledgeBase.filter(item => item.type == 'resource');
+                return this.items.filter(item => item.type == 'resource');
             },
         },
 
@@ -170,11 +178,27 @@
         },
 
         mounted() {
+            this.items = this.knowledgeBase;
+            if (this.admin) {
+                this.role_filter = 'office_user';
+            }
             this.hash = window.location.hash ? window.location.hash.substr(1) : '';
             window.addEventListener("hashchange", this.changeUrl, false);
 
             // Hide the other quick search on the page, if it exists
             $('.quick-search').not('.vue-portal-target .quick-search').hide();
+        },
+
+        watch: {
+            role_filter(newVal) {
+                if (newVal == '') {
+                    this.items = this.knowledgeBase;
+                    return;
+                }
+
+                this.items = this.knowledgeBase.filter(obj => obj.assigned_roles.includes(newVal));
+                window.location = '#';
+            },
         },
     }
 </script>

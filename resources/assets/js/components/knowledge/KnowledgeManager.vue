@@ -1,6 +1,15 @@
 <template>
     <b-card>
-        <b-btn class="pull-right" variant="primary" href="/admin/knowledge-manager/create">Add Item</b-btn>
+        <div class="mb-3">
+            <label for="role_filter" class="mr-2">Filter For Role:</label>
+            <b-select v-model="role_filter" style="width:auto" id="role_filter">
+                <option value="">-- Show All --</option>
+                <option value="caregiver">Caregiver</option>
+                <option value="client">Client</option>
+                <option value="office_user">Office User</option>
+            </b-select>
+            <b-btn class="pull-right" variant="primary" href="/admin/knowledge-manager/create">Add Item</b-btn>
+        </div>
 
         <h3>FAQs</h3>
         <div class="table-responsive">
@@ -80,6 +89,7 @@
 
         data() {
             return {
+                role_filter: '',
                 items: [],
                 fields: {
                     title: {},
@@ -132,6 +142,17 @@
 
         mounted() {
             this.items = this.knowledgeBase;
+        },
+
+        watch: {
+            role_filter(newVal) {
+                if (newVal == '') {
+                    this.items = this.knowledgeBase;
+                    return;
+                }
+
+                this.items = this.knowledgeBase.filter(obj => obj.assigned_roles.includes(newVal));
+            },
         },
     }
 </script>

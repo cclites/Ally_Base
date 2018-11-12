@@ -27,6 +27,8 @@ class UpdateKnowledgeRequest extends FormRequest
         $knowledge = $this->route('knowledge');
 
         return [
+            'assigned_roles' => 'required|array|min:1',
+            'assigned_roles.*' => 'required|string|distinct|in:client,caregiver,office_user',
             'type' => 'required|in:faq,tutorial,resource',
             'title' => 'required|string|max:500',
             'slug' => [

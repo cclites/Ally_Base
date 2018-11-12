@@ -14,10 +14,10 @@ class Knowledge extends Model
 
     public $appends = ['assigned_roles'];
 
-    public static function boot() {
-
-        // create the slug automatically 
-        static::saving(function(Knowledge $item) {
+    public static function boot()
+    {
+        // create the slug automatically
+        static::saving(function (Knowledge $item) {
             if (is_null($item->slug)) {
                 $item->slug = self::uniqueSlug($item->title, $item->id);
             }
@@ -33,7 +33,7 @@ class Knowledge extends Model
     {
         return $this->belongsToMany(Attachment::class, 'knowledge_attachments');
     }
-    
+
     /**
      * Scope to add keyword search to title and body.
      *
@@ -100,19 +100,24 @@ class Knowledge extends Model
      */
     public function getAssignedRolesAttribute()
     {
-        return $this->roles->pluck('role')->toArray();    
+        return $this->roles->pluck('role')->toArray();
     }
 
     /**
      * Add the scope for a specific role.
      *
      * @param \Illuminate\Database\Query\Builder query
+     * @param array $roles
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeForRole($query, $role)
+    public function scopeForRoles($query, $roles)
     {
-        return $query->whereHas('roles', function ($q) use ($role) {
-            return $q->where('role', $role);
+        if (! is_array($roles)) {
+            $roles = [$roles];
+        }
+
+        return $query->whereHas('roles', function ($q) use ($roles) {
+            return $q->whereIn('role', $roles);
         });
     }
 

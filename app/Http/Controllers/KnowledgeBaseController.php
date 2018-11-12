@@ -14,9 +14,15 @@ class KnowledgeBaseController extends Controller
      */
     public function index()
     {
+        $roles = auth()->user()->role_type;
+        if (auth()->user()->role_type == 'admin') {
+            $roles = ['caregiver', 'client', 'office_user'];
+        }
+
         if (request()->wantsJson()) {
             if (request()->has('q')) {
-                $knowledge = Knowledge::withKeyword(request()->q)->get();
+                $knowledge = Knowledge::forRoles($roles)
+                    ->withKeyword(request()->q)->get();
 
                 return response()->json($knowledge);
             } else {
@@ -24,7 +30,7 @@ class KnowledgeBaseController extends Controller
             }
         }
 
-        $knowledge = Knowledge::all();
+        $knowledge = Knowledge::forRoles($roles)->get();
 
         return view('knowledge-base')->with(compact(['knowledge']));
     }
