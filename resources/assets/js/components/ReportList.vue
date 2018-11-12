@@ -4,7 +4,7 @@
             <b-card v-for="category in categoryColumns[index]" :key="category.id">
                 <div slot="header">
                     <template v-for="icon in category.icons">
-                        <i :class="icon" class="mr-2"></i>
+                        <i :class="icon" :key="icon" class="mr-2"></i>
                     </template>
                     {{ category.name }}
                 </div>
@@ -298,6 +298,18 @@
                             category: 1
                         },
                         {
+                            name: 'Revenue',
+                            url: 'reports/revenue',
+                            description: 'Shows the total run down of the revenue and profit',
+                            category: 1
+                        },
+                        {
+                            name: 'Sales Pipeline',
+                            url: 'reports/sales-pipeline',
+                            description: 'Shows the current status of the sales pipelines',
+                            category: 1
+                        },
+                        {
                             name: 'Shifts by Caregiver',
                             url: 'reports/caregiver-shifts',
                             description: 'See how many shifts have been worked by a caregiver',
@@ -355,12 +367,26 @@
                     ];
 
                     if (this.data.type === 'Agency') {
-                        data.push({
-                            name: 'ADP and Paychex',
-                            url: 'javascript:;',
-                            description: '',
-                            category: 7
-                        });
+                        data.push(
+                            {
+                                name: 'ADP Payroll Export',
+                                url: 'javascript:;',
+                                description: '',
+                                category: 7
+                            },
+                            {
+                                name: 'Paychex Payroll Export',
+                                url: 'javascript:;',
+                                description: '',
+                                category: 7
+                            },
+                            {
+                                name: 'Payroll Report',
+                                url: 'reports/payroll',
+                                description: '',
+                                category: 7
+                            },
+                        );
                     }
 
                     return _.groupBy(data, 'category');

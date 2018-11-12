@@ -67,7 +67,7 @@ class ClientController extends BaseController
     {
         $query = $this->business()
             ->clients();
-            
+
         if (request()->care_plans) {
             $query->with('carePlans');
         }
@@ -181,6 +181,8 @@ class ClientController extends BaseController
             'user.documents',
             'referralSource',
             'notes.creator',
+            'careDetails',
+            'carePlans',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
@@ -461,5 +463,20 @@ class ClientController extends BaseController
         $client->setPreferences($request->validated());
 
         return new SuccessResponse('Client preferences updated.');
+    }
+
+    public function defaultRates(Request $request, Client $client)
+    {
+        if (!$this->businessHasClient($client)) {
+            return new ErrorResponse(403, 'You do not have access to this client.');
+        }
+
+        $data = $request->validate([
+            'hourly_rate_id' => 'nullable|exists:rate_codes,id',
+            'fixed_rate_id' => 'nullable|exists:rate_codes,id',
+        ]);
+
+        $client->update($data);
+        return new SuccessResponse('The default rates have been saved.');
     }
 }

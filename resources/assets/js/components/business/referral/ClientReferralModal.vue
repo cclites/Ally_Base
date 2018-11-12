@@ -5,36 +5,16 @@
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Organization Name" label-for="organization">
-                            <b-form-input
-                                    id="organization"
-                                    name="organization"
-                                    v-model="form.organization"
-                                    type="text"
-                                    required
-                            >
-                            </b-form-input>
+                            <b-form-input v-model="form.organization" type="text" required />
                             <input-help :form="form" field="organization"></input-help>
                         </b-form-group>
                         <b-form-group label="Contact Name" label-for="name">
-                            <b-form-input
-                                    id="name"
-                                    name="contact_name"
-                                    v-model="form.contact_name"
-                                    type="text"
-                                    required
-                            >
-                            </b-form-input>
+                            <b-form-input v-model="form.contact_name" type="text" required />
                             <input-help :form="form" field="contact_name"></input-help>
                         </b-form-group>
                         <b-form-group label="Phone Number" label-for="phone">
-                            <b-form-input
-                                    id="phone"
-                                    name="phone"
-                                    v-model="form.phone"
-                                    type="text"
-                            >
-                            </b-form-input>
-                            <input-help :form="form" field="organization"></input-help>
+                            <b-form-input v-model="form.phone" type="text" />
+                            <input-help :form="form" field="phone"></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>

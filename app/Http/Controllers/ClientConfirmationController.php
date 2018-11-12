@@ -32,10 +32,11 @@ class ClientConfirmationController extends Controller
             return view('confirmation.expired');
         }
 
-        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->first();
-        if (Carbon::now()->diffInDays($lastStatusDate->created_at) > 14) {
-            return 'This link has expired.  Please ask the provider to re-send your confirmation email.';
-        }
+        // commented out to work with client onboarding wizard
+//        $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->first();
+//        if (Carbon::now()->diffInDays($lastStatusDate->created_at) > 14) {
+//            return 'This link has expired.  Please ask the provider to re-send your confirmation email.';
+//        }
 
         $phoneNumber = ($client->evvPhone) ? $client->evvPhone->national_number : null;
 

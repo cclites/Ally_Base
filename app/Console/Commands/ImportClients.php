@@ -60,7 +60,7 @@ class ImportClients extends BaseImport
             'email' => $this->resolve('Email', $row),
             'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),
             'password' => bcrypt(str_random(12)),
-            'active' => $this->resolve('Active', $row) ?? 1,
+            'active' => $this->resolve('Active', $row),
         ];
 
         // Prevent Duplicates

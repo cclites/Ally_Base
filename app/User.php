@@ -134,6 +134,31 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
             ->orderBy('priority');
     }
 
+    public function officeUser()
+    {
+        return $this->hasOne('App\OfficeUser', 'id', 'id');
+    }
+    /**
+     * A user can have many assigned tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id');
+    }
+
+    /**
+     * Get the user's assigned tasks that are not completed.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dueTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id')
+            ->whereNull('completed_at');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -146,6 +171,26 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function getNameLastFirstAttribute()
     {
         return $this->nameLastFirst();
+    }
+
+    /**
+     * Get the default phone number for the user.
+     *
+     * @return string
+     */
+    public function getDefaultPhoneAttribute()
+    {
+        $phone = null;
+
+        if ($this->phoneNumbers->where('type', 'primary')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'primary')->first();
+        } elseif ($this->phoneNumbers->where('type', 'mobile')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'mobile')->first();
+        } else {
+            $phone = $this->phoneNumbers->first();
+        }
+
+        return empty($phone) ? '' : $phone->number;
     }
 
     ///////////////////////////////////////////
@@ -185,10 +230,5 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function changePassword($password)
     {
         return $this->update(['password' => bcrypt($password)]);
-    }
-
-    public function officeUser()
-    {
-        return $this->hasOne('App\OfficeUser', 'id', 'id');
     }
 }

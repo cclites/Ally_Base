@@ -49,7 +49,6 @@
         
         data() {
             return{
-                errors: {},
                 addingNew: false,
                 form: new Form({
                     name: '',

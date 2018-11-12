@@ -105,13 +105,13 @@
                         <b-row>
                             <b-col>
                                 <div class="form-check">
-                                    <input-help :form="form" field="daily_rates" text="Select the shift type you wish to match against."/>
-                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_any_rates" value="">
+                                    <input-help :form="form" field="fixed_rates" text="Select the shift type you wish to match against."/>
+                                    <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="delete_any_rates" value="">
                                     <label for="delete_any_rates" class="rate-label">Any Type</label>
-                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_hourly_rates" :value="0">
+                                    <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="delete_hourly_rates" :value="0">
                                     <label for="delete_hourly_rates" class="rate-label">Hourly Shifts Only</label>
-                                    <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="delete_daily_rates" :value="1">
-                                    <label for="delete_daily_rates" class="rate-label">Daily Shifts Only</label>
+                                    <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="delete_fixed_rates" :value="1">
+                                    <label for="delete_fixed_rates" class="rate-label">Daily Shifts Only</label>
                                 </div>
                             </b-col>
                         </b-row>
@@ -224,7 +224,7 @@
                     'client_id': (this.clientId > 0) ? this.clientId : '-',
                     'caregiver_id': (this.caregiverId > 0) ? this.caregiverId : '-',
                     'bydays': [],
-                    'daily_rates': "",
+                    'fixed_rates': "",
 
                     //
                     // 'new_start_time': '',
