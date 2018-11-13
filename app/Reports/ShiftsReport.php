@@ -83,7 +83,7 @@ class ShiftsReport extends BaseReport
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
                 // Send both verified and EVV for backwards compatibility
                 'verified' => $shift->verified,
-                'EVV' => $shift->verified,
+                'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
                 'goals' => $shift->goals,
                 'questions' => $shift->questions,
             ];
