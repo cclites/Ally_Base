@@ -48,7 +48,19 @@ class RateFactory
     function allyFeeIncluded(int $businessId)
     {
         return $this->getRateStructure($businessId) === 'client_rate'
-            && $this->settings->get($businessId, 'include_ally_fees', false);
+            && $this->settings->get($businessId, 'include_ally_fee', false);
+    }
+
+    /**
+     * Determine if the business is using rate codes (true) or free text rates (false)
+     *
+     * @param int $businessId
+     * @return bool
+     */
+    function usingRateCodes(int $businessId)
+    {
+        return $this->getRateStructure($businessId) === 'client_rate'
+            && $this->settings->get($businessId, 'use_rate_codes', false);
     }
 
     /**
@@ -138,11 +150,13 @@ class RateFactory
         $allyFeeIncluded = $this->allyFeeIncluded($businessId);
 
         if ($rateStructure === 'client_rate') {
-            $clientRate = $this->getClientRate(0.0, $chargedRate, $allyFee, $allyFeeIncluded);
+            if ($this->shouldRecalculateClientRate($clientRate, $caregiverRate, $allyFee)) {
+                $clientRate = $this->getClientRate(0.0, $chargedRate, $allyFee, $allyFeeIncluded);
+            }
             $providerFee = $this->getProviderFee($clientRate, $caregiverRate, $allyFee, $allyFeeIncluded);
         }
         else {
-            $clientRate = $this->getClientRate($providerFee, $caregiverRate, $allyFee, $allyFeeIncluded);
+            $clientRate = $this->getClientRate($providerFee, $caregiverRate, $allyFee, false); // ally fee can't be included in this rate structure
         }
 
         return new Rates(
@@ -153,6 +167,19 @@ class RateFactory
             $allyFeeIncluded,
             $fixedRates
         );
+    }
+
+    /**
+     * Whether or not the clientRate needs to be re-calculated.  This method ensures the client rate is not less than the caregiver rate and ally fee.
+     *
+     * @param float $clientRate
+     * @param float $caregiverRate
+     * @param float $allyFee
+     * @return bool
+     */
+    protected function shouldRecalculateClientRate(float $clientRate, float $caregiverRate, float $allyFee)
+    {
+        return ($caregiverRate + $allyFee) > $clientRate;
     }
 
     /**
@@ -178,10 +205,15 @@ class RateFactory
      */
     public function getRatesForSchedule(Schedule $schedule)
     {
-        $caregiverRate = $schedule->caregiver_rate ?? $this->getDefaultCaregiverRate($schedule->caregiver, $schedule->fixed_rates);
+        // TODO: Optimize getRatesForClientCaregiver call
+        $usingRateCodes = $this->usingRateCodes($schedule->business_id);
+        $caregiverRate = $this->resolveRate($schedule->caregiver_rate, $schedule->caregiver_rate_id, $usingRateCodes)
+            ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->caregiver_rate;
         $providerFee = $schedule->provider_fee;
-        $clientRate = $schedule->client_rate ?? $this->getDefaultClientRate($schedule->client, $schedule->fixed_rates);
+        $clientRate = $this->resolveRate($schedule->client_rate, $schedule->client_rate_id, $usingRateCodes)
+            ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->client_rate;
         $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
+
         return $this->getRateObject(
             $paymentMethod,
             $schedule->business_id,
@@ -199,7 +231,7 @@ class RateFactory
      * @param array|null $pivot
      * @return \App\Shifts\Rates
      */
-    public function getRatesForClientCaregiver(Client $client, Caregiver $caregiver, $fixedRates = false, array $pivot = null)
+    public function getRatesForClientCaregiver(Client $client, Caregiver $caregiver, bool $fixedRates = false, array $pivot = null)
     {
         if (!$pivot) {
             $pivot = (array) \DB::table('client_caregivers')->where('client_id', $client->id)
@@ -207,10 +239,11 @@ class RateFactory
                 ->first();
         }
 
-        $caregiverRate = $this->getCaregiverRateFromPivot($pivot, $fixedRates)
+        $usingRateCodes = $this->usingRateCodes($client->business_id);
+        $caregiverRate = $this->getCaregiverRateFromPivot($pivot, $usingRateCodes, $fixedRates)
             ?? $this->getDefaultCaregiverRate($caregiver, $fixedRates);
-        $providerFee = $this->getProviderFeeFromPivot($pivot, $fixedRates);
-        $clientRate = $this->getClientRateFromPivot($pivot, $fixedRates)
+        $providerFee = $this->getProviderFeeFromPivot($pivot, $usingRateCodes, $fixedRates);
+        $clientRate = $this->getClientRateFromPivot($pivot, $usingRateCodes, $fixedRates)
             ?? $this->getDefaultClientRate($client, $fixedRates);
         $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
 
@@ -243,7 +276,7 @@ class RateFactory
      * @param bool $fixedRates
      * @return float
      */
-    public function getDefaultCaregiverRate(Caregiver $caregiver, $fixedRates = false)
+    public function getDefaultCaregiverRate(Caregiver $caregiver, bool $fixedRates = false)
     {
         if ($fixedRates) {
             return $caregiver->defaultFixedRate ? $caregiver->defaultFixedRate->rate : 0.0;
@@ -252,32 +285,48 @@ class RateFactory
         return $caregiver->defaultHourlyRate ? $caregiver->defaultHourlyRate->rate : 0.0;
     }
 
-    protected function getCaregiverRateFromPivot($pivot, $fixedRates = false)
+    protected function getCaregiverRateFromPivot(array $pivot, bool $usingRateCodes, bool $fixedRates = false)
     {
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
-        return (float) array_get($pivot, "caregiver_${fieldId}_rate")
-            ?: (float) $this->getRateFromCode(array_get($pivot, "caregiver_${fieldId}_id"))
-            ?: null;
+
+        return $this->resolveRate(
+            array_get($pivot, "caregiver_${fieldId}_rate"),
+            array_get($pivot, "caregiver_${fieldId}_id"),
+            $usingRateCodes
+        );
     }
 
-    protected function getProviderFeeFromPivot($pivot, $fixedRates = false)
+    protected function getProviderFeeFromPivot(array $pivot, bool $usingRateCodes, bool $fixedRates = false)
     {
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
-        return $pivot["provider_${fieldId}_fee"] ?? null;
+
+        return $this->resolveRate(
+            array_get($pivot, "provider_${fieldId}_fee"),
+            array_get($pivot, "provider_${fieldId}_id"),
+            $usingRateCodes
+        );
     }
 
-    protected function getClientRateFromPivot($pivot, $fixedRates = false)
+    protected function getClientRateFromPivot(array $pivot, bool $usingRateCodes, bool $fixedRates = false)
     {
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
-        return (float) array_get($pivot, "client_${fieldId}_rate")
-            ?: (float) $this->getRateFromCode(array_get($pivot, "client_${fieldId}_id"))
-            ?: null;
+
+        return $this->resolveRate(
+            array_get($pivot, "client_${fieldId}_rate"),
+            array_get($pivot, "client_${fieldId}_id"),
+            $usingRateCodes
+        );
     }
 
     protected function getRateFromCode(int $id = null)
     {
-        // Todo: Optimize
+        // Todo: Optimize, store rate code cache?
         if (!$id) return null;
         return RateCode::where('id', $id)->value('rate');
+    }
+
+    protected function resolveRate($freeTextValue, $rateCodeId, bool $usingRateCodes)
+    {
+        return $usingRateCodes ? $this->getRateFromCode((int) $rateCodeId) : $freeTextValue;
     }
 }
