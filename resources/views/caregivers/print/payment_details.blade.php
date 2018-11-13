@@ -129,7 +129,7 @@
                                 @endforeach
                             </td>
                             <td>
-                                {{ $shift->client['name'] }}
+                                {{ substr($shift->client['name'], 0, 1) . '****** *******' }}
                             </td>
                             <td>
                                 ${{ $shift->caregiver_rate }}
