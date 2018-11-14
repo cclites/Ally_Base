@@ -1,11 +1,8 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\PhoneNumber
@@ -19,6 +16,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $notes
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
  * @property mixed $number
  * @property-read \App\User $user
@@ -27,15 +25,14 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereExtension($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereNationalNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereUserId($value)
  * @mixin \Eloquent
  */
-class PhoneNumber extends Model implements Auditable
+class PhoneNumber extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     const DEFAULT_REGION = 'US';
     const DEFAULT_FORMAT = PhoneNumberFormat::NATIONAL;
 

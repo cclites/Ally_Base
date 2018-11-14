@@ -1,9 +1,9 @@
 <?php
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\SystemException
@@ -21,8 +21,12 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\User|null $acknowledger
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $reference
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException notAcknowledged()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereBusinessId($value)
@@ -37,9 +41,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class SystemException extends Model implements Auditable
+class SystemException extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use \OwenIt\Auditing\Auditable;
+    use BelongsToOneBusiness;
 
     protected $guarded = ['id'];
 

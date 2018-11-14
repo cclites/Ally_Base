@@ -1,35 +1,31 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-
 /**
- * Class EmergencyContact
+ * App\EmergencyContact
  *
- * @package App
- * @property string $name
- * @property string $phone_number
- * @property string $relationship
- * @property User $user
  * @property int $id
  * @property int $user_id
+ * @property string $name
+ * @property string|null $phone_number
+ * @property string|null $relationship
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property int $priority
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact wherePhoneNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact wherePriority($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereRelationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereUserId($value)
  * @mixin \Eloquent
  */
-class EmergencyContact extends Model implements Auditable
+class EmergencyContact extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $guarded = ['id'];
 
     public function user()

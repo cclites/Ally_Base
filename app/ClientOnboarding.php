@@ -7,6 +7,14 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
+/**
+ * App\ClientOnboarding
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardingActivity[] $activities
+ * @property-read \App\Client $client
+ * @property-read \App\Signature $signature
+ * @mixin \Eloquent
+ */
 class ClientOnboarding extends Model
 {
     protected $guarded = ['id'];

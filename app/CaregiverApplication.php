@@ -2,16 +2,13 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use Crypt;
 
 /**
  * App\CaregiverApplication
  *
  * @property int $id
  * @property int $business_id
- * @property int $caregiver_application_status_id
  * @property string $last_name
  * @property string $first_name
  * @property string|null $middle_initial
@@ -28,32 +25,31 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string $email
  * @property string|null $emergency_contact_name
  * @property string|null $emergency_contact_phone
- * @property int|null $worked_here_before
+ * @property bool $worked_here_before
  * @property string|null $worked_before_location
- * @property int|null $caregiver_position_id
  * @property string|null $preferred_start_date
  * @property string|null $preferred_days
  * @property string|null $preferred_times
  * @property string|null $preferred_shift_length
- * @property int|null $work_weekends
+ * @property bool $work_weekends
  * @property int|null $travel_radius
  * @property string|null $vehicle
- * @property int|null $dui
- * @property int|null $reckless_driving
- * @property int|null $moving_violation
+ * @property bool $dui
+ * @property bool $reckless_driving
+ * @property bool $moving_violation
  * @property int|null $moving_violation_count
- * @property int|null $accidents
+ * @property bool $accidents
  * @property int|null $accident_count
  * @property string|null $driving_violations_desc
- * @property int|null $felony_conviction
- * @property int|null $theft_conviction
- * @property int|null $drug_conviction
- * @property int|null $violence_conviction
+ * @property bool $felony_conviction
+ * @property bool $theft_conviction
+ * @property bool $drug_conviction
+ * @property bool $violence_conviction
  * @property string|null $criminal_history_desc
- * @property int|null $currently_injured
- * @property int|null $previously_injured
- * @property int|null $lift_25_lbs
- * @property int|null $workmans_comp
+ * @property bool $currently_injured
+ * @property bool $previously_injured
+ * @property bool $lift_25_lbs
+ * @property bool $workmans_comp
  * @property string|null $workmans_comp_dates
  * @property string|null $injury_status_desc
  * @property string|null $employer_1_name
@@ -96,17 +92,16 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $acknowledged_terms
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $position
+ * @property string $status
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read mixed $name
- * @property-read \App\CaregiverPosition|null $position
- * @property-read \App\CaregiverApplicationStatus $status
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAccidentCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAccidents($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAcknowledgedTerms($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCaregiverApplicationStatusId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCaregiverPositionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCellPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCellPhoneProvider($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCity($value)
@@ -158,6 +153,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereMiddleInitial($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereMovingViolation($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereMovingViolationCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication wherePosition($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication wherePreferredDays($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication wherePreferredShiftLength($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication wherePreferredStartDate($value)
@@ -175,6 +171,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereReference3Relationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereTheftConviction($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereTravelRadius($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereUpdatedAt($value)
@@ -188,10 +185,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereZip($value)
  * @mixin \Eloquent
  */
-class CaregiverApplication extends Model implements Auditable
+class CaregiverApplication extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $guarded = ['id'];
 
     protected $casts = [

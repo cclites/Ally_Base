@@ -1,9 +1,5 @@
 <?php
-
 namespace App;
-
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\GatewayTransactionHistory
@@ -15,6 +11,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float $amount
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\GatewayTransaction $transaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAction($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAmount($value)
@@ -25,10 +22,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class GatewayTransactionHistory extends Model implements Auditable
+class GatewayTransactionHistory extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $table = 'gateway_transaction_history';
     protected $guarded = ['id'];
 

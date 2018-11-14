@@ -1,11 +1,10 @@
 <?php
-
 namespace App;
 
 use App\Contracts\UserRole;
+use App\Traits\BelongsToBusinesses;
 use App\Traits\IsUserRole;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\OfficeUser
@@ -13,30 +12,36 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $id
  * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read mixed $active
+ * @property mixed $avatar
  * @property-read mixed $date_of_birth
  * @property-read mixed $email
  * @property-read mixed $first_name
+ * @property-read mixed $gender
+ * @property-read mixed $in_active_at
  * @property-read mixed $last_name
  * @property-read mixed $name
  * @property-read mixed $name_last_first
  * @property-read mixed $username
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser active()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @mixin \Eloquent
- * @property-read mixed $active
- * @property-read mixed $gender
  */
-class OfficeUser extends Model implements UserRole, Auditable
+class OfficeUser extends AuditableModel implements UserRole
 {
-    use \OwenIt\Auditing\Auditable;
-
-    use IsUserRole;
+    use IsUserRole, BelongsToBusinesses;
 
     protected $table = 'office_users';
     public $timestamps = false;
@@ -59,5 +64,37 @@ class OfficeUser extends Model implements UserRole, Auditable
     public function tasks()
     {
         return $this->hasMany(Task::class, 'creator_id');
+    }
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return $this->businesses->pluck('id')->toArray();
+    }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->whereHas('businesses', function($q) use ($businessIds) {
+            $q->whereIn('id', $businessIds);
+        });
     }
 }

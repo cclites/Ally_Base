@@ -10,12 +10,12 @@ use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\BelongsToBusinesses;
 use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Crypt;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
-use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasOwnMetaData;
 
 /**
@@ -27,48 +27,91 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $title
  * @property \Carbon\Carbon|null $deleted_at
  * @property \Carbon\Carbon|null $hire_date
- * @property string|null $gender
  * @property \Carbon\Carbon|null $onboarded
  * @property string|null $misc
+ * @property string|null $preferences
+ * @property string|null $import_identifier
+ * @property string|null $w9_name
+ * @property string|null $w9_business_name
+ * @property string|null $w9_tax_classification
+ * @property string|null $w9_llc_type
+ * @property string|null $w9_exempt_payee_code
+ * @property string|null $w9_exempt_fatca_reporting_code
+ * @property string|null $w9_address
+ * @property string|null $w9_city_state_zip
+ * @property string|null $w9_account_numbers
+ * @property string|null $w9_employer_id_number
+ * @property string|null $medicaid_id
+ * @property-read \App\Address $address
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\CaregiverAvailability $availability
  * @property-read \App\BankAccount|null $bankAccount
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \App\RateCode $defaultFixedRate
+ * @property-read \App\RateCode $defaultHourlyRate
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
- * @property mixed $date_of_birth  Proxied
- * @property mixed $email  Proxied
- * @property mixed $first_name  Proxied
- * @property mixed $last_name  Proxied
- * @property mixed $name  Proxied
- * @property mixed $username  Proxied
+ * @property-read mixed $active
+ * @property mixed $avatar
+ * @property-read \App\Business[]|\Illuminate\Database\Eloquent\Collection $businesses
+ * @property-read mixed $date_of_birth
+ * @property-read mixed $email
+ * @property-read mixed $first_name
+ * @property-read mixed $gender
+ * @property-read mixed $in_active_at
+ * @property-read mixed $last_name
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read mixed $username
+ * @property null|string $w9_ssn
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverLicense[] $licenses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverMeta[] $meta
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
+ * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \App\PhoneNumber $phoneNumber
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $skills
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver active()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereBankAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereGender($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereHireDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereImportIdentifier($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereMedicaidId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereMeta($key, $delimiter = null, $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereMisc($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereOnboarded($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver wherePreferences($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9AccountNumbers($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9Address($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9BusinessName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9CityStateZip($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9EmployerIdNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9ExemptFatcaReportingCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9ExemptPayeeCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9LlcType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9Name($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9TaxClassification($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
- * @property-read mixed $active
  */
-class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, Auditable
+class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
 {
-    use IsUserRole;
+    use IsUserRole, BelongsToBusinesses;
     use \App\Traits\HasPaymentHold;
-    use \OwenIt\Auditing\Auditable;
     use HasOwnMetaData;
     use HasDefaultRates;
 
@@ -117,9 +160,10 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->belongsTo(BankAccount::class);
     }
 
-    public function businesses()
+    public function businessChains()
     {
-        return $this->belongsToMany(Business::class, 'business_caregivers');
+        return $this->belongsToMany(BusinessChain::class, 'chain_caregivers', 'caregiver_id', 'chain_id')
+            ->withTimestamps();
     }
 
     public function clients()
@@ -202,6 +246,19 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+    /**
+     * Backwards compatibility with old relationship, return a collection of all businesses through chains
+     * @return \App\Business[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getBusinessesAttribute()
+    {
+        foreach($this->businessChains as $chain) {
+            $collection = $chain->businesses;
+            $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
+        }
+        return $businesses ?? collect();
+    }
 
     /**
      * Encrypt ssn on entry
@@ -432,5 +489,34 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->allTransactionsQuery()
                     ->orderBy('created_at')
                     ->get();
+    }
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return $this->businesses->pluck('id')->toArray();
+    }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * A query scope for filtering results by related business IDs
+     * Note: Use forAuthorizedBusinesses in controllers
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->whereHas('businessChains.businesses', function($q) use ($businessIds) {
+            $q->whereIn('id', $businessIds);
+        });
     }
 }

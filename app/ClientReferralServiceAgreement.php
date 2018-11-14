@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
+/**
+ * App\ClientReferralServiceAgreement
+ *
+ * @property-read \App\Client $client
+ * @mixin \Eloquent
+ */
 class ClientReferralServiceAgreement extends Model
 {
     protected $guarded = ['id'];

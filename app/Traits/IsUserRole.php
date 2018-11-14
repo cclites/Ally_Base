@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
 {
-    use SoftDeletes;
     use HiddenIdTrait;
     use HasAddressesAndNumbers;
+    use SoftDeletes;
 
     /**
      * IsUserRole constructor.

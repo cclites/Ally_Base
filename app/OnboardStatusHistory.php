@@ -1,9 +1,7 @@
 <?php
-
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\OnboardStatusHistory
@@ -20,21 +18,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardStatusHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class OnboardStatusHistory extends Model implements Auditable
+class OnboardStatusHistory extends Model
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $table = 'onboard_status_history';
     protected $guarded = ['id'];
-
-    ///////////////////////////////////////////
-    /// Relationship Methods
-    ///////////////////////////////////////////
-
-
-
-    ////////////////////////////////////////////
-    /// Other Methods
-    ///////////////////////////////////////////
 
 }

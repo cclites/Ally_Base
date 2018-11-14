@@ -1,14 +1,28 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-
-class ClientGoal extends Model implements Auditable
+/**
+ * App\ClientGoal
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property string $question
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Client $client
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereQuestion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class ClientGoal extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-    
     protected $table = 'client_goals';
 
     protected $guarded = ['id'];

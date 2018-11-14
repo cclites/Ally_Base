@@ -1,10 +1,7 @@
 <?php
-
 namespace App;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Signature
@@ -15,6 +12,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property mixed $content
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $signable
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereContent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereCreatedAt($value)
@@ -24,10 +22,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Signature extends Model implements Auditable
+class Signature extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $guarded = ['id'];
 
     /**

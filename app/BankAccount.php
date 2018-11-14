@@ -8,8 +8,6 @@ use App\Gateway\ACHPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
 use Crypt;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\BankAccount
@@ -26,6 +24,10 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $verified
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business|null $business
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read object $charge_metrics
  * @property-read mixed $last_four
  * @property-read \App\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountHolderType($value)
@@ -41,14 +43,11 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereVerified($value)
  * @mixin \Eloquent
- * @property-read \App\Business|null $business
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
-class BankAccount extends Model implements ChargeableInterface, Auditable
+class BankAccount extends AuditableModel implements ChargeableInterface
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'bank_accounts';
     protected $guarded = ['id'];

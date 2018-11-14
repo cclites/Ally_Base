@@ -1,17 +1,51 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
-use OwenIt\Auditing\Contracts\Auditable;
 
-class Timesheet extends Model implements Auditable
+/**
+ * App\Timesheet
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property int $caregiver_id
+ * @property int $client_id
+ * @property int $creator_id
+ * @property \Carbon\Carbon|null $approved_at
+ * @property \Carbon\Carbon|null $denied_at
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @property-read \App\User $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\TimesheetEntry[] $entries
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
+ * @property-read int $exception_count
+ * @property-read void $is_approved
+ * @property-read void $is_denied
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereApprovedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereCaregiverId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereCreatorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereDeniedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use \OwenIt\Auditing\Auditable;
-    
+    use BelongsToOneBusiness;
+
     protected $guarded = ['id'];
 
     protected $dates = ['approved_at', 'denied_at'];

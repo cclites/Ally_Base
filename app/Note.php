@@ -1,9 +1,8 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 
 /**
  * App\Note
@@ -17,10 +16,13 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $business_id
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\User $creator
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCaregiverId($value)
@@ -32,9 +34,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Note extends Model implements Auditable
+class Note extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use \OwenIt\Auditing\Auditable;
+    use BelongsToOneBusiness;
 
     protected $guarded = ['id'];
 

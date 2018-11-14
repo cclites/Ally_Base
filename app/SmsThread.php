@@ -1,13 +1,43 @@
 <?php
-
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\Model;
 use App\SmsThreadRecipient;
 use Carbon\Carbon;
 
-class SmsThread extends Model
+/**
+ * App\SmsThread
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property string $from_number
+ * @property string $message
+ * @property int $can_reply
+ * @property \Carbon\Carbon $sent_at
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \Illuminate\Database\Eloquent\Relations\HasMany $unique_recipient_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadRecipient[] $recipients
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $replies
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCanReply($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereFromNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class SmsThread extends Model implements BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
+
     /**
      * The attributes that should not be mass assignable.
      *

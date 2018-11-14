@@ -5,6 +5,14 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * App\ClientMedication
+ *
+ * @property mixed $dose
+ * @property mixed $frequency
+ * @property mixed $type
+ * @mixin \Eloquent
+ */
 class ClientMedication extends Model
 {
     protected $guarded = ['id'];

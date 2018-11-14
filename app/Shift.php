@@ -1,19 +1,17 @@
 <?php
-
 namespace App;
 
 use App\Businesses\Timezone;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftStatusManager;
+use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Shift
@@ -22,22 +20,32 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int|null $caregiver_id
  * @property int|null $client_id
  * @property int|null $business_id
- * @property int $checked_in
+ * @property int|null $schedule_id
+ * @property string $checked_in_method
  * @property \Carbon\Carbon|null $checked_in_time
  * @property float|null $checked_in_latitude
  * @property float|null $checked_in_longitude
+ * @property int|null $checked_in_distance The distance in meters from the client evv address.
+ * @property string|null $checked_in_agent
+ * @property string|null $checked_in_ip
+ * @property int $checked_in_verified
  * @property string|null $checked_in_number evv phone number
+ * @property string $checked_out_method
  * @property \Carbon\Carbon|null $checked_out_time
  * @property float|null $checked_out_latitude
  * @property float|null $checked_out_longitude
+ * @property int|null $checked_out_distance The distance in meters from the client evv address.
+ * @property string|null $checked_out_agent
+ * @property string|null $checked_out_ip
+ * @property int $checked_out_verified
  * @property string|null $checked_out_number evv phone number
  * @property string|null $caregiver_comments
+ * @property float|null $hours
  * @property string|null $hours_type
  * @property float $mileage
  * @property float $other_expenses
  * @property int $verified
- * @property int|null $schedule_id
- * @property int $fixed_rates
+ * @property int $daily_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string|null $status
@@ -45,22 +53,39 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $other_expenses_desc
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property int|null $import_id
+ * @property int|null $timesheet_id
+ * @property int|null $address_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \App\Address|null $address
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
+ * @property-read mixed $ally_pct
+ * @property-read mixed $charged_at
+ * @property-read mixed $confirmed_at
  * @property-read mixed $duration
  * @property-read mixed $read_only
+ * @property-read mixed $timezone
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftIssue[] $issues
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
  * @property-read \App\Payment|null $payment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \App\Schedule|null $schedule
  * @property-read \App\Signature $signature
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAllDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift betweenDates($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusiness($business)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregiver($caregiver)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAddressId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCharge()
@@ -68,21 +93,34 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedIn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInAgent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInDistance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInIp($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLatitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInVerified($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutAgent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutDistance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutIp($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLatitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutVerified($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereConfirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDailyRates($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereImportId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMobileVerified()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpenses($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpensesDesc($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePaymentId($value)
@@ -91,15 +129,17 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereReadOnly()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereScheduleId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereTelephonyVerified()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereTimesheetId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUnconfirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
  */
-class Shift extends Model implements HasAllyFeeInterface, Auditable
+class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
     use HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
 
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];
@@ -530,6 +570,16 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $this->questions()->sync($items);
     }
 
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return [$this->business_id];
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////
@@ -648,4 +698,6 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
         return $query->whereBetween('checked_in_time', [$startDate, $endDate]);
     }
+
+
 }

@@ -1,15 +1,41 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
-use OwenIt\Auditing\Contracts\Auditable;
 
-class TimesheetEntry extends Model implements Auditable
+/**
+ * App\TimesheetEntry
+ *
+ * @property int $id
+ * @property int $timesheet_id
+ * @property \Carbon\Carbon $checked_in_time
+ * @property \Carbon\Carbon $checked_out_time
+ * @property float $mileage
+ * @property float $other_expenses
+ * @property string|null $caregiver_comments
+ * @property float $caregiver_rate
+ * @property float $provider_fee
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read void $activities
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read float $duration
+ * @property-read \App\Timesheet $timesheet
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCaregiverComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCaregiverRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCheckedInTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCheckedOutTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereOtherExpenses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereTimesheetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class TimesheetEntry extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $guarded = ['id'];
 
     protected $appends = ['duration', 'activities'];

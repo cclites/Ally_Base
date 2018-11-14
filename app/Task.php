@@ -1,16 +1,59 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 use App\Events\TaskAssigned;
 use Carbon\Carbon;
 
-class Task extends Model implements Auditable
+/**
+ * App\Task
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property int $creator_id
+ * @property string $name
+ * @property string|null $notes
+ * @property int $assigned_user_id
+ * @property \Carbon\Carbon|null $due_date
+ * @property \Carbon\Carbon|null $completed_at
+ * @property string|null $deleted_at
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\User|null $assignedUser
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
+ * @property-read \App\OfficeUser $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\TaskEditHistory[] $editHistory
+ * @property-read mixed $assigned_type
+ * @property-read \TaskEditHistory $last_edit
+ * @property-write mixed $completed
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task assignedTo($user_id)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task createdBy($user_id)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forBusinesses($businessIds)
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Query\Builder|\App\Task onlyTrashed()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereAssignedUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereCompletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereCreatorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereDueDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Task withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Task withoutTrashed()
+ * @mixin \Eloquent
+ */
+class Task extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use \OwenIt\Auditing\Auditable;
+    use BelongsToOneBusiness;
     use SoftDeletes;
     
     /**

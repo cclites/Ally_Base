@@ -1,7 +1,7 @@
 <?php
 namespace App\Contracts;
 
-interface UserRole
+interface UserRole extends BelongsToBusinessesInterface
 {
     public function getRoleType();
     public function user();

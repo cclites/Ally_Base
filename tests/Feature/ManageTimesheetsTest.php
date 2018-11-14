@@ -21,12 +21,14 @@ class ManageTimesheetsTest extends TestCase
     {
         parent::setUp();
 
+        $this->disableExceptionHandling();
+
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
         $this->business->update(['allows_manual_shifts' => true]);
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->chain->caregivers()->save($this->caregiver);
         $this->caregiver->clients()->save($this->client);
         
         $this->officeUser = factory('App\OfficeUser')->create();

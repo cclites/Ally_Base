@@ -1,9 +1,6 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ScheduleNote
@@ -12,6 +9,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string $note
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereId($value)
@@ -19,9 +17,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class ScheduleNote extends Model implements Auditable
+class ScheduleNote extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'schedule_notes';
     protected $guarded = ['id'];
