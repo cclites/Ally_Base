@@ -54,7 +54,10 @@ class UnconfirmedShiftsController extends Controller
         }
 
         if (in_array($shift->status, ShiftStatusManager::getUnconfirmedStatuses())) {
-            $shift->update(['status' => Shift::WAITING_FOR_AUTHORIZATION]);
+            $shift->update([
+                'status' => Shift::WAITING_FOR_AUTHORIZATION,
+                'client_confirmed' => true,
+            ]);
         }
 
         return new SuccessResponse('Shift has been confirmed.');
