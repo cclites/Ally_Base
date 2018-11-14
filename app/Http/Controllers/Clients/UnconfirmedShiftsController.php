@@ -66,6 +66,7 @@ class UnconfirmedShiftsController extends Controller
     /**
      * Update the given shift.
      *
+     * @param \Illuminate\Http\Request $request
      * @param Shift $shift
      * @return \Illuminate\Http\Response
      */
@@ -97,10 +98,17 @@ class UnconfirmedShiftsController extends Controller
 
             return new SuccessResponse('You have successfully updated this shift.');
         }
-        
+
         return new ErrorResponse(500, 'The shift could not be updated.');
     }
-    
+
+    /**
+     * Show the shift details.
+     *
+     * @param Request $request
+     * @param Shift $shift
+     * @return ErrorResponse|\Illuminate\Http\JsonResponse
+     */
     public function show(Request $request, Shift $shift)
     {
         if ($shift->client_id != auth()->id()) {
