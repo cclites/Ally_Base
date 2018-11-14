@@ -78,6 +78,7 @@ class ShiftsReport extends BaseReport
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),
                 'confirmed_at' => $shift->confirmed_at,
+                'client_confirmed' => $shift->client_confirmed,
                 'charged' => !($shift->statusManager()->isPending()),
                 'charged_at' => $shift->charged_at,
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
