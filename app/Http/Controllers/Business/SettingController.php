@@ -20,6 +20,7 @@ class SettingController extends BaseController
     public function index(Request $request)
     {
         $business = $this->business();
+        $business->append('client_deactivation_reasons', 'caregiver_deactivation_reasons');
 
         if ($request->expectsJson() && $request->input('json')) {
             return $business;

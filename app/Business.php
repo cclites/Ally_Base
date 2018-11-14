@@ -124,6 +124,38 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->activities->merge(Activity::whereNull('business_id')->get())->sortBy('code')->values();
     }
 
+    public function deactivationReasons()
+    {
+        return $this->hasMany(DeactivationReason::class);
+    }
+
+    public function getAllDeactivationReasonsAttribute()
+    {
+        return $this->deactivationReasons->merge(DeactivationReason::whereNull('business_id')->get())->values();
+    }
+
+    public function getClientDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('business_id')
+            ->where('type', 'client')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'client')
+                ->get())
+            ->values();
+    }
+
+    public function getCaregiverDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('business_id')
+            ->where('type', 'caregiver')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'caregiver')
+                ->get())
+            ->values();
+    }
+
     public function clients()
     {
         return $this->hasMany(Client::class);
@@ -273,7 +305,7 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
     {
         return $this->hasMany(SmsThread::class);
     }
-    
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
