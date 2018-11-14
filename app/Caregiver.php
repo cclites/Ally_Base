@@ -10,11 +10,13 @@ use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasOwnMetaData;
 
 /**
  * App\Caregiver
@@ -67,6 +69,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
     use IsUserRole;
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
+    use HasOwnMetaData;
+    use HasDefaultRates;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -92,6 +96,8 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         'w9_account_numbers',
         'w9_employer_id_number',
         'medicaid_id',
+        'hourly_rate_id',
+        'fixed_rate_id'
     ];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
@@ -121,10 +127,18 @@ class Caregiver extends Model implements UserRole, CanBeConfirmedInterface, Reco
         return $this->belongsToMany(Client::class, 'client_caregivers')
                     ->withTimestamps()
                     ->withPivot([
+                        'caregiver_hourly_id',
                         'caregiver_hourly_rate',
-                        'caregiver_daily_rate',
+                        'caregiver_fixed_id',
+                        'caregiver_fixed_rate',
+                        'client_hourly_id',
+                        'client_hourly_rate',
+                        'client_fixed_id',
+                        'client_fixed_rate',
+                        'provider_hourly_id',
                         'provider_hourly_fee',
-                        'provider_daily_fee',
+                        'provider_fixed_id',
+                        'provider_fixed_fee',
                     ]);
     }
 

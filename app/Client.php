@@ -13,12 +13,14 @@ use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\HasAllyFeeTrait;
+use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasOwnMetaData;
 
 /**
  * App\Client
@@ -106,6 +108,8 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
     use \App\Traits\HasPaymentHold;
     use HasAllyFeeTrait;
     use \OwenIt\Auditing\Auditable;
+    use HasOwnMetaData;
+    use HasDefaultRates;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -153,6 +157,11 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         'medicaid_diagnosis_codes',
         'client_type_descriptor',
         'receive_summary_email',
+        'onboarding_step',
+        'referral_source_id',
+        'qb_customer_id',
+        'hourly_rate_id',
+        'fixed_rate_id'
     ];
 
     ///////////////////////////////////////////
@@ -200,10 +209,18 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
                     ->with('user')
                     ->withTimestamps()
                     ->withPivot([
+                        'caregiver_hourly_id',
                         'caregiver_hourly_rate',
-                        'caregiver_daily_rate',
+                        'caregiver_fixed_id',
+                        'caregiver_fixed_rate',
+                        'client_hourly_id',
+                        'client_hourly_rate',
+                        'client_fixed_id',
+                        'client_fixed_rate',
+                        'provider_hourly_id',
                         'provider_hourly_fee',
-                        'provider_daily_fee',
+                        'provider_fixed_id',
+                        'provider_fixed_fee',
                     ]);
     }
 
@@ -260,6 +277,29 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         return $this->hasOne(ClientPreferences::class, 'id');
     }
 
+    public function medications()
+    {
+        return $this->hasMany(ClientMedication::class);
+    }
+
+    public function referralServiceAgreement()
+    {
+        return $this->hasOne(ClientReferralServiceAgreement::class);
+    }
+
+    public function referralSource() {
+        return $this->belongsTo('App\ReferralSource');
+    }
+
+    /**
+     * Get the client's CareDetails relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    */
+    public function careDetails()
+    {
+        return $this->hasOne(CareDetails::class, 'client_id', 'id');
+    }    
 
     ///////////////////////////////////////////
     /// Mutators

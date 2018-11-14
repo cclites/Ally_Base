@@ -56,7 +56,7 @@ abstract class ClockBase
             throw new InvalidScheduleParameters('This caregiver is not assigned to this shift.');
         }
 
-        if ($schedule->daily_rates) {
+        if ($schedule->fixed_rates) {
             throw new InvalidScheduleParameters('Daily rate shifts cannot be clocked in to.');
         }
     }

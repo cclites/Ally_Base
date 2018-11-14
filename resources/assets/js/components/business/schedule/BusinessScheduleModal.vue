@@ -56,13 +56,16 @@
                         <b-row>
                             <b-col>
                                 <strong>Shift Type: </strong>
-                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
+                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
                                 <label for="create_hourly_rates" class="rate-label">Hourly</label>
-                                <input name="daily_rates" v-model="form.daily_rates" type="radio" class="with-gap" id="create_daily_rates" :value="1">
-                                <label for="create_daily_rates" class="rate-label">Daily</label>
+                                <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_fixed_rates" :value="1">
+                                <label for="create_fixed_rates" class="rate-label">Daily</label>
                             </b-col>
                         </b-row>
-                        <b-row v-show="form.daily_rates !== null">
+
+                        <!-- FREE-TEXT RATES -->
+
+                        <b-row v-if="form.fixed_rates !== null && !usingRateCodes">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
@@ -76,7 +79,21 @@
                                     <input-help :form="form" field="caregiver_rate" text="Enter the hourly rate paid to the caregiver." />
                                 </b-form-group>
                             </b-col>
-                            <b-col sm="6">
+
+                            <b-col sm="6" v-if="clientRateStructure">
+                                <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
+                                    <b-form-input
+                                            id="client_rate"
+                                            name="client_rate"
+                                            type="number"
+                                            step="any"
+                                            v-model="form.client_rate"
+                                    >
+                                    </b-form-input>
+                                    <input-help :form="form" field="client_rate" text="Enter the hourly fee charged to the client." />
+                                </b-form-group>
+                            </b-col>
+                            <b-col sm="6" v-else>
                                 <b-form-group :label="`Provider ${rateType} Fee`" label-for="provider_fee">
                                     <b-form-input
                                             id="provider_fee"
@@ -89,13 +106,14 @@
                                     <input-help :form="form" field="provider_fee" text="Enter the hourly fee charged by the provider." />
                                 </b-form-group>
                             </b-col>
+
                             <b-col sm="6">
                                 <b-form-group label="Ally Fee" label-for="ally_fee">
                                     <div v-if="allyFee">
                                         {{ allyFee }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
                                     </div>
                                     <div v-else>
-                                        Enter Caregiver and Provider Rates
+                                        Enter Amounts Above
                                     </div>
                                 </b-form-group>
                             </b-col>
@@ -105,6 +123,41 @@
                                 </b-form-group>
                             </b-col>
                         </b-row>
+
+                        <!-- RATE CODES -->
+                        <b-row v-if="form.fixed_rates !== null && usingRateCodes">
+                            <b-col sm="6">
+                                <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate_id">
+                                    <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
+                                        <option value="">--Use Default--</option>
+                                        <option v-for="code in caregiverFixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                                    </b-select>
+                                    <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-else>
+                                        <option value="">--Use Default--</option>
+                                        <option v-for="code in caregiverHourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                                    </b-select>
+                                    <input-help :form="form" field="caregiver_rate" text="Override the caregiver rate code, or use the defaults." />
+                                </b-form-group>
+                            </b-col>
+                            <!-- No check is needed here because rate codes are only possible under clientRateStructure for now  (|| true) -->
+                            <b-col sm="6" v-if="clientRateStructure || true">
+                                <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
+                                    <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
+                                        <option value="">--Use Default--</option>
+                                        <option v-for="code in clientFixedRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                                    </b-select>
+                                    <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-else>
+                                        <option value="">--Use Default--</option>
+                                        <option v-for="code in clientHourlyRateCodes" :value="code.id" :key="code.id">{{ code.name }}</option>
+                                    </b-select>
+                                    <input-help :form="form" field="client_rate" text="Override the client rate code, or use the defaults." />
+                                </b-form-group>
+                            </b-col>
+
+                        </b-row>
+                        <!-- END RATES -->
+
+
                         <b-row>
                             <b-col lg="6">
                                 <b-form-group label="Start Date" label-for="startDate">
@@ -136,9 +189,9 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
-                                            :readonly="!!form.daily_rates"
+                                            :readonly="!!form.fixed_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.daily_rates" />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.fixed_rates" />
                                     <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
                                 </b-form-group>
                             </b-col>
@@ -276,9 +329,12 @@
 
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
+    import RateCodes from "../../../mixins/RateCodes";
+    import BusinessSettings from "../../../mixins/BusinessSettings";
+    import RateFactory from "../../../classes/RateFactory";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [BusinessSettings, FormatsNumbers, RateCodes],
 
         props: {
             model: Boolean,
@@ -330,6 +386,7 @@
 
         mounted() {
             this.loadClientData();
+            this.fetchRateCodes();
         },
 
         computed: {
@@ -359,28 +416,20 @@
                 return this.selectedSchedule;
             },
 
-            allyFee() {
-                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
-                let providerHourlyFloat = parseFloat(this.form.provider_fee);
-                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
-                    return false;
-                }
-                let allyFee = (caregiverHourlyFloat + providerHourlyFloat) * parseFloat(this.allyPct);
-                return allyFee.toFixed(2);
-            },
-
             displayAllyPct() {
                 return (parseFloat(this.allyPct) * 100).toFixed(2);
             },
 
+            chargedRate() {
+                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.clientRateStructure);
+            },
+
+            allyFee() {
+                return RateFactory.getAllyFee(this.allyPct, this.chargedRate);
+            },
+
             totalRate() {
-                let caregiverHourlyFloat = parseFloat(this.form.caregiver_rate);
-                let providerHourlyFloat = parseFloat(this.form.provider_fee);
-                if (isNaN(caregiverHourlyFloat) || isNaN(providerHourlyFloat)) {
-                    return 'Enter Caregiver and Provider Rates'
-                }
-                let totalRate = caregiverHourlyFloat + providerHourlyFloat + parseFloat(this.allyFee);
-                return totalRate.toFixed(2);
+                return this.chargedRate + this.allyFee;
             },
 
             selectedCaregiver() {
@@ -416,10 +465,10 @@
             },
 
             rateType() {
-                if (this.form.daily_rates === 0) {
+                if (this.form.fixed_rates === 0) {
                     return 'Hourly';
                 }
-                if (this.form.daily_rates === 1) {
+                if (this.form.fixed_rates === 1) {
                     return 'Daily';
                 }
                 return '';
@@ -466,8 +515,11 @@
                     'duration': this.schedule.duration || 0,
                     'caregiver_id': this.schedule.caregiver_id || "",
                     'client_id': this.schedule.client_id || "",
-                    'daily_rates': this.schedule.daily_rates || 0,
+                    'fixed_rates': this.schedule.fixed_rates || 0,
                     'caregiver_rate': this.schedule.caregiver_rate || "",
+                    'caregiver_rate_id': this.schedule.caregiver_rate_id || "",
+                    'client_rate': this.schedule.client_rate || "",
+                    'client_rate_id': this.schedule.client_rate_id || "",
                     'provider_fee': this.schedule.provider_fee || "",
                     'notes': this.schedule.notes || "",
                     'hours_type': this.schedule.hours_type || "default",
@@ -540,7 +592,11 @@
             },
 
             deleteSchedule() {
-                if (this.schedule.id && confirm('Are you sure you wish to delete this scheduled shift?')) {
+                let confirmMessage = 'Are you sure you wish to delete this scheduled shift?';
+                if (moment(this.schedule.starts_at).isBefore(moment())) {
+                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: This will not affect any shift already in the Shift History.";
+                }
+                if (this.schedule.id && confirm(confirmMessage)) {
                     let form = new Form();
                     form.submit('delete', '/business/schedule/' + this.schedule.id)
                         .then(response => {
@@ -713,7 +769,7 @@
 
             startTime(val) {
                 this.form.duration = this.getDuration();
-                if (this.form.daily_rates) {
+                if (this.form.fixed_rates) {
                     // Lock end time to start time for daily rates
                     this.endTime = val;
                 }
@@ -723,7 +779,7 @@
                 this.form.duration = this.getDuration();
             },
 
-            'form.daily_rates': function(val, old_val) {
+            'form.fixed_rates': function(val, old_val) {
                 this.prefillRates();
                 if (val) {
                     // Lock end time to start time for daily rates

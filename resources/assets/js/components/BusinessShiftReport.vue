@@ -582,7 +582,7 @@
             },
 
             hourlyFormat(item, amount) {
-                return (item.daily_rates) ? '---' : this.moneyFormat(amount);
+                return (item.fixed_rates) ? '---' : this.moneyFormat(amount);
             },
 
             onShiftDelete(id) {

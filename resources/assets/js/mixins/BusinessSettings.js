@@ -5,6 +5,15 @@ export default {
         }
     },
 
+    computed: {
+        clientRateStructure() {
+            return this.businessSettings().rate_structure === 'client_rate';
+        },
+        usingRateCodes() {
+            return !!this.businessSettings().use_rate_codes;
+        }
+    },
+
     async mounted() {
         await axios.get('/business-settings?json=1')
             .then(response => {
@@ -12,6 +21,7 @@ export default {
             })
             .catch(err => {
                 this.businessSettingsStore = {};
+                this.mounted(); // re-fetch
             });
     },
 

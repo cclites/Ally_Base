@@ -12,7 +12,6 @@ use App\Shifts\ShiftStatusManager;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
@@ -37,7 +36,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float $other_expenses
  * @property int $verified
  * @property int|null $schedule_id
- * @property int $daily_rates
+ * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string|null $status
@@ -122,9 +121,9 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
 
     public static function recalculateDurationOnChange()
     {
-        self::saving(function(Shift $shift) {
+        self::saving(function (Shift $shift) {
             if ($shift->checked_out_time &&
-                ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
+                ($shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time'))
             ) {
                 $shift->hours = $shift->duration(true);
             }
@@ -146,8 +145,8 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
     const PAID_BUSINESS_ONLY_NOT_CHARGED = 'PAID_BUSINESS_ONLY_NOT_CHARGED'; // Shift that failed payment to the caregiver, paid successfully to the business, but still requires payment from the client
     const PAID_CAREGIVER_ONLY_NOT_CHARGED = 'PAID_CAREGIVER_ONLY_NOT_CHARGED'; // Shift that failed payment to the business, paid successfully to the caregiver, but still requires payment from the client
-    const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
-    const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
+    const PAID_NOT_CHARGED = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
+    const PAID = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
     ////////////////////////////////////
     //// Shift Methods
@@ -181,7 +180,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
 
     public function deposits()
     {
-        return $this->belongsToMany(Deposit::class,'deposit_shifts');
+        return $this->belongsToMany(Deposit::class, 'deposit_shifts');
     }
 
     public function client()
@@ -238,7 +237,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     {
         return $this->hasOne(ShiftCostHistory::class, 'id');
     }
-    
+
     public function signature()
     {
         return $this->morphOne(Signature::class, 'signable');
@@ -296,7 +295,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
             ->where('new_status', 'WAITING_FOR_AUTHORIZATION')
             ->pluck('created_at')
             ->first();
-    
+
         return optional($date)->toDateTimeString();
     }
 
@@ -306,7 +305,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
             ->where('new_status', 'WAITING_FOR_PAYOUT')
             ->pluck('created_at')
             ->first();
-            
+
         return optional($date)->toDateTimeString();
     }
 
@@ -327,7 +326,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function duration($forceRecalculation = false)
     {
-        if (!$forceRecalculation && $this->hours) {
+        if (! $forceRecalculation && $this->hours) {
             return $this->hours;
         }
 
@@ -341,7 +340,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function scheduledEndTime()
     {
-        if (!$this->schedule) {
+        if (! $this->schedule) {
             // Return now if no schedule
             return Carbon::now();
         }
@@ -356,11 +355,15 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function remaining()
     {
-        if ($this->checked_out_time) return 0;
+        if ($this->checked_out_time) {
+            return 0;
+        }
         $end = $this->scheduledEndTime();
         $now = Carbon::now();
 
-        if ($now >= $end) return 0;
+        if ($now >= $end) {
+            return 0;
+        }
         return round($now->diffInMinutes($end) / 60, 2);
     }
 
@@ -422,11 +425,11 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function syncIssues($issues)
     {
-        $new = collect($issues)->filter(function($item) {
-            return !isset($item['id']);
+        $new = collect($issues)->filter(function ($item) {
+            return ! isset($item['id']);
         });
 
-        $existing = collect($issues)->filter(function($item) {
+        $existing = collect($issues)->filter(function ($item) {
             return isset($item['id']);
         });
 
@@ -438,7 +441,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
                 ->delete();
 
             // update the existing issues in case they changed
-            foreach($existing as $item) {
+            foreach ($existing as $item) {
                 $issue = ShiftIssue::where('id', $item['id'])->first();
                 if ($issue) {
                     $issue->update($item);
@@ -450,7 +453,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         }
 
         // create new issues from the issues that have no id
-        foreach($new as $item) {
+        foreach ($new as $item) {
             ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
         }
     }
@@ -500,7 +503,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         // first reformat array to work with sync
         // and drop any values with empty comments.
         $data = [];
-        foreach($goals as $goalId => $comments) {
+        foreach ($goals as $goalId => $comments) {
             if (empty($comments)) {
                 continue;
             }
@@ -523,7 +526,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     public function syncQuestions($questions, $answers)
     {
         $items = [];
-        foreach($questions as $q) {
+        foreach ($questions as $q) {
             $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
             $items[$q->id] = ['answer' => $answer];
         }
@@ -569,13 +572,13 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 
-    public function scopeWhereTelephonyVerified($query) 
+    public function scopeWhereTelephonyVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_number');
     }
 
-    public function scopeWhereMobileVerified($query) 
+    public function scopeWhereMobileVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
@@ -624,6 +627,10 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     {
         if (empty($ids)) {
             return $query;
+        }
+
+        if (! is_array($ids)) {
+            $ids = [$ids];
         }
 
         return $query->whereIn('business_id', $ids);

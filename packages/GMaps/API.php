@@ -1,5 +1,7 @@
 <?php
-namespace App\GMaps;
+namespace Packages\GMaps;
+
+use Packages\GMaps\Exceptions\UnexpectedResponseException;
 
 class API {
 
@@ -34,17 +36,17 @@ class API {
 		return self::$key;
 	}
 
-	/**
-	 * Base GET method for communicating with Places API
-	 *
-	 * @param $resource
-	 * @param array $parameters
-	 * @param string $format
-	 * @param int $expectedResponse
-	 *
-	 * @return mixed
-	 * @throws Exception
-	 */
+    /**
+     * Base GET method for communicating with Places API
+     *
+     * @param $resource
+     * @param array $parameters
+     * @param string $format
+     * @param int $expectedResponse
+     *
+     * @return mixed
+     * @throws \Packages\GMaps\Exceptions\UnexpectedResponseException
+     */
 	public static function get($resource, $parameters = array(), $format = 'json', $expectedResponse = 200, $addKey = true) {
 
 		// build url from parameters

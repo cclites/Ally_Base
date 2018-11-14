@@ -16,6 +16,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $country_code
  * @property string|null $national_number
  * @property string|null $extension
+ * @property string|null $notes
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\Client $client

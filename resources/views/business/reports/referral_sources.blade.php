@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <referral-sources-report />
+    <referral-sources-report  :reports="{{ $reports }}"/>
 @endsection

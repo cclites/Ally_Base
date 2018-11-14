@@ -3,7 +3,6 @@
 namespace App\Reports;
 
 use App\Shift;
-use Carbon\Carbon;
 use App\Shifts\ShiftStatusManager;
 use App\Business;
 
@@ -126,7 +125,7 @@ class UnconfirmedShiftsReport extends BaseReport
      *
      * @return array
      */
-    protected function getUnconfirmedStatuses() 
+    protected function getUnconfirmedStatuses()
     {
         return $this->include_clocked_in ? ShiftStatusManager::getUnconfirmedStatuses() : [Shift::WAITING_FOR_CONFIRMATION];
     }
@@ -152,7 +151,7 @@ class UnconfirmedShiftsReport extends BaseReport
                 }
                 return true;
             })
-            ->map(function(Shift $s) {
+            ->map(function (Shift $s) {
                 $total = floatval($s->hours) * floatval($s->caregiver_rate);
 
                 return (object) [

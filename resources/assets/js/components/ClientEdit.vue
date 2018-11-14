@@ -104,9 +104,22 @@
                     <b-form-group label="Date inquired about Service">
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
-                    <b-form-group label="How were they referred?">
-                        <b-form-input id="referral" v-model="form.referral"></b-form-input>
-                    </b-form-group>
+                    <b-row>
+                        <b-col md="9">
+                            <b-form-group label="How were they referred?" label-for="referral">
+                                <b-form-select id="referral"
+                                               v-model="form.referral_source_id"
+                                >
+                                    <option :value="referralsource.id" v-for="referralsource in referralsources">{{ referralsource.organization }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="3" class="pad-top">
+                            <div class="pt-3">
+                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
+                            </div>
+                        </b-col>
+                    </b-row>
                     <b-form-group>
                         <b-form-checkbox id="ambulatory"
                                          v-model="form.ambulatory"
@@ -241,9 +254,9 @@
                 <b-col lg="12">
                     <hr />
                 </b-col>
-                <b-col lg="6">
+                <b-col lg="8">
                     <b-row>
-                        <b-col xlg="8" lg="6" sm="12">
+                        <b-col lg="6" sm="12">
                             <b-form-group label="Ally Client Agreement Status" label-for="onboard_status">
                                 <b-form-select
                                         id="onboard_status"
@@ -258,19 +271,29 @@
                                 <input-help :form="form" field="onboard_status" :text="onboardStatusText"></input-help>
                             </b-form-group>
                         </b-col>
-                        <b-col xlg="4" lg="6" sm="12">
+                        <b-col lg="6" sm="12">
                             <b-form-group v-if="client.onboard_status == 'needs_agreement'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Send Client Agreement via Email</b-button>
+                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <br>
+                                <b-button variant="info" @click="sendConfirmation()" size="sm">Send Client Agreement via
+                                    Email
+                                </b-button>
+                            </b-form-group>
+                            <b-form-group v-if="client.onboarding_step < 6">
+                                <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
+                                <br>
+                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
                             <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
-                                <label class="col-form-label col-12 hidden-sm-down"><span>Client Agreement Email</span></label>
-                                <b-button  variant="info" @click="sendConfirmation()">Resend Client Agreement via Email</b-button>
+                                <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
+                                <b-button variant="info" @click="sendConfirmation()" size="sm">Resend Client Agreement via
+                                    Email
+                                </b-button>
                             </b-form-group>
                         </b-col>
                     </b-row>
                 </b-col>
-                <b-col lg="6">
+                <b-col lg="4">
                     <b-form-group label="Confirmation URL" label-for="ssn" v-if="confirmUrl && (form.onboard_status=='needs_agreement' || form.onboard_status=='emailed_reconfirmation')">
                         <a :href="confirmUrl" target="_blank">{{ confirmUrl }}</a>
                         <input-help :form="form" field="confirmUrl" text="The URL the client can use to confirm their Ally agreement."></input-help>
@@ -288,7 +311,7 @@
         </form>
 
         <reset-password-modal v-model="passwordModal" :url="'/business/clients/' + this.client.id + '/password'"></reset-password-modal>
-        
+
         <b-modal id="deactivateModal"
                  title="Are you sure?"
                  v-model="deactivateModal"
@@ -300,7 +323,7 @@
                         <div class="mb-3">Are you sure you wish to archive {{ this.client.name }}?</div>
                         <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
                         <div v-else>They have no future scheduled shifts.</div>
-                                    
+
                         <b-form-group slabel-for="inactive_at" class="mt-4">
                             <date-picker
                                 class="w-50 mx-auto"
@@ -310,7 +333,7 @@
                             </date-picker>
                             <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
                         </b-form-group>
-                        
+
                     </b-col>
                 </b-row>
             </b-container>
@@ -327,6 +350,8 @@
             v-model="activateModal">
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
+
+        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
     </b-card>
 </template>
 
@@ -341,6 +366,7 @@
             'client': {},
             'lastStatusDate' : {},
             'confirmUrl': {},
+            'referralsources': {}
         },
 
         mixins: [ClientForm, FormatsDates],
@@ -363,7 +389,7 @@
                     onboard_status: this.client.onboard_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
-                    referral: this.client.referral,
+                    referral_source_id: this.client.referral_source ? this.client.referral_source.id : null,
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
@@ -389,6 +415,7 @@
                 deactivateModal: false,
                 activateModal: false,
                 inactive_at: '',
+                showReferralModal: false,
             }
         },
 
@@ -397,6 +424,18 @@
         },
 
         methods: {
+            newrefsourcedata(data) {
+                if(data) {
+                    this.show = false;
+                    this.referralsources.push(data);
+                    this.form.referral_source_id = data.id;
+                }
+            },
+
+            closemodal(status) {
+                this.show = status;
+            },
+
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -465,3 +504,9 @@
 
     }
 </script>
+
+<style scoped>
+    .pad-top {
+        padding-top: 16px;
+    }
+</style>

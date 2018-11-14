@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Controllers\Business;
+
+use App\CareDetails;
+use App\Http\Requests\UpdateClientCareDetailsRequest;
+use App\Responses\ErrorResponse;
+use App\Responses\SuccessResponse;
+use App\Client;
+
+class ClientCareDetailsController extends BaseController
+{
+    /**
+     * Update the client care details.
+     *
+     * @param UpdateClientCareDetailsRequest $request
+     * @param Client $client
+     * @return SuccessResponse|ErrorResponse
+     */
+    public function update(UpdateClientCareDetailsRequest $request, Client $client)
+    {
+        if (empty($client->careDetails)) {
+            $client->careDetails()->create([]);
+        }
+
+        $data = CareDetails::convertFormData($request->validated());
+        if ($client->careDetails()->update($data)) {
+            return new SuccessResponse('Client care needs have been saved successfully.', $client->fresh()->careDetails);
+        }
+
+        return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
+    }
+}

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\GMaps\GeocodeCoordinates;
 use App\Scheduling\RuleParser;
 use Carbon\Carbon;
 use Tests\TestCase;

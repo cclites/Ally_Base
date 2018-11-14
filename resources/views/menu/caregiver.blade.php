@@ -23,7 +23,24 @@
     </ul>
 </li>
 <li>
+    <a href="{{ route('caregivers.tasks') }}">
+        <div class="row">
+            <div class="col-8">
+                <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
+            </div>
+            <div class="col-4">
+                <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ auth()->user()->dueTasks()->count() }}</span>
+            </div>
+        </div>
+    </a>
+</li>
+<li>
     <a href="/profile" aria-expanded="false">
         <i class="mdi mdi-account-circle"></i><span class="hide-menu">My Information</span>
+    </a>
+</li>
+<li>
+    <a href="{{ route('caregivers.clients') }}" aria-expanded="false">
+        <i class="fa fa-users"></i><span class="hide-menu">My Clients</span>
     </a>
 </li>

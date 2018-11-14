@@ -100,13 +100,13 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this caregiver.');
         }
 
-        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->daily_rates);
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
         $creator->startsAt($startsAt)
             ->duration($request->duration)
             ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
-            ->rates($request->caregiver_rate, $request->provider_fee, $request->daily_rates);
+            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
@@ -173,7 +173,7 @@ class ScheduleController extends BaseController
 
         $notes = $request->input('notes');
 
-        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->daily_rates);
+        $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         if ($schedule->notes != $notes) {
             if (strlen($notes)) {
@@ -203,8 +203,8 @@ class ScheduleController extends BaseController
         $client = Client::findOrFail($client_id);
         if ($caregiver_id && !$client->hasCaregiver($caregiver_id)) {
             $data = [
-                'caregiver_daily_rate' => $daily ? $caregiver_rate : 0,
-                'provider_daily_fee' => $daily ? $provider_fee : 0,
+                'caregiver_fixed_rate' => $daily ? $caregiver_rate : 0,
+                'provider_fixed_fee' => $daily ? $provider_fee : 0,
                 'caregiver_hourly_rate' => $daily ? 0 : $caregiver_rate,
                 'provider_hourly_fee' => $daily ? 0 : $provider_fee,
             ];
@@ -270,14 +270,7 @@ class ScheduleController extends BaseController
             return new ErrorResponse(403, 'You do not have access to this schedule.');
         }
 
-        if ($schedule->starts_at < Carbon::now($this->business()->timezone)->setTime(0, 0)) {
-            return new ErrorResponse(400, 'Past schedules are unable to be deleted.');
-        }
-
-        if ($schedule->shifts->count()) {
-            return new ErrorResponse(400, 'This schedule cannot be deleted because it already has an active shift.');
-        }
-
+        // Schedules are soft deleted now so we do not have to worry about related shifts
         $schedule->delete();
         return new SuccessResponse('The scheduled shift has been deleted.');
     }
@@ -413,7 +406,8 @@ class ScheduleController extends BaseController
     public function bulkDestroy(BulkDestroyScheduleRequest $request)
     {
         $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
-        $schedules = $query->doesntHave('shifts')->get();
+        // Schedules are soft deleted now so we do not have to worry about related shifts
+        $schedules = $query->get();
 
         if (!$schedules->count()) {
             return new ErrorResponse(400, 'No matching schedules could be found.');

@@ -10,6 +10,7 @@ use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use OwenIt\Auditing\Contracts\Auditable;
+use Packages\MetaData\HasMetaData;
 
 /**
  * App\User
@@ -64,6 +65,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     use \App\Traits\HasPaymentHold;
     use \OwenIt\Auditing\Auditable;
     use HasAddressesAndNumbers;
+    use HasMetaData;
 
     /**
      * The attributes that are mass assignable.
@@ -132,6 +134,32 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
             ->orderBy('priority');
     }
 
+    public function officeUser()
+    {
+        return $this->hasOne('App\OfficeUser', 'id', 'id');
+    }
+
+    /**
+     * A user can have many assigned tasks.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id');
+    }
+
+    /**
+     * Get the user's assigned tasks that are not completed.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dueTasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_user_id')
+            ->whereNull('completed_at');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -159,7 +187,27 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         }
         return "$first $last";
     }
-    
+
+    /**
+     * Get the default phone number for the user.
+     *
+     * @return string
+     */
+    public function getDefaultPhoneAttribute()
+    {
+        $phone = null;
+
+        if ($this->phoneNumbers->where('type', 'primary')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'primary')->first();
+        } elseif ($this->phoneNumbers->where('type', 'mobile')->count()) {
+            $phone = $this->phoneNumbers->where('type', 'mobile')->first();
+        } else {
+            $phone = $this->phoneNumbers->first();
+        }
+
+        return empty($phone) ? '' : $phone->number;
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
@@ -172,7 +220,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
      */
     public function getRoleClass($type = null)
     {
-        if (!$type) $type = $this->role_type;
+        if (! $type) {
+            $type = $this->role_type;
+        }
 
         switch ($type) {
             case 'admin':
@@ -197,10 +247,5 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function changePassword($password)
     {
         return $this->update(['password' => bcrypt($password)]);
-    }
-
-    public function officeUser()
-    {
-        return $this->hasOne('App\OfficeUser', 'id', 'id');
     }
 }
