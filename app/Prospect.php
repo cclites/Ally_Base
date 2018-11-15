@@ -38,14 +38,16 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $client_id
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property int|null $referral_source_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Client|null $client
  * @property-read mixed $name
  * @property-read mixed $name_last_first
- * @property-read \App\ReferralSource $referralSource
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @property-read \App\ReferralSource|null $referralSource
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereBusinessId($value)
@@ -71,6 +73,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereNeedsPaymentInfo($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReadyToSchedule($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReferredBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereState($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereUpdatedAt($value)

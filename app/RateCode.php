@@ -7,9 +7,26 @@ use App\Traits\BelongsToOneBusiness;
 /**
  * App\RateCode
  *
+ * @property int $id
+ * @property int $business_id
+ * @property string $name
+ * @property string $type
+ * @property float|null $rate
+ * @property int $fixed
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereFixed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class RateCode extends AuditableModel implements BelongsToBusinessesInterface

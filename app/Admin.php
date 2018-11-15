@@ -33,18 +33,17 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin orderByName($direction = 'ASC')
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereId($value)
  * @mixin \Eloquent
  */
-class Admin extends Model implements UserRole, Auditable
+class Admin extends AuditableModel implements UserRole
 {
-    use \OwenIt\Auditing\Auditable;
     use BelongsToBusinesses;
-    
     use IsUserRole;
 
     protected $table = 'admins';

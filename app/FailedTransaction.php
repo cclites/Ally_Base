@@ -16,6 +16,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \App\GatewayTransaction $transaction
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\FailedTransaction onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\FailedTransaction whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\FailedTransaction whereDeletedAt($value)

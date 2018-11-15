@@ -1,14 +1,23 @@
 <?php
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * App\OnboardingActivity
  *
+ * @property int $id
+ * @property string $name
+ * @property string $category
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereCategory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class OnboardingActivity extends Model
+class OnboardingActivity extends BaseModel
 {
     protected $guarded = ['id'];
 }

@@ -45,7 +45,7 @@ use Carbon\Carbon;
  * @property float $mileage
  * @property float $other_expenses
  * @property int $verified
- * @property int $daily_rates
+ * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
  * @property string|null $status
@@ -80,11 +80,12 @@ use Carbon\Carbon;
  * @property-read \App\Signature $signature
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift betweenDates($start, $end)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusiness($business)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregiver($caregiver)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAddressId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()
@@ -114,7 +115,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereConfirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDailyRates($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFixedRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereId($value)

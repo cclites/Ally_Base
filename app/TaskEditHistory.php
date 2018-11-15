@@ -1,8 +1,6 @@
 <?php
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * App\TaskEditHistory
  *
@@ -13,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read void $edited_by
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereTaskId($value)
@@ -20,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereUserId($value)
  * @mixin \Eloquent
  */
-class TaskEditHistory extends Model
+class TaskEditHistory extends BaseModel
 {
     /**
      * The table name.

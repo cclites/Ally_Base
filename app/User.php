@@ -54,7 +54,7 @@ use Packages\MetaData\HasMetaData;
  * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
- * @method static \Illuminate\Database\Eloquent\Builder|\App\User forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereAccessGroupId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereActive($value)

@@ -11,6 +11,7 @@ namespace App;
  * @property string|null $other
  * @property int $completed
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereActivityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereCompleted($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereId($value)

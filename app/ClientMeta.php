@@ -1,8 +1,5 @@
 <?php
-
 namespace App;
-
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\ClientMeta
@@ -13,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $value
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereId($value)
@@ -21,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereValue($value)
  * @mixin \Eloquent
  */
-class ClientMeta extends Model
+class ClientMeta extends BaseModel
 {
     protected $table = 'client_meta';
     protected $fillable = ['key', 'value'];

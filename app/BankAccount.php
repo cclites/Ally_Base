@@ -30,6 +30,7 @@ use Crypt;
  * @property-read object $charge_metrics
  * @property-read mixed $last_four
  * @property-read \App\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountHolderType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BankAccount whereAccountType($value)

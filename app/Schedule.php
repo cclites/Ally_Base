@@ -22,9 +22,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $duration
  * @property int $overtime_duration
  * @property int|null $note_id
- * @property int $daily_rates
+ * @property int $fixed_rates
+ * @property int|null $caregiver_rate_id
+ * @property int|null $client_rate_id
+ * @property int|null $provider_fee_id
  * @property float|null $caregiver_rate
  * @property float|null $provider_fee
+ * @property float|null $client_rate
  * @property string $hours_type
  * @property int|null $care_plan_id
  * @property string $status
@@ -44,28 +48,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $shift_status
  * @property-read \App\ScheduleNote|null $note
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forClient($client)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule future($timezone)
  * @method static \Illuminate\Database\Query\Builder|\App\Schedule onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCarePlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereConvertedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDailyRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereFixedRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereNoteId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereOvertimeDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFeeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStartsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereUpdatedAt($value)

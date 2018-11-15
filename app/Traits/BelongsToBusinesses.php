@@ -4,7 +4,6 @@ namespace App\Traits;
 use App\Business;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\User;
-use Auth;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -72,13 +71,14 @@ trait BelongsToBusinesses
      * NOTE: This should be used in controllers
      *
      * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $businessIds
-     * @param \App\User|null $authorizedUser
+     * @param array|null $businessIds  Sourced from request input 'businesses' if not provided
+     * @param \App\User|null $authorizedUser   Sourced from the currently authenticated user if not provided
      * @return void
      */
-    public function scopeForAuthorizedBusinesses(Builder $builder, array $businessIds, User $authorizedUser = null)
+    public function scopeForRequestedBusinesses(Builder $builder, array $businessIds = null, User $authorizedUser = null)
     {
-        if (!$authorizedUser) $authorizedUser = Auth::user();
+        if ($businessIds === null) $businessIds = (array) request()->input('businesses', []);
+        if ($authorizedUser === null) $authorizedUser = auth()->user();
 
         if ($authorizedUser->role_type !== 'admin') {
             $businessIds = $this->filterAttachedBusinesses($authorizedUser, $businessIds);

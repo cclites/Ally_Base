@@ -1,7 +1,6 @@
 <?php
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
@@ -9,7 +8,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @package App
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  */
-abstract class AuditableModel extends Model implements Auditable
+abstract class AuditableModel extends BaseModel implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
 }

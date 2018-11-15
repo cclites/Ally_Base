@@ -22,6 +22,7 @@ namespace App;
  * @property-read mixed $week
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\GatewayTransaction|null $transaction
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereAdjustment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereBusinessId($value)

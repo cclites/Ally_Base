@@ -1,8 +1,5 @@
 <?php
-
 namespace App;
-
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\CaregiverMeta
@@ -13,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $value
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereId($value)
@@ -21,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereValue($value)
  * @mixin \Eloquent
  */
-class CaregiverMeta extends Model
+class CaregiverMeta extends BaseModel
 {
     protected $table = 'caregiver_meta';
     protected $fillable = ['key', 'value'];

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @property int $id
  * @property string|null $deleted_at
+ * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
@@ -32,9 +33,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser orderByName($direction = 'ASC')
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereChainId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @mixin \Eloquent

@@ -19,15 +19,16 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
- * @method static Builder|\App\Activity forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
- * @method static Builder|\App\Activity forBusinesses($businessIds)
- * @method static Builder|\App\Activity whereBusinessId($value)
- * @method static Builder|\App\Activity whereCode($value)
- * @method static Builder|\App\Activity whereCreatedAt($value)
- * @method static Builder|\App\Activity whereDescription($value)
- * @method static Builder|\App\Activity whereId($value)
- * @method static Builder|\App\Activity whereName($value)
- * @method static Builder|\App\Activity whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class Activity extends AuditableModel implements BelongsToBusinessesInterface
@@ -36,6 +37,7 @@ class Activity extends AuditableModel implements BelongsToBusinessesInterface
 
     protected $table = 'activities';
     protected $guarded = ['id'];
+    protected $orderedColumn = 'code';
 
     ///////////////////////////////////////////
     /// Relationship Methods

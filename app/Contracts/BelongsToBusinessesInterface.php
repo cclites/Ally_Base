@@ -61,9 +61,9 @@ interface BelongsToBusinessesInterface
      * NOTE: This should be used in controllers
      *
      * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $businessIds
+     * @param array|null $businessIds
      * @param \App\User|null $authorizedUser
      * @return void
      */
-    public function scopeForAuthorizedBusinesses(Builder $builder, array $businessIds, User $authorizedUser = null);
+    public function scopeForRequestedBusinesses(Builder $builder, array $businessIds = null, User $authorizedUser = null);
 }

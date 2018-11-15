@@ -13,6 +13,7 @@ namespace App;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
  * @property-read \App\ClientGoal $goal
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereClientGoalId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereCreatedAt($value)

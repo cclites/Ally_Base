@@ -24,9 +24,10 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $reference
- * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException notAcknowledged()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereBusinessId($value)

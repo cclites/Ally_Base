@@ -30,8 +30,9 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read mixed $week
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\GatewayTransaction|null $transaction
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAdjustment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereBusinessAllotment($value)

@@ -3,8 +3,6 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
-use Illuminate\Database\Eloquent\Model;
-use App\SmsThreadRecipient;
 use Carbon\Carbon;
 
 /**
@@ -22,8 +20,9 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Relations\HasMany $unique_recipient_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadRecipient[] $recipients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $replies
- * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCanReply($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCreatedAt($value)
@@ -34,7 +33,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class SmsThread extends Model implements BelongsToBusinessesInterface
+class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 

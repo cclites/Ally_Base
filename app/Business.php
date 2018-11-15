@@ -74,13 +74,17 @@ use App\Exceptions\ExistingBankAccountException;
  * @property int $auto_append_hours
  * @property int $auto_confirm_unmodified_shifts
  * @property int $auto_confirm_verified_shifts
+ * @property string $rate_structure
+ * @property int $include_ally_fee
+ * @property int $use_rate_codes
+ * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BankAccount|null $bankAccount
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
- * @property-read \App\BusinessChain $chain
+ * @property-read \App\BusinessChain|null $chain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clientsUsingProviderPayment
@@ -100,6 +104,7 @@ use App\Exceptions\ExistingBankAccountException;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Timesheet[] $timesheets
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $users
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereActive($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress2($value)
@@ -116,6 +121,7 @@ use App\Exceptions\ExistingBankAccountException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarDefaultView($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarNextDayThreshold($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarRememberFilters($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereChainId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereChargeDiffEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoComments($value)
@@ -134,6 +140,7 @@ use App\Exceptions\ExistingBankAccountException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereDefaultCommissionRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereEin($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereIncludeAllyFee($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLastDayOfCycle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLastDayOfFirstPeriod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLocationExceptions($value)
@@ -153,6 +160,7 @@ use App\Exceptions\ExistingBankAccountException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePaymentAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePhone1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePhone2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereRateStructure($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereRequireSignatures($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereSceShiftsInProgress($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereScheduling($value)
@@ -164,6 +172,7 @@ use App\Exceptions\ExistingBankAccountException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUnpairedPayRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUseRateCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveCaregivers()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveClients()

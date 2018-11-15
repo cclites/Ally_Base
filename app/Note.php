@@ -21,8 +21,9 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\User $creator
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCaregiverId($value)

@@ -22,6 +22,7 @@ use File;
  * @property-read \App\User|null $user
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Document onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereDeletedAt($value)

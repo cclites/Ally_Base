@@ -66,6 +66,10 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $medicaid_diagnosis_codes
  * @property string|null $client_type_descriptor
  * @property int $receive_summary_email
+ * @property int|null $referral_source_id
+ * @property int|null $onboarding_step
+ * @property int|null $hourly_rate_id
+ * @property int|null $fixed_rate_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
@@ -75,8 +79,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
- * @property-read \App\RateCode $defaultFixedRate
- * @property-read \App\RateCode $defaultHourlyRate
+ * @property-read \App\RateCode|null $defaultFixedRate
+ * @property-read \App\RateCode|null $defaultHourlyRate
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \App\Address $evvAddress
@@ -106,14 +110,15 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\ClientPreferences $preferences
  * @property-read \App\ClientReferralServiceAgreement $referralServiceAgreement
- * @property-read \App\ReferralSource $referralSource
+ * @property-read \App\ReferralSource|null $referralSource
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client orderByName($direction = 'ASC')
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereAmbulatory($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentType($value)
@@ -130,8 +135,10 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHospitalName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHospitalNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHourlyRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereImportIdentifier($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereInquiryDate($value)
@@ -149,12 +156,14 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMedicaidId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMeta($key, $delimiter = null, $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReceiveSummaryEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()

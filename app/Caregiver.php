@@ -42,6 +42,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $w9_account_numbers
  * @property string|null $w9_employer_id_number
  * @property string|null $medicaid_id
+ * @property int|null $hourly_rate_id
+ * @property int|null $fixed_rate_id
  * @property-read \App\Address $address
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
@@ -51,8 +53,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
- * @property-read \App\RateCode $defaultFixedRate
- * @property-read \App\RateCode $defaultHourlyRate
+ * @property-read \App\RateCode|null $defaultFixedRate
+ * @property-read \App\RateCode|null $defaultHourlyRate
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
@@ -80,12 +82,15 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $skills
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver orderByName($direction = 'ASC')
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereBankAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereFixedRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereHireDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereHourlyRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereImportIdentifier($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereMedicaidId($value)

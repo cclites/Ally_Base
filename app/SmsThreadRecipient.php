@@ -1,8 +1,6 @@
 <?php
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * App\SmsThreadRecipient
  *
@@ -14,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\SmsThread $thread
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereNumber($value)
@@ -22,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereUserId($value)
  * @mixin \Eloquent
  */
-class SmsThreadRecipient extends Model
+class SmsThreadRecipient extends BaseModel
 {
     /**
      * The attributes that should not be mass assignable.

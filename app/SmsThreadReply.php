@@ -1,8 +1,6 @@
 <?php
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * App\SmsThreadReply
  *
@@ -19,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Business|null $business
  * @property-read \App\SmsThread $thread
  * @property-read \App\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereFromNumber($value)
@@ -31,7 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereUserId($value)
  * @mixin \Eloquent
  */
-class SmsThreadReply extends Model
+class SmsThreadReply extends BaseModel
 {
     /**
      * The attributes that should not be mass assignable.

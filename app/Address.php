@@ -26,6 +26,7 @@ use Packages\GMaps\NoGeocodeFoundException;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read string $full_address
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereCity($value)
