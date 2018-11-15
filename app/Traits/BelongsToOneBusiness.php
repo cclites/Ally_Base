@@ -26,8 +26,6 @@ trait BelongsToOneBusiness
      */
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        $builder->whereHas('businesses', function($q) use ($businessIds) {
-            $q->whereIn('id', $businessIds);
-        });
+        $builder->whereIn('business_id', $businessIds);
     }
 }

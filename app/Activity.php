@@ -4,6 +4,7 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Activity
@@ -18,15 +19,15 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forBusinesses($businessIds)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCode($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereUpdatedAt($value)
+ * @method static Builder|\App\Activity forAuthorizedBusinesses($businessIds, \App\User $authorizedUser = null)
+ * @method static Builder|\App\Activity forBusinesses($businessIds)
+ * @method static Builder|\App\Activity whereBusinessId($value)
+ * @method static Builder|\App\Activity whereCode($value)
+ * @method static Builder|\App\Activity whereCreatedAt($value)
+ * @method static Builder|\App\Activity whereDescription($value)
+ * @method static Builder|\App\Activity whereId($value)
+ * @method static Builder|\App\Activity whereName($value)
+ * @method static Builder|\App\Activity whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class Activity extends AuditableModel implements BelongsToBusinessesInterface
@@ -50,4 +51,22 @@ class Activity extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsToMany(CarePlan::class, 'care_plan_activities');
     }
 
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->where(function($q) use ($businessIds) {
+            $q->whereIn('business_id', $businessIds)
+                ->orWhereNull('business_id');
+        });
+    }
 }
