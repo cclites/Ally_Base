@@ -47,6 +47,9 @@ Vue.use(VueGoogleMaps, {
     installComponents: true,
 });
 
+import 'vue-plyr';
+import 'vue-plyr/dist/vue-plyr.css';
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -296,6 +299,11 @@ Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
 /* Payroll Policy */
 Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));
+
+Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeManager'));
+Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
+Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
+Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

@@ -50,6 +50,9 @@ Route::group(['middleware' => 'auth'], function() {
     Route::put('emergency-contacts/{user}/{contact}', 'EmergencyContactController@update');
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
     Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
+
+    Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
+    Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
 });
 
 Route::group([
@@ -405,6 +408,15 @@ Route::group([
     Route::get('quickbooks-api/authorization', 'Admin\QuickBooksApiController@authorization')->name('quickbooks_api.authorization');
     Route::get('quickbooks-api/connection', 'Admin\QuickBooksApiController@connection')->name('quickbooks_api.connection');
     Route::post('quickbooks-api/create-invoice', 'Admin\QuickBooksApiController@createInvoice');
+
+    Route::get('knowledge-manager', 'Admin\KnowledgeManagerController@index')->name('knowledge.manager');
+    Route::post('knowledge-manager', 'Admin\KnowledgeManagerController@store');
+    Route::get('knowledge-manager/create', 'Admin\KnowledgeManagerController@create');
+    Route::get('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@edit')->name('knowledge.edit');
+    Route::patch('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@update');
+    Route::delete('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@destroy');
+    Route::post('knowledge-manager/attachments', 'Admin\KnowledgeAttachmentController@store');
+    Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
