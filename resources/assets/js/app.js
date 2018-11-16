@@ -47,6 +47,9 @@ Vue.use(VueGoogleMaps, {
     installComponents: true,
 });
 
+import 'vue-plyr';
+import 'vue-plyr/dist/vue-plyr.css';
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -186,6 +189,7 @@ Vue.component('sales-pipeline-report', require('./components/business/reports/Sa
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
+Vue.component('caregiver-client-narrative', require('./components/caregivers/ClientNarrative'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
@@ -215,6 +219,7 @@ Vue.component('client-addresses-tab', require('./components/business/clients/Cli
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
+Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
@@ -295,6 +300,11 @@ Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 
 /* Payroll Policy */
 Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));
+
+Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeManager'));
+Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
+Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
+Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
 
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');

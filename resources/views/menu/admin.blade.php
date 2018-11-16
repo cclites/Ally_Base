@@ -1,5 +1,3 @@
-
-
 <li>
     <a class="has-arrow" href="/home" aria-expanded="false"><i class="mdi mdi-gauge"></i><span class="hide-menu">Dashboard </span></a>
 </li>
@@ -39,25 +37,11 @@
 </li>
 <li>
     <a href="{{ route('admin.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
-    {{--<a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>--}}
-    {{--<ul aria-expanded="false" class="collapse">--}}
-        {{--<li><a href="{{ route('admin.reports.unsettled') }}">Unsettled Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.reconciliation') }}">Reconciliation Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.failed_transactions.index') }}">Failed Transactions</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.pending_transactions') }}">Pending Transactions</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.on_hold') }}">On Hold Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.deposits.failed') }}">Failed Deposits</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.shared_shifts') }}">Shared Shifts</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.unpaid_shifts') }}">Unpaid Shifts</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.caregivers.deposits_missing_bank_account') }}">Missing Deposit Accounts</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.finances') }}">Financial Summary</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.client_caregiver_visits') }}">Client Caregiver Visits</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.active_clients') }}">Active Clients Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.bucket') }}">Bank Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.evv') }}">EVV Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.emails') }}">Emails Report</a></li>--}}
-        {{--<li><a href="{{ route('admin.reports.audit-log') }}">Audit Log</a></li>--}}
-    {{--</ul>--}}
+</li>
+<li>
+    <a class="" href="{{ route('admin.knowledge.manager') }}" aria-expanded="false">
+        <i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>
+    </a>
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-upload"></i><span class="hide-menu">Shift Imports</span></a>
@@ -66,7 +50,6 @@
         <li><a href="{{ route('admin.imports.index') }}">Import History</a></li>
     </ul>
 </li>
-
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-diamond"></i><span class="hide-menu">Testing</span></a>
     <ul aria-expanded="false" class="collapse">
@@ -74,6 +57,5 @@
         <li><a href="{{ route('admin.tellus') }}">Tellus</a></li>
         <li><a href="{{ route('admin.nacha_ach') }}">Nacha Ach</a></li>
         <li><a href="{{ route('admin.quickbooks_api') }}">QuickBooks API</a></li>
-
     </ul>
 </li>

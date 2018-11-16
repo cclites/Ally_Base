@@ -50,12 +50,17 @@ Route::group(['middleware' => 'auth'], function() {
     Route::put('emergency-contacts/{user}/{contact}', 'EmergencyContactController@update');
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
     Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
+
+    Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
+    Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
 });
 
 Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
 ], function () {
+    Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
+
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
@@ -71,6 +76,9 @@ Route::group([
 
     Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
     Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
+    Route::get('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@index')->name('caregivers.clients.narrative');
+    Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
+    Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
@@ -403,6 +411,15 @@ Route::group([
     Route::get('quickbooks-api/authorization', 'Admin\QuickBooksApiController@authorization')->name('quickbooks_api.authorization');
     Route::get('quickbooks-api/connection', 'Admin\QuickBooksApiController@connection')->name('quickbooks_api.connection');
     Route::post('quickbooks-api/create-invoice', 'Admin\QuickBooksApiController@createInvoice');
+
+    Route::get('knowledge-manager', 'Admin\KnowledgeManagerController@index')->name('knowledge.manager');
+    Route::post('knowledge-manager', 'Admin\KnowledgeManagerController@store');
+    Route::get('knowledge-manager/create', 'Admin\KnowledgeManagerController@create');
+    Route::get('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@edit')->name('knowledge.edit');
+    Route::patch('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@update');
+    Route::delete('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@destroy');
+    Route::post('knowledge-manager/attachments', 'Admin\KnowledgeAttachmentController@store');
+    Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

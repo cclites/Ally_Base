@@ -362,7 +362,18 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     public function careDetails()
     {
         return $this->hasOne(CareDetails::class, 'client_id', 'id');
-    }    
+    }
+
+    /**
+     * Get the ClientNarrative relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function narrative()
+    {
+        return $this->hasMany(ClientNarrative::class)
+            ->latest();
+    }
 
     ///////////////////////////////////////////
     /// Mutators
