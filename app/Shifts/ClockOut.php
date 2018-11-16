@@ -67,7 +67,8 @@ class ClockOut extends ClockBase
         }
 
         // Determine whether this is a verified clock in attempt
-        $verified = ($shift->verified && !$this->manual) ? true : false;
+        $verified = ($shift->checked_in_verified && !$this->manual) ? true : false;
+        $clockOutVerified = false;
 
         // Attempt to verify EVV regardless of previous status,
         // but only throw the exception if it's an attempt at a verified clock in
@@ -88,12 +89,12 @@ class ClockOut extends ClockBase
             'checked_out_number' => $this->number,
             'checked_out_ip' => \Request::ip(),
             'checked_out_agent' => \Request::userAgent(),
-            'checked_out_verified' => $clockOutVerified ?? false,
+            'checked_out_verified' => $clockOutVerified,
             'caregiver_comments' => $this->comments,
             'other_expenses' => $this->otherExpenses,
             'other_expenses_desc' => $this->otherExpensesDesc,
             'mileage' => $this->mileage,
-            'verified' => $verified,
+            'verified' => $verified && $clockOutVerified,
         ]);
 
         $shift->syncGoals($this->goals);
