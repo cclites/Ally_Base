@@ -15,3 +15,8 @@
         <i class="mdi mdi-account-circle"></i><span class="hide-menu">My Information</span>
     </a>
 </li>
+<li>
+    <a href="{{ route('clients.caregivers') }}" aria-expanded="false">
+        <i class="fa fa-users"></i><span class="hide-menu">My Caregivers</span>
+    </a>
+</li>

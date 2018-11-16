@@ -56,6 +56,8 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
 ], function () {
+    Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
+
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
