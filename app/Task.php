@@ -31,8 +31,8 @@ use Carbon\Carbon;
  * @property-write mixed $completed
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task assignedTo($user_id)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task createdBy($user_id)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Task onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()

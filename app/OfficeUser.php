@@ -33,8 +33,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereChainId($value)

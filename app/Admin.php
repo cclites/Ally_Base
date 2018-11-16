@@ -33,8 +33,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereDeletedAt($value)

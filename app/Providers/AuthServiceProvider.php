@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Activity;
+use App\Client;
 use App\EmergencyContact;
 use App\PhoneNumber;
+use App\Policies\ActivityPolicy;
+use App\Policies\ClientPolicy;
 use App\Policies\EmergencyContactPolicy;
 use App\Policies\PhoneNumberPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +21,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
+        Activity::class => ActivityPolicy::class,
+        Client::class => ClientPolicy::class,
         PhoneNumber::class => PhoneNumberPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class
     ];

@@ -115,8 +115,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereAmbulatory($value)

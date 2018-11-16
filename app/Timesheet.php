@@ -29,8 +29,8 @@ use Illuminate\Support\Arr;
  * @property-read int $exception_count
  * @property-read void $is_approved
  * @property-read void $is_denied
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereApprovedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereBusinessId($value)

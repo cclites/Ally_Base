@@ -18,8 +18,8 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\Business $business
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospect
- * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereContactName($value)

@@ -48,9 +48,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $shift_status
  * @property-read \App\ScheduleNote|null $note
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule future($timezone)
  * @method static \Illuminate\Database\Query\Builder|\App\Schedule onlyTrashed()

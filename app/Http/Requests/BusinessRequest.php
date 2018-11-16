@@ -1,0 +1,139 @@
+<?php
+namespace App\Http\Requests;
+
+use App\User;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+
+/**
+ * Class BusinessRequest
+ * @package App\Http\Requests
+ *
+ * This class should be extended for any office user request in which the entity requires a business_id
+ */
+abstract class BusinessRequest extends FormRequest
+{
+    /**
+     * The array of rules to validate against
+     *
+     * @return array
+     */
+    abstract public function rules();
+
+    /**
+     * A default authorize() method to return true.  Authorization rules normally belong in a policy, called from the controller.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * A default filtered() method to return validated data that has been properly filtered and formatted
+     * Notes: Extend this method to add formatting to dates and other fields
+     *
+     * @return array
+     */
+    public function filtered()
+    {
+        return $this->validated();
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator(Validator $validator)
+    {
+        $this->addBusinessIdRule($validator);
+    }
+
+    /**
+     * Automatically add the business_id for single business users to the validation data
+     *
+     * @return array
+     */
+    protected function validationData()
+    {
+        return $this->addBusinessInput($this->all());
+    }
+
+    /**
+     * Automatically add the business_id for single business users to the validation data
+     *
+     * @return array
+     */
+    public function validated()
+    {
+        return $this->addBusinessInput(parent::validated());
+    }
+
+    /**
+     * Add the validation rule for business_id to
+     *
+     * @param \Illuminate\Validation\Validator $validator
+     */
+    protected function addBusinessIdRule(Validator $validator)
+    {
+        if (!array_key_exists('business_id', $this->rules())) {
+            $validator->addRules([
+                'business_id' => $this->getBusinessRulesForUser(),
+            ]);
+            $validator->setCustomMessages([
+                'business_id.in' => 'You do not have access to the selected business.',
+                'business_id.*' => 'Unknown business identifier.',
+            ]);
+        }
+    }
+
+    /**
+     * The rules for business_id for a specified user
+     *
+     * @param \App\User|null $user
+     * @return array
+     */
+    protected function getBusinessRulesForUser(User $user = null)
+    {
+        if (!$user) $user = \Auth::user();
+
+        if ($user->role_type === 'admin') {
+            return ['required', 'exists:businesses,id'];
+        }
+
+        $businessIds = $user->getBusinessIds();
+        $rules = [
+            'required',  // may be replaced with 'required' later
+            'integer',
+            'in:' . implode(',', $businessIds)
+        ];
+
+        return $rules;
+    }
+
+    /**
+     * Returns the business ID from the request, defaulting to a single business if the user only has 1 attached
+     *
+     * @param \App\User|null $user
+     * @return array|string
+     */
+    protected function getBusinessId(User $user = null)
+    {
+        if (!$user) $user = \Auth::user();
+
+        $businessIds = $user->getBusinessIds();
+        $default = count($businessIds) === 1 ? current($businessIds) : null;
+
+        return $this->input('business_id', $default);
+    }
+
+    protected function addBusinessInput(array $original)
+    {
+        return $original + [
+            'business_id' => $this->getBusinessId(),
+        ];
+    }
+}

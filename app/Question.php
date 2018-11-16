@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Question forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Question forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question forType($client_type)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Question onlyTrashed()

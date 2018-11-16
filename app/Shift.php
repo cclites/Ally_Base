@@ -80,11 +80,11 @@ use Carbon\Carbon;
  * @property-read \App\Signature $signature
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift betweenDates($start, $end)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusiness($business)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregiver($caregiver)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAddressId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()

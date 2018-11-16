@@ -82,8 +82,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $skills
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver active()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forAuthorizedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver orderByName($direction = 'ASC')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereBankAccountId($value)
