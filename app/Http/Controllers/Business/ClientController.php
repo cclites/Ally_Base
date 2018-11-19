@@ -14,7 +14,6 @@ use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Rules\ValidSSN;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use Carbon\Carbon;
@@ -107,11 +106,13 @@ class ClientController extends BaseController
         $this->authorize('create', [Client::class, $data]);
 
         // Look for duplicates
-        if ($request->email && Client::forRequestedBusinesses()->where('email', $request->email)->first()) {
-            return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
-        }
-        if (Client::forRequestedBusinesses()->where('firstname', $request->firstname)->where('lastname', $request->lastname)->first()) {
-            return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
+        if (!$request->override) {
+            if ($request->email && Client::forRequestedBusinesses()->where('email', $request->email)->first()) {
+                return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
+            }
+            if (Client::forRequestedBusinesses()->where('firstname', $request->firstname)->where('lastname', $request->lastname)->first()) {
+                return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
+            }
         }
 
         if ($client = Client::create($data)) {

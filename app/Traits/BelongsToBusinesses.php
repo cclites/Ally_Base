@@ -84,8 +84,8 @@ trait BelongsToBusinesses
             $businessIds = $this->filterAttachedBusinesses($authorizedUser, $businessIds);
             // If empty, filter by all businesses the authorized user has access to
             if (!count($businessIds)) $businessIds = $authorizedUser->getBusinessIds();
-        }
 
-        $builder->forBusinesses($businessIds);
+            $builder->forBusinesses($businessIds);
+        }
     }
 }

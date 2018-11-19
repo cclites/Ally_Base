@@ -79,7 +79,7 @@ abstract class BasePolicy
             return true;
         }
 
-        if ($this->isOfficeUser() && $user->officeUser->chain_id == $entity->chain_id) {
+        if ($this->isOfficeUser() && $user->officeUser->sharesChainWith($entity)) {
             return true;
         }
 

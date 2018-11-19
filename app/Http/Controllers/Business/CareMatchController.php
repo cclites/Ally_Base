@@ -26,6 +26,8 @@ class CareMatchController extends BaseController
 
     function clientMatch(Request $request, Client $client)
     {
+        $this->authorize('read', $client);
+
         $request->validate([
             'starts_at' => 'nullable|date',
             'duration' => 'nullable|integer|required_if:exclude_overtime,1',

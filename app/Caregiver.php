@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Confirmations\Confirmation;
+use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
@@ -11,6 +12,8 @@ use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToChains;
+use App\Traits\BelongsToOneChain;
 use App\Traits\HasDefaultRates;
 use App\Traits\IsUserRole;
 use Crypt;
@@ -113,9 +116,9 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold
+class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, BelongsToChainsInterface
 {
-    use IsUserRole, BelongsToBusinesses;
+    use IsUserRole, BelongsToBusinesses, BelongsToChains;
     use \App\Traits\HasPaymentHold;
     use HasOwnMetaData;
     use HasDefaultRates;
@@ -506,6 +509,16 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->businesses->pluck('id')->toArray();
     }
 
+    /**
+     * Return an array of business chain IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getChainIds()
+    {
+        return $this->businessChains->pluck('id')->toArray();
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -522,6 +535,24 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     {
         $builder->whereHas('businessChains.businesses', function($q) use ($businessIds) {
             $q->whereIn('id', $businessIds);
+        });
+    }
+
+    /**
+     * A query scope for filtering results by related business chains
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param int|\App\BusinessChain|array $chains
+     * @return void
+     */
+    public function scopeForChains(Builder $builder, $chains)
+    {
+        $chains = array_map(function($chain) {
+            return ($chain instanceof BusinessChain) ? $chain->id : $chain;
+        }, (array) $chains);
+
+        $builder->whereHas('businessChains', function($q) use ($chains) {
+            $q->whereIn('chain_id', $chains);
         });
     }
 }

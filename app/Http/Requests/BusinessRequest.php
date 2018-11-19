@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Business;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -73,6 +74,32 @@ abstract class BusinessRequest extends FormRequest
     }
 
     /**
+     * Returns the business ID from the request, defaulting to a single business if the user only has 1 attached
+     *
+     * @param \App\User|null $user
+     * @return array|string
+     */
+    public function getBusinessId(User $user = null)
+    {
+        if (!$user) $user = \Auth::user();
+
+        $businessIds = $user->getBusinessIds();
+        $default = count($businessIds) === 1 ? current($businessIds) : null;
+
+        return $this->input('business_id', $default);
+    }
+
+    /**
+     * @param \App\User|null $user
+     * @return \App\Business|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function getBusiness(User $user = null)
+    {
+        return Business::findOrFail($this->getBusinessId($user));
+    }
+
+    /**
      * Add the validation rule for business_id to
      *
      * @param \Illuminate\Validation\Validator $validator
@@ -112,22 +139,6 @@ abstract class BusinessRequest extends FormRequest
         ];
 
         return $rules;
-    }
-
-    /**
-     * Returns the business ID from the request, defaulting to a single business if the user only has 1 attached
-     *
-     * @param \App\User|null $user
-     * @return array|string
-     */
-    protected function getBusinessId(User $user = null)
-    {
-        if (!$user) $user = \Auth::user();
-
-        $businessIds = $user->getBusinessIds();
-        $default = count($businessIds) === 1 ? current($businessIds) : null;
-
-        return $this->input('business_id', $default);
     }
 
     protected function addBusinessInput(array $original)

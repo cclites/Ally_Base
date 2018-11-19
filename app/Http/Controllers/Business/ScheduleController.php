@@ -90,7 +90,7 @@ class ScheduleController extends BaseController
     {
         $data = $request->filtered();
         $this->authorize('create', [Schedule::class, $data]);
-        $business = Business::findOrFail($data['business_id']);
+        $business = $request->getBusiness();
 
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
@@ -152,7 +152,7 @@ class ScheduleController extends BaseController
     public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
     {
         $data = $request->filtered();
-        $business = Business::findOrFail($data['business_id']);
+        $business = $request->getBusiness();
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
 

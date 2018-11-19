@@ -33,7 +33,7 @@ class QuestionController extends Controller
     public function store(CreateQuestionRequest $request)
     {
         $data = $request->filtered();
-        $this->authorize('update', Business::findOrFail($data['business_id']));
+        $this->authorize('update', $request->getBusiness());
 
         if ($question = Question::create($data)) {
             return new SuccessResponse('Question has been created.', $question);

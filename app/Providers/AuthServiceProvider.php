@@ -25,6 +25,7 @@ use App\Policies\RateCodePolicy;
 use App\Policies\ReferralSourcePolicy;
 use App\Policies\SchedulePolicy;
 use App\Policies\ShiftPolicy;
+use App\Policies\SmsThreadPolicy;
 use App\Policies\SystemExceptionPolicy;
 use App\Policies\TaskPolicy;
 use App\Prospect;
@@ -32,6 +33,7 @@ use App\RateCode;
 use App\ReferralSource;
 use App\Schedule;
 use App\Shift;
+use App\SmsThread;
 use App\SystemException;
 use App\Task;
 use Illuminate\Support\Facades\Gate;
@@ -59,6 +61,7 @@ class AuthServiceProvider extends ServiceProvider
         ReferralSource::class => ReferralSourcePolicy::class,
         Schedule::class => SchedulePolicy::class,
         Shift::class => ShiftPolicy::class,
+        SmsThread::class => SmsThreadPolicy::class,
         SystemException::class => SystemExceptionPolicy::class,
         Task::class => TaskPolicy::class,
     ];

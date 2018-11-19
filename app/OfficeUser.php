@@ -1,8 +1,10 @@
 <?php
 namespace App;
 
+use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\UserRole;
 use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToOneChain;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -42,9 +44,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @mixin \Eloquent
  */
-class OfficeUser extends AuditableModel implements UserRole
+class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface
 {
-    use IsUserRole, BelongsToBusinesses;
+    use IsUserRole, BelongsToBusinesses, BelongsToOneChain;
 
     protected $table = 'office_users';
     public $timestamps = false;
@@ -53,11 +55,6 @@ class OfficeUser extends AuditableModel implements UserRole
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
-
-    public function businessChain()
-    {
-        return $this->belongsTo(BusinessChain::class, 'chain_id');
-    }
 
     public function businesses()
     {

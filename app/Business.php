@@ -3,12 +3,13 @@
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\ChargeableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
-use App\Traits\BelongsToOneBusiness;
+use App\Traits\BelongsToOneChain;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -183,9 +184,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveClients()
  * @mixin \Eloquent
  */
-class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface
+class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface, BelongsToChainsInterface
 {
-    use BelongsToBusinesses;
+    use BelongsToBusinesses, BelongsToOneChain;
     use \App\Traits\HasPaymentHold;
     use \App\Traits\HasAllyFeeTrait;
 
