@@ -2,12 +2,55 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
+use App\BusinessChain;
 use App\Http\Controllers\Controller;
 use App\Traits\ActiveBusiness;
 
 class BaseController extends Controller
 {
     use ActiveBusiness;
+
+    protected $activeBusinessChain;
+
+    /**
+     * Return the active business chain
+     *
+     * @return \App\BusinessChain
+     * @throws \Exception
+     */
+    protected function businessChain()
+    {
+        if ($this->activeBusinessChain) {
+            return $this->activeBusinessChain;
+        }
+
+        return \Auth::user()->officeUser->businessChain;
+    }
+
+    /**
+     * Override the active business chain (used for Admins)
+     *
+     * @param \App\BusinessChain $businessChain
+     */
+    protected function setBusinessChainAs(BusinessChain $businessChain)
+    {
+        $this->activeBusinessChain = $businessChain;
+    }
+
+    /**
+     * Override the active business (used for Admins)
+     *
+     * @param \App\Business $business
+     */
+    protected function setBusinessAs(Business $business)
+    {
+        $this->setBusinessChainAs($business->chain);
+
+        // @deprecated below
+        $activeBusiness = app()->make(\App\ActiveBusiness::class);
+        $activeBusiness->set($business);
+    }
 
     /**
      * Check if the office user has access to $business

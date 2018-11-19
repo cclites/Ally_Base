@@ -260,8 +260,8 @@ Route::group([
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
-    Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
-    Route::post('exceptions/{id}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
+    Route::get('exceptions/{exception}', 'Business\ExceptionController@show')->name('exceptions.show');
+    Route::post('exceptions/{exception}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

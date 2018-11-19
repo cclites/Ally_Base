@@ -1,6 +1,9 @@
 <?php
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
+
 /**
  * App\Deposit
  *
@@ -37,8 +40,9 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Deposit extends AuditableModel
+class Deposit extends AuditableModel implements BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
 
     protected $table = 'deposits';
     protected $guarded = ['id'];

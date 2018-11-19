@@ -54,6 +54,11 @@ class OfficeUser extends AuditableModel implements UserRole
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    public function businessChain()
+    {
+        return $this->belongsTo(BusinessChain::class, 'chain_id');
+    }
+
     public function businesses()
     {
         return $this->belongsToMany(Business::class, 'business_office_users');

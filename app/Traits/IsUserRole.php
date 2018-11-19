@@ -8,6 +8,7 @@ use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 use App\Document;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
@@ -314,22 +315,30 @@ trait IsUserRole
      * @param \Illuminate\Database\Eloquent\Builder $builder
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($builder)
+    public function scopeActive(Builder $builder)
     {
         return $builder->whereHas('user', function($q) { $q->where('active', 1); });
     }
 
     /**
+     * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $direction
+     */
+    public function scopeOrdered(Builder $builder, string $direction = null)
+    {
+        $this->scopeOrderByName($builder, $direction ?? 'ASC');
+    }
+
+    /**
      * @param \Illuminate\Database\Eloquent\Builder $builder
      * @param string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByName($builder, $direction = 'ASC')
+    public function scopeOrderByName(Builder $builder, $direction = 'ASC')
     {
         $builder->join('users', 'users.id', '=', $this->table . '.id')
             ->orderBy('users.lastname', $direction)
             ->orderBy('users.firstname', $direction);
-
-        return $builder;
     }
 }

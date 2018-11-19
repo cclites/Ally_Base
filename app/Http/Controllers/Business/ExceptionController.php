@@ -16,9 +16,8 @@ class ExceptionController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = $this->business()->exceptions();
+        $query = SystemException::forRequestedBusinesses()->ordered();
         $exceptions = (clone $query)->whereNull('acknowledged_at')
-            ->orderBy('created_at')
             ->get();
 
         if ($request->expectsJson() && $request->input('json')) {
@@ -38,21 +37,22 @@ class ExceptionController extends BaseController
      * @param  \App\SystemException  $exception
      * @return \Illuminate\Http\Response
      */
-    public function show($exception_id)
+    public function show(SystemException $exception)
     {
-        $exception = $this->business()->exceptions()->findOrFail($exception_id);
-
+        $this->authorize('read', $exception);
         return view('business.exceptions.show', compact('exception'));
     }
 
     /**
      * Acknowledge the specific exception
      *
-     * @param $exception_id
+     * @param \Illuminate\Http\Request $request
+     * @param \App\SystemException $exception
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      */
-    public function acknowledge(Request $request, $exception_id)
+    public function acknowledge(Request $request, SystemException $exception)
     {
-        $exception = $this->business()->exceptions()->findOrFail($exception_id);
+        $this->authorize('update', $exception);
 
         if ($exception->acknowledge($request->input('notes', ''))) {
             return new SuccessResponse('You have successfully acknowlegded the exception.', [], route('business.exceptions.index'));

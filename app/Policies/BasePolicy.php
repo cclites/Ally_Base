@@ -68,4 +68,21 @@ abstract class BasePolicy
 
         return false;
     }
+
+    protected function businessChainCheck(User $user, $entity)
+    {
+        if ($entity->user_id == $user->id) {
+            return true;
+        }
+
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isOfficeUser() && $user->officeUser->chain_id == $entity->chain_id) {
+            return true;
+        }
+
+        return false;
+    }
 }

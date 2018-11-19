@@ -219,15 +219,13 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @param array $data
      * @param \App\User $creator
-     * @param \App\Business $business
      * @return \App\Timesheet
      */
-    public static function createWithEntries($data, $creator, $business)
+    public static function createWithEntries($data, $creator)
     {
         try {
             $timesheet = Timesheet::make(Arr::except($data, 'entries'));
             $timesheet->creator_id = $creator->id;
-            $timesheet->business_id = $business->id;
             $timesheet->save();
             
             foreach($data['entries'] as $item) {

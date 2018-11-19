@@ -5,12 +5,8 @@ use App\Business;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateScheduleRequest extends FormRequest
+class CreateScheduleRequest extends BusinessRequest
 {
-    public function authorize()
-    {
-        return true;
-    }
 
     public function rules() {
         $minDate = Carbon::parse('2017-01-01');

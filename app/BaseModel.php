@@ -20,11 +20,12 @@ abstract class BaseModel extends Model
      * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
      *
      * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $direction
      */
-    public function scopeOrdered(Builder $builder)
+    public function scopeOrdered(Builder $builder, string $direction = null)
     {
         if ($this->orderedColumn) {
-            $builder->orderBy($this->orderedColumn, $this->orderedDir);
+            $builder->orderBy($this->orderedColumn, $direction ?? $this->orderedDir ?? 'ASC');
         }
     }
 }

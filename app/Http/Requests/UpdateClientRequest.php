@@ -7,18 +7,8 @@ use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
 
-class UpdateClientRequest extends FormRequest
+class UpdateClientRequest extends BusinessRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -30,7 +20,7 @@ class UpdateClientRequest extends FormRequest
             'firstname' => 'required',
             'lastname' => 'required',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => ['required', Rule::unique('users')->ignore($this->client->id)],
+            'username' => ['required', Rule::unique('users')->ignore($this->route('client')->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -54,5 +44,26 @@ class UpdateClientRequest extends FormRequest
             'avatar' => ['nullable', new Avatar()],
             'referral_source_id' => 'nullable|numeric',
         ];
+    }
+
+    public function messages()
+    {
+        return [
+            'email.required_unless' => 'The email is required unless you check the "No Email" box.',
+            'username.unique' => 'This username is taken. Please use a different one.',
+        ];
+    }
+
+
+    public function filtered()
+    {
+        $data = $this->validated();
+        if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+        if ($data['inquiry_date']) $data['inquiry_date'] = filter_date($data['inquiry_date']);
+        if ($data['service_start_date']) $data['service_start_date'] = filter_date($data['service_start_date']);
+        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
+        if ($this->input('no_email')) $data['email'] = $this->route('client')->getAutoEmail();
+
+        return $data;
     }
 }

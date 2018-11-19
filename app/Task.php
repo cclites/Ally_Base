@@ -90,6 +90,11 @@ class Task extends AuditableModel implements BelongsToBusinessesInterface
     ];
 
     /**
+     * @var string
+     */
+    protected $orderedColumn = 'due_date';
+
+    /**
      * The relationships that should be auto-loaded.
      *
      * @var array

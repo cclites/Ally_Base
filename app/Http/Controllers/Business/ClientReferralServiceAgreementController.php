@@ -14,7 +14,7 @@ class ClientReferralServiceAgreementController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client_id' => 'required|int',
+            'client_id' => 'required|exists:clients',
             'referral_fee' => 'required|numeric',
             'per_visit_referral_fee' => 'required|numeric',
             'per_visit_assessment_fee' => 'required|numeric',
@@ -35,6 +35,7 @@ class ClientReferralServiceAgreementController extends Controller
         unset($data['onboarding_step']);
         $referralServiceAgreement = DB::transaction(function () use ($data, $request) {
             $client = Client::find($request->client_id);
+            $this->authorize('update', $client);
             $client->update(['onboarding_step' => $request->onboarding_step]);
             return ClientReferralServiceAgreement::create($data);
         });

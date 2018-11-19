@@ -34,6 +34,8 @@ class ReferralSource extends AuditableModel implements BelongsToBusinessesInterf
 {
     use BelongsToOneBusiness;
 
+    protected $orderedColumn = 'organization';
+
     protected $fillable = [
         'business_id',
         'organization',

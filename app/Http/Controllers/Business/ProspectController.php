@@ -21,7 +21,7 @@ class ProspectController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = $this->business()->prospects()->orderBy('lastname')->orderBy('firstname');
+            $query = Prospect::forRequestedBusinesses()->ordered();
             return $query->get();
         }
 
@@ -50,7 +50,8 @@ class ProspectController extends BaseController
     public function store(UpdateProspectRequest $request)
     {
         $data = $request->filtered();
-        $prospect = $this->business()->prospects()->create($data);
+        $this->authorize('create', [Prospect::class, $data]);
+        $prospect = Prospect::create($data);
 
         return new CreatedResponse('The prospect has been created.', $prospect, route('business.prospects.show', [$prospect]));
     }
@@ -63,11 +64,11 @@ class ProspectController extends BaseController
      */
     public function show(Prospect $prospect)
     {
-        if (!$this->businessHasProspect($prospect)) {
-            abort(403);
-        }
+        $this->authorize('read', $prospect);
+
         $prospect->referralSource;
         $referralsources = ReferralSource::all();
+
         return view('business.prospects.show', compact('prospect', 'referralsources'));
     }
 
@@ -80,9 +81,7 @@ class ProspectController extends BaseController
      */
     public function update(UpdateProspectRequest $request, Prospect $prospect)
     {
-        if (!$this->businessHasProspect($prospect)) {
-            return new ErrorResponse(403, 'You do not have access to this prospect.');
-        }
+        $this->authorize('update', $prospect);
 
         $data = $request->filtered();
         $prospect->update($data);
@@ -98,9 +97,7 @@ class ProspectController extends BaseController
      */
     public function convert(Prospect $prospect)
     {
-        if (!$this->businessHasProspect($prospect)) {
-            return new ErrorResponse(403, 'You do not have access to this prospect.');
-        }
+        $this->authorize('update', $prospect);  // Eventually this should also check 'create' client
 
         $username = $prospect->email ?? str_slug($prospect->name) . mt_rand(10,999);
         if (!$client = $prospect->convert($username)) {
@@ -120,9 +117,7 @@ class ProspectController extends BaseController
      */
     public function destroy(Prospect $prospect)
     {
-        if (!$this->businessHasProspect($prospect)) {
-            return new ErrorResponse(403, 'You do not have access to this prospect.');
-        }
+        $this->authorize('delete', $prospect);
 
         $prospect->delete();
         return new SuccessResponse('The prospect has been deleted.', [], route('business.prospects.index'));

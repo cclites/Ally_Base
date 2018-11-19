@@ -145,6 +145,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     protected $guarded = ['id'];
     protected $appends = ['duration', 'readOnly'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
+    protected $orderedColumn = ['checked_in_time'];
 
     ///////////////////////////////////////////
     /// Events

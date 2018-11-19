@@ -2,10 +2,15 @@
 
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\ChargeableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
+use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToOneBusiness;
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * App\Business
  *
@@ -178,8 +183,9 @@ use App\Exceptions\ExistingBankAccountException;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveClients()
  * @mixin \Eloquent
  */
-class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold
+class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface
 {
+    use BelongsToBusinesses;
     use \App\Traits\HasPaymentHold;
     use \App\Traits\HasAllyFeeTrait;
 
@@ -534,6 +540,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
      * @param string $lastname
      * @param string|null $email
      * @param string|null $role
+     * @deprecated
      *
      * @return false|string   Returns the matching field or false for no duplicates
      */
@@ -664,6 +671,16 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         })->values();
     }
 
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return [$this->id];
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -677,4 +694,17 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         return $builder->with(['caregivers' => function($q) { $q->active()->orderByName(); }]);
     }
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->whereIn('id', $businessIds);
+    }
+
 }

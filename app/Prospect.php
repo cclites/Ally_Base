@@ -218,6 +218,18 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
     ////////////////////////////////////
 
     /**
+     * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $direction
+     */
+    public function scopeOrdered(Builder $builder, string $direction = null)
+    {
+        $builder->orderBy('lastname', $direction ?? 'ASC')
+            ->orderBy('firstname', $direction ?? 'ASC');
+    }
+
+    /**
      * A query scope for filtering results by related business IDs
      *
      * @param \Illuminate\Database\Eloquent\Builder $builder

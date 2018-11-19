@@ -17,7 +17,7 @@ class ClaimController extends BaseController
     public function data(Request $request)
     {
         $request->validate([
-            'client_id' => 'required|int',
+            'client_id' => 'required|exists:clients',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'export_type' => 'required|string'
@@ -31,6 +31,8 @@ class ClaimController extends BaseController
             }
         ])
             ->find($request->client_id);
+
+        $this->authorize('read', $client);
 
         $summary = [];
         foreach ($client->shifts as $shift) {
@@ -48,6 +50,7 @@ class ClaimController extends BaseController
     public function print(Request $request)
     {
         $request->validate([
+            'client_id' => 'required|exists:clients',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'export_type' => 'nullable|string',
@@ -55,9 +58,7 @@ class ClaimController extends BaseController
         ]);
 
         $client = Client::findOrFail($request->client_id);
-        if (!$this->businessHasClient($client)) {
-            abort(403);
-        }
+        $this->authorize('read', $client);
 
         $start_date = Carbon::parse($request->start_date, $this->business()->timezone);
         $end_date = Carbon::parse($request->end_date, $this->business()->timezone);

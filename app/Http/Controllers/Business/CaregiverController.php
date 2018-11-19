@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\CreateCaregiverRequest;
 use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
@@ -35,7 +37,7 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = $this->business()->caregivers()->orderByName();
+            $query = Caregiver::forRequestedBusinesses()->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -52,12 +54,7 @@ class CaregiverController extends BaseController
             return $query->get();
         }
 
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
-
-        return view('business.caregivers.index', compact('multiLocation'));
+        return view('business.caregivers.index');
     }
 
     /**
@@ -73,27 +70,18 @@ class CaregiverController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\CreateCaregiverRequest $request
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function store(Request $request)
+    public function store(CreateCaregiverRequest $request)
     {
-        $data = $request->validate([
-            'firstname' => 'required',
-            'lastname' => 'required',
-            'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => 'required|unique:users',
-            'date_of_birth' => 'nullable',
-            'ssn' => 'nullable',
-            'password' => 'nullable|confirmed',
-            'title' => 'required',
-            'medicaid_id' => 'nullable',
-            'gender' => 'nullable|in:M,F',
-        ]);
+        $data = $request->filtered();
+        $this->authorize('create', [Caregiver::class, $data]);
 
         // Look for duplicates in the current business
-        if (!$request->override && $duplicate = $this->business()->checkForDuplicateUser($request->firstname, $request->lastname, $request->email, 'caregiver')) {
+        $business = Business::find($data['business_id']);
+        if (!$request->override && $duplicate = $business->checkForDuplicateUser($request->firstname, $request->lastname, $request->email, 'caregiver')) {
             if ($duplicate == 'email') {
                 return new ConfirmationResponse('There is already a caregiver with the email address ' . $request->email . '.');
             }

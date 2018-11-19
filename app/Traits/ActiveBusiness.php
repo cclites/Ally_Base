@@ -195,15 +195,4 @@ trait ActiveBusiness
     {
         return $this->business()->timezone ?? 'America/New_York';
     }
-
-    /**
-     * Override the active business (used for Admins)
-     *
-     * @param \App\Business $business
-     * @deprecated
-     */
-    protected function setBusinessAs(Business $business) {
-        $activeBusiness = app()->make(\App\ActiveBusiness::class);
-        $activeBusiness->set($business);
-    }
 }

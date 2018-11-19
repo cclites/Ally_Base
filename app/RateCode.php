@@ -34,6 +34,7 @@ class RateCode extends AuditableModel implements BelongsToBusinessesInterface
     use BelongsToOneBusiness;
 
     protected $table = 'rate_codes';
+    protected $orderedColumn = 'name';
 
     protected $fillable = [
         'name', 'type', 'rate', 'fixed'

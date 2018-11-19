@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
+use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Mail\ClientConfirmation;
@@ -31,11 +32,11 @@ class ClientController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = $this->business()->clients()
+            $query = Client::forRequestedBusinesses()
                 ->when($request->filled('client_type'), function($query) use ($request) {
                     $query->where('client_type', $request->input('client_type'));
                 })
-                ->orderByName();
+                ->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -55,18 +56,12 @@ class ClientController extends BaseController
             return $query->get();
         }
 
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
-
-        return view('business.clients.index', compact('multiLocation'));
+        return view('business.clients.index');
     }
 
     public function listNames()
     {
-        $query = $this->business()
-            ->clients();
+        $query = Client::forRequestedBusinesses();
 
         if (request()->care_plans) {
             $query->with('carePlans');
@@ -103,45 +98,27 @@ class ClientController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\CreateClientRequest $request
      * @return \Illuminate\Contracts\Support\Responsable
-     * @throws \Exception
      */
-    public function store(Request $request)
+    public function store(CreateClientRequest $request)
     {
-        $data = $request->validate(
-            [
-                'firstname' => 'required',
-                'lastname' => 'required',
-                'email' => 'required_unless:no_email,1|nullable|email',
-                'username' => 'required|unique:users',
-                'date_of_birth' => 'nullable',
-                'business_fee' => 'nullable|numeric',
-                'client_type' => 'required',
-                'ssn' => ['nullable', new ValidSSN()],
-                'onboard_status' => 'required',
-                'gender' => 'nullable|in:M,F',
-            ]
-        );
+        $data = $request->filtered();
+        $this->authorize('create', [Client::class, $data]);
 
-        // Look for duplicates in the current business
-        if (!$request->override && $duplicate = $this->business()->checkForDuplicateUser($request->firstname, $request->lastname, $request->email, 'client')) {
-            if ($duplicate == 'email') {
-                return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
-            }
+        // Look for duplicates
+        if ($request->email && Client::forRequestedBusinesses()->where('email', $request->email)->first()) {
+            return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
+        }
+        if (Client::forRequestedBusinesses()->where('firstname', $request->firstname)->where('lastname', $request->lastname)->first()) {
             return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
         }
 
-        // Format data for insertion
-        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
-        if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
-        $data['password'] = bcrypt(random_bytes(32));
+        if ($client = Client::create($data)) {
+            if ($request->input('no_email')) {
+                $client->setAutoEmail()->save();
+            }
 
-        $client = new Client($data);
-        if ($request->input('no_email')) {
-            $client->setAutoEmail();
-        }
-        if ($this->business()->clients()->save($client)) {
             $history = new OnboardStatusHistory([
                 'status' => $data['onboard_status']
             ]);
@@ -149,7 +126,7 @@ class ClientController extends BaseController
 
             // Provider pay
             if ($request->provider_pay) {
-                $client->setPaymentMethod($this->business());
+                $client->setPaymentMethod($client->business);
             }
 
             return new CreatedResponse('The client has been created.', [ 'id' => $client->id, 'url' => route('business.clients.edit', [$client->id]) ]);
@@ -166,9 +143,7 @@ class ClientController extends BaseController
      */
     public function show(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         $client->load([
             'user',
@@ -230,25 +205,12 @@ class ClientController extends BaseController
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
-
-        $data = $request->validated();
-
-        $data['inquiry_date'] = $data['inquiry_date'] ? Carbon::parse($data['inquiry_date']) : null;
-        $data['service_start_date'] = $data['service_start_date'] ? Carbon::parse($data['service_start_date']) : null;
-
-        if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
-        if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+        $this->authorize('update', $client);
+        $data = $request->filtered();
 
         $addOnboardRecord = false;
         if ($client->onboard_status != $data['onboard_status']) {
             $addOnboardRecord = true;
-        }
-
-        if ($request->input('no_email')) {
-            $data['email'] = $client->getAutoEmail();
         }
 
         if ($client->update($data)) {
@@ -272,9 +234,7 @@ class ClientController extends BaseController
      */
     public function destroy(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('delete', $client);
 
         if ($client->hasActiveShift()) {
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
@@ -301,9 +261,7 @@ class ClientController extends BaseController
      */
     public function reactivate(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         if ($client->update(['active' => true, 'inactive_at' => null])) {
             $client->clearFutureSchedules();
@@ -321,9 +279,7 @@ class ClientController extends BaseController
      */
     public function serviceOrders(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->validate([
             'max_weekly_hours' => 'required|numeric|min:0|max:999',
@@ -337,27 +293,21 @@ class ClientController extends BaseController
 
     public function address(Request $request, Client $client, $type)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         return (new AddressController())->update($request, $client->user, $type, 'The client\'s address');
     }
 
     public function phone(Request $request, Client $client, $type)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         return (new PhoneController())->upsert($request, $client->user, $type, 'The client\'s phone number');
     }
 
     public function paymentMethod(Request $request, Client $client, string $type)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $backup = ($type === 'backup');
         $redirect = route('business.clients.edit', [$client->id]) . '#payment';
@@ -382,9 +332,7 @@ class ClientController extends BaseController
 
     public function destroyPaymentMethod(Client $client, string $type)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         if ($type == 'backup') {
             $client->backupPayment()->dissociate();
@@ -398,9 +346,7 @@ class ClientController extends BaseController
 
     public function sendConfirmationEmail(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $client->sendConfirmationEmail();
         return new SuccessResponse('Email Sent to Client');
@@ -414,10 +360,9 @@ class ClientController extends BaseController
         ];
     }
 
-    public function changePassword(Request $request, Client $client) {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+    public function changePassword(Request $request, Client $client)
+    {
+        $this->authorize('update', $client);
 
         $request->validate([
             'password' => 'required|confirmed|min:6'
@@ -431,9 +376,7 @@ class ClientController extends BaseController
 
     public function ltci(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->only([
             'ltci_name',
@@ -456,10 +399,10 @@ class ClientController extends BaseController
         }
     }
 
-    public function preferences(UpdateClientPreferencesRequest $request, Client $client) {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+    public function preferences(UpdateClientPreferencesRequest $request, Client $client)
+    {
+        $this->authorize('update', $client);
+
         $client->setPreferences($request->validated());
 
         return new SuccessResponse('Client preferences updated.');
@@ -467,9 +410,7 @@ class ClientController extends BaseController
 
     public function defaultRates(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->validate([
             'hourly_rate_id' => 'nullable|exists:rate_codes,id',

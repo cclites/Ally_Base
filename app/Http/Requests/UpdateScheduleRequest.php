@@ -5,13 +5,8 @@ use App\Business;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateScheduleRequest extends FormRequest
+class UpdateScheduleRequest extends BusinessRequest
 {
-    public function authorize()
-    {
-        return true;
-    }
-
     public function rules() {
         $minDate = Carbon::parse('2017-01-01');
         $maxDate = Carbon::now()->addDays(735); // A little over 2 years
