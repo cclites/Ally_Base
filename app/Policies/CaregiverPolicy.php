@@ -15,12 +15,14 @@ class CaregiverPolicy extends BasePolicy
 
     public function read(User $user, Caregiver $caregiver)
     {
-        return $this->businessChainCheck($user, $caregiver);
+        return $user->id == $caregiver->id
+            || $this->businessChainCheck($user, $caregiver);
     }
 
     public function update(User $user, Caregiver $caregiver)
     {
-        return $this->businessChainCheck($user, $caregiver);
+        return $user->id == $caregiver->id
+            || $this->businessChainCheck($user, $caregiver);
     }
 
     public function delete(User $user, Caregiver $caregiver)

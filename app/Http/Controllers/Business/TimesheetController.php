@@ -9,7 +9,7 @@ use App\Responses\SuccessResponse;
 use App\Http\Requests\ApproveTimesheetRequest;
 use App\Shift;
 use DB;
-use App\Http\Requests\CreateTimesheetsRequest;
+use App\Http\Requests\CreateTimesheetRequest;
 
 class TimesheetController extends BaseController
 {
@@ -35,11 +35,11 @@ class TimesheetController extends BaseController
     /**
      * Handles submission of Timesheets.
      *
-     * @param CreateTimesheetsRequest $request
+     * @param CreateTimesheetRequest $request
      * @param Timesheet $timesheet
      * @return \Illuminate\Http\Response
      */
-    public function store(CreateTimesheetsRequest $request)
+    public function store(CreateTimesheetRequest $request)
     {
         $data = $request->filtered();
         $this->authorize('create', [Timesheet::class, $data]);

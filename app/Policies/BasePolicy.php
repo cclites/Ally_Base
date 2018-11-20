@@ -45,6 +45,14 @@ abstract class BasePolicy
         return auth()->user()->role_type === 'office_user';
     }
 
+    protected function isCaregiver() {
+        return auth()->user()->role_type === 'caregiver';
+    }
+
+    protected function isClient() {
+        return auth()->user()->role_type === 'client';
+    }
+
     /**
      * Re-usable check for business-owned entities
      *
@@ -84,5 +92,11 @@ abstract class BasePolicy
         }
 
         return false;
+    }
+
+    protected function caregiverCheck(User $user, $entity)
+    {
+        return $this->isCaregiver()
+            && $user->caregiver->sharesBusinessWith($entity);
     }
 }

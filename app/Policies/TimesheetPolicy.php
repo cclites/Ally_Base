@@ -16,7 +16,7 @@ class TimesheetPolicy extends BasePolicy
     public function create(User $user, $data)
     {
         $timesheet = new Timesheet($data);
-        return $this->businessCheck($user, $timesheet)
+        return $timesheet->business_id == $timesheet->client->business_id
             && $user->can('read', $timesheet->client)
             && $user->can('read', $timesheet->caregiver);
     }

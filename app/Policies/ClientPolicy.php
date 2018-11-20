@@ -15,12 +15,15 @@ class ClientPolicy extends BasePolicy
 
     public function read(User $user, Client $client)
     {
-        return $this->businessCheck($user, $client);
+        return $user->id == $client->id
+            || $this->caregiverCheck($user, $client)
+            || $this->businessCheck($user, $client);
     }
 
     public function update(User $user, Client $client)
     {
-        return $this->businessCheck($user, $client);
+        return $user->id == $client->id
+            || $this->businessCheck($user, $client);
     }
 
     public function delete(User $user, Client $client)

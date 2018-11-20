@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\Http\Requests\CaregiverTimesheetRequest;
 use Illuminate\Http\Request;
-use App\Http\Requests\CreateTimesheetsRequest;
+use App\Http\Requests\CreateTimesheetRequest;
 use App\Responses\ErrorResponse;
 use App\Timesheet;
 use App\TimesheetEntry;
@@ -58,25 +59,25 @@ class TimesheetController extends BaseController
     /**
      * Handles submission of Timesheets.
      *
-     * @param \App\Http\Requests\CreateTimesheetsRequest $request
+     * @param \App\Http\Requests\CreateTimesheetRequest $request
      * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
      * @throws \Exception
      */
-    public function store(CreateTimesheetsRequest $request)
+    public function store(CreateTimesheetRequest $request)
     {
-        if (auth()->user()->role_type == 'caregiver' && $request->caregiver_id != auth()->user()->id) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $data = $request->validated();
+        $business = $request->getBusiness();
+        $this->authorize('create', [Timesheet::class, $data]);
 
-        if (! activeBusiness()->allows_manual_shifts) {
-            return new ErrorResponse(403, 'Forbidden.');
+        if (! $business->allows_manual_shifts) {
+            return new ErrorResponse(403, 'This business does not allow manual timesheets to be submitted.');
         }
 
         DB::beginTransaction();
 
         $timesheet = Timesheet::createWithEntries(
-            $request->validated(),
-            auth()->user(),
+            $data,
+            auth()->user()
         );
 
         if ($timesheet === false) {
@@ -92,7 +93,7 @@ class TimesheetController extends BaseController
         );
     }
 
-    public function update(CreateTimesheetsRequest $request, Timesheet $timesheet)
+    public function update(CreateTimesheetRequest $request, Timesheet $timesheet)
     {
         if ($request->caregiver_id != $this->caregiver()->id || $timesheet->caregiver_id != $this->caregiver()->id) {
             return new ErrorResponse(403, 'You do not have access to this caregiver.');

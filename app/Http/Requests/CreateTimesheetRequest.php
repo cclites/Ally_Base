@@ -1,8 +1,13 @@
 <?php
 namespace App\Http\Requests;
 
-class CreateTimesheetsRequest extends BusinessRequest
+use App\Client;
+use App\User;
+
+class CreateTimesheetRequest extends BusinessRequest
 {
+    protected $client;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -14,7 +19,7 @@ class CreateTimesheetsRequest extends BusinessRequest
             'caregiver_id' => 'required|exists:caregivers,id',
             'client_id' => 'required|exists:clients,id',
             'entries' => 'required|array|min:1',
-            
+
             'entries.*.mileage' => 'nullable|numeric|max:1000|min:0',
             'entries.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
             'entries.*.checked_in_time' => 'required|date_format:Y-m-d H:i:s',
@@ -42,5 +47,24 @@ class CreateTimesheetsRequest extends BusinessRequest
             'entries.*' => 'You must add at least one shift.',
             'activities.*' => 'You must select at least 1 activity.',
         ];
+    }
+
+    public function getClient()
+    {
+        if (!$this->client) {
+            $this->client = Client::findOrFail($this->input('client_id'));
+        }
+
+        return $this->client;
+    }
+
+    public function getBusinessId(User $user = null)
+    {
+        return $this->getClient()->business_id;
+    }
+
+    protected function getBusinessRulesForUser(User $user = null)
+    {
+        return ['required', 'exists:businesses,id'];
     }
 }

@@ -78,7 +78,7 @@ class CaregiverController extends BaseController
     public function store(CreateCaregiverRequest $request)
     {
         $data = $request->filtered();
-        $this->authorize('create', [Caregiver::class, $data]);
+        // No authorization needed at this time, the caregiver is saved to the business chain.
 
         // Look for duplicates
         if (!$request->override) {

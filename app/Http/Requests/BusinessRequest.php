@@ -122,8 +122,9 @@ abstract class BusinessRequest extends FormRequest
                 'business_id' => $this->getBusinessRulesForUser(),
             ]);
             $validator->setCustomMessages([
-                'business_id.in' => 'You do not have access to the selected business.',
-                'business_id.*' => 'Unknown business identifier.',
+                'business_id.required' => 'You must select a business location.',
+                'business_id.in' => 'You do not have access to the selected business location.',
+                'business_id.*' => 'Unknown business location identifier.',
             ]);
             $validator->after(function(Validator $validator) {
                 if (!empty($validator->failed()['business_id']['In'])) {
