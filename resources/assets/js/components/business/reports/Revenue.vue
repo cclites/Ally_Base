@@ -128,7 +128,7 @@
                             </b-col>
 
                             <b-col lg="6" v-if="priorTableData.length > 0">
-                                <h2>Prior date comparaison</h2>
+                                <h2>Prior date comparison</h2>
                                 <p>This is the data for date period prior to the one currently selected.</p>
                                 <br/><br/>
                                 <b-table striped :fields="tableFields" :items="priorTableData">
@@ -222,15 +222,6 @@ export default {
         };
     },
     computed: {
-        revenue() {
-            return this.calculateGrowth('revenue');
-        },
-        wages() {
-            return this.calculateGrowth('wages');
-        },
-        profit() {
-            return this.calculateGrowth('profit');
-        },
         chartData() {
             let date = Object.keys(this.data.current);
             const currentProfit = [];
