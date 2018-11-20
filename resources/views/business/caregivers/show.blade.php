@@ -122,7 +122,7 @@
                 <business-schedule :caregiver="{{ $caregiver }}" :business="{{ activeBusiness() }}"></business-schedule>
             </div>
         @endif
-        <div class="tabe-pane" id="clients" role="tabpanel">
+        <div class="tab-pane" id="clients" role="tabpanel">
             <business-caregiver-clients-tab :caregiver="{{ $caregiver }}"></business-caregiver-clients-tab>
         </div>
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
