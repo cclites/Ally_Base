@@ -8,6 +8,7 @@ use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
+use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
@@ -27,12 +28,7 @@ class ScheduleController extends BaseController
 {
     public function index()
     {
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
-
-        return view('business.schedule', ['business' => $this->business(), 'multiLocation' => $multiLocation]);
+        return view('business.schedule', ['business' => $this->business()]);
     }
 
     public function events(Request $request)
@@ -412,16 +408,15 @@ class ScheduleController extends BaseController
     /**
      * Handles printable schedule report submission
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\PrintableScheduleRequest $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function print(Request $request)
+    public function print(PrintableScheduleRequest $request)
     {
-        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
-
         $start = Carbon::parse($request->input('start', 'First day of this month'));
         $end = Carbon::parse($request->input('end', 'First day of next month'));
-        $schedules = Schedule::forRequestedBusinesses()->whereBetween('starts_at', [$start, $end])->get();
+        $business = $request->getBusiness();
+        $schedules = $business->schedules()->whereBetween('starts_at', [$start, $end])->get();
 
         $schedules = $schedules->map(function ($schedule) {
             $schedule->date = $schedule->starts_at->format('m/d/Y');

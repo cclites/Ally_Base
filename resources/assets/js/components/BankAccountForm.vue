@@ -94,6 +94,7 @@
             'submitUrl': '',
             'account': {},
             'source': {},
+            'businessId': '',
         },
 
         data() {
@@ -101,18 +102,7 @@
                 'year': [],
                 'months': [],
                 'years': [],
-                'form': new Form({
-                    // todo update defaults for bank account info
-                    nickname: this.account.nickname,
-                    name_on_account: this.account.name_on_account,
-                    routing_number: (this.account.last_four) ? '*********' : '',
-                    routing_number_confirmation: '',
-                    account_number: (this.account.last_four) ? '*****' + this.account.last_four : '',
-                    account_number_confirmation: '',
-                    account_type: this.account.account_type,
-                    account_holder_type: this.account.account_holder_type,
-                    ignore_validation: false,
-                }),
+                'form': this.makeForm(this.account),
                 submitting: false,
                 buttonText: '',
                 buttonVariant: '',
@@ -151,6 +141,24 @@
                 this.submitting = false;
             },
 
+            makeForm(account) {
+                let defaults = {};
+                if (this.businessId) defaults.business_id = this.businessId;
+
+                return new Form({
+                    ...defaults,
+                    nickname: account.nickname,
+                    name_on_account: account.name_on_account,
+                    routing_number: (account.last_four) ? '*********' : '',
+                    routing_number_confirmation: '',
+                    account_number: (account.last_four) ? '*****' + account.last_four : '',
+                    account_number_confirmation: '',
+                    account_type: account.account_type,
+                    account_holder_type: account.account_holder_type,
+                    ignore_validation: false,
+                })
+            },
+
             resetButtonText() {
                 this.buttonText = 'Save Bank Account';
                 this.buttonVariant = 'success';
@@ -159,6 +167,12 @@
             formKeyDown(event) {
                 this.resetButtonText();
                 this.form.clearError(event.target.name);
+            }
+        },
+
+        watch: {
+            account(val) {
+                this.form = this.makeForm(val);
             }
         }
     }

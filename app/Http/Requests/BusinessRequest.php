@@ -15,6 +15,13 @@ use Illuminate\Validation\Validator;
 abstract class BusinessRequest extends FormRequest
 {
     /**
+     * If true, preserve the validated data and don't add business_id to it.
+     *
+     * @var bool
+     */
+    protected $preserveValidated = false;
+
+    /**
      * The array of rules to validate against
      *
      * @return array
@@ -70,6 +77,10 @@ abstract class BusinessRequest extends FormRequest
      */
     public function validated()
     {
+        if ($this->preserveValidated) {
+            return parent::validated();
+        }
+
         return $this->addBusinessInput(parent::validated());
     }
 

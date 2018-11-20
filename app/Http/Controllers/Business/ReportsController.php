@@ -564,12 +564,13 @@ class ReportsController extends BaseController
 
     public function timesheetData(TimesheetReportRequest $request)
     {
-        $data = $request->filtered();
+        $data = $request->validated();
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
-        $timezone = $request->getBusiness()->timezone;
+        $business = $request->getBusiness();
+        $timezone = $business->timezone;
 
-        $client_shift_groups = $this->clientShiftGroups($data);
+        $client_shift_groups = $this->clientShiftGroups($business, $data);
         $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
 
         switch ($data['export_type']) {
@@ -667,9 +668,9 @@ class ReportsController extends BaseController
         return $shifts;
     }
 
-    private function clientShiftGroups(array $data)
+    private function clientShiftGroups(Business $business, array $data)
     {
-        return Shift::forRequestedBusinesses()
+        return $business->shifts()
             ->with('activities', 'client', 'caregiver')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
             ->when($data['client_id'], function ($query) use ($data) {
@@ -980,7 +981,12 @@ class ReportsController extends BaseController
      * 
      * @return Response
      */
-    public function showSalesPipeline() {
+    public function showSalesPipeline(Request $request)
+    {
+        if ($request->expectsJson()) {
+            return $this->salesPipelineReport($request);
+        }
+
         return view('business.reports.sales-pipeline');
     }
 
@@ -990,7 +996,7 @@ class ReportsController extends BaseController
      * 
      * @return array
      */
-    public function salesPipelineReport(Request $request) {
+    protected function salesPipelineReport(Request $request) {
 
         $this->validate($request, [
             'start_date' => 'required|string|date',

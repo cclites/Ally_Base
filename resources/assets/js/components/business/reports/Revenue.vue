@@ -29,6 +29,11 @@
                                 ></date-picker>
                             </b-form-group>
                         </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Business Location">
+                                <business-location-select v-model="form.business_id" :allow-all="true"></business-location-select>
+                            </b-form-group>
+                        </b-col>
                         <b-col lg="3" class="form-checkbox">
                             <b-form-group>
                                 <b-form-checkbox-group :checked="true" disabled>
@@ -38,15 +43,12 @@
                                     >Include CG Wages as COGS</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
-                        </b-col>
-                        <b-col lg="3" class="form-checkbox">
                             <b-form-group>
                                 <b-form-checkbox-group>
                                     <b-form-checkbox v-model="form.compare_to_prior">Compare to previous period</b-form-checkbox>
                                 </b-form-checkbox-group>
                             </b-form-group>
                         </b-col>
-
                         <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <b-button variant="info" @click="fetchData()">Generate</b-button>
@@ -165,9 +167,11 @@
 <script>
 import axios from 'axios';
 import LineChart from './analytics/LineChart';
+import BusinessLocationSelect from "../BusinessLocationSelect";
 
 export default {
     components: {
+        BusinessLocationSelect,
         LineChart,
     },
     data() {
@@ -179,6 +183,7 @@ export default {
                 end_date: '11/01/2018',
                 compare_to_prior: 0,
                 wages_as_cogs: 1,
+                business_id: "",
             }),
             data: {
                 current: {},
@@ -296,11 +301,11 @@ export default {
             return (value > 0) ? 'success' : 'danger';
         },
         fetchData() {
-            const {start_date, end_date, compare_to_prior} = this.form;
+            const {start_date, end_date, compare_to_prior, business_id} = this.form;
             const compare = compare_to_prior[0] ? 1 : 0;
             this.loading = true;
 
-            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}&compare_to_prior=${compare}`)
+            this.form.post(`/business/reports/revenue?start_date=${start_date}&end_date=${end_date}&compare_to_prior=${compare}&businesses[]=${business_id}`)
                 .then(({data}) => {
                     this.data = data;
                     this.loading = false;

@@ -43,7 +43,7 @@ class TimesheetController extends BaseController
     public function show(Timesheet $timesheet)
     {
         $caregiver = $this->caregiver();
-        $business = activeBusiness();
+        $business = $timesheet->business;
         $activities = $business->allActivities();
         $caregivers = $business->caregiverClientList($business);
 
@@ -77,7 +77,6 @@ class TimesheetController extends BaseController
         $timesheet = Timesheet::createWithEntries(
             $request->validated(),
             auth()->user(),
-            activeBusiness()
         );
 
         if ($timesheet === false) {

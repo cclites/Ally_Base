@@ -35,7 +35,6 @@ class CommunicationController extends Controller
     {
         $recipients = null;
         $message = '';
-        $business = $this->business();
 
         $request->session()->reflash();
 
@@ -64,7 +63,7 @@ class CommunicationController extends Controller
             $message = $this->draftOpenShiftMessage($schedule);
         }
 
-        return view('business.communication.text-caregivers', compact('message', 'recipients', 'business'));
+        return view('business.communication.text-caregivers', compact('message', 'recipients'));
     }
 
     /**

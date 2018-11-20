@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <business-settings :business="{{ $business }}"></business-settings>
+    <business-settings></business-settings>
 @endsection
