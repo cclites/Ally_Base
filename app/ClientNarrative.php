@@ -4,6 +4,26 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\ClientNarrative
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property int $creator_id
+ * @property string $notes
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \App\User $creator
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereCreatorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ClientNarrative extends Model
 {
     /**

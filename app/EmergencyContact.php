@@ -14,7 +14,7 @@ namespace App;
  * @property int $priority
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereName($value)

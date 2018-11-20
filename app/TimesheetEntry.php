@@ -21,7 +21,7 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read float $duration
  * @property-read \App\Timesheet $timesheet
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCaregiverComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCaregiverRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereCheckedInTime($value)

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $signable
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereContent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereId($value)

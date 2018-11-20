@@ -21,7 +21,7 @@ namespace App;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $users
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereCity($value)

@@ -11,7 +11,7 @@ namespace App;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read void $edited_by
  * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereTaskId($value)

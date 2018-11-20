@@ -102,6 +102,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientMedication[] $medications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientMeta[] $meta
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientNarrative[] $narrative
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
@@ -118,7 +119,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client orderByName($direction = 'ASC')
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereAmbulatory($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentType($value)
@@ -134,6 +135,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFirstName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereEmail($email = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHospitalName($value)
@@ -155,6 +157,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMedicaidDiagnosisCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMedicaidId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMeta($key, $delimiter = null, $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereName($firstname = null, $lastname = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)

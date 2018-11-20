@@ -27,7 +27,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
  * @property string|null $signature_client_text
  * @property string|null $executed_by_ip
  * @property-read \App\Client $client
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereAgreementFile($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereCreatedAt($value)

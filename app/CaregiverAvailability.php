@@ -26,7 +26,7 @@ namespace App;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\User|null $updatedByUser
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability whereAfternoon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability whereEvening($value)

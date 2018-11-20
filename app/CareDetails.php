@@ -54,7 +54,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereAlcohol($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereAssistMedications($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereBathing($value)

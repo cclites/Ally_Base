@@ -4,6 +4,22 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Attachment
+ *
+ * @property int $id
+ * @property string $filename
+ * @property string $name
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read string $url
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Attachment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Attachment whereFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Attachment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Attachment whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Attachment whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Attachment extends Model
 {
     /**

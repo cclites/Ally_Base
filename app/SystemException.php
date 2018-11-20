@@ -27,7 +27,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException notAcknowledged()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereAcknowledgedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereBusinessId($value)

@@ -32,7 +32,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\GatewayTransaction|null $transaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAdjustment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereBusinessAllotment($value)

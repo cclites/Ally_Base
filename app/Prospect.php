@@ -47,7 +47,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \App\ReferralSource|null $referralSource
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereBusinessId($value)

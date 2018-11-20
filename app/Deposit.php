@@ -25,7 +25,9 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read mixed $week
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\GatewayTransaction|null $transaction
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereAdjustment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereBusinessId($value)

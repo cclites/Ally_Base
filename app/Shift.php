@@ -85,7 +85,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregiver($caregiver)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClient($client)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAddressId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()

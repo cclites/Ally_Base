@@ -10,7 +10,7 @@ namespace App;
  * @property string|null $license
  * @property int|null $minimum_rating
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences whereGender($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences whereLanguage($value)

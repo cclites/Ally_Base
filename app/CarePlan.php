@@ -22,7 +22,7 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\CarePlan onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CarePlan whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CarePlan whereClientId($value)

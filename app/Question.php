@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question forType($client_type)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Question onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Question whereClientType($value)

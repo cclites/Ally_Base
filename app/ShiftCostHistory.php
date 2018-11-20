@@ -17,7 +17,7 @@ namespace App;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Shift $shift
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyFee($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereAllyPct($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereCaregiverExpenses($value)

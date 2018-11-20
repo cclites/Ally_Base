@@ -54,7 +54,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule future($timezone)
  * @method static \Illuminate\Database\Query\Builder|\App\Schedule onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCarePlanId($value)

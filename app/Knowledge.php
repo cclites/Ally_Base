@@ -4,6 +4,37 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Knowledge
+ *
+ * @property int $id
+ * @property string $type
+ * @property string $title
+ * @property string $slug
+ * @property string|null $body
+ * @property string|null $youtube_id
+ * @property string|null $video_attachment_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Attachment[] $attachments
+ * @property-read array $assigned_roles
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\KnowledgeRole[] $roles
+ * @property-read \App\Attachment $video
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge forRoles($roles)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereVideoAttachmentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereYoutubeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge withKeyword($keyword)
+ * @mixin \Eloquent
+ */
 class Knowledge extends Model
 {
     /**

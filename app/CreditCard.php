@@ -27,7 +27,7 @@ use Crypt;
  * @property-read \Carbon $expiration_date
  * @property-read mixed $last_four
  * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationMonth($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationYear($value)

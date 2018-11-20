@@ -17,7 +17,7 @@ namespace App;
  * @property-read \App\GatewayTransaction $issuedTransaction
  * @property-read \App\Payment $refundedPayment
  * @property-read \App\GatewayTransaction $refundedTransaction
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereId($value)

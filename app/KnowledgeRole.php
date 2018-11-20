@@ -4,6 +4,17 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\KnowledgeRole
+ *
+ * @property int $id
+ * @property int $knowledge_id
+ * @property string $role
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole whereKnowledgeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole whereRole($value)
+ * @mixin \Eloquent
+ */
 class KnowledgeRole extends Model
 {
     /**

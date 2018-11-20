@@ -87,6 +87,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BankAccount|null $bankAccount
+ * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
@@ -110,7 +111,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Timesheet[] $timesheets
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $users
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereActive($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress2($value)

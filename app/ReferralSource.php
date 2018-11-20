@@ -20,7 +20,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospect
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereContactName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereCreatedAt($value)

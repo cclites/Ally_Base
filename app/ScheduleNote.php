@@ -11,7 +11,7 @@ namespace App;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereNote($value)

@@ -10,7 +10,7 @@ namespace App;
  * @property string|null $value
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereId($value)

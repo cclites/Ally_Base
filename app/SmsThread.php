@@ -22,7 +22,7 @@ use Carbon\Carbon;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $replies
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCanReply($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereCreatedAt($value)

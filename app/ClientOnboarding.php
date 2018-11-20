@@ -71,7 +71,7 @@ use Illuminate\Support\Facades\File;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardingActivity[] $activities
  * @property-read \App\Client $client
  * @property-read \App\Signature $signature
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereAllergies($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereCgAttirePref($value)

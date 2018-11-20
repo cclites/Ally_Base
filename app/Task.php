@@ -35,7 +35,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Task onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereAssignedUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Task whereBusinessId($value)

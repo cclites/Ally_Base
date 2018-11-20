@@ -20,7 +20,7 @@ use libphonenumber\PhoneNumberUtil;
  * @property-read \App\Client $client
  * @property mixed $number
  * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereCountryCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereExtension($value)

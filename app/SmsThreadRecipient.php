@@ -12,7 +12,7 @@ namespace App;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \App\SmsThread $thread
  * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereNumber($value)

@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereCreatedAt($value)

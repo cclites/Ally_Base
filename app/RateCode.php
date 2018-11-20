@@ -18,7 +18,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereFixed($value)
