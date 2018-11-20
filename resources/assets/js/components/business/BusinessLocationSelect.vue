@@ -1,6 +1,7 @@
 <template>
     <b-select :disabled="disabled" v-model="selectedBusiness" v-show="!hidden">
         <option v-if="allowAll && businesses.length > 1" value="">All Business Locations</option>
+        <option v-else value="">--Select a Business Location--</option>
         <option v-for="business in businesses" :key="business.id" :value="business.id">
             {{ business.name }}
         </option>
@@ -14,6 +15,7 @@
         name: "BusinessLocationSelect",
 
         props: {
+            value: Number,
             allowAll: Boolean,
             hideable: Boolean, // Hide when there is only one element
         },

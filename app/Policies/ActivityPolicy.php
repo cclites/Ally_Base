@@ -20,11 +20,19 @@ class ActivityPolicy extends BasePolicy
 
     public function update(User $user, Activity $activity)
     {
+        if (!$activity->business_id) {
+            return $user->role_type === 'admin';
+        }
+
         return $this->businessCheck($user, $activity);
     }
 
     public function delete(User $user, Activity $activity)
     {
+        if (!$activity->business_id) {
+            return $user->role_type === 'admin';
+        }
+
         if ($activity->carePlans()->exists()) {
             $this->deny('You cannot delete this activity because it is attached to a client care plan.');
         }

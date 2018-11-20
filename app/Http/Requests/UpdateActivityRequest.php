@@ -13,7 +13,7 @@ class UpdateActivityRequest extends BusinessRequest
                 'required',
                 'integer',
                 'min:100',
-                Rule::unique('activities', 'code')->where('business_id', $this->getBusinessId())
+                Rule::unique('activities', 'code')->where('business_id', $this->getBusinessId())->ignore($this->route('activity')->id ?? null)
             ],
             'name' => 'required'
         ];
@@ -22,6 +22,7 @@ class UpdateActivityRequest extends BusinessRequest
     public function messages()
     {
         return [
+            'code.unique' => 'The code already exists',
             'code.*' => 'The code must be a number greater than 100',
         ];
     }

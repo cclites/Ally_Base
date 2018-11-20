@@ -27,12 +27,7 @@ class ScheduleController extends BaseController
 {
     public function index()
     {
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
-
-        return view('business.schedule', ['business' => $this->business(), 'multiLocation' => $multiLocation]);
+        return view('business.schedule', ['business' => $this->business()]);
     }
 
     public function events(Request $request)

@@ -114,7 +114,7 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
-    Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
+    Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
