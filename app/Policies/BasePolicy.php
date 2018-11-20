@@ -34,24 +34,32 @@ abstract class BasePolicy
     }
 
     ////////////////////////////////////
-    //// User checks
+    //// Authenticated user role checks
     ////////////////////////////////////
 
-    protected function isAdmin() {
+    protected function isAdmin()
+    {
         return auth()->user()->role_type === 'admin';
     }
 
-    protected function isOfficeUser() {
+    protected function isOfficeUser()
+    {
         return auth()->user()->role_type === 'office_user';
     }
 
-    protected function isCaregiver() {
+    protected function isCaregiver()
+    {
         return auth()->user()->role_type === 'caregiver';
     }
 
-    protected function isClient() {
+    protected function isClient()
+    {
         return auth()->user()->role_type === 'client';
     }
+
+    ////////////////////////////////////
+    //// Common access checks
+    ////////////////////////////////////
 
     /**
      * Re-usable check for business-owned entities
@@ -98,5 +106,15 @@ abstract class BasePolicy
     {
         return $this->isCaregiver()
             && $user->caregiver->sharesBusinessWith($entity);
+    }
+
+    protected function checkOnRole(User $user, string $ability, User $entity)
+    {
+        if (in_array($entity->role_type, ['office_user', 'admin'])) {
+            // TODO: Office users should eventually be able to be managed by chain administrators
+            return $user->role_type === 'admin';
+        }
+
+        return $user->can($ability, $entity->role);
     }
 }

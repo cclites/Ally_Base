@@ -52,6 +52,7 @@ use Packages\MetaData\HasMetaData;
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read \App\OfficeUser $officeUser
  * @property-read \App\PaymentHold $paymentHold
+ * @property-read \App\Contracts\UserRole $role
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User forBusinesses($businessIds)

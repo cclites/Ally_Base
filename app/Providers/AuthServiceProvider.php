@@ -29,6 +29,7 @@ use App\Policies\SmsThreadPolicy;
 use App\Policies\SystemExceptionPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimesheetPolicy;
+use App\Policies\UserPolicy;
 use App\Prospect;
 use App\RateCode;
 use App\ReferralSource;
@@ -38,6 +39,7 @@ use App\SmsThread;
 use App\SystemException;
 use App\Task;
 use App\Timesheet;
+use App\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -67,6 +69,7 @@ class AuthServiceProvider extends ServiceProvider
         SystemException::class => SystemExceptionPolicy::class,
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
+        User::class => UserPolicy::class,
     ];
 
     /**

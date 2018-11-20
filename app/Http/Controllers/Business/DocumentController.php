@@ -12,10 +12,11 @@ class DocumentController extends BaseController
 {
     /**
      * List documents.
-     * TODO: check permissions
      */
     public function index(User $user)
     {
+        $this->authorize('read', $user);
+
         return $user->documents;
     }
 
@@ -27,9 +28,13 @@ class DocumentController extends BaseController
      */
     public function store(Request $request)
     {
+        $user = User::findOrFail($request->input('user_id'));
+        $this->authorize('read', $user);
+
         $file = $request->file('file');
         $file->store('documents');
-        User::find($request->input('user_id'))->documents()->create([
+
+        $user->documents()->create([
             'name' => $request->input('name'),
             'filename' => $file->hashName(),
             'original_filename' => $file->getClientOriginalName(),
@@ -41,6 +46,8 @@ class DocumentController extends BaseController
 
     public function destroy(Document $document)
     {
+        $this->authorize('read', $document->user);
+
         try {
             if ($document->delete()) {
                 return new SuccessResponse('Document deleted.');
@@ -53,10 +60,13 @@ class DocumentController extends BaseController
 
     /**
      * Download document.
-     * TODO: check permissions
+     * @param \App\Document $document
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function download(Document $document)
     {
+        $this->authorize('read', $document->user);
+
         $path = storage_path('app/documents/' . $document->filename);
         return response()->download($path, $document->original_filename);
     }
