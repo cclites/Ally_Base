@@ -1,4 +1,10 @@
 # November 20, 2018
+
+## Business Chains
+ * There is now a concept above "businesses" called Business Chains.  This enables chains and franchises to manage multiple business locations.  
+ * Caregivers and office users belong to chains, while almost all other resources still belong to businesses.
+ * Caregivers can work for multiple chains and can work for any business inside the chain.
+ * Office users can only work for one chain but can be restricted to only certain businesses inside the chain.
  
 ## Abstract Model Classes and New Interfaces
  * All models should now extend a base model controlled by us.  Either AuditableModel or BaseModel.   This allows us to more easily control global aspects of all models, such as query scopes, or auditing functionality in the future.
