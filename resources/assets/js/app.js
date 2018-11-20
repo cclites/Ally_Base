@@ -142,6 +142,7 @@ Vue.component('business-exception', require('./components/BusinessException.vue'
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-rate-codes', require('./components/business/rate_codes/BusinessRateCodes'));
 Vue.component('business-reconciliation-report', require('./components/BusinessReconciliationReport'));

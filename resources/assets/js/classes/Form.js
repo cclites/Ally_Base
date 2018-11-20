@@ -60,6 +60,13 @@ class Form {
         }
         return false;
     }
+
+    /**
+     * Alias for wasModified
+     *
+     * @param field
+     * @returns {boolean}
+     */
     isDirty(field=null) {
         return this.wasModified(field);
     }
@@ -75,6 +82,19 @@ class Form {
         this.clearError();
     }
 
+    /**
+     * Send a GET request to the given URL.  Converts data properties to the query string.
+     * .
+     * @param {string} url
+     */
+    get(url) {
+        const data = this.data();
+        for(let field in data) {
+            let value = encodeURIComponent(data[field]);
+            url += (url.includes('?')) ? `&${field}=${value}` : `?${field}=${value}`;
+        }
+        return axios.get(url);
+    }
 
     /**
      * Send a POST request to the given URL.
@@ -113,6 +133,7 @@ class Form {
      * @param {string} url
      */
     submit(method, url, multipart = false) {
+        method = method.toLowerCase();
         let Form = this;
         return new Promise((resolve, reject) => {
             axios[method](url, this.data(multipart))
