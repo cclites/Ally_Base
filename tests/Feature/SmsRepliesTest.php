@@ -30,7 +30,7 @@ class SmsRepliesTest extends TestCase
 
         $this->caregiver = factory('App\Caregiver')->create();
         $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->chain->caregivers()->save($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create();
         $this->officeUser->businesses()->attach($this->business->id);
@@ -113,11 +113,10 @@ class SmsRepliesTest extends TestCase
             'recipients' => Caregiver::all()->pluck('id')->toArray(),
         ];
 
-        $this->postJson(route('business.communication.text-caregivers'), $data)
-            ->assertStatus(200);
+        $response = $this->postJson(route('business.communication.text-caregivers'), $data);
 
+        $response->assertStatus(200);
         $this->assertCount(1, SmsThread::all());
-
         $this->assertCount(1, SmsThread::first()->recipients);
     }
 
@@ -283,7 +282,7 @@ class SmsRepliesTest extends TestCase
         ]);
 
         $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
-            ->assertStatus(401);
+            ->assertStatus(403);
     }
 
     /** @test */

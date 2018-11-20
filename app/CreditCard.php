@@ -1,6 +1,4 @@
 <?php
-
-
 namespace App;
 
 use App\Contracts\ChargeableInterface;
@@ -9,8 +7,6 @@ use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Crypt;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CreditCard
@@ -25,9 +21,13 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int|null $expiration_year
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read object $charge_metrics
  * @property-read \Carbon $expiration_date
  * @property-read mixed $last_four
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationMonth($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereExpirationYear($value)
@@ -39,13 +39,11 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CreditCard whereUserId($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $transactions
  */
-class CreditCard extends Model implements ChargeableInterface, Auditable
+class CreditCard extends AuditableModel implements ChargeableInterface
 {
     use ChargedTransactionsTrait;
     use HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'credit_cards';
     protected $guarded = ['id'];

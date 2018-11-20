@@ -8,13 +8,14 @@ use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
 use App\Document;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 trait IsUserRole
 {
-    use SoftDeletes;
     use HiddenIdTrait;
     use HasAddressesAndNumbers;
+    use SoftDeletes;
 
     /**
      * IsUserRole constructor.
@@ -314,22 +315,60 @@ trait IsUserRole
      * @param \Illuminate\Database\Eloquent\Builder $builder
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($builder)
+    public function scopeActive(Builder $builder)
     {
         return $builder->whereHas('user', function($q) { $q->where('active', 1); });
     }
 
     /**
+     * Search users by email, supports wildcards (%@email.com%)
+     *
      * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param string $direction
+     * @param string|null $email
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByName($builder, $direction = 'ASC')
+    public function scopeWhereEmail(Builder $builder, string $email = null)
+    {
+        return $builder->whereHas('user', function($q) use ($email) {
+            $q->where('email', 'LIKE', $email);
+        });
+    }
+
+    /**
+     * Search users by first and last name, supports wildcards (John%).  Set either parameter null to skip.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $firstname
+     * @param $string|null lastname
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereName(Builder $builder, string $firstname = null, string $lastname = null)
+    {
+        return $builder->whereHas('user', function($q) use ($firstname, $lastname) {
+            if ($firstname !== null) $q->where('firstname', 'LIKE', $firstname);
+            if ($lastname !== null) $q->where('lastname', 'LIKE', $lastname);
+        });
+    }
+
+    /**
+     * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $direction
+     */
+    public function scopeOrdered(Builder $builder, string $direction = null)
+    {
+        $this->scopeOrderByName($builder, $direction ?? 'ASC');
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string $direction
+     */
+    public function scopeOrderByName(Builder $builder, $direction = 'ASC')
     {
         $builder->join('users', 'users.id', '=', $this->table . '.id')
             ->orderBy('users.lastname', $direction)
             ->orderBy('users.firstname', $direction);
-
-        return $builder;
     }
 }

@@ -9,17 +9,16 @@ use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
-use App\Shifts\AllyFeeCalculator;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
+use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use App\Traits\HasDefaultRates;
+use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
-use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasOwnMetaData;
 
 /**
@@ -33,54 +32,11 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $backup_payment_type
  * @property string|null $backup_payment_id
  * @property string $client_type
- * @property null|string $ssn
+ * @property mixed|null $ssn
  * @property string|null $onboard_status
  * @property string|null $deleted_at
  * @property float|null $fee_override
  * @property float $max_weekly_hours
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
- * @property-read \App\Business $business
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
- * @property-read \App\Address $evvAddress
- * @property-read \App\PhoneNumber $evvPhone
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
- * @property-read string $ally_percentage
- * @property-read mixed $date_of_birth
- * @property-read mixed $email
- * @property-read mixed $first_name
- * @property-read mixed $last_name
- * @property-read mixed $name
- * @property-read mixed $name_last_first
- * @property-read string $payment_type
- * @property-read mixed $username
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
- * @property-read \App\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessFee($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereClientType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMaxWeeklyHours($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
- * @mixin \Eloquent
  * @property \Carbon\Carbon|null $inquiry_date
  * @property \Carbon\Carbon|null $service_start_date
  * @property string|null $referral
@@ -90,26 +46,136 @@ use Packages\MetaData\HasOwnMetaData;
  * @property string|null $poa_last_name
  * @property string|null $poa_phone
  * @property string|null $poa_relationship
+ * @property string|null $import_identifier
+ * @property string|null $dr_first_name
+ * @property string|null $dr_last_name
+ * @property string|null $dr_phone
+ * @property string|null $dr_fax
+ * @property string|null $ltci_name
+ * @property string|null $ltci_address
+ * @property string|null $ltci_city
+ * @property string|null $ltci_state
+ * @property string|null $ltci_zip
+ * @property string|null $ltci_policy
+ * @property string|null $ltci_claim
+ * @property string|null $ltci_phone
+ * @property string|null $ltci_fax
+ * @property string|null $hospital_name
+ * @property string|null $hospital_number
+ * @property string|null $medicaid_id
+ * @property string|null $medicaid_diagnosis_codes
+ * @property string|null $client_type_descriptor
+ * @property int $receive_summary_email
+ * @property int|null $referral_source_id
+ * @property int|null $onboarding_step
+ * @property int|null $hourly_rate_id
+ * @property int|null $fixed_rate_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Business $business
+ * @property-read \App\CareDetails $careDetails
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \App\RateCode|null $defaultFixedRate
+ * @property-read \App\RateCode|null $defaultHourlyRate
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read \App\Address $evvAddress
+ * @property-read \App\PhoneNumber $evvPhone
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientExcludedCaregiver[] $excludedCaregivers
  * @property-read mixed $active
+ * @property-read mixed $ally_percentage
+ * @property mixed $avatar
+ * @property-read mixed $date_of_birth
+ * @property-read mixed $email
+ * @property-read mixed $first_name
  * @property-read mixed $gender
+ * @property-read mixed $in_active_at
+ * @property-read mixed $last_name
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read mixed $payment_type
+ * @property-read mixed $username
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientMedication[] $medications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientMeta[] $meta
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientNarrative[] $narrative
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
+ * @property-read \App\PaymentHold $paymentHold
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \App\ClientPreferences $preferences
+ * @property-read \App\ClientReferralServiceAgreement $referralServiceAgreement
+ * @property-read \App\ReferralSource|null $referralSource
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client orderByName($direction = 'ASC')
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereAmbulatory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBackupPaymentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereClientType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereClientTypeDescriptor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDefaultPaymentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDiagnosis($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFax($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrFirstName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrLastName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereDrPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereEmail($email = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFeeOverride($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereFixedRateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHospitalName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHospitalNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHourlyRateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereImportIdentifier($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereInquiryDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciClaim($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciFax($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciPolicy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereLtciZip($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMaxWeeklyHours($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMedicaidDiagnosisCodes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMedicaidId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereMeta($key, $delimiter = null, $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereName($firstname = null, $lastname = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereOnboardingStep($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaFirstName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client wherePoaRelationship($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReceiveSummaryEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferral($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()
+ * @mixin \Eloquent
  */
-class Client extends Model implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface, Auditable
+class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {
-    use IsUserRole, Notifiable;
-    use \App\Traits\HasPaymentHold;
-    use HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
-    use HasOwnMetaData;
-    use HasDefaultRates;
+    use IsUserRole, BelongsToOneBusiness, Notifiable;
+    use HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -565,6 +631,5 @@ class Client extends Model implements UserRole, CanBeConfirmedInterface, Reconci
         // Default to CC fee
         return (float) config('ally.credit_card_fee');
     }
-
 
 }

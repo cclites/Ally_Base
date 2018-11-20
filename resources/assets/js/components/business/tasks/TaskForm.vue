@@ -24,6 +24,11 @@
                         <input-help :form="form" field="notes" text="" />
                     </b-form-group>
 
+                    <b-form-group label="Business Location" label-for="notes">
+                        <business-location-select v-model="form.business_id"></business-location-select>
+                        <input-help :form="form" field="business_id" text="" />
+                    </b-form-group>
+
                     <b-form-group>
                         <label label-for="assigned_user_id">Assigned to
                             <span v-if="assignedType == 'Caregiver'">
@@ -75,7 +80,9 @@
 
 <script>
     import FormatsDates from "../../../mixins/FormatsDates";
+    import BusinessLocationSelect from "../BusinessLocationSelect";
     export default {
+        components: {BusinessLocationSelect},
         mixins: [FormatsDates],
 
         props: {
@@ -134,6 +141,7 @@
                     assigned_user_id: data.assigned_user_id || '',
                     notes: data.notes,
                     completed: data.completed_at ? 1 : 0,
+                    business_id: "",
                 });
                 this.assignedType = data.assigned_type;
             },

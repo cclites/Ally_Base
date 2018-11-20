@@ -9,7 +9,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
 
-class ScheduledVsActualReport extends BaseReport
+class ScheduledVsActualReport extends BusinessResourceReport
 {
     /**
      * @var bool

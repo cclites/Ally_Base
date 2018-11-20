@@ -1,13 +1,54 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
-class ClientReferralServiceAgreement extends Model
+/**
+ * App\ClientReferralServiceAgreement
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property float $referral_fee
+ * @property float $per_visit_referral_fee
+ * @property float $per_visit_assessment_fee
+ * @property string $termination_notice
+ * @property string $executed_by
+ * @property array $payment_options
+ * @property string|null $agreement_file
+ * @property mixed $signature_one
+ * @property mixed $signature_two
+ * @property mixed $signature_client
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $signature_one_text
+ * @property string|null $signature_two_text
+ * @property string|null $signature_client_text
+ * @property string|null $executed_by_ip
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereAgreementFile($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereExecutedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereExecutedByIp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement wherePaymentOptions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement wherePerVisitAssessmentFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement wherePerVisitReferralFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereReferralFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureClient($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureClientText($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureOne($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureOneText($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureTwo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereSignatureTwoText($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereTerminationNotice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class ClientReferralServiceAgreement extends BaseModel
 {
     protected $guarded = ['id'];
 

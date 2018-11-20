@@ -14,9 +14,7 @@ class ClientCaregiverController extends BaseController
 {
     public function store(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
         $caregiver_id = $request->input('caregiver_id');
@@ -56,9 +54,7 @@ class ClientCaregiverController extends BaseController
 
     public function index(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         $caregivers = $client->caregivers->map(function ($caregiver) use ($client) {
             return (new ClientCaregiver($client, $caregiver))->toResponse(null);
@@ -69,18 +65,14 @@ class ClientCaregiverController extends BaseController
 
     public function show(Client $client, Caregiver $caregiver)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         return new ClientCaregiver($client, $caregiver);
     }
 
     public function potentialCaregivers(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         $current_caregivers = $client->caregivers()->select('caregivers.id')->pluck('id');
         $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
@@ -109,9 +101,7 @@ class ClientCaregiverController extends BaseController
      */
     public function detachCaregiver(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $caregiver = Caregiver::find(request('caregiver_id'));
 
@@ -138,14 +128,13 @@ class ClientCaregiverController extends BaseController
     /**
      * Update rate information for future scheduled shifts for client/caregiver.
      *
+     * @param \Illuminate\Http\Request $request
      * @param Client $client
      * @return ErrorResponse|SuccessResponse
      */
     public function updateScheduleRates(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
 
@@ -172,9 +161,6 @@ class ClientCaregiverController extends BaseController
                 'caregiver_rate' => $caregiver->pivot->caregiver_fixed_rate,
                 'provider_fee' => $caregiver->pivot->provider_fixed_fee,
             ]);
-
-        $request->validate(['caregiver_id' => 'required|exists:caregivers,id']);
-        $caregiver_id = $request->input('caregiver_id');
 
         return new SuccessResponse($caregiver->name() . "'s rate was applied to all future schedules.");
     }

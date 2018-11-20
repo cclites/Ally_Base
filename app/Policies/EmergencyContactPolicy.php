@@ -16,7 +16,7 @@ class EmergencyContactPolicy extends BasePolicy
      * @param  \App\EmergencyContact  $emergencyContact
      * @return mixed
      */
-    public function view(User $user, EmergencyContact $emergencyContact)
+    public function read(User $user, EmergencyContact $emergencyContact)
     {
         return $this->check($user, $emergencyContact);
     }
@@ -35,12 +35,18 @@ class EmergencyContactPolicy extends BasePolicy
 
     protected function check(User $user, EmergencyContact $emergencyContact)
     {
-        if ($emergencyContact->user_id != $user->id) {
-            if (!$this->isAdmin() && !$this->businessHasUser($emergencyContact->user)) {
-                return false;
-            }
+        if ($emergencyContact->user_id == $user->id) {
+            return true;
         }
 
-        return true;
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isOfficeUser() && $user->sharesBusinessWith($emergencyContact->user)) {
+            return true;
+        }
+
+        return false;
     }
 }

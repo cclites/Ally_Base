@@ -41,20 +41,14 @@ class TimesheetController extends BaseController
      */
     public function store(CreateTimesheetsRequest $request)
     {
-        if (!$this->businessHasCaregiver($request->caregiver_id)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
-        
-        if (!$this->businessHasClient($request->client_id)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
-        
+        $data = $request->filtered();
+        $this->authorize('create', [Timesheet::class, $data]);
+
         DB::beginTransaction();
 
         $timesheet = Timesheet::createWithEntries(
-            $request->validated(),
-            auth()->user(),
-            activeBusiness()
+            $data,
+            auth()->user()
         );
 
         if ($timesheet !== false) {
@@ -117,13 +111,12 @@ class TimesheetController extends BaseController
      */
     public function update(ApproveTimesheetRequest $request, Timesheet $timesheet)
     {
-        if (!$this->businessHasTimesheet($timesheet)) {
-            return new ErrorResponse(403, 'You do not have access to this Timesheet.');
-        }
+        $this->authorize('update', $timesheet);
+        $data = $request->filtered();
         
         DB::beginTransaction();
         
-        $timesheet = $timesheet->updateWithEntries($request->validated());
+        $timesheet = $timesheet->updateWithEntries($data);
 
         if ($timesheet != false) {
             if ($request->approve == 1) {
@@ -145,15 +138,13 @@ class TimesheetController extends BaseController
 
     /**
      * Denies the Manual Timesheet.
-     *
-     * @return void
+     * @param \App\Timesheet $timesheet
+     * @return \App\Responses\SuccessResponse
      */
     public function deny(Timesheet $timesheet)
     {
-        if (!$this->businessHasTimesheet($timesheet)) {
-            return new ErrorResponse(403, 'You do not have access to this Timesheet.');
-        }
-        
+        $this->authorize('update', $timesheet);
+
         $timesheet->deny();
 
         return new SuccessResponse(

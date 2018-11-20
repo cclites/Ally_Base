@@ -19,6 +19,8 @@ class ClientCareDetailsController extends BaseController
      */
     public function update(UpdateClientCareDetailsRequest $request, Client $client)
     {
+        $this->authorize('update', $client);
+
         if (empty($client->careDetails)) {
             $client->careDetails()->create([]);
         }

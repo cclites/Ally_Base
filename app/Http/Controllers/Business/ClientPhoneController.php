@@ -15,9 +15,7 @@ class ClientPhoneController extends BaseController
      */
     public function index(Client $client)
     {
-        if (! $this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $numbers = $client->phoneNumbers->sort(function($a, $b) {
             $numberGen = function($type) {

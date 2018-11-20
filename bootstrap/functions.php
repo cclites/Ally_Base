@@ -85,7 +85,7 @@ function utc_date($input, $to_format='Y-m-d H:i:s', $from_timezone='America/New_
  * @return bool
  */
 function is_admin() {
-    if ($impersonator = Auth::user()->impersonator()) {
+    if (Auth::check() && $impersonator = Auth::user()->impersonator()) {
         return $impersonator->role_type === 'admin';
     }
     return is_admin_now();
@@ -106,15 +106,17 @@ function is_admin_now() {
  * @return bool
  */
 function is_office_user() {
-    return Auth::user()->role_type === 'office_user';
+    return Auth::check() && Auth::user()->role_type === 'office_user';
 }
 
-/**
- * Get the active business object or return null.
- * 
- * @return string
- */
+
 if (! function_exists('activeBusiness')) {
+    /**
+     * Get the active business object or return null.
+     *
+     * @return string
+     * @deprecated
+     */
     function activeBusiness() {
         if (Auth::check() && Auth::user()->role_type === 'caregiver') {
             return Auth::user()->role->businesses->first();

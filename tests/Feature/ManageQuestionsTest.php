@@ -20,6 +20,8 @@ class ManageQuestionsTest extends TestCase
     {
         parent::setUp();
 
+        $this->withoutExceptionHandling();
+
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
         $this->caregiver = factory('App\Caregiver')->create();
@@ -32,8 +34,6 @@ class ManageQuestionsTest extends TestCase
     /** @test */
     public function an_office_user_can_create_a_custom_question()
     {
-        $this->withoutExceptionHandling();
-
         $this->actingAs($this->officeUser->user);
         
         $this->assertCount(0, $this->business->questions);

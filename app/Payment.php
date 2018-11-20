@@ -1,11 +1,9 @@
 <?php
-
 namespace App;
 
 use App\Businesses\Timezone;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToOneBusiness;
 
 /**
  * App\Payment
@@ -17,19 +15,25 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float|null $amount
  * @property string|null $transaction_id
  * @property string|null $transaction_code
+ * @property int $adjustment
+ * @property string|null $notes
  * @property int|null $success
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property float $business_allotment
  * @property float $caregiver_allotment
  * @property float $system_allotment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Caregiver $caregiver
  * @property-read \App\Client|null $client
  * @property-read mixed $week
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $method
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\GatewayTransaction|null $transaction
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAdjustment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereBusinessAllotment($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereBusinessId($value)
@@ -37,6 +41,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment wherePaymentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereSuccess($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereSystemAllotment($value)
@@ -45,9 +50,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class Payment extends Model implements Auditable
+class Payment extends AuditableModel implements BelongsToBusinessesInterface
 {
-    use \OwenIt\Auditing\Auditable;
+    use BelongsToOneBusiness;
 
     protected $table = 'payments';
     protected $guarded = ['id'];
@@ -82,9 +87,9 @@ class Payment extends Model implements Auditable
         return $this->belongsTo(GatewayTransaction::class, 'transaction_id');
     }
 
-    ////////////////////////////////////////////
-    /// Other Methods
-    ///////////////////////////////////////////
+    ////////////////////////////////////
+    //// Mutators
+    ////////////////////////////////////
 
     public function getWeekAttribute()
     {
@@ -98,4 +103,10 @@ class Payment extends Model implements Auditable
         }
         return null;
     }
+
+    ////////////////////////////////////////////
+    /// Instance Methods
+    ///////////////////////////////////////////
+
+
 }

@@ -66,7 +66,7 @@ class ClockInTest extends TestCase
         $shift = $clockIn->setNumber($phone->national_number)->clockIn($this->schedule);
 
         $this->assertInstanceOf(Shift::class, $shift);
-        $this->assertTrue($shift->isVerified());
+        $this->assertTrue($shift->checked_in_verified);
         $this->assertEquals(Shift::METHOD_TELEPHONY, $shift->checked_in_method);
     }
 
@@ -83,7 +83,7 @@ class ClockInTest extends TestCase
         $shift = $clockIn->setGeocode($latitude, $longitude)->clockIn($this->schedule);
 
         $this->assertInstanceOf(Shift::class, $shift);
-        $this->assertTrue($shift->isVerified());
+        $this->assertTrue($shift->checked_in_verified);
     }
 
     public function test_a_shift_has_distance_and_verified_set_with_valid_geocode()
@@ -139,7 +139,6 @@ class ClockInTest extends TestCase
         $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->business, $this->client);
 
         $this->assertInstanceOf(Shift::class, $shift);
-        $this->assertTrue($shift->isVerified());
         $this->assertTrue($shift->checked_in_verified);
     }
 }

@@ -88,7 +88,7 @@ class ClockIn extends ClockBase
             'business_id' => $business->id,
             'client_id' => $client->id,
             'schedule_id' => null,
-            'verified' => !$this->manual,
+            'checked_in_verified' => !$this->manual,
             'checked_in_method' => $this->getMethod(),
             'checked_in_time' => Carbon::now(),
             'checked_in_latitude' => $this->latitude,

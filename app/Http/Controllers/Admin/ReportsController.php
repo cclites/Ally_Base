@@ -85,6 +85,7 @@ class ReportsController extends Controller
 
         $report = new ShiftsReport;
         $report->between($startDate, $endDate)
+            ->forRequestedBusinesses()
             ->query()
             ->whereIn('status', $statuses)
             ->where(function (Builder $q) {
@@ -242,7 +243,7 @@ class ReportsController extends Controller
     public function shifts(Request $request)
     {
         $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
+        $report->forRequestedBusinesses()->orderBy('checked_in_time');
 
         $this->addShiftReportFilters($report, $request);
 

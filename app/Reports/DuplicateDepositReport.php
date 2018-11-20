@@ -11,7 +11,7 @@ use App\Shift;
  *
  * @package App\Reports
  */
-class DuplicateDepositReport extends BaseReport
+class DuplicateDepositReport extends BusinessResourceReport
 {
 
     /**

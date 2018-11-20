@@ -1,20 +1,10 @@
 <?php
-
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Carbon\Carbon;
 
-class CreateTaskRequest extends FormRequest
+class CreateTaskRequest extends BusinessRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -30,5 +20,13 @@ class CreateTaskRequest extends FormRequest
             'assigned_user_id' => 'nullable|exists:users,id',
             'completed' => 'nullable|boolean',
         ];
+    }
+
+    public function filtered()
+    {
+        $data = $this->validated();
+        $data['due_date'] = isset($data['due_date']) ? Carbon::parse($data['due_date']) : null;
+
+        return $data;
     }
 }

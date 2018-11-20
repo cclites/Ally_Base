@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <prospect-edit :prospect="{{ $prospect ?? 'null' }}" :referralsources="{{ $referralsources }}"></prospect-edit>
+            <prospect-edit :prospect="{{ $prospect ?? 'null' }}"></prospect-edit>
         </div>
     </div>
 @endsection
