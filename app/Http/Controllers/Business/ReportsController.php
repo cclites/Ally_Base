@@ -437,8 +437,12 @@ class ReportsController extends BaseController
     public function creditCards()
     {
         $report_date = Carbon::now()->addDays(request('daysFromNow'));
+
+        $defaultCardsIds = Client::forRequestedBusinesses()->where('default_payment_type', CreditCard::class)->pluck('default_payment_id')->toArray();
+        $backupCardIds = Client::forRequestedBusinesses()->where('backup_payment_type', CreditCard::class)->pluck('backup_payment_id')->toArray();
+
         $cards = CreditCard::with('user')
-            ->whereIn('user_id', Client::forRequestedBusinesses()->pluck('id'))
+            ->whereIn('id', array_merge($defaultCardsIds, $backupCardIds))
             ->get()
             ->filter(function ($card) use ($report_date) {
                 return $card->expirationDate->lt($report_date);
