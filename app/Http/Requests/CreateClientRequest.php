@@ -14,8 +14,8 @@ class CreateClientRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'firstname' => 'required',
-            'lastname' => 'required',
+            'firstname' => 'required|string|max:45',
+            'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => 'required|unique:users',
             'date_of_birth' => 'nullable',

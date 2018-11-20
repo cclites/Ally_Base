@@ -16,8 +16,8 @@ class UpdateCaregiverRequest extends FormRequest
     public function rules()
     {
         return [
-            'firstname' => 'required',
-            'lastname' => 'required',
+            'firstname' => 'required|string|max:45',
+            'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => [
                 'required',
@@ -29,8 +29,8 @@ class UpdateCaregiverRequest extends FormRequest
                 new ValidSSN(),
             ],
             'password' => 'nullable|confirmed',
-            'title' => 'required',
-            'medicaid_id' => 'nullable',
+            'title' => 'required|string|max:32',
+            'medicaid_id' => 'nullable|string|max:100',
             'gender' => 'nullable|in:M,F',
             'avatar' => [
                 'nullable',

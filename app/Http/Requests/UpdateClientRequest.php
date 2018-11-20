@@ -17,8 +17,8 @@ class UpdateClientRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'firstname' => 'required',
-            'lastname' => 'required',
+            'firstname' => 'required|string|max:45',
+            'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => ['required', Rule::unique('users')->ignore($this->route('client')->id)],
             'date_of_birth' => 'nullable|date',
@@ -29,20 +29,20 @@ class UpdateClientRequest extends BusinessRequest
             'onboard_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
-            'diagnosis' => 'nullable|string',
+            'diagnosis' => 'nullable|string|max:100',
             'ambulatory' => 'nullable|boolean',
-            'poa_first_name' => 'nullable|string',
-            'poa_last_name' => 'nullable|string',
-            'poa_phone' => 'nullable|string',
-            'poa_relationship' => 'nullable|string',
-            'dr_first_name' => 'nullable|string',
-            'dr_last_name' => 'nullable|string',
-            'dr_phone' => 'nullable|string',
-            'dr_fax' => 'nullable|string',
-            'hospital_name' => 'nullable|string',
-            'hospital_number' => 'nullable|string',
+            'poa_first_name' => 'nullable|string|max:50',
+            'poa_last_name' => 'nullable|string|max:50',
+            'poa_phone' => 'nullable|string|max:25',
+            'poa_relationship' => 'nullable|string|max:50',
+            'dr_first_name' => 'nullable|string|max:50',
+            'dr_last_name' => 'nullable|string|max:50',
+            'dr_phone' => 'nullable|string|max:25',
+            'dr_fax' => 'nullable|string|max:25',
+            'hospital_name' => 'nullable|string|max:100',
+            'hospital_number' => 'nullable|string|max:25',
             'avatar' => ['nullable', new Avatar()],
-            'referral_source_id' => 'nullable|numeric',
+            'referral_source_id' => 'nullable|exists:referral_sources,id',
         ];
     }
 
