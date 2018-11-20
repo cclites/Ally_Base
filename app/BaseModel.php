@@ -24,7 +24,7 @@ abstract class BaseModel extends Model
      */
     public function scopeOrdered(Builder $builder, string $direction = null)
     {
-        if ($this->orderedColumn) {
+        if (is_string($this->orderedColumn)) {
             $builder->orderBy($this->orderedColumn, $direction ?? $this->orderedDir ?? 'ASC');
         }
     }

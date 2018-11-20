@@ -15,6 +15,10 @@ export default {
         },
         formatYesNo(value) {
             return this.boolToYesNo(value);
-        }
+        },
+        showBusinessName(businessId) {
+            let business = this.$store.state.business.businesses.find(business => business.id == businessId);
+            return business ? business.name : "";
+        },
     }
 }

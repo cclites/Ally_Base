@@ -35,8 +35,7 @@ class ProspectController extends BaseController
      */
     public function create()
     {
-        $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
-        return view('business.prospects.show', compact('referralsources'));
+        return view('business.prospects.show');
     }
 
 
@@ -66,11 +65,7 @@ class ProspectController extends BaseController
     {
         $this->authorize('read', $prospect);
 
-        $prospect->referralSource;
-        // TODO: This and (@create) need to have front end logic to filter sources based on the selected business
-        $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
-
-        return view('business.prospects.show', compact('prospect', 'referralsources'));
+        return view('business.prospects.show', compact('prospect'));
     }
 
     /**

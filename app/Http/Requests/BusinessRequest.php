@@ -86,7 +86,7 @@ abstract class BusinessRequest extends FormRequest
         $businessIds = $user->getBusinessIds();
         $default = count($businessIds) === 1 ? current($businessIds) : null;
 
-        return $this->input('business_id', $default);
+        return $this->input('business_id') ?: $default;
     }
 
     /**
@@ -148,8 +148,8 @@ abstract class BusinessRequest extends FormRequest
 
     protected function addBusinessInput(array $original)
     {
-        return $original + [
+        return array_merge($original, [
             'business_id' => $this->getBusinessId(),
-        ];
+        ]);
     }
 }

@@ -16,6 +16,10 @@
                             <b-form-input v-model="form.phone" type="text" />
                             <input-help :form="form" field="phone"></input-help>
                         </b-form-group>
+                        <b-form-group label="Business Location" label-for="business_id">
+                            <business-location-select v-model="form.business_id" />
+                            <input-help :form="form" field="business_id"></input-help>
+                        </b-form-group>
                     </b-col>
                 </b-row>
         </b-container>
@@ -33,7 +37,9 @@
 </template>
 
 <script>
+    import BusinessLocationSelect from "../BusinessLocationSelect";
     export default {
+        components: {BusinessLocationSelect},
         props: {
             value: Boolean,
             source: Object,
@@ -62,6 +68,7 @@
                     organization: defaults.organization,
                     contact_name: defaults.contact_name,
                     phone: defaults.phone,
+                    business_id: defaults.business_id || ""
                 });
             },
 

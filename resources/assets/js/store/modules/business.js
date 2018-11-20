@@ -1,6 +1,6 @@
 // initial state
 const state = {
-    businesses: []
+    businesses: [],
 }
 
 // getters
@@ -19,7 +19,7 @@ const mutations = {
         state.businesses = businesses
     },
 
-    addBusiness(state, business) {
+    updateBusiness(state, business) {
 
     },
 

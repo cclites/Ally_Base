@@ -42,6 +42,10 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the prospect will use."></input-help>
                     </b-form-group>
+                    <b-form-group label="Business Location" label-for="business_id">
+                        <business-location-select v-model="form.business_id"></business-location-select>
+                        <input-help :form="form" field="business_id" text="Select the type of payment the prospect will use."></input-help>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -127,23 +131,8 @@
             <hr />
             <b-row>
                 <b-col lg="6">
-                    <b-row>
-                        <b-col md="9">
-                            <b-form-group label="Referred By" label-for="referred_by">
-                                <b-form-select id="referral"
-                                               v-model="form.referral_source_id"
-                                >
-                                    <option :value="referralsource.id" v-for="referralsource in referralsources">{{ referralsource.organization }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
-                            </b-form-group>
-                        </b-col>
-                        <b-col md="3" class="pad-top">
-                            <div class="pt-3">
-                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
-                            </div>
-                        </b-col>
-                    </b-row>
+                    <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                    <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Last Contacted" label-for="last_contacted">
@@ -188,15 +177,17 @@
                 </b-col>
             </b-row>
         </form>
-        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
     </b-card>
 </template>
 
 <script>
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
+    import ReferralSourceSelect from "../referral/ReferralSourceSelect";
+    import BusinessLocationSelect from "../BusinessLocationSelect";
 
     export default {
+        components: {BusinessLocationSelect, ReferralSourceSelect},
         props: ['prospect', 'referralsources'],
 
         data() {
@@ -206,6 +197,7 @@
                     'lastname': this.getOriginal('lastname'),
                     'email': this.getOriginal('email'),
                     'client_type': this.getOriginal('client_type'),
+                    'business_id': this.getOriginal('business_id'),
                     'date_of_birth': this.getOriginalDate('date_of_birth'),
                     'phone': this.getOriginal('phone'),
                     'address1': this.getOriginal('address1'),
@@ -214,7 +206,7 @@
                     'state': this.getOriginal('state'),
                     'zip': this.getOriginal('zip'),
                     'country': this.getOriginal('country', 'US'),
-                    'referral_source_id': this.prospect && this.prospect.referral_source ? this.prospect.referral_source.id : null,
+                    'referral_source_id': this.getOriginal('referral_source_id'),
                     'last_contacted': this.getOriginalDate('last_contacted'),
                     'initial_call_date': this.getOriginalDate('initial_call_date'),
                     'had_initial_call': this.getOriginal('had_initial_call', 0),
@@ -240,7 +232,6 @@
                 submitting: false,
                 countries: new Countries(),
                 states: new States(),
-                showReferralModal: false,
             }
         },
 
@@ -288,14 +279,6 @@
                 if (!confirm(`Are you sure you wish to delete ${item.firstname} ${item.lastname}?`)) return;
                 let form = new Form({});
                 form.submit('delete', `/business/prospects/${item.id}`);
-            },
-
-            newrefsourcedata(data) {
-                if(data) {
-                    this.show = false;
-                    this.referralsources.push(data);
-                    this.form.referral_source_id = data.id;
-                }
             },
 
             closemodal(status) {

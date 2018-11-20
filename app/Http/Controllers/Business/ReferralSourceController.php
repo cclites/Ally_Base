@@ -12,6 +12,9 @@ class ReferralSourceController extends BaseController
     public function index($edit = 0, $create = 0)
     {
         $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
+        if (request()->expectsJson()) {
+            return $referralsources;
+        }
 
         return view('business.referral.list', compact('referralsources', 'edit', 'create'));
     }

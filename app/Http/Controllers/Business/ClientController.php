@@ -155,7 +155,6 @@ class ClientController extends BaseController
             'creditCards',
             'payments',
             'user.documents',
-            'referralSource',
             'notes.creator',
             'careDetails',
             'carePlans',
@@ -187,9 +186,8 @@ class ClientController extends BaseController
 
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
-        $referralsources = $this->business()->referralSources;
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'referralsources'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
     }
 
     public function edit(Client $client)

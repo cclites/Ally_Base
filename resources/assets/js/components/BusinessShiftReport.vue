@@ -18,6 +18,7 @@
                                 v-model="end_date"
                                 placeholder="End Date">
                         </date-picker>
+                        <business-location-select v-model="business_id" class="mb-1" :allow-all="true" :hideable="true"></business-location-select>
                         <b-form-select v-model="caregiver_id" class="mx-1 mb-1">
                             <option value="">All Caregivers</option>
                             <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
@@ -26,7 +27,6 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
-                        <business-location-select :allow-all="true" v-model="business_id"></business-location-select>
                         <b-form-select v-model="payment_method" class="mb-1">
                             <option value="">All Payment Methods</option>
                             <option value="credit_card">Credit Card</option>
@@ -41,10 +41,6 @@
                             <option value="">All Statuses</option>
                             <option value="charged">Charged</option>
                             <option value="uncharged">Un-Charged</option>
-                        </b-form-select>
-                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
-                            <option value="all">All Locations</option>
-                            <option :value="multi_location.name">{{ multi_location.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>

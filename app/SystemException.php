@@ -47,7 +47,7 @@ class SystemException extends AuditableModel implements BelongsToBusinessesInter
     use BelongsToOneBusiness;
 
     protected $guarded = ['id'];
-    protected $orderedColumn = ['id'];
+    protected $orderedColumn = 'id';
 
     ///////////////////////////////////////////
     /// Relationship Methods
