@@ -17,10 +17,14 @@ class ActivityController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $activities = Activity::forRequestedBusinesses()->get();
-        
+        $activities = Activity::forRequestedBusinesses()->ordered()->get();
+
+        if ($request->expectsJson()) {
+            return $activities;
+        }
+
         return view('business.activities.index', compact('activities'));
     }
 
