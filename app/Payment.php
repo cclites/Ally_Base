@@ -57,6 +57,7 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     protected $table = 'payments';
     protected $guarded = ['id'];
     protected $appends = ['week'];
+    protected $week;
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -93,15 +94,18 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
 
     public function getWeekAttribute()
     {
-        $shift = $this->shifts()->orderBy('checked_in_time', 'DESC')->first();
-        if ($shift && $time = $shift->checked_in_time) {
-            $time->setTimezone(Timezone::getTimezone($shift->business_id) ?: 'America/New_York');
-            return (object) [
-                'start' => $time->setIsoDate($time->year, $time->weekOfYear)->toDateString(),
-                'end' => $time->setIsoDate($time->year, $time->weekOfYear, 7)->toDateString()
-            ];
+        if (!$this->week) {
+            $shift = $this->shifts()->orderBy('checked_in_time', 'DESC')->first();
+            if ($shift && $time = $shift->checked_in_time) {
+                $time->setTimezone(Timezone::getTimezone($shift->business_id) ?: 'America/New_York');
+                $this->week = (object) [
+                    'start' => $time->setIsoDate($time->year, $time->weekOfYear)->toDateString(),
+                    'end' => $time->setIsoDate($time->year, $time->weekOfYear, 7)->toDateString()
+                ];
+            }
         }
-        return null;
+
+        return $this->week;
     }
 
     ////////////////////////////////////////////
