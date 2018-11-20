@@ -31,13 +31,12 @@ interface BelongsToChainsInterface
 
 
     /**
-     * Returns the provided business IDs that are actually attached to the given entity
+     * Returns the provided business IDs that are actually attached to the current entity
      *
-     * @param \App\Contracts\BelongsToChainsInterface $entity
      * @param array $chainIds
      * @return array
      */
-    public function filterAttachedChains(BelongsToChainsInterface $entity, array $chainIds);
+    public function filterAttachedChains(array $chainIds);
 
     /**
      * A query scope for filtering results by related business chains

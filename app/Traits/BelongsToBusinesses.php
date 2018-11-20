@@ -46,13 +46,12 @@ trait BelongsToBusinesses
     /**
      * Returns the provided business IDs that are actually attached to the given entity
      *
-     * @param \App\Contracts\BelongsToBusinessesInterface $entity
      * @param array $businessIds
      * @return array
      */
-    public function filterAttachedBusinesses(BelongsToBusinessesInterface $entity, array $businessIds)
+    public function filterAttachedBusinesses(array $businessIds)
     {
-        return array_intersect($businessIds, $entity->getBusinessIds());
+        return array_intersect($businessIds, $this->getBusinessIds());
     }
 
     /**
@@ -63,7 +62,7 @@ trait BelongsToBusinesses
      */
     public function sharesBusinessWith(BelongsToBusinessesInterface $entity)
     {
-        return count($this->filterAttachedBusinesses($entity, $this->getBusinessIds())) > 0;
+        return count($this->filterAttachedBusinesses($entity->getBusinessIds())) > 0;
     }
 
     /**
@@ -77,14 +76,19 @@ trait BelongsToBusinesses
      */
     public function scopeForRequestedBusinesses(Builder $builder, array $businessIds = null, User $authorizedUser = null)
     {
-        if ($businessIds === null) $businessIds = (array) request()->input('businesses', []);
+        if ($businessIds === null) $businessIds = array_filter((array) request()->input('businesses', []));
         if ($authorizedUser === null) $authorizedUser = auth()->user();
 
         if ($authorizedUser->role_type !== 'admin') {
-            $businessIds = $this->filterAttachedBusinesses($authorizedUser, $businessIds);
+            $businessIds = $authorizedUser->filterAttachedBusinesses($businessIds);
             // If empty, filter by all businesses the authorized user has access to
             if (!count($businessIds)) $businessIds = $authorizedUser->getBusinessIds();
 
+            $builder->forBusinesses($businessIds);
+            return;
+        }
+
+        if (count($businessIds)) {
             $builder->forBusinesses($businessIds);
         }
     }

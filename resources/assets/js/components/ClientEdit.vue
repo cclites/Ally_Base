@@ -42,6 +42,10 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
+                    <b-form-group label="Business Location" label-for="business_id">
+                        <business-location-select v-model="form.business_id"></business-location-select>
+                        <input-help :form="form" field="business_id" text="Select the business location for this client (if applicable)."></input-help>
+                    </b-form-group>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
                             <b-form-radio value="M">Male</b-form-radio>
@@ -359,6 +363,7 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
+    import BusinessLocationSelect from './business/BusinessLocationSelect'
     window.croppie = require('croppie');
 
     export default {
@@ -372,7 +377,8 @@
         mixins: [ClientForm, FormatsDates],
 
         components: {
-            DatePicker
+            DatePicker,
+            BusinessLocationSelect,
         },
 
         data() {
@@ -404,6 +410,7 @@
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
+                    business_id: this.client.business_id,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,

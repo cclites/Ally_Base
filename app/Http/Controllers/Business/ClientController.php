@@ -107,10 +107,10 @@ class ClientController extends BaseController
 
         // Look for duplicates
         if (!$request->override) {
-            if ($request->email && Client::forRequestedBusinesses()->where('email', $request->email)->first()) {
+            if ($request->email && Client::forRequestedBusinesses()->whereEmail($request->email)->first()) {
                 return new ConfirmationResponse('There is already a client with the email address ' . $request->email . '.');
             }
-            if (Client::forRequestedBusinesses()->where('firstname', $request->firstname)->where('lastname', $request->lastname)->first()) {
+            if (Client::forRequestedBusinesses()->whereName($request->firstname, $request->lastname)->first()) {
                 return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
             }
         }

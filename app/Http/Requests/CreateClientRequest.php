@@ -2,6 +2,7 @@
 namespace App\Http\Requests;
 
 use App\Client;
+use App\Rules\ValidSSN;
 
 class CreateClientRequest extends BusinessRequest
 {
@@ -40,7 +41,7 @@ class CreateClientRequest extends BusinessRequest
         $data = $this->validated();
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
-        $data['password'] = bcrypt($data['password'] ?: str_random());
+        $data['password'] = bcrypt($data['password'] ?? str_random());
         if (empty($data['email'])) $data['email'] = (new Client())->getAutoEmail();
 
         return $data;

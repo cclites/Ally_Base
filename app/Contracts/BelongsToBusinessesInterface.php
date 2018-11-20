@@ -30,13 +30,12 @@ interface BelongsToBusinessesInterface
     public function belongsToAnyBusiness(array $businesses);
 
     /**
-     * Returns the provided business IDs that are actually attached to the given entity
+     * Returns the provided business IDs that are actually attached to the current entity
      *
-     * @param \App\Contracts\BelongsToBusinessesInterface $entity
      * @param array $businessIds
      * @return array
      */
-    public function filterAttachedBusinesses(BelongsToBusinessesInterface $entity, array $businessIds);
+    public function filterAttachedBusinesses(array $businessIds);
 
     /**
      * Whether the entity shares any of the same businesses as the provided entity

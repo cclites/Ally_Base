@@ -260,8 +260,8 @@ class ShiftController extends BaseController
                     $shift->issues()->save($issue);
                 }
                 Signature::onModelInstance($shift, request('signature'));
-                if ($data['narrative_notes']) {
-                    $shift->client->narrative()->create(['notes' => $data['narrative_notes'], 'creator_id' => auth()->id()]);
+                if ($narrativeNotes = $request->input('narrative_notes')) {
+                    $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }
                 return new SuccessResponse('You have successfully clocked out.');
             }

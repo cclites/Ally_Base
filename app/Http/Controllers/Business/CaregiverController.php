@@ -82,10 +82,10 @@ class CaregiverController extends BaseController
 
         // Look for duplicates
         if (!$request->override) {
-            if ($request->email && Caregiver::forRequestedBusinesses()->where('email', $request->email)->first()) {
+            if ($request->email && Caregiver::forRequestedBusinesses()->whereEmail($request->email)->first()) {
                 return new ConfirmationResponse('There is already a caregiver with the email address ' . $request->email . '.');
             }
-            if (Caregiver::forRequestedBusinesses()->where('firstname', $request->firstname)->where('lastname', $request->lastname)->first()) {
+            if (Caregiver::forRequestedBusinesses()->whereName($request->firstname, $request->lastname)->first()) {
                 return new ConfirmationResponse('There is already a caregiver with the name ' . $request->firstname . ' ' . $request->lastname . '.');
             }
         }

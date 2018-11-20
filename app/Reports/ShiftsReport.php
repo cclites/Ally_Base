@@ -6,7 +6,7 @@ use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use App\Traits\ShiftReportFilters;
 
-class ShiftsReport extends BaseReport
+class ShiftsReport extends BusinessResourceReport
 {
     use ShiftReportFilters;
 

@@ -4,7 +4,7 @@ namespace App\Reports;
 
 use App\Shift;
 
-class UnpaidShiftsReport extends BaseReport
+class UnpaidShiftsReport extends BusinessResourceReport
 {
 
     /**

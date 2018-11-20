@@ -26,6 +26,7 @@
                             <option value="">All Clients</option>
                             <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                         </b-form-select>
+                        <business-location-select :allow-all="true" v-model="business_id"></business-location-select>
                         <b-form-select v-model="payment_method" class="mb-1">
                             <option value="">All Payment Methods</option>
                             <option value="credit_card">Credit Card</option>
@@ -160,9 +161,11 @@
     import EditShiftModal from "./modals/EditShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
     import LocalStorage from "../mixins/LocalStorage";
+    import BusinessLocationSelect from "./business/BusinessLocationSelect";
 
     export default {
         components: {
+            BusinessLocationSelect,
             ShiftHistorySummaries,
             ShiftDetailsModal,
             FilterColumnsModal,
@@ -193,6 +196,7 @@
                 },
                 start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                business_id: "",
                 caregiver_id: "",
                 client_id: "",
                 import_id: "",
@@ -358,7 +362,8 @@
             queryString() {
                 return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
                         + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method
-                        + '&import_id=' + this.import_id + '&status=' + this.charge_status;
+                        + '&import_id=' + this.import_id + '&status=' + this.charge_status
+                        + '&businesses[]=' + this.business_id;
             }
         },
 
@@ -373,6 +378,8 @@
                     if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
+                    let filterBusinessId = this.getLocalStorage('filterBusinessId');
+                    if (filterBusinessId) this.client_id = filterBusinessId;
                     let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
                     if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
@@ -595,6 +602,9 @@
         },
 
         watch: {
+            business_id(val) {
+                this.setLocalStorage('filterBusinessId', val);
+            },
             caregiver_id(val) {
                 this.setLocalStorage('filterCaregiverId', val);
             },

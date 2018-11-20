@@ -105,7 +105,7 @@ class CommunicationController extends Controller
                 ->get();
         } else {
             $recipients = Caregiver::forRequestedBusinesses()
-                ->whereIn('caregiver_id', $request->recipients)
+                ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
@@ -134,7 +134,7 @@ class CommunicationController extends Controller
         ];
 
         $this->authorize('create', [SmsThread::class, $data]);
-        $thread = SmsThread::create();
+        $thread = SmsThread::create($data);
 
         // send txt to all primary AND mobile numbers
         foreach ($recipients as $recipient) {

@@ -4,7 +4,7 @@ namespace App\Reports;
 use App\Client;
 use App\Shifts\AllyFeeCalculator;
 
-class ClientCaregiversReport extends BaseReport
+class ClientCaregiversReport extends BusinessResourceReport
 {
 
     public function __construct()

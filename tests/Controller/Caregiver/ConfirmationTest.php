@@ -12,6 +12,12 @@ class ConfirmationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->disableExceptionHandling();
+    }
+
     public function testCaregiverCanCompleteConfirmation()
     {
         $caregiver = factory(Caregiver::class)->create();

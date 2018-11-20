@@ -31,7 +31,7 @@ class ManageTimesheetsTest extends TestCase
         $this->business->chain->caregivers()->save($this->caregiver);
         $this->caregiver->clients()->save($this->client);
         
-        $this->officeUser = factory('App\OfficeUser')->create();
+        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
 
         factory('App\Activity', 5)->create([

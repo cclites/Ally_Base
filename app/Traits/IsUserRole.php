@@ -321,6 +321,36 @@ trait IsUserRole
     }
 
     /**
+     * Search users by email, supports wildcards (%@email.com%)
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $email
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereEmail(Builder $builder, string $email = null)
+    {
+        return $builder->whereHas('user', function($q) use ($email) {
+            $q->where('email', 'LIKE', $email);
+        });
+    }
+
+    /**
+     * Search users by first and last name, supports wildcards (John%).  Set either parameter null to skip.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $firstname
+     * @param $string|null lastname
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereName(Builder $builder, string $firstname = null, string $lastname = null)
+    {
+        return $builder->whereHas('user', function($q) use ($firstname, $lastname) {
+            if ($firstname !== null) $q->where('firstname', 'LIKE', $firstname);
+            if ($lastname !== null) $q->where('lastname', 'LIKE', $lastname);
+        });
+    }
+
+    /**
      * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
      *
      * @param \Illuminate\Database\Eloquent\Builder $builder

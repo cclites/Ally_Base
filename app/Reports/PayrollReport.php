@@ -4,7 +4,7 @@ namespace App\Reports;
 
 use App\Shift;
 
-class PayrollReport extends BaseReport
+class PayrollReport extends BusinessResourceReport
 {
     /**
      * The begin date.

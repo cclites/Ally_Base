@@ -10,25 +10,21 @@ require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
-import Form from './classes/Form';
-window.Form = Form;
-import Countries from './classes/Countries';
-window.Countries = Countries;
-
-window.Vue = require('vue');
-
-// Vue Third Party Components
-
-import BootstrapVue from 'bootstrap-vue';
-Vue.use(BootstrapVue);
-
-import VueTheMask from 'vue-the-mask';
-Vue.use(VueTheMask);
-
+import BootstrapVue from 'bootstrap-vue'
+import Form from './classes/Form'
+import store from './store'
+import VueTheMask from 'vue-the-mask'
 import VeeValidate from 'vee-validate'
-Vue.use(VeeValidate, {fieldsBagName: '_fields'});
-
 import * as VueGoogleMaps from 'vue2-google-maps'
+import 'vue-plyr';
+import 'vue-plyr/dist/vue-plyr.css';
+
+window.Form = Form;
+window.Vue = require('vue');
+window.Store = store;
+Vue.use(BootstrapVue);
+Vue.use(VueTheMask);
+Vue.use(VeeValidate, {fieldsBagName: '_fields'});
 Vue.use(VueGoogleMaps, {
     load: {
         key: window.gmapsKey,
@@ -46,9 +42,6 @@ Vue.use(VueGoogleMaps, {
     //// then disable the following:
     installComponents: true,
 });
-
-import 'vue-plyr';
-import 'vue-plyr/dist/vue-plyr.css';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -344,5 +337,6 @@ Vue.directive('tooltip', function(el, binding){
 
 const app = new Vue({
     el: '#main-wrapper',
+    store,
 });
 require('./alerts');

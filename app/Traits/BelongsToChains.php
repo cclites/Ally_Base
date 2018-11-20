@@ -26,13 +26,12 @@ trait BelongsToChains
     /**
      * Returns the provided business IDs that are actually attached to the given entity
      *
-     * @param \App\Contracts\BelongsToChainsInterface $entity
      * @param array $chainIds
      * @return array
      */
-    public function filterAttachedChains(BelongsToChainsInterface $entity, array $chainIds)
+    public function filterAttachedChains(array $chainIds)
     {
-        return array_intersect($chainIds, $entity->getChainIds());
+        return array_intersect($chainIds, $this->getChainIds());
     }
 
 
@@ -44,7 +43,7 @@ trait BelongsToChains
      */
     public function sharesChainWith(BelongsToChainsInterface $entity)
     {
-        return count($this->filterAttachedChains($entity, $this->getChainIds())) > 0;
+        return count($this->filterAttachedChains($entity->getChainIds())) > 0;
     }
 
     /**

@@ -50,7 +50,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
 
     protected $table = 'office_users';
     public $timestamps = false;
-    public $fillable = [];
+    public $fillable = ['chain_id'];
 
     ///////////////////////////////////////////
     /// Relationship Methods

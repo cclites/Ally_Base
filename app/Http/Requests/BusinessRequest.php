@@ -114,6 +114,11 @@ abstract class BusinessRequest extends FormRequest
                 'business_id.in' => 'You do not have access to the selected business.',
                 'business_id.*' => 'Unknown business identifier.',
             ]);
+            $validator->after(function(Validator $validator) {
+                if (!empty($validator->failed()['business_id']['In'])) {
+                    abort(403, 'You do not have access to the selected business.');
+                }
+            });
         }
     }
 
