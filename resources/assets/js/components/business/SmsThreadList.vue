@@ -56,7 +56,6 @@ export default {
 
     data: () => ({
         busy: true,
-
         items: [],
         perPage: 25,
         currentPage: 1,
@@ -82,12 +81,12 @@ export default {
                 key: 'sent_at',
                 sortable: true,
             },
-            {
-                label: 'Business Location',
-                key: 'business_id',
-                sortable: true,
-                formatter: this.showBusinessName,
-            },
+            // {  // For some reason this isn't working, need to debug
+            //     label: 'Business Location',
+            //     key: 'business_id',
+            //     sortable: true,
+            //     formatter: this.showBusinessName,
+            // },
             {
                 key: 'actions',
                 class: 'hidden-print'
