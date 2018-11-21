@@ -15,10 +15,10 @@ use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use App\Traits\HasDefaultRates;
 use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
+use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Crypt;
 use Packages\MetaData\HasOwnMetaData;
 
 /**
@@ -175,7 +175,7 @@ use Packages\MetaData\HasOwnMetaData;
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
-    use HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -381,16 +381,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
-
-    public function setSsnAttribute($value)
-    {
-        $this->attributes['ssn'] = Crypt::encrypt($value);
-    }
-
-    public function getSsnAttribute()
-    {
-        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
-    }
 
     public function getPaymentTypeAttribute()
     {

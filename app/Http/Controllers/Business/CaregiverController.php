@@ -131,7 +131,6 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
-        $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
