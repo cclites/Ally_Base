@@ -404,12 +404,15 @@
                 let items;
 
                 if (this.caregiverView) {
-                    items = this.caregivers;
                     this.resourceIdField = 'caregiver_id';
+                    items = this.caregivers;
                 }
                 else {
-                    items = this.clients;
                     this.resourceIdField = 'client_id';
+                    items = this.clients;
+                    if (this.filterBusinessId) {
+                        items = items.filter(client => client.business_id == this.filterBusinessId);
+                    }
                 }
 
 
