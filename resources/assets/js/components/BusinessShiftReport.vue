@@ -375,7 +375,7 @@
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
                     let filterBusinessId = this.getLocalStorage('filterBusinessId');
-                    if (filterBusinessId) this.client_id = filterBusinessId;
+                    if (filterBusinessId) this.business_id = filterBusinessId;
                     let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
                     if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
@@ -426,6 +426,7 @@
             },
 
             reloadData() {
+                this.updateSavedFormFilters();
                 this.setLocalStorage('sortBy', 'Day');
                 this.setLocalStorage('sortDesc', 'false');
                 return this.loadData();
@@ -594,30 +595,20 @@
                 this.addShiftModal = false;
                 this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
                 this.loadSummaries();
+            },
+
+            updateSavedFormFilters()
+            {
+                this.setLocalStorage('filterBusinessId', this.business_id);
+                this.setLocalStorage('filterCaregiverId', this.caregiver_id);
+                this.setLocalStorage('filterClientId', this.client_id);
+                this.setLocalStorage('filterPaymentMethod', this.payment_method);
+                this.setLocalStorage('startDate', this.start_date);
+                this.setLocalStorage('endDate', this.end_date);
             }
         },
 
         watch: {
-            business_id(val) {
-                this.setLocalStorage('filterBusinessId', val);
-            },
-            caregiver_id(val) {
-                this.setLocalStorage('filterCaregiverId', val);
-            },
-            client_id(val) {
-                this.setLocalStorage('filterClientId', val);
-                if (val) this.payment_method = ""; // Set payment method filter back to all if client is selected
-            },
-            payment_method(val) {
-                this.setLocalStorage('filterPaymentMethod', val);
-                if (val) this.client_id = ""; // Set client filter back to all if payment method is selected
-            },
-            start_date(val) {
-                this.setLocalStorage('startDate', val);
-            },
-            end_date(val) {
-                this.setLocalStorage('endDate', val);
-            },
             sortBy(val) {
                 this.setLocalStorage('sortBy', val);
             },
