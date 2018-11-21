@@ -185,8 +185,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUseRateCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveCaregivers()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Business withActiveClients()
  * @mixin \Eloquent
  */
 class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface, BelongsToChainsInterface
@@ -690,16 +688,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
-
-    public function scopeWithActiveClients($builder)
-    {
-        return $builder->with(['clients' => function($q) { $q->active()->orderByName(); }]);
-    }
-
-    public function scopeWithActiveCaregivers($builder)
-    {
-        return $builder->with(['caregivers' => function($q) { $q->active()->orderByName(); }]);
-    }
 
     /**
      * A query scope for filtering results by related business IDs

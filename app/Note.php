@@ -40,6 +40,7 @@ class Note extends AuditableModel implements BelongsToBusinessesInterface
     use BelongsToOneBusiness;
 
     protected $guarded = ['id'];
+    protected $orderedColumn = 'id';
 
     public function business()
     {

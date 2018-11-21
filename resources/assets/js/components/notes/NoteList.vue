@@ -25,7 +25,7 @@
                     <!-- this slot appears above the options from 'options' prop -->
                     <option :value="null">-- Caregiver --</option>
                 </template>
-                <option :value="caregiver.id" v-for="caregiver in business.caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
             </b-form-select>
 
             <b-form-select v-model="searchForm.client" class="mr-2 mb-2">
@@ -33,7 +33,7 @@
                     <!-- this slot appears above the options from 'options' prop -->
                     <option :value="null">-- Client --</option>
                 </template>
-                <option :value="client.id" v-for="client in business.clients" :key="client.id">{{ client.nameLastFirst }}</option>
+                <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
             </b-form-select>
 
             <b-form-input
@@ -88,7 +88,7 @@
         </div>
 
         <b-modal id="noteModal" :title="noteModalTitle" v-model="noteModal" size="lg">
-            <note-form :business="business" :note="note" ref="noteForm" />
+            <note-form :caregiver="{}" :client="{}" :note="note" ref="noteForm" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="noteModal=false">Close</b-btn>
@@ -105,15 +105,16 @@
         mixins: [ FormatsDates ],
 
         props: {
-            'business': Object,
+            'notes': Array,
         },
 
         data() {
             return {
                 note: {},
                 noteModal: false,
-
-                items: this.business.notes,
+                caregivers: [],
+                clients: [],
+                items: this.notes,
                 searchForm: {
                     caregiver: null,
                     client: null,
@@ -157,8 +158,9 @@
         },
 
         mounted() {
+            this.loadClients();
+            this.loadCaregivers();
             this.totalRows = this.items.length;
-
             let startDate = jQuery('#start-date');
             let endDate = jQuery('#end-date');
             let component = this;
@@ -186,6 +188,18 @@
         },
 
         methods: {
+            async loadClients() {
+                console.log('loadClients called');
+                const response = await axios.get('/business/clients?json=1');
+                this.clients = response.data;
+            },
+
+            async loadCaregivers() {
+                console.log('loadCaregivers called');
+                const response = await axios.get('/business/caregivers?json=1');
+                this.caregivers = response.data;
+            },
+
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
@@ -214,7 +228,6 @@
             },
 
             edit(note) {
-                this.note = {};
                 this.note = note;
                 this.noteModal = true;
             },
@@ -226,7 +239,7 @@
                             this.items = this.items.filter(obj => obj.id != this.note.id);
                         }
                         this.items.push(note);
-                        this.note = {};
+                        this.note = {update: Math.random()};
                         this.noteModal = false;
                     })
                     .catch(e => {

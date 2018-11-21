@@ -31,7 +31,7 @@
         </b-card>
         
         <b-modal id="noteModal" title="Add Note" v-model="noteModal" size="lg">
-            <note-form :business="business" :note="note" ref="noteForm" />
+            <note-form :client="client" :caregiver="caregiver" :note="note" ref="noteForm" :modal="1" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="noteModal=false">Close</b-btn>
@@ -56,7 +56,6 @@
     export default {
         props: {
             notes: { type: Array, default: [] },
-            business: { type: Object, default: () => { return {} } },
             caregiver: { type: Object, default: () => { return {} } },
             client: { type: Object, default: () => { return {} } },
         },
@@ -79,7 +78,7 @@
                         if (this.noteBelongsToThisUser(note)) {
                             this.localNotes.unshift(note);
                         }
-                        this.note = {};
+                        this.note = {update: Math.random()};
                     })
                     .catch(e => {
                         console.log(e);
@@ -87,10 +86,6 @@
             },
 
             create() {
-                this.note = {
-                    caregiver_id: this.caregiver.id ? this.caregiver.id : '',
-                    client_id: this.client.id ? this.client.id : '',
-                };
                 this.noteModal = true;
             },
 

@@ -24,6 +24,9 @@
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>
+                <b-form-group label="Business Location">
+                    <business-location-select v-model="form.business_id"></business-location-select>
+                </b-form-group>
                 <b-form-group label="Tags" label-for="tags">
                     <b-form-input
                             id="tags"
@@ -41,7 +44,7 @@
                     <b-form-textarea
                             id="body"
                             name="body"
-                            :rows="13"
+                            :rows="14"
                             v-model="form.body"
                     >
                     </b-form-textarea>
@@ -52,21 +55,40 @@
 </template>
 
 <script>
+    import BusinessLocationSelect from "../business/BusinessLocationSelect";
     export default {
-        props: ['business', 'note'],
+        components: {BusinessLocationSelect},
+        props: {
+            client: {
+                type: Object,
+                default: () => {},
+            },
+            caregiver: {
+                type: Object,
+                default: () => {},
+            },
+            note: {
+                type: Object,
+                default: () => {},
+            },
+            modal: {
+                type: Number,
+                default: 0,
+            }
+        },
 
         data() {
             return {
-                clients: this.business.clients || [],
-                caregivers: this.business.caregivers || [],
+                clients: [],
+                caregivers: [],
                 form: new Form({}),
                 busy: false,
             }
         },
 
         mounted() {
-            if (!this.clients.length) this.loadClients();
-            if (!this.caregivers.length) this.loadCaregivers();
+            this.loadClients();
+            this.loadCaregivers();
             this.fillForm({});
             console.log('NoteForm mounted');
         },
@@ -84,11 +106,11 @@
                 this.caregivers = response.data;
             },
 
-            submit() {
+            async submit() {
                 let path = '/notes';
                 let method = 'post';
 
-                if (this.note.id) {
+                if (this.note && this.note.id) {
                     path = '/notes/' + this.note.id;
                     method = 'patch';
                 }
@@ -109,12 +131,12 @@
 
             fillForm(data) {
                 this.form = new Form({
-                    business_id: this.business.id,
-                    caregiver_id: data.caregiver_id,
-                    client_id: data.client_id,
-                    body: data.body,
-                    tags: data.tags,
-                    modal: 1, // added so controller doesn't send redirect response
+                    business_id: data.business_id || this.client.business_id || "",
+                    caregiver_id: data.caregiver_id || this.caregiver.id || "",
+                    client_id: data.client_id || this.client.id || "",
+                    body: data.body || "",
+                    tags: data.tags || "",
+                    modal: this.modal, // added so controller doesn't send redirect response
                 });
             },
         },
