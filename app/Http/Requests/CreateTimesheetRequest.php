@@ -1,12 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
-use App\Client;
-use App\User;
-
-class CreateTimesheetRequest extends BusinessRequest
+class CreateTimesheetRequest extends BusinessClientRequest
 {
-    protected $client;
 
     /**
      * Get the validation rules that apply to the request.
@@ -49,22 +45,4 @@ class CreateTimesheetRequest extends BusinessRequest
         ];
     }
 
-    public function getClient()
-    {
-        if (!$this->client) {
-            $this->client = Client::findOrFail($this->input('client_id'));
-        }
-
-        return $this->client;
-    }
-
-    public function getBusinessId(User $user = null)
-    {
-        return $this->getClient()->business_id;
-    }
-
-    protected function getBusinessRulesForUser(User $user = null)
-    {
-        return ['required', 'exists:businesses,id'];
-    }
 }

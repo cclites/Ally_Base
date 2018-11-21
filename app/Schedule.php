@@ -93,6 +93,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     protected $dates = ['starts_at'];
     protected $with = ['business', 'note'];
     protected $appends = ['notes'];
+    protected $orderedColumn = 'starts_at';
 
     /**
      * The "booting" method of the model.
