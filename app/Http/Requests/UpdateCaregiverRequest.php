@@ -21,7 +21,7 @@ class UpdateCaregiverRequest extends FormRequest
             'email' => 'required_unless:no_email,1|nullable|email',
             'username' => [
                 'required',
-                Rule::unique('users')->ignore($this->route('caregiver'), 'id'),
+                Rule::unique('users')->ignore($this->route('caregiver')->id, 'id'),
             ],
             'date_of_birth' => 'nullable|date',
             'ssn' => [
