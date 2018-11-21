@@ -73,9 +73,9 @@ class OnHoldReport extends BaseReport
         return Caregiver::has('paymentHold')->with('paymentHold')
                         ->get()
                         ->map(function (Caregiver $caregiver) {
-                            $business = $caregiver->businesses()->first();
+                            $businessChain = $caregiver->businessChains()->first();
                             $startDate = new Carbon('2017-01-01');
-                            $endDate = Carbon::now($business->timezone)->startOfWeek();
+                            $endDate = Carbon::now('America/New_York')->startOfWeek();
                             $depositAggregator = new CaregiverDepositAggregator($caregiver, $startDate, $endDate);
                             $deposit = $depositAggregator->getDeposit();
 
@@ -83,8 +83,8 @@ class OnHoldReport extends BaseReport
                                 'type'                => 'caregiver',
                                 'id'                  => $caregiver->id,
                                 'name'                => $caregiver->nameLastFirst(),
-                                'business'            => $business->name,
-                                'business_id'         => $business->id,
+                                'business'            => $businessChain->name,
+                                'business_chain_id'   => $businessChain->id,
                                 'payment_outstanding' => 0.00,
                                 'deposit_outstanding' => $deposit->amount ?? 0.00,
                                 'last_transaction_id' => $caregiver->allTransactionsQuery()
