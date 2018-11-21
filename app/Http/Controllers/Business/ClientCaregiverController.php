@@ -42,7 +42,7 @@ class ClientCaregiverController extends BaseController
             // Append # of future shifts scheduled for this client/caregiver
             $caregiver->scheduled_shifts_count = $caregiver->schedules()->where('client_id', $client->id)
                 ->forClient($client)
-                ->future($this->business()->timezone)
+                ->future($client->business->timezone)
                 ->count();
 
             $responseData = new ClientCaregiver($client, $caregiver);
@@ -77,12 +77,11 @@ class ClientCaregiverController extends BaseController
         $current_caregivers = $client->caregivers()->select('caregivers.id')->pluck('id');
         $excluded_caregivers = $client->excludedCaregivers()->select('caregiver_id')->pluck('caregiver_id');
         $excluded_caregivers = $excluded_caregivers->merge($current_caregivers);
-        $caregivers = $this->business()
-            ->caregivers()
+        $caregivers = Caregiver::forRequestedBusinesses()
+            ->ordered()
             ->active()
             ->whereNotIn('caregivers.id', $excluded_caregivers->values())
             ->select('caregivers.id')
-            ->orderByName()
             ->get()
             ->map(function ($caregiver) {
                 return [
@@ -112,7 +111,7 @@ class ClientCaregiverController extends BaseController
         // check for scheduled shifts and or clockin
         $check = $caregiver->schedules()
             ->forClient($client)
-            ->future($this->business()->timezone)
+            ->future($client->business->timezone)
             ->exists();
 
         if ($check) {
@@ -146,7 +145,7 @@ class ClientCaregiverController extends BaseController
         $caregiver->schedules()
             ->where('fixed_rates', 0)
             ->forClient($client)
-            ->future($this->business()->timezone)
+            ->future($client->business->timezone)
             ->update([
                 'caregiver_rate' => $caregiver->pivot->caregiver_hourly_rate,
                 'provider_fee' => $caregiver->pivot->provider_hourly_fee,
@@ -156,7 +155,7 @@ class ClientCaregiverController extends BaseController
         $caregiver->schedules()
             ->where('fixed_rates', 1)
             ->forClient($client)
-            ->future($this->business()->timezone)
+            ->future($client->business->timezone)
             ->update([
                 'caregiver_rate' => $caregiver->pivot->caregiver_fixed_rate,
                 'provider_fee' => $caregiver->pivot->provider_fixed_fee,
