@@ -5,7 +5,9 @@ namespace App\Scheduling;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use App\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class CareMatch
 {
@@ -148,15 +150,14 @@ class CareMatch
         return $this;
     }
 
-    function get(Business $business)
+    /**
+     * Get CareMatch results from a provided query
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Collection|Caregiver[]
+     */
+    public function getResults(Builder $query)
     {
-        $query = $business->caregivers()->active();
-
-        if ($this->forClient) {
-            // Query only client caregivers
-            $query = $this->forClient->caregivers()->active();
-        }
-
         $this->queryActivities($query);
         $this->queryPreferences($query);
         $this->queryRating($query);
@@ -171,6 +172,53 @@ class CareMatch
         $results = $this->filterLocation($results);
 
         return $results->take($this->limit)->values();
+    }
+
+    /**
+     * Get results relating to businesses an office user has access to
+     *
+     * @param \App\User $user
+     * @return \App\Caregiver[]|\Illuminate\Database\Eloquent\Collection
+     */
+    function resultsForOfficeUser(User $user = null)
+    {
+        $query = Caregiver::forRequestedBusinesses(null, $user)->active();
+
+        if ($this->forClient) {
+            return $this->resultsForClient($this->forClient);
+        }
+
+        return $this->getResults($query);
+    }
+
+    /**
+     * Get results matching only client assignments
+     *
+     * @param \App\Client $client
+     * @return \App\Caregiver[]|\Illuminate\Database\Eloquent\Collection
+     */
+    function resultsForClient(Client $client)
+    {
+        $query = $client->caregivers()->active();
+
+        return $this->getResults($query);
+    }
+
+    /**
+     * Get results that relate to a specific business
+     *
+     * @param \App\Business $business
+     * @return \App\Caregiver[]|\Illuminate\Database\Eloquent\Collection
+     */
+    function resultsForBusiness(Business $business)
+    {
+        $query = Caregiver::forBusinesses([$business->id])->active();
+
+        if ($this->forClient) {
+            return $this->resultsForClient($this->forClient);
+        }
+
+        return $this->getResults($query);
     }
 
     protected function queryRating($builder)

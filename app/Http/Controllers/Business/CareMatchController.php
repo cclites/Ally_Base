@@ -90,6 +90,6 @@ class CareMatchController extends BaseController
             $this->careMatch->matchesRating($request->rating);
         }
 
-        return $this->careMatch->get($this->business());
+        return $this->careMatch->resultsForOfficeUser();
     }
 }
