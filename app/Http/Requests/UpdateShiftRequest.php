@@ -3,7 +3,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Support\Arr;
 
-class UpdateShiftRequest extends BusinessRequest
+class UpdateShiftRequest extends BusinessClientRequest
 {
     /**
      * Get the validation rules that apply to the request.
