@@ -445,11 +445,12 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $aggregator->events($start, $end);
     }
 
-    public function sendConfirmationEmail()
+    public function sendConfirmationEmail(BusinessChain $businessChain = null)
     {
+        if (!$businessChain) $businessChain = $this->businessChains()->first();
         $confirmation = new Confirmation($this);
         $confirmation->touchTimestamp();
-        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $this->businesses()->first()));
+        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $businessChain));
     }
 
     /**

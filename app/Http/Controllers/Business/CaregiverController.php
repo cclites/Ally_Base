@@ -268,7 +268,7 @@ class CaregiverController extends BaseController
         $caregiver = Caregiver::findOrFail($caregiver_id);
         $this->authorize('update', $caregiver);
 
-        $caregiver->sendConfirmationEmail();
+        $caregiver->sendConfirmationEmail($this->businessChain());
         return new SuccessResponse('Email Sent to Caregiver');
     }
 
