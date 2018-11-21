@@ -53,7 +53,7 @@ class ClientCarePlanController extends BaseController
 
         $plan = new CarePlan([
             'name' => $data['name'],
-            'business_id' => $this->business()->id,
+            'business_id' => $client->business_id,
         ]);
 
         if (isset($data['notes']) && strlen($data['notes'])) {
