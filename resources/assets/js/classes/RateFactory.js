@@ -7,7 +7,8 @@ class RateFactory {
 
     static getAllyFee(percentage, chargedRate)
     {
-        return parseFloat(percentage) * parseFloat(chargedRate);
+        let allyFee = parseFloat(percentage) * parseFloat(chargedRate);
+        return parseFloat(allyFee.toFixed(2));
     }
 
     static getProviderFee(clientRate, caregiverRate, allyPct, allyFeeIncluded = false)
