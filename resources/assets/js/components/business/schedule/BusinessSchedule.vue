@@ -293,7 +293,7 @@
                 }
 
                 if (this.filterBusinessId) {
-                    url += '&business_id=' + this.filterBusinessId;
+                    url += '&businesses[]=' + this.filterBusinessId;
                 }
 
                 return url;
