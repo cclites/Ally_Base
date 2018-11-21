@@ -2,7 +2,7 @@
 
 namespace App;
 
-use Crypt;
+use App\Traits\HasSSNAttribute;
 
 /**
  * App\CaregiverApplication
@@ -188,6 +188,8 @@ use Crypt;
  */
 class CaregiverApplication extends AuditableModel
 {
+    use HasSSNAttribute;
+
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -224,26 +226,6 @@ class CaregiverApplication extends AuditableModel
     public function getNameAttribute()
     {
         return $this->first_name . ' ' . $this->last_name;
-    }
-
-    /**
-     * Encrypt ssn on entry
-     *
-     * @param $value
-     */
-    public function setSsnAttribute($value)
-    {
-        $this->attributes['ssn'] = Crypt::encrypt($value);
-    }
-
-    /**
-     * Decrypt ssn on retrieval
-     *
-     * @return null|string
-     */
-    public function getSsnAttribute()
-    {
-        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
     }
 
     ////////////////////////////////////
