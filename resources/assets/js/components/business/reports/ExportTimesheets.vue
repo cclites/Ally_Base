@@ -31,7 +31,7 @@
                                 </b-form-group>
                             </b-col>
                             <b-col lg="2">
-                                <b-form-group label="Business Location">
+                                <b-form-group label="Office Location">
                                     <business-location-select v-model="form.business_id" name="business_id" required></business-location-select>
                                 </b-form-group>
                             </b-col>

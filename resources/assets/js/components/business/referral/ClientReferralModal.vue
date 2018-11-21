@@ -16,7 +16,7 @@
                             <b-form-input v-model="form.phone" type="text" />
                             <input-help :form="form" field="phone"></input-help>
                         </b-form-group>
-                        <b-form-group label="Business Location" label-for="business_id">
+                        <b-form-group label="Office Location" label-for="business_id">
                             <business-location-select v-model="form.business_id" />
                             <input-help :form="form" field="business_id"></input-help>
                         </b-form-group>

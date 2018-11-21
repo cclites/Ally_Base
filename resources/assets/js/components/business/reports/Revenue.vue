@@ -30,7 +30,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="3">
-                            <b-form-group label="Business Location">
+                            <b-form-group label="Office Location">
                                 <business-location-select v-model="form.business_id" :allow-all="true"></business-location-select>
                             </b-form-group>
                         </b-col>

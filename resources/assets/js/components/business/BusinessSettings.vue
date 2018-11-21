@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-card header="Select a Business Location" header-variant="info">
+        <b-card header="Select a Office Location" header-variant="info">
             <b-row>
                 <b-col lg="4" md="6">
                     <business-location-select v-model="businessId"></business-location-select>

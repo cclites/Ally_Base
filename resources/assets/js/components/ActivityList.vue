@@ -58,7 +58,7 @@
                         </b-form-input>
                         <input-help :form="form" field="name" text="Enter the display name for this activity."></input-help>
                     </b-form-group>
-                    <b-form-group label="Business Location">
+                    <b-form-group label="Office Location">
                         <business-location-select v-model="form.business_id"></business-location-select>
                     </b-form-group>
                </b-row>
@@ -108,7 +108,7 @@
                     },
                     {
                         key: 'business_id',
-                        label: 'Business Location',
+                        label: 'Office Location',
                         sortable: true,
                         formatter: this.showBusinessName,
                     },

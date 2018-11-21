@@ -24,7 +24,7 @@
                         <input-help :form="form" field="notes" text="" />
                     </b-form-group>
 
-                    <b-form-group label="Business Location" label-for="notes">
+                    <b-form-group label="Office Location" label-for="notes">
                         <business-location-select v-model="form.business_id"></business-location-select>
                         <input-help :form="form" field="business_id" text="" />
                     </b-form-group>

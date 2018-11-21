@@ -24,7 +24,7 @@
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>
-                <b-form-group label="Business Location">
+                <b-form-group label="Office Location">
                     <business-location-select v-model="form.business_id"></business-location-select>
                 </b-form-group>
                 <b-form-group label="Tags" label-for="tags">

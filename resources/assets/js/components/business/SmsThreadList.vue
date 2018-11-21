@@ -82,7 +82,7 @@ export default {
                 sortable: true,
             },
             // {  // For some reason this isn't working, need to debug
-            //     label: 'Business Location',
+            //     label: 'Office Location',
             //     key: 'business_id',
             //     sortable: true,
             //     formatter: this.showBusinessName,
