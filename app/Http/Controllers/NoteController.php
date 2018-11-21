@@ -50,7 +50,7 @@ class NoteController extends Controller
             'created_by' => auth()->id(),
         ]))) {
 
-            if ($request->has('modal')) {
+            if ($request->input('modal')) {
                 return new CreatedResponse('Note Created', $note->load('creator', 'client', 'caregiver'));
             }
 
@@ -70,7 +70,7 @@ class NoteController extends Controller
     public function update(CreateNoteRequest $request, Note $note)
     {
         if ($note->update($request->validated())) {
-            if ($request->has('modal')) {
+            if ($request->input('modal')) {
                 return new SuccessResponse('Note has been updated.', $note->fresh()->load('creator', 'client', 'caregiver'));
             }
 

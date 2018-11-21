@@ -61,15 +61,15 @@
         props: {
             client: {
                 type: Object,
-                default: () => {},
+                default: () => ({}),
             },
             caregiver: {
                 type: Object,
-                default: () => {},
+                default: () => ({}),
             },
             note: {
                 type: Object,
-                default: () => {},
+                default: () => ({}),
             },
             modal: {
                 type: Number,
@@ -106,7 +106,7 @@
                 this.caregivers = response.data;
             },
 
-            async submit() {
+            submit() {
                 let path = '/notes';
                 let method = 'post';
 

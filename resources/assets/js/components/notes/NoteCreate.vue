@@ -3,7 +3,7 @@
         <note-form ref="noteForm"></note-form>
         <b-row>
             <b-col lg="12">
-                <submit-button :submitting="submitting" variant="success" type="button" @click="saveNote()">Create</submit-button>
+                <b-btn :disabled="submitting" variant="success" type="button" @click="saveNote()">Create</b-btn>
             </b-col>
         </b-row>
     </b-card>
@@ -20,7 +20,9 @@
         methods: {
             async saveNote() {
                 this.submitting = true;
-                await this.$refs.noteForm.submit();
+                try {
+                    await this.$refs.noteForm.submit();
+                } catch (e) {}
                 this.submitting = false;
             }
         }
