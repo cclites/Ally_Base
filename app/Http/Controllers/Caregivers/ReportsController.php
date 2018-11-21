@@ -2,22 +2,16 @@
 
 namespace App\Http\Controllers\Caregivers;
 
-use App\Caregiver;
 use App\Deposit;
-use App\Http\Controllers\Controller;
-use App\Payment;
 use App\Reports\ShiftsReport;
 use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
-use App\Traits\ActiveBusiness;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Response;
 
-class ReportsController extends Controller
+class ReportsController extends BaseController
 {
-    use ActiveBusiness;
-
     public function deposits()
     {
         return view('caregivers.reports.deposits');
@@ -32,7 +26,7 @@ class ReportsController extends Controller
                     ->orderBy('checked_in_time');
     
             if (request()->has('start_date') || request()->has('end_date')) {
-                $timezone = auth()->user()->role->businesses()->first()->timezone;
+                $timezone = $this->timezone();
                 $startDate = new Carbon(request()->input('start_date') . ' 00:00:00', $timezone);
                 $endDate = new Carbon(request()->input('end_date') . ' 23:59:59', $timezone);
                 $report->between($startDate, $endDate);
@@ -53,7 +47,7 @@ class ReportsController extends Controller
     {
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
-        $caregiver = Caregiver::find(auth()->id());
+        $caregiver = $this->caregiver();
         $deposits = Deposit::with('shifts')->where('caregiver_id', $caregiver->id)
             ->orderBy('created_at', 'DESC')
             ->get()
@@ -63,6 +57,8 @@ class ReportsController extends Controller
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
+
+        // TODO: We should not rely on a single business here  (ALLY-431)
         $business = $caregiver->businesses->first();
 
         return view('caregivers.reports.payment_history', compact('caregiver', 'deposits', 'business'));
@@ -72,7 +68,7 @@ class ReportsController extends Controller
     {
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
-        $caregiver = Caregiver::with('businesses')->find(auth()->id());
+        $caregiver = $this->caregiver();
         $deposits = Deposit::with('shifts')
             ->where('caregiver_id', $caregiver->id)
             ->whereYear('created_at', request()->year)
@@ -84,6 +80,8 @@ class ReportsController extends Controller
                 $deposit->end = Carbon::instance($deposit->created_at)->subWeek()->endOfWeek()->toDateString();
                 return $deposit;
             });
+
+        // TODO: We should not rely on a single business here  (ALLY-431)
         $business = $caregiver->businesses->first();
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
         $filename = $year . '_year_summary.pdf';
@@ -112,7 +110,9 @@ class ReportsController extends Controller
     {
         $deposit = Deposit::find($id);
         $shifts = $this->getPaymentShifts($id);
-        $business = auth()->user()->role->businesses->first();
+
+        // TODO: We should not rely on a single business here  (ALLY-431)
+        $business = $this->caregiver()->businesses->first();
 
         if (strtolower(request()->type) == 'pdf') {
             $pdf = PDF::loadView('caregivers.print.payment_details', compact('business', 'shifts', 'deposit'))->setOrientation('landscape');
