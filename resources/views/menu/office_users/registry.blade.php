@@ -24,6 +24,13 @@
     </ul>
 </li>
 <li>
+    <a class="has-arrow" href="{{ route('business.contacts.index') }}" aria-expanded="false"><i class="fa fa-user-plus"></i><span class="hide-menu">Contacts</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.contacts.index') }}">Contact List</a></li>
+        <li><a href="{{ route('business.contacts.create') }}">Add Contact</a></li>
+    </ul>
+</li>
+<li>
     <a href="{{ route('business.care-match') }}" ><i class="fa fa-clone"></i><span class="hide-menu">Care Match</span></a>
 </li>
 <li>

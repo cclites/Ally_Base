@@ -219,6 +219,9 @@ Vue.component('client-caregiver-list', require('./components/clients/ClientCareg
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
 
+Vue.component('contact-edit', require('./components/business/contacts/ContactEdit.vue'));
+Vue.component('contact-list', require('./components/business/contacts/ContactList.vue'));
+
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
 
