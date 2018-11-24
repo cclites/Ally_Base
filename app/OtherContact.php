@@ -12,6 +12,28 @@ class OtherContact extends Model implements BelongsToBusinessesInterface
     use BelongsToBusinesses;
 
     /**
+     * The fields that are mass assignable
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'firstname',
+        'lastname',
+        'business_id',
+        'email',
+        'title',
+        'company',
+        'phone',
+        'address1',
+        'address2',
+        'city',
+        'state',
+        'zip',
+        'country',
+        'general_notes',
+    ];
+
+    /**
      * Return an array of business IDs the entity is attached to
      *
      * @return array
