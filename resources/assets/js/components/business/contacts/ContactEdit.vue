@@ -157,8 +157,8 @@
                     'email': this.getOriginal('email'),
                     'client_type': this.getOriginal('client_type'),
                     'business_id': this.getOriginal('business_id'),
-                    'title': this.getOriginalDate('title'),
-                    'company': this.getOriginalDate('company'),
+                    'title': this.getOriginal('title'),
+                    'company': this.getOriginal('company'),
                     'phone': this.getOriginal('phone'),
                     'address1': this.getOriginal('address1'),
                     'address2': this.getOriginal('address2'),
@@ -168,16 +168,6 @@
                     'country': this.getOriginal('country', 'US'),
                     'general_notes': this.getOriginal('general_notes'),
                 }),
-                statuses: {
-                    'Assessment Scheduled': 'had_assessment_scheduled',
-                    'Assessment Performed': 'had_assessment_performed',
-                    'Needs Contract': 'needs_contract',
-                    'Expecting Client Signature': 'expecting_client_signature',
-                    'Collect Payment Information': 'needs_payment_info',
-                    'Ready to Schedule Care': 'ready_to_schedule',
-                    'Closed - Loss': 'closed_loss',
-                    'Closed - Win': 'closed_win',
-                },
                 submitting: false,
                 countries: new Countries(),
                 states: new States(),
@@ -197,10 +187,6 @@
 
             getOriginal(field, defaultValue = "") {
                 return this.contact ? this.contact[field] : defaultValue;
-            },
-
-            getOriginalDate(field, defaultValue = "") {
-                return this.contact && this.contact[field] ? moment(this.contact[field]).format('MM/DD/YYYY') : defaultValue;
             },
 
             async saveProfile() {
