@@ -70,18 +70,16 @@
                         sortable: true
                     },
                     {
-                        key: 'title',
-                        label: 'Title',
-                        sortable: true
-                    },
-                    {
                         key: 'email',
                         label: 'Email Address',
                         sortable: true
                     },
                     {
+                        key: 'title',
+                        sortable: true
+                    },
+                    {
                         key: 'company',
-                        label: 'Company',
                         sortable: true
                     },
                     {
