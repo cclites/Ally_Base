@@ -3,7 +3,7 @@
         <form v-show="showForm" @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Select a Client" label-for="client_id" required>
+                    <b-form-group label="Select a Client" label-for="client_id" label-class="required" required>
                         <b-form-select
                                 id="client_id"
                                 name="client_id"
