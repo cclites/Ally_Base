@@ -47,10 +47,12 @@
                 fields: [
                     {
                         key: 'firstname',
+                        label: 'First Name',
                         sortable: true,
                     },
                     {
                         key: 'lastname',
+                        label: 'Last Name',
                         sortable: true,
                     },
                     'actions'

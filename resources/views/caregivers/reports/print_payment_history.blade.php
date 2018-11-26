@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-    <div class="container">
+    <div class="">
         <div class="row" style="margin-top: 1rem;">
             <div class="col-sm-4">
                 {{ $caregiver->firstname }} {{ $caregiver->lastname }}<br>
