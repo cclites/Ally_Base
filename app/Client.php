@@ -541,6 +541,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         }
 
         if ($method->persistChargeable() && $this->$relation()->associate($method)->save()) {
+            unset($this->relations[$relation]); // force a reload of the relationship with the correct relation name (bug fix)
             return $method;
         }
     }

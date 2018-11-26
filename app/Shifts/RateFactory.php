@@ -209,7 +209,7 @@ class RateFactory
         $usingRateCodes = $this->usingRateCodes($schedule->business_id);
         $caregiverRate = $this->resolveRate($schedule->caregiver_rate, $schedule->caregiver_rate_id, $usingRateCodes)
             ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->caregiver_rate;
-        $providerFee = $schedule->provider_fee;
+        $providerFee = (float) $schedule->provider_fee;
         $clientRate = $this->resolveRate($schedule->client_rate, $schedule->client_rate_id, $usingRateCodes)
             ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->client_rate;
         $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
@@ -233,19 +233,20 @@ class RateFactory
      */
     public function getRatesForClientCaregiver(Client $client, Caregiver $caregiver, bool $fixedRates = false, array $pivot = null)
     {
+
         if (!$pivot) {
             $pivot = (array) \DB::table('client_caregivers')->where('client_id', $client->id)
                 ->where('caregiver_id', $caregiver->id)
                 ->first();
         }
 
+        $paymentMethod = $client->defaultPayment ?? new CreditCard(); // use CC rates as default
         $usingRateCodes = $this->usingRateCodes($client->business_id);
         $caregiverRate = $this->getCaregiverRateFromPivot($pivot, $usingRateCodes, $fixedRates)
             ?? $this->getDefaultCaregiverRate($caregiver, $fixedRates);
-        $providerFee = $this->getProviderFeeFromPivot($pivot, $usingRateCodes, $fixedRates);
+        $providerFee = $this->getProviderFeeFromPivot($pivot, $usingRateCodes, $fixedRates) ?? 0.0;
         $clientRate = $this->getClientRateFromPivot($pivot, $usingRateCodes, $fixedRates)
             ?? $this->getDefaultClientRate($client, $fixedRates);
-        $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
 
         return $this->getRateObject(
             $paymentMethod,
