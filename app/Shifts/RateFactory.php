@@ -9,7 +9,6 @@ use App\CreditCard;
 use App\RateCode;
 use App\Schedule;
 use App\Shift;
-use http\Exception\InvalidArgumentException;
 
 class RateFactory
 {

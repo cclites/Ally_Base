@@ -315,12 +315,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     public function defaultPayment()
     {
-        return $this->morphTo('default_payment');
+        return $this->morphTo('defaultPayment', 'default_payment_type', 'default_payment_id');
     }
 
     public function backupPayment()
     {
-        return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+        return $this->morphTo('backupPayment', 'backup_payment_type', 'backup_payment_id');
     }
 
     public function notes()
@@ -541,7 +541,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         }
 
         if ($method->persistChargeable() && $this->$relation()->associate($method)->save()) {
-            unset($this->relations[$relation]); // force a reload of the relationship with the correct relation name (bug fix)
             return $method;
         }
     }
