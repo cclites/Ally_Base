@@ -27,7 +27,6 @@ class CaregiverApplicationStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'business_id' => 'required|exists:businesses,id',
             'first_name' => 'required|string',
             'middle_initial' => 'nullable|string',
             'last_name' => 'required|string',

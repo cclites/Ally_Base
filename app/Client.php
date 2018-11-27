@@ -171,6 +171,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()
  * @mixin \Eloquent
+ * @property-read string $masked_ssn
+ * @property null|string $w9_ssn
  */
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {

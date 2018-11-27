@@ -19,9 +19,7 @@ Route::get('/', function () {
 
 Route::view('check-my-time', 'check-my-time');
 
-Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
-Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
-Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
+Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
 Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
 Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
 Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
@@ -423,3 +421,10 @@ Route::group([
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
 Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');
+
+Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function() {
+    Route::get('/', 'CaregiverApplicationController@create');
+    Route::get('apply', 'CaregiverApplicationController@create')->name('apply');
+    Route::get('done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
+    Route::post('apply', 'CaregiverApplicationController@store');
+});
