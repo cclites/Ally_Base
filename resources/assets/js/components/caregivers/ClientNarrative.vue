@@ -1,12 +1,12 @@
 <template>
     <b-card>
         <div class="client-details mb-4">
-            <h1>{{ client.name }}</h1>
+            <h1>Client: {{ client.name }}</h1>
         </div>
 
         <div class="d-flex mb-2">
-            <h3 class="f-1">Narrative Notes:</h3>
-            <b-button class="ml-auto" variant="success" @click="showAddModal()">Add New Narrative Note</b-button>
+            <h3 class="f-1">Caregiver's Narrative:</h3>
+            <b-button class="ml-auto" variant="success" @click="showAddModal()">Add to Narrative</b-button>
         </div>
 
         <loading-card v-if="loading" />
