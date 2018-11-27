@@ -39,8 +39,10 @@ $factory->define(\App\Business::class, function(Faker $faker) {
 });
 
 $factory->define(\App\BusinessChain::class, function(Faker $faker) {
+    $name = $faker->unique()->company;
     return [
-        'name' => $faker->unique()->company,
+        'name' => $name,
+        'slug' => str_slug($name),
         'address1' => $faker->streetAddress,
         'address2' => null,
         'city' => $faker->city,

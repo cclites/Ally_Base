@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Caregiver Application Edit')
+@section('title', 'Edit Application')
+
+@section('breadcrumbs')
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('business.caregivers.applications') }}">Caregiver Applications</a></li>
+    <li class="breadcrumb-item active">Edit</li>
+@endsection
 
 @section('content')
     <caregiver-application-edit :application="{{ json_encode($application) }}"

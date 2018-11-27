@@ -84,7 +84,7 @@ class ShiftImportController extends Controller
 
         // Set expectations
         $business = $shifts->first()->business;
-        $caregivers = $business->caregivers;
+        $caregivers = $business->chain->caregivers;
         $clients = $business->clients;
 
         // Additional validations
@@ -105,7 +105,7 @@ class ShiftImportController extends Controller
             }
 
             if (!$caregivers->where('id', $shift->caregiver_id)->count()) {
-                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a caregiver that does not belong to the business.');
+                return new ErrorResponse(400, 'The shift ' . $shiftName . ' has a caregiver that does not belong to the business chain.');
             }
 
             if ($shift->duration() > 24) {

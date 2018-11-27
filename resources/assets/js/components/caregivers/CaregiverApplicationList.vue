@@ -2,23 +2,23 @@
     <b-card>
         <b-row class="mb-3">
             <b-col>
-                Application URL: <a :href="'/'+business.id+'/caregiver-application/create'">{{ applicationUrl }}</a>
+                Application URL: <a :href="applicationUrl">{{ applicationUrl }}</a>
             </b-col>
         </b-row>
         <b-row class="mb-3">
             <b-col lg="3">
-                From: <date-picker v-model="searchForm.from_date" placeholder="From" />
+                From: <date-picker v-model="start_date" placeholder="From" />
             </b-col>
 
             <b-col lg="3">
-                To: <date-picker v-model="searchForm.to_date" placeholder="To" />
+                To: <date-picker v-model="end_date" placeholder="To" />
             </b-col>
 
             <b-col lg="3">
-                Status: <b-form-select v-model="searchForm.status" class="mb-3">
+                Status: <b-form-select v-model="status" class="mb-3">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
-                        <option :value="null">-- Status --</option>
+                        <option value="">-- All Statuses --</option>
                     </template>
                     <option v-for="status in statuses" :key="status">{{ status }}</option>
                 </b-form-select>
@@ -26,7 +26,7 @@
 
             <b-col lg="2">
                 Filter:<br />
-                <b-button @click="filter" variant="info">
+                <b-button @click="reloadData" variant="info">
                     Update
                 </b-button>
             </b-col>
@@ -79,7 +79,7 @@
 
     export default {
         props: {
-            'business': Object,
+            'applicationUrl': String,
             'applications': Array,
         },
 
@@ -87,12 +87,10 @@
             return {
                 items: this.applications,
                 statuses: ['New', 'Open', 'Converted'],
-                searchForm: {
-                    from_date: null,
-                    to_date: null,
-                    status: null
-                },
-                totalRows: 0,
+                start_date: "",
+                end_date: "",
+                status: "",
+                totalRows: this.applications.length,
                 perPage: 15,
                 currentPage: 1,
                 sortBy: null,
@@ -129,16 +127,6 @@
             }
         },
 
-        mounted() {
-            this.totalRows = this.items.length;
-        },
-
-        computed: {
-            applicationUrl() {
-                return window.location.hostname+'/'+this.business.id+'/caregiver-application/create';
-            }
-        },
-
         methods: {
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
@@ -148,9 +136,10 @@
             dateFormat(date) {
                 return moment(date).format('L');
             },
-            filter() {
+            reloadData() {
                 this.loading = true;
-                axios.post('/business/caregivers/applications/search', this.searchForm)
+                let url = `/business/caregivers/applications?json=1&start_date=${this.start_date}&end_date=${this.end_date}&status=${this.status}`;
+                axios.get(url)
                     .then(response => {
                         this.items = response.data;
                         this.loading = false;

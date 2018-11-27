@@ -2,13 +2,14 @@
 
 namespace App;
 
+use App\Contracts\BelongsToChainsInterface;
+use App\Traits\BelongsToOneChain;
 use App\Traits\HasSSNAttribute;
 
 /**
- * App\CaregiverApplication
+ * \App\CaregiverApplication
  *
  * @property int $id
- * @property int $business_id
  * @property string $last_name
  * @property string $first_name
  * @property string|null $middle_initial
@@ -94,17 +95,23 @@ use App\Traits\HasSSNAttribute;
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $position
  * @property string $status
+ * @property int $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\BusinessChain $businessChain
+ * @property-read string $masked_ssn
  * @property-read mixed $name
+ * @property null|string $w9_ssn
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication forChains($chains)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAccidentCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAccidents($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAcknowledgedTerms($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereAddress2($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCellPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCellPhoneProvider($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereChainId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereCriminalHistoryDesc($value)
@@ -186,8 +193,9 @@ use App\Traits\HasSSNAttribute;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereZip($value)
  * @mixin \Eloquent
  */
-class CaregiverApplication extends AuditableModel
+class CaregiverApplication extends AuditableModel implements BelongsToChainsInterface
 {
+    use BelongsToOneChain;
     use HasSSNAttribute;
 
     protected $guarded = ['id'];
@@ -217,7 +225,6 @@ class CaregiverApplication extends AuditableModel
     const STATUS_OPEN = 'Open';
     const STATUS_CONVERTED = 'Converted';
 
-
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -243,8 +250,6 @@ class CaregiverApplication extends AuditableModel
     public function convertToCaregiver()
     {
         return \DB::transaction(function() {
-            // Business
-            $business = Business::findOrFail($this->business_id);
 
             // Check if username exists
             $userExists = User::where('username', $this->email)->exists();
@@ -265,7 +270,7 @@ class CaregiverApplication extends AuditableModel
                 'password' => bcrypt(random_bytes(32)),
             ]);
 
-            $business->caregivers()->attach($caregiver);
+            $this->businessChain->caregivers()->attach($caregiver);
 
             $address = new Address([
                 'address1' => $this->address,
