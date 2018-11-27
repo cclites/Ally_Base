@@ -52,7 +52,7 @@ class ClientNarrative extends Model
      *
      * @var array
      */
-    protected $appends = [];
+    protected $appends = ['is_owner'];
     
     // **********************************************************
     // RELATIONSHIPS
@@ -71,7 +71,17 @@ class ClientNarrative extends Model
     // **********************************************************
     // MUTATORS
     // **********************************************************
-    
+
+    /**
+     * Flag for if the note is owned by the current user.
+     *
+     * @return void
+     */
+    public function getIsOwnerAttribute()
+    {
+        return $this->creator_id === auth()->id();
+    }
+
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************

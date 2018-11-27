@@ -6,7 +6,7 @@
 
         <div class="d-flex mb-2">
             <h3 class="f-1">Caregiver's Narrative:</h3>
-            <b-button class="ml-auto" variant="success" @click="showAddModal()">Add to Narrative</b-button>
+            <b-button class="ml-auto" variant="success" @click="showFormModal()">Add to Narrative</b-button>
         </div>
 
         <loading-card v-if="loading" />
@@ -20,7 +20,8 @@
                 <b-card v-for="item in items" :key="item.id" class="item">
                     <div class="d-flex">
                         <div class="f-1 card-text" style="white-space: pre-wrap">{{ item.notes }}</div>
-                        <div class="ml-auto">
+                        <div v-if="item.is_owner" class="ml-auto">
+                            <b-button variant="info" size="sm" @click.prevent="showFormModal(item)"><i class="fa fa-edit"></i></b-button>
                             <b-button variant="danger" size="sm" @click.prevent="destroy(item.id)"><i class="fa fa-times"></i></b-button>
                         </div>
                     </div>
@@ -45,10 +46,10 @@
         </div>
 
         <b-modal v-if="client"
-            v-model="addModal"
-            title="Add Narrative Notes"
-            @ok="add()"
-            ok-title="Add Notes"
+            v-model="formModal"
+            :title="modalTitle"
+            @ok="save()"
+            ok-title="Save"
             ok-variant="success"
             size="lg"
             :busy="busy"
@@ -96,10 +97,27 @@ export default {
             perPage: 15,
             totalRows: 0,
             currentPage: 1,
-            addModal: false,
+            formModal: false,
             form: new Form({ notes: '' }),
             confirmDeleteModal: false,
             deleteId: null,
+            currentNote: null,
+        }
+    },
+
+    computed: {
+        modalTitle() {
+            if (this.currentNote) {
+                return 'Edit Narrative Notes';
+            }
+            return 'Add Narrative Notes';
+        },
+
+        formUrl() {
+            if (this.currentNote) {
+                return `/caregiver/clients/${this.client.id}/narrative/${this.currentNote}`;
+            }
+            return `/caregiver/clients/${this.client.id}/narrative`;
         }
     },
 
@@ -118,9 +136,15 @@ export default {
                 })
         },
         
-        showAddModal() {
-            this.form.notes = '';
-            this.addModal = true;
+        showFormModal(note = null) {
+            if (note) {
+                this.currentNote = note.id;
+                this.form.notes = note.notes;
+            } else {
+                this.currentNote = null;
+                this.form.notes = '';
+            }
+            this.formModal = true;
         },
 
         focusTextarea() {
@@ -129,9 +153,10 @@ export default {
             });
         },
 
-        add() {
+        save() {
             this.busy = true;
-            this.form.post(`/caregiver/clients/${this.client.id}/narrative`)
+            let method = this.currentNote ? 'patch' : 'post';
+            this.form.submit(method, this.formUrl)
                 .then( ({ data }) => {
                     if (this.currentPage == 1) {
                         this.fetch();
