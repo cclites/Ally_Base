@@ -1,12 +1,11 @@
 <template>
-    <b-card>
-        <div class="client-details mb-4">
-            <h1>Client: {{ client.name }}</h1>
-        </div>
-
-        <div class="d-flex mb-2">
+    <div>
+        <div v-if="mode == 'caregiver'" class="d-flex mb-2">
             <h3 class="f-1">Caregiver's Narrative:</h3>
-            <b-button class="ml-auto" variant="success" @click="showFormModal()">Add to Narrative</b-button>
+            <b-button class="ml-auto" variant="info" @click="showFormModal()">Add to Narrative</b-button>
+        </div>
+        <div v-else class="mb-2">
+            <b-button class="ml-auto" variant="info" @click="showFormModal()">Add to Narrative</b-button>
         </div>
 
         <loading-card v-if="loading" />
@@ -20,7 +19,7 @@
                 <b-card v-for="item in items" :key="item.id" class="item">
                     <div class="d-flex">
                         <div class="f-1 card-text" style="white-space: pre-wrap">{{ item.notes }}</div>
-                        <div v-if="item.is_owner" class="ml-auto">
+                        <div v-if="mode == 'admin' || item.is_owner" class="ml-auto">
                             <b-button variant="info" size="sm" @click.prevent="showFormModal(item)"><i class="fa fa-edit"></i></b-button>
                             <b-button variant="danger" size="sm" @click.prevent="destroy(item.id)"><i class="fa fa-times"></i></b-button>
                         </div>
@@ -50,7 +49,7 @@
             :title="modalTitle"
             @ok="save()"
             ok-title="Save"
-            ok-variant="success"
+            ok-variant="info"
             size="lg"
             :busy="busy"
             @shown="focusTextarea()"
@@ -67,15 +66,15 @@
                <b-btn variant="danger" @click.prevent="confirmDeleteModal = false; destroy(deleteId, true)">Delete</b-btn>
             </div>
         </b-modal>
-    </b-card>
+    </div>
 </template>
 
 <script>
-import FormatsDates from "../../mixins/FormatsDates";
-import FormatsStrings from "../../mixins/FormatsStrings";
+import FormatsDates from "../mixins/FormatsDates";
+import FormatsStrings from "../mixins/FormatsStrings";
 
 export default {
-    name: 'CaregiverClientNarrative',
+    name: 'ClientNarrative',
 
     mixins: [ FormatsDates, FormatsStrings ],
 
@@ -87,6 +86,7 @@ export default {
                 return {};
             },
         },
+        mode: { type: String, default: 'caregiver' },
     },
 
     data() {
@@ -113,18 +113,16 @@ export default {
             return 'Add Narrative Notes';
         },
 
-        formUrl() {
-            if (this.currentNote) {
-                return `/caregiver/clients/${this.client.id}/narrative/${this.currentNote}`;
-            }
-            return `/caregiver/clients/${this.client.id}/narrative`;
-        }
+        url() {
+            let prefix = this.mode == 'admin' ? 'business' : this.mode;
+            return `/${prefix}/clients/${this.client.id}/narrative`;
+        },
     },
 
     methods: {
         fetch() {
             this.loading = true;
-            axios.get(`/caregiver/clients/${this.client.id}/narrative?json=1&per_page=${this.perPage}&page=${this.currentPage}`)
+            axios.get(this.url + `?json=1&per_page=${this.perPage}&page=${this.currentPage}`)
                 .then( ({ data }) => {
                     this.items = data.data;
                     this.totalRows = data.total;
@@ -156,7 +154,7 @@ export default {
         save() {
             this.busy = true;
             let method = this.currentNote ? 'patch' : 'post';
-            this.form.submit(method, this.formUrl)
+            this.form.submit(method, this.url + (this.currentNote ? `/${this.currentNote}` : ''))
                 .then( ({ data }) => {
                     if (this.currentPage == 1) {
                         this.fetch();
@@ -179,9 +177,8 @@ export default {
 
             this.busy = true;
             let form = new Form();
-            form.submit('delete', `/caregiver/clients/${this.client.id}/narrative/${id}`)
+            form.submit('delete', this.url + `/${id}`)
                 .then( ({ data }) => {
-                    // this.items = this.items.filter(item => item.id != id);
                     this.fetch();
                     this.busy = false;
                 })
