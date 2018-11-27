@@ -5,6 +5,7 @@ use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
+use App\Shifts\RateFactory;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -94,6 +95,13 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     protected $with = ['business', 'note'];
     protected $appends = ['notes'];
     protected $orderedColumn = 'starts_at';
+    protected $casts = [
+        'fixed_rates' => 'boolean',
+        'duration' => 'integer',
+        'caregiver_rate' => 'float',
+        'client_rate' => 'float',
+        'provider_fee' => 'float',
+    ];
 
     /**
      * The "booting" method of the model.
@@ -452,11 +460,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function getCaregiverRate()
     {
-        if (strlen($this->caregiver_rate)) return $this->caregiver_rate;
-        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->fixed_rates) ? $relation->pivot->caregiver_fixed_rate : $relation->pivot->caregiver_hourly_rate;
-        }
-        return 0;
+        return app(RateFactory::class)->getRatesForSchedule($this)->caregiver_rate
+            ?? $this->caregiver_rate
+            ?? 0;
     }
 
     /**
@@ -466,11 +472,9 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function getProviderFee()
     {
-        if (strlen($this->provider_fee)) return $this->provider_fee;
-        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->fixed_rates) ? $relation->pivot->provider_fixed_fee : $relation->pivot->provider_hourly_fee;
-        }
-        return 0;
+        return app(RateFactory::class)->getRatesForSchedule($this)->provider_fee
+            ?? $this->provider_fee
+            ?? 0;
     }
 
     ////////////////////////////////////

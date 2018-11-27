@@ -189,13 +189,20 @@ class RateFactory
     public function getRatesForShift(Shift $shift)
     {
         // TODO IMPORTANT:  RATE PERSISTENCE FOR CHARGED SHIFTS
+        // TODO: REPLACE BELOW COST HISTORY WITH NEW SHIFT COSTS LOGIC, RIGHT NOW THIS DOES NOT SUPPORT RATE CODES
+        $allyPct = ($shift->costHistory) ? $shift->costHistory->ally_pct
+            : $this->getPaymentMethod($shift->client)->getAllyPercentage();
+        $chargedRate = bcadd($shift->caregiver_rate, $shift->provider_fee, 2);
+        $allyFee = round(bcmul($chargedRate, $allyPct, 4), 2);
 
-        if ($shift->schedule) {
-            return $this->getRatesForSchedule($shift->schedule);
-        }
-
-        // Assume hourly and pull data from client caregiver relationship
-        return $this->getRatesForClientCaregiver($shift->client_id, $shift->caregiver_id, false);
+        return new Rates(
+            $shift->caregiver_rate,
+            $shift->provider_fee,
+            $chargedRate,
+            $allyFee,
+            false,
+            $shift->fixed_rates
+        );
     }
 
     /**
@@ -211,10 +218,9 @@ class RateFactory
         $providerFee = (float) $schedule->provider_fee;
         $clientRate = $this->resolveRate($schedule->client_rate, $schedule->client_rate_id, $usingRateCodes)
             ?? $this->getRatesForClientCaregiver($schedule->client, $schedule->caregiver, $schedule->fixed_rates)->client_rate;
-        $paymentMethod = $schedule->client->defaultPayment ?? new CreditCard(); // use CC rates as default
 
         return $this->getRateObject(
-            $paymentMethod,
+            $this->getPaymentMethod($schedule->client),
             $schedule->business_id,
             $schedule->fixed_rates,
             $caregiverRate,
@@ -239,7 +245,6 @@ class RateFactory
                 ->first();
         }
 
-        $paymentMethod = $client->defaultPayment ?? new CreditCard(); // use CC rates as default
         $usingRateCodes = $this->usingRateCodes($client->business_id);
         $caregiverRate = $this->getCaregiverRateFromPivot($pivot, $usingRateCodes, $fixedRates)
             ?? $this->getDefaultCaregiverRate($caregiver, $fixedRates);
@@ -248,7 +253,7 @@ class RateFactory
             ?? $this->getDefaultClientRate($client, $fixedRates);
 
         return $this->getRateObject(
-            $paymentMethod,
+            $this->getPaymentMethod($client),
             $client->business_id,
             $fixedRates,
             $caregiverRate,
@@ -328,5 +333,10 @@ class RateFactory
     protected function resolveRate($freeTextValue, $rateCodeId, bool $usingRateCodes)
     {
         return $usingRateCodes ? $this->getRateFromCode((int) $rateCodeId) : $freeTextValue;
+    }
+
+    protected function getPaymentMethod(Client $client)
+    {
+        return $client->defaultPayment ?? new CreditCard();
     }
 }
