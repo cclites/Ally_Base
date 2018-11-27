@@ -3,9 +3,11 @@
 use Faker\Generator as Faker;
 use App\ClientType;
 use Illuminate\Support\Arr;
+use App\Question;
+use App\Business;
 
-$factory->define(App\Question::class, function (Faker $faker) {
-    $business = factory(App\Business::class)->create();
+$factory->define(Question::class, function (Faker $faker) {
+    $business = factory(Business::class)->create();
 
     return [
         'business_id' => $business->id,
@@ -15,8 +17,8 @@ $factory->define(App\Question::class, function (Faker $faker) {
     ];
 });
 
-$factory->state(\App\Question::class, 'required', function(Faker $faker) {
-    $business = factory(App\Business::class)->create();
+$factory->state(Question::class, 'required', function(Faker $faker) {
+    $business = factory(Business::class)->create();
 
     return [
         'business_id' => $business->id,

@@ -372,7 +372,7 @@ class ReportsController extends BaseController
         $report->between(Carbon::now(), $defaultDate);
         $report->query()->whereIn('caregiver_id', $caregiverIds);
         $certifications = $report->rows();
-
+        dd($caregiverIds);
         return view('business.reports.certifications', compact('certifications'));
     }
 
