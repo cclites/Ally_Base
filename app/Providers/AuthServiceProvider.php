@@ -83,5 +83,16 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
+
+        Gate::define('view-caregiver-statements', function (User $user, Caregiver $caregiver) {
+            return $user->role_type === 'admin'
+                || (
+                    $user->role_type === 'office_user'
+                    && $caregiver->shifts()
+                        ->has('deposits')
+                        ->whereNotIn('business_id', $user->getBusinessIds())
+                        ->doesntExist()
+                );
+        });
     }
 }
