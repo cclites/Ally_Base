@@ -157,7 +157,7 @@
                     <div class="card-body">
                         <div class="alert alert-warning">
                             <h4>You do not have access to this caregiver's payment statements.</h4>
-                            Due to this caregiver working for a business you do not have access to, you cannot view the caregiver's payment statements.  Payment statements from Ally can include shifts from multiple businesses.
+                            Due to this caregiver working for a location you do not have access to, you cannot view the caregiver's payment statements.  Payment statements from Ally can include shifts from multiple locations.
                         </div>
                     </div>
                 </div>
