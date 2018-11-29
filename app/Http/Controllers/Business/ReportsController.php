@@ -363,16 +363,12 @@ class ReportsController extends BaseController
 
     public function certificationExpirations(Request $request)
     {
-        $defaultDate = new Carbon('now +30 days');
-
         $caregiverIds = Caregiver::forRequestedBusinesses()->pluck('id')->toArray();
-
         $report = new CertificationExpirationReport();
         $report->forRequestedBusinesses()->orderBy('expires_at');
-        $report->between(Carbon::now(), $defaultDate);
         $report->query()->whereIn('caregiver_id', $caregiverIds);
         $certifications = $report->rows();
-        dd($caregiverIds);
+
         return view('business.reports.certifications', compact('certifications'));
     }
 
