@@ -22,6 +22,7 @@ import 'vue-plyr/dist/vue-plyr.css';
 window.Form = Form;
 window.Vue = require('vue');
 window.Store = store;
+window.DevelopmentMode = process.env.NODE_ENV === 'development';
 Vue.use(BootstrapVue);
 Vue.use(VueTheMask);
 Vue.use(VeeValidate, {fieldsBagName: '_fields'});
