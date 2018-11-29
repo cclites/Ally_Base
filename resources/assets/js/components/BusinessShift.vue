@@ -6,7 +6,7 @@
         <div class="alert alert-warning" v-if="status === 'WAITING_FOR_CONFIRMATION'">
             <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
         </div>
-        <form @submit.prevent="saveShift()" @keydown="form.clearError($event.target.name)" :class="formClass">
+        <form @submit.prevent="" @keydown="form.clearError($event.target.name)" :class="formClass">
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Client" label-for="client_id">
@@ -354,7 +354,7 @@
                 </b-col>
                 <b-col lg="8" class="text-right" v-if="!shift.readOnly">
                     <div v-if="!deleted">
-                        <b-button variant="info" type="submit" @click="saveShift(false)">
+                        <b-button variant="info" type="button" @click="saveShift(false)">
                             <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
                         </b-button>
                         <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
