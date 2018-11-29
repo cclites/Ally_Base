@@ -386,7 +386,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function setCheckedInTimeAttribute($value)
     {
-        if ($this->checked_in_time->copy()->second(0) != $value) {
+        if (!$this->checked_in_time || $this->checked_in_time->copy()->second(0) != $value) {
             $this->attributes['checked_in_time'] = $value;
         }
     }
@@ -397,7 +397,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function setCheckedOutTimeAttribute($value)
     {
-        if ($this->checked_out_time->copy()->second(0) != $value) {
+        if (!$this->checked_out_time || $this->checked_out_time->copy()->second(0) != $value) {
             $this->attributes['checked_out_time'] = $value;
         }
     }
