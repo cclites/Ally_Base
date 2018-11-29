@@ -119,6 +119,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9TaxClassification($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
+ * @property-read string $masked_ssn
  */
 class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
 {
