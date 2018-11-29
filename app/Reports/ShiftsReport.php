@@ -30,7 +30,7 @@ class ShiftsReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Shift::query();
+        $this->query = Shift::with(['business', 'caregiver', 'client', 'statusHistory', 'goals', 'questions', 'costHistory', 'client.defaultPayment']);
     }
 
     /**
@@ -50,7 +50,7 @@ class ShiftsReport extends BusinessResourceReport
      */
     protected function results()
     {
-        $shifts = $this->query->with(['business', 'caregiver', 'client', 'statusHistory', 'goals', 'questions', 'costHistory', 'client.defaultPayment'])->get();
+        $shifts = $this->query->get();
         $rows = $shifts->map(function(Shift $shift) {
             $row = [
                 'id' => $shift->id,
