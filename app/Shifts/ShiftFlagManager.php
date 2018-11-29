@@ -37,7 +37,8 @@ class ShiftFlagManager
 
     public function isDuplicate(Shift $shift)
     {
-        return Shift::where('caregiver_id', $shift->caregiver_id)
+        return Shift::where('id', '!=', $shift->id)
+            ->where('caregiver_id', $shift->caregiver_id)
             ->where('client_id', $shift->client_id)
             ->where(function($q) use ($shift) {
                 $q->whereBetween('checked_in_time', [$shift->checked_in_time, $shift->checked_out_time])
