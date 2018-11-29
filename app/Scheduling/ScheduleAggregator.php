@@ -5,6 +5,11 @@ namespace App\Scheduling;
 use App\Schedule;
 use Carbon\Carbon;
 
+/**
+ * Class ScheduleAggregator
+ * @package App\Scheduling
+ * @deprecated   May no longer be needed since Schedules are one-off, we can aggregate using simple queries using the Schedule repository
+ */
 class ScheduleAggregator
 {
     /**

@@ -15,10 +15,14 @@ class ClientCarePlanController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, Client $client)
     {
+        $this->authorize('read', $client);
+
         return $client->carePlans()
             ->withCount('futureSchedules')
             ->orderBy('name')
@@ -33,6 +37,8 @@ class ClientCarePlanController extends BaseController
      */
     public function store(Request $request, Client $client)
     {
+        $this->authorize('update', $client);
+
         $data = $request->validate(
             [
                 'name' => 'required',
@@ -47,7 +53,7 @@ class ClientCarePlanController extends BaseController
 
         $plan = new CarePlan([
             'name' => $data['name'],
-            'business_id' => $this->business()->id,
+            'business_id' => $client->business_id,
         ]);
 
         if (isset($data['notes']) && strlen($data['notes'])) {
@@ -72,6 +78,8 @@ class ClientCarePlanController extends BaseController
      */
     public function show(Client $client, CarePlan $carePlan)
     {
+        $this->authorize('read', $client);
+
         $carePlan->future_schedules_count = $carePlan->futureSchedules()->count();
         return $carePlan;
     }
@@ -79,15 +87,14 @@ class ClientCarePlanController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\CarePlan  $carePlan
+     * @param  \Illuminate\Http\Request $request
+     * @param \App\Client $client
+     * @param  \App\CarePlan $carePlan
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Client $client, CarePlan $carePlan)
     {
-        if ($carePlan->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this group.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->validate(
             [
@@ -120,14 +127,13 @@ class ClientCarePlanController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\CarePlan  $carePlan
+     * @param \App\Client $client
+     * @param  \App\CarePlan $carePlan
      * @return \Illuminate\Http\Response
      */
     public function destroy(Client $client, CarePlan $carePlan)
     {
-        if ($carePlan->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this group.');
-        }
+        $this->authorize('update', $client);
 
         if ($carePlan->delete()) {
             $carePlan->removeFromFutureSchedules();

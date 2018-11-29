@@ -1,6 +1,6 @@
 <template>
     <div ref="calendar" id="calendar">
-        <loading-card v-show="loading" style="z-index: 1000;position: absolute;top: 25%;left:  50%;width: 100%;margin-left: -50%;" />
+        <loading-card v-show="loading" style="z-index: 1000;position: absolute;top: 500px;left:  50%;width: 100%;margin-left: -50%;" />
     </div>
 </template>
 
@@ -272,5 +272,8 @@
     .fc-now-indicator-line {
         border-style: dotted;
         border-left-width: 2px !important;
+    }
+    #calendar {
+        min-height: 600px;
     }
 </style>

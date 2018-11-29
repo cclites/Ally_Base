@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Question;
@@ -14,10 +15,12 @@ class QuestionController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param \App\Business $business
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Business $business)
     {
+        $this->authorize('update', $business);
         return response()->json(activeBusiness()->questions);
     }
 
@@ -29,7 +32,10 @@ class QuestionController extends Controller
      */
     public function store(CreateQuestionRequest $request)
     {
-        if ($question = activeBusiness()->questions()->create($request->validated())) {
+        $data = $request->filtered();
+        $this->authorize('update', $request->getBusiness());
+
+        if ($question = Question::create($data)) {
             return new SuccessResponse('Question has been created.', $question);
         }
 
@@ -45,11 +51,10 @@ class QuestionController extends Controller
      */
     public function update(CreateQuestionRequest $request, Question $question)
     {
-        if ($question->business_id != activeBusiness()->id) {
-            return new ErrorResponse(403, 'You do not have access to that question.');
-        }
+        $data = $request->filtered();
+        $this->authorize('update', $question->business);
 
-        if ($question->update($request->validated())) {
+        if ($question->update($data)) {
             return new SuccessResponse('Question has been saved.', $question->fresh());
         }
 
@@ -64,9 +69,7 @@ class QuestionController extends Controller
      */
     public function destroy(Question $question)
     {
-        if ($question->business_id != activeBusiness()->id) {
-            return new ErrorResponse(403, 'You do not have access to that question.');
-        }
+        $this->authorize('update', $question->business);
 
         if ($question->delete()) {
             return new SuccessResponse('The question has been deleted.');

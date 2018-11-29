@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\TimesheetReportRequest;
 use App\ReferralSource;
 use App\Reports\PayrollReport;
 use App\Shifts\ShiftStatusManager;
@@ -82,7 +83,8 @@ class ReportsController extends BaseController
 
         $report = new ShiftsReport();
 
-        $report->query()->where('business_id', $this->business()->id)
+        $report->forRequestedBusinesses()
+            ->query()
             ->whereBetween('checked_in_time', [$dates->start, $dates->end])
             ->whereNotNull('checked_out_time')
             ->whereHas('client', function ($q) {
@@ -133,7 +135,7 @@ class ReportsController extends BaseController
         $weekEndUTC = $weekEnd->copy()->setTimezone('UTC');
 
         // Pull the list of relevant caregivers to loop through
-        $query = $this->business()->caregivers();
+        $query = Caregiver::forRequestedBusinesses()->ordered();
         $query->whereHas('shifts', function ($query) use ($weekStartUTC, $weekEndUTC) {
             $query->whereBetween('checked_in_time', [$weekStartUTC, $weekEndUTC]);
         });
@@ -247,19 +249,19 @@ class ReportsController extends BaseController
         return response()->json(compact('results', 'date_range'));
     }
 
-    public function reconciliation(Request $request)
+    public function reconciliation(Request $request, ProviderReconciliationReport $report)
     {
         if ($request->expectsJson() && $request->input('json')) {
-            $report = new ProviderReconciliationReport($this->business());
-            return $report->orderBy('created_at', 'DESC')
-                          ->rows();
+            return $report->forRequestedBusinesses()
+                ->orderBy('created_at', 'DESC')
+                ->rows();
         }
 
         if ($request->input('export')) {
-            $report = new ProviderReconciliationReport($this->business());
-            return $report->orderBy('created_at', 'DESC')
-                          ->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
-                          ->download();
+            return $report->forRequestedBusinesses()
+                ->orderBy('created_at', 'DESC')
+                ->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+                ->download();
         }
 
         return view('business.reports.reconciliation');
@@ -267,7 +269,7 @@ class ReportsController extends BaseController
 
     public function deposits()
     {
-        $deposits = Deposit::where('business_id', $this->business()->id)
+        $deposits = Deposit::forRequestedBusinesses()
             ->where('deposit_type', 'business')
             ->orderBy('created_at', 'DESC')
             ->get();
@@ -276,7 +278,7 @@ class ReportsController extends BaseController
 
     public function payments()
     {
-        $payments = Payment::where('business_id', $this->business()->id)
+        $payments = Payment::forRequestedBusinesses()
             ->whereNotNull('client_id')
             ->orderBy('created_at', 'DESC')
             ->get()
@@ -310,8 +312,8 @@ class ReportsController extends BaseController
         }
 
         $report = new ScheduledPaymentsReport();
-        $report->query()->where('business_id', $this->business()->id);
-        $scheduled = $report->rows()->sum('business_allotment');
+        $report->forRequestedBusinesses();
+        $scheduled = (clone $report)->rows()->sum('business_allotment');
         $report->query()
             ->whereBetween('checked_in_time', $dates->values()->toArray())
             ->when(request()->filled('client_id'), function ($query) {
@@ -331,15 +333,13 @@ class ReportsController extends BaseController
             'scheduled' => $scheduled
         ];
 
-        $caregivers = $this->business()
-            ->caregivers()
+        $caregivers = Caregiver::forRequestedBusinesses()
             ->select('caregivers.id')
             ->get()
             ->sortBy('nameLastFirst')
             ->values()
             ->all();
-        $clients = $this->business()
-            ->clients()
+        $clients = Client::forRequestedBusinesses()
             ->select('clients.id')
             ->get()
             ->sortBy('nameLastFirst')
@@ -357,25 +357,20 @@ class ReportsController extends BaseController
     public function shiftsReport()
     {
         $activities = $this->business()->allActivities();
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
 
-        return view('business.reports.shifts', compact('activities', 'multiLocation'));
+        return view('business.reports.shifts', compact('activities'));
     }
 
     public function certificationExpirations(Request $request)
     {
         $defaultDate = new Carbon('now +30 days');
 
-        $caregivers = $this->business()->caregivers;
-        $caregiverIds = $caregivers->pluck('id');
+        $caregiverIds = Caregiver::forRequestedBusinesses()->pluck('id')->toArray();
 
         $report = new CertificationExpirationReport();
-        $report->orderBy('expires_at');
+        $report->forRequestedBusinesses()->orderBy('expires_at');
         $report->between(Carbon::now(), $defaultDate);
-        $report->query()->whereIn('caregiver_id', $caregiverIds->toArray());
+        $report->query()->whereIn('caregiver_id', $caregiverIds);
         $certifications = $report->rows();
 
         return view('business.reports.certifications', compact('certifications'));
@@ -384,8 +379,7 @@ class ReportsController extends BaseController
     public function shifts(Request $request)
     {
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)
-               ->orderBy('checked_in_time');
+        $report->orderBy('checked_in_time');
 
         $this->addShiftReportFilters($report, $request);
 
@@ -400,8 +394,6 @@ class ReportsController extends BaseController
     public function caregiverPayments(Request $request)
     {
         $report = new CaregiverPaymentsReport();
-        $report->where('business_id', $this->business()->id);
-
         $this->addShiftReportFilters($report, $request);
 
         return $report->rows();
@@ -410,32 +402,16 @@ class ReportsController extends BaseController
     public function clientCharges(Request $request)
     {
         $report = new ClientChargesReport();
-        $report->where('business_id', $this->business()->id);
-
         $this->addShiftReportFilters($report, $request);
 
         return $report->rows();
     }
 
-    public function scheduledVsActual(Request $request)
-    {
-        if ($request->expectsJson() && $request->input('json')) {
-            $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
-            $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
-
-            $report = new ScheduledVsActualReport($this->business());
-            $report->between($startDate, $endDate);
-            return $report->rows();
-        }
-        return view('business.reports.scheduled_vs_actual');
-    }
-
     public function clientCaregivers(Request $request)
     {
-        if ($request->expectsJson() && $request->input('json')) {
+        if ($request->expectsJson()) {
             $report = new ClientCaregiversReport();
-            $report->where('business_id', $this->business()->id);
-            return $report->rows();
+            return $report->forRequestedBusinesses()->rows();
         }
 
         return view('business.reports.client-caregiver-rates');
@@ -446,9 +422,9 @@ class ReportsController extends BaseController
      */
     public function clientEmailMissing()
     {
-        $clients = Client::whereHas('user', function ($query) {
-            $query->whereNull('email');
-        })->get();
+        $clients = Client::forRequestedBusinesses()
+            ->whereEmail('%@noemail.allyms.com')
+            ->ordered();
 
         return view('business.reports.client_email_missing', compact('clients'));
     }
@@ -461,8 +437,12 @@ class ReportsController extends BaseController
     public function creditCards()
     {
         $report_date = Carbon::now()->addDays(request('daysFromNow'));
+
+        $defaultCardsIds = Client::forRequestedBusinesses()->where('default_payment_type', CreditCard::class)->pluck('default_payment_id')->toArray();
+        $backupCardIds = Client::forRequestedBusinesses()->where('backup_payment_type', CreditCard::class)->pluck('backup_payment_id')->toArray();
+
         $cards = CreditCard::with('user')
-            ->whereIn('user_id', $this->business()->clients()->select('id')->pluck('id'))
+            ->whereIn('id', array_merge($defaultCardsIds, $backupCardIds))
             ->get()
             ->filter(function ($card) use ($report_date) {
                 return $card->expirationDate->lt($report_date);
@@ -483,8 +463,7 @@ class ReportsController extends BaseController
      */
     public function caregiversMissingBankAccounts()
     {
-        $caregivers = $this->business()
-            ->caregivers()
+        $caregivers = Caregiver::forRequestedBusinesses()
             ->with(['shifts' => function ($query) {
                 $query->where('status', 'WAITING_FOR_PAYOUT');
             }])
@@ -501,8 +480,7 @@ class ReportsController extends BaseController
      */
     public function clientsMissingPaymentMethods()
     {
-        $clients = $this->business()
-            ->clients()
+        $clients = Client::forRequestedBusinesses()
             ->with(['shifts' => function ($query) {
                 $query->where('status', 'WAITING_FOR_CHARGE');
             }])
@@ -517,8 +495,11 @@ class ReportsController extends BaseController
         return view('business.reports.printable-schedules');
     }
 
-    protected function addShiftReportFilters($report, Request $request)
+    protected function addShiftReportFilters(ShiftsReport $report, Request $request)
     {
+        // Restrict businesses
+        $report->forRequestedBusinesses();
+
         if ($request->has('start_date') || $request->has('end_date')) {
             $startDate = new Carbon($request->input('start_date') . ' 00:00:00', $this->business()->timezone);
             $endDate = new Carbon($request->input('end_date') . ' 23:59:59', $this->business()->timezone);
@@ -576,27 +557,20 @@ class ReportsController extends BaseController
 
     public function exportTimesheets()
     {
-        $caregivers = $this->business()->caregivers;
-        $clients = $this->business()->clients;
+        $caregivers = Caregiver::forRequestedBusinesses()->ordered()->get();
+        $clients = Client::forRequestedBusinesses()->ordered()->get();
         return view('business.reports.export_timesheets', compact('caregivers', 'clients'));
     }
 
-    public function timesheetData(Request $request)
+    public function timesheetData(TimesheetReportRequest $request)
     {
-        $data = $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'client_id' => 'nullable|int',
-            'caregiver_id' => 'nullable|int',
-            'client_type' => 'nullable|string',
-            'export_type' => 'required|string'
-        ]);
-
+        $data = $request->validated();
         $start_date = $data['start_date'];
         $end_date = $data['end_date'];
-        $timezone = $this->business()->timezone;
+        $business = $request->getBusiness();
+        $timezone = $business->timezone;
 
-        $client_shift_groups = $this->clientShiftGroups($data);
+        $client_shift_groups = $this->clientShiftGroups($business, $data);
         $viewData = compact('client_shift_groups', 'start_date', 'end_date', 'timezone');
 
         switch ($data['export_type']) {
@@ -613,6 +587,8 @@ class ReportsController extends BaseController
         Carbon::setWeekStartsAt(Carbon::MONDAY);
 
         $caregiver = Caregiver::find($caregiver_id);
+        $this->authorize('read', $caregiver);
+
         $deposits = Deposit::with('shifts')
             ->where('caregiver_id', $caregiver->id)
             ->whereYear('created_at', request()->year)
@@ -625,6 +601,7 @@ class ReportsController extends BaseController
                 return $deposit;
             });
         $business = $this->business();
+
         $pdf = PDF::loadView('caregivers.reports.print_payment_history', compact('caregiver', 'deposits', 'business'));
         return $pdf->download($year . '_year_summary.pdf');
     }
@@ -632,6 +609,8 @@ class ReportsController extends BaseController
     public function printPaymentDetails($id, $caregiver_id)
     {
         $deposit = Deposit::find($id);
+        $this->authorize('read', $deposit);
+
         $shifts = $this->getPaymentShifts($id, $caregiver_id);
         $business = $this->business();
 
@@ -651,46 +630,47 @@ class ReportsController extends BaseController
     protected function getPaymentShifts($id, $caregiver_id)
     {
         $shifts = Shift::with('deposits', 'activities')
-                       ->whereHas('deposits', function ($query) use ($id) {
-                           $query->where('deposits.id', $id);
-                       })
-                       ->where('caregiver_id', $caregiver_id)
-                       ->orderBy('checked_in_time')
-                       ->get()
-                       ->map(function ($shift) {
-                           $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate,
-                               $shift->provider_fee);
-                           $row = (object)collect($shift->toArray())
-                               ->merge([
-                                   'hours'           => $shift->duration(),
-                                   'ally_fee'        => number_format($allyFee, 2),
-                                   'hourly_total'    => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee,
-                                       2),
-                                   'mileage_costs'   => number_format($shift->costs()->getMileageCost(), 2),
-                                   'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
-                                   'provider_total'  => number_format($shift->costs()->getProviderFee(), 2),
-                                   'ally_total'      => number_format($shift->costs()->getAllyFee(), 2),
-                                   'ally_pct'        => AllyFeeCalculator::getPercentage($shift->client, null),
-                                   'shift_total'     => number_format($shift->costs()->getTotalCost(), 2),
-                                   'confirmed'       => $shift->statusManager()->isConfirmed(),
-                                   'status'          => $shift->status ? title_case(preg_replace('/_/', ' ',
-                                       $shift->status)) : '',
-                                   'EVV'             => $shift->verified,
-                               ])->toArray();
+            ->forRequestedBusinesses()
+            ->whereHas('deposits', function ($query) use ($id) {
+               $query->where('deposits.id', $id);
+            })
+            ->where('caregiver_id', $caregiver_id)
+            ->orderBy('checked_in_time')
+            ->get()
+            ->map(function ($shift) {
+               $allyFee = AllyFeeCalculator::getHourlyRate($shift->client, null, $shift->caregiver_rate,
+                   $shift->provider_fee);
+               $row = (object)collect($shift->toArray())
+                   ->merge([
+                       'hours'           => $shift->duration(),
+                       'ally_fee'        => number_format($allyFee, 2),
+                       'hourly_total'    => number_format($shift->caregiver_rate + $shift->provider_fee + $allyFee,
+                           2),
+                       'mileage_costs'   => number_format($shift->costs()->getMileageCost(), 2),
+                       'caregiver_total' => number_format($shift->costs()->getCaregiverCost(), 2),
+                       'provider_total'  => number_format($shift->costs()->getProviderFee(), 2),
+                       'ally_total'      => number_format($shift->costs()->getAllyFee(), 2),
+                       'ally_pct'        => AllyFeeCalculator::getPercentage($shift->client, null),
+                       'shift_total'     => number_format($shift->costs()->getTotalCost(), 2),
+                       'confirmed'       => $shift->statusManager()->isConfirmed(),
+                       'status'          => $shift->status ? title_case(preg_replace('/_/', ' ',
+                           $shift->status)) : '',
+                       'EVV'             => $shift->verified,
+                   ])->toArray();
 
-                           $row->checked_in_time = Carbon::parse($row->checked_in_time);
-                           $row->checked_out_time = Carbon::parse($row->checked_out_time);
-                           $row->activities = collect($row->activities)->sortBy('name');
+               $row->checked_in_time = Carbon::parse($row->checked_in_time);
+               $row->checked_out_time = Carbon::parse($row->checked_out_time);
+               $row->activities = collect($row->activities)->sortBy('name');
 
-                           return $row;
-                       });
+               return $row;
+            });
 
         return $shifts;
     }
 
-    private function clientShiftGroups(array $data)
+    private function clientShiftGroups(Business $business, array $data)
     {
-        return $this->business()->shifts()
+        return $business->shifts()
             ->with('activities', 'client', 'caregiver')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
             ->when($data['client_id'], function ($query) use ($data) {
@@ -731,35 +711,32 @@ class ReportsController extends BaseController
      */
     public function referralSources()
     {
-        $business = $this->business();
         $reports = [];
 
         $shiftstatuses = ShiftStatusManager::getPendingStatuses();
 
-        if($business) {
-            $referralsources = ReferralSource::where('business_id', $business->id)
-                ->withCount('client', 'prospect')->with(['client.shifts' => function($query) use($shiftstatuses){
-                    $query->whereNotIn('status', $shiftstatuses)->get();
-                }])->get();
+        $referralsources = ReferralSource::forRequestedBusinesses()
+            ->withCount('client', 'prospect')->with(['client.shifts' => function($query) use($shiftstatuses){
+                $query->whereNotIn('status', $shiftstatuses)->get();
+            }])->get();
 
-            if($referralsources) {
-                foreach($referralsources as $referralsource) {
-                    $reports[] = [
-                        "id" => $referralsource->id,
-                        "business_id" => $referralsource->business_id,
-                        "organization" => $referralsource->organization,
-                        "contact_name" => $referralsource->contact_name,
-                        "phone" => $referralsource->phone,
-                        "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
-                        "client_count" => $referralsource->client_count,
-                        "prospect_count" => $referralsource->prospect_count,
-                        "shift_total" => ($referralsource->client->map(function($item) {
-                               return $item->shifts->map(function($shift) {
-                                   return number_format($shift->costs()->getTotalCost(), 2);
-                               })->sum();
-                        }))->sum()
-                    ];
-                }
+        if($referralsources) {
+            foreach($referralsources as $referralsource) {
+                $reports[] = [
+                    "id" => $referralsource->id,
+                    "business_id" => $referralsource->business_id,
+                    "organization" => $referralsource->organization,
+                    "contact_name" => $referralsource->contact_name,
+                    "phone" => $referralsource->phone,
+                    "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
+                    "client_count" => $referralsource->client_count,
+                    "prospect_count" => $referralsource->prospect_count,
+                    "shift_total" => ($referralsource->client->map(function($item) {
+                           return $item->shifts->map(function($shift) {
+                               return number_format($shift->costs()->getTotalCost(), 2);
+                           })->sum();
+                    }))->sum()
+                ];
             }
         }
 
@@ -785,7 +762,7 @@ class ReportsController extends BaseController
     public function caregiverShifts()
     {
         if (request()->has('fetch')) {
-            $report = $this->business()->shifts()
+            $report = Shift::forRequestedBusinesses()
                 ->selectRaw('caregiver_id, count(*) as total')
                 ->betweenDates(request()->start_date, request()->end_date)
                 ->forCaregiver(request()->user_id)
@@ -803,7 +780,7 @@ class ReportsController extends BaseController
         }
 
         $type = 'caregiver';
-        $users = $this->business()->caregiverList();
+        $users = Caregiver::forRequestedBusinesses()->ordered()->get();
 
         return view('business.reports.shift_summary', compact(['type', 'users']));
     }
@@ -816,7 +793,7 @@ class ReportsController extends BaseController
     public function clientShifts()
     {
         if (request()->has('fetch')) {
-            $report = $this->business()->shifts()
+            $report = Shift::forRequestedBusinesses()
                 ->selectRaw('client_id, count(*) as total')
                 ->betweenDates(request()->start_date, request()->end_date)
                 ->forClient(request()->user_id)
@@ -835,7 +812,7 @@ class ReportsController extends BaseController
 
         
         $type = 'client';
-        $users = $this->business()->clientList();
+        $users = Client::forRequestedBusinesses()->active()->ordered()->get();
 
         return view('business.reports.shift_summary', compact(['type', 'users']));
     }
@@ -851,7 +828,8 @@ class ReportsController extends BaseController
 
         if (request()->has('fetch')) {
             if ($type == 'client') {
-                return response()->json($this->business()->clients->map(function ($item) {
+                $query = Client::forRequestedBusinesses();
+                return response()->json($query->get()->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
@@ -860,7 +838,8 @@ class ReportsController extends BaseController
                     ];
                 }));
             } else {
-                return response()->json($this->business()->caregivers->map(function ($item) {
+                $query = Caregiver::forRequestedBusinesses();
+                return response()->json($query->get()->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
@@ -877,13 +856,13 @@ class ReportsController extends BaseController
     /**
      * Details on each attempted clock in and clock out
      *
+     * @param \App\Reports\EVVReport $report
      * @return Response
      */
-    public function evv()
+    public function evv(EVVReport $report)
     {
         if (request()->expectsJson() && request()->input('json')) {
-            $report = new EVVReport();
-            $report->where('business_id', $this->business()->id);
+            $report->forRequestedBusinesses();
 
             if ($method = request()->input('method')) {
                 if ($method === 'geolocation') $report->geolocationOnly();
@@ -905,7 +884,8 @@ class ReportsController extends BaseController
 
         if (request()->has('fetch')) {
             if ($type == 'client') {
-                return response()->json($this->business()->clients->map(function ($item) {
+                $query = Client::forRequestedBusinesses();
+                return response()->json($query->get()->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
@@ -915,7 +895,8 @@ class ReportsController extends BaseController
                     ];
                 }));
             } else {
-                return response()->json($this->business()->caregivers->map(function ($item) {
+                $query = Caregiver::forRequestedBusinesses();
+                return response()->json($query->get()->map(function ($item) {
                     return [
                         'id' => $item->id,
                         'name' => $item->nameLastFirst,
@@ -941,7 +922,7 @@ class ReportsController extends BaseController
     public function payrollReport(Request $request, PayrollReport $report)
     {
         if ($request->has('json') || $request->has('export')) {
-            $data = $report->forBusiness($this->business()->id)
+            $data = $report->forRequestedBusinesses()
                 ->forDates($request->start, $request->end)
                 ->forCaregiver($request->caregiver)
                 ->rows();
@@ -954,7 +935,7 @@ class ReportsController extends BaseController
             return response()->json($data);
         }
 
-        $caregivers = $this->business()->caregiverList(true, true);
+        $caregivers = Caregiver::forRequestedBusinesses()->active()->ordered()->get();
 
         return view('business.reports.payroll', compact('caregivers'));
     }
@@ -1000,7 +981,12 @@ class ReportsController extends BaseController
      * 
      * @return Response
      */
-    public function showSalesPipeline() {
+    public function showSalesPipeline(Request $request)
+    {
+        if ($request->expectsJson()) {
+            return $this->salesPipelineReport($request);
+        }
+
         return view('business.reports.sales-pipeline');
     }
 
@@ -1010,7 +996,7 @@ class ReportsController extends BaseController
      * 
      * @return array
      */
-    public function salesPipelineReport(Request $request) {
+    protected function salesPipelineReport(Request $request) {
 
         $this->validate($request, [
             'start_date' => 'required|string|date',
@@ -1038,7 +1024,7 @@ class ReportsController extends BaseController
                 'ready_to_schedule',
                 'created_at',
             ])
-            ->where('business_id', $this->business()->id)
+            ->forRequestedBusinesses()
             ->whereBetween('created_at', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->with('referralSource')
             ->get();
@@ -1052,9 +1038,10 @@ class ReportsController extends BaseController
      *
      * @return array
      */
-    private function organizeRevenueReport(Request $request) {
+    private function organizeRevenueReport(Request $request)
+    {
         $report = new ShiftsReport();
-        $report->where('business_id', $this->business()->id)->orderBy('checked_in_time');
+        $report->orderBy('checked_in_time');
         $this->addShiftReportFilters($report, $request);
         $data = $report->rows();
         $groupedByDate = [];

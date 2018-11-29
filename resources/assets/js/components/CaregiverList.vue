@@ -11,13 +11,7 @@
                     <option :value="0">Inactive Caregivers</option>
                 </b-form-select>
             </b-col>
-            <b-col lg="3" v-if="multi_location.multiLocationRegistry == 'yes'">
-                <b-form-select v-model="location" class="mb-1" >
-                    <option value="all">All Locations</option>
-                    <option :value="multi_location.name">{{ multi_location.name }}</option>
-                </b-form-select>
-            </b-col>
-            <b-col :lg="multi_location.multiLocationRegistry == 'yes' ? '3' : '6'" class="text-right">
+            <b-col lg="6" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
@@ -63,9 +57,7 @@
     export default {
         mixins: [FormatsListData],
 
-        props: {
-            'multi_location': Object,
-        },
+        props: {},
 
         data() {
             return {
@@ -130,11 +122,6 @@
 
         mounted() {
             this.loadCaregivers();
-            if(this.multi_location.multiLocationRegistry == 'yes') {
-                document.querySelectorAll('.location').forEach(elem => {
-                    elem.classList.remove('d-none');
-                })
-            }
         },
 
         computed: {
@@ -152,7 +139,6 @@
                     caregiver.primaryphone = this.getPhone(caregiver).number;
                     caregiver.zipcode = this.getAddress(caregiver).zip;
                     caregiver.city = this.getAddress(caregiver).city;
-                    caregiver.location = this.multi_location.name;
                     return caregiver;
                 });
                 this.loading = false;

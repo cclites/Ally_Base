@@ -13,14 +13,7 @@ use Faker\Generator as Faker;
 |
 */
 
-$companies = [];
-$factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
-    // Ensure a unique company name when creating multiple
-    $company = $faker->company;
-    while(in_array($company, $companies)) {
-        $company = $faker->company;
-    }
-    $companies[] = $company;
+$factory->define(\App\Business::class, function(Faker $faker) {
     return [
         'name' => $faker->unique()->company,
         'type' => 'Registry',
@@ -36,6 +29,27 @@ $factory->define(\App\Business::class, function(Faker $faker) use ($companies) {
         'timezone' => $faker->randomElement(['America/Los_Angeles', 'America/Phoenix', 'UTC', 'America/New_York']),
         'contact_name' => $faker->name,
         'contact_email' => $faker->safeEmail,
-        'contact_phone' => $faker->phoneNumber
+        'contact_phone' => $faker->phoneNumber,
+        'chain_id' => function() {
+            $chain = \App\BusinessChain::inRandomOrder()->first();
+            if (!$chain) $chain = factory(\App\BusinessChain::class)->create();
+            return $chain->id;
+        }
+    ];
+});
+
+$factory->define(\App\BusinessChain::class, function(Faker $faker) {
+    $name = $faker->unique()->company;
+    return [
+        'name' => $name,
+        'slug' => str_slug($name),
+        'address1' => $faker->streetAddress,
+        'address2' => null,
+        'city' => $faker->city,
+        'state' => $faker->randomElement(['CA', 'OH', 'NY', 'MI', 'PA', 'FL', 'TX', 'WA']),
+        'country' => 'US',
+        'zip' => $faker->randomNumber(5),
+        'phone1' => $faker->phoneNumber,
+        'phone2' => $faker->phoneNumber,
     ];
 });

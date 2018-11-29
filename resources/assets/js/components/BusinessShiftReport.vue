@@ -18,6 +18,7 @@
                                 v-model="end_date"
                                 placeholder="End Date">
                         </date-picker>
+                        <business-location-select v-model="business_id" class="mb-1" :allow-all="true" :hideable="true"></business-location-select>
                         <b-form-select v-model="caregiver_id" class="mx-1 mb-1">
                             <option value="">All Caregivers</option>
                             <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
@@ -40,10 +41,6 @@
                             <option value="">All Statuses</option>
                             <option value="charged">Charged</option>
                             <option value="uncharged">Un-Charged</option>
-                        </b-form-select>
-                        <b-form-select v-model="location" class="mb-1" v-if="multi_location.multiLocationRegistry == 'yes'">
-                            <option value="all">All Locations</option>
-                            <option :value="multi_location.name">{{ multi_location.name }}</option>
                         </b-form-select>
                         &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
                         &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
@@ -160,9 +157,11 @@
     import EditShiftModal from "./modals/EditShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
     import LocalStorage from "../mixins/LocalStorage";
+    import BusinessLocationSelect from "./business/BusinessLocationSelect";
 
     export default {
         components: {
+            BusinessLocationSelect,
             ShiftHistorySummaries,
             ShiftDetailsModal,
             FilterColumnsModal,
@@ -193,6 +192,7 @@
                 },
                 start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                 end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                business_id: "",
                 caregiver_id: "",
                 client_id: "",
                 import_id: "",
@@ -358,7 +358,8 @@
             queryString() {
                 return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
                         + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method
-                        + '&import_id=' + this.import_id + '&status=' + this.charge_status;
+                        + '&import_id=' + this.import_id + '&status=' + this.charge_status
+                        + '&businesses[]=' + this.business_id;
             }
         },
 
@@ -373,6 +374,8 @@
                     if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
                     let filterClientId = this.getLocalStorage('filterClientId');
                     if (filterClientId) this.client_id = filterClientId;
+                    let filterBusinessId = this.getLocalStorage('filterBusinessId');
+                    if (filterBusinessId) this.business_id = filterBusinessId;
                     let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
                     if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
                     let sortBy = this.getLocalStorage('sortBy');
@@ -423,6 +426,7 @@
             },
 
             reloadData() {
+                this.updateSavedFormFilters();
                 this.setLocalStorage('sortBy', 'Day');
                 this.setLocalStorage('sortDesc', 'false');
                 return this.loadData();
@@ -591,27 +595,20 @@
                 this.addShiftModal = false;
                 this.items.shifts = this.items.shifts.filter(shift => shift.id !== id);
                 this.loadSummaries();
+            },
+
+            updateSavedFormFilters()
+            {
+                this.setLocalStorage('filterBusinessId', this.business_id);
+                this.setLocalStorage('filterCaregiverId', this.caregiver_id);
+                this.setLocalStorage('filterClientId', this.client_id);
+                this.setLocalStorage('filterPaymentMethod', this.payment_method);
+                this.setLocalStorage('startDate', this.start_date);
+                this.setLocalStorage('endDate', this.end_date);
             }
         },
 
         watch: {
-            caregiver_id(val) {
-                this.setLocalStorage('filterCaregiverId', val);
-            },
-            client_id(val) {
-                this.setLocalStorage('filterClientId', val);
-                if (val) this.payment_method = ""; // Set payment method filter back to all if client is selected
-            },
-            payment_method(val) {
-                this.setLocalStorage('filterPaymentMethod', val);
-                if (val) this.client_id = ""; // Set client filter back to all if payment method is selected
-            },
-            start_date(val) {
-                this.setLocalStorage('startDate', val);
-            },
-            end_date(val) {
-                this.setLocalStorage('endDate', val);
-            },
             sortBy(val) {
                 this.setLocalStorage('sortBy', val);
             },

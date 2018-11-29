@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Caregiver;
+use App\Http\Requests\SendTextRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
@@ -33,13 +35,12 @@ class CommunicationController extends Controller
     {
         $recipients = null;
         $message = '';
-        $business = $this->business();
 
         $request->session()->reflash();
 
         // handle loading and setting recipient list (coming from care match results)
         if ($request->session()->has('sms.load-recipients')) {
-            $recipients = $this->business()->caregivers()
+            $recipients = Caregiver::forRequestedBusinesses()
                 ->active()
                 ->whereIn('caregivers.id', $request->session()->get('sms.load-recipients'))
                 ->whereHas('phoneNumbers')
@@ -55,15 +56,14 @@ class CommunicationController extends Controller
         }
 
         // handle draft open shift message (coming from schedule)
+        // TODO: shift_id is incorrectly named, it is a schedule id
         if (request()->preset == 'open-shift' && request()->has('shift_id')) {
-            $shift = Schedule::findOrFail(request()->shift_id);
-            if (! $this->businessHasSchedule($shift)) {
-                return new ErrorResponse(403, 'You do not have access to this shift.');
-            }
-            $message = $this->draftOpenShiftMessage($shift);
+            $schedule = Schedule::findOrFail(request()->shift_id);
+            $this->authorize('read', $schedule);
+            $message = $this->draftOpenShiftMessage($schedule);
         }
 
-        return view('business.communication.text-caregivers', compact('message', 'recipients', 'business'));
+        return view('business.communication.text-caregivers', compact('message', 'recipients'));
     }
 
     /**
@@ -91,25 +91,20 @@ class CommunicationController extends Controller
     /**
      * Initiate SMS text blast.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \App\Http\Requests\SendTextRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function sendText(Request $request)
+    public function sendText(SendTextRequest $request)
     {
-        $request->validate([
-            'message' => 'required|string|min:5',
-            'recipients' => 'array',
-            'recipients.*' => 'integer',
-            'can_reply' => 'boolean',
-        ]);
-
-        if ($request->all) {
-            $recipients = $this->business()->caregivers()->active()
+        if ($request->input('all')) {
+            $recipients = Caregiver::forRequestedBusinesses()
+                ->active()
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
         } else {
-            $recipients = $this->business()->caregivers()->whereIn('caregiver_id', $request->recipients)
+            $recipients = Caregiver::forRequestedBusinesses()
+                ->whereIn('id', $request->recipients)
                 ->has('phoneNumbers')
                 ->with('phoneNumbers')
                 ->get();
@@ -119,23 +114,26 @@ class CommunicationController extends Controller
             }
         }
 
-        $business = activeBusiness();
+        $business = $request->getBusiness();
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
-            if ($request->can_reply) {
+            if ($request->input('can_reply')) {
                 return new ErrorResponse(422, 'You cannot receive SMS replies at this time because you have not been assigned a unique outgoing SMS number, please contact Ally.');
             }
 
             $from = PhoneNumber::formatNational(config('services.twilio.default_number'));
         }
 
-        $thread = SmsThread::create([
+        $data = [
             'business_id' => $business->id,
             'from_number' => $from,
             'message' => $request->message,
             'can_reply' => $request->can_reply,
             'sent_at' => Carbon::now(),
-        ]);
+        ];
+
+        $this->authorize('create', [SmsThread::class, $data]);
+        $thread = SmsThread::create($data);
 
         // send txt to all primary AND mobile numbers
         foreach ($recipients as $recipient) {
@@ -234,8 +232,7 @@ class CommunicationController extends Controller
      */
     public function threadIndex()
     {
-        $business = $this->business();
-        $threads = $business->smsThreads()
+        $threads = SmsThread::forRequestedBusinesses()
             ->withCount(['recipients', 'replies'])
             ->latest()
             ->get();
@@ -244,7 +241,7 @@ class CommunicationController extends Controller
             return response()->json($threads);
         }
 
-        return view('business.communication.sms-thread-list', compact('threads', 'business'));
+        return view('business.communication.sms-thread-list', compact('threads'));
     }
 
     /**
@@ -255,10 +252,7 @@ class CommunicationController extends Controller
      */
     public function threadShow(SmsThread $thread)
     {
-        if (activeBusiness()->id != $thread->business_id) {
-            return new ErrorResponse(401, 'You do not have access to this thread.');
-        }
-
+        $this->authorize('read', $thread);
         $thread->load(['recipients', 'replies']);
 
         if (request()->wantsJson()) {

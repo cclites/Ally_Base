@@ -110,7 +110,7 @@
                             <b-col sm="6">
                                 <b-form-group label="Ally Fee" label-for="ally_fee">
                                     <div v-if="allyFee">
-                                        {{ allyFee }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
+                                        {{ numberFormat(allyFee) }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
                                     </div>
                                     <div v-else>
                                         Enter Amounts Above
@@ -119,7 +119,7 @@
                             </b-col>
                             <b-col sm="6">
                                 <b-form-group :label="`Total ${rateType} Rate`" label-for="ally_fee">
-                                    {{ totalRate }}
+                                    {{ numberFormat(totalRate) }}
                                 </b-form-group>
                             </b-col>
                         </b-row>

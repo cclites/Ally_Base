@@ -1,17 +1,10 @@
 <?php
 namespace App\Http\Requests;
 
-use App\Business;
 use Carbon\Carbon;
-use Illuminate\Foundation\Http\FormRequest;
 
-class CreateScheduleRequest extends FormRequest
+class CreateScheduleRequest extends BusinessClientRequest
 {
-    public function authorize()
-    {
-        return true;
-    }
-
     public function rules() {
         $minDate = Carbon::parse('2017-01-01');
         $maxDate = Carbon::now()->addDays(735); // A little over 2 years

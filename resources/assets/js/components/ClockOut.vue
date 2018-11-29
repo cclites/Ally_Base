@@ -121,7 +121,7 @@
                                              :rows="3"
                             >
                             </b-form-textarea>
-                            <input-help :form="form" field="caregiver_comments" text="Enter any important notes or comments about your shift."></input-help>
+                            <input-help :form="form" field="caregiver_comments" text="Enter any important notes or comments about your shift.  Shift related only: do not use for Client Narrative."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -143,6 +143,14 @@
                             :label="goal.question">
                             <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
                             <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Add Note to Client Narrative" for="narrative_notes">
+                            <textarea v-model="form.narrative_notes" id="narrative_notes" class="form-control" rows="3" wrap="soft"></textarea>
+                            <input-help :form="form" field="narrative_notes" text="This will be added to the Client Narration."></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -203,6 +211,7 @@
                     signature: null,
                     goals: {},
                     questions: {},
+                    narrative_notes: '',
                 }),
                 showManual: false,
                 time: null,

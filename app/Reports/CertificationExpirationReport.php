@@ -3,10 +3,12 @@
 namespace App\Reports;
 
 use App\CaregiverLicense;
+use App\Contracts\BusinessReportInterface;
 use App\Contracts\Report;
+use App\User;
 use Carbon\Carbon;
 
-class CertificationExpirationReport extends BaseReport
+class CertificationExpirationReport extends BaseReport implements BusinessReportInterface
 {
     /**
      * @var bool
@@ -114,4 +116,21 @@ class CertificationExpirationReport extends BaseReport
         return $rows;
     }
 
+    public function forBusinesses(array $businessIds = null)
+    {
+        $this->query()->whereHas('caregiver', function($q) use ($businessIds) {
+            $q->forBusinesses($businessIds);
+        });
+
+        return $this;
+    }
+
+    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null)
+    {
+        $this->query()->whereHas('caregiver', function($q) use ($businessIds, $authorizedUser) {
+            $q->forRequestedBusinesses($businessIds, $authorizedUser);
+        });
+
+        return $this;
+    }
 }

@@ -17,20 +17,27 @@ class ClaimController extends BaseController
     public function data(Request $request)
     {
         $request->validate([
-            'client_id' => 'required|int',
+            'client_id' => 'required|exists:clients,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'export_type' => 'required|string'
         ]);
 
+        // TODO: Clean up temporary duplicate client find, Necessary to get the right timezone (from client business)
+        $client = Client::findOrFail($request->client_id);
+        $start_date = Carbon::parse($request->start_date, $client->business->timezone);
+        $end_date = Carbon::parse($request->end_date, $client->business->timezone);
+
         $client = Client::with([
             'addresses',
-            'shifts' => function ($query) use ($request) {
-                $query->whereBetween('checked_in_time', [Carbon::parse($request->start_date), Carbon::parse($request->end_date)])
+            'shifts' => function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('checked_in_time', [$start_date, $end_date])
                     ->whereNotNull('checked_out_time');
             }
         ])
             ->find($request->client_id);
+
+        $this->authorize('read', $client);
 
         $summary = [];
         foreach ($client->shifts as $shift) {
@@ -48,6 +55,7 @@ class ClaimController extends BaseController
     public function print(Request $request)
     {
         $request->validate([
+            'client_id' => 'required|exists:clients,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'export_type' => 'nullable|string',
@@ -55,12 +63,10 @@ class ClaimController extends BaseController
         ]);
 
         $client = Client::findOrFail($request->client_id);
-        if (!$this->businessHasClient($client)) {
-            abort(403);
-        }
+        $this->authorize('read', $client);
 
-        $start_date = Carbon::parse($request->start_date, $this->business()->timezone);
-        $end_date = Carbon::parse($request->end_date, $this->business()->timezone);
+        $start_date = Carbon::parse($request->start_date, $client->business->timezone);
+        $end_date = Carbon::parse($request->end_date, $client->business->timezone);
 
         // Shifts
         $shifts = $client->shifts()->whereBetween('checked_in_time', [
@@ -77,7 +83,7 @@ class ClaimController extends BaseController
         });
         $claimNumber = $client->ltci_claim;
         $policyNumber = $client->ltci_policy;
-        $business = $this->business();
+        $business = $client->business;
         $timezone = $business->timezone;
         $report_type = $request->report_type == 'notes' ? 'notes' : 'full';
         

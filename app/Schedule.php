@@ -1,14 +1,14 @@
 <?php
-
 namespace App;
 
 use App\Businesses\Timezone;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
 use App\Scheduling\RuleParser;
+use App\Shifts\RateFactory;
+use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 
 
 /**
@@ -24,48 +24,84 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $overtime_duration
  * @property int|null $note_id
  * @property int $fixed_rates
- * @property float $caregiver_rate
- * @property float $provider_fee
+ * @property int|null $caregiver_rate_id
+ * @property int|null $client_rate_id
+ * @property int|null $provider_fee_id
+ * @property float|null $caregiver_rate
+ * @property float|null $provider_fee
+ * @property float|null $client_rate
  * @property string $hours_type
+ * @property int|null $care_plan_id
+ * @property string $status
+ * @property string|null $converted_at
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
- * @property-read \App\CarePlan $carePlan
+ * @property-read \App\CarePlan|null $carePlan
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ScheduleException[] $exceptions
+ * @property-read bool $clocked_in_shift
  * @property-read mixed $notes
+ * @property-read mixed $shift_status
  * @property-read \App\ScheduleNote|null $note
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule future($timezone)
+ * @method static \Illuminate\Database\Query\Builder|\App\Schedule onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCarePlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCaregiverRateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereClientRateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereConvertedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereFixedRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereNoteId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereOvertimeDuration($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereProviderFeeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStartsAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereWeekday($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\Schedule withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Schedule withoutTrashed()
  * @mixin \Eloquent
  */
-class Schedule extends Model implements Auditable
+class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
     use SoftDeletes;
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'schedules';
     protected $guarded = ['id'];
     protected $dates = ['starts_at'];
     protected $with = ['business', 'note'];
     protected $appends = ['notes'];
+    protected $orderedColumn = 'starts_at';
+    protected $casts = [
+        'fixed_rates' => 'boolean',
+        'duration' => 'integer',
+        'caregiver_rate' => 'float',
+        'client_rate' => 'float',
+        'provider_fee' => 'float',
+    ];
 
     /**
      * The "booting" method of the model.
@@ -266,15 +302,19 @@ class Schedule extends Model implements Auditable
         return false;
     }
 
-    /*
-     * OLD
+    /**
+     * @deprecated
+     * @return bool
      */
-
     public function isRecurring()
     {
         return !$this->isSingle();
     }
 
+    /**
+     * @deprecated
+     * @return bool
+     */
     public function isSingle()
     {
         return (strlen($this->rrule) === 0);
@@ -420,11 +460,9 @@ class Schedule extends Model implements Auditable
      */
     public function getCaregiverRate()
     {
-        if (strlen($this->caregiver_rate)) return $this->caregiver_rate;
-        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->fixed_rates) ? $relation->pivot->caregiver_fixed_rate : $relation->pivot->caregiver_hourly_rate;
-        }
-        return 0;
+        return app(RateFactory::class)->getRatesForSchedule($this)->caregiver_rate
+            ?? $this->caregiver_rate
+            ?? 0;
     }
 
     /**
@@ -434,12 +472,14 @@ class Schedule extends Model implements Auditable
      */
     public function getProviderFee()
     {
-        if (strlen($this->provider_fee)) return $this->provider_fee;
-        if ($relation = $this->client->caregivers()->find($this->caregiver_id)) {
-            return ($this->fixed_rates) ? $relation->pivot->provider_fixed_fee : $relation->pivot->provider_hourly_fee;
-        }
-        return 0;
+        return app(RateFactory::class)->getRatesForSchedule($this)->provider_fee
+            ?? $this->provider_fee
+            ?? 0;
     }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
 
     /**
      * Get only schedules for the given client.
@@ -471,4 +511,5 @@ class Schedule extends Model implements Auditable
     {
         return $query->where('starts_at', '>=', Carbon::now($timezone)->subHour());
     }
+
 }

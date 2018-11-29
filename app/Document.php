@@ -2,28 +2,27 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\File;
-use OwenIt\Auditing\Contracts\Auditable;
+use File;
 
 /**
- * Class Document
+ * App\Document
  *
- * @package App
- * @property string $name
- * @property string $filename
- * @property string $original_filename
- * @property string $type
- * @property string $description
  * @property int $id
  * @property int|null $user_id
+ * @property string|null $name
+ * @property string $filename
+ * @property string $original_filename
+ * @property string|null $type
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $description
  * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\User|null $user
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\App\Document onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Document whereDeletedAt($value)
@@ -39,10 +38,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Query\Builder|\App\Document withoutTrashed()
  * @mixin \Eloquent
  */
-class Document extends Model implements Auditable
+class Document extends AuditableModel
 {
     use SoftDeletes;
-    use \OwenIt\Auditing\Auditable;
 
     protected $guarded = ['id', 'user_id'];
 

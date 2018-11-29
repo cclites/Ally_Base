@@ -1,10 +1,27 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class SmsThreadRecipient extends Model
+/**
+ * App\SmsThreadRecipient
+ *
+ * @property int $id
+ * @property int $sms_thread_id
+ * @property int $user_id
+ * @property string $number
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\SmsThread $thread
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereSmsThreadId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereUserId($value)
+ * @mixin \Eloquent
+ */
+class SmsThreadRecipient extends BaseModel
 {
     /**
      * The attributes that should not be mass assignable.

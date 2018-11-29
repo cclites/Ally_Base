@@ -2,7 +2,7 @@
     <b-container>
         <b-row>
             <b-col class="mt-5">
-                <h2>{{ business.name }}</h2>
+                <h2>{{ businessChain.name }}</h2>
             </b-col>
         </b-row>
 
@@ -143,7 +143,7 @@
                                      v-model="form.worked_here_before"
                                      :value="true"
                                      :unchecked-value="false">
-                        Have you worked for {{ business.name }} before?
+                        Have you worked for {{ businessChain.name }} before?
                     </b-form-checkbox>
                 </b-col>
                 <b-col lg="6">
@@ -209,7 +209,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Driving History</div>
-                    <em>{{ business.name }} will be reviewing your driving history. Untruthfulness will cause your application to be immediately rejected.</em>
+                    <em>{{ businessChain.name }} will be reviewing your driving history. Untruthfulness will cause your application to be immediately rejected.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -279,7 +279,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Criminal History</div>
-                    <em>{{ business.name }} will be reviewing your criminal history. Untruthfulness will cause your application to be immediately rejected.</em>
+                    <em>{{ businessChain.name }} will be reviewing your criminal history. Untruthfulness will cause your application to be immediately rejected.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -396,7 +396,7 @@
                     <div class="h5">Employment History</div>
                     <em>Please supply the requested information below for your previous 3 employers.
                         Inaccurate information (example: wrong phone number) will delay the processing of your application.
-                        Please notify your work references that a {{ business.name }} representative will be contacting them.
+                        Please notify your work references that a {{ businessChain.name }} representative will be contacting them.
                     </em>
                 </b-col>
             </b-row>
@@ -482,7 +482,7 @@
                     <em>Please list three references that have personal knowledge of you and your character.
                         Do not use anyone used in the Professional Reference section.
                         Inaccurate information (example: wrong phone number) will delay the processing of your application.
-                        Please notify your personal references that a {{ business.name }} representative will be contacting them.
+                        Please notify your personal references that a {{ businessChain.name }} representative will be contacting them.
                     </em>
                 </b-col>
             </b-row>
@@ -536,7 +536,7 @@
     import States from '../../classes/States';
 
     export default {
-        props: ['business'],
+        props: ['businessChain'],
 
         mixins: [],
 
@@ -553,7 +553,6 @@
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
                 states: new States(),
                 form: new Form({
-                    business_id: this.business.id,
                     first_name: '',
                     middle_initial: '',
                     last_name: '',
@@ -646,7 +645,7 @@
 
         methods: {
             saveApp() {
-                this.form.post('/'+this.business.id+'/caregiver-application');
+                this.form.post('/'+this.businessChain.slug+'/apply');
             }
         },
 

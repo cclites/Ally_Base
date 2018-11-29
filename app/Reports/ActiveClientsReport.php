@@ -4,7 +4,7 @@ namespace App\Reports;
 use App\Shift;
 use App\Payment;
 
-class ActiveClientsReport extends BaseReport
+class ActiveClientsReport extends BusinessResourceReport
 {
     public $range;
     public $compareRange;

@@ -2,6 +2,8 @@
 namespace Tests\Feature;
 
 use App\Business;
+use App\Caregiver;
+use App\Client;
 use App\Schedule;
 use App\Shift;
 use App\Shifts\ScheduleConverter;
@@ -23,10 +25,15 @@ class ScheduleConverterTest extends TestCase
      */
     public $business;
 
+    private $client;
+    private $caregiver;
+
     public function setUp()
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();
+        $this->client = factory(Client::class)->create();
+        $this->caregiver = factory(Caregiver::class)->create();
         $this->scheduleConverter = new ScheduleConverter($this->business);
     }
 
@@ -36,8 +43,8 @@ class ScheduleConverterTest extends TestCase
         $schedule = factory(Schedule::class)->create([
             'starts_at' => $date,
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
         ]);
 
         $start = $date->copy()->subHour(); $end = $date->copy()->addHour();
@@ -51,8 +58,8 @@ class ScheduleConverterTest extends TestCase
         $schedule = factory(Schedule::class)->create([
             'starts_at' => Carbon::now(),
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
             'converted_at' => Carbon::now()
         ]);
         $result = $this->scheduleConverter->hasBeenConverted($schedule);
@@ -65,8 +72,8 @@ class ScheduleConverterTest extends TestCase
         $schedule = factory(Schedule::class)->create([
             'starts_at' => $date,
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
         ]);
 
         $start = $date->copy()->subHour(); $end = $date->copy()->addHour();
@@ -82,15 +89,15 @@ class ScheduleConverterTest extends TestCase
         $schedule = factory(Schedule::class)->create([
             'starts_at' => $date,
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
         ]);
         $shift = factory(Shift::class)->create([
             'schedule_id' => null,
             'checked_in_time' => $date->copy()->subHour()->setTimezone('UTC'),
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
         ]);
 
         $result = $this->scheduleConverter->shiftMatchesTime($schedule, $date);
@@ -103,8 +110,8 @@ class ScheduleConverterTest extends TestCase
         $schedule = factory(Schedule::class)->create([
             'starts_at' => $date,
             'business_id' => $this->business->id,
-            'client_id' => 1,
-            'caregiver_id' => 1,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
         ]);
 
         $start = $date->copy()->subHour(); $end = $date->copy()->addHour();

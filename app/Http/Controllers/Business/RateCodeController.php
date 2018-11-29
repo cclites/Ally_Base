@@ -18,13 +18,13 @@ class RateCodeController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = $this->business()->rateCodes();
+        $query = RateCode::forRequestedBusinesses()->ordered();
 
         if ($type = $request->input('type')) {
             $query->where('type', $type);
         }
 
-        $rateCodes = $query->orderBy('name')->get();
+        $rateCodes = $query->get();
 
         if ($request->expectsJson()) {
             return $rateCodes;
@@ -36,12 +36,15 @@ class RateCodeController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \App\Http\Requests\UpdateRateCodeRequest $request
      * @return \Illuminate\Http\Response
      */
     public function store(UpdateRateCodeRequest $request)
     {
-        $rateCode = $this->business()->rateCodes()->create($request->validated());
+        $data = $request->filtered();
+        $this->authorize('create', [RateCode::class, $data]);
+
+        $rateCode = RateCode::create($data);
         return new CreatedResponse('The rate code has been created.', $rateCode);
     }
 
@@ -53,9 +56,7 @@ class RateCodeController extends BaseController
      */
     public function show(RateCode $rateCode)
     {
-        if ($rateCode->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this rate code.');
-        }
+        $this->authorize('read', $rateCode);
 
         return response($rateCode);
     }
@@ -70,11 +71,10 @@ class RateCodeController extends BaseController
      */
     public function update(UpdateRateCodeRequest $request, RateCode $rateCode)
     {
-        if ($rateCode->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this rate code.');
-        }
+        $this->authorize('update', $rateCode);
+        $data = $request->filtered();
 
-        $rateCode->update($request->validated());
+        $rateCode->update($data);
         return new SuccessResponse('The rate code has been updated', $rateCode);
     }
 
@@ -86,9 +86,7 @@ class RateCodeController extends BaseController
      */
     public function destroy(RateCode $rateCode)
     {
-        if ($rateCode->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this rate code.');
-        }
+        $this->authorize('delete', $rateCode);
 
         try {
             if (!$rateCode->delete()) throw new \Exception();

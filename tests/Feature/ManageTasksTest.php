@@ -466,6 +466,8 @@ class ManageTasksTest extends TestCase
     /** @test */
     public function an_office_user_cannot_update_another_businesses_task()
     {
+        $this->withExceptionHandling();
+
         $business2 = factory('App\Business')->create();
         $user2 = factory('App\OfficeUser')->create();
         $user2->businesses()->attach($business2->id);
@@ -477,8 +479,8 @@ class ManageTasksTest extends TestCase
 
         $this->actingAs($this->officeUser->user);
 
-        $this->patchJson(route('business.tasks.update', ['task' => $task->id]), $task->toArray())
-            ->assertStatus(403);
+        $response = $this->patchJson(route('business.tasks.update', ['task' => $task->id]), $task->toArray());
+        $response->assertStatus(403);
     }
 
     /** @test */

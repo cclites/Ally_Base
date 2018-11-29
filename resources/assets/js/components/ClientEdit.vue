@@ -42,6 +42,10 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
+                    <b-form-group label="Office Location" label-for="business_id">
+                        <business-location-select v-model="form.business_id"></business-location-select>
+                        <input-help :form="form" field="business_id" text="Select the business location for this client (if applicable)."></input-help>
+                    </b-form-group>
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
                             <b-form-radio value="M">Male</b-form-radio>
@@ -104,22 +108,10 @@
                     <b-form-group label="Date inquired about Service">
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
-                    <b-row>
-                        <b-col md="9">
-                            <b-form-group label="How were they referred?" label-for="referral">
-                                <b-form-select id="referral"
-                                               v-model="form.referral_source_id"
-                                >
-                                    <option :value="referralsource.id" v-for="referralsource in referralsources">{{ referralsource.organization }}</option>
-                                </b-form-select>
-                            </b-form-group>
-                        </b-col>
-                        <b-col md="3" class="pad-top">
-                            <div class="pt-3">
-                                <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
-                            </div>
-                        </b-col>
-                    </b-row>
+
+                    <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                    <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+
                     <b-form-group>
                         <b-form-checkbox id="ambulatory"
                                          v-model="form.ambulatory"
@@ -359,6 +351,8 @@
     import ClientForm from '../mixins/ClientForm';
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
+    import BusinessLocationSelect from './business/BusinessLocationSelect'
+    import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     window.croppie = require('croppie');
 
     export default {
@@ -372,7 +366,9 @@
         mixins: [ClientForm, FormatsDates],
 
         components: {
-            DatePicker
+            ReferralSourceSelect,
+            DatePicker,
+            BusinessLocationSelect,
         },
 
         data() {
@@ -389,7 +385,7 @@
                     onboard_status: this.client.onboard_status,
                     inquiry_date: this.client.inquiry_date ? this.formatDate(this.client.inquiry_date) : '',
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
-                    referral_source_id: this.client.referral_source ? this.client.referral_source.id : null,
+                    referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
                     diagnosis: this.client.diagnosis,
                     ambulatory: !!this.client.ambulatory,
                     gender: this.client.gender,
@@ -404,6 +400,7 @@
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
+                    business_id: this.client.business_id,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,

@@ -2,8 +2,6 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\CaregiverLicense
@@ -11,11 +9,13 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $id
  * @property int $caregiver_id
  * @property string $name
- * @property string $description
- * @property string $expires_at
+ * @property string|null $description
+ * @property \Carbon\Carbon $expires_at
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Caregiver $caregiver
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereDescription($value)
@@ -25,10 +25,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class CaregiverLicense extends Model implements Auditable
+class CaregiverLicense extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $table = 'caregiver_licenses';
     protected $guarded = ['id'];
     public $dates = ['expires_at'];

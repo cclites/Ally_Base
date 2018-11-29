@@ -8,6 +8,7 @@ trait ShiftReportFilters
 {
     public function forShift(Shift $shift) {
         $this->query()->where('id', $shift->id);
+        return $this;
     }
 
     public function forTransaction(GatewayTransaction $transaction) {
@@ -21,6 +22,7 @@ trait ShiftReportFilters
                 $q->where('deposits.id', $transaction->deposit->id);
             });
         }
+        return $this;
     }
 
     public function forPaymentMethod($method_type)
@@ -28,12 +30,14 @@ trait ShiftReportFilters
         $this->query()->whereHas('client', function($q) use ($method_type) {
             $q->where('default_payment_type', $method_type);
         });
+        return $this;
     }
 
     public function forReconciliationReport(GatewayTransaction $transaction) {
         if ($transaction->deposit) {
             $this->query()->where('provider_fee', '>', 0);
         }
+        return $this;
     }
 
 }

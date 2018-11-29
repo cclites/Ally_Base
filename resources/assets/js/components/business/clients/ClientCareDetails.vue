@@ -3,6 +3,7 @@
         header="Detailed Client Care Needs"
         header-text-variant="white"
         header-bg-variant="info"
+        class="client-care-needs"
     >
         <h2>General</h2>
         <b-form-group label="Living Arrangements">
@@ -414,7 +415,9 @@
     }
 </script>
 
-<style>
-    .form-group legend { font-weight: 600; }
-    label.custom-radio { align-items: center; }
+<style lang="scss">
+    .client-care-needs {
+        .form-group legend { font-weight: 600; }
+        label.custom-radio { align-items: center; }
+    }
 </style>

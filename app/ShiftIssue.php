@@ -1,9 +1,5 @@
 <?php
-
 namespace App;
-
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ShiftIssue
@@ -13,7 +9,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int $client_injury
  * @property int $caregiver_injury
  * @property string|null $comments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Shift $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereCaregiverInjury($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereClientInjury($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereComments($value)
@@ -21,9 +19,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereShiftId($value)
  * @mixin \Eloquent
  */
-class ShiftIssue extends Model implements Auditable
+class ShiftIssue extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'shift_issues';
     public $timestamps = false;

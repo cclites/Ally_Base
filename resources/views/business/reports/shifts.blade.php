@@ -16,7 +16,6 @@
             :admin="{{ (int) is_admin() }}"
             :imports="{{ json_encode($imports) }}"
             :autoload="{{ (int) request('autoload', 1) }}"
-            :multi_location="{{ json_encode($multiLocation) }}"
             :activities="{{ $activities }}">
         </business-shift-report>
         {{--<business-shift-history :shifts="{{ $shifts }}"></business-shift-history>--}}

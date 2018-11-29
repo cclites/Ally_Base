@@ -13,7 +13,7 @@ class CaregiverLocationController extends BaseController
 
     public function report()
     {
-        $clients = $this->business()->clients()->with('user', 'evvAddress')->get();
+        $clients = Client::forRequestedBusinesses()->with('user', 'evvAddress')->get();
         return view('business.caregivers.distance_report', compact('clients'));
     }
 
@@ -30,9 +30,8 @@ class CaregiverLocationController extends BaseController
         if (empty($data['distance'])) $data['distance'] = self::DEFAULT_DISTANCE;
 
         $client = Client::with('evvAddress')->find($data['client_id']);
-        if ($this->business()->id != $client->business_id) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
+
         if (!$client->evvAddress) {
             return new ErrorResponse(400, 'This client does not have service address on file.');
         }

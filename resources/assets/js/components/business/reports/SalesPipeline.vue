@@ -30,6 +30,12 @@
                             </b-form-group>
                         </b-col>
 
+                        <b-col lg="3">
+                            <b-form-group label="Office Location">
+                                <business-location-select v-model="form.businesses[0]" :allow-all="true"></business-location-select>
+                            </b-form-group>
+                        </b-col>
+
                         <b-col lg="2">
                             <b-form-group label="&nbsp;">
                                 <b-button variant="info" @click="fetchData()">Generate</b-button>
@@ -66,9 +72,11 @@
 import axios from 'axios';
 import ECharts from 'vue-echarts';
 import moment from 'moment';
+import BusinessLocationSelect from "../BusinessLocationSelect";
 
 export default {
     components: {
+        BusinessLocationSelect,
         ECharts,
     },
     mounted() {
@@ -81,6 +89,7 @@ export default {
             form: new Form({
                 start_date: '09/01/2018',
                 end_date: '12/01/2018',
+                businesses: [""],
             }),
             totalProspects: 0,
             pipeline: {
@@ -233,7 +242,7 @@ export default {
             this.referralData = {};
             Object.keys(this.pipeline).forEach(field => this.pipeline[field] = 0);
 
-            this.form.post(`/business/reports/sales-pipeline`)
+            this.form.get(`/business/reports/sales-pipeline`)
                 .then(({data}) => {
                     const {start_date, end_date} = this.form;
                     this.loading = false;

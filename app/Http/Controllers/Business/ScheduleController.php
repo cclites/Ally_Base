@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Business;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
 use App\Http\Requests\CreateScheduleRequest;
+use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
@@ -26,38 +28,31 @@ class ScheduleController extends BaseController
 {
     public function index()
     {
-        $multiLocation = [
-            'multiLocationRegistry' => $this->business()->multi_location_registry,
-            'name' => $this->business()->name
-        ];
-
-        return view('business.schedule', ['business' => $this->business(), 'multiLocation' => $multiLocation]);
+        return view('business.schedule', ['business' => $this->business()]);
     }
 
-    public function events(Request $request, ScheduleAggregator $aggregator)
+    public function events(Request $request)
     {
-        $aggregator->where('business_id', $this->business()->id);
+        $query = Schedule::forRequestedBusinesses()
+            ->with(['client', 'caregiver', 'shifts', 'carePlan'])
+            ->ordered();
 
         // Filter by client or caregiver
         if ($client_id = $request->input('client_id')) {
-            $aggregator->where('client_id', $client_id);
+            $query->where('client_id', $client_id);
         }
+
         if ($caregiver_id = $request->input('caregiver_id')) {
-            $aggregator->where('caregiver_id', $caregiver_id);
+            $query->where('caregiver_id', $caregiver_id);
         } elseif ($request->input('caregiver_id') === '0') {
-            $aggregator->where('caregiver_id', null);
+            $query->where('caregiver_id', null);
         }
 
-        $start = new Carbon(
-            $request->input('start', date('Y-m-d', strtotime('First day of this month'))),
-            $this->business()->timezone
-        );
-        $end = new Carbon(
-            $request->input('end', date('Y-m-d', strtotime('First day of next month'))),
-            $this->business()->timezone
-        );
+        $start = Carbon::parse($request->input('start', 'First day of this month'));
+        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse($aggregator->getSchedulesBetween($start, $end));
+        $events = new ScheduleEventsResponse($schedules);
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
         return [
@@ -75,9 +70,7 @@ class ScheduleController extends BaseController
      */
     public function show(Schedule $schedule)
     {
-        if (!$this->businessHasSchedule($schedule)) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.', $schedule);
-        }
+        $this->authorize('read', $schedule);
 
         return new ScheduleResponse($schedule->load('client'));
     }
@@ -93,19 +86,16 @@ class ScheduleController extends BaseController
      */
     public function store(CreateScheduleRequest $request, ScheduleCreator $creator)
     {
-        if (!$this->businessHasClient($request->client_id)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
-        if ($request->caregiver_id && !$this->businessHasCaregiver($request->caregiver_id)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $data = $request->filtered();
+        $this->authorize('create', [Schedule::class, $data]);
+        $business = $request->getBusiness();
 
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
-        $startsAt = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        $startsAt = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
         $creator->startsAt($startsAt)
             ->duration($request->duration)
-            ->assignments($this->business()->id, $request->client_id, $request->caregiver_id)
+            ->assignments($business->id, $request->client_id, $request->caregiver_id)
             ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
         if ($request->hours_type == 'overtime') {
@@ -124,7 +114,7 @@ class ScheduleController extends BaseController
         }
 
         if ($request->interval_type) {
-            $endDate = Carbon::createFromTimestamp($request->recurring_end_date, $this->business()->timezone);
+            $endDate = Carbon::createFromTimestamp($request->recurring_end_date, $business->timezone);
             $creator->interval($request->interval_type, $endDate, $request->bydays ?? []);
         }
 
@@ -159,9 +149,10 @@ class ScheduleController extends BaseController
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
     {
-        if (!$this->businessHasSchedule($schedule)) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.');
-        }
+        $data = $request->filtered();
+        $business = $request->getBusiness();
+        $this->authorize('update', $schedule);
+        $this->authorize('read', $business);
 
         $totalHours = $aggregator->getTotalScheduledHoursForWeekOf($schedule->starts_at, $schedule->client_id);
         $newTotalHours = $totalHours - ($schedule->duration / 60) + ($request->duration / 60);
@@ -185,7 +176,7 @@ class ScheduleController extends BaseController
         }
 
         $data = $request->validated();
-        $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $this->business()->timezone);
+        $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
         unset($data['notes']);
         $schedule->update($data);
         return new SuccessResponse('The schedule has been updated.');
@@ -224,9 +215,7 @@ class ScheduleController extends BaseController
      */
     public function updateStatus(Schedule $schedule)
     {
-        if (!$this->businessHasSchedule($schedule)) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.');
-        }
+        $this->authorize('update', $schedule);
 
         if ($schedule->shifts->count()) {
             return new ErrorResponse(400, 'This schedule cannot be modified because it already has an active shift.');
@@ -266,9 +255,7 @@ class ScheduleController extends BaseController
      */
     public function destroy(Schedule $schedule)
     {
-        if (!$this->businessHasSchedule($schedule)) {
-            return new ErrorResponse(403, 'You do not have access to this schedule.');
-        }
+        $this->authorize('delete', $schedule);
 
         // Schedules are soft deleted now so we do not have to worry about related shifts
         $schedule->delete();
@@ -284,10 +271,10 @@ class ScheduleController extends BaseController
      */
     public function bulkUpdate(BulkUpdateScheduleRequest $request, ScheduleAggregator $aggregator)
     {
-        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $query = $request->scheduleQuery();
         $schedules = $query->get();
-        $client = Client::find($request->client_id);
 
+        $client = Client::find($request->client_id);
         $this->validateCaregiverAssignment($client);
 
         if (!$schedules->count()) {
@@ -405,7 +392,7 @@ class ScheduleController extends BaseController
      */
     public function bulkDestroy(BulkDestroyScheduleRequest $request)
     {
-        $query = $request->scheduleQuery()->where('business_id', $this->business()->id);
+        $query = $request->scheduleQuery();
         // Schedules are soft deleted now so we do not have to worry about related shifts
         $schedules = $query->get();
 
@@ -423,24 +410,17 @@ class ScheduleController extends BaseController
     /**
      * Handles printable schedule report submission
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\PrintableScheduleRequest $request
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function print(Request $request, ScheduleAggregator $aggregator)
+    public function print(PrintableScheduleRequest $request)
     {
-        $request->validate(['start_date' => 'required|date', 'end_date' => 'required|date']);
-        $start = new Carbon(
-            $request->input('start_date'),
-            $this->business()->timezone
-        );
-        $end = (new Carbon(
-            $request->input('end_date'),
-            $this->business()->timezone
-        ))->setTime(23, 59, 59);
+        $start = Carbon::parse($request->input('start', 'First day of this month'));
+        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $business = $request->getBusiness();
+        $schedules = $business->schedules()->whereBetween('starts_at', [$start, $end])->get();
 
-        $aggregator->where('business_id', $this->business()->id);
-        $schedules = $aggregator->getSchedulesBetween($start, $end);
-        $schedules->map(function ($schedule) {
+        $schedules = $schedules->map(function ($schedule) {
             $schedule->date = $schedule->starts_at->format('m/d/Y');
             $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
             return $schedule;
@@ -481,6 +461,7 @@ class ScheduleController extends BaseController
 
     public function preview(Schedule $schedule)
     {
+        $this->authorize('read', $schedule);
         $data = $schedule->load(['caregiver', 'client'])->toArray();
 
         if ($schedule->caregiver) {

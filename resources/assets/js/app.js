@@ -10,25 +10,21 @@ require('./ie-fix');
 require('./custom');
 require('./sidebarmenu');
 
-import Form from './classes/Form';
-window.Form = Form;
-import Countries from './classes/Countries';
-window.Countries = Countries;
-
-window.Vue = require('vue');
-
-// Vue Third Party Components
-
-import BootstrapVue from 'bootstrap-vue';
-Vue.use(BootstrapVue);
-
-import VueTheMask from 'vue-the-mask';
-Vue.use(VueTheMask);
-
+import BootstrapVue from 'bootstrap-vue'
+import Form from './classes/Form'
+import store from './store'
+import VueTheMask from 'vue-the-mask'
 import VeeValidate from 'vee-validate'
-Vue.use(VeeValidate, {fieldsBagName: '_fields'});
-
 import * as VueGoogleMaps from 'vue2-google-maps'
+import 'vue-plyr';
+import 'vue-plyr/dist/vue-plyr.css';
+
+window.Form = Form;
+window.Vue = require('vue');
+window.Store = store;
+Vue.use(BootstrapVue);
+Vue.use(VueTheMask);
+Vue.use(VeeValidate, {fieldsBagName: '_fields'});
 Vue.use(VueGoogleMaps, {
     load: {
         key: window.gmapsKey,
@@ -123,6 +119,7 @@ Vue.component('admin-financial-summary', require('./components/admin/reports/Fin
 Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSettings.vue'));
 
 // Office User
+Vue.component('business-bank-accounts', require('./components/business/settings/BusinessBankAccounts'));
 Vue.component('business-care-match', require('./components/business/BusinessCareMatch'));
 Vue.component('business-caregiver-availability-tab', require('./components/business/caregivers/BusinessCaregiverAvailabilityTab'));
 Vue.component('business-caregiver-skills-tab', require('./components/business/caregivers/BusinessCaregiverSkillsTab'));
@@ -145,6 +142,7 @@ Vue.component('business-exception', require('./components/BusinessException.vue'
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
+Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-rate-codes', require('./components/business/rate_codes/BusinessRateCodes'));
 Vue.component('business-reconciliation-report', require('./components/BusinessReconciliationReport'));
@@ -187,6 +185,7 @@ Vue.component('sales-pipeline-report', require('./components/business/reports/Sa
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
+Vue.component('caregiver-client-narrative', require('./components/caregivers/ClientNarrative'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
@@ -216,6 +215,7 @@ Vue.component('client-addresses-tab', require('./components/business/clients/Cli
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
 Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
+Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
@@ -297,6 +297,11 @@ Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));
 /* Payroll Policy */
 Vue.component('payroll-policy', require('./components/business/tabs/PayrollPolicy'));
 
+Vue.component('knowledge-manager', require('./components/knowledge/KnowledgeManager'));
+Vue.component('knowledge-editor', require('./components/knowledge/KnowledgeEditor'));
+Vue.component('knowledge-item', require('./components/knowledge/KnowledgeItem'));
+Vue.component('knowledge-base', require('./components/knowledge/KnowledgeBase'));
+
 Vue.filter('date', value => {
     return moment.utc(value).local().format('L');
 });
@@ -335,5 +340,6 @@ Vue.directive('tooltip', function(el, binding){
 
 const app = new Vue({
     el: '#main-wrapper',
+    store,
 });
 require('./alerts');

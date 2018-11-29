@@ -12,7 +12,7 @@ class ShiftsController extends Controller
     public function data(Request $request)
     {
         $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
+        $report->forRequestedBusinesses()->orderBy('checked_in_time');
 
         $this->addShiftReportFilters($report, $request);
 

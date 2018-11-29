@@ -38,9 +38,10 @@
 
 <script>
     import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsListData from "../../../mixins/FormatsListData";
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsListData],
 
         props: ['referralSources', 'editSourceId', 'createSource'],
 
@@ -72,6 +73,12 @@
                         key: 'phone',
                         label: 'Phone',
                         sortable: true
+                    },
+                    {
+                        key: 'business_id',
+                        label: 'Location',
+                        sortable: true,
+                        formatter: this.showBusinessName,
                     },
                     {
                         key: 'created_at',

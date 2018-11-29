@@ -13,43 +13,32 @@ class ClientExcludedCaregiverController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         return response()->json($client->excludedCaregivers);
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
+     * @param \App\Client $client
      * @return ErrorResponse|\Illuminate\Http\Response
      */
-    public function store(Request $request, $client)
+    public function store(Request $request, Client $client)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->validate(['caregiver_id' => 'required|int']);
 
         $caregiver = ClientExcludedCaregiver::create([
-            'client_id' => $client,
+            'client_id' => $client->id,
             'caregiver_id' => $data['caregiver_id'],
             'note' => $request->input('note', null)
         ]);
@@ -62,40 +51,6 @@ class ClientExcludedCaregiverController extends BaseController
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\ClientExcludedCaregiver  $clientExcludedCaregiver
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ClientExcludedCaregiver $clientExcludedCaregiver)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\ClientExcludedCaregiver  $clientExcludedCaregiver
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ClientExcludedCaregiver $clientExcludedCaregiver)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\ClientExcludedCaregiver  $clientExcludedCaregiver
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, ClientExcludedCaregiver $clientExcludedCaregiver)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int $id
@@ -105,9 +60,8 @@ class ClientExcludedCaregiverController extends BaseController
     {
         $excluded = ClientExcludedCaregiver::find($id);
 
-        if (!$this->businessHasClient($excluded->client_id)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $client = $excluded->client;
+        $this->authorize('update', $client);
 
         $excluded->delete();
         return response()->json([]);
