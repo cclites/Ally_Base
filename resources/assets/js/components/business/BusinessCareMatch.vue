@@ -181,6 +181,9 @@
             <template slot="rating" scope="row">
 
             </template>
+            <template slot="distance" scope="row">
+                {{ convertToMiles(row.item.distance) }}
+            </template>
             <template slot="actions" scope="row">
                 <slot :item="row.item">
                     <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
@@ -193,10 +196,11 @@
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDistance from "../../mixins/FormatsDistance";
     import Languages from "../../classes/Languages";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDistance],
 
         props: {
             clients: Array,
@@ -245,7 +249,6 @@
                     {
                         key: 'distance',
                         sortable: true,
-                        formatter: this.numberFormat
                     },
                     {
                         key: 'activity_match',
