@@ -553,6 +553,19 @@ class ReportsController extends BaseController
             }
         }
 
+        if ($confirmed = $request->input('confirmed')) {
+            if ($confirmed === 'unconfirmed') {
+                $report->query()->where('status', Shift::WAITING_FOR_CONFIRMATION);
+            }
+            else {
+                $report->query()->whereNotIn('status',  [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
+            }
+        }
+
+        if (is_array($flags = $request->input('flags'))) {
+            $report->query()->whereFlagsIn($flags);
+        }
+
     }
 
     public function exportTimesheets()

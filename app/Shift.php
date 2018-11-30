@@ -13,6 +13,7 @@ use App\Shifts\ShiftStatusManager;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Shift
@@ -811,5 +812,17 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $query->whereBetween('checked_in_time', [$startDate, $endDate]);
     }
 
+    /**
+     * Search shifts that contain any of the provided flags
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $flags
+     */
+    public function scopeWhereFlagsIn(Builder $query, array $flags)
+    {
+        $query->whereHas('shiftFlags', function($q) use ($flags) {
+            $q->whereIn('flag', $flags);
+        });
+    }
 
 }

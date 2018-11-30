@@ -4,8 +4,6 @@
             <b-col lg="6">
                 <b-card
                         header="Client Charges for Date Range &amp; Filters"
-                        header-text-variant="white"
-                        header-bg-variant="info"
                 >
                     <div id="client-charge-summary">
                         <h5 class="d-none d-print-block">Client Charge Summary</h5>
@@ -58,8 +56,6 @@
             <b-col lg="6">
                 <b-card
                         header="Caregiver Payments for Date Range &amp; Filters"
-                        header-text-variant="white"
-                        header-bg-variant="info"
                 >
                     <div id="caregiver-payment-summary">
                         <h4 class="d-none d-print-block">Caregiver Payment Summary</h4>

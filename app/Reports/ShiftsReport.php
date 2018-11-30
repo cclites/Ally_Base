@@ -86,6 +86,7 @@ class ShiftsReport extends BusinessResourceReport
                 'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
                 'goals' => $shift->goals,
                 'questions' => $shift->questions,
+                'flags' => $shift->flags,
             ];
             return $row;
         });
