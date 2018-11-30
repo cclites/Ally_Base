@@ -129,16 +129,24 @@
                         <div class="card">
                             <div class="card-body">
                                 <h6 class="card-title">Filter by Flags</h6>
-                                <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags">All Flags</b-form-checkbox>
-                                <b-form-checkbox v-for="(display, value) in flagTypes"
-                                                 v-model="filters.flags"
-                                                 :value="value"
-                                                 :key="value"
-                                                 class="flag-checkbox"
-                                                 @change="includeAllFlags = false"
-                                >
-                                    {{ display }}
-                                </b-form-checkbox>
+                                <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
+                                    <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
+                                    <b-radio value="none">Has No Flags</b-radio><br />
+                                    <b-radio value="selected">Has Selected Flags:</b-radio>
+                                </b-form-radio-group>
+                                <b-col lg="12">
+                                    <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
+                                    <b-form-checkbox v-for="(display, value) in flagTypes"
+                                                     v-model="filters.flags"
+                                                     :value="value"
+                                                     :key="value"
+                                                     class="flag-checkbox"
+                                                     :disabled="filters.flag_type !== 'selected'"
+                                                     @change="includeAllFlags = false"
+                                    >
+                                        {{ display }}
+                                    </b-form-checkbox>
+                                </b-col>
                             </div>
                         </div>
                     </b-col>
@@ -148,7 +156,7 @@
                 <b-btn variant="info" @click="reloadData()">
                     Generate Report
                 </b-btn>
-                <b-btn variant="default" @click="showFiltersModal=false">Close</b-btn>
+                <b-btn variant="default" @click="filtersModal=false">Close</b-btn>
             </div>
         </b-modal>
 
@@ -244,9 +252,10 @@
                     payment_method: "",
                     charge_status: "",
                     confirmed_status: "",
+                    flag_type: "any",
                     flags: [],
                 },
-                includeAllFlags: true,
+                includeAllFlags: false,
                 filterDescription: '',
                 clients: [],
                 caregivers: [],
@@ -414,7 +423,7 @@
                 return '?start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
                         + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
                         + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
-                        + '&businesses[]=' + filters.business_id + '&' + jQuery.param({'flags': filters.flags})
+                        + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags})
             }
         },
 
@@ -425,12 +434,6 @@
                     for (let filter of Object.keys(this.filters)) {
                         let value = this.getLocalStorage(filter);
                         if (value) this.filters[filter] = value;
-                    }
-                    // Default  flags
-                    this.includeAllFlags = false;
-                    if (!this.filters.flags.length) {
-                        this.includeAllFlags = true;
-                        this.filters.flags = this.shiftFlags;
                     }
                     // Sorting/show UI
                     let sortBy = this.getLocalStorage('sortBy');
@@ -504,20 +507,28 @@
                         this.loaded++;
                     })
                     .catch(error => {
+                        if (error.response.data && error.response.data.message) {
+                            alerts.addMessage('error', error.response.data.message);
+                        }
                         this.filtersModal = true;
                     });
             },
 
-            getFilterDescription()
-            {
+            getFilterDescription() {
                 return `<strong>Current Filters:</strong> `
-                + `Dates: ${this.getTextFromRefInput('startDate')} - ${this.getTextFromRefInput('endDate')}; `
-                + `Caregiver: ${this.getTextFromRefInput('caregiverFilter')}; `
-                + `Client: ${this.getTextFromRefInput('clientFilter')}; `
-                + `Payment Method: ${this.getTextFromRefInput('paymentFilter')}; `
-                + `Charge Status: ${this.getTextFromRefInput('chargeFilter')}; `
-                + `Confirmed Status: ${this.getTextFromRefInput('confirmedFilter')}; `
-                + `Flags: ${this.filters.flags.length === this.shiftFlags.length ? 'ALL' : this.getTextFromSelector($('.flag-checkbox > input:checked').closest('label'))}`;
+                    + `Dates: ${this.getTextFromRefInput('startDate')} - ${this.getTextFromRefInput('endDate')}; `
+                    + `Caregiver: ${this.getTextFromRefInput('caregiverFilter')}; `
+                    + `Client: ${this.getTextFromRefInput('clientFilter')}; `
+                    + `Payment Method: ${this.getTextFromRefInput('paymentFilter')}; `
+                    + `Charge Status: ${this.getTextFromRefInput('chargeFilter')}; `
+                    + `Confirmed Status: ${this.getTextFromRefInput('confirmedFilter')}; `
+                    + this.getFlagFilterDescription();
+            },
+
+            getFlagFilterDescription() {
+                if (this.filters.flag_type === 'none') return 'No Flags';
+                if (this.filters.flag_type === 'selected') return `Flags: ${this.filters.flags.length === this.shiftFlags.length ? 'ALL' : this.getTextFromSelector($('.flag-checkbox > input:checked').closest('label'))}`;
+                return '';
             },
 
             getTextFromSelector($selector) {
@@ -697,7 +708,10 @@
             },
 
             updateFilterFlags() {
-                this.filters.flags = this.includeAllFlags ? this.shiftFlags : [];
+                this.filters.flags = this.includeAllFlags && this.filters.flag_type === 'selected' ? this.shiftFlags : [];
+                if (this.filters.flag_type !== 'selected') {
+                    this.includeAllFlags = false;
+                }
             }
         },
 

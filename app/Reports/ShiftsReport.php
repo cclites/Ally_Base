@@ -51,6 +51,7 @@ class ShiftsReport extends BusinessResourceReport
     protected function results()
     {
         $shifts = $this->query->get();
+        $this->generated = true;
         $rows = $shifts->map(function(Shift $shift) {
             $row = [
                 'id' => $shift->id,
@@ -91,5 +92,16 @@ class ShiftsReport extends BusinessResourceReport
             return $row;
         });
         return $rows;
+    }
+
+    /**
+     * Count the number of rows
+     *
+     * @return int
+     */
+    public function count()
+    {
+        if ($this->rows) return $this->rows->count();
+        return $this->query()->count();
     }
 }

@@ -41,8 +41,10 @@ class ShiftFlagManager
             ->where('caregiver_id', $shift->caregiver_id)
             ->where('client_id', $shift->client_id)
             ->where(function($q) use ($shift) {
-                $q->whereBetween('checked_in_time', [$shift->checked_in_time, $shift->checked_out_time])
-                    ->orWhereBetween('checked_out_time', [$shift->checked_in_time, $shift->checked_out_time]);
+                $checkedIn = $shift->checked_in_time->copy()->addMinutes(5)->toDateTimeString();
+                $checkedOut = $shift->checked_in_time->copy()->subMinutes(5)->toDateTimeString();
+                $q->whereBetween('checked_in_time', [$checkedIn, $checkedOut])
+                    ->orWhereBetween('checked_out_time', [$checkedIn, $checkedOut]);
             })->exists();
     }
 

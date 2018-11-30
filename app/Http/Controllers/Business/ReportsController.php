@@ -383,6 +383,11 @@ class ReportsController extends BaseController
 
         $this->addShiftReportFilters($report, $request);
 
+        if ($report->count() > 1000) {
+            // Limit shift history to 1000 shifts for performance reasons
+            return new ErrorResponse(400, 'There are too many shifts to report.  Please reduce your date range.');
+        }
+
         if ($request->input('export')) {
             return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
                           ->download();
@@ -562,8 +567,14 @@ class ReportsController extends BaseController
             }
         }
 
-        if (is_array($flags = $request->input('flags'))) {
-            $report->query()->whereFlagsIn($flags);
+        $flagType = $request->input('flag_type');
+        if ($flagType && $flagType !== 'any') {
+            if ($flagType === 'none') {
+                $report->query()->doesntHave('shiftFlags');
+            }
+            else if (is_array($flags = $request->input('flags'))) {
+                $report->query()->whereFlagsIn($flags);
+            }
         }
 
     }
