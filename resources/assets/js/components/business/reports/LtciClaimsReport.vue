@@ -36,6 +36,7 @@
                                     <option value="">All Client Types</option>
                                     <option value="LTCI">LTC Insurance</option>
                                     <option value="medicaid">Medicaid</option>
+                                    <option value="va">VA</option>
                                     <option value="private_pay">Private Pay</option>
                                 </b-form-select>
                             </b-form-group>
