@@ -18,16 +18,10 @@ class BusinessClientController extends Controller
      */
     public function index(Business $business)
     {
-        return User::whereRoleType('client')
-                   ->whereActive(1)
-                   ->whereIn('id', function ($q) use ($business) {
-                       $q->select('id')
-                         ->from('clients')
-                         ->where('business_id', $business->id);
-                   })
-                   ->orderBy('lastname')
-                   ->orderBy('firstname')
-                   ->get();
+        return $business->clients()
+            ->ordered()
+            ->active()
+            ->get();
     }
 
     /**

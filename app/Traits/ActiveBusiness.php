@@ -10,6 +10,7 @@ use App\Shift;
 use App\Timesheet;
 use App\User;
 
+
 trait ActiveBusiness
 {
     protected $override;
@@ -17,6 +18,7 @@ trait ActiveBusiness
     /**
      * @return \App\Business
      * @throws \Exception
+     * @deprecated
      */
     protected function business()
     {
@@ -32,6 +34,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Client $client
      * @return bool
+     * @deprecated
      */
     protected function businessHasClient($client)
     {
@@ -54,6 +57,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Prospect $prospect
      * @return bool
+     * @deprecated
      */
     protected function businessHasProspect($prospect)
     {
@@ -76,6 +80,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Caregiver $caregiver
      * @return bool
+     * @deprecated
      */
     protected function businessHasCaregiver($caregiver)
     {
@@ -99,6 +104,7 @@ trait ActiveBusiness
      *
      * @param \App\User $user
      * @return bool
+     * @deprecated
      */
     protected function businessHasUser(User $user)
     {
@@ -117,6 +123,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Shift $shift
      * @return bool
+     * @deprecated
      */
     protected function businessHasShift($shift)
     {
@@ -139,6 +146,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Schedule $schedule
      * @return bool
+     * @deprecated
      */
     protected function businessHasSchedule($schedule)
     {
@@ -161,6 +169,7 @@ trait ActiveBusiness
      *
      * @param int|\App\Timesheet $timesheet
      * @return bool
+     * @deprecated
      */
     protected function businessHasTimesheet($timesheet)
     {
@@ -180,19 +189,10 @@ trait ActiveBusiness
 
     /**
      * @return string
+     * @deprecated
      */
     protected function timezone()
     {
         return $this->business()->timezone ?? 'America/New_York';
-    }
-
-    /**
-     * Override the active business (used for Admins)
-     *
-     * @param \App\Business $business
-     */
-    protected function setBusinessAs(Business $business) {
-        $activeBusiness = app()->make(\App\ActiveBusiness::class);
-        $activeBusiness->set($business);
     }
 }

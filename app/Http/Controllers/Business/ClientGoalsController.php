@@ -15,21 +15,28 @@ class ClientGoalsController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, Client $client)
     {
+        $this->authorize('read', $client);
+
         return response()->json($client->goals()->get());
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
+     * @param \App\Client $client
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, Client $client)
     {
+        $this->authorize('update', $client);
+
         $data = $request->validate(
             [
                 'question' => 'required|max:255',
@@ -56,9 +63,7 @@ class ClientGoalsController extends BaseController
      */
     public function update(Request $request, Client $client, ClientGoal $goal)
     {
-        if ($client->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         $data = $request->validate(
             [
@@ -85,9 +90,7 @@ class ClientGoalsController extends BaseController
      */
     public function destroy(Client $client, ClientGoal $goal)
     {
-        if ($client->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('update', $client);
 
         if ($goal->delete()) {
             return new SuccessResponse('The goal has been archived.', []);

@@ -2,10 +2,89 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Traits\BelongsToBusinesses;
+use Illuminate\Database\Eloquent\Builder;
 
-class Prospect extends Model
+/**
+ * App\Prospect
+ *
+ * @property int $id
+ * @property string $firstname
+ * @property string $lastname
+ * @property string|null $email
+ * @property string|null $client_type
+ * @property string|null $date_of_birth
+ * @property string|null $phone
+ * @property string|null $address1
+ * @property string|null $address2
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $zip
+ * @property string $country
+ * @property string|null $referred_by
+ * @property string|null $last_contacted
+ * @property string|null $initial_call_date
+ * @property int $had_initial_call
+ * @property int $had_assessment_scheduled
+ * @property int $had_assessment_performed
+ * @property int $needs_contract
+ * @property int $expecting_client_signature
+ * @property int $needs_payment_info
+ * @property int $ready_to_schedule
+ * @property int $closed_loss
+ * @property int $closed_win
+ * @property int $business_id
+ * @property int|null $client_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property int|null $referral_source_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
+ * @property-read \App\Client|null $client
+ * @property-read mixed $name
+ * @property-read mixed $name_last_first
+ * @property-read \App\ReferralSource|null $referralSource
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress1($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereAddress2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereBusinessId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereClientType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereClosedLoss($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereClosedWin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereDateOfBirth($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereExpectingClientSignature($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereFirstname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereHadAssessmentPerformed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereHadAssessmentScheduled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereHadInitialCall($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereInitialCallDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereLastContacted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereLastname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereNeedsContract($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereNeedsPaymentInfo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReadyToSchedule($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReferralSourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereReferredBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereZip($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect withConverted()
+ * @mixin \Eloquent
+ */
+class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 {
+    use BelongsToBusinesses;
+
     protected $table = 'prospects';
     protected $guarded = ['id'];
 
@@ -122,5 +201,43 @@ class Prospect extends Model
 
     public function referralSource() {
         return $this->belongsTo('App\ReferralSource');
+    }
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return [$this->business_id];
+    }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    /**
+     * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param string|null $direction
+     */
+    public function scopeOrdered(Builder $builder, string $direction = null)
+    {
+        $builder->orderBy('lastname', $direction ?? 'ASC')
+            ->orderBy('firstname', $direction ?? 'ASC');
+    }
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->whereIn('business_id', $businessIds);
     }
 }

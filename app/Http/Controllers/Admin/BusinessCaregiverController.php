@@ -18,16 +18,11 @@ class BusinessCaregiverController extends Controller
      */
     public function index(Business $business)
     {
-        return User::whereRoleType('caregiver')
-                   ->whereActive(1)
-                   ->whereIn('id', function ($q) use ($business) {
-                       $q->select('caregiver_id')
-                         ->from('business_caregivers')
-                         ->where('business_id', $business->id);
-                   })
-                   ->orderBy('lastname')
-                   ->orderBy('firstname')
-                   ->get();
+        return $business->chain
+            ->caregivers()
+            ->ordered()
+            ->active()
+            ->get();
     }
 
     /**

@@ -9,11 +9,5 @@
 @endsection
 
 @section('content')
-    @if($business->outgoing_sms_number)
-        <business-sms-thread-list :threads="{{ $threads }}" />
-    @else
-        <div class="alert alert-warning">
-            Please contact Ally to enable SMS messages on your account.
-        </div>
-    @endif
+    <business-sms-thread-list :threads="{{ $threads }}" />
 @endsection

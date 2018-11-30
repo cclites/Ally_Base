@@ -42,7 +42,7 @@ class ClientChargesReport extends ScheduledPaymentsReport
         $rows = [];
 
         foreach ($shifts->groupBy('client_id') as $client_id => $client_shifts) {
-            $client = Client::withTrashed()->find($client_id);
+            $client = $client_shifts->first()->client;
             $row = [
                 'id'              => $client_id,
                 'name'            => $client->name(),

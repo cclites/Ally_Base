@@ -3,19 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Rules\ValidTimezoneOrOffset;
-use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateBusinessRequest extends FormRequest
+class UpdateBusinessRequest extends BusinessRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    protected $preserveValidated = true;
 
     /**
      * Get the validation rules that apply to the request.

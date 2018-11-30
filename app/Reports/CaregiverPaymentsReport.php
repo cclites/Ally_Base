@@ -42,7 +42,7 @@ class CaregiverPaymentsReport extends ScheduledPaymentsReport
         $rows = [];
 
         foreach ($shifts->groupBy('caregiver_id') as $caregiver_id => $caregiver_shifts) {
-            $caregiver = Caregiver::withTrashed()->find($caregiver_id);
+            $caregiver = $caregiver_shifts->first()->caregiver;
             $row = [
                 'id'            => $caregiver_id,
                 'name'          => optional($caregiver)->name(),

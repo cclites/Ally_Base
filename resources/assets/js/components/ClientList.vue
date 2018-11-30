@@ -5,19 +5,16 @@
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
             </b-col>
             <b-col lg="3">
+                <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
+            </b-col>
+            <b-col lg="3">
                 <b-form-select v-model="active">
                     <option :value="null">All Clients</option>
                     <option :value="1">Active Clients</option>
                     <option :value="0">Inactive Clients</option>
                 </b-form-select>
             </b-col>
-            <b-col lg="3" v-if="multi_location.multiLocationRegistry == 'yes'">
-                <b-form-select v-model="location" class="mb-1">
-                    <option value="all">All Locations</option>
-                    <option :value="multi_location.name">{{ multi_location.name }}</option>
-                </b-form-select>
-            </b-col>
-            <b-col :lg="multi_location.multiLocationRegistry == 'yes' ? '3' : '6'" class="text-right">
+            <b-col lg="3" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
@@ -59,13 +56,15 @@
 
 <script>
     import FormatsListData from "../mixins/FormatsListData";
+    import BusinessLocationSelect from "./business/BusinessLocationSelect";
+    import business from "../store/modules/business";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
 
     export default {
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsListData],
 
-        props: {
-            'multi_location': Object,
-        },
+        props: {},
 
         data() {
             return {
@@ -79,7 +78,7 @@
                 filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
-                location: 'all',
+                business_id: "",
                 clients: [],
                 fields: [
                     {
@@ -125,17 +124,12 @@
 
         mounted() {
             this.loadClients();
-            if(this.multi_location.multiLocationRegistry == 'yes') {
-                document.querySelectorAll('.location').forEach(elem => {
-                    elem.classList.remove('d-none');
-                })
-            }
         },
 
         computed: {
             listUrl() {
                 let active = (this.active !== null) ? this.active : '';
-                return '/business/clients?json=1&address=1&active=' + active;
+                return '/business/clients?json=1&address=1&active=' + active + '&businesses[]=' + this.business_id;
             }
         },
 

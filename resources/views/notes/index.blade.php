@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <note-list :business="{{ json_encode($business) }}"></note-list>
+    <note-list :notes="{{ $notes }}"></note-list>
 @endsection

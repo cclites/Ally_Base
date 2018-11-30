@@ -4,7 +4,105 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CareDetails extends Model
+/**
+ * App\CareDetails
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property int $lives_alone
+ * @property string|null $pets
+ * @property int $smoker
+ * @property int $alcohol
+ * @property int $incompetent
+ * @property string|null $competency_level
+ * @property int $can_provide_direction
+ * @property int $assist_medications
+ * @property string|null $medication_overseer
+ * @property string|null $safety_measures
+ * @property string|null $safety_instructions
+ * @property string|null $mobility
+ * @property string|null $mobility_instructions
+ * @property string|null $toileting
+ * @property string|null $toileting_instructions
+ * @property string|null $bathing
+ * @property string|null $bathing_frequency
+ * @property string|null $bathing_instructions
+ * @property string|null $vision
+ * @property string|null $hearing
+ * @property string|null $hearing_instructions
+ * @property string|null $diet
+ * @property string|null $diet_likes
+ * @property string|null $feeding_instructions
+ * @property string|null $skin
+ * @property string|null $skin_conditions
+ * @property string|null $hair
+ * @property string|null $hair_frequency
+ * @property string|null $oral
+ * @property string|null $shaving
+ * @property string|null $shaving_instructions
+ * @property string|null $nails
+ * @property string|null $dressing
+ * @property string|null $dressing_instructions
+ * @property string|null $housekeeping
+ * @property string|null $housekeeping_instructions
+ * @property string|null $errands
+ * @property string|null $supplies
+ * @property string|null $supplies_instructions
+ * @property string|null $comments
+ * @property string|null $instructions
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereAlcohol($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereAssistMedications($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereBathing($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereBathingFrequency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereBathingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereCanProvideDirection($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereCompetencyLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereDiet($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereDietLikes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereDressing($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereDressingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereErrands($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereFeedingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHair($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHairFrequency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHearing($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHearingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHousekeeping($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereHousekeepingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereIncompetent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereLivesAlone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereMedicationOverseer($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereMobility($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereMobilityInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereNails($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereOral($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails wherePets($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSafetyInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSafetyMeasures($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereShaving($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereShavingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSkin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSkinConditions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSmoker($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSupplies($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereSuppliesInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereToileting($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereToiletingInstructions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereVision($value)
+ * @mixin \Eloquent
+ */
+class CareDetails extends AuditableModel
 {
     /**
      * The table associated with the model.

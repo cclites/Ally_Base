@@ -117,12 +117,10 @@
                 </div>
             </div>
         </div>
-        @if($business->scheduling)
-            <div class="tab-pane" id="schedule" role="tabpanel">
-                <business-schedule :caregiver="{{ $caregiver }}" :business="{{ activeBusiness() }}"></business-schedule>
-            </div>
-        @endif
-        <div class="tabe-pane" id="clients" role="tabpanel">
+        <div class="tab-pane" id="schedule" role="tabpanel">
+            <business-schedule :caregiver="{{ $caregiver }}" :business="{{ activeBusiness() }}"></business-schedule>
+        </div>
+        <div class="tab-pane" id="clients" role="tabpanel">
             <business-caregiver-clients-tab :caregiver="{{ $caregiver }}"></business-caregiver-clients-tab>
         </div>
         <div class="tab-pane" id="caregiver_notes" role="tabpanel">
@@ -151,7 +149,19 @@
                                     :user-id="{{ $caregiver->id }}"></emergency-contacts-tab>
         </div>
         <div class="tab-pane" id="payment_statement" role="tabpanel">
-            <business-caregiver-pay-statements :caregiver="{{ $caregiver }}" :deposits="{{ $caregiver->deposits }}"></business-caregiver-pay-statements>
+            <!-- Check access to caregiver statements tab via Gate -->
+            @can('view-caregiver-statements', $caregiver)
+                <business-caregiver-pay-statements :caregiver="{{ $caregiver }}" :deposits="{{ $caregiver->deposits }}"></business-caregiver-pay-statements>
+            @else
+                <div class="card">
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <h4>You do not have access to this caregiver's payment statements.</h4>
+                            Due to this caregiver working for a location you do not have access to, you cannot view the caregiver's payment statements.  Payment statements from Ally can include shifts from multiple locations.
+                        </div>
+                    </div>
+                </div>
+            @endcan
         </div>
         <div class="tab-pane" id="misc" role="tabpanel">
             <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>

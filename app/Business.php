@@ -2,12 +2,15 @@
 
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\ChargeableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToOneChain;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Business
@@ -34,54 +37,161 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float $mileage_rate
  * @property string $calendar_default_view
  * @property string $calendar_caregiver_filter
+ * @property int $calendar_remember_filters
  * @property int $auto_confirm
+ * @property int $ask_on_confirm
+ * @property string|null $contact_name
+ * @property string|null $contact_email
+ * @property string|null $contact_phone
+ * @property int $allows_manual_shifts
+ * @property int $location_exceptions
+ * @property int $timesheet_exceptions
+ * @property int $require_signatures
+ * @property int $co_mileage
+ * @property int $co_injuries
+ * @property int $co_comments
+ * @property int $co_expenses
+ * @property int $co_issues
+ * @property int $co_signature
+ * @property string $calendar_next_day_threshold
+ * @property mixed|null $ein
+ * @property string|null $medicaid_id
+ * @property string|null $medicaid_npi_number
+ * @property string|null $medicaid_npi_taxonomy
+ * @property string|null $outgoing_sms_number
+ * @property string|null $multi_location_registry
+ * @property string $shift_rounding_method
+ * @property string|null $pay_cycle
+ * @property string|null $last_day_of_cycle
+ * @property string|null $last_day_of_first_period
+ * @property string|null $mileage_reimbursement_rate
+ * @property array $unpaired_pay_rates
+ * @property string|null $overtime_hours_day
+ * @property string|null $overtime_hours_week
+ * @property string|null $overtime_consecutive_days
+ * @property string|null $dbl_overtime_hours_day
+ * @property string|null $dbl_overtime_consecutive_days
+ * @property string|null $overtime_method
+ * @property int $allow_client_confirmations
+ * @property int $auto_confirm_modified
+ * @property int $shift_confirmation_email
+ * @property int $sce_shifts_in_progress
+ * @property int $charge_diff_email
+ * @property int $auto_append_hours
+ * @property int $auto_confirm_unmodified_shifts
+ * @property int $auto_confirm_verified_shifts
+ * @property string $rate_structure
+ * @property int $include_ally_fee
+ * @property int $use_rate_codes
+ * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BankAccount|null $bankAccount
+ * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
+ * @property-read \App\BusinessChain|null $chain
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clientsUsingProviderPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \App\BankAccount|null $paymentAccount
+ * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ReferralSource[] $referralSources
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\PaymentQueue[] $upcomingPayments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThread[] $smsThreads
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Timesheet[] $timesheets
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $users
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereActive($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAddress2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAllowClientConfirmations($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAllowsManualShifts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAutoAppendHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAutoConfirm($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAutoConfirmModified($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAutoConfirmUnmodifiedShifts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAutoConfirmVerifiedShifts($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereBankAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarCaregiverFilter($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarDefaultView($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarNextDayThreshold($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCalendarRememberFilters($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereChainId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereChargeDiffEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoExpenses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoInjuries($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoIssues($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCoSignature($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereContactEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereContactName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereContactPhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereDblOvertimeConsecutiveDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereDblOvertimeHoursDay($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereDefaultCommissionRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereEin($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereIncludeAllyFee($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLastDayOfCycle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLastDayOfFirstPeriod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereLocationExceptions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMedicaidId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMedicaidNpiNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMedicaidNpiTaxonomy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMileageRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMileageReimbursementRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereMultiLocationRegistry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereOutgoingSmsNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereOvertimeConsecutiveDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereOvertimeHoursDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereOvertimeHoursWeek($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereOvertimeMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePayCycle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePaymentAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePhone1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business wherePhone2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereRateStructure($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereRequireSignatures($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereSceShiftsInProgress($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereScheduling($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereShiftConfirmationEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereShiftRoundingMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereTimesheetExceptions($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereTimezone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUnpairedPayRates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUseRateCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
- * @property int $ask_on_confirm
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereAskOnConfirm($value)
  */
-class Business extends Model implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, Auditable
+class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface, BelongsToChainsInterface
 {
+    use BelongsToBusinesses, BelongsToOneChain;
     use \App\Traits\HasPaymentHold;
     use \App\Traits\HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'businesses';
     protected $guarded = ['id'];
@@ -124,6 +234,11 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         return $this->activities->merge(Activity::whereNull('business_id')->get())->sortBy('code')->values();
     }
 
+    public function chain()
+    {
+        return $this->belongsTo(BusinessChain::class, 'chain_id');
+    }
+
     public function clients()
     {
         return $this->hasMany(Client::class);
@@ -141,6 +256,7 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @deprecated Caregivers are attached to the chain, not the business
      */
     public function caregivers()
     {
@@ -428,6 +544,7 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
      * @param string $lastname
      * @param string|null $email
      * @param string|null $role
+     * @deprecated
      *
      * @return false|string   Returns the matching field or false for no duplicates
      */
@@ -558,17 +675,30 @@ class Business extends Model implements ChargeableInterface, ReconcilableInterfa
         })->values();
     }
 
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return [$this->id];
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
 
-    public function scopeWithActiveClients($builder)
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        return $builder->with(['clients' => function($q) { $q->active()->orderByName(); }]);
+        $builder->whereIn('id', $businessIds);
     }
 
-    public function scopeWithActiveCaregivers($builder)
-    {
-        return $builder->with(['caregivers' => function($q) { $q->active()->orderByName(); }]);
-    }
 }

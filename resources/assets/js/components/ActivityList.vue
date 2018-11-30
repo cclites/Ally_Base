@@ -58,6 +58,10 @@
                         </b-form-input>
                         <input-help :form="form" field="name" text="Enter the display name for this activity."></input-help>
                     </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                          :form="form"
+                          field="business_id"
+                          help-text="Select the office location for this custom activity." />
                </b-row>
             </b-container>
             <div slot="modal-footer">
@@ -70,7 +74,14 @@
 </template>
 
 <script>
+    import FormatsListData from "../mixins/FormatsListData";
+    import BusinessLocationSelect from "./business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+
     export default {
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
+        mixins: [FormatsListData],
+
         props: {
             'activities': {},
         },
@@ -80,7 +91,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
-                sortBy: null,
+                sortBy: 'code',
                 sortDesc: false,
                 filter: null,
                 activityModal: false,
@@ -96,6 +107,12 @@
                         key: 'name',
                         label: 'Activity Name',
                         sortable: true,
+                    },
+                    {
+                        key: 'business_id',
+                        label: 'Office Location',
+                        sortable: true,
+                        formatter: this.showBusinessName,
                     },
                     {
                         key: 'actions',
@@ -126,6 +143,7 @@
                 this.form = new Form({
                     code: this.selectedItem.code,
                     name: this.selectedItem.name,
+                    business_id: this.selectedItem.business_id,
                 });
             },
             createActivity() {
@@ -134,18 +152,20 @@
                 this.form = new Form({
                     code: null,
                     name: null,
+                    business_id: "",
                 });
             },
             saveActivity() {
-                var component = this;
-                if (component.selectedItem.id) {
-                    component.form.patch('/business/activities/' + component.selectedItem.id)
-                        .then(function(response) {
-                            component.activityModal = false;
-                            component.items.map(function(activity) {
-                                if (activity.id == component.selectedItem.id) {
-                                    activity.code = component.form.code;
-                                    activity.name = component.form.name;
+                if (this.selectedItem.id) {
+                    this.form.patch('/business/activities/' + this.selectedItem.id)
+                        .then(response => {
+                            this.activityModal = false;
+                            this.items = this.items.map(activity => {
+                                if (activity.id == this.selectedItem.id) {
+                                    return {
+                                        ...activity,
+                                        ...this.form,
+                                    }
                                 }
                                 return activity;
                             })

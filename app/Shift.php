@@ -1,18 +1,19 @@
 <?php
-
 namespace App;
 
 use App\Businesses\Timezone;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\DurationCalculator;
+use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
+use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Shift
@@ -21,21 +22,31 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int|null $caregiver_id
  * @property int|null $client_id
  * @property int|null $business_id
- * @property int $checked_in
+ * @property int|null $schedule_id
+ * @property string $checked_in_method
  * @property \Carbon\Carbon|null $checked_in_time
  * @property float|null $checked_in_latitude
  * @property float|null $checked_in_longitude
+ * @property int|null $checked_in_distance The distance in meters from the client evv address.
+ * @property string|null $checked_in_agent
+ * @property string|null $checked_in_ip
+ * @property int $checked_in_verified
  * @property string|null $checked_in_number evv phone number
+ * @property string $checked_out_method
  * @property \Carbon\Carbon|null $checked_out_time
  * @property float|null $checked_out_latitude
  * @property float|null $checked_out_longitude
+ * @property int|null $checked_out_distance The distance in meters from the client evv address.
+ * @property string|null $checked_out_agent
+ * @property string|null $checked_out_ip
+ * @property int $checked_out_verified
  * @property string|null $checked_out_number evv phone number
  * @property string|null $caregiver_comments
+ * @property float|null $hours
  * @property string|null $hours_type
  * @property float $mileage
  * @property float $other_expenses
  * @property int $verified
- * @property int|null $schedule_id
  * @property int $fixed_rates
  * @property float $caregiver_rate
  * @property float $provider_fee
@@ -44,22 +55,40 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $other_expenses_desc
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property int|null $import_id
+ * @property int|null $timesheet_id
+ * @property int|null $address_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
+ * @property-read \App\Address|null $address
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
+ * @property-read mixed $ally_pct
+ * @property-read mixed $charged_at
+ * @property-read mixed $confirmed_at
  * @property-read mixed $duration
  * @property-read mixed $read_only
+ * @property-read mixed $timezone
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftIssue[] $issues
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
  * @property-read \App\Payment|null $payment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \App\Schedule|null $schedule
  * @property-read \App\Signature $signature
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftStatusHistory[] $statusHistory
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAllDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift betweenDates($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusiness($business)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregiver($caregiver)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClient($client)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAddressId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingBusinessDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCaregiverDeposit()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereAwaitingCharge()
@@ -67,21 +96,34 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverComments($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCaregiverRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedIn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInAgent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInDistance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInIp($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLatitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedInVerified($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutAgent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutDistance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutIp($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLatitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCheckedOutVerified($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereConfirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFixedRates($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereHoursType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereImportId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMileage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereMobileVerified()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpenses($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereOtherExpensesDesc($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift wherePaymentId($value)
@@ -90,19 +132,23 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereReadOnly()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereScheduleId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereTelephonyVerified()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereTimesheetId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUnconfirmed()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
  */
-class Shift extends Model implements HasAllyFeeInterface, Auditable
+class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
     use HasAllyFeeTrait;
-    use \OwenIt\Auditing\Auditable;
 
-    protected $guarded = ['id'];
-    protected $appends = ['duration', 'readOnly'];
+    protected $appends = ['duration', 'readOnly', 'flags'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
+    protected $guarded = ['id'];
+    protected $orderedColumn = ['checked_in_time'];
+    protected $with = ['shiftFlags'];
 
     ///////////////////////////////////////////
     /// Events
@@ -117,15 +163,26 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     {
         parent::boot();
         self::recalculateDurationOnChange();
+        self::regenerateFlagsOnChange();
     }
 
     public static function recalculateDurationOnChange()
     {
-        self::saving(function (Shift $shift) {
+        self::saving(function(Shift $shift) {
             if ($shift->checked_out_time &&
-                ($shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time'))
+                ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
             ) {
                 $shift->hours = $shift->duration(true);
+            }
+        });
+    }
+
+    public static function regenerateFlagsOnChange()
+    {
+        self::saved(function(Shift $shift) {
+            if ($shift->checked_out_time) {
+                $flags = app(ShiftFlagManager::class)->generateFlags($shift);
+                $shift->syncFlags($flags);
             }
         });
     }
@@ -270,6 +327,16 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
             ->withPivot('answer');
     }
 
+    /**
+     * Get the ShiftFlags relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function shiftFlags()
+    {
+        return $this->hasMany(ShiftFlag::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -314,6 +381,38 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $this->getAllyPercentage();
     }
 
+    /**
+     * Skip updates that only modify the seconds.
+     * @param $value
+     */
+    public function setCheckedInTimeAttribute($value)
+    {
+        if (!$this->checked_in_time || $this->checked_in_time->copy()->second(0) != $value) {
+            $this->attributes['checked_in_time'] = $value;
+        }
+    }
+
+    /**
+     * Skip updates that only modify the seconds.
+     * @param $value
+     */
+    public function setCheckedOutTimeAttribute($value)
+    {
+        if (!$this->checked_out_time || $this->checked_out_time->copy()->second(0) != $value) {
+            $this->attributes['checked_out_time'] = $value;
+        }
+    }
+
+    /**
+     * Get the Shift's flags in array form.
+     *
+     * @return array
+     */
+    public function getFlagsAttribute()
+    {
+        return $this->shiftFlags->pluck('flag')->toArray();
+    }
+
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////
@@ -326,7 +425,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function duration($forceRecalculation = false)
     {
-        if (! $forceRecalculation && $this->hours) {
+        if (!$forceRecalculation && $this->hours) {
             return $this->hours;
         }
 
@@ -340,7 +439,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function scheduledEndTime()
     {
-        if (! $this->schedule) {
+        if (!$this->schedule) {
             // Return now if no schedule
             return Carbon::now();
         }
@@ -355,15 +454,11 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function remaining()
     {
-        if ($this->checked_out_time) {
-            return 0;
-        }
+        if ($this->checked_out_time) return 0;
         $end = $this->scheduledEndTime();
         $now = Carbon::now();
 
-        if ($now >= $end) {
-            return 0;
-        }
+        if ($now >= $end) return 0;
         return round($now->diffInMinutes($end) / 60, 2);
     }
 
@@ -425,11 +520,11 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
      */
     public function syncIssues($issues)
     {
-        $new = collect($issues)->filter(function ($item) {
-            return ! isset($item['id']);
+        $new = collect($issues)->filter(function($item) {
+            return !isset($item['id']);
         });
 
-        $existing = collect($issues)->filter(function ($item) {
+        $existing = collect($issues)->filter(function($item) {
             return isset($item['id']);
         });
 
@@ -441,7 +536,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
                 ->delete();
 
             // update the existing issues in case they changed
-            foreach ($existing as $item) {
+            foreach($existing as $item) {
                 $issue = ShiftIssue::where('id', $item['id'])->first();
                 if ($issue) {
                     $issue->update($item);
@@ -453,7 +548,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         }
 
         // create new issues from the issues that have no id
-        foreach ($new as $item) {
+        foreach($new as $item) {
             ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
         }
     }
@@ -503,7 +598,7 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         // first reformat array to work with sync
         // and drop any values with empty comments.
         $data = [];
-        foreach ($goals as $goalId => $comments) {
+        foreach($goals as $goalId => $comments) {
             if (empty($comments)) {
                 continue;
             }
@@ -526,11 +621,76 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
     public function syncQuestions($questions, $answers)
     {
         $items = [];
-        foreach ($questions as $q) {
+        foreach($questions as $q) {
             $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
             $items[$q->id] = ['answer' => $answer];
         }
         $this->questions()->sync($items);
+    }
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return [$this->business_id];
+    }
+
+    /**
+     * Check if the Shift has the given flag.
+     *
+     * @param string $flag
+     * @return boolean
+     */
+    public function hasFlag($flag)
+    {
+        return in_array($flag, $this->flags);
+    }
+
+    /**
+     * Add given flag to the Shift's flags, only if not added.
+     *
+     * @param string $flag
+     * @return void
+     */
+    public function addFlag($flag)
+    {
+        if ($this->hasFlag($flag)) {
+            return false;
+        }
+
+        $this->shiftFlags()->create(['flag' => $flag]);
+        $this->load('shiftFlags');
+    }
+
+    /**
+     * Remove an existing flag from the shift
+     *
+     * @param $flag
+     * @return bool
+     */
+    public function removeFlag($flag)
+    {
+        return (bool) $this->shiftFlags()->where('flag', $flag)->delete();
+    }
+
+    /**
+     * Sync existing flags with a new array of generated flags
+     *
+     * @param array $flags
+     */
+    public function syncFlags(array $flags)
+    {
+        $removeFlags = array_diff($this->flags, $flags);
+        $addFlags = array_diff($flags, $this->flags);
+        foreach($addFlags as $flag) {
+            $this->addFlag($flag);
+        }
+        foreach($removeFlags as $flag) {
+            $this->removeFlag($flag);
+        }
     }
 
     ///////////////////////////////////////////
@@ -572,13 +732,13 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 
-    public function scopeWhereTelephonyVerified($query)
+    public function scopeWhereTelephonyVerified($query) 
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_number');
     }
 
-    public function scopeWhereMobileVerified($query)
+    public function scopeWhereMobileVerified($query) 
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
@@ -655,4 +815,18 @@ class Shift extends Model implements HasAllyFeeInterface, Auditable
         $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
         return $query->whereBetween('checked_in_time', [$startDate, $endDate]);
     }
+
+    /**
+     * Search shifts that contain any of the provided flags
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $flags
+     */
+    public function scopeWhereFlagsIn(Builder $query, array $flags)
+    {
+        $query->whereHas('shiftFlags', function($q) use ($flags) {
+            $q->whereIn('flag', $flags);
+        });
+    }
+
 }

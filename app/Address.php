@@ -5,8 +5,6 @@ namespace App;
 use Packages\GMaps\Geocode;
 use Packages\GMaps\GeocodeCoordinates;
 use Packages\GMaps\NoGeocodeFoundException;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\Address
@@ -25,7 +23,10 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property float|null $latitude
  * @property float|null $longitude
  * @property string|null $county
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read string $full_address
  * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereAddress1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereCity($value)
@@ -42,10 +43,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereZip($value)
  * @mixin \Eloquent
  */
-class Address extends Model implements Auditable
+class Address extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-    
     protected $table = 'addresses';
     protected $guarded = ['id'];
 

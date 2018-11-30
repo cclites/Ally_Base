@@ -20,12 +20,10 @@ class BulkDestroyScheduleRequest extends FormRequest
      */
     public function scheduleQuery()
     {
-        $query = Schedule::whereBetween('starts_at',
-            [
-                filter_date($this->start_date) . ' 00:00:00',
-                filter_date($this->end_date) . ' 23:59:59',
-            ]
-        );
+        $query = Schedule::forRequestedBusinesses()->whereBetween('starts_at', [
+            filter_date($this->start_date) . ' 00:00:00',
+            filter_date($this->end_date) . ' 23:59:59',
+        ]);
 
         if ($this->start_time) {
             $query->where('starts_at', 'LIKE', '% ' . $this->start_time . '%');

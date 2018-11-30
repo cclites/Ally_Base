@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\BankAccount;
 use App\Business;
+use App\Http\Requests\UpdateBusinessBankRequest;
 use App\Http\Requests\UpdateBusinessRequest;
 use App\OfficeUser;
 use App\Payments\PaymentMethodReplace;
@@ -20,32 +21,18 @@ class SettingController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson() && $request->input('json')) {
-            // this endpoint is accessible to all logged in users, so this
-            // is an attempt to hide any potentail sensitive data.
-            switch(auth()->user()->role_type) {
-                case 'client':
-                    $business = auth()->user()->role->business;
-                    break;
-                case 'caregiver':
-                    $business = auth()->user()->role->businesses()->first();
-                    break;
-                default:
-                    $business = activeBusiness();
-                    break;
-            }
-
-            return collect($business->toArray())
-                ->except(['bank_account_id', 'address1', 'address2', 'phone1', 'phone2', 'default_commission_rate', 'created_at', 'updated_at', 'payment_account_id', 'contact_email', 'contact_phone', 'ein', 'outgoing_sms_number']);
+            return $this->business();
         }
 
-        $business = $this->business();
-        return view('business.settings.index', compact('business'));
+        return view('business.settings.index');
     }
 
-    public function bankAccounts()
+    public function bankAccounts(Business $business = null)
     {
-        $business = $this->business();
-        $business->load(['bankAccount', 'paymentAccount']);
+        if ($business) {
+            $this->authorize('update', $business);
+            $business->load('bankAccount', 'paymentAccount');
+        }
 
         return view('business.settings.bank_accounts', compact('business'));
     }
@@ -53,13 +40,13 @@ class SettingController extends BaseController
     /**
      * Show the form for creating a new resource.
      *
-     * @param Request $request
+     * @param UpdateBusinessBankRequest $request
      * @param string $type
      * @return ErrorResponse|SuccessResponse
      * @throws \App\Exceptions\ExistingBankAccountException
      * @throws \Exception
      */
-    public function storeBankAccount(Request $request, string $type)
+    public function storeBankAccount(UpdateBusinessBankRequest $request, string $type)
     {
         switch($type) {
             case 'deposit':
@@ -70,9 +57,9 @@ class SettingController extends BaseController
                 break;
         }
 
-        $newAccount = $this->validateBankAccount($request, $this->business()->getBankAccount($relation));
-        $newAccount->business_id = $this->business()->id;
-        if ($this->business()->setBankAccount($relation, $newAccount)) {
+        $business = $request->getBusiness();
+        $newAccount = $request->getBankAccount($business->getBankAccount($relation));
+        if ($business->setBankAccount($relation, $newAccount)) {
             return new SuccessResponse('The bank account has been updated.');
         }
 
@@ -88,14 +75,18 @@ class SettingController extends BaseController
      */
     public function update(UpdateBusinessRequest $request, $id)
     {
-        app('settings')->set($this->business(), $request->validated());
+        $business = $request->getBusiness();
+        $this->authorize('update', $business);
+        app('settings')->set($business, $request->validated());
 
-        return new SuccessResponse('Business settings updated.');
+        return new SuccessResponse('Business settings updated.', $request->getBusiness());
     }
 
-    public function updatePayrollPolicy(Request $request, $id) {
+    public function updatePayrollPolicy(Request $request, $id)
+    {
+        $business = Business::findOrFail($request->business_id);
+        $this->authorize('update', $business);
         $data = $request->all();
-        $business = $this->business();
         $business->pay_cycle = $data['pay_cycle'];
         $business->last_day_of_cycle = $data['last_day_of_cycle'];
         $business->last_day_of_first_period = $data['last_day_of_first_period'];

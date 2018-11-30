@@ -59,7 +59,7 @@
                                 <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
                                 <label for="create_hourly_rates" class="rate-label">Hourly</label>
                                 <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_fixed_rates" :value="1">
-                                <label for="create_fixed_rates" class="rate-label">Daily</label>
+                                <label for="create_fixed_rates" class="rate-label">Fixed/Daily</label>
                             </b-col>
                         </b-row>
 
@@ -110,7 +110,7 @@
                             <b-col sm="6">
                                 <b-form-group label="Ally Fee" label-for="ally_fee">
                                     <div v-if="allyFee">
-                                        {{ allyFee }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
+                                        {{ numberFormat(allyFee) }}&nbsp;&nbsp;(Payment Type: {{ paymentType }} {{ displayAllyPct }}%)
                                     </div>
                                     <div v-else>
                                         Enter Amounts Above
@@ -119,7 +119,7 @@
                             </b-col>
                             <b-col sm="6">
                                 <b-form-group :label="`Total ${rateType} Rate`" label-for="ally_fee">
-                                    {{ totalRate }}
+                                    {{ numberFormat(totalRate) }}
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -189,10 +189,8 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
-                                            :readonly="!!form.fixed_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.fixed_rates" />
-                                    <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -465,13 +463,7 @@
             },
 
             rateType() {
-                if (this.form.fixed_rates === 0) {
-                    return 'Hourly';
-                }
-                if (this.form.fixed_rates === 1) {
-                    return 'Daily';
-                }
-                return '';
+                return (this.form.fixed_rates === 1) ? 'Fixed' : 'Hourly';
             },
 
             firstShiftEndDate() {
@@ -515,7 +507,7 @@
                     'duration': this.schedule.duration || 0,
                     'caregiver_id': this.schedule.caregiver_id || "",
                     'client_id': this.schedule.client_id || "",
-                    'fixed_rates': this.schedule.fixed_rates || 0,
+                    'fixed_rates': this.schedule.fixed_rates ? 1 : 0,
                     'caregiver_rate': this.schedule.caregiver_rate || "",
                     'caregiver_rate_id': this.schedule.caregiver_rate_id || "",
                     'client_rate': this.schedule.client_rate || "",
@@ -769,10 +761,6 @@
 
             startTime(val) {
                 this.form.duration = this.getDuration();
-                if (this.form.fixed_rates) {
-                    // Lock end time to start time for daily rates
-                    this.endTime = val;
-                }
             },
 
             endTime() {
@@ -781,10 +769,6 @@
 
             'form.fixed_rates': function(val, old_val) {
                 this.prefillRates();
-                if (val) {
-                    // Lock end time to start time for daily rates
-                    this.endTime = this.startTime;
-                }
             },
 
             'form.client_id': function(val, old_val) {

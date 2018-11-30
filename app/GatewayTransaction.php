@@ -1,11 +1,8 @@
 <?php
-
 namespace App;
 
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\GatewayTransaction
@@ -25,11 +22,15 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $response_data
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Deposit $deposit
+ * @property-read \App\FailedTransaction $failedTransaction
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransactionHistory[] $history
  * @property-read \App\GatewayTransactionHistory $lastHistory
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $method
  * @property-read \App\Payment $payment
- * @property-read \Illuminate\Database\Eloquent\Model|\App\Contracts\ChargeableInterface $method
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\TransactionRefund[] $refunds
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAvsPass($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereCreatedAt($value)
@@ -47,10 +48,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class GatewayTransaction extends Model implements Auditable
+class GatewayTransaction extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
-
     protected $table = 'gateway_transactions';
     protected $guarded = ['id'];
 

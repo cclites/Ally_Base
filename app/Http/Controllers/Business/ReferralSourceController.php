@@ -1,18 +1,20 @@
 <?php
-
 namespace App\Http\Controllers\Business;
 
+use App\Http\Requests\UpdateReferralSourceRequest;
 use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use Illuminate\Http\Request;
 
 class ReferralSourceController extends BaseController
 {
     public function index($edit = 0, $create = 0)
     {
-        $referralsources = $this->business()->referralSources;
+        $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
+        if (request()->expectsJson()) {
+            return $referralsources;
+        }
 
         return view('business.referral.list', compact('referralsources', 'edit', 'create'));
     }
@@ -24,42 +26,40 @@ class ReferralSourceController extends BaseController
 
     public function edit(ReferralSource $referralSource)
     {
+        $this->authorize('update', $referralSource);
+
         return $this->index($referralSource->id);
     }
 
     public function show(ReferralSource $referralSource)
     {
+        $this->authorize('read', $referralSource);
+
         return $this->index($referralSource->id);
     }
 
-    public function store(Request $request)
+    public function store(UpdateReferralSourceRequest $request)
     {
-        $data = $request->validate([
-            'organization' => 'required',
-            'contact_name' => 'required',
-            'phone' => 'nullable|max:32',
-        ]);
+        $data = $request->filtered();
+        $this->authorize('create', [ReferralSource::class, $data]);
 
-        $referralSource = $this->business()->referralSources()->create($data);
+        $referralSource = ReferralSource::create($data);
         if ($referralSource) {
             return new CreatedResponse('The referral source has been created!', $referralSource);
         }
+
+        return new ErrorResponse(500, 'Unable to create referral source.');
     }
 
-    public function update(ReferralSource $referralSource, Request $request)
+    public function update(ReferralSource $referralSource, UpdateReferralSourceRequest $request)
     {
-        if ($referralSource->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access.');
-        }
-
-        $data = $request->validate([
-            'organization' => 'required',
-            'contact_name' => 'required',
-            'phone' => 'nullable|max:32',
-        ]);
+        $this->authorize('update', $referralSource);
+        $data = $request->filtered();
 
         if ($referralSource->update($data)) {
             return new SuccessResponse('The referral source has been saved!', $referralSource);
         }
+
+        return new ErrorResponse(500, 'Unable to save referral source.');
     }
 }

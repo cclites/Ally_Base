@@ -2,7 +2,7 @@
 
 @section('title', 'Payment Details - Print')
 
-@section('content')
+@push('head')
     <style>
         body {
             color: #000;
@@ -60,7 +60,10 @@
             max-height: 80px;
         }
     </style>
-    <div class="container-fluid">
+@endpush
+
+@section('content')
+    <div class="">
         <div class="row print-header">
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>

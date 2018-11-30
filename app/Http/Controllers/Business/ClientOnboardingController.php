@@ -34,6 +34,8 @@ class ClientOnboardingController extends Controller
      */
     public function create(Client $client)
     {
+        $this->authorize('update', $client);
+
         $onboardingActivities = OnboardingActivity::all();
         $activities = collect([
             'hands_on' => $onboardingActivities->where('category', 'hands_on')->values(),
@@ -66,6 +68,8 @@ class ClientOnboardingController extends Controller
      */
     public function store(Request $request, Client $client)
     {
+        $this->authorize('update', $client);
+
         $onboarding = DB::transaction(function () use ($request, $client) {
 
             $clientData = collect($request->only('id', 'firstname', 'lastname', 'email', 'date_of_birth', 'gender'))
@@ -133,28 +137,6 @@ class ClientOnboardingController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\ClientOnboarding  $clientOnboarding
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ClientOnboarding $clientOnboarding)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\ClientOnboarding  $clientOnboarding
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ClientOnboarding $clientOnboarding)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -163,6 +145,8 @@ class ClientOnboardingController extends Controller
      */
     public function update(Request $request, ClientOnboarding $clientOnboarding)
     {
+        $this->authorize('update', $clientOnboarding->client);
+
         $clientOnboarding->client->update(['onboarding_step' => $request->onboarding_step]);
         switch ($request->onboarding_step) {
             case 3:
@@ -182,17 +166,6 @@ class ClientOnboardingController extends Controller
             'client.referralServiceAgreement');
 
         return new SuccessResponse('Success', ['onboarding' => $clientOnboarding]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\ClientOnboarding  $clientOnboarding
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ClientOnboarding $clientOnboarding)
-    {
-        //
     }
 
     public function intakePdf(ClientOnboarding $clientOnboarding)

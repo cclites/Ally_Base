@@ -5,18 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateRateCodeRequest extends FormRequest
+class UpdateRateCodeRequest extends BusinessRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -28,7 +18,7 @@ class UpdateRateCodeRequest extends FormRequest
             'name' => [
                 'required',
                 Rule::unique('rate_codes')->where(function ($query) {
-                    $query->where('business_id', activeBusiness()->id);
+                    $query->where('business_id', $this->getBusinessId());
                     if ($rateCode = $this->route('rate_code')) {
                         $query->where('id', '!=', $rateCode->id);
                     }

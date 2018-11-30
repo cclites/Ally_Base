@@ -61,8 +61,11 @@
 
 <script>
     import Chart from 'chart.js';
+    import FormatsListData from "../../../mixins/FormatsListData";
 
     export default {
+        mixins: [FormatsListData],
+
         props: ['reports'],
 
         data() {
@@ -82,6 +85,12 @@
                         key: 'phone',
                         label: 'Phone',
                         sortable: true
+                    },
+                    {
+                        key: 'business_id',
+                        label: 'Location',
+                        sortable: true,
+                        formatter: this.showBusinessName,
                     },
                     {
                         key: 'prospectscount',

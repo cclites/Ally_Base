@@ -12,8 +12,6 @@
         <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
     @endif
     @if($active_business)
-        <caregiver-list
-            :multi_location="{{ json_encode($multiLocation) }}">
-        </caregiver-list>
+        <caregiver-list></caregiver-list>
     @endif
 @endsection

@@ -7,7 +7,7 @@ use App\Rules\PhonePossible;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProspectRequest extends FormRequest
+class UpdateProspectRequest extends BusinessRequest
 {
     protected $dates = ['date_of_birth', 'last_contacted', 'initial_call_date'];
 

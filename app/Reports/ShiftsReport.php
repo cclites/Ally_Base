@@ -6,7 +6,7 @@ use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use App\Traits\ShiftReportFilters;
 
-class ShiftsReport extends BaseReport
+class ShiftsReport extends BusinessResourceReport
 {
     use ShiftReportFilters;
 
@@ -30,7 +30,7 @@ class ShiftsReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = Shift::query();
+        $this->query = Shift::with(['business', 'caregiver', 'client', 'statusHistory', 'goals', 'questions', 'costHistory', 'client.defaultPayment']);
     }
 
     /**
@@ -50,7 +50,8 @@ class ShiftsReport extends BaseReport
      */
     protected function results()
     {
-        $shifts = $this->query->with(['caregiver', 'client', 'statusHistory', 'goals', 'questions'])->get();
+        $shifts = $this->query->get();
+        $this->generated = true;
         $rows = $shifts->map(function(Shift $shift) {
             $row = [
                 'id' => $shift->id,
@@ -84,12 +85,24 @@ class ShiftsReport extends BaseReport
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
                 // Send both verified and EVV for backwards compatibility
                 'verified' => $shift->verified,
-                'EVV' => $shift->verified,
+                'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
                 'goals' => $shift->goals,
                 'questions' => $shift->questions,
+                'flags' => $shift->flags,
             ];
             return $row;
         });
         return $rows;
+    }
+
+    /**
+     * Count the number of rows
+     *
+     * @return int
+     */
+    public function count()
+    {
+        if ($this->rows) return $this->rows->count();
+        return $this->query()->count();
     }
 }

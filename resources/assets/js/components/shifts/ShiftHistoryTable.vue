@@ -7,6 +7,9 @@
                  :sort-desc.sync="sortDesc"
                  class="shift-table"
         >
+            <template slot="Flags" scope="data">
+                <i v-for="flag in data.value" :class="flagIcons[flag]" :title="flagTypes[flag]" v-b-tooltip.hover></i>
+            </template>
             <template slot="Day" scope="data">
                 {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
             </template>
@@ -43,9 +46,10 @@
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
+    import ShiftFlags from "../../mixins/ShiftFlags";
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, ShiftFlags],
 
         props: {
             items: Array,

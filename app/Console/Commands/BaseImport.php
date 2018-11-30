@@ -465,6 +465,18 @@ abstract class BaseImport extends Command
     }
 
     /**
+     * Resolve Gender into a single letter (M/F)
+     *
+     * @param int $row
+     * @param $cellValue
+     * @return null|string
+     */
+    protected function resolveGender(int $row, $cellValue)
+    {
+        return is_string($cellValue) ? strtoupper(substr($cellValue, 0, 1)) : null;
+    }
+
+    /**
      * Transform dates to YYYY-MM-DD
      *
      * @param string $value
