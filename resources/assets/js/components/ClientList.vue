@@ -5,14 +5,14 @@
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
             </b-col>
             <b-col lg="3">
+                <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
+            </b-col>
+            <b-col lg="3">
                 <b-form-select v-model="active">
                     <option :value="null">All Clients</option>
                     <option :value="1">Active Clients</option>
                     <option :value="0">Inactive Clients</option>
                 </b-form-select>
-            </b-col>
-            <b-col lg="3">
-                <business-location-select :allow-all="true" v-model="business_id"></business-location-select>
             </b-col>
             <b-col lg="3" class="text-right">
                 <b-form-input v-model="filter" placeholder="Type to Search" />
@@ -58,9 +58,10 @@
     import FormatsListData from "../mixins/FormatsListData";
     import BusinessLocationSelect from "./business/BusinessLocationSelect";
     import business from "../store/modules/business";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsListData],
 
         props: {},
