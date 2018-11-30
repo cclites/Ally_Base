@@ -58,9 +58,10 @@
                         </b-form-input>
                         <input-help :form="form" field="name" text="Enter the display name for this activity."></input-help>
                     </b-form-group>
-                    <b-form-group label="Office Location">
-                        <business-location-select v-model="form.business_id"></business-location-select>
-                    </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                          :form="form"
+                          field="business_id"
+                          help-text="Select the office location for this custom activity." />
                </b-row>
             </b-container>
             <div slot="modal-footer">
@@ -75,9 +76,10 @@
 <script>
     import FormatsListData from "../mixins/FormatsListData";
     import BusinessLocationSelect from "./business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsListData],
 
         props: {

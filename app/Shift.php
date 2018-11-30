@@ -8,10 +8,12 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Shifts\CostCalculator;
 use App\Shifts\DurationCalculator;
+use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * App\Shift
@@ -142,10 +144,11 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     use BelongsToOneBusiness;
     use HasAllyFeeTrait;
 
-    protected $guarded = ['id'];
-    protected $appends = ['duration', 'readOnly'];
+    protected $appends = ['duration', 'readOnly', 'flags'];
     protected $dates = ['checked_in_time', 'checked_out_time', 'signature'];
+    protected $guarded = ['id'];
     protected $orderedColumn = ['checked_in_time'];
+    protected $with = ['shiftFlags'];
 
     ///////////////////////////////////////////
     /// Events
@@ -160,6 +163,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         parent::boot();
         self::recalculateDurationOnChange();
+        self::regenerateFlagsOnChange();
     }
 
     public static function recalculateDurationOnChange()
@@ -169,6 +173,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
                 ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
             ) {
                 $shift->hours = $shift->duration(true);
+            }
+        });
+    }
+
+    public static function regenerateFlagsOnChange()
+    {
+        self::saved(function(Shift $shift) {
+            if ($shift->checked_out_time) {
+                $flags = app(ShiftFlagManager::class)->generateFlags($shift);
+                $shift->syncFlags($flags);
             }
         });
     }
@@ -313,6 +327,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
             ->withPivot('answer');
     }
 
+    /**
+     * Get the ShiftFlags relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function shiftFlags()
+    {
+        return $this->hasMany(ShiftFlag::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -355,6 +379,38 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function getAllyPctAttribute()
     {
         return $this->getAllyPercentage();
+    }
+
+    /**
+     * Skip updates that only modify the seconds.
+     * @param $value
+     */
+    public function setCheckedInTimeAttribute($value)
+    {
+        if (!$this->checked_in_time || $this->checked_in_time->copy()->second(0) != $value) {
+            $this->attributes['checked_in_time'] = $value;
+        }
+    }
+
+    /**
+     * Skip updates that only modify the seconds.
+     * @param $value
+     */
+    public function setCheckedOutTimeAttribute($value)
+    {
+        if (!$this->checked_out_time || $this->checked_out_time->copy()->second(0) != $value) {
+            $this->attributes['checked_out_time'] = $value;
+        }
+    }
+
+    /**
+     * Get the Shift's flags in array form.
+     *
+     * @return array
+     */
+    public function getFlagsAttribute()
+    {
+        return $this->shiftFlags->pluck('flag')->toArray();
     }
 
     //////////////////////////////////////
@@ -582,6 +638,61 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return [$this->business_id];
     }
 
+    /**
+     * Check if the Shift has the given flag.
+     *
+     * @param string $flag
+     * @return boolean
+     */
+    public function hasFlag($flag)
+    {
+        return in_array($flag, $this->flags);
+    }
+
+    /**
+     * Add given flag to the Shift's flags, only if not added.
+     *
+     * @param string $flag
+     * @return void
+     */
+    public function addFlag($flag)
+    {
+        if ($this->hasFlag($flag)) {
+            return false;
+        }
+
+        $this->shiftFlags()->create(['flag' => $flag]);
+        $this->load('shiftFlags');
+    }
+
+    /**
+     * Remove an existing flag from the shift
+     *
+     * @param $flag
+     * @return bool
+     */
+    public function removeFlag($flag)
+    {
+        return (bool) $this->shiftFlags()->where('flag', $flag)->delete();
+    }
+
+    /**
+     * Sync existing flags with a new array of generated flags
+     *
+     * @param array $flags
+     */
+    public function syncFlags(array $flags)
+    {
+        $removeFlags = array_diff($this->flags, $flags);
+        $addFlags = array_diff($flags, $this->flags);
+        foreach($addFlags as $flag) {
+            $this->addFlag($flag);
+        }
+        foreach($removeFlags as $flag) {
+            $this->removeFlag($flag);
+        }
+    }
+
     ///////////////////////////////////////////
     /// Query Scopes
     ///////////////////////////////////////////
@@ -701,5 +812,17 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $query->whereBetween('checked_in_time', [$startDate, $endDate]);
     }
 
+    /**
+     * Search shifts that contain any of the provided flags
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $flags
+     */
+    public function scopeWhereFlagsIn(Builder $query, array $flags)
+    {
+        $query->whereHas('shiftFlags', function($q) use ($flags) {
+            $q->whereIn('flag', $flags);
+        });
+    }
 
 }

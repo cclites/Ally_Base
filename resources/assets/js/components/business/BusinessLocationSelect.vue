@@ -38,7 +38,7 @@
             },
             hidden() {
                 return this.hideable && this.disabled;
-            }
+            },
         },
 
         data() {
@@ -46,8 +46,21 @@
             }
         },
 
-        watch: {
+        methods: {
+            emitLocationCount() {
+                // Can be caught by parent component to decide how to display to single or multi-location registries
+                this.$emit('locationCount', this.businesses.length);
+            }
+        },
 
+        mounted() {
+            this.emitLocationCount();
+        },
+
+        watch: {
+            businesses() {
+                this.emitLocationCount();
+            }
         }
     }
 </script>

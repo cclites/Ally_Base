@@ -42,10 +42,10 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Office Location" label-for="business_id">
-                        <business-location-select v-model="form.business_id"></business-location-select>
-                        <input-help :form="form" field="business_id" text="Select the business location for this client (if applicable)."></input-help>
-                    </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                                                  :form="form"
+                                                  field="business_id"
+                                                  help-text="Select the office location for this client" />
                     <b-form-group label="Gender">
                         <b-form-radio-group id="gender" v-model="form.gender">
                             <b-form-radio value="M">Male</b-form-radio>
@@ -353,6 +353,7 @@
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from './business/BusinessLocationSelect'
     import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     window.croppie = require('croppie');
 
     export default {
@@ -366,6 +367,7 @@
         mixins: [ClientForm, FormatsDates],
 
         components: {
+            BusinessLocationFormGroup,
             ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
