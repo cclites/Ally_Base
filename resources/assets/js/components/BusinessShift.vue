@@ -721,10 +721,10 @@
                 if (old) this.validateTimeDifference('checked_in_time')
             },
             checked_out_date(val, old) {
-                if (old) this.validateTimeDifference('checked_out_time')
+                this.validateTimeDifference('checked_in_time')
             },
             checked_out_time(val, old) {
-                if (old) this.validateTimeDifference('checked_out_time')
+                this.validateTimeDifference('checked_in_time')
             },
             'form.client_id': function() {
                 if (!this.shift.id) {
