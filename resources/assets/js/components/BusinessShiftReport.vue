@@ -132,7 +132,7 @@
                                 <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
                                     <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
                                     <b-radio value="none">Has No Flags</b-radio><br />
-                                    <b-radio value="selected">Has Selected Flags:</b-radio>
+                                    <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
                                 </b-form-radio-group>
                                 <b-col lg="12">
                                     <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
