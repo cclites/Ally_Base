@@ -779,6 +779,17 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Shows the page to generate the client directory
+     *
+     * @return Response
+     */
+    public function clientDirectory()
+    {
+        $clients = Client::forRequestedBusinesses()->with('address')->get();
+        return view('business.reports.client_directory', compact('clients'));
+    }
+
+    /**
      * See how many shifts have been worked by a caregiver
      *
      * @return Response
