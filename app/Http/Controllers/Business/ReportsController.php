@@ -24,6 +24,7 @@ use App\Reports\ProviderReconciliationReport;
 use App\Reports\ScheduledPaymentsReport;
 use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
+use App\Reports\ClientDirectoryReport;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
@@ -787,6 +788,30 @@ class ReportsController extends BaseController
     {
         $clients = Client::forRequestedBusinesses()->with('address')->get();
         return view('business.reports.client_directory', compact('clients'));
+    }
+
+    /**
+     * Shows the page to generate the client directory
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return Response
+     */
+    public function generateClientDirectoryReport(Request $request)
+    {
+        $report = new ClientDirectoryReport();
+        $report->forRequestedBusinesses();
+        $report->applyColumnFilters($request->all());
+
+        if ($report->count() > 1000) {
+            // Limit to 1K clients for performance reasons
+            return new ErrorResponse(400, 'There are too many clients to report.  Please reduce your date range.');
+        }
+
+        if ($request->input('export')) {
+            return $report->download();
+        }
+
+        return $report->rows();
     }
 
     /**
