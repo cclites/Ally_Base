@@ -17,50 +17,53 @@
 
             <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
 
-            <shift-history-summaries v-show="showSummary && loaded >= 3"
-                                     :client-charges="items.clientCharges"
-                                     :caregiver-payments="items.caregiverPayments"
-                                     :admin="admin"
-            />
+        </b-card>
 
-            <b-card
-                    header="Shift List for Date Range &amp; Filters"
-                    title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
-                    v-show="loaded >= 3"
-            >
-                <b-row class="mb-2">
-                    <b-col sm="6">
-                        <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
-                        <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
-                    </b-col>
-                    <b-col sm="6" class="text-right">
-                        <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                        <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                    </b-col>
-                </b-row>
-                <shift-history-table :fields="fields" :items="shiftHistoryItems">
-                    <template slot="actions" scope="row">
-                        <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
-                        <div v-if="row.item.id">
-                            <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                            <span>
-                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
-                                </span>
-                            <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+        <shift-history-summaries v-show="showSummary && loaded >= 3"
+                                 :client-charges="items.clientCharges"
+                                 :caregiver-payments="items.caregiverPayments"
+                                 :admin="admin"
+        />
 
-                            <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
-                            <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                            <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                            <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
-                            <!--<b-dropdown-divider></b-dropdown-divider>-->
-                            <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
-                            <!--</b-dropdown>-->
-                        </div>
-                    </template>
-                </shift-history-table>
-            </b-card>
+        <b-card
+                header="Shift List for Date Range &amp; Filters"
+                title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
+                v-show="loaded >= 3"
+                ref="SHRCard"
+        >
+            <b-row class="mb-2">
+                <b-col sm="6">
+                    <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
+                    <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                </b-col>
+                <b-col sm="6" class="text-right">
+                    <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                    <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                    <b-btn @click="fullscreenToggle()"><i class="fa fa-arrows-alt"></i></b-btn>
+                </b-col>
+            </b-row>
+            <shift-history-table :fields="fields" :items="shiftHistoryItems">
+                <template slot="actions" scope="row">
+                    <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
+                    <div v-if="row.item.id">
+                        <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                        <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                        <span>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                            </span>
+                        <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+
+                        <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
+                        <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-divider></b-dropdown-divider>-->
+                        <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
+                        <!--</b-dropdown>-->
+                    </div>
+                </template>
+            </shift-history-table>
         </b-card>
 
         <b-modal size="lg" v-model="filtersModal" id="filtersModal" title="Select Date Range &amp; Filters">
@@ -428,6 +431,12 @@
         },
 
         methods: {
+            fullscreenToggle() {
+                $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
+                $('.left-sidebar').toggle();
+                $('.footer').toggle();
+            },
+
             loadFiltersFromStorage() {
                 if (typeof(Storage) !== "undefined") {
                     // Saved filters
@@ -754,5 +763,12 @@
 
     #filtersModal .datepicker {
         max-width: 150px;
+    }
+
+    .fullscreen-shr {
+        background-color: white;
+        z-index: 101;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
     }
 </style>
