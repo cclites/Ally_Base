@@ -854,11 +854,12 @@
         height: auto;
         max-width: 400px;
     }
-
+    .shift-table .fa {
+        font-size: 16px;
+    }
     #filtersModal .datepicker {
         max-width: 150px;
     }
-
     .fullscreen-shr {
         background-color: white;
         z-index: 101;
