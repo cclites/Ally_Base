@@ -157,8 +157,8 @@
             </shift-history-table>
         </b-card>
 
-        <b-modal size="lg" v-model="filtersModal" id="filtersModal" title="Select Date Range &amp; Filters">
-            <!-- This modal is temporarily hidden -->
+        <b-modal size="lg" id="filtersModal" title="Select Date Range &amp; Filters">
+            <!-- This modal is temporarily hidden, add v-model="filtersModal" to re-enable -->
             <!-- The filters are available inline instead -->
             <b-container fluid>
                 <b-row>
@@ -358,8 +358,7 @@
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
-                // filtersModal: !this.autoload,
-                filtersModal: false, // temporarily hidden
+                filtersModal: !this.autoload,
                 addShiftModal: false,
                 editShiftModal: false,
                 detailsModal: false,
@@ -613,6 +612,7 @@
                         if (error.response.data && error.response.data.message) {
                             alerts.addMessage('error', error.response.data.message);
                         }
+                        this.loaded++;
                         this.filtersModal = true;
                     });
             },
