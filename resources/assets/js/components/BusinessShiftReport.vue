@@ -2,11 +2,102 @@
     <div>
         <b-card>
             <b-row class="mb-2">
-                <b-col lg="8">
-                    <small v-show="loaded >= 3" v-html="filterDescription"></small>
-                </b-col>
-                <b-col lg="4" class="text-right">
-                    <b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>
+                <b-container fluid>
+                    <b-row>
+                        <b-col lg="6">
+                            <b-form-group label="Date Range" class="form-inline">
+                                <date-picker ref="startDate"
+                                             v-model="filters.start_date"
+                                             placeholder="Start Date">
+                                </date-picker> &nbsp;to&nbsp;
+                                <date-picker ref="endDate"
+                                             v-model="filters.end_date"
+                                             placeholder="End Date">
+                                </date-picker>
+                            </b-form-group>
+                            <b-form-group label="Caregiver" class="form-inline">
+                                <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
+                                    <option value="">All Caregivers</option>
+                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Client" class="form-inline">
+                                <b-form-select v-model="filters.client_id" ref="clientFilter">
+                                    <option value="">All Clients</option>
+                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <!-- Business Location is not shown on single business registries -->
+                            <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Payment Method" class="form-inline">
+                                <b-form-select v-model="filters.payment_method" ref="paymentFilter">
+                                    <option value="">All Payment Methods</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="bank_account">Bank Account</option>
+                                    <option value="business">Provider Payment</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Charge Status" class="form-inline">
+                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="charged">Charged</option>
+                                    <option value="uncharged">Un-Charged</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Confirmed Status" class="form-inline">
+                                <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="unconfirmed">Unconfirmed</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <!-- ADMIN ONLY DROPDOWN -->
+                            <b-form-group label="Admin Imports" class="form-inline">
+                                <b-form-select v-if="admin" v-model="filters.import_id">
+                                    <option value="">--Filter by Import--</option>
+                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Filter by Flags</h6>
+                                    <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
+                                        <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
+                                        <b-radio value="none">Has No Flags</b-radio><br />
+                                        <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
+                                    </b-form-radio-group>
+                                    <b-col lg="12">
+                                        <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
+                                        <b-form-checkbox v-for="(display, value) in flagTypes"
+                                                         v-model="filters.flags"
+                                                         :value="value"
+                                                         :key="value"
+                                                         class="flag-checkbox"
+                                                         :disabled="filters.flag_type !== 'selected'"
+                                                         @change="includeAllFlags = false"
+                                        >
+                                            {{ display }}
+                                        </b-form-checkbox>
+                                    </b-col>
+                                </div>
+                            </div>
+                        </b-col>
+                    </b-row>
+                </b-container>
+
+                <!--<b-col lg="8">-->
+                    <!--<small v-show="loaded >= 3" v-html="filterDescription"></small>-->
+                <!--</b-col>-->
+
+                <b-col lg="12" class="text-right">
+                    <!--<b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>-->
+                    <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
                     <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="loaded >= 3">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
@@ -67,6 +158,8 @@
         </b-card>
 
         <b-modal size="lg" v-model="filtersModal" id="filtersModal" title="Select Date Range &amp; Filters">
+            <!-- This modal is temporarily hidden -->
+            <!-- The filters are available inline instead -->
             <b-container fluid>
                 <b-row>
                     <b-col lg="6">
@@ -265,7 +358,8 @@
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
-                filtersModal: !this.autoload,
+                // filtersModal: !this.autoload,
+                filtersModal: false, // temporarily hidden
                 addShiftModal: false,
                 editShiftModal: false,
                 detailsModal: false,
