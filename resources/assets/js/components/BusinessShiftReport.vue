@@ -865,5 +865,7 @@
         z-index: 101;
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
+        border: 0 !important;
+        box-shadow: none !important;
     }
 </style>
