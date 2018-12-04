@@ -111,14 +111,10 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     public function getIncludedBusinessIds()
     {
-        if ($this->for_email) {
-            return Business::where('shift_confirmation_email', true)
-                ->get()
-                ->pluck('id')
-                ->toArray();
-        }
-
-        return [];
+        return Business::where('shift_confirmation_email', true)
+            ->get()
+            ->pluck('id')
+            ->toArray();
     }
 
     /**
@@ -138,8 +134,12 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     protected function results()
     {
-        return $this->query()
-            ->forBusinesses($this->getIncludedBusinessIds())
+        $query = $this->query();
+        if ($this->for_email) {
+            $query = $query->forBusinesses($this->getIncludedBusinessIds());
+        }
+
+        return $query
             ->forClient($this->client)
             ->whereIn('status', $this->getUnconfirmedStatuses())
             ->get()
