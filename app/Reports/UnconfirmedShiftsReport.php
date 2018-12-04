@@ -114,7 +114,8 @@ class UnconfirmedShiftsReport extends BaseReport
         if ($this->for_email) {
             return Business::where('shift_confirmation_email', true)
                 ->get()
-                ->pluck('id');
+                ->pluck('id')
+                ->toArray();
         }
 
         return [];
