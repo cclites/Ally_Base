@@ -209,8 +209,8 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     const PAID_CAREGIVER_ONLY = 'PAID_CAREGIVER_ONLY'; // Shift that failed payment to the business, but paid successfully to the caregiver
     const PAID_BUSINESS_ONLY_NOT_CHARGED = 'PAID_BUSINESS_ONLY_NOT_CHARGED'; // Shift that failed payment to the caregiver, paid successfully to the business, but still requires payment from the client
     const PAID_CAREGIVER_ONLY_NOT_CHARGED = 'PAID_CAREGIVER_ONLY_NOT_CHARGED'; // Shift that failed payment to the business, paid successfully to the caregiver, but still requires payment from the client
-    const PAID_NOT_CHARGED  = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
-    const PAID  = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
+    const PAID_NOT_CHARGED = 'PAID_NOT_CHARGED';  // Shift that was paid out to both business & caregiver but still requires payment from the client
+    const PAID = 'PAID';  // Shift that has been successfully charged and paid out (FINAL)
 
     ////////////////////////////////////
     //// Shift Methods
@@ -244,7 +244,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
 
     public function deposits()
     {
-        return $this->belongsToMany(Deposit::class,'deposit_shifts');
+        return $this->belongsToMany(Deposit::class, 'deposit_shifts');
     }
 
     public function client()
@@ -301,7 +301,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         return $this->hasOne(ShiftCostHistory::class, 'id');
     }
-    
+
     public function signature()
     {
         return $this->morphOne(Signature::class, 'signable');
@@ -374,7 +374,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
             ->where('new_status', 'WAITING_FOR_AUTHORIZATION')
             ->pluck('created_at')
             ->first();
-    
+
         return optional($date)->toDateTimeString();
     }
 
@@ -384,7 +384,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
             ->where('new_status', 'WAITING_FOR_PAYOUT')
             ->pluck('created_at')
             ->first();
-            
+
         return optional($date)->toDateTimeString();
     }
 
@@ -776,22 +776,6 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         }
 
         return $query->where('client_id', $client);
-    }
-
-    /**
-     * Get shifts that belong to the supplied business only.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     * @param int $business
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeForBusiness($query, $business)
-    {
-        if (empty($business)) {
-            return $query;
-        }
-
-        return $query->where('business_id', $business);
     }
 
     /**

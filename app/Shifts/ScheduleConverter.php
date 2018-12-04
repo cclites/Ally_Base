@@ -128,8 +128,16 @@ class ScheduleConverter
      * @param string $status
      * @return Shift|false
      */
-    public function convert(Schedule $schedule, Carbon $clockIn, $status = Shift::WAITING_FOR_CONFIRMATION)
+    public function convert(Schedule $schedule, Carbon $clockIn, $status = null)
     {
+        if (empty($status)) {
+            $status = Shift::WAITING_FOR_CONFIRMATION;
+
+            if (app('settings')->get($schedule->business_id, 'auto_confirm')) {
+                $status = Shift::WAITING_FOR_AUTHORIZATION;
+            }
+        }
+
         // Make sure schedule has proper assignments
         if ($schedule->business_id != $this->business->id) {
             return false;

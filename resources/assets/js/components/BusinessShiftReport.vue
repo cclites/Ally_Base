@@ -480,6 +480,7 @@
                         'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
+                        'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
                         'status': item.status,

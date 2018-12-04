@@ -2,7 +2,7 @@
 
 namespace App\Shifts;
 
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Shift;
 use Carbon\Carbon;
 
@@ -10,7 +10,7 @@ class DurationCalculator
 {
     const DEFAULT_METHOD = 'shift';
 
-    public function __construct(Settings $settings)
+    public function __construct(SettingsRepository $settings)
     {
         $this->settings = $settings;
     }

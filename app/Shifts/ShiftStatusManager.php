@@ -256,7 +256,8 @@ class ShiftStatusManager
      */
     public function ackClockOut($verified)
     {
-        if ($verified && $this->shift->business->auto_confirm) {
+        if (app('settings')->get($this->shift->business, 'auto_confirm') 
+            || ($verified && app('settings')->get($this->shift->business, 'auto_confirm_verified_shifts'))) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return $this->update(Shift::WAITING_FOR_CONFIRMATION);
