@@ -629,16 +629,6 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     }
 
     /**
-     * Return an array of business IDs the entity is attached to
-     *
-     * @return array
-     */
-    public function getBusinessIds()
-    {
-        return [$this->business_id];
-    }
-
-    /**
      * Check if the Shift has the given flag.
      *
      * @param string $flag

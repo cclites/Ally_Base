@@ -2,11 +2,102 @@
     <div>
         <b-card>
             <b-row class="mb-2">
-                <b-col lg="8">
-                    <small v-show="loaded >= 3" v-html="filterDescription"></small>
-                </b-col>
-                <b-col lg="4" class="text-right">
-                    <b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>
+                <b-container fluid>
+                    <b-row>
+                        <b-col lg="6">
+                            <b-form-group label="Date Range" class="form-inline">
+                                <date-picker ref="startDate"
+                                             v-model="filters.start_date"
+                                             placeholder="Start Date">
+                                </date-picker> &nbsp;to&nbsp;
+                                <date-picker ref="endDate"
+                                             v-model="filters.end_date"
+                                             placeholder="End Date">
+                                </date-picker>
+                            </b-form-group>
+                            <b-form-group label="Caregiver" class="form-inline">
+                                <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
+                                    <option value="">All Caregivers</option>
+                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Client" class="form-inline">
+                                <b-form-select v-model="filters.client_id" ref="clientFilter">
+                                    <option value="">All Clients</option>
+                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <!-- Business Location is not shown on single business registries -->
+                            <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
+                        </b-col>
+                        <b-col lg="6">
+                            <b-form-group label="Payment Method" class="form-inline">
+                                <b-form-select v-model="filters.payment_method" ref="paymentFilter">
+                                    <option value="">All Payment Methods</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="bank_account">Bank Account</option>
+                                    <option value="business">Provider Payment</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Charge Status" class="form-inline">
+                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="charged">Charged</option>
+                                    <option value="uncharged">Un-Charged</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <b-form-group label="Confirmed Status" class="form-inline">
+                                <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="unconfirmed">Unconfirmed</option>
+                                </b-form-select>
+                            </b-form-group>
+                            <!-- ADMIN ONLY DROPDOWN -->
+                            <b-form-group label="Admin Imports" class="form-inline">
+                                <b-form-select v-if="admin" v-model="filters.import_id">
+                                    <option value="">--Filter by Import--</option>
+                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Filter by Flags</h6>
+                                    <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
+                                        <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
+                                        <b-radio value="none">Has No Flags</b-radio><br />
+                                        <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
+                                    </b-form-radio-group>
+                                    <b-col lg="12">
+                                        <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
+                                        <b-form-checkbox v-for="(display, value) in flagTypes"
+                                                         v-model="filters.flags"
+                                                         :value="value"
+                                                         :key="value"
+                                                         class="flag-checkbox"
+                                                         :disabled="filters.flag_type !== 'selected'"
+                                                         @change="includeAllFlags = false"
+                                        >
+                                            {{ display }}
+                                        </b-form-checkbox>
+                                    </b-col>
+                                </div>
+                            </div>
+                        </b-col>
+                    </b-row>
+                </b-container>
+
+                <!--<b-col lg="8">-->
+                    <!--<small v-show="loaded >= 3" v-html="filterDescription"></small>-->
+                <!--</b-col>-->
+
+                <b-col lg="12" class="text-right">
+                    <!--<b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>-->
+                    <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
                     <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="loaded >= 3">{{ summaryButtonText }}</b-button>
                 </b-col>
             </b-row>
@@ -17,53 +108,58 @@
 
             <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
 
-            <shift-history-summaries v-show="showSummary && loaded >= 3"
-                                     :client-charges="items.clientCharges"
-                                     :caregiver-payments="items.caregiverPayments"
-                                     :admin="admin"
-            />
-
-            <b-card
-                    header="Shift List for Date Range &amp; Filters"
-                    title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
-                    v-show="loaded >= 3"
-            >
-                <b-row class="mb-2">
-                    <b-col sm="6">
-                        <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
-                        <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
-                    </b-col>
-                    <b-col sm="6" class="text-right">
-                        <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                        <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                    </b-col>
-                </b-row>
-                <shift-history-table :fields="fields" :items="shiftHistoryItems">
-                    <template slot="actions" scope="row">
-                        <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
-                        <div v-if="row.item.id">
-                            <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                            <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                            <span>
-                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
-                                </span>
-                            <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
-
-                            <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
-                            <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                            <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                            <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
-                            <!--<b-dropdown-divider></b-dropdown-divider>-->
-                            <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
-                            <!--</b-dropdown>-->
-                        </div>
-                    </template>
-                </shift-history-table>
-            </b-card>
         </b-card>
 
-        <b-modal size="lg" v-model="filtersModal" id="filtersModal" title="Select Date Range &amp; Filters">
+        <shift-history-summaries v-show="showSummary && loaded >= 3"
+                                 :client-charges="items.clientCharges"
+                                 :caregiver-payments="items.caregiverPayments"
+                                 :admin="admin"
+        />
+
+        <b-card
+                header="Shift List for Date Range &amp; Filters"
+                title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
+                v-show="loaded >= 3"
+                ref="SHRCard"
+        >
+            <b-row class="mb-2">
+                <b-col sm="6">
+                    <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
+                    <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                </b-col>
+                <b-col sm="6" class="text-right">
+                    <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                    <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                    <b-btn @click="fullscreenToggle()"><i class="fa fa-arrows-alt"></i></b-btn>
+                </b-col>
+            </b-row>
+            <shift-history-table :fields="fields" :items="shiftHistoryItems">
+                <template slot="actions" scope="row">
+                    <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
+                    <div v-if="row.item.id">
+                        <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                        <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                        <span>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                            </span>
+                        <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+
+                        <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
+                        <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-divider></b-dropdown-divider>-->
+                        <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
+                        <!--</b-dropdown>-->
+                    </div>
+                </template>
+            </shift-history-table>
+        </b-card>
+
+        <b-modal size="lg" id="filtersModal" title="Select Date Range &amp; Filters">
+            <!-- This modal is temporarily hidden, add v-model="filtersModal" to re-enable -->
+            <!-- The filters are available inline instead -->
             <b-container fluid>
                 <b-row>
                     <b-col lg="6">
@@ -429,6 +525,12 @@
         },
 
         methods: {
+            fullscreenToggle() {
+                $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
+                $('.left-sidebar').toggle();
+                $('.footer').toggle();
+            },
+
             loadFiltersFromStorage() {
                 if (typeof(Storage) !== "undefined") {
                     // Saved filters
@@ -511,6 +613,7 @@
                         if (error.response.data && error.response.data.message) {
                             alerts.addMessage('error', error.response.data.message);
                         }
+                        this.loaded++;
                         this.filtersModal = true;
                     });
             },
@@ -752,8 +855,18 @@
         height: auto;
         max-width: 400px;
     }
-
+    .shift-table .fa {
+        font-size: 16px;
+    }
     #filtersModal .datepicker {
         max-width: 150px;
+    }
+    .fullscreen-shr {
+        background-color: white;
+        z-index: 101;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border: 0 !important;
+        box-shadow: none !important;
     }
 </style>

@@ -385,7 +385,7 @@ class ReportsController extends BaseController
 
         if ($report->count() > 1000) {
             // Limit shift history to 1000 shifts for performance reasons
-            return new ErrorResponse(400, 'There are too many shifts to report.  Please reduce your date range.');
+            return new ErrorResponse(400, 'There are too many shifts to display.  Please adjust your filters and re-run.');
         }
 
         if ($request->input('export')) {
