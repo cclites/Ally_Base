@@ -25,11 +25,12 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import BusinessSettings from "../../mixins/BusinessSettings";
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     export default {
         props: ['shifts', 'activities'],
 
-        mixins: [ FormatsDates, FormatsNumbers ],
+        mixins: [ FormatsDates, FormatsNumbers, BusinessSettings ],
 
         data() {
             return {
@@ -83,6 +84,10 @@
             },
 
             confirm(shift) {
+                if (this.businessSettings().ask_on_confirm && ! confirm('Are you sure you want to confirm this shift?')) {
+                    return;
+                }
+
                 axios.post(`/unconfirmed-shifts/${shift.id}/confirm`, { confirmed: true })
                     .then( ({ data }) => {
                         let index = this.items.findIndex(obj => obj.id == shift.id);
