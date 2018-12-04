@@ -68,6 +68,7 @@ class CronShiftSummaryEmails extends Command
                 $businessName,
                 $confirmation->token
             ));
+            sleep(1); // sleep 1s after each email
             
             // break; // <----------------- for testing
         }
