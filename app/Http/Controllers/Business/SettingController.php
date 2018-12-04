@@ -81,7 +81,20 @@ class SettingController extends BaseController
     {
         $business = $request->getBusiness();
         $this->authorize('update', $business);
-        app('settings')->set($business, $request->validated());
+
+        $data = $request->validated();
+        
+        if ($data['auto_confirm'] == 1) {
+            // turn off related other confirm settings
+            $data['allow_client_confirmations'] = 0;
+            $data['auto_confirm_modified'] = 0;
+            $data['shift_confirmation_email'] = 0;
+            $data['charge_diff_email'] = 0;
+            $data['auto_append_hours'] = 0;
+            $data['auto_confirm_unmodified_shifts'] = 0;
+        }
+
+        app('settings')->set($business, $data);
 
         return new SuccessResponse('Business settings updated.', $request->getBusiness());
     }

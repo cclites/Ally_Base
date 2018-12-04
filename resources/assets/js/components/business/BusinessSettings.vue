@@ -349,6 +349,7 @@
                             <b-form-group label="Allow clients to confirm and modify visits"
                                           label-for="allow_client_confirmations">
                                 <b-form-select id="allow_client_confirmations"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.allow_client_confirmations"
                                 >
                                     <option value="0">No</option>
@@ -358,6 +359,7 @@
                             <b-form-group label="Automatically confirm visits that clients modify"
                                           label-for="auto_confirm_modified">
                                 <b-form-select id="auto_confirm_modified"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.auto_confirm_modified"
                                 >
                                     <option value="0">No</option>
@@ -368,6 +370,7 @@
                                     label="Send client summary visits confirmation and pending charge email Monday of each week"
                                     label-for="shift_confirmation_email">
                                 <b-form-select id="shift_confirmation_email"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.shift_confirmation_email"
                                 >
                                     <option value="0">No</option>
@@ -377,6 +380,7 @@
                             <div class="pl-5">
                                 <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
                                     <b-form-select id="sce_shifts_in_progress"
+                                                   :disabled="businessSettings.auto_confirm == 1"
                                                    v-model="businessSettings.sce_shifts_in_progress"
                                     >
                                         <option value="0">No</option>
@@ -395,6 +399,7 @@
                                     label="Send follow up email to client if total charge differs after modifying and/or adding visits"
                                     label-for="charge_diff_email">
                                 <b-form-select id="charge_diff_email"
+                                               disabled
                                                v-model="businessSettings.charge_diff_email"
                                 >
                                     <option value="0">No</option>
@@ -405,6 +410,7 @@
                                     label="Automatically append hours to visits in progress even after client confirms"
                                     label-for="auto_append_hours">
                                 <b-form-select id="auto_append_hours"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.auto_append_hours"
                                 >
                                     <option value="0">No</option>
@@ -414,6 +420,7 @@
                             <b-form-group label="Automatically confirm all visits if clients do not modify"
                                           label-for="auto_confirm_unmodified_shifts">
                                 <b-form-select id="auto_confirm_unmodified_shifts"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.auto_confirm_unmodified_shifts"
                                 >
                                     <option value="0">No</option>
@@ -424,6 +431,7 @@
                                     label="Automatically confirm visits that are successfully verified via GPS or telephony"
                                     label-for="auto_confirm_verified_shifts">
                                 <b-form-select id="auto_confirm_verified_shifts"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.auto_confirm_verified_shifts"
                                 >
                                     <option value="0">No</option>
@@ -442,6 +450,7 @@
                             </b-form-group>
                             <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
                                 <b-form-select id="ask_on_confirm"
+                                               :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.ask_on_confirm"
                                 >
                                     <option value="0">No</option>
