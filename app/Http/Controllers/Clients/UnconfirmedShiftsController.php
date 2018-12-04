@@ -45,12 +45,10 @@ class UnconfirmedShiftsController extends Controller
      */
     public function confirm(Shift $shift)
     {
+        $this->authorize('update', $shift);
+
         if (! app('settings')->get(auth()->user()->role->business_id, 'allow_client_confirmations')) {
             return redirect('/');
-        }
-
-        if (auth()->id() != $shift->client_id) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
         }
 
         if (in_array($shift->status, ShiftStatusManager::getUnconfirmedStatuses())) {
@@ -72,9 +70,7 @@ class UnconfirmedShiftsController extends Controller
      */
     public function update(Request $request, Shift $shift)
     {
-        if ($shift->client_id != auth()->id()) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('update', $shift);
 
         if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
@@ -122,6 +118,8 @@ class UnconfirmedShiftsController extends Controller
      */
     public function show(Request $request, Shift $shift)
     {
+        $this->authorize('read', $shift);
+
         if ($shift->client_id != auth()->id()) {
             return new ErrorResponse(403, 'You do not have access to this shift.');
         }
