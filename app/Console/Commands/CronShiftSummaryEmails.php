@@ -61,14 +61,16 @@ class CronShiftSummaryEmails extends Command
             ]);
             $confirmation->shifts()->sync($shifts->pluck('id'));
 
-            \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
-                $client,
-                $shifts,
-                $total,
-                $businessName,
-                $confirmation->token
-            ));
-            sleep(1); // sleep 1s after each email
+            if ($email = filter_var($client->email, FILTER_VALIDATE_EMAIL)) {
+                \Mail::to($client->email)->send(new ClientShiftSummaryEmail(
+                    $client,
+                    $shifts,
+                    $total,
+                    $businessName,
+                    $confirmation->token
+                ));
+                sleep(1); // sleep 1s after each email
+            }
             
             // break; // <----------------- for testing
         }
