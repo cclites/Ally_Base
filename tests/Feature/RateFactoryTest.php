@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\BankAccount;
 use App\Business;
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
 use App\RateCode;
@@ -35,7 +35,7 @@ class RateFactoryTest extends TestCase
     public $business;
 
     /**
-     * @var Settings
+     * @var SettingsRepository
      */
     public $settings;
 
@@ -51,7 +51,7 @@ class RateFactoryTest extends TestCase
         $this->business = factory(Business::class)->create();
         $this->client = factory(Client::class)->create(['business_id' => $this->business->id]);
         $this->caregiver = factory(Caregiver::class)->create();
-        $this->settings = app(Settings::class);
+        $this->settings = app(SettingsRepository::class);
         $this->rateFactory = app(RateFactory::class);
     }
 

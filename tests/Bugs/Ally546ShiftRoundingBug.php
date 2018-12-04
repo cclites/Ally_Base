@@ -2,7 +2,7 @@
 
 namespace Tests\Bugs;
 
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Shift;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,8 +18,8 @@ class Ally546ShiftRoundingBug extends TestCase
             'checked_out_time' => '2018-10-02 18:01:12',
         ]);
 
-        app()->bind(Settings::class, function() {
-            $mock = \Mockery::mock(Settings::class);
+        app()->bind(SettingsRepository::class, function() {
+            $mock = \Mockery::mock(SettingsRepository::class);
             $mock->shouldReceive('get')->andReturn('individual');
             return $mock;
         });

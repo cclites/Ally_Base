@@ -1,7 +1,7 @@
 <?php
 namespace App\Shifts;
 
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
 use App\Contracts\HasAllyFeeInterface;
@@ -14,15 +14,15 @@ class RateFactory
 {
 
     /**
-     * @var \App\Businesses\Settings
+     * @var \App\Businesses\SettingsRepository
      */
     protected $settings;
 
     /**
      * RateFactory constructor.
-     * @param \App\Businesses\Settings $settings
+     * @param \App\Businesses\SettingsRepository $settings
      */
-    public function __construct(Settings $settings)
+    public function __construct(SettingsRepository $settings)
     {
         $this->settings = $settings;
     }
