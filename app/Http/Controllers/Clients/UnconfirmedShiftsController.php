@@ -21,7 +21,7 @@ class UnconfirmedShiftsController extends Controller
      */
     public function index(UnconfirmedShiftsReport $report)
     {
-        if (! auth()->user()->role->business->allow_client_confirmations) {
+        if (! app('settings')->get(auth()->user()->role->business_id, 'allow_client_confirmations')) {
             return redirect('/');
         }
 
@@ -45,7 +45,7 @@ class UnconfirmedShiftsController extends Controller
      */
     public function confirm(Shift $shift)
     {
-        if (! auth()->user()->role->business->allow_client_confirmations) {
+        if (! app('settings')->get(auth()->user()->role->business_id, 'allow_client_confirmations')) {
             return redirect('/');
         }
 

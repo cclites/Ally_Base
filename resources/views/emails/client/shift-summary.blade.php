@@ -13,7 +13,7 @@ Your home care service week is finished. Please review and confirm your pending 
 
 ## <center>Total pending charge:  ${{ number_format($total, 2) }}</center>
 
-@if ($client->business->allow_client_confirmations)
+@if (app('settings')->get($client->business_id, 'allow_client_confirmations'))
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
     <tr>
         <td align="center">
