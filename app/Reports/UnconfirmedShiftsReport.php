@@ -20,6 +20,14 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     protected $include_clocked_in;
 
+
+    /**
+     * Flag to include all confirmed statuses as well as unconfirmed, but not charged
+     *
+     * @var bool
+     */
+    protected $include_confirmed;
+
     /**
      * Flag to idenfiy that the report is being build
      * for the email report.
@@ -104,6 +112,18 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
+     * Set include clocked in flag.
+     *
+     * @return UnconfirmedShiftsReport
+     */
+    public function includeConfirmed()
+    {
+        $this->include_confirmed = true;
+
+        return $this;
+    }
+
+    /**
      * Get the businesses that are set up to send shift confirmation emails.
      * Returns an empty array if report is not for email.
      *
@@ -118,13 +138,22 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
-     * Get the statuses classified as unconfirmed according to the report settings.
+     * Get the applicable statuses according to the report settings.
      *
      * @return array
      */
-    protected function getUnconfirmedStatuses()
+    protected function getShiftStatuses()
     {
-        return $this->include_clocked_in ? ShiftStatusManager::getUnconfirmedStatuses() : [Shift::WAITING_FOR_CONFIRMATION];
+        $statuses = $this->include_confirmed ? ShiftStatusManager::getPendingStatuses()
+            : ShiftStatusManager::getUnconfirmedStatuses();
+
+        if (!$this->include_clocked_in) {
+            $statuses = array_filter($statuses, function($status) {
+                return $status !== 'CLOCKED_IN';
+            });
+        }
+
+        return $statuses;
     }
 
     /**
@@ -141,7 +170,7 @@ class UnconfirmedShiftsReport extends BaseReport
 
         return $query
             ->forClient($this->client)
-            ->whereIn('status', $this->getUnconfirmedStatuses())
+            ->whereIn('status', $this->getShiftStatuses())
             ->get()
             ->filter(function (Shift $s) {
                 if ($this->for_email) {
