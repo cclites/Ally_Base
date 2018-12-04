@@ -80,6 +80,10 @@ class UnconfirmedShiftsController extends Controller
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
+        if (! app('settings')->get(auth()->user()->role->business_id, 'allow_client_confirmations')) {
+            return redirect('/');
+        }
+
         $data = $request->validate(
             [
                 'checked_in_time' => 'required|date',
@@ -92,6 +96,13 @@ class UnconfirmedShiftsController extends Controller
 
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
+
+        // Automatically confirm visits that clients modify
+        if (app('settings')->get(auth()->user()->role->business_id, 'auto_confirm_modified') 
+            && in_array($shift->status, ShiftStatusManager::getUnconfirmedStatuses())) {
+                $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
+                $data['client_confirmed'] = true;
+        }
 
         if ($shift->update($data)) {
             $shift->activities()->sync($request->input('activities', []));

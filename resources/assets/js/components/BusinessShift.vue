@@ -378,11 +378,8 @@
             </div> <!-- // end ! isClient -->
             <b-row v-if="isClient">
                 <b-col lg="12" class="text-right mt-3">
-                    <b-button variant="info" type="submit" @click="saveShift(true)">
-                        <i class="fa fa-check"></i> Save &amp; Confirm
-                    </b-button>
-                    <b-button variant="success" type="submit" @click="saveShift(false)">
-                        <i class="fa fa-save"></i> Save &amp; DO NOT Confirm Yet
+                    <b-button variant="info" type="submit" @click="saveShift(false)">
+                        Modify Shift
                     </b-button>
                 </b-col>
             </b-row>
