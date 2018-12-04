@@ -21,6 +21,10 @@ class SettingController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson() && $request->input('json')) {
+            if (auth()->user()->role_type == 'client') {
+                return response()->json(auth()->user()->role->business);
+            }
+            
             return $this->business();
         }
 
