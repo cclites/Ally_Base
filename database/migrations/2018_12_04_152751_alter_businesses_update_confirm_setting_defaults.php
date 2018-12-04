@@ -19,10 +19,10 @@ class AlterBusinessesUpdateConfirmSettingDefaults extends Migration
         });
 
         Schema::table('businesses', function (Blueprint $table) {
-            $table->boolean('allow_client_confirmations')->default(0);
+            $table->boolean('allow_client_confirmations')->default(0)->after('overtime_method');
         });
 
-        if (env('APP_ENV') !== 'production') {
+        if (app()->environment() !== 'production') {
             return;
         }
 
@@ -30,6 +30,9 @@ class AlterBusinessesUpdateConfirmSettingDefaults extends Migration
             $business->update([
                 'auto_confirm_verified_shifts' => $business->auto_confirm,
                 'auto_confirm' => 0,
+                'shift_confirmation_email' => 0,
+                'sce_shifts_in_progress' => 0,
+                'auto_append_hours' => 0,
             ]);   
         }
     }
