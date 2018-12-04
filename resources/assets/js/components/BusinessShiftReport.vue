@@ -869,7 +869,7 @@
         height: auto;
         max-width: 400px;
     }
-    .shift-table .fa {
+    .shift-table td > .fa {
         font-size: 16px;
     }
     #filtersModal .datepicker, #filtersContainer .datepicker {
