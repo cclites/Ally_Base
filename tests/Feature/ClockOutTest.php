@@ -208,7 +208,7 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_does_create_unverified_exceptions()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => true]);
         $shift = $this->createShift();
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->clockOut($shift);
@@ -219,7 +219,7 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_creates_verified_shifts_waiting_for_authorization()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => true]);
 
         // Make a client phone number
         $phone = factory(PhoneNumber::class)->make();
@@ -235,7 +235,7 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_disabled_creates_verified_shifts_waiting_for_confirmation()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => false]);
 
         // Make a client phone number
         $phone = factory(PhoneNumber::class)->make();
