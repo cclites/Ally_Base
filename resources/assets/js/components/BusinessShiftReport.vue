@@ -66,8 +66,8 @@
                         </b-col>
                         <b-col xl="4" lg="6">
                             <!-- ADMIN ONLY DROPDOWN -->
-                            <b-form-group label="Admin Imports" class="form-inline">
-                                <b-form-select v-if="admin" v-model="filters.import_id">
+                            <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                                <b-form-select v-model="filters.import_id">
                                     <option value="">--Filter by Import--</option>
                                     <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                                 </b-form-select>
@@ -226,8 +226,8 @@
                             </b-form-select>
                         </b-form-group>
                         <!-- ADMIN ONLY DROPDOWN -->
-                        <b-form-group label="Admin Imports" class="form-inline">
-                            <b-form-select v-if="admin" v-model="filters.import_id">
+                        <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                            <b-form-select v-model="filters.import_id">
                                 <option value="">--Filter by Import--</option>
                                 <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                             </b-form-select>
