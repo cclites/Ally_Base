@@ -46,7 +46,7 @@
                             <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
                         </b-col>
                         <b-col sm="6" class="text-right">
-                            <b-btn href="#" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                            <b-btn :href="downloadableUrl" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
                             <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
                         </b-col>
                     </b-row>
@@ -192,6 +192,26 @@
             }
 
             return items;
+        },
+
+        downloadableUrl() {
+            // Convert this.columns to a valid query string
+            const columnsToRemove = Object.keys(this.columns).map(key => {
+                const value = Number(this.columns[key].shouldShow);
+                return `${key}=${value}`;
+            });
+
+            // convert this.filters to a valid query string
+            let filtersToApply = Object.keys(this.filters).map(key => {
+                let value = this.filters[key];
+                value = typeof value  == 'boolean' ? Number(value) : value;
+
+                return (value === null || value === '') ? undefined : `${key}=${value}`;
+            });
+    
+            filtersToApply = filtersToApply.filter(value => typeof value !== 'undefined'); // Remove all non applied filters
+
+            return `/business/reports/client-directory/download?export=1&${columnsToRemove.join('&')}&${filtersToApply.join('&')}`;
         }
     },
 
@@ -208,7 +228,7 @@
 
         printTable() {
             $('#clients-table').print();
-        }
+        },
     },
  }
  </script>
