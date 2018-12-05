@@ -389,7 +389,7 @@ class ReportsController extends BaseController
         }
 
         if ($request->input('export')) {
-            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone ?? 'America/New_York')
                           ->download();
         }
 
