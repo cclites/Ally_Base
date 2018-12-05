@@ -800,14 +800,26 @@ class ReportsController extends BaseController
     {
         $report = new ClientDirectoryReport();
         $report->forRequestedBusinesses();
-        $report->applyColumnFilters($request->all());
+
+        if($request->start_date && $request->end_date) {
+            $report->query()
+                ->join('users','clients.id','=','users.id')
+                ->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'))
+                ->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+        }
+
+        if($request->has('client_active')) {
+            $report->where('active', $request->client_active);
+        }
+
+        $report->applyColumnFilters($request->except(['start_date','end_date','client_active']));
 
         if ($report->count() > 1000) {
             // Limit to 1K clients for performance reasons
             return new ErrorResponse(400, 'There are too many clients to report.  Please reduce your date range.');
         }
 
-        if ($request->input('export')) {
+        if ($request->has('export') && $request->export == true) {
             return $report->download();
         }
 
