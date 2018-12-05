@@ -61,7 +61,7 @@ trait IsDirectoryReport {
                 }
             }
 
-            return $caregiver;
+            return $entry;
         });
     }
 }
