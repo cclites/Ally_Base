@@ -25,7 +25,7 @@
 
                         <b-col lg="3">
                             <b-form-group label="Client status">
-                                <b-form-select v-model="filters.client_active">
+                                <b-form-select v-model="filters.active">
                                     <option :value="null">All Clients</option>
                                     <option :value="true">Active Clients</option>
                                     <option :value="false">Inactive Clients</option>
@@ -130,7 +130,7 @@
             filters: {
                 start_date: '',
                 end_date: '',
-                client_active: null,
+                active: null,
             },
             columns: {
                 firstname: {
@@ -180,15 +180,15 @@
         },
 
         items() {
-            const {start_date, end_date, client_active} = this.filters;
+            const {start_date, end_date, active} = this.filters;
             let items = this.clients;
 
             if(start_date && end_date) {
                 items = items.filter(({user}) => moment(user.created_at).isBetween(start_date, end_date));
             }
 
-            if(typeof client_active == 'boolean') {
-                items = items.filter(client => client.active == client_active);
+            if(typeof active == 'boolean') {
+                items = items.filter(client => client.active == active);
             }
 
             return items;
