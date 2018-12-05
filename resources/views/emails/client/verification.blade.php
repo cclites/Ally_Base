@@ -7,9 +7,5 @@ We are now processing transactions on behalf of {{ $business->name }}.  To ensur
     Click here to confirm
 @endcomponent
 
-Sincerely,
-
-The Ally Management Team
-
-(800) 930-0587
+@include('emails.partials.signature')
 @endcomponent

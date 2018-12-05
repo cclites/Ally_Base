@@ -1,4 +1,4 @@
-@component('mail::message', ['header' => $businessName . ' - Powered by Ally'])
+@component('mail::message')
 ## Hello {{ $client->firstname }},
 
 Your home care service week is finished. Please review and confirm your pending charge for home care visits. These visits will be charged to your account on file in 24 hours.
@@ -47,9 +47,5 @@ Please do not reply to this email.
 Thank you for choosing Ally!
 
 <br/>
-Sincerely,
-
-The Ally Management Team
-
-(800) 930-0587
+@include('emails.partials.signature')
 @endcomponent
