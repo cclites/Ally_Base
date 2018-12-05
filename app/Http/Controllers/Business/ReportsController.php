@@ -800,16 +800,15 @@ class ReportsController extends BaseController
     {
         $report = new ClientDirectoryReport();
         $report->forRequestedBusinesses();
+            $report->query()->join('users','clients.id','=','users.id');
 
         if($request->start_date && $request->end_date) {
-            $report->query()
-                ->join('users','clients.id','=','users.id')
-                ->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'))
-                ->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+            $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
+            $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
         }
 
         if($request->has('client_active')) {
-            $report->where('active', $request->client_active);
+            $report->where('users.active', $request->client_active);
         }
 
         $report->applyColumnFilters($request->except(['start_date','end_date','client_active']));
