@@ -719,10 +719,10 @@
             loadCaregiverRates() {
                 if (!this.form.caregiver_id || !this.form.client_id) return;
                 axios.get('/business/clients/' + this.form.client_id + '/caregivers/' + this.form.caregiver_id).then(response => {
-                    console.log(response.data.pivot);
-                    if (response.data.pivot) {
-                        this.form.caregiver_rate = response.data.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
-                        this.form.provider_fee = response.data.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
+                    if (response.data.rates) {
+                        let rates = response.data.rates[this.rateType.toLowerCase()];
+                        this.form.caregiver_rate = rates.caregiver_rate.toFixed(2);
+                        this.form.provider_fee = rates.provider_fee.toFixed(2);
                     }
                 });
             },
