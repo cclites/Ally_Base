@@ -129,10 +129,11 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col lg="12">
-                            <b-form-group>
-                                <b-button @click="update" variant="info">Save</b-button>
-                            </b-form-group>
+                        <b-col>
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
+                            </b-btn>
                         </b-col>
                     </b-row>
                 </b-tab>
@@ -170,9 +171,6 @@
                                     </option>
                                 </b-form-select>
                             </b-form-group>
-                            <b-btn @click="update" variant="info">
-                                Save
-                            </b-btn>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Phone 2">
@@ -201,6 +199,14 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
+                    <b-row>
+                        <b-col>
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
+                            </b-btn>
+                        </b-col>
+                    </b-row>
                 </b-tab>
                 <b-tab title="Medicaid">
                     <b-row>
@@ -227,8 +233,9 @@
                     </b-row>
                     <b-row>
                         <b-col>
-                            <b-btn @click="update" variant="info">
-                                Save
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
                             </b-btn>
                         </b-col>
                     </b-row>
@@ -305,11 +312,11 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col lg="12">
-                            <b-btn @click="update" variant="info">
-                                Save
+                        <b-col>
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
                             </b-btn>
-                            <hr/>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -429,7 +436,7 @@
                                     <option :value="1">Yes</option>
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="auto_confirm" class="text-danger"
-                                            text="Note: This may lead to billing errors and unhappy clients."></input-help>
+                                            text="Note: Setting this to Yes may lead to billing errors and unhappy clients."></input-help>
                             </b-form-group>
                             <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
                                 <b-form-select id="ask_on_confirm"
@@ -446,8 +453,9 @@
                     </b-row>
                     <b-row>
                         <b-col>
-                            <b-btn @click="update" variant="info">
-                                Save
+                            <hr />
+                            <b-btn @click="update" variant="info" size="lg">
+                                Save Settings
                             </b-btn>
                         </b-col>
                     </b-row>
