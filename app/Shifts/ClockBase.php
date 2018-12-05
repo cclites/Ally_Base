@@ -55,10 +55,6 @@ abstract class ClockBase
         if ($schedule->caregiver_id != $this->caregiver->id) {
             throw new InvalidScheduleParameters('This caregiver is not assigned to this shift.');
         }
-
-        if ($schedule->fixed_rates) {
-            throw new InvalidScheduleParameters('Daily rate shifts cannot be clocked in to.');
-        }
     }
 
     public function verifyGeocode(Client $client)
