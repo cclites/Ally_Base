@@ -498,7 +498,13 @@
             },
 
             openCareMatchTab() {
-               this.activeTab = this.$refs.tabs.tabs.length - 1;
+                const tabs = this.$refs.tabs.tabs;
+                for (let i = 0; i < tabs.length; i ++) {
+                    if (tabs[i].title === 'Care Match') {
+                        this.activeTab = i;
+                        break;
+                    }
+                }
             },
 
             makeForm() {
