@@ -2,7 +2,11 @@
     {{-- Header --}}
     @slot('header')
         @component('mail::header', ['url' => config('app.url')])
-            {{ $header ? $header : config('app.name') }}
+            @if(isset($header))
+                $header
+            @else
+                <img src="{{ asset('images/AllyLogo-new-light.png') }}" alt="{{ config('app.name') }}">
+            @endif
         @endcomponent
     @endslot
 
