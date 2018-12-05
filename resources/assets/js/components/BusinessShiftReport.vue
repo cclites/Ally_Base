@@ -1,7 +1,7 @@
 <template>
     <div>
-        <b-card>
-            <b-row class="mb-2">
+        <b-card body-class="pb-2">
+            <b-row>
                 <b-container fluid id="filtersContainer">
                     <b-row>
                         <b-col xl="4" lg="6">
@@ -76,8 +76,8 @@
                     </b-row>
                     <b-row>
                         <b-col lg="12">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card mb-0">
+                                <div class="card-body p-3">
                                     <h6 class="card-title">Filter by Flags</h6>
                                     <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags(true)">
                                         <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
@@ -875,6 +875,9 @@
     }
     #filtersModal .datepicker, #filtersContainer .datepicker {
         max-width: 150px;
+    }
+    #filtersContainer .form-group {
+        margin-bottom: 0.5rem;
     }
     .fullscreen-shr {
         background-color: white;
