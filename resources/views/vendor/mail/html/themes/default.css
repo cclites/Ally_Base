@@ -217,7 +217,7 @@ img {
     -webkit-text-size-adjust: none;
 }
 
-.button-blue {
+.button-green {
     background-color: #26c6da;
     border-top: 10px solid #26c6da;
     border-right: 18px solid #26c6da;
@@ -225,7 +225,7 @@ img {
     border-left: 18px solid #26c6da;
 }
 
-.button-green {
+.button-blue {
     background-color: #1e88e5;
     border-top: 10px solid #1e88e5;
     border-right: 18px solid #1e88e5;
@@ -234,11 +234,11 @@ img {
 }
 
 .button-red {
-    background-color: #bf5329;
-    border-top: 10px solid #bf5329;
-    border-right: 18px solid #bf5329;
-    border-bottom: 10px solid #bf5329;
-    border-left: 18px solid #bf5329;
+    background-color: #bf2b36;
+    border-top: 10px solid #bf2b36;
+    border-right: 18px solid #bf2b36;
+    border-bottom: 10px solid #bf2b36;
+    border-left: 18px solid #bf2b36;
 }
 
 /* Panels */
