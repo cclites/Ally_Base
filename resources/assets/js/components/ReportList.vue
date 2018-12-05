@@ -233,7 +233,7 @@
                         },
                         {
                             name: 'Caregiver Directory',
-                            url: 'caregivers',
+                            url: 'reports/caregiver-directory',
                             description: 'Shows the full list of caregivers',
                             category: 3
                         },

@@ -791,6 +791,17 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Shows the page to generate the caregiver directory
+     *
+     * @return Response
+     */
+    public function caregiverDirectory()
+    {
+        $caregivers = Caregiver::forRequestedBusinesses()->with('address')->get();
+        return view('business.reports.caregiver_directory', compact('caregivers'));
+    }
+
+    /**
      * Shows the page to generate the client directory
      * 
      * @param \Illuminate\Http\Request $request
@@ -807,8 +818,8 @@ class ReportsController extends BaseController
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
         }
 
-        if($request->has('client_active')) {
-            $report->where('users.active', $request->client_active);
+        if($request->has('active')) {
+            $report->where('users.active', $request->active);
         }
 
         $report->applyColumnFilters($request->except(['start_date','end_date','client_active']));
