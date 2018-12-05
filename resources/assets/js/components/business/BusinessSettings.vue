@@ -372,7 +372,7 @@
                             </div>
                             <div>
                                 <small class="form-text text-muted">Shift Confirmation Email Example:</small>
-                                <img src="/images/shift-confirmation-email-example.png" style="max-width: 100%"/>
+                                <img src="/images/shift-confirmation-email-example.png" class="email-example-img mb-1" />
                             </div>
                         </b-col>
 
@@ -588,3 +588,10 @@
         }
     }
 </script>
+
+<style scoped>
+    .email-example-img {
+        max-width: 100%;
+        border: 1px solid #eee;
+    }
+</style>
