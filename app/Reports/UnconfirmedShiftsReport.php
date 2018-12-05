@@ -192,6 +192,7 @@ class UnconfirmedShiftsReport extends BaseReport
                     'business_name' => $s->business->name,
                     'caregiver' => $this->mask_names ? $s->caregiver->user->maskedName : $s->caregiver->user->name,
                     'hours' => $s->hours,
+                    'confirmed' => $s->statusManager()->isConfirmed(),
                     'rate' => $s->costs()->getTotalHourlyCost(),
                     'total' => $s->costs()->getTotalCost(),
                 ];

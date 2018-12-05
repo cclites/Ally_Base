@@ -1,7 +1,7 @@
 @component('mail::message')
 ## Hello {{ $client->firstname }},
 
-Your home care service week is finished. Please review and confirm your pending charge for home care visits. These visits will be charged to your account on file in 24 hours.
+Your home care service week is finished. Please review and confirm your home care visits using the confirm or modify buttons below.
 
 @component('mail::table')
 | Date            | Caregiver            | Hours            | Rate             | Total             |
@@ -10,8 +10,6 @@ Your home care service week is finished. Please review and confirm your pending 
 @endforeach
 @endcomponent
 
-
-## <center>Total pending charge:  ${{ number_format($total, 2) }}</center>
 
 @if (app('settings')->get($client->business_id, 'allow_client_confirmations'))
 <table class="action" align="center" width="100%" cellpadding="0" cellspacing="0">
@@ -23,10 +21,10 @@ Your home care service week is finished. Please review and confirm your pending 
                         <table border="0" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td>
-                                    <a href="{{ route('token-confirm-shifts', ['token' => $confirmToken]) }}" class="button button-green" target="_blank">Confirm</a>
+                                    <a href="{{ route('token-confirm-shifts', ['token' => $confirmToken]) }}" class="button button-blue" target="_blank">Confirm</a>
                                 </td>
                                 <td style="padding-left: 50px">
-                                    <a href="{{ route('client.unconfirmed-shifts') }}" class="button button-blue" target="_blank">Modify</a>
+                                    <a href="{{ route('client.unconfirmed-shifts') }}" class="button button-red" target="_blank">Modify</a>
                                 </td>
                             </tr>
                         </table>
@@ -38,9 +36,9 @@ Your home care service week is finished. Please review and confirm your pending 
 </table>
 @endif
 
-Your payment method on file will be charged within 24 hours.
+Your visit details and actual charge amount are subject to change by your home care company.  Your payment method on file will be charged within 24 hours.  Failure to take action may result in an incorrect bill amount.
 
-Please do not reply to this email.
+Please do not reply to this email.  For any questions regarding this charge please contact your home care company.
 
 <br/>
 

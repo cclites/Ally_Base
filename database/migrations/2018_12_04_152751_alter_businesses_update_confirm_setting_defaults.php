@@ -19,7 +19,7 @@ class AlterBusinessesUpdateConfirmSettingDefaults extends Migration
         });
 
         Schema::table('businesses', function (Blueprint $table) {
-            $table->boolean('allow_client_confirmations')->default(0)->after('overtime_method');
+            $table->boolean('allow_client_confirmations')->default(1)->after('overtime_method');
         });
 
         if (app()->environment() !== 'production') {

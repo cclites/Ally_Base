@@ -26,6 +26,7 @@ class UnconfirmedShiftsController extends Controller
         }
 
         $shifts = $report->forClient(auth()->id())
+            ->includeConfirmed()
             ->rows();
 
         if (request()->wantsJson() && request()->has('json')) {
@@ -43,22 +44,36 @@ class UnconfirmedShiftsController extends Controller
      * @param Shift $shift
      * @return \Illuminate\Http\Response
      */
-    public function confirm(Shift $shift)
+    public function confirm(Shift $shift, Request $request)
     {
         $this->authorize('update', $shift);
 
         if (! app('settings')->get(auth()->user()->role->business_id, 'allow_client_confirmations')) {
-            return redirect('/');
+            return new ErrorResponse(400, 'Client confirmations are not permitted.  Please contact the registry.');
         }
 
-        if (in_array($shift->status, ShiftStatusManager::getUnconfirmedStatuses())) {
+        if ($request->confirmed) {
+            $availableStatuses = ShiftStatusManager::getUnconfirmedStatuses();
+            $newStatus = Shift::WAITING_FOR_AUTHORIZATION;
+            $verb = 'confirmed';
+        }
+        else {
+            $availableStatuses = ShiftStatusManager::getConfirmedStatuses(true);
+            $newStatus = Shift::WAITING_FOR_CONFIRMATION;
+            $verb = 'unconfirmed';
+        }
+
+        if (in_array($shift->status, $availableStatuses)) {
             $shift->update([
-                'status' => Shift::WAITING_FOR_AUTHORIZATION,
-                'client_confirmed' => true,
+                'status' => $newStatus,
+                'client_confirmed' => (bool) $request->confirmed,
             ]);
         }
+        else {
+            return new ErrorResponse(400, "This shift is not able to be $verb at this time.");
+        }
 
-        return new SuccessResponse('Shift has been confirmed.');
+        return new SuccessResponse("This shift has been $verb.");
     }
 
     /**

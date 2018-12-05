@@ -1,15 +1,15 @@
 <template>
-    <b-card title="Unconfirmed Shifts">
+    <b-card title="Pending Shifts">
         <loading-card v-if="loading" />
         <div class="table-responsive" v-else>
             <b-table show-empty :items="items" :fields="fields">
                 <template scope="data" slot="actions">
-                    <div v-if="data.item.is_confirmed" class="text-muted">
-                        Confirmed
+                    <div v-if="data.item.confirmed" class="text-muted">
+                        <b-button @click="unconfirm(data.item)" variant="primary">Un-confirm</b-button>
                     </div>
                     <div v-else>
-                        <b-button @click="modify(data.item)" variant="success">Modify</b-button>
-                        <b-button @click="confirm(data.item)" variant="warning">Confirm</b-button>
+                        <b-button @click="confirm(data.item)" variant="info">Confirm</b-button>
+                        <b-button @click="modify(data.item)" variant="danger">Modify</b-button>
                     </div>
                 </template>
             </b-table>
@@ -62,7 +62,10 @@
                         key: 'total',
                         label: 'Total',
                         formatter: (value) => { return this.moneyFormat(value); }
-
+                    },
+                    {
+                        key: 'confirmed',
+                        formatter: (value) => value ? '<i class="fa fa-check" style="color: green"></i>' : '',
                     },
                     {
                         key: 'actions',
@@ -83,18 +86,23 @@
                 this.showModifyModal = true;
             },
 
-            confirm(shift) {
+            unconfirm(shift) {
+                return this.confirm(shift, false);
+            },
+
+            confirm(shift, confirmed=true) {
                 if (this.businessSettings().ask_on_confirm && ! confirm('Are you sure you want to confirm this shift?')) {
                     return;
                 }
 
-                axios.post(`/unconfirmed-shifts/${shift.id}/confirm`, { confirmed: true })
+                axios.post(`/unconfirmed-shifts/${shift.id}/confirm`, { confirmed })
                     .then( ({ data }) => {
                         let index = this.items.findIndex(obj => obj.id == shift.id);
                         if (index >= 0) {
-                            let updated = this.items[index];
-                            updated.is_confirmed = true;
-                            this.items.splice(index, 1, updated);
+                            Vue.set(this.items, index, {
+                                ...this.items[index],
+                                confirmed
+                            });
                         }
                     })
                     .catch(e => {

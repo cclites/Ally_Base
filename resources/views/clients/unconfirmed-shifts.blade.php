@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Unconfirmed Shifts')
+@section('title', 'Pending Shifts')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item active">Unconfirmed Shifts</li>
+    <li class="breadcrumb-item active">Pending Shifts</li>
 @endsection
 
 @section('content')
