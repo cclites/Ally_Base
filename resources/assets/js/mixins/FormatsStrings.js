@@ -16,6 +16,9 @@ export default {
             if (address.address2) str = str + br + address.address2;
             str = str + br + address.city + `, ` + address.state + ' ' + address.zip;
             return str;
-        }
+        },
+        toSnakeCase(str) {
+            return _.snakeCase(str);
+        },
     }
 }
