@@ -17,6 +17,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <hr />
             <b-row>
                 <b-col lg="6">
                     <h5>Find caregivers who...</h5>
@@ -68,7 +69,7 @@
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="activities" :true-value=".01" :false-value="null">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver's skills matches at least 1 of the client's ADL requirements</span>
+                            <span class="custom-control-description">Caregiver's skills match at least 1 of the client's ADL requirements</span>
                         </label>
                     </div>
                     <!--<div class="form-check">-->
@@ -99,46 +100,40 @@
                             <span class="custom-control-description">Located within a <input type="number" step="1" v-model="radius" :disabled="!radiusEnabled" class="form-control-sm col-2"/> mile radius of service address</span>
                         </label>
                     </div>
-                    <b-row>
-                        <b-col lg="4">
-                            <b-form-group label="Caregiver Gender" label-for="gender">
-                                <b-form-select id="gender"
-                                               v-model="gender"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_gender" text="" />
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
-                            <b-form-group label="Caregiver License" label-for="license">
-                                <b-form-select id="license"
-                                               v-model="license"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option value="CNA">CNA</option>
-                                    <option value="HHA">HHA</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_license" text="" />
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
-                            <b-form-group label="Spoken Language" label-for="language">
-                                <b-form-select id="language"
-                                               v-model="language"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option v-for="lang in languages.getOptions()" :value="lang.value">{{ lang.text }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_language" text="" />
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
+                    <div>
+                        <b-form-group label="Caregiver Gender" label-for="gender">
+                            <b-form-select id="gender"
+                                            v-model="gender"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_gender" text="" />
+                        </b-form-group>
+                        <b-form-group label="Caregiver License" label-for="license">
+                            <b-form-select id="license"
+                                            v-model="license"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="CNA">CNA</option>
+                                <option value="HHA">HHA</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_license" text="" />
+                        </b-form-group>
+                        <b-form-group label="Spoken Language" label-for="language">
+                            <b-form-select id="language"
+                                            v-model="language"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option v-for="lang in languages.getOptions()" :value="lang.value">{{ lang.text }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_language" text="" />
+                        </b-form-group>
+                    </div>
 
                     <!--<div class="form-check">-->
                         <!--<label class="custom-control custom-checkbox">-->
@@ -253,7 +248,6 @@
                         sortable: true,
                         formatter: val => numeral(val).format('0%'),
                     },
-                    'rating',
                     'actions'
                 ],
                 sortBy: 'distance',
