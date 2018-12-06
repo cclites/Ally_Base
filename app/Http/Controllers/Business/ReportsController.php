@@ -803,7 +803,7 @@ class ReportsController extends BaseController
     }
 
     /**
-     * Shows the page to generate the caregiver directory
+     * Handle the request to generate the caregiver directory
      * 
      * @param \Illuminate\Http\Request $request
      * @return Response
@@ -838,7 +838,7 @@ class ReportsController extends BaseController
     }
 
     /**
-     * Shows the page to generate the client directory
+     * Handle the request to generate the client directory
      * 
      * @param \Illuminate\Http\Request $request
      * @return Response
