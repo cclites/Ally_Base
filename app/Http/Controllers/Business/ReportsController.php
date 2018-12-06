@@ -26,6 +26,7 @@ use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
 use App\Reports\ClientDirectoryReport;
 use App\Reports\CaregiverDirectoryReport;
+use App\Reports\ProspectDirectoryReport;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
@@ -811,6 +812,36 @@ class ReportsController extends BaseController
     {
         $caregivers = Caregiver::forRequestedBusinesses()->with('address')->get();
         return view('business.reports.caregiver_directory', compact('caregivers'));
+    }
+
+    /**
+     * Handle the request to generate the prospect directory
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return Response
+     */
+    public function generateProspectDirectoryReport(Request $request)
+    {
+        $report = new ProspectDirectoryReport();
+        $report->forRequestedBusinesses();
+
+        if($request->start_date && $request->end_date) {
+            $report->where('created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
+            $report->where('created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+        }
+
+        $report->applyColumnFilters($request->except(['start_date','end_date']));
+
+        if ($report->count() > 1000) {
+            // Limit to 1K prospects for performance reasons
+            return new ErrorResponse(400, 'There are too many prospects to report.  Please reduce your date range.');
+        }
+
+        if ($request->has('export') && $request->export == true) {
+            return $report->download();
+        }
+
+        return $report->rows();
     }
 
     /**
