@@ -8,15 +8,10 @@
 </template>
 
 <script>
+    import { mapGetters, mapMutations } from 'vuex'
+
     export default {
         name: 'deactivation-reason-manager',
-
-        props: {
-            business: {
-                type: Object,
-                required: true
-            },
-        },
 
         mixins: [],
 
@@ -25,7 +20,7 @@
         data() {
             return {
                 form: new Form({
-                    business_id: this.business.id,
+                    business_id: 0,
                     name: '',
                     type: ''
                 })
@@ -33,18 +28,22 @@
         },
 
         created() {
-        },
-
-        mounted() {
+            this.form.business_id = this.business.id
         },
 
         computed: {
+            business() {
+                return this.$parent.business;
+            },
+
             label() {
                 return _.upperFirst(this.form.type) + ' Deactivation Reason'
             }
         },
 
         methods: {
+            ...mapGetters(['defaultBusiness']),
+
             async addReason() {
                 let response = await this.form.post('/business/settings/deactivation-reasons');
                 this.$emit('reasonAdded', response.data);

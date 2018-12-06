@@ -7,7 +7,7 @@
                 </b-col>
             </b-row>
         </b-card>
-        <b-card no-body v-if="business.id">
+        <b-card no-body v-if="business">
             <b-tabs pills card>
                 <b-tab title="System" active>
                     <b-row>
@@ -126,6 +126,30 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="6">
+                            <div class="mb-2">Reason codes when deactivating clients</div>
+                            <b-list-group>
+                                <b-list-group-item v-for="reason in business.clientDeactivationReasons" :key="reason.id">
+                                    {{ reason.name }}
+                                </b-list-group-item>
+                                <b-list-group-item button @click="addDeactivationReason('client')">
+                                    <i class="fa fa-plus mr-2"></i>Add Reason
+                                </b-list-group-item>
+                            </b-list-group>
+                        </b-col>
+                        <b-col lg="6">
+                            <div class="mb-2">Reason codes when deactivating caregivers</div>
+                            <b-list-group>
+                                <b-list-group-item v-for="reason in business.caregiverDeactivationReasons"
+                                                   :key="reason.id">{{ reason.name }}
+                                </b-list-group-item>
+                                <b-list-group-item button @click="addDeactivationReason('caregiver')">
+                                    <i class="fa fa-plus mr-2"></i>Add Reason
+                                </b-list-group-item>
+                            </b-list-group>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -334,7 +358,7 @@
                 <b-tab title="Shift Confirmations">
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Allow clients to confirm and modify visits in the client portal"
+                            <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
                                           label-for="allow_client_confirmations">
                                 <b-form-select id="allow_client_confirmations"
                                                :disabled="businessSettings.auto_confirm == 1"
@@ -354,12 +378,10 @@
                                     <option :value="1">Yes</option>
                                 </b-form-select>
                             </b-form-group>
-                            <!-- Summary email is disabled and set to no (by watcher) when allow_client_confirmation == 0 -->
                             <b-form-group
-                                    label="Send client visit summary and pending charge email Monday of each week"
-                                    label-for="shift_confirmation_email">
+                                label="Send client summary visits confirmation and pending charge email Monday of each week"
+                                label-for="shift_confirmation_email">
                                 <b-form-select id="shift_confirmation_email"
-                                               :disabled="businessSettings.auto_confirm == 1 || businessSettings.allow_client_confirmations == 0"
                                                v-model="businessSettings.shift_confirmation_email"
                                 >
                                     <option :value="0">No</option>
@@ -435,8 +457,7 @@
                                     <option :value="0">No</option>
                                     <option :value="1">Yes</option>
                                 </b-form-select>
-                                <input-help :form="businessSettings" field="auto_confirm" class="text-danger"
-                                            text="Note: Setting this to Yes may lead to billing errors and unhappy clients."></input-help>
+                                <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
                             </b-form-group>
                             <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
                                 <b-form-select id="ask_on_confirm"
@@ -462,11 +483,15 @@
                 </b-tab>
             </b-tabs>
         </b-card>
+
+        <deactivation-reason-manager v-if="business" ref="deactivationReasonManager" @reasonAdded="updateReasons($event)"></deactivation-reason-manager>
     </div>
 </template>
 
 <script>
     import BusinessLocationSelect from "./BusinessLocationSelect";
+
+    import {mapGetters, mapState, mapMutations} from 'vuex';
 
     export default {
         components: {BusinessLocationSelect},
@@ -498,20 +523,40 @@
                     }
                 },
                 signatureOption: null,
+                deactivationReasons: {
+                    client: [],
+                    caregiver: []
+                }
             }
         },
 
         computed: {
+            ...mapState(['currentBusiness']),
+
             business() {
-                return this.$store.getters.getBusiness(this.businessId) || ""
+                let idx = _.findIndex(this.$store.state.business.businesses, ['id', this.businessId]);
+
+                return this.$store.state.business.businesses[idx];
+                //return !_.isEmpty(this.businessId) ? this.getBusiness(this.businessId) : this.defaultBusiness;
             }
         },
 
-        mounted() {
+        created() {
 
         },
 
+        mounted() {
+            this.deactivationReasons = {
+                client: this.business ? this.business.clientDeactivationReasons : [],
+                caregiver: this.business ? this.business.caregiverDeactivationReasons : []
+            };
+        },
+
         methods: {
+            ...mapMutations(['setCurrentBusiness']),
+
+            ...mapGetters(['defaultBusiness', 'getBusiness']),
+
             makeForm(business) {
                 return new Form({
                     //logo: business.logo,
@@ -558,10 +603,12 @@
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
                 });
             },
+
             async update() {
                 const response = await this.businessSettings.put('/business/settings/' + this.business.id);
                 this.$store.commit('updateBusiness', response.data.data);
             },
+
             getSignatureOption(business) {
                 for (var option of Object.keys(this.signatureMapping)) {
                     let obj = this.signatureMapping[option];
@@ -571,20 +618,39 @@
                     }
                 }
             },
+
             updateSignatureValues() {
                 if (!this.signatureOption) return;
                 Object.assign(this.businessSettings, this.signatureMapping[this.signatureOption]);
             },
+
+            addDeactivationReason(type) {
+                this.$refs.deactivationReasonManager.show(type);
+            },
+
+            updateReasons(event) {
+                let item = event.data;
+                this.deactivationReasons[item.type].push(item);
+            },
+
         },
 
         watch: {
             signatureOption() {
                 this.updateSignatureValues()
             },
+
             business(business, oldBusiness) {
+                console.dir(business);
+                if (!oldBusiness && business) {
+                    this.businessSettings = this.makeForm (business);
+                    this.signatureOption = this.getSignatureOption (business);
+                    return;
+                }
+
                 if (business.id !== oldBusiness.id) {
-                    this.businessSettings = this.makeForm(business);
-                    this.signatureOption = this.getSignatureOption(business);
+                    this.businessSettings = this.makeForm (business);
+                    this.signatureOption = this.getSignatureOption (business);
                 }
             },
             'businessSettings.allow_client_confirmations': function(value) {

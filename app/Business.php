@@ -200,6 +200,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         'unpaired_pay_rates' => 'json',
     ];
 
+    protected $appends = ['clientDeactivationReasons', 'caregiverDeactivationReasons'];
+
     ///////////////////////////////////////////
     /// Business type constants
     ///////////////////////////////////////////
@@ -360,6 +362,11 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->morphMany(GatewayTransaction::class, 'method');
     }
 
+    public function deactivationReasons()
+    {
+        return $this->hasMany(DeactivationReason::class);
+    }
+
     /**
      * Get the custom questions relation.
      *
@@ -389,7 +396,38 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         return $this->hasMany(SmsThread::class);
     }
-    
+
+    ///////////////////////////////////////////
+    /// Attributes
+    ///////////////////////////////////////////
+
+    public function getAllDeactivationReasonsAttribute()
+    {
+        return $this->deactivationReasons->merge(DeactivationReason::whereNull('business_id')->get())->values();
+    }
+
+    public function getClientDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('business_id')
+            ->where('type', 'client')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'client')
+                ->get())
+            ->values();
+    }
+
+    public function getCaregiverDeactivationReasonsAttribute()
+    {
+        return DeactivationReason::whereNull('business_id')
+            ->where('type', 'caregiver')
+            ->get()
+            ->merge($this->deactivationReasons()
+                ->where('type', 'caregiver')
+                ->get())
+            ->values();
+    }
+
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////
