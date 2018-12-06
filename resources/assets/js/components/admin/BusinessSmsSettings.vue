@@ -1,12 +1,12 @@
 <template>
-    <b-card header="SMS Settings"
+    <b-card header="Text Message Settings"
         header-bg-variant="info"
         header-text-variant="white"
     >
         <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Outgoing SMS Number" label-for="outgoing_sms_number">
+                    <b-form-group label="Outgoing Text Messaging Number" label-for="outgoing_sms_number">
                         <mask-input v-model="form.outgoing_sms_number" name="number"></mask-input>
                         <!-- <b-form-input
                             id="outgoing_sms_number"
@@ -22,7 +22,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button variant="success" type="submit">Save SMS Settings</b-button>
+                    <b-button variant="success" type="submit">Save Text Messaging Settings</b-button>
                 </b-col>
             </b-row>
         </form>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'SMS Caregivers')
+@section('title', 'Text Message Caregivers')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>

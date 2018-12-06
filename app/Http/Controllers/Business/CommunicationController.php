@@ -118,7 +118,7 @@ class CommunicationController extends Controller
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
             if ($request->input('can_reply')) {
-                return new ErrorResponse(422, 'You cannot receive SMS replies at this time because you have not been assigned a unique outgoing SMS number, please contact Ally.');
+                return new ErrorResponse(422, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
             }
 
             $from = PhoneNumber::formatNational(config('services.twilio.default_number'));

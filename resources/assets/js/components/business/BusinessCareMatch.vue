@@ -161,7 +161,7 @@
                 <b-col lg="6">
                     <h4>
                         Matches: {{ matches.length }}
-                        <b-btn v-if="matches.length > 0" variant="success" class="ml-3" @click="SmsMatches()">SMS All Matching Caregivers</b-btn>
+                        <b-btn v-if="matches.length > 0" variant="success" class="ml-3" @click="SmsMatches()">Text Message All Matching Caregivers</b-btn>
                     </h4>
                 </b-col>
                 <b-col lg="6" class="text-right">
