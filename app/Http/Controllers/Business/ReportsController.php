@@ -781,6 +781,17 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Shows the page to generate the prospect directory
+     *
+     * @return Response
+     */
+    public function prospectDirectory()
+    {
+        $prospects = Prospect::forRequestedBusinesses()->get();
+        return view('business.reports.prospect_directory', compact('prospects'));
+    }
+
+    /**
      * Shows the page to generate the client directory
      *
      * @return Response
@@ -823,7 +834,7 @@ class ReportsController extends BaseController
             $report->where('users.active', $request->active);
         }
 
-        $report->applyColumnFilters($request->except(['start_date','end_date','caregiver_active']));
+        $report->applyColumnFilters($request->except(['start_date','end_date','active']));
 
         if ($report->count() > 1000) {
             // Limit to 1K caregivers for performance reasons
@@ -858,7 +869,7 @@ class ReportsController extends BaseController
             $report->where('users.active', $request->active);
         }
 
-        $report->applyColumnFilters($request->except(['start_date','end_date','client_active']));
+        $report->applyColumnFilters($request->except(['start_date','end_date','active']));
 
         if ($report->count() > 1000) {
             // Limit to 1K clients for performance reasons

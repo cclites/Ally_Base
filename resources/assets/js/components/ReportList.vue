@@ -250,6 +250,12 @@
                             category: 1
                         },
                         {
+                            name: 'Prospects Directory',
+                            url: 'reports/prospect-directory',
+                            description: 'Shows the full list of prospective clients',
+                            category: 1
+                        },
+                        {
                             name: 'Caregiver Applications',
                             url: 'caregivers/applications',
                             description: 'See all caregiver applicants',
