@@ -1,6 +1,9 @@
 <?php
 namespace App;
 
+use App\Traits\BelongsToOneBusiness;
+use App\Contracts\BelongsToBusinessesInterface;
+
 /**
  * App\SmsThreadReply
  *
@@ -30,8 +33,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereUserId($value)
  * @mixin \Eloquent
  */
-class SmsThreadReply extends BaseModel
+class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
+
     /**
      * The attributes that should not be mass assignable.
      *
