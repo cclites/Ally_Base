@@ -2,12 +2,12 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle text-muted text-muted" id="notificationsDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-bell fa-lg"></i>
             <span class="badge badge-danger badge-notifications" v-if="notifications.length">{{ notifications.length }}</span>
-            <b-tooltip target="notificationsDropdown" placement="left" show title="You have exceptions that need your action!" v-if="showTooltip"></b-tooltip>
+            <b-tooltip target="notificationsDropdown" placement="left" show title="You have notifications that require action" v-if="showTooltip"></b-tooltip>
         </a>
         <div class="dropdown-menu dropdown-menu-right mailbox scale-up">
             <ul>
                 <li>
-                    <div class="drop-title">Exceptions</div>
+                    <div class="drop-title">Notifications</div>
                 </li>
                 <li>
                     <div class="message-center">
@@ -19,12 +19,12 @@
                             </div>
                         </a>
                         <a href="javascript:void(0);" v-if="!notifications.length">
-                            <b>No active exceptions</b>
+                            <b>No notifications</b>
                         </a>
                     </div>
                 </li>
                 <li>
-                    <a class="nav-link text-center" href="/business/exceptions"> <strong>View all exceptions</strong> <i class="fa fa-angle-right"></i> </a>
+                    <a class="nav-link text-center" href="/business/exceptions"> <strong>View all notifications</strong> <i class="fa fa-angle-right"></i> </a>
                 </li>
             </ul>
         </div>
