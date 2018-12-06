@@ -24,7 +24,7 @@
                             required
                         >
                             <option value="">--Select--</option>
-                            <option value="dropdown">List of Optionns</option>
+                            <option value="dropdown">List of Options</option>
                             <option value="radio">Yes/No Question</option>
                             <option value="input">Free text</option>
                             <option value="textarea">Long text</option>
@@ -32,13 +32,13 @@
                         <input-help :form="form" field="type" />
                     </b-form-group>
                     
-                    <b-form-group label="The field label" label-for="label" label-class="required">
+                    <b-form-group label="The label to use for your field" label-for="label" label-class="required">
                         <b-form-input
                             id="label"
                             name="label"
                             type="text"
                             v-model="form.label"
-                            placeholder="(e.g.: Your High School graduation year)"
+                            placeholder="(e.g.: Favorite color)"
                             required
                         />
                         <input-help :form="form" field="label" />
@@ -94,10 +94,10 @@
                         <input-help :form="form" field="default_value" :text="`Whenever an input is required then a default value will be given to all the existing ${form.user_type ? form.user_type : 'user'}s`" />
                     </b-form-group>
 
-                    <div>
+                    <div v-if="form.type == 'dropdown'">
                         <h3>Your list options:</h3>
-                        <p>You have created any yet. Please add them using the input below.</p>
-                        <b-row>
+                        <p v-if="options.length == 0">You have created any yet. Please add them using the input below.</p>
+                        <b-row v-else>
                             <b-col lg="12">
                                 <b-btn 
                                     v-for="(option, i) in options"
@@ -110,9 +110,9 @@
                         </b-row>
 
                         <form @submit.prevent="addOption()">
-                            <b-row>
+                            <b-row class="pad-top">
                                     <b-col md="9">
-                                        <b-form-group label="New option">
+                                        <b-form-group label="New option:">
                                             <b-form-input 
                                                 type="text"
                                                 v-model="optionInput"
@@ -136,6 +136,7 @@
                     <submit-button :submitting="submitting" variant="success" type="submit">
                         Save
                     </submit-button>
+                    <b-btn @click="destroy()" v-if="field" variant="danger">Delete custom field</b-btn>
                 </b-col>
             </b-row>
         </form>
@@ -160,11 +161,11 @@
             return {
                 submitting: false,
                 form: new Form({
-                    user_type: '',
-                    type: '',
-                    label: '',
-                    required: false,
-                    default_value: '',
+                    user_type: this.getOriginal('user_type'),
+                    type: this.getOriginal('type'),
+                    label: this.getOriginal('label'),
+                    required: this.getOriginal('required', false),
+                    default_value: this.getOriginal('default_value'),
                 }),
                 options: [],
                 optionInput: '',
@@ -175,26 +176,28 @@
             action() {
                 return this.field ? 'edit' : 'create';
             },
-        },
 
-        mounted() {
+            defaultOptions() {
+                const options = [{value: '', text: '--- Select ---'}];
+                this.options.forEach(text => options.push({ text, value: text }));
+
+                return options;
+
+            },
         },
 
         methods: {
 
-            getOriginal(field, defaultValue = "") {
-                return this.prospect ? this.prospect[field] : defaultValue;
-            },
-
-            getOriginalDate(field, defaultValue = "") {
-                return this.prospect && this.prospect[field] ? moment(this.prospect[field]).format('MM/DD/YYYY') : defaultValue;
+            getOriginal(attribute, defaultValue = '') {
+                return this.field ? this.field[attribute] : defaultValue;
             },
 
             addOption() {
-                const alreadyExist = this.options.some(opt => opt == this.optionInput);
+                const value = this.optionInput.trim();
+                const alreadyExist = this.options.some(option => option == value);
 
-                if(!alreadyExist && this.optionInput.trim().length > 0) {
-                    this.options.push(this.optionInput.trim());
+                if(!alreadyExist && value.length > 0) {
+                    this.options.push(value);
                     this.optionInput = '';
                 }
             },
@@ -205,23 +208,50 @@
 
             async save() {
                 this.submitting = true;
-                try {
-                    let response;
-                    if (this.prospect) {
-                        response = await this.form.patch(`/business/prospects/${this.prospect.id}`);
-                    }
-                    else {
-                        response = await this.form.post('/business/prospects');
-                    }
+
+                if(this.form.type == 'dropdown' && this.options.length < 1) {
+                    alert('You need more than 1 option for this list field to be valid.');
+                    return;
                 }
-                catch(error) {}
+
+                try {
+                    // Create/update the custom field
+                    const response = this.field 
+                        ? await this.form.patch(`/business/custom-fields/${this.field.id}`)
+                        : await this.form.post('/business/custom-fields');
+                    
+                    // Create/update the custom dropdown field options
+                    if(this.form.type == 'dropdown') {
+                        const optionForm = new Form({options: this.options.join(',')})
+                        const res = this.field 
+                            ? await optionForm.patch(`/business/custom-fields/options/${this.field.id}`)
+                            : await optionForm.post('/business/custom-fields/options');
+                    }
+                } catch(error) {}
                 this.submitting = false;
             },
 
-            destroy(item) {
-                if (!confirm(`Are you sure you wish to delete?`)) return;
+            destroy() {
+                if (!confirm(`Are you sure you wish to delete this field?`)) return;
                 const form = new Form({});
-                form.submit('delete', `/business/prospects/${item.id}`);
+                form.submit('delete', `/business/prospects/${this.field.id}`);
+            },
+        },
+
+        watch: {
+            form: {
+                handler(newer, old) {
+                    if(newer.type != old.type) {
+                        this.form.default_value = '';
+                        this.optionInput = '';
+                        this.options = [];
+                    }
+
+                    if(!newer.required) {
+                        this.default_value = '';
+                    }
+                },
+                deep: true,
             },
         },
     }
