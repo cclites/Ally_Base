@@ -5,10 +5,10 @@ namespace App;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasPaymentHold;
 use App\Traits\BelongsToBusinesses;
+use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
-use Bizhub\Impersonate\Traits\CanImpersonate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -214,6 +214,20 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->nameLastFirst();
     }
 
+    public function getMaskedNameAttribute()
+    {
+        $first = $this->firstname;
+        if (strlen($first) > 1) {
+            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        }
+
+        $last = $this->lastname;
+        if (strlen($last) > 1) {
+            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        }
+        return "$first $last";
+    }
+
     /**
      * Get the default phone number for the user.
      *
@@ -246,7 +260,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
      */
     public function getRoleClass($type = null)
     {
-        if (!$type) $type = $this->role_type;
+        if (! $type) {
+            $type = $this->role_type;
+        }
 
         switch ($type) {
             case 'admin':

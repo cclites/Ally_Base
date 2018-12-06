@@ -383,8 +383,13 @@ class ReportsController extends BaseController
 
         $this->addShiftReportFilters($report, $request);
 
+        if ($report->count() > 1000) {
+            // Limit shift history to 1000 shifts for performance reasons
+            return new ErrorResponse(400, 'There are too many shifts to display.  Please adjust your filters and re-run.');
+        }
+
         if ($request->input('export')) {
-            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+            return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone ?? 'America/New_York')
                           ->download();
         }
 
@@ -550,6 +555,25 @@ class ReportsController extends BaseController
                 $report->query()->whereReadOnly();
             } elseif ($status === 'uncharged') {
                 $report->query()->wherePending();
+            }
+        }
+
+        if ($confirmed = $request->input('confirmed')) {
+            if ($confirmed === 'unconfirmed') {
+                $report->query()->where('status', Shift::WAITING_FOR_CONFIRMATION);
+            }
+            else {
+                $report->query()->whereNotIn('status',  [Shift::WAITING_FOR_CONFIRMATION, Shift::CLOCKED_IN]);
+            }
+        }
+
+        $flagType = $request->input('flag_type');
+        if ($flagType && $flagType !== 'any') {
+            if ($flagType === 'none') {
+                $report->query()->doesntHave('shiftFlags');
+            }
+            else if (is_array($flags = $request->input('flags'))) {
+                $report->query()->whereFlagsIn($flags);
             }
         }
 

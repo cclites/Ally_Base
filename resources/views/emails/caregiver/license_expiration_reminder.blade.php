@@ -6,5 +6,5 @@ Please contact {{ $business->name }} with your updated certification information
 
 Thank you!
 
-{{ config('app.name') }}
+@include('emails.partials.signature')
 @endcomponent

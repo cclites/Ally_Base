@@ -279,6 +279,10 @@ class ShiftController extends BaseController
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_method'] = Shift::METHOD_OFFICE;
 
+        if (app('settings')->get($shift->business_id, 'auto_confirm')) {
+            $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
+        }
+
         if ($shift->update($data)) {
             return new SuccessResponse('Shift was successfully clocked out.');
         }
