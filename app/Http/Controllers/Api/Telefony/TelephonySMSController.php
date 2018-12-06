@@ -40,11 +40,6 @@ class TelephonySMSController extends BaseTelefonyController
             $business = Business::where('outgoing_sms_number', $to)->first();
             $business_id = optional($business)->id;
         } else {
-            $matchingRecipient = SmsThreadRecipient::where('sms_thread_id', $thread->id)->first();
-            if (! empty($matchingRecipient)) {
-                $user_id = $matchingRecipient->user->id;
-            }
-
             if (! $thread->isAcceptingReplies()) {
                 $thread = null;
             }
