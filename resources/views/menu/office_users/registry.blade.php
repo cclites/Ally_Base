@@ -72,18 +72,6 @@
     </ul>
 </li>
 <li>
-    <a href="{{ route('business.tasks.index') }}">
-        <div class="row">
-            <div class="col-8">
-                <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
-            </div>
-            <div class="col-4">
-                <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ auth()->user()->dueTasks()->count() }}</span>
-            </div>
-        </div>
-    </a>
-</li>
-<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
