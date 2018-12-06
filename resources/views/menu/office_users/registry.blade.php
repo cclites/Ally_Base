@@ -84,20 +84,6 @@
     </a>
 </li>
 <li>
-    <a href="{{ route('business.exceptions.index') }}">
-        <div class="row">
-            <div class="col-8">
-                <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions</span>
-            </div>
-            <div class="col-4">
-                    <span class="badge badge-danger badge-notifications hide-menu menu-badge">
-                        {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
-                    </span>
-            </div>
-        </div>
-    </a>
-</li>
-<li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
