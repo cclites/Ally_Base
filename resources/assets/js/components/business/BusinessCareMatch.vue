@@ -17,7 +17,6 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <hr />
             <b-row>
                 <b-col lg="6">
                     <h5>Find caregivers who...</h5>
