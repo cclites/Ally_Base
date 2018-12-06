@@ -158,6 +158,7 @@ Vue.component('business-scheduled-payments', require('./components/business/repo
 Vue.component('business-schedule', require('./components/business/schedule/BusinessSchedule.vue'));
 Vue.component('business-schedule-modal', require('./components/business/schedule/BusinessScheduleModal'));
 Vue.component('business-settings', require('./components/business/BusinessSettings.vue'));
+Vue.component('custom-field-edit', require('./components/business/custom_fields/CustomFieldEdit.vue'));
 Vue.component('business-transaction', require('./components/BusinessTransaction.vue'));
 Vue.component('business-caregiver-misc-tab', require('./components/business/caregivers/CaregiverMiscTab'));
 Vue.component('business-export-timesheets', require('./components/business/reports/ExportTimesheets'));
