@@ -1,29 +1,50 @@
 export default {
     data() {
         return {
-            flagTypes: {
-                'added': 'Manually Added',
-                'converted': 'Copied from Schedule',
-                'duplicate': 'Potential Duplicate',
-                'modified': 'Modified',
+            flagsObject: {
+                'added': {
+                    'text': 'Manually Added',
+                    'icon': 'fa fa-plus-circle mr-1',
+                    'color': '#FC4B6C',
+                },
+                'converted': {
+                    'text': 'Copied from Schedule',
+                    'icon': 'fa fa-calendar-plus-o mr-1',
+                    'color': '#00C9DC',
+                },
+                'duplicate': {
+                    'text': 'Potential Duplicate',
+                    'icon': 'fa fa-files-o mr-1',
+                    'color': 'red',
+                },
+                'modified': {
+                    'text': 'Modified',
+                    'icon': 'fa fa-pencil mr-1',
+                    'color': 'orange',
+                },
                 // 'outside_auth': 'Outside Service Auth',
-                'time_excessive': 'Excessive Length'
+                'time_excessive': {
+                    'text': 'Excessive Length',
+                    'icon': 'fa fa-clock-o mr-1',
+                    'color': 'red',
+                }
             },
-            flagIcons: {
-                'added': 'fa fa-plus-circle mr-1',
-                'converted': 'fa fa-calendar-plus-o mr-1',
-                'duplicate': 'fa fa-files-o mr-1',
-                'modified': 'fa fa-pencil mr-1',
-                'outside_auth': 'fa fa-outdent mr-1',
-                'time_excessive': 'fa fa-clock-o mr-1',
-            }
         }
     },
 
     computed: {
         shiftFlags() {
             return Object.keys(this.flagTypes);
-        }
+        },
+        flagColors() {
+            return _.mapValues(this.flagsObject, item => item.color);
+        },
+        flagIcons() {
+            return _.mapValues(this.flagsObject, item => item.icon);
+        },
+        flagTypes() {
+            return _.mapValues(this.flagsObject, item => item.text);
+        },
     },
 
 }

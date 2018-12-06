@@ -72,6 +72,8 @@ Vue.component('client-payment-history', require('./components/clients/ClientPaym
 Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 Vue.component('client-phone-numbers-tab', require('./components/clients/profile/ClientPhoneNumbersTab'));
+Vue.component('client-unconfirmed-shifts', require('./components/clients/UnconfirmedShifts'));
+Vue.component('client-modify-shift-modal', require('./components/clients/ModifyShiftModal'));
 
 
 // Caregiver

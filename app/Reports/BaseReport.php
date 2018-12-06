@@ -182,6 +182,7 @@ abstract class BaseReport implements Report
 
                 $data = $this->setHeadersFormat()
                              ->setNumericToFloatFormat()
+                             ->setScalarFilter()
                              ->toArray();
                 $sheet->fromArray($data, null, 'A1', true);
 
@@ -294,6 +295,21 @@ abstract class BaseReport implements Report
                 return $value;
             }, $row);
         };
+        return $this;
+    }
+
+    /**
+     * Filter non-scalar values from the array (useful for exports)
+     *
+     * @return $this
+     */
+    function setScalarFilter()
+    {
+        $this->setArrayFormat();
+        $this->formatters['scalar'] = function($row) {
+            return array_filter($row, 'is_scalar');
+        };
+
         return $this;
     }
 

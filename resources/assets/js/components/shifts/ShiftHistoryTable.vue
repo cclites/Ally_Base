@@ -8,7 +8,7 @@
                  class="shift-table"
         >
             <template slot="Flags" scope="data">
-                <i v-for="flag in data.value" :class="flagIcons[flag]" :title="flagTypes[flag]" v-b-tooltip.hover></i>
+                <i v-for="flag in data.value" :class="flagIcons[flag]" :title="flagTypes[flag]" :style="`color: ${flagColors[flag]}`" v-b-tooltip.hover></i>
             </template>
             <template slot="Day" scope="data">
                 {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
@@ -29,7 +29,8 @@
                 </span>
             </template>
             <template slot="Confirmed" scope="row">
-                <span v-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Yes</span>
+                <span v-if="row.item.Confirmed && row.item.client_confirmed == 1" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Client</span>
+                <span v-else-if="row.item.Confirmed" v-tooltip:left="formatDateTimeFromUTC(row.item.confirmed_at)">Yes</span>
                 <span v-else>{{ (row.item.Confirmed === undefined) ? '' : 'No' }}</span>
             </template>
             <template slot="Charged" scope="row">
