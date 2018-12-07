@@ -17,11 +17,19 @@ class Form {
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
         this.errorMods = 0;
+        this.hideErrors = [];
     }
 
     disableRedirects() {
         this.handler.redirects = false;
         return this;
+    }
+
+    /**
+     * Disable error messages for the provided HTTP status code
+     */
+    hideErrorsFor(statusCode) {
+        this.hideErrors.push(statusCode);
     }
 
     /**
@@ -147,7 +155,7 @@ class Form {
                 .catch(error => {
                     console.log('Axios error');
                     this.handler = new AxiosResponseHandler();
-                    this.handler.handleError(error, this.alertFromResponse);
+                    this.handler.handleError(error, this.alertFromResponse, this.hideErrors);
                     reject(error);
                 });
         });

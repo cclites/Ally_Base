@@ -558,7 +558,7 @@
                     method = 'patch';
                     url = url + '/' + this.schedule.id;
                 }
-                this.form.submit(method, url)
+                this.form.hideErrorsFor(449).submit(method, url)
                     .then(response => {
                         this.refreshEvents();
                         this.submitting = false;
