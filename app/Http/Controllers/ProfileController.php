@@ -51,6 +51,8 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
+        $this->authorize('update', auth()->user());
+
         $data = $request->validated();
 
         if(auth()->user()->role_type == 'client') {
@@ -87,18 +89,24 @@ class ProfileController extends Controller
 
     public function address(Request $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $user = auth()->user();
         return (new AddressController())->update($request, $user, $type, 'Your address');
     }
 
     public function phone(Request $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $user = auth()->user();
         return (new PhoneController())->upsert($request, $user, $type, 'Your phone number');
     }
 
     public function paymentMethod(UpdatePaymentMethodRequest $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $client = $request->user()->role;
         $backup = ($type === 'backup');
 
@@ -117,6 +125,8 @@ class ProfileController extends Controller
 
     public function bankAccount(Request $request)
     {
+        $this->authorize('update', auth()->user());
+        
         $caregiver = $request->user()->role;
 
         $existing = $caregiver->bankAccount;
@@ -129,6 +139,8 @@ class ProfileController extends Controller
     }
 
     public function destroyPaymentMethod($type) {
+        $this->authorize('update', auth()->user());
+        
         /**
          * @var Client $client
          */
