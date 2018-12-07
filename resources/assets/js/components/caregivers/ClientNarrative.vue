@@ -6,7 +6,7 @@
 
         <div class="d-flex mb-2">
             <h3 class="f-1">Narrative Notes:</h3>
-            <b-button class="ml-auto" variant="success" @click="showAddModal()">Add New Narrative Note</b-button>
+            <b-button class="ml-auto" variant="success" @click="showAddModal()" :disabled="authInactive">Add New Narrative Note</b-button>
         </div>
 
         <loading-card v-if="loading" />
@@ -21,7 +21,7 @@
                     <div class="d-flex">
                         <div class="f-1 card-text" style="white-space: pre-wrap">{{ item.notes }}</div>
                         <div class="ml-auto">
-                            <b-button variant="danger" size="sm" @click.prevent="destroy(item.id)"><i class="fa fa-times"></i></b-button>
+                            <b-button variant="danger" size="sm" @click.prevent="destroy(item.id)" :disabled="authInactive"><i class="fa fa-times"></i></b-button>
                         </div>
                     </div>
                     <template slot="footer">
@@ -55,7 +55,7 @@
             @shown="focusTextarea()"
         >
             <b-container fluid>
-                <b-form-textarea :rows="5" v-model="form.notes" ref="form_notes"></b-form-textarea>
+                <b-form-textarea :rows="5" v-model="form.notes" ref="form_notes" :readonly="authInactive"></b-form-textarea>
             </b-container>
         </b-modal>
 
@@ -72,11 +72,12 @@
 <script>
 import FormatsDates from "../../mixins/FormatsDates";
 import FormatsStrings from "../../mixins/FormatsStrings";
+import AuthUser from "../../mixins/AuthUser";
 
 export default {
     name: 'CaregiverClientNarrative',
 
-    mixins: [ FormatsDates, FormatsStrings ],
+    mixins: [ FormatsDates, FormatsStrings, AuthUser ],
 
     props: {
         client: {
