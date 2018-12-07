@@ -107,6 +107,7 @@ Route::group([
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 
     Route::post('/profile/bank-account', 'ProfileController@bankAccount');
+    Route::put('/profile/preferences', 'ProfileController@preferences');
     Route::get('tasks', 'Caregivers\TasksController@index')->name('caregivers.tasks');
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
