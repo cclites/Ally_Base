@@ -14,6 +14,7 @@ $factory->define(CustomField::class, function (Faker $faker) {
     return [
         'chain_id' => BusinessChain::inRandomOrder()->first()->id,
         'type' => $faker->randomElement(['input', 'radio', 'textarea']),
+        'user_type' => $faker->randomElement(['client', 'caregiver']),
         'key' => $faker->word,
         'label' => $faker->word,
         'required' => $faker->boolean,

@@ -16,6 +16,7 @@ class CreateCustomFieldsTable extends Migration
         Schema::create('business_custom_fields', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('chain_id')->unsigned();
+            $table->text('user_type');
             $table->text('key');
             $table->text('label');
             $table->text('type');

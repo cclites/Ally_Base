@@ -22,6 +22,7 @@ class CustomField extends Model
         'chain_id',
         'key',
         'label',
+        'user_type',
         'type',
         'required',
         'default_value',

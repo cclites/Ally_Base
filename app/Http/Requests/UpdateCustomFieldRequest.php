@@ -13,7 +13,7 @@ class UpdateCustomFieldRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,11 @@ class UpdateCustomFieldRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'key' => 'required|string',
+            'label' => 'required|string',
+            'type' => 'required|string|in:dropdown,radio,input,textarea',
+            'required' => 'required|boolean',
+            'default_value' => 'nullable',
         ];
     }
 }
