@@ -43,10 +43,8 @@ class TasksController extends Controller
      */
     public function show(Task $task)
     {
-        if ($task->assigned_user_id != auth()->id()) {
-            return new ErrorResponse(403, 'You do not have access to this task.');
-        }
-
+        $this->authorize('read', $task);
+        
         if (request()->wantsJson()) {
             return response()->json($task);
         }
@@ -60,6 +58,8 @@ class TasksController extends Controller
      */
     public function update(Task $task)
     {
+        $this->authorize('update', $task);
+        
         if (request()->has('complete')) {
             if (request()->complete) {
                 $task->update(['completed_at' => Carbon::now()]);

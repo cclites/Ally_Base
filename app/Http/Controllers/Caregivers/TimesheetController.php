@@ -95,9 +95,7 @@ class TimesheetController extends BaseController
 
     public function update(CreateTimesheetRequest $request, Timesheet $timesheet)
     {
-        if ($request->caregiver_id != $this->caregiver()->id || $timesheet->caregiver_id != $this->caregiver()->id) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('update', $timesheet);
 
         if ($timesheet->approved_at || $timesheet->denied_at) {
             return new ErrorResponse(400, 'This timesheet has already been ' . ($timesheet->approved_at ? 'approved' : 'denied' . '.'));
