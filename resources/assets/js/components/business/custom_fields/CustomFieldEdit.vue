@@ -96,7 +96,7 @@
 
                     <div v-if="form.type == 'dropdown'">
                         <h3>Your list options:</h3>
-                        <p v-if="options.length == 0">You have created any yet. Please add them using the input below.</p>
+                        <p v-if="options.length == 0">You haven't created any yet. Please add them using the input below.</p>
                         <b-row v-else>
                             <b-col lg="12">
                                 <b-btn 
@@ -105,7 +105,7 @@
                                     @click="deleteOption(i)"
                                     class="mr-2"
                                     title="Click this button to remove this option"
-                                >{{option}} <b-badge pill variant="danger" class="ml-2"><i class="fa fa-times" /></b-badge></b-btn>
+                                >{{stringFormat(option)}} <b-badge pill variant="danger" class="ml-2"><i class="fa fa-times" /></b-badge></b-btn>
                             </b-col>
                         </b-row>
 
