@@ -163,7 +163,7 @@
                  :client="client"
                  :caregiver="selectedCaregiver"
                  :caregiver-list="caregiverList"
-                 :rate-structure="businessSettings().rate_structure"
+                 :rate-structure="business.rate_structure"
                  :pivot="selectedCaregiver.pivot"
                  @saved="handleSavedCaregiver"
         />
@@ -331,7 +331,6 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateCodes from "../../../mixins/RateCodes";
     import RateCodeModal from "../rate_codes/RateCodeModal";
     import ClientCaregiverRateCodeModal from "./ClientCaregiverRateCodeModal";
@@ -349,7 +348,7 @@
 
         components: {ClientCaregiverRateCodeModal, RateCodeModal},
 
-        mixins: [FormatsNumbers, BusinessSettings, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         data() {
             return {
@@ -384,6 +383,9 @@
         },
         
         computed: {
+            business() {
+                return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
+            },
             modalTitle() {
                 if (this.selectedCaregiver.id) {
                     return 'Edit Caregiver Assignment';

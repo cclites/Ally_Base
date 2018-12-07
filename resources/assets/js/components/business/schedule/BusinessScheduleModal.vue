@@ -328,11 +328,10 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateFactory from "../../../classes/RateFactory";
 
     export default {
-        mixins: [BusinessSettings, FormatsNumbers, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         props: {
             model: Boolean,

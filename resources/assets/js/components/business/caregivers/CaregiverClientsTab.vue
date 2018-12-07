@@ -275,7 +275,6 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateCodes from "../../../mixins/RateCodes";
     import RateCodeModal from "../rate_codes/RateCodeModal";
     import ClientCaregiverRateCodeModal from "../clients/ClientCaregiverRateCodeModal";
@@ -287,7 +286,7 @@
 
         components: {ClientCaregiverRateCodeModal, RateCodeModal},
 
-        mixins: [FormatsNumbers, BusinessSettings, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         data() {
             return {
