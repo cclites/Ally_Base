@@ -1,6 +1,9 @@
 import PhoneNumber from '../components/PhoneNumber';
+import AuthUser from './AuthUser';
 
 export default {
+    mixins: [ AuthUser ],
+    
     props: ['user'],
 
     components: {

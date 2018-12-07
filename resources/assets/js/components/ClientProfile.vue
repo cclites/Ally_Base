@@ -13,6 +13,7 @@
                             type="text"
                             v-model="form.firstname"
                             required
+                            :readonly="authInactive"
                         >
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Enter your first name."></input-help>
@@ -24,6 +25,7 @@
                             type="text"
                             v-model="form.lastname"
                             required
+                            :readonly="authInactive"
                             >
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter your last name."></input-help>
@@ -36,6 +38,7 @@
                             name="email"
                             type="email"
                             v-model="form.email"
+                            :readonly="authInactive"
                             >
                         </b-form-input>
                         <input-help :form="form" field="email" text="Enter your email address.  Ex: user@domain.com"></input-help>
@@ -46,6 +49,7 @@
                                 name="date_of_birth"
                                 type="text"
                                 v-model="form.date_of_birth"
+                                :readonly="authInactive"
                         >
                         </b-form-input>
                         <input-help :form="form" field="date_of_birth" text="Enter your date of birth. Ex: MM/DD/YYYY"></input-help>
@@ -63,27 +67,37 @@
                     <b-col lg="6">
                         <b-form-group label="First Name">
                             <b-form-input id="poa_first_name"
-                                          v-model="form.poa_first_name"></b-form-input>
+                                          v-model="form.poa_first_name"
+                                          :readonly="authInactive"></b-form-input>
                         </b-form-group>
                         <b-form-group label="Phone">
                             <b-form-input id="poa_phone"
-                                          v-model="form.poa_phone"></b-form-input>
+                                          v-model="form.poa_phone"
+                                          :readonly="authInactive"></b-form-input>
                         </b-form-group>
                     </b-col>
                     <b-col lg="6">
                         <b-form-group label="Last Name">
                             <b-form-input id="poa_last_name"
-                                          v-model="form.poa_last_name"></b-form-input>
+                                          v-model="form.poa_last_name"
+                                          :readonly="authInactive"></b-form-input>
                         </b-form-group>
                         <b-form-group label="Relationship">
                             <b-form-input id="poa_relationship"
-                                          v-model="form.poa_relationship"></b-form-input>
+                                          v-model="form.poa_relationship"
+                                          :readonly="authInactive"></b-form-input>
                         </b-form-group>
                     </b-col>
                     <b-col lg="12">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="receive_summary_email" v-model="form.receive_summary_email" :true-value="1" :false-value="0">
+                                <input type="checkbox" 
+                                    class="custom-control-input" 
+                                    name="receive_summary_email" 
+                                    v-model="form.receive_summary_email" 
+                                    :true-value="1" 
+                                    :false-value="0"
+                                    :disabled="authInactive">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">Receive the weekly shift summary email</span>
                             </label>
@@ -94,7 +108,7 @@
             </template>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button id="save-profile" variant="success" type="submit" :disabled="authInactive">Save Profile</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -103,6 +117,7 @@
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
+    import AuthUser from '../mixins/AuthUser';
 
     export default {
         props: {
@@ -110,7 +125,7 @@
             'user': {}
         },
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, AuthUser],
 
         data() {
             return {
