@@ -46,7 +46,7 @@ class ProfileController extends Controller
                     "% Processing Fee)"
             ];
         } else if ($type == 'caregiver') {
-            $user->role->load('availability');
+            $user->role->load(['availability', 'skills']);
         }
 
         return view('profile.' . $type, compact('user', 'payment_type_message'));
@@ -164,4 +164,29 @@ class ProfileController extends Controller
         $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
         return new SuccessResponse('Your availability preferences have been saved.');
     }
+
+    /**
+     * Update caregiver skills preferences.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function skills(Request $request)
+    {
+        if (auth()->user()->role_type != 'caregiver' || auth()->user()->active == 0) {
+            abort(403);
+        }
+
+        $caregiver = auth()->user()->role;
+
+        $request->validate([
+            'skills' => 'array',
+            'skills.*' => 'integer',
+        ]);
+
+        $caregiver->skills()->sync($request->skills);
+
+        return new SuccessResponse('Caregiver skills updated');
+    }
+
 }

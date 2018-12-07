@@ -25,6 +25,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>
+        </li>
     </ul>
 
     <!-- Mobile nav tabs (drop down) -->
@@ -83,7 +86,7 @@
             <business-caregiver-availability-tab :caregiver="{{ $user->role }}" updated-by="{{ $user->role->availability->updatedByUser->name ?? '' }}"></business-caregiver-availability-tab>
         </div>
         <div class="tab-pane" id="skills" role="tabpanel">
-            woohoo
+            <business-caregiver-skills-tab :caregiver="{{ $user->role }}"></business-caregiver-skills-tab>
         </div>
     </div>
 @endsection
