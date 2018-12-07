@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class UpdateCustomFieldRequest extends FormRequest
+class UpdateCustomFieldRequest extends BusinessRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +22,6 @@ class UpdateCustomFieldRequest extends FormRequest
     public function rules()
     {
         return [
-            'key' => 'required|string',
             'label' => 'required|string',
             'type' => 'required|string|in:dropdown,radio,input,textarea',
             'user_type' => 'required|string|in:client,caregiver',
