@@ -27,6 +27,7 @@ class UpdateCustomFieldRequest extends FormRequest
             'key' => 'required|string',
             'label' => 'required|string',
             'type' => 'required|string|in:dropdown,radio,input,textarea',
+            'user_type' => 'required|string|in:client,caregiver',
             'required' => 'required|boolean',
             'default_value' => 'nullable',
         ];
