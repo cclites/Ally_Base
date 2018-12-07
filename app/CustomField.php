@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\BusinessChain;
 
 class CustomField extends Model
 {
@@ -27,4 +28,14 @@ class CustomField extends Model
         'required',
         'default_value',
     ];
+
+    /**
+     * Get the business chain that this field was created for
+     *
+     * @return \App\BusinessChain
+     */
+    public function businessChain()
+    {
+        return $this->belongsTo(BusinessChain::class, 'chain_id');
+    }
 }
