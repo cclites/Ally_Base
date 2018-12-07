@@ -32,6 +32,8 @@ use App\Policies\SystemExceptionPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimesheetPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\CustomFieldPolicy;
+use App\CustomField;
 use App\Prospect;
 use App\RateCode;
 use App\ReferralSource;
@@ -73,6 +75,7 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
+        CustomField::class => CustomFieldPolicy::class,
     ];
 
     /**
