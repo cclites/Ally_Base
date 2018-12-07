@@ -32,7 +32,7 @@
                 <b-col lg="2" sm="4" xs="12">
                     <b-form-group>
                         <label class="col-form-label col-12 hidden-xs-down"><span>&nbsp;</span></label>
-                        <b-button id="save-profile" variant="success" type="submit">Save Password</b-button>
+                        <b-button variant="success" type="submit">Save Password</b-button>
                     </b-form-group>
                 </b-col>
             </b-row>

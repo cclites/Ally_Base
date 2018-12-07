@@ -94,7 +94,7 @@
             </template>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="success" type="submit">Save Profile</b-button>
                 </b-col>
             </b-row>
         </form>
