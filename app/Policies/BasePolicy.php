@@ -108,6 +108,12 @@ abstract class BasePolicy
             && $user->caregiver->sharesBusinessWith($entity);
     }
 
+    protected function caregiverBelongsToClientCheck(User $user, $client)
+    {
+        return $this->isCaregiver()
+            && $user->caregiver->belongsToClient($client);
+    }
+
     protected function checkOnRole(User $user, string $ability, User $entity)
     {
         if (in_array($entity->role_type, ['office_user', 'admin'])) {

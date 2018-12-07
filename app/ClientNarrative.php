@@ -68,6 +68,16 @@ class ClientNarrative extends Model
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Get the client relatioship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\
+    */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
