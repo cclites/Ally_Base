@@ -3,18 +3,23 @@
 namespace App\Http\Controllers\Business;
 
 use Illuminate\Http\Request;
+use App\CustomField;
+use App\Business;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateCustomFieldRequest;
 
 class CustomFieldController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
+     * @param App\Business $business
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Business $business)
     {
-        //
+        $this->authorize('update', $business);
+        return response()->json(activeBusiness()->custom_fields);
     }
 
     /**
@@ -30,12 +35,19 @@ class CustomFieldController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateCustomFieldRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UpdateCustomFieldRequest $request)
     {
-        //
+        $data = $request->filtered();
+        $this->authorize('create', $request->getBusiness());
+
+        if ($field = CustomField::create($data)) {
+            return new SuccessResponse('Custom field has been created.', $field);
+        }
+
+        return new ErrorResponse(500, 'Could not create the custom field.  Please try again.');
     }
 
     /**
@@ -63,13 +75,20 @@ class CustomFieldController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateCustomFieldRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateCustomFieldRequest $request, $id)
     {
-        //
+        $data = $request->filtered();
+        $this->authorize('update', $request->getBusiness());
+
+        if ($field->update($data)) {
+            return new SuccessResponse('Custom field has been saved.', $field->fresh());
+        }
+
+        return new ErrorResponse(500, 'Could not save the custom field.  Please try again.');
     }
 
     /**
@@ -80,6 +99,12 @@ class CustomFieldController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->authorize('delete', $field->business);
+
+        if ($field->delete()) {
+            return new SuccessResponse('The field has been deleted.');
+        }
+
+        return new ErrorResponse(500, 'Could not delete the field.  Please try again.');
     }
 }
