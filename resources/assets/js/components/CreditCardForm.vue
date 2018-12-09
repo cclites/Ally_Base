@@ -89,7 +89,7 @@
                         this.form.number = '************ ' + this.form.number.slice(-4);
                         this.form.number_confirmation = '';
                         this.form.cvv = '***';
-                        this.$parent.typeMessage = response.data;
+                        this.$parent.onUpdatePaymentMethod(response.data);
                     });
             }
         }

@@ -34,7 +34,7 @@
                 <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
             </b-col>
             <b-col sm="6" class="text-right">
-                {{ paymentTypeMessage }}
+                {{ paymentText }}
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -339,7 +339,7 @@
     export default {
         props: {
             'client': Object,
-            'allyRate': Number,
+            'allyRateOriginal': Number,
             'paymentTypeMessage': {
                 default() {
                     return '';
@@ -390,8 +390,28 @@
                 }
                 return 'Add Caregiver to Client';
             },
+
+            paymentText() {
+                const paymentMethodDetail = this.$store.getters.getPaymentMethodDetail();
+                return paymentMethodDetail.paymentText || this.paymentTypeMessage;
+            },
+
+            allyRate() {
+                const paymentMethodDetail = this.$store.getters.getPaymentMethodDetail();
+                return paymentMethodDetail.allyRate || this.allyRateOriginal;
+            },
+
+            paymentMethodDetail() {
+                return this.$store.getters.getPaymentMethodDetail();
+            }
         },
-        
+
+        watch: {
+            paymentMethodDetail(newData, oldData) {
+                this.items = [];
+                this.fetchAssignedCaregivers();
+            },
+        },
 
         methods: {
             addCaregiver() {
