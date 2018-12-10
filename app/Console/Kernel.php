@@ -42,7 +42,7 @@ class Kernel extends ConsoleKernel
             ->hourly();
 
         $schedule->command('cron:shift_summary_emails')
-            ->weeklyOn(1, '11:00'); // 6am EST / 7am EDT
+            ->weeklyOn(1, '14:30'); // 9:30am EST / 10:30am EDT
     }
 
     /**
