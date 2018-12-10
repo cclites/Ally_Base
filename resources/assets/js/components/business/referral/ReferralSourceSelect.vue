@@ -1,6 +1,6 @@
 <template>
     <b-row>
-        <b-col md="9">
+        <b-col md="8">
             <b-form-group label="Referred By" label-for="referred_by">
                 <b-form-select id="referral"
                                v-model="selectedValue"
@@ -10,7 +10,7 @@
                 </b-form-select>
             </b-form-group>
         </b-col>
-        <b-col md="3" class="pad-top">
+        <b-col md="4" class="pad-top">
             <b-form-group label="Add">
                 <b-btn  @click="showReferralModal = true">Add Referral Source</b-btn>
             </b-form-group>
