@@ -328,7 +328,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ in_distance }}m</td>
+                                <td>{{ convertToMiles(in_distance) }}m</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="shift.checked_in_number">
@@ -358,7 +358,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ out_distance }}m</td>
+                                <td>{{ convertToMiles(out_distance) }}m</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="shift.checked_out_number">
@@ -432,9 +432,10 @@
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
+    import FormatsDistance from "../mixins/FormatsDistance";
 
     export default {
-        mixins: [FormatsNumbers, FormatsDates],
+        mixins: [FormatsNumbers, FormatsDates, FormatsDistance],
 
         props: {
             'shift': {
