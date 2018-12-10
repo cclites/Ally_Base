@@ -67,6 +67,11 @@
                         <b-form-textarea v-model="form.general_notes" id="general_notes" :rows="3"></b-form-textarea>
                         <input-help :form="form" field="general_notes" text="You can use this input to enter some notes about this contact."></input-help>
                     </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                                                  :form="form"
+                                                  field="business_id"
+                                                  help-text="Select the office location this contact belongs to."
+                    />
                 </b-col>
             </b-row>
             <hr />
@@ -145,8 +150,10 @@
 <script>
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
+        components: {BusinessLocationFormGroup},
         props: ['contact'],
 
         data() {
