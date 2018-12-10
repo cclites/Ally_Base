@@ -15,6 +15,6 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <business-g-reply-table :replies="{{ $replies }}" />
+        <business-sms-reply-table :replies="{{ $replies }}" />
     </b-card>
 @endsection
