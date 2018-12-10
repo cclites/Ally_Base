@@ -1,15 +1,14 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\OfficeUser;
+use App\Business;
+use App\BankAccount;
 
 $factory->define(BankAccount::class, function (Faker $faker) {
     return [
-        'user_id' => function () {
-            return factory(\App\OfficeUser::class)->create()->user->id;
-        },
-        'business_id' => function () {
-            return factory(\App\Business::class)->create()->id;
-        },
+        'user_id' => factory(OfficeUser::class)->create()->user->id,
+        'business_id' => factory(Business::class)->create()->id,
         'nickname' => $faker->word,
         'name_on_account' => $faker->name,
         'routing_number' => $this->faker->randomNumber(9),

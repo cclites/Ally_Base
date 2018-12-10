@@ -81,7 +81,7 @@
         </b-row>
         <b-row>
             <b-col>
-                <b-btn size="lg" variant="success" @click="updateInsuranceInfo()">Update</b-btn>
+                <b-btn size="lg" variant="success" @click="updateInsuranceInfo()">Save</b-btn>
             </b-col>
         </b-row>
     </div>
