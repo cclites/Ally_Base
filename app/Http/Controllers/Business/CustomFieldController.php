@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Business;
 
 use Illuminate\Http\Request;
 use App\CustomField;
+use App\CustomFieldOption;
 use App\Business;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCustomFieldRequest;
+use App\Http\Requests\UpdateCustomFieldOptionsRequest;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 
@@ -46,12 +48,40 @@ class CustomFieldController extends Controller
         $data['key'] = snake_case($request->label);
         $data['chain_id'] = activeBusiness()->chain_id;
         $this->authorize('update', $request->getBusiness());
-
+        
         if ($field = CustomField::create($data)) {
             return new SuccessResponse('Custom field has been created.', $field);
         }
 
         return new ErrorResponse(500, 'Could not create the custom field.  Please try again.');
+    }
+
+    /**
+     * Store the newly created options for a custom dropdown field
+     *
+     * @param \App\Http\Requests\UpdateCustomFieldOptionsRequest $request
+     * @param \App\CustomField $field
+     * @return \Illuminate\Http\Response
+     */
+    public function storeOptions(UpdateCustomFieldOptionsRequest $request, CustomField $field)
+    {
+        $this->authorize('update', $request->getBusiness());
+
+        if($field->type != 'dropdown') {
+            return new ErrorResponse(500, 'Could not create the custom field options for a field that is not a drop down.  Please try again.');
+        }
+
+        $data = $request->filtered();
+        $options = array_unique(explode(',', $data['options']));
+        foreach ($options as $option) {
+            CustomFieldOption::create([
+                'field_id' => $field->id,
+                'value' => snake_case($option),
+                'label' => $option,
+            ]);
+        }
+
+        return $field->options;
     }
 
     /**
