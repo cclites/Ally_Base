@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\CustomField;
 use Illuminate\Database\Eloquent\Model;
 
 class CustomFieldOption extends Model
@@ -22,4 +23,14 @@ class CustomFieldOption extends Model
         'field_id',
         'option_value',
     ];
+
+    /**
+     * Get the custom dropdown field that this option belongs to
+     *
+     * @return \App\CustomField
+     */
+    public function field()
+    {
+        return $this->belongsTo(CustomField::class);
+    }
 }

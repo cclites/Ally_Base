@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\BusinessChain;
+use App\CustomFieldOption;
 
 class CustomField extends Model
 {
@@ -37,5 +38,15 @@ class CustomField extends Model
     public function businessChain()
     {
         return $this->belongsTo(BusinessChain::class, 'chain_id');
+    }
+
+    /**
+     * Get the dropdown custom fields options associated with this field
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function options()
+    {
+        return $this->hasMany(CustomFieldOption::class, 'field_id');
     }
 }
