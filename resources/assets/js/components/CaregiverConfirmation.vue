@@ -7,7 +7,7 @@
         >
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="First Name" label-for="firstname">
+                    <b-form-group label="First Name" label-for="firstname" label-class="required">
                         <b-form-input
                                 id="firstname"
                                 name="firstname"
@@ -18,7 +18,7 @@
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Confirm your first name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Last Name" label-for="lastname">
+                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
                         <b-form-input
                                 id="lastname"
                                 name="lastname"
@@ -29,7 +29,7 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Confirm your last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Email Address" label-for="email">
+                    <b-form-group label="Email Address" label-for="email" label-class="required">
                         <b-form-input
                                 id="email"
                                 name="email"
@@ -41,7 +41,7 @@
                         <input-help :form="form" field="email" text="Confirm your email address.  Ex: user@domain.com"></input-help>
                     </b-form-group>
                     <div class="username-password-box">
-                        <b-form-group label="Username" label-for="username">
+                        <b-form-group label="Username" label-for="username" label-class="required">
                             <b-form-input
                                     id="email"
                                     name="email"
@@ -52,7 +52,7 @@
                             </b-form-input>
                             <input-help :form="form" field="email" text="View your username which will be used to logging in."></input-help>
                         </b-form-group>
-                        <b-form-group label="Password" label-for="password">
+                        <b-form-group label="Password" label-for="password" label-class="required">
                             <b-form-input
                                     id="password"
                                     name="password"
@@ -63,7 +63,7 @@
                             </b-form-input>
                             <input-help :form="form" field="password" text="Enter a new password that will be used for logging in."></input-help>
                         </b-form-group>
-                        <b-form-group label="Confirm Password" label-for="password_confirmation">
+                        <b-form-group label="Confirm Password" label-for="password_confirmation" label-class="required">
                             <b-form-input
                                     id="password_confirmation"
                                     name="password_confirmation"

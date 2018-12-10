@@ -84,7 +84,7 @@
                 </b-row>
                 <b-row v-if="business.co_injuries">
                     <b-col lg="12">
-                        <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
+                        <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury" label-class="required">
                             <b-form-select
                                     id="injuries"
                                     name="injuries"

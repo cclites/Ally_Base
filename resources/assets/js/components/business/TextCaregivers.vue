@@ -60,11 +60,11 @@
                     </div>
                     <input-help :form="form" field="recipients" text=""></input-help>
                 </b-form-group>
-                <b-form-group label="From Number">
+                <b-form-group label="From Number" label-class="required">
                     <business-location-select v-model="form.business_id" required></business-location-select>
                     <input-help :form="form" field="business_id" text=""></input-help>
                 </b-form-group>
-                <b-form-group label="Message">
+                <b-form-group label="Message" label-class="required">
                     <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
                     <input-help :form="form" field="message" text=""></input-help>
                 </b-form-group>
