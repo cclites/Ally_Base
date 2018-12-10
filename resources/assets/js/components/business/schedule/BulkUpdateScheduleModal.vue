@@ -109,7 +109,7 @@
                                     <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="update_hourly_rates" :value="0">
                                     <label for="update_hourly_rates" class="rate-label">Hourly Shifts Only</label>
                                     <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="update_fixed_rates" :value="1">
-                                    <label for="update_fixed_rates" class="rate-label">Daily Shifts Only</label>
+                                    <label for="update_fixed_rates" class="rate-label">Fixed/Daily Shifts Only</label>
                                 </div>
                             </b-col>
                         </b-row>
@@ -385,7 +385,7 @@
                     return 'Hourly';
                 }
                 if (this.form.fixed_rates === 1) {
-                    return 'Daily';
+                    return 'Fixed';
                 }
                 return '';
             },

@@ -6,6 +6,7 @@ namespace App;
  *
  * @property int $id
  * @property string $name
+ * @property string $slug
  * @property string|null $address1
  * @property string|null $address2
  * @property string|null $city
@@ -32,16 +33,30 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain wherePhone1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain wherePhone2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereScheduling($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereState($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereZip($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  */
 class BusinessChain extends AuditableModel
 {
 
     protected $table = 'business_chains';
     protected $guarded = ['id'];
+    protected $orderedColumn = 'id';
+
+    ////////////////////////////////////
+    //// Static Methods
+    ////////////////////////////////////
+
+    public static function generateSlug($name)
+    {
+        return str_slug(
+            str_replace('&', ' and ', $name)
+        );
+    }
 
     ////////////////////////////////////
     //// Relationship Methods
@@ -58,8 +73,22 @@ class BusinessChain extends AuditableModel
             ->withTimestamps();
     }
 
+    public function caregiverApplications()
+    {
+        return $this->hasMany(CaregiverApplication::class, 'chain_id');
+    }
+
     public function users()
     {
         return $this->hasMany(OfficeUser::class, 'chain_id');
+    }
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
+    public function getCaregiverApplicationUrl()
+    {
+        return route('business_chain_routes.apply', ['slug' => $this->slug]);
     }
 }

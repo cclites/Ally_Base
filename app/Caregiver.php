@@ -5,7 +5,7 @@ namespace App;
 use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
-use App\Contracts\HasPaymentHold;
+use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
@@ -13,10 +13,10 @@ use App\Mail\CaregiverConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToChains;
-use App\Traits\BelongsToOneChain;
 use App\Traits\HasDefaultRates;
+use App\Traits\HasPaymentHold;
+use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
-use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
@@ -119,13 +119,12 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereW9TaxClassification($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver withMeta()
  * @mixin \Eloquent
+ * @property-read string $masked_ssn
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, BelongsToChainsInterface
+class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains;
-    use \App\Traits\HasPaymentHold;
-    use HasOwnMetaData;
-    use HasDefaultRates;
+    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -154,6 +153,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'hourly_rate_id',
         'fixed_rate_id'
     ];
+    protected $appends = ['masked_ssn'];
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
 
@@ -270,46 +270,6 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
             $businesses = isset($businesses) ? $businesses->merge($collection) : $collection;
         }
         return $businesses ?? collect();
-    }
-
-    /**
-     * Encrypt ssn on entry
-     *
-     * @param $value
-     */
-    public function setSsnAttribute($value)
-    {
-        $this->attributes['ssn'] = Crypt::encrypt($value);
-    }
-
-    /**
-     * Decrypt ssn on retrieval
-     *
-     * @return null|string
-     */
-    public function getSsnAttribute()
-    {
-        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
-    }
-
-    /**
-     * Encrypt ssn on entry
-     *
-     * @param $value
-     */
-    public function setw9SsnAttribute($value)
-    {
-        $this->setSsnAttribute($value);
-    }
-
-    /**
-     * Decrypt ssn on retrieval
-     *
-     * @return null|string
-     */
-    public function getw9SsnAttribute()
-    {
-        return $this->getSsnAttribute();
     }
 
     ///////////////////////////////////////////
@@ -445,11 +405,12 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $aggregator->events($start, $end);
     }
 
-    public function sendConfirmationEmail()
+    public function sendConfirmationEmail(BusinessChain $businessChain = null)
     {
+        if (!$businessChain) $businessChain = $this->businessChains()->first();
         $confirmation = new Confirmation($this);
         $confirmation->touchTimestamp();
-        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $this->businesses()->first()));
+        \Mail::to($this->email)->send(new CaregiverConfirmation($this, $businessChain));
     }
 
     /**

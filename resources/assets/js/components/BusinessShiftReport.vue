@@ -1,55 +1,126 @@
 <template>
     <div>
-        <b-row>
-            <b-col lg="12">
-                <b-card
-                        header="Select Date Range &amp; Filters"
-                        header-text-variant="white"
-                        header-bg-variant="info"
-                >
-                    <b-form inline @submit.prevent="reloadData()">
-                        <date-picker
-                                class="mb-1"
-                                v-model="start_date"
-                                placeholder="Start Date">
-                        </date-picker> &nbsp;to&nbsp;
-                        <date-picker
-                                class="mb-1"
-                                v-model="end_date"
-                                placeholder="End Date">
-                        </date-picker>
-                        <business-location-select v-model="business_id" class="mb-1" :allow-all="true" :hideable="true"></business-location-select>
-                        <b-form-select v-model="caregiver_id" class="mx-1 mb-1">
-                            <option value="">All Caregivers</option>
-                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                        </b-form-select>
-                        <b-form-select v-model="client_id" class="mr-1 mb-1">
-                            <option value="">All Clients</option>
-                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                        </b-form-select>
-                        <b-form-select v-model="payment_method" class="mb-1">
-                            <option value="">All Payment Methods</option>
-                            <option value="credit_card">Credit Card</option>
-                            <option value="bank_account">Bank Account</option>
-                            <option value="business">Provider Payment</option>
-                        </b-form-select>
-                        <b-form-select v-if="admin" v-model="import_id" class="mb-1">
-                            <option value="">--Filter by Import--</option>
-                            <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
-                        </b-form-select>
-                        <b-form-select v-model="charge_status" class="mb-1">
-                            <option value="">All Statuses</option>
-                            <option value="charged">Charged</option>
-                            <option value="uncharged">Un-Charged</option>
-                        </b-form-select>
-                        &nbsp;&nbsp;<b-button type="submit" variant="info" class="mb-1">Generate Report</b-button>
-                        &nbsp;&nbsp;<b-button type="button" @click="showHideSummary()" variant="primary" class="mb-1">{{ summaryButtonText }}</b-button>
-                    </b-form>
-                </b-card>
-            </b-col>
-        </b-row>
+        <b-card body-class="pb-2">
+            <b-row>
+                <b-container fluid id="filtersContainer">
+                    <b-row>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Date Range" class="form-inline">
+                                <date-picker ref="startDate"
+                                             v-model="filters.start_date"
+                                             placeholder="Start Date">
+                                </date-picker> &nbsp;to&nbsp;
+                                <date-picker ref="endDate"
+                                             v-model="filters.end_date"
+                                             placeholder="End Date">
+                                </date-picker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Caregiver" class="form-inline">
+                                <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
+                                    <option value="">All Caregivers</option>
+                                    <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Client" class="form-inline">
+                                <b-form-select v-model="filters.client_id" ref="clientFilter">
+                                    <option value="">All Clients</option>
+                                    <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Payment Method" class="form-inline">
+                                <b-form-select v-model="filters.payment_method" ref="paymentFilter">
+                                    <option value="">All Payment Methods</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="bank_account">Bank Account</option>
+                                    <option value="business">Provider Payment</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Charge Status" class="form-inline">
+                                <b-form-select v-model="filters.charge_status" ref="chargeFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="charged">Charged</option>
+                                    <option value="uncharged">Un-Charged</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <b-form-group label="Confirmed Status" class="form-inline">
+                                <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="unconfirmed">Unconfirmed</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <!-- Business Location is not shown on single business registries -->
+                            <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <!-- ADMIN ONLY DROPDOWN -->
+                            <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                                <b-form-select v-model="filters.import_id">
+                                    <option value="">--Filter by Import--</option>
+                                    <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
+                            <div class="card mb-0">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title">Filter by Flags</h6>
+                                    <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags(true)">
+                                        <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
+                                        <b-radio value="none">Has No Flags</b-radio><br />
+                                        <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
+                                    </b-form-radio-group>
+                                    <b-col lg="12">
+                                        <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
+                                        <b-form-checkbox v-for="(display, value) in flagTypes"
+                                                         v-model="filters.flags"
+                                                         :value="value"
+                                                         :key="value"
+                                                         class="flag-checkbox"
+                                                         :disabled="filters.flag_type !== 'selected'"
+                                                         @change="includeAllFlags = false"
+                                        >
+                                            {{ display }}
+                                        </b-form-checkbox>
+                                    </b-col>
+                                </div>
+                            </div>
+                        </b-col>
+                    </b-row>
+                </b-container>
 
-        <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
+                <!--<b-col lg="8">-->
+                    <!--<small v-show="loaded >= 3" v-html="filterDescription"></small>-->
+                <!--</b-col>-->
+
+                <b-col lg="12" class="text-right">
+                    <!--<b-button type="button" @click="filtersModal = true" variant="info" class="ml-2">Update Filters and Generate Report</b-button>-->
+                    <b-btn variant="info" @click="reloadData()">Generate Report</b-btn>
+                    <b-button type="button" @click="showHideSummary()" variant="primary" class="ml-2" v-show="loaded >= 3">{{ summaryButtonText }}</b-button>
+                </b-col>
+            </b-row>
+
+            <div class="text-center text-muted" v-show="loaded == -1">
+                Update filters and press Generate Report
+            </div>
+
+            <loading-card v-show="loaded >= 0 && loaded < 3"></loading-card>
+
+        </b-card>
 
         <shift-history-summaries v-show="showSummary && loaded >= 3"
                                  :client-charges="items.clientCharges"
@@ -57,57 +128,147 @@
                                  :admin="admin"
         />
 
-        <b-row v-show="loaded == -1">
-            <b-col lg="12">
-                <b-card class="text-center text-muted">
-                    Select filters and press Generate Report
-                </b-card>
-            </b-col>
-        </b-row>
+        <b-card
+                header="Shift List for Date Range &amp; Filters"
+                header-text-variant="white"
+                header-bg-variant="info"
+                title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
+                v-show="loaded >= 3"
+                ref="SHRCard"
+        >
+            <b-row class="mb-2">
+                <b-col sm="6">
+                    <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
+                    <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                </b-col>
+                <b-col sm="6" class="text-right">
+                    <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
+                    <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
+                    <b-btn @click="fullscreenToggle()"><i class="fa fa-arrows-alt"></i></b-btn>
+                </b-col>
+            </b-row>
+            <shift-history-table :fields="fields" :items="shiftHistoryItems">
+                <template slot="actions" scope="row">
+                    <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
+                    <div v-if="row.item.id">
+                        <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
+                        <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
+                        <span>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                            </span>
+                        <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
 
-        <b-row v-show="loaded >= 3">
-            <b-col lg="12">
-                <b-card
-                        header="Shifts"
-                        header-text-variant="white"
-                        header-bg-variant="info"
-                        title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
-                >
-                    <b-row class="mb-2">
-                        <b-col sm="6">
-                            <b-btn @click="addShiftModal = true" variant="info">Add a Shift</b-btn>
-                            <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
-                        </b-col>
-                        <b-col sm="6" class="text-right">
-                            <b-btn :href="urlPrefix + 'shifts' + queryString + '&export=1'" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
-                            <b-btn @click="printTable()" variant="primary"><i class="fa fa-print"></i> Print</b-btn>
-                        </b-col>
-                    </b-row>
-                    <shift-history-table :fields="fields" :items="shiftHistoryItems">
-                        <template slot="actions" scope="row">
-                            <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
-                            <div v-if="row.item.id">
-                                <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
-                                <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
-                                <span>
-                                    <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                    <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
-                                </span>
-                                <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
+                        <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
+                        <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="confirmShift(row.item)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-divider></b-dropdown-divider>-->
+                        <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
+                        <!--</b-dropdown>-->
+                    </div>
+                </template>
+            </shift-history-table>
+        </b-card>
 
-                                <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
-                                    <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                                    <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                                    <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
-                                    <!--<b-dropdown-divider></b-dropdown-divider>-->
-                                    <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
-                                <!--</b-dropdown>-->
+        <b-modal size="lg" id="filtersModal" title="Select Date Range &amp; Filters">
+            <!-- This modal is temporarily hidden, add v-model="filtersModal" to re-enable -->
+            <!-- The filters are available inline instead -->
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="6">
+                        <b-form-group label="Date Range" class="form-inline">
+                            <date-picker ref="startDate"
+                                         v-model="filters.start_date"
+                                         placeholder="Start Date">
+                            </date-picker> &nbsp;to&nbsp;
+                            <date-picker ref="endDate"
+                                         v-model="filters.end_date"
+                                         placeholder="End Date">
+                            </date-picker>
+                        </b-form-group>
+                        <b-form-group label="Caregiver" class="form-inline">
+                            <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
+                                <option value="">All Caregivers</option>
+                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Client" class="form-inline">
+                            <b-form-select v-model="filters.client_id" ref="clientFilter">
+                                <option value="">All Clients</option>
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <!-- Business Location is not shown on single business registries -->
+                        <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Payment Method" class="form-inline">
+                            <b-form-select v-model="filters.payment_method" ref="paymentFilter">
+                                <option value="">All Payment Methods</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="bank_account">Bank Account</option>
+                                <option value="business">Provider Payment</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Charge Status" class="form-inline">
+                            <b-form-select v-model="filters.charge_status" ref="chargeFilter">
+                                <option value="">All Statuses</option>
+                                <option value="charged">Charged</option>
+                                <option value="uncharged">Un-Charged</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Confirmed Status" class="form-inline">
+                            <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
+                                <option value="">All Statuses</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="unconfirmed">Unconfirmed</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <!-- ADMIN ONLY DROPDOWN -->
+                        <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                            <b-form-select v-model="filters.import_id">
+                                <option value="">--Filter by Import--</option>
+                                <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
+                            </b-form-select>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Filter by Flags</h6>
+                                <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
+                                    <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
+                                    <b-radio value="none">Has No Flags</b-radio><br />
+                                    <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
+                                </b-form-radio-group>
+                                <b-col lg="12">
+                                    <b-form-checkbox v-model="includeAllFlags" @change="updateFilterFlags" :disabled="filters.flag_type !== 'selected'">All Flags</b-form-checkbox>
+                                    <b-form-checkbox v-for="(display, value) in flagTypes"
+                                                     v-model="filters.flags"
+                                                     :value="value"
+                                                     :key="value"
+                                                     class="flag-checkbox"
+                                                     :disabled="filters.flag_type !== 'selected'"
+                                                     @change="includeAllFlags = false"
+                                    >
+                                        {{ display }}
+                                    </b-form-checkbox>
+                                </b-col>
                             </div>
-                        </template>
-                    </shift-history-table>
-                </b-card>
-            </b-col>
-        </b-row>
+                        </div>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="info" @click="reloadData()">
+                    Generate Report
+                </b-btn>
+                <b-btn variant="default" @click="filtersModal=false">Close</b-btn>
+            </div>
+        </b-modal>
 
         <!-- Filter columns modal -->
         <filter-columns-modal v-model="columnsModal"
@@ -129,8 +290,8 @@
 
         <add-shift-modal 
             v-model="addShiftModal" 
-            :caregiver="caregiver_id" 
-            :client="client_id"
+            :caregiver="filters.caregiver_id"
+            :client="filters.client_id"
             :no-close-on-backdrop="true"
             @shift-created="onShiftCreate"
         ></add-shift-modal>
@@ -149,7 +310,6 @@
 <script>
     import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
-    import BusinessSettings from "../mixins/BusinessSettings";
     import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
@@ -157,11 +317,12 @@
     import EditShiftModal from "./modals/EditShiftModal";
     import ShiftHistorySummaries from "./shifts/ShiftHistorySummaries";
     import LocalStorage from "../mixins/LocalStorage";
-    import BusinessLocationSelect from "./business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import ShiftFlags from "../mixins/ShiftFlags";
 
     export default {
         components: {
-            BusinessLocationSelect,
+            BusinessLocationFormGroup,
             ShiftHistorySummaries,
             ShiftDetailsModal,
             FilterColumnsModal,
@@ -170,7 +331,7 @@
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, BusinessSettings, LocalStorage],
+        mixins: [FormatsDates, FormatsNumbers, LocalStorage, ShiftFlags],
 
         props: {
             admin: Number,
@@ -190,18 +351,27 @@
                     clientCharges: [],
                     caregiverPayments: [],
                 },
-                start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
-                end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
-                business_id: "",
-                caregiver_id: "",
-                client_id: "",
-                import_id: "",
-                payment_method: "",
+                filters: {
+                    start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
+                    end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                    business_id: "",
+                    caregiver_id: "",
+                    client_id: "",
+                    import_id: "",
+                    payment_method: "",
+                    charge_status: "",
+                    confirmed_status: "",
+                    flag_type: "any",
+                    flags: [],
+                },
+                includeAllFlags: false,
+                filterDescription: '',
                 clients: [],
                 caregivers: [],
                 showSummary: false,
                 sortBy: 'Day',
                 sortDesc: false,
+                filtersModal: !this.autoload,
                 addShiftModal: false,
                 editShiftModal: false,
                 detailsModal: false,
@@ -213,9 +383,8 @@
                 filteredFields: [],
                 urlPrefix: '/business/reports/data/',
                 loaded: -1,
-                charge_status: '',
                 localStoragePrefix: 'shift_report_',
-                location: 'all'
+                location: 'all',
             }
         },
 
@@ -231,6 +400,7 @@
         computed: {
             availableFields() {
                 let fields = [
+                    'Flags',
                     'Day',
                     'Time',
                     'Hours',
@@ -252,15 +422,6 @@
                     'Confirmed',
                     'Charged',
                 ];
-
-                // remove certain fields completely based on business settings
-                if (! this.businessSettings().co_mileage) {
-                    fields.splice(fields.indexOf('Mileage'), 1);
-                    fields.splice(fields.indexOf('Mileage Costs'), 1);
-                }
-                if (! this.businessSettings().co_expenses) {
-                    fields.splice(fields.indexOf('Other Expenses'), 1);
-                }
 
                 return fields;
             },
@@ -288,6 +449,7 @@
                         'id': item.id,
                         'client_id': item.client_id,
                         'caregiver_id': item.caregiver_id,
+                        'Flags': item.flags,
                         'Day': item.checked_in_time, // filtered in template
                         'Time': moment.utc(item.checked_in_time).local().format('h:mm A') + ' - ' + ((item.checked_out_time) ? moment.utc(item.checked_out_time).local().format('h:mm A') : ''),
                         'Hours': item.hours,
@@ -308,14 +470,17 @@
                         'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
+                        'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
                         'status': item.status,
+                        'business_id': item.business_id,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
                 items.push({
                     '_rowVariant': 'info',
+                    'Flags': '',
                     'Day': 'Total',
                     'Time': '',
                     'Hours': this.shiftTotals.hours,
@@ -356,28 +521,30 @@
                 return (this.showSummary) ? 'Hide Summary' : 'Show Summary';
             },
             queryString() {
-                return '?start_date=' + this.start_date + '&end_date=' + this.end_date + '&caregiver_id=' + this.caregiver_id
-                        + '&client_id=' + this.client_id + '&payment_method=' + this.payment_method
-                        + '&import_id=' + this.import_id + '&status=' + this.charge_status
-                        + '&businesses[]=' + this.business_id;
+                const filters = this.filters;
+                return '?start_date=' + filters.start_date + '&end_date=' + filters.end_date + '&caregiver_id=' + filters.caregiver_id
+                        + '&client_id=' + filters.client_id + '&payment_method=' + filters.payment_method
+                        + '&import_id=' + filters.import_id + '&status=' + filters.charge_status + '&confirmed=' + filters.confirmed_status
+                        + '&businesses[]=' + filters.business_id + '&flag_type=' + filters.flag_type + '&' + jQuery.param({'flags': filters.flags})
             }
         },
 
         methods: {
+            fullscreenToggle() {
+                $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
+                $('.left-sidebar').toggle();
+                $('.footer').toggle();
+                window.scrollTo(0, 0);
+            },
+
             loadFiltersFromStorage() {
                 if (typeof(Storage) !== "undefined") {
-                    let startDate = this.getLocalStorage('startDate');
-                    if (startDate) this.start_date = startDate;
-                    let endDate = this.getLocalStorage('endDate');
-                    if (endDate) this.end_date = endDate;
-                    let filterCaregiverId = this.getLocalStorage('filterCaregiverId');
-                    if (filterCaregiverId) this.caregiver_id = filterCaregiverId;
-                    let filterClientId = this.getLocalStorage('filterClientId');
-                    if (filterClientId) this.client_id = filterClientId;
-                    let filterBusinessId = this.getLocalStorage('filterBusinessId');
-                    if (filterBusinessId) this.business_id = filterBusinessId;
-                    let filterPaymentMethod = this.getLocalStorage('filterPaymentMethod');
-                    if (filterPaymentMethod) this.payment_method = filterPaymentMethod;
+                    // Saved filters
+                    for (let filter of Object.keys(this.filters)) {
+                        let value = this.getLocalStorage(filter);
+                        if (value) this.filters[filter] = value;
+                    }
+                    // Sorting/show UI
                     let sortBy = this.getLocalStorage('sortBy');
                     if (sortBy) this.sortBy = sortBy;
                     let sortDesc = this.getLocalStorage('sortDesc');
@@ -433,6 +600,8 @@
             },
 
             loadData() {
+                this.filtersModal = false;
+                this.filterDescription = this.getFilterDescription();
                 this.loaded = 0;
                 this.loadSummaries();
 
@@ -445,7 +614,55 @@
                             this.items.shifts = [];
                         }
                         this.loaded++;
+                    })
+                    .catch(error => {
+                        if (error.response.data && error.response.data.message) {
+                            alerts.addMessage('error', error.response.data.message);
+                        }
+                        this.loaded++;
+                        this.filtersModal = true;
                     });
+            },
+
+            getFilterDescription() {
+                return `<strong>Current Filters:</strong> `
+                    + `Dates: ${this.getTextFromRefInput('startDate')} - ${this.getTextFromRefInput('endDate')}; `
+                    + `Caregiver: ${this.getTextFromRefInput('caregiverFilter')}; `
+                    + `Client: ${this.getTextFromRefInput('clientFilter')}; `
+                    + `Payment Method: ${this.getTextFromRefInput('paymentFilter')}; `
+                    + `Charge Status: ${this.getTextFromRefInput('chargeFilter')}; `
+                    + `Confirmed Status: ${this.getTextFromRefInput('confirmedFilter')}; `
+                    + this.getFlagFilterDescription();
+            },
+
+            getFlagFilterDescription() {
+                if (this.filters.flag_type === 'none') return 'No Flags';
+                if (this.filters.flag_type === 'selected') return `Flags: ${this.filters.flags.length === this.shiftFlags.length ? 'ALL' : this.getTextFromSelector($('.flag-checkbox > input:checked').closest('label'))}`;
+                return '';
+            },
+
+            getTextFromSelector($selector) {
+                if ($selector.length > 1) {
+                    let texts = [];
+                    for(let i = 0; i < $selector.length; i++) {
+                        texts.push(this.getTextFromSelector($($selector[i])));
+                    }
+                    return texts.join(', ');
+                }
+                switch($selector.prop('tagName')) {
+                    case 'LABEL':
+                        return $selector.text();
+                    case 'INPUT':
+                        return $selector.val();
+                    case 'SELECT':
+                        return $selector.find('option:selected').text();
+                }
+            },
+
+            getTextFromRefInput(refName)
+            {
+                const $selector = $(this.$refs[refName].$el);
+                return this.getTextFromSelector($selector);
             },
 
             loadFiltersData() {
@@ -480,8 +697,11 @@
                 }
             },
 
-            confirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            confirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to confirm this shift?')) {
                         return;
                     }
@@ -501,8 +721,11 @@
                     });
             },
 
-            unconfirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            unconfirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to un-confirm this shift?')) {
                         return;
                     }
@@ -523,11 +746,11 @@
             },
 
             confirmSelected() {
-                return this.confirmShift(this.selectedItem.id);
+                return this.confirmShift(this.selectedItem);
             },
 
             unconfirmSelected() {
-                return this.unconfirmShift(this.selectedItem.id);
+                return this.unconfirmShift(this.selectedItem);
             },
 
             printSelected() {
@@ -551,15 +774,12 @@
             },
 
             setInitialFields() {
-                if (this.getLocalStorage('fields')) {
-                    let fields = JSON.parse(this.getLocalStorage('fields'));
+                let fields = this.getLocalStorage('fields');
+                if (fields && fields[0] && typeof(fields[0]) !== 'object') {
                     if (fields[0] && typeof(fields[0]) !== 'object') {
-                        // Temporarily Force 'Confirmed'
-                        if (fields.indexOf('Confirmed') === -1) {
-                            fields.push('Confirmed');
-                        }
-                        if (fields.indexOf('Charged') === -1) {
-                            fields.push('Charged');
+                        // Temporarily Force 'Flags'
+                        if (fields.indexOf('Flags') === -1) {
+                            fields.push('Flags');
                         }
                         this.filteredFields = fields;
                         return;
@@ -597,15 +817,18 @@
                 this.loadSummaries();
             },
 
-            updateSavedFormFilters()
-            {
-                this.setLocalStorage('filterBusinessId', this.business_id);
-                this.setLocalStorage('filterCaregiverId', this.caregiver_id);
-                this.setLocalStorage('filterClientId', this.client_id);
-                this.setLocalStorage('filterPaymentMethod', this.payment_method);
-                this.setLocalStorage('startDate', this.start_date);
-                this.setLocalStorage('endDate', this.end_date);
-            }
+            updateSavedFormFilters() {
+                for (let filter of Object.keys(this.filters)) {
+                    this.setLocalStorage(filter, this.filters[filter]);
+                }
+            },
+
+            updateFilterFlags(changedType = false) {
+                if (changedType) {
+                    this.includeAllFlags = (this.filters.flag_type === 'selected');
+                }
+                this.filters.flags = this.includeAllFlags && this.filters.flag_type === 'selected' ? this.shiftFlags : [];
+            },
         },
 
         watch: {
@@ -616,10 +839,10 @@
                 this.setLocalStorage('sortDesc', val);
             },
             filteredFields(val) {
-                this.setLocalStorage('fields', JSON.stringify(val));
+                this.setLocalStorage('fields', val);
             },
             showSummary(val) {
-                this.setLocalStorage('showSummary', JSON.stringify(val));
+                this.setLocalStorage('showSummary', val);
             },
         }
     }
@@ -643,5 +866,22 @@
         width: 100%;
         height: auto;
         max-width: 400px;
+    }
+    .shift-table td > .fa {
+        font-size: 16px;
+    }
+    #filtersModal .datepicker, #filtersContainer .datepicker {
+        max-width: 150px;
+    }
+    #filtersContainer .form-group {
+        margin-bottom: 0.5rem;
+    }
+    .fullscreen-shr {
+        background-color: white;
+        z-index: 101;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border: 0 !important;
+        box-shadow: none !important;
     }
 </style>

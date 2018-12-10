@@ -9,7 +9,6 @@ use App\User;
  * Class PaymentPolicy
  * @package App\Policies
  *
- * TODO: This needs to check for client payment access as well as business payment access
  */
 class PaymentPolicy extends BasePolicy
 {
@@ -20,7 +19,8 @@ class PaymentPolicy extends BasePolicy
 
     public function read(User $user, Payment $payment)
     {
-        return $this->businessCheck($user, $payment);
+        return $payment->client_id == $user->id
+            || $this->businessCheck($user, $payment);
     }
 
     public function update(User $user, Payment $payment)

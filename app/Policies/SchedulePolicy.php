@@ -17,7 +17,7 @@ class SchedulePolicy extends BasePolicy
         $client = Client::find($data['client_id']);
 
         return $user->can('read', $business)
-            && $user->can('read', $caregiver)
+            && (!$caregiver || $user->can('read', $caregiver))
             && $user->can('read', $client)
             && $business->id == $client->business_id;
     }

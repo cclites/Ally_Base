@@ -5,7 +5,7 @@ namespace App\Businesses;
 use App\Business;
 use Illuminate\Cache\CacheManager;
 
-class Settings
+class SettingsRepository
 {
     /**
      * @var \Illuminate\Cache\CacheManager

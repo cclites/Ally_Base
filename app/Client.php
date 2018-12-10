@@ -15,10 +15,10 @@ use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use App\Traits\HasDefaultRates;
 use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
+use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Crypt;
 use Packages\MetaData\HasOwnMetaData;
 
 /**
@@ -171,11 +171,13 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()
  * @mixin \Eloquent
+ * @property-read string $masked_ssn
+ * @property null|string $w9_ssn
  */
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
-    use HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -315,12 +317,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     public function defaultPayment()
     {
-        return $this->morphTo('default_payment');
+        return $this->morphTo('defaultPayment', 'default_payment_type', 'default_payment_id');
     }
 
     public function backupPayment()
     {
-        return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+        return $this->morphTo('backupPayment', 'backup_payment_type', 'backup_payment_id');
     }
 
     public function notes()
@@ -381,16 +383,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
-
-    public function setSsnAttribute($value)
-    {
-        $this->attributes['ssn'] = Crypt::encrypt($value);
-    }
-
-    public function getSsnAttribute()
-    {
-        return empty($this->attributes['ssn']) ? null : Crypt::decrypt($this->attributes['ssn']);
-    }
 
     public function getPaymentTypeAttribute()
     {
@@ -553,6 +545,22 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         if ($method->persistChargeable() && $this->$relation()->associate($method)->save()) {
             return $method;
         }
+    }
+
+    /**
+     * Swap the client's primary and backup payment methods
+     *
+     * @throws \Exception
+     */
+    public function swapPaymentMethods()
+    {
+        $this->load(['defaultPayment', 'backupPayment']);
+        $backup = $this->backupPayment;
+        $default = $this->defaultPayment;
+        if (!$backup || !$default) throw new \Exception('Client needs a backup and primary payment method for this method to work.');
+
+        $this->defaultPayment()->associate($backup)->save();
+        $this->backupPayment()->associate($default)->save();
     }
 
     public function sendConfirmationEmail()

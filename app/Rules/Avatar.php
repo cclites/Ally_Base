@@ -25,7 +25,7 @@ class Avatar implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (starts_with($value, config('app.url') . '/avatars') || $value == '/images/default-avatar.png') {
+        if (str_contains($value, '/storage/avatars') || $value == '/images/default-avatar.png') {
             return true;
         }
 

@@ -131,7 +131,6 @@ class CaregiverController extends BaseController
                 return $query->orderBy('created_at', 'desc');
             }
         ]);
-        $caregiver->masked_ssn = '***-**-' . substr($caregiver->ssn, -4);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
 
@@ -228,10 +227,6 @@ class CaregiverController extends BaseController
         $caregiver = Caregiver::findOrFail($caregiver_id);
         $this->authorize('update', $caregiver);
 
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
-
         return (new AddressController())->update($request, $caregiver->user, $type, 'The caregiver\'s address');
     }
 
@@ -268,7 +263,7 @@ class CaregiverController extends BaseController
         $caregiver = Caregiver::findOrFail($caregiver_id);
         $this->authorize('update', $caregiver);
 
-        $caregiver->sendConfirmationEmail();
+        $caregiver->sendConfirmationEmail($this->businessChain());
         return new SuccessResponse('Email Sent to Caregiver');
     }
 

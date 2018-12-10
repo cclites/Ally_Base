@@ -22,6 +22,7 @@ import 'vue-plyr/dist/vue-plyr.css';
 window.Form = Form;
 window.Vue = require('vue');
 window.Store = store;
+window.DevelopmentMode = process.env.NODE_ENV === 'development';
 Vue.use(BootstrapVue);
 Vue.use(VueTheMask);
 Vue.use(VeeValidate, {fieldsBagName: '_fields'});
@@ -71,6 +72,8 @@ Vue.component('client-payment-history', require('./components/clients/ClientPaym
 Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
 Vue.component('client-phone-numbers-tab', require('./components/clients/profile/ClientPhoneNumbersTab'));
+Vue.component('client-unconfirmed-shifts', require('./components/clients/UnconfirmedShifts'));
+Vue.component('client-modify-shift-modal', require('./components/clients/ModifyShiftModal'));
 
 
 // Caregiver
@@ -218,6 +221,9 @@ Vue.component('client-caregiver-list', require('./components/clients/ClientCareg
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
+
+Vue.component('contact-edit', require('./components/business/contacts/ContactEdit.vue'));
+Vue.component('contact-list', require('./components/business/contacts/ContactList.vue'));
 
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));

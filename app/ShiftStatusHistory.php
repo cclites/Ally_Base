@@ -22,4 +22,9 @@ class ShiftStatusHistory extends AuditableModel
 {
     protected $table = 'shift_status_history';
     protected $guarded = ['id'];
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'shift_id');
+    }
 }

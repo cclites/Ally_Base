@@ -5,6 +5,13 @@
         </a>
     </li>
 @endif
+@if(auth()->user()->role->business->allow_client_confirmations)
+    <li>
+        <a href="/unconfirmed-shifts" aria-expanded="false">
+            <i class="mdi mdi-history"></i><span class="hide-menu">Pending Shifts</span>
+        </a>
+    </li>
+@endif
 <li>
     <a href="/payment-history" aria-expanded="false">
         <i class="mdi mdi-credit-card"></i><span class="hide-menu">Payment History</span>
