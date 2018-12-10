@@ -95,7 +95,7 @@
                     </b-form-group>
 
                     <div v-if="form.type == 'dropdown'">
-                        <h3>Your list options:</h3>
+                        <h3>Your list of options:</h3>
                         <p v-if="options.length == 0">You haven't created any yet. Please add them using the input below.</p>
                         <b-row v-else>
                             <b-col lg="12">
@@ -179,10 +179,9 @@
 
             defaultOptions() {
                 const options = [{value: '', text: '--- Select ---'}];
-                this.options.forEach(text => options.push({ text, value: text }));
+                this.options.forEach(text => options.push({ text, value: this.toSnakeCase(text) }));
 
                 return options;
-
             },
         },
 
@@ -216,16 +215,16 @@
 
                 try {
                     // Create/update the custom field
-                    const response = this.field 
+                    const {data} = this.field 
                         ? await this.form.patch(`/business/custom-fields/${this.field.id}`)
                         : await this.form.post('/business/custom-fields');
-                    
+
                     // Create/update the custom dropdown field options
                     if(this.form.type == 'dropdown') {
-                        const optionForm = new Form({options: this.options.join(',')})
+                        const optionForm = new Form({ options: this.options.map(option => this.toSnakeCase(option)).join(',') });
                         const res = this.field 
                             ? await optionForm.patch(`/business/custom-fields/options/${this.field.id}`)
-                            : await optionForm.post('/business/custom-fields/options');
+                            : await optionForm.post(`/business/custom-fields/options/${data.data.id}`);
                     }
                 } catch(error) {}
                 this.submitting = false;
