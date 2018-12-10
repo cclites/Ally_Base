@@ -3,13 +3,13 @@
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
-use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
 class OtherContact extends Model implements BelongsToBusinessesInterface
 {
-    use BelongsToBusinesses;
+    use BelongsToOneBusiness;
 
     /**
      * The fields that are mass assignable
@@ -33,15 +33,18 @@ class OtherContact extends Model implements BelongsToBusinessesInterface
         'general_notes',
     ];
 
-    /**
-     * Return an array of business IDs the entity is attached to
-     *
-     * @return array
-     */
-    public function getBusinessIds()
+    ////////////////////////////////////
+    //// Relationships
+    ////////////////////////////////////
+
+    public function business()
     {
-        return [$this->business_id];
+        return $this->belongsTo(Business::class);
     }
+
+    ////////////////////////////////////
+    //// Mutators
+    ////////////////////////////////////
 
     public function getNameAttribute()
     {
@@ -63,10 +66,9 @@ class OtherContact extends Model implements BelongsToBusinessesInterface
         return $this->lastname . ', ' . $this->firstname;
     }
 
-    public function business()
-    {
-        return $this->belongsTo(Business::class);
-    }
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
 
     /**
      * Add a query scope "ordered()" to centralize the control of sorting order of model results in queries
@@ -80,15 +82,4 @@ class OtherContact extends Model implements BelongsToBusinessesInterface
             ->orderBy('firstname', $direction ?? 'ASC');
     }
 
-    /**
-     * A query scope for filtering results by related business IDs
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $businessIds
-     * @return void
-     */
-    public function scopeForBusinesses(Builder $builder, array $businessIds)
-    {
-        $builder->whereIn('business_id', $businessIds);
-    }
 }
