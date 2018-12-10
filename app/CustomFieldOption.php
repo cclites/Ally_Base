@@ -24,6 +24,23 @@ class CustomFieldOption extends Model
         'value',
         'label',
     ];
+    
+    /**
+     * The custom model attributes to add to the Eloquent model
+     *
+     * @var array
+     */
+    protected $appends = ['text'];
+
+    /**
+     * Create an alias for the label attribute to simplify usage of custom field options in the front end
+     *
+     * @return string
+     */
+    public function getTextAttribute()
+    {
+        return $this->label;
+    }
 
     /**
      * Get the custom dropdown field that this option belongs to
