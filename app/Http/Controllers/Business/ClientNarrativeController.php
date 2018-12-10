@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Caregivers;
+namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Responses\ErrorResponse;
@@ -18,16 +18,10 @@ class ClientNarrativeController extends BaseController
      */
     public function index(Request $request, Client $client)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('read', $client);
 
-        if ($request->expectsJson() && $request->has('json')) {
-            $narrative = $client->narrative()->paginate($request->per_page);
-            return response()->json($narrative);
-        }
-
-        return view('caregivers.client_narrative', compact(['client']));
+        $narrative = $client->narrative()->paginate($request->per_page);
+        return response()->json($narrative);
     }
 
     /**
@@ -39,9 +33,7 @@ class ClientNarrativeController extends BaseController
      */
     public function store(Request $request, Client $client)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('update', $client);
 
         $request->validate([
             'notes' => 'required|min:1|max:63000',
@@ -69,9 +61,7 @@ class ClientNarrativeController extends BaseController
      */
     public function update(Request $request, Client $client, ClientNarrative $narrative)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('update', $client);
 
         $request->validate([
             'notes' => 'required|min:1|max:63000',
@@ -91,9 +81,7 @@ class ClientNarrativeController extends BaseController
      */
     public function destroy(Request $request, Client $client, ClientNarrative $narrative)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('update', $client);
 
         if ($narrative->delete()) {
             return new SuccessResponse('Narrative notes were successfully deleted.');
