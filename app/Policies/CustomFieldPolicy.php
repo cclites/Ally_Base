@@ -9,7 +9,7 @@ class CustomFieldPolicy extends BasePolicy
 {
     public function create(User $user, $data)
     {
-        $client = new CustomField($data);
+        $field = new CustomField($data);
         return $this->businessCheck($user, $field);
     }
 
