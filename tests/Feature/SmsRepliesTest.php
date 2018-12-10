@@ -29,7 +29,8 @@ class SmsRepliesTest extends TestCase
         $this->business->update(['outgoing_sms_number' => '8001112222']);
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
+        $number = $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
+        $number->update(['receives_sms' => 1]);
         $this->business->chain->caregivers()->save($this->caregiver);
         
         $this->officeUser = factory('App\OfficeUser')->create();
