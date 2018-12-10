@@ -528,7 +528,6 @@
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
-                    'care_plan_id': "",
                 });
                 this.setDateTimeFromSchedule();
             },
