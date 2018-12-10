@@ -41,6 +41,12 @@ export default {
             else {
                 Vue.set(this.rateCodes, index, code);
             }
+        },
+        isUsingRateCodes(business) {
+            return !!business.use_rate_codes;
+        },
+        hasClientRateStructure(business) {
+            return business.rate_structure === 'client_rate';
         }
     }
 }

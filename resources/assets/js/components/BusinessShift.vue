@@ -68,7 +68,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group v-if="businessSettings().co_mileage" label="Mileage" label-for="mileage">
+                    <b-form-group v-if="business.co_mileage" label="Mileage" label-for="mileage">
                         <b-form-input
                                 id="mileage"
                                 name="mileage"
@@ -80,7 +80,7 @@
                         </b-form-input>
                         <input-help :form="form" field="mileage" text="Confirm the number of miles driven during this shift."></input-help>
                     </b-form-group>
-                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses" label-for="other_expenses">
+                    <b-form-group v-if="business.co_expenses" label="Other Expenses" label-for="other_expenses">
                         <b-form-input
                                 id="other_expenses"
                                 name="other_expenses"
@@ -198,7 +198,7 @@
                     </b-row>
                 </b-col>
                 <b-col md="7" sm="6">
-                    <b-form-group v-if="businessSettings().co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
+                    <b-form-group v-if="business.co_expenses" label="Other Expenses Description" label-for="other_expenses_desc">
                         <b-textarea
                                 id="other_expenses_desc"
                                 name="other_expenses_desc"
@@ -209,7 +209,7 @@
                         </b-textarea>
                         <input-help :form="form" field="other_expenses_desc" text=""></input-help>
                     </b-form-group>
-                    <b-form-group v-if="businessSettings().co_comments && ! isClient" label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
+                    <b-form-group v-if="business.co_comments && ! isClient" label="Shift Notes / Caregiver Comments" label-for="caregiver_comments">
                         <b-textarea
                                 id="caregiver_comments"
                                 name="caregiver_comments"
@@ -268,7 +268,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row class="with-padding-top" v-if="(businessSettings().co_issues || businessSettings().co_injuries) && !is_modal">
+                <b-row class="with-padding-top" v-if="(business.co_issues || business.co_injuries) && !is_modal">
                     <b-col lg="12">
                         <h5>
                             Shift Issues
@@ -432,10 +432,9 @@
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
-    import BusinessSettings from '../mixins/BusinessSettings';
 
     export default {
-        mixins: [FormatsNumbers, FormatsDates, BusinessSettings],
+        mixins: [FormatsNumbers, FormatsDates],
 
         props: {
             'shift': {
@@ -477,6 +476,12 @@
             this.fixDateTimes();
         },
         computed: {
+            selectedClient() {
+                return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
+            },
+            business() {
+                return this.selectedClient.business_id ? this.$store.getters.getBusiness(this.selectedClient.business_id) : {};
+            },
             isClient() {
                 return this.role == 'client';
             },
@@ -529,7 +534,7 @@
                 }
                 return '';
             },
-            urlPefix() {
+            urlPrefix() {
                 return this.isClient ? `/unconfirmed-shifts/` : `/business/shifts/`;
             }
         },
@@ -637,11 +642,11 @@
                 this.form.checked_out_time = this.getClockedOutMoment().format();
                 if (this.shift.id) {
                     try {
-                        let response = await this.form.patch(`${this.urlPefix}${this.shift.id}`);
+                        let response = await this.form.patch(`${this.urlPrefix}${this.shift.id}`);
                         if (confirm) {
                             try {
                                 let form = new Form();
-                                let confirmResponse = await form.post(`${this.urlPefix}${this.shift.id}/confirm`);
+                                let confirmResponse = await form.post(`${this.urlPrefix}${this.shift.id}/confirm`);
                             }
                             catch (e) {
                                 console.log(e);

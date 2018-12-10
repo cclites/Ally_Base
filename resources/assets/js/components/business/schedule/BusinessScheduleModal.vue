@@ -65,7 +65,7 @@
 
                         <!-- FREE-TEXT RATES -->
 
-                        <b-row v-if="form.fixed_rates !== null && !usingRateCodes">
+                        <b-row v-if="form.fixed_rates !== null && !isUsingRateCodes(business)">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
@@ -80,7 +80,7 @@
                                 </b-form-group>
                             </b-col>
 
-                            <b-col sm="6" v-if="clientRateStructure">
+                            <b-col sm="6" v-if="hasClientRateStructure(business)">
                                 <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
                                     <b-form-input
                                             id="client_rate"
@@ -125,7 +125,7 @@
                         </b-row>
 
                         <!-- RATE CODES -->
-                        <b-row v-if="form.fixed_rates !== null && usingRateCodes">
+                        <b-row v-if="form.fixed_rates !== null && isUsingRateCodes(business)">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate_id">
                                     <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
@@ -140,7 +140,7 @@
                                 </b-form-group>
                             </b-col>
                             <!-- No check is needed here because rate codes are only possible under clientRateStructure for now  (|| true) -->
-                            <b-col sm="6" v-if="clientRateStructure || true">
+                            <b-col sm="6" v-if="hasClientRateStructure(business) || true">
                                 <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
                                     <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
                                         <option value="">--Use Default--</option>
@@ -328,11 +328,10 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateFactory from "../../../classes/RateFactory";
 
     export default {
-        mixins: [BusinessSettings, FormatsNumbers, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         props: {
             model: Boolean,
@@ -388,6 +387,28 @@
         },
 
         computed: {
+            selectedCaregiver() {
+                if (this.form.caregiver_id) {
+                    for(let index in this.clientCaregivers) {
+                        let caregiver = this.clientCaregivers[index];
+                        if (caregiver.id == this.form.caregiver_id) {
+                            return caregiver;
+                        }
+                    }
+                }
+                return {
+                    pivot: {}
+                };
+            },
+
+            selectedClient() {
+                return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
+            },
+
+            business() {
+                return this.selectedClient.business_id ? this.$store.getters.getBusiness(this.selectedClient.business_id) : {};
+            },
+
             title() {
                 if (this.copiedSchedule.starts_at) {
                     return 'Copying Schedule';
@@ -419,7 +440,7 @@
             },
 
             chargedRate() {
-                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.clientRateStructure);
+                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.hasClientRateStructure(this.business));
             },
 
             allyFee() {
@@ -428,20 +449,6 @@
 
             totalRate() {
                 return this.chargedRate + this.allyFee;
-            },
-
-            selectedCaregiver() {
-                if (this.form.caregiver_id) {
-                    for(let index in this.clientCaregivers) {
-                        let caregiver = this.clientCaregivers[index];
-                        if (caregiver.id == this.form.caregiver_id) {
-                            return caregiver;
-                        }
-                    }
-                }
-                return {
-                    pivot: {}
-                };
             },
 
             caregivers() {
@@ -559,7 +566,7 @@
                     method = 'patch';
                     url = url + '/' + this.schedule.id;
                 }
-                this.form.submit(method, url)
+                this.form.hideErrorsFor(449).submit(method, url)
                     .then(response => {
                         this.refreshEvents();
                         this.submitting = false;
