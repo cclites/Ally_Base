@@ -165,26 +165,25 @@
         </div>
 
         <loading-card v-show="loading"></loading-card>
-        <b-table bordered striped hover show-empty
-                 :items="matches"
-                 :fields="fields"
-                 :sort-by.sync="sortBy"
-                 :sort-desc.sync="sortDesc"
-                 v-show="!loading"
-        >
-            <template slot="rating" scope="row">
-
-            </template>
-            <template slot="distance" scope="row">
-                {{ convertToMiles(row.item.distance) }}
-            </template>
-            <template slot="actions" scope="row">
-                <slot :item="row.item">
-                    <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
-                    <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
-                </slot>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="matches"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     v-show="!loading"
+            >
+                <template slot="distance" scope="row">
+                    {{ convertToMiles(row.item.distance) }}
+                </template>
+                <template slot="actions" scope="row">
+                    <slot :item="row.item">
+                        <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
+                        <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
+                    </slot>
+                </template>
+            </b-table>
+        </div>
     </div>
 </template>
 
