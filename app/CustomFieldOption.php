@@ -21,7 +21,8 @@ class CustomFieldOption extends Model
      */
     protected $fillable = [
         'field_id',
-        'option_value',
+        'value',
+        'label',
     ];
 
     /**

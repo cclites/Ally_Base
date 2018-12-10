@@ -13,6 +13,7 @@ $factory->define(CustomFieldOption::class, function (Faker $faker) {
 
     return [
         'field_id' => CustomField::inRandomOrder()->first()->id,
-        'option_value' => $faker->word,
+        'value' => snake_case($faker->word),
+        'label' => $faker->word,
     ];
 });

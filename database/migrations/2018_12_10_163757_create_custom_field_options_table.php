@@ -16,7 +16,8 @@ class CreateCustomFieldOptionsTable extends Migration
         Schema::create('business_custom_field_options', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('field_id')->unsigned();
-            $table->text('option_value');
+            $table->text('value');
+            $table->text('label');
             $table->timestamps();
 
             $table->foreign('field_id')->references('id')->on('business_custom_fields')->onDelete('cascade');
