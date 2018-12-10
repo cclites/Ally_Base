@@ -1,7 +1,9 @@
+
 <?php
 
 use Faker\Generator as Faker;
 use App\CustomField;
+use App\CustomFieldOption;
 use App\BusinessChain;
 
 $factory->define(CustomField::class, function (Faker $faker) {
@@ -28,7 +30,7 @@ $factory->define(CustomField::class, function (Faker $faker) {
             }else if($field['type'] == 'radio') {
                 return (string) $faker->boolean;
             }else if($field['type'] == 'dropdown') {
-                return 0; // TOOD: create custom field options model and update this
+                return 0; // TOOD: this cannot be set automatically so a post create method must be used
             }
         },
     ];
