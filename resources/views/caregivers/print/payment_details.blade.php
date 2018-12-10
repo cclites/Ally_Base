@@ -69,6 +69,7 @@
                 <div>{{ $deposit->caregiver->name }}</div>
                 <table style="float: right;">
                     <tr>
+                    <tr>
                         <td>Deposit Date</td>
                         <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
                     </tr>
@@ -132,7 +133,7 @@
                                 @endforeach
                             </td>
                             <td>
-                                {{ substr($shift->client['name'], 0, 1) . '****** *******' }}
+                                {{ $shift->client['masked_name'] }}
                             </td>
                             <td>
                                 ${{ $shift->caregiver_rate }}
