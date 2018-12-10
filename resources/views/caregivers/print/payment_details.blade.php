@@ -69,7 +69,6 @@
                 <div>{{ $deposit->caregiver->name }}</div>
                 <table style="float: right;">
                     <tr>
-                    <tr>
                         <td>Deposit Date</td>
                         <td>{{ $deposit->created_at->format('m/d/Y') }}</td>
                     </tr>
