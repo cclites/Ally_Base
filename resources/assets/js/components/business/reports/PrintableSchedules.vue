@@ -26,7 +26,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <b-form-group label="Office Location">
+                        <b-form-group label="Office Location" label-class="required">
                             <business-location-select name="business_id" required></business-location-select>
                         </b-form-group>
                     </b-col>

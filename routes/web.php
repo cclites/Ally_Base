@@ -20,6 +20,8 @@ Route::get('/', function () {
 Route::view('check-my-time', 'check-my-time');
 
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
+Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
+Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
 Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
 Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
 Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
@@ -49,6 +51,8 @@ Route::group(['middleware' => 'auth'], function() {
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
     Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
 
+    Route::get('business-settings', 'Business\SettingController@index')->name('business-settings');
+
     Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
     Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
 });
@@ -58,13 +62,17 @@ Route::group([
     'roles' => ['client'],
 ], function () {
     Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
-
+    Route::get('unconfirmed-shifts', 'Clients\UnconfirmedShiftsController@index')->name('client.unconfirmed-shifts');
+    Route::post('unconfirmed-shifts/{shift}/confirm', 'Clients\UnconfirmedShiftsController@confirm')->name('client.unconfirmed-shifts.confirm');
+    Route::patch('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@update')->name('client.unconfirmed-shifts.update');
+    Route::get('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@show')->name('client.unconfirmed-shifts.show');
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
-    Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
+    Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
     Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
+    Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
 });
 
 Route::group([
@@ -75,6 +83,7 @@ Route::group([
     Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
     Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
     Route::get('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@index')->name('caregivers.clients.narrative');
+    Route::patch('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@update')->name('caregivers.clients.narrative.update');
     Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
     Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
@@ -192,6 +201,11 @@ Route::group([
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
+    Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
+    Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
+    Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
+    Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
+
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
@@ -293,6 +307,7 @@ Route::group([
 
     Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
     Route::resource('prospects', 'Business\ProspectController');
+    Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');

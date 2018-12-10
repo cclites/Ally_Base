@@ -269,7 +269,7 @@ class CommunicationController extends Controller
      */
     public function otherReplies()
     {
-        $replies = SmsThreadReply::where('business_id', activeBusiness()->id)
+        $replies = SmsThreadReply::forRequestedBusinesses()
             ->whereNull('sms_thread_id')
             ->latest()
             ->get();

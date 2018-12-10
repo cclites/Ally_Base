@@ -8,6 +8,12 @@ use App\CaregiverApplication;
 use App\Client;
 use App\CreditCard;
 use App\EmergencyContact;
+use App\Note;
+use App\PhoneNumber;
+use App\ScheduleNote;
+use App\Shift;
+use App\SmsThreadRecipient;
+use App\SmsThreadReply;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +33,11 @@ class ClearSensitiveData extends Command
      * @var string
      */
     protected $description = 'Clear sensitive data from a production dump';
+
+    /**
+     * @var \Faker\Generator
+     */
+    protected $faker;
 
     /**
      * Execute the console command.
@@ -50,46 +61,89 @@ class ClearSensitiveData extends Command
         User::whereEmail('admin@allyms.com')->first()->changePassword('admin');
 
         // Reset lastname, birthdays, SSN on all clients and caregivers
-        Client::chunk(200, function($collection) {
+        Client::chunk(400, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function($user) {
                 $this->clearPersonalData($user);
             });
+            \DB::commit();
         });
-        Caregiver::chunk(200, function($collection) {
+        Caregiver::chunk(400, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function($user) {
                 $this->clearPersonalData($user);
             });
+            \DB::commit();
         });
         CaregiverApplication::chunk(200, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function($user) {
                 $this->clearPersonalData($user);
             });
+            \DB::commit();
         });
 
         // Clear emergency contact name and numbers
-        EmergencyContact::chunk(200, function($collection) {
+        EmergencyContact::chunk(500, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function($contact) {
                 $contact->update(['name' => $this->faker->name, 'phone_number' => mt_rand(3000000000,9999999999)]);
             });
+            \DB::commit();
         });
 
         // Reset all credit card numbers
-        CreditCard::chunk(200, function($collection) {
+        CreditCard::chunk(500, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function(CreditCard $card) {
                 $card->name_on_card = $this->faker->name;
                 $card->number = $this->faker->creditCardNumber;
                 $card->save();
             });
+            \DB::commit();
         });
 
         // Reset all bank account numbers
-        BankAccount::chunk(200, function($collection) {
+        BankAccount::chunk(500, function($collection) {
+            \DB::beginTransaction();
             $collection->each(function(BankAccount $account) {
                 $account->name_on_account = $this->faker->name;
                 $account->account_number = $this->faker->bankAccountNumber;
                 $account->save();
             });
+            \DB::commit();
         });
+
+        // Reset all SMS numbers
+        SmsThreadRecipient::select('user_id')->groupBy('user_id')->get()->each(function(SmsThreadRecipient $recipient) {
+            $phoneNumber = PhoneNumber::where('user_id', $recipient->user_id)->first();
+            $newNumber = $phoneNumber->national_number;
+            SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $newNumber]);
+            SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $newNumber]);
+        });
+
+        // Reset all notes
+        Note::chunk(500, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(Note $note) {
+                $note->body = $this->faker->paragraph;
+                $note->save();
+            });
+            \DB::commit();
+        });
+        ScheduleNote::chunk(500, function($collection) {
+            \DB::beginTransaction();
+            $collection->each(function(ScheduleNote $note) {
+                $note->note = $this->faker->sentence;
+                $note->save();
+            });
+            \DB::commit();
+        });
+
+        // Clear shift data
+        \DB::statement('UPDATE shifts SET caregiver_comments = ? WHERE caregiver_comments IS NOT NULL', [$this->faker->sentence]);
+        \DB::statement('UPDATE shifts SET checked_in_latitude = checked_in_latitude + RAND(), checked_out_latitude = checked_out_latitude + RAND() WHERE checked_in_latitude IS NOT NULL');
+        \DB::statement('UPDATE shifts SET checked_in_number = "555555555", checked_out_number = "555555555" WHERE checked_in_number IS NOT NULL');
     }
 
     protected function clearPersonalData(Model $user)
@@ -106,10 +160,13 @@ class ClearSensitiveData extends Command
         else if ($user->last_name) {
             // for applications
             $user->last_name = $this->faker->lastName;
+            $user->address = $this->faker->streetAddress;
         }
         if ($user->addresses) {
             foreach($user->addresses as $address) {
                 $address->address1 = $this->faker->streetAddress;
+                $address->latitude = $address->latitude + (float) rand() / (float) getrandmax();
+                $address->longitude = $address->longitude - (float) rand() / (float) getrandmax();
                 $address->save();
             }
         }

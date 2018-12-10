@@ -6,24 +6,26 @@
         <form @submit.prevent="savePassword()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="5" sm="4" xs="12">
-                    <b-form-group label="New Password" label-for="password">
+                    <b-form-group label="New Password" label-for="password" label-class="required">
                         <b-form-input
                                 id="password"
                                 name="password"
                                 type="password"
                                 v-model="form.password"
+                                required
                         >
                         </b-form-input>
                         <input-help :form="form" field="password" text="Enter a new password."></input-help>
                     </b-form-group>
                 </b-col>
                 <b-col lg="5" sm="4" xs="12">
-                    <b-form-group label="Confirm Password" label-for="password_confirmation">
+                    <b-form-group label="Confirm Password" label-for="password_confirmation" label-class="required">
                         <b-form-input
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 type="password"
                                 v-model="form.password_confirmation"
+                                required
                         >
                         </b-form-input>
                         <input-help :form="form" field="password_confirmation" text="Confirm your new password."></input-help>

@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\ActiveBusiness;
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Contracts\ChatServiceInterface;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
                 ->setIconUrl('https://s3.amazonaws.com/teambox-assets/avatars-v2/a052eac951312dc8d2c72c23ac675f8d47540438/thumb.png?1454879401');
         });
 
-        $this->app->singleton('settings', Settings::class);
+        $this->app->singleton('settings', SettingsRepository::class);
         $this->app->singleton(ActiveBusiness::class, ActiveBusiness::class);
 
         if ($this->app->environment() == 'local') {

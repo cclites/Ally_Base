@@ -9,6 +9,7 @@ use App\Console\Commands\ImportPaychexCaregivers;
 use App\Console\Commands\ScheduledPaymentsCsv;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\CronShiftSummaryEmails;
 
 class Kernel extends ConsoleKernel
 {
@@ -23,6 +24,7 @@ class Kernel extends ConsoleKernel
         ImportPaychexCaregivers::class,
         CronUpdateTransactionLog::class,
         CronScheduleConverter::class,
+        CronShiftSummaryEmails::class,
     ];
 
     /**
@@ -35,8 +37,12 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('cron:transaction_log')
             ->dailyAt('12:00'); // 7am EST / 8am EDT
+
         $schedule->command('cron:schedule_converter')
             ->hourly();
+
+        $schedule->command('cron:shift_summary_emails')
+            ->weeklyOn(1, '14:30'); // 9:30am EST / 10:30am EDT
     }
 
     /**

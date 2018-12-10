@@ -10,7 +10,7 @@ export default {
                 'converted': {
                     'text': 'Copied from Schedule',
                     'icon': 'fa fa-calendar-plus-o mr-1',
-                    'color': '#FFB22B',
+                    'color': '#00C9DC',
                 },
                 'duplicate': {
                     'text': 'Potential Duplicate',

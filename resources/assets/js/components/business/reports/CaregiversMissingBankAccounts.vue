@@ -1,9 +1,14 @@
 <template>
     <b-card>
         <div class="table-responsive">
-            <b-table :items="items"
-                     show-empty
-                     :fields="fields">
+            <b-table 
+            :items="items"
+                show-empty
+                :fields="fields"
+            >
+                <template slot="name" scope="row">
+                    <a :href="`/business/caregivers/${row.item.id}`">{{ row.item.name }}</a>
+                </template>
             </b-table>
         </div>
     </b-card>

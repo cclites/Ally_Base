@@ -3,7 +3,7 @@
         <form v-show="showForm" @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Select a Client" label-for="client_id" required>
+                    <b-form-group label="Select a Client" label-for="client_id" label-class="required" required>
                         <b-form-select
                                 id="client_id"
                                 name="client_id"
@@ -175,6 +175,9 @@
             <template slot="rating" scope="row">
 
             </template>
+            <template slot="distance" scope="row">
+                {{ convertToMiles(row.item.distance) }}
+            </template>
             <template slot="actions" scope="row">
                 <slot :item="row.item">
                     <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
@@ -187,10 +190,11 @@
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDistance from "../../mixins/FormatsDistance";
     import Languages from "../../classes/Languages";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDistance],
 
         props: {
             clients: Array,
@@ -239,7 +243,6 @@
                     {
                         key: 'distance',
                         sortable: true,
-                        formatter: this.numberFormat
                     },
                     {
                         key: 'activity_match',

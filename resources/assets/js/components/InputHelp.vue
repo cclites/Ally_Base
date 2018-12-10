@@ -19,3 +19,15 @@
         }
     }
 </script>
+
+<style scoped>
+    .text-danger {
+        color: red !important;
+    }
+    .text-warning {
+        color: orange !important;
+    }
+    .text-info {
+        color: blue !important;
+    }
+</style>

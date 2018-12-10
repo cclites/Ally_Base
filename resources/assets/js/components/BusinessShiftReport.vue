@@ -1,10 +1,10 @@
 <template>
     <div>
-        <b-card>
-            <b-row class="mb-2">
-                <b-container fluid>
+        <b-card body-class="pb-2">
+            <b-row>
+                <b-container fluid id="filtersContainer">
                     <b-row>
-                        <b-col lg="6">
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Date Range" class="form-inline">
                                 <date-picker ref="startDate"
                                              v-model="filters.start_date"
@@ -15,22 +15,24 @@
                                              placeholder="End Date">
                                 </date-picker>
                             </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Caregiver" class="form-inline">
                                 <b-form-select v-model="filters.caregiver_id" ref="caregiverFilter">
                                     <option value="">All Caregivers</option>
                                     <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Client" class="form-inline">
                                 <b-form-select v-model="filters.client_id" ref="clientFilter">
                                     <option value="">All Clients</option>
                                     <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
                                 </b-form-select>
                             </b-form-group>
-                            <!-- Business Location is not shown on single business registries -->
-                            <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
                         </b-col>
-                        <b-col lg="6">
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Payment Method" class="form-inline">
                                 <b-form-select v-model="filters.payment_method" ref="paymentFilter">
                                     <option value="">All Payment Methods</option>
@@ -39,6 +41,8 @@
                                     <option value="business">Provider Payment</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Charge Status" class="form-inline">
                                 <b-form-select v-model="filters.charge_status" ref="chargeFilter">
                                     <option value="">All Statuses</option>
@@ -46,6 +50,8 @@
                                     <option value="uncharged">Un-Charged</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
                             <b-form-group label="Confirmed Status" class="form-inline">
                                 <b-form-select v-model="filters.confirmed_status" ref="confirmedFilter">
                                     <option value="">All Statuses</option>
@@ -53,9 +59,15 @@
                                     <option value="unconfirmed">Unconfirmed</option>
                                 </b-form-select>
                             </b-form-group>
+                        </b-col>
+                        <b-col xl="4" lg="6">
+                            <!-- Business Location is not shown on single business registries -->
+                            <business-location-form-group class="form-inline" v-model="filters.business_id" :allow-all="true" />
+                        </b-col>
+                        <b-col xl="4" lg="6">
                             <!-- ADMIN ONLY DROPDOWN -->
-                            <b-form-group label="Admin Imports" class="form-inline">
-                                <b-form-select v-if="admin" v-model="filters.import_id">
+                            <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                                <b-form-select v-model="filters.import_id">
                                     <option value="">--Filter by Import--</option>
                                     <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                                 </b-form-select>
@@ -64,10 +76,10 @@
                     </b-row>
                     <b-row>
                         <b-col lg="12">
-                            <div class="card">
-                                <div class="card-body">
+                            <div class="card mb-0">
+                                <div class="card-body p-3">
                                     <h6 class="card-title">Filter by Flags</h6>
-                                    <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags">
+                                    <b-form-radio-group v-model="filters.flag_type" @change="updateFilterFlags(true)">
                                         <b-radio value="any">Include All Shifts - Flagged or Not</b-radio><br />
                                         <b-radio value="none">Has No Flags</b-radio><br />
                                         <b-radio value="selected">Has Any of the Selected Flags:</b-radio>
@@ -118,6 +130,8 @@
 
         <b-card
                 header="Shift List for Date Range &amp; Filters"
+                header-text-variant="white"
+                header-bg-variant="info"
                 title="Confirmed Shifts will be charged &amp; paid, Unconfirmed Shifts will NOT"
                 v-show="loaded >= 3"
                 ref="SHRCard"
@@ -140,15 +154,15 @@
                         <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                         <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                         <span>
-                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
                             </span>
                         <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
 
                         <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
                         <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="confirmShift(row.item)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
                         <!--<b-dropdown-divider></b-dropdown-divider>-->
                         <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
                         <!--</b-dropdown>-->
@@ -212,8 +226,8 @@
                             </b-form-select>
                         </b-form-group>
                         <!-- ADMIN ONLY DROPDOWN -->
-                        <b-form-group label="Admin Imports" class="form-inline">
-                            <b-form-select v-if="admin" v-model="filters.import_id">
+                        <b-form-group label="Admin Imports" class="form-inline" v-if="admin">
+                            <b-form-select v-model="filters.import_id">
                                 <option value="">--Filter by Import--</option>
                                 <option v-for="item in imports" :value="item.id" :key="item.id">{{ item.name }} ({{ item.created_at }})</option>
                             </b-form-select>
@@ -296,7 +310,6 @@
 <script>
     import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
-    import BusinessSettings from "../mixins/BusinessSettings";
     import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
@@ -318,7 +331,7 @@
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, BusinessSettings, LocalStorage, ShiftFlags],
+        mixins: [FormatsDates, FormatsNumbers, LocalStorage, ShiftFlags],
 
         props: {
             admin: Number,
@@ -410,15 +423,6 @@
                     'Charged',
                 ];
 
-                // remove certain fields completely based on business settings
-                if (! this.businessSettings().co_mileage) {
-                    fields.splice(fields.indexOf('Mileage'), 1);
-                    fields.splice(fields.indexOf('Mileage Costs'), 1);
-                }
-                if (! this.businessSettings().co_expenses) {
-                    fields.splice(fields.indexOf('Other Expenses'), 1);
-                }
-
                 return fields;
             },
 
@@ -466,9 +470,11 @@
                         'Type': item.hours_type == 'default' ? 'Reg' : item.hours_type,
                         'Confirmed': item.confirmed,
                         'confirmed_at': item.confirmed_at,
+                        'client_confirmed': item.client_confirmed,
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
                         'status': item.status,
+                        'business_id': item.business_id,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
@@ -528,6 +534,7 @@
                 $(this.$refs.SHRCard).toggleClass('fullscreen-shr');
                 $('.left-sidebar').toggle();
                 $('.footer').toggle();
+                window.scrollTo(0, 0);
             },
 
             loadFiltersFromStorage() {
@@ -690,8 +697,11 @@
                 }
             },
 
-            confirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            confirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to confirm this shift?')) {
                         return;
                     }
@@ -711,8 +721,11 @@
                     });
             },
 
-            unconfirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            unconfirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to un-confirm this shift?')) {
                         return;
                     }
@@ -733,11 +746,11 @@
             },
 
             confirmSelected() {
-                return this.confirmShift(this.selectedItem.id);
+                return this.confirmShift(this.selectedItem);
             },
 
             unconfirmSelected() {
-                return this.unconfirmShift(this.selectedItem.id);
+                return this.unconfirmShift(this.selectedItem);
             },
 
             printSelected() {
@@ -810,12 +823,12 @@
                 }
             },
 
-            updateFilterFlags() {
-                this.filters.flags = this.includeAllFlags && this.filters.flag_type === 'selected' ? this.shiftFlags : [];
-                if (this.filters.flag_type !== 'selected') {
-                    this.includeAllFlags = false;
+            updateFilterFlags(changedType = false) {
+                if (changedType) {
+                    this.includeAllFlags = (this.filters.flag_type === 'selected');
                 }
-            }
+                this.filters.flags = this.includeAllFlags && this.filters.flag_type === 'selected' ? this.shiftFlags : [];
+            },
         },
 
         watch: {
@@ -854,11 +867,14 @@
         height: auto;
         max-width: 400px;
     }
-    .shift-table .fa {
+    .shift-table td > .fa {
         font-size: 16px;
     }
-    #filtersModal .datepicker {
+    #filtersModal .datepicker, #filtersContainer .datepicker {
         max-width: 150px;
+    }
+    #filtersContainer .form-group {
+        margin-bottom: 0.5rem;
     }
     .fullscreen-shr {
         background-color: white;

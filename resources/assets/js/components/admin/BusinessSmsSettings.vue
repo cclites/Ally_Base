@@ -6,7 +6,7 @@
         <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Outgoing SMS Number" label-for="outgoing_sms_number">
+                    <b-form-group label="Outgoing SMS Number" label-for="outgoing_sms_number" label-class="required">
                         <mask-input v-model="form.outgoing_sms_number" name="number"></mask-input>
                         <!-- <b-form-input
                             id="outgoing_sms_number"

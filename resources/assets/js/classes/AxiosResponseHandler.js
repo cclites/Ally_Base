@@ -13,9 +13,12 @@ class AxiosResponseHandler {
         if (this.hasRedirect()) this.handleRedirect();
     }
 
-    handleError(error, alert = true) {
+    handleError(error, alert = true, ignoreStatuses = []) {
         this.error = error;
         this.response = error.response;
+        if (ignoreStatuses.includes(this.response.status)) {
+            return;
+        }
         if (this.response.status === 503) {
             this.handleAlert('error', 'The application is updating. Please try again in 1 minute.');
             return

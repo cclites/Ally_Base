@@ -132,7 +132,7 @@
                                 @endforeach
                             </td>
                             <td>
-                                {{ $shift->client['name'] }}
+                                {{ $shift->client['masked_name'] }}
                             </td>
                             <td>
                                 ${{ $shift->caregiver_rate }}
