@@ -210,13 +210,13 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Care Plan Requested by Client" label-for="care_plan_id">
+                                <b-form-group label="Service Needs/ADL Groups" label-for="care_plan_id">
                                     <b-form-select
                                             id="care_plan_id"
                                             name="care_plan_id"
                                             v-model="form.care_plan_id"
                                     >
-                                        <option value="">--No Care Plan--</option>
+                                        <option value="">--None--</option>
                                         <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="care_plan_id" text="" />
