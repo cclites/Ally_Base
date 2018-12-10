@@ -46,6 +46,8 @@
 </template>
 
 <script>
+    import Countries from '../classes/Countries';
+
     export default {
         props: {
             'title': '',

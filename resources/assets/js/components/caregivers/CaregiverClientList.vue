@@ -7,7 +7,8 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <b-btn @click="viewClient(row.item)" class="btn btn-secondary">View</b-btn>
+                    <b-btn @click="viewClient(row.item)" class="btn btn-secondary">View Details</b-btn>
+                    <b-btn :href="`/caregiver/clients/${row.item.id}/narrative`" class="btn btn-secondary">View/Edit Narrative</b-btn>
                 </template>
             </b-table>
         </div>
@@ -46,10 +47,12 @@
                 fields: [
                     {
                         key: 'firstname',
+                        label: 'First Name',
                         sortable: true,
                     },
                     {
                         key: 'lastname',
+                        label: 'Last Name',
                         sortable: true,
                     },
                     'actions'

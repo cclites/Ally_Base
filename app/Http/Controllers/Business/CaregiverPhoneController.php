@@ -15,9 +15,7 @@ class CaregiverPhoneController extends BaseController
      */
     public function index(Caregiver $caregiver)
     {
-        if (! $this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('read', $caregiver);
 
         $numbers = $caregiver->phoneNumbers->sort(function($a, $b) {
             $numberGen = function($type) {

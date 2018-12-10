@@ -4,7 +4,7 @@ namespace App\Reports;
 
 use App\Shift;
 
-class PayrollReport extends BaseReport
+class PayrollReport extends BusinessResourceReport
 {
     /**
      * The begin date.
@@ -102,7 +102,7 @@ class PayrollReport extends BaseReport
     protected function results()
     {
         $detail = $this->query()
-            ->forBusiness($this->businessId)
+            ->forBusinesses([$this->businessId])
             ->betweenDates($this->start_date, $this->end_date)
             ->forCaregiver($this->caregiverId)
             ->orderBy('checked_in_time')

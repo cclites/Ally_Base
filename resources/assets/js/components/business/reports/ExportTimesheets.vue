@@ -10,7 +10,7 @@
                     <form action="/business/reports/print/timesheet-data" method="post" target="_blank">
                         <input type="hidden" name="_token" :value="token">
                         <b-row>
-                            <b-col lg="3">
+                            <b-col lg="2">
                                 <b-form-group label="Start Date">
                                     <date-picker
                                             class="mb-1"
@@ -20,7 +20,7 @@
                                     </date-picker>
                                 </b-form-group>
                             </b-col>
-                            <b-col lg="3">
+                            <b-col lg="2">
                                 <b-form-group label="End Date">
                                     <date-picker
                                             class="mb-1"
@@ -30,7 +30,12 @@
                                     </date-picker>
                                 </b-form-group>
                             </b-col>
-                            <b-col lg="3">
+                            <b-col lg="2">
+                                <b-form-group label="Office Location">
+                                    <business-location-select v-model="form.business_id" name="business_id" required></business-location-select>
+                                </b-form-group>
+                            </b-col>
+                            <b-col lg="2">
                                 <b-form-group label="Caregiver">
                                     <b-form-select v-model="form.caregiver_id" class="mx-1 mb-1" name="caregiver_id">
                                         <option value="">All Caregivers</option>
@@ -39,7 +44,7 @@
                                     </b-form-select>
                                 </b-form-group>
                             </b-col>
-                            <b-col lg="3">
+                            <b-col lg="2">
                                 <b-form-group label="Client">
                                     <b-form-select v-model="form.client_id" class="mr-1 mb-1" name="client_id">
                                         <option value="">All Clients</option>
@@ -48,9 +53,7 @@
                                     </b-form-select>
                                 </b-form-group>
                             </b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col lg="3">
+                            <b-col lg="2">
                                 <b-form-group label="Client Type">
                                     <b-form-select v-model="form.client_type" class="mb-1" name="client_type">
                                         <option value="">All</option>
@@ -61,6 +64,9 @@
                                     </b-form-select>
                                 </b-form-group>
                             </b-col>
+                        </b-row>
+                        <b-row>
+
                             <b-col lg="3">
                                 <b-form-group label="Export Type">
                                     <b-form-radio-group id="export_type" v-model="form.export_type" name="export_type">
@@ -103,8 +109,10 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import BusinessLocationSelect from "../BusinessLocationSelect";
 
     export default {
+        components: {BusinessLocationSelect},
         mixins: [FormatsDates, FormatsNumbers],
 
         props: ['clients', 'caregivers', 'token'],
@@ -115,6 +123,7 @@
                 form: new Form({
                     start_date: moment().startOf('isoweek').format('MM/DD/YYYY'),
                     end_date: moment().startOf('isoweek').add(6, 'days').format('MM/DD/YYYY'),
+                    business_id: '',
                     caregiver_id: '',
                     client_id: '',
                     client_type: '',

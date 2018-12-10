@@ -2,11 +2,14 @@
 
 namespace App;
 
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasPaymentHold;
+use App\Traits\BelongsToBusinesses;
+use App\Traits\CanImpersonate;
 use App\Traits\HasAddressesAndNumbers;
 use App\Traits\HiddenIdTrait;
 use App\Traits\PreventsDelete;
-use Bizhub\Impersonate\Traits\CanImpersonate;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -25,39 +28,59 @@ use Packages\MetaData\HasMetaData;
  * @property string $role_type
  * @property int|null $access_group_id
  * @property int $active
+ * @property string|null $inactive_at
  * @property string|null $remember_token
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $email_sent_at
+ * @property string|null $gender
+ * @property string|null $avatar
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
+ * @property-read \App\Admin $admin
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $dueTasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\EmergencyContact[] $emergencyContacts
+ * @property-read string $default_phone
  * @property-read mixed $name
  * @property-read mixed $name_last_first
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Packages\MetaData\MetaData[] $meta
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @property-read \App\OfficeUser $officeUser
+ * @property-read \App\PaymentHold $paymentHold
+ * @property-read \App\Contracts\UserRole $role
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $tasks
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereAccessGroupId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereAvatar($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereDateOfBirth($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereEmailSentAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereFirstname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereGender($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereInactiveAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereLastname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereMeta($key, $delimiter = null, $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereRoleType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUsername($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User withMeta()
  * @mixin \Eloquent
- * @property string|null $gender
- * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereGender($value)
  */
-class User extends Authenticatable implements HasPaymentHold, Auditable
+class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface
 {
+    use BelongsToBusinesses;
     use Notifiable;
     use PreventsDelete;
     use CanImpersonate;
@@ -101,10 +124,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         return $this->lastname . ', ' . $this->firstname;
     }
 
-    ///////////////////////////////////////////
-    /// Relationship Methods
-    ///////////////////////////////////////////
+    ////////////////////////////////////
+    //// Role Relationships
+    ////////////////////////////////////
 
+    /**
+     * Get the role instance, compatible with any role but not compatible with eager loading and querying relations
+     * Note: Use admin, caregiver, client, or officeUser methods for eager loading or querying
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne|null
+     */
     public function role()
     {
         if ($this->getRoleClass()) {
@@ -112,6 +141,32 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
         }
         return null;
     }
+
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id', 'id');
+    }
+
+    public function caregiver()
+    {
+        return $this->hasOne(Caregiver::class, 'id', 'id');
+    }
+
+    public function client()
+    {
+        return $this->hasOne(Client::class, 'id', 'id');
+    }
+
+    public function officeUser()
+    {
+        return $this->hasOne(OfficeUser::class, 'id', 'id');
+    }
+
+
+    ///////////////////////////////////////////
+    /// Relationship Methods
+    ///////////////////////////////////////////
+
 
     public function bankAccounts()
     {
@@ -134,25 +189,11 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
             ->orderBy('priority');
     }
 
-    public function officeUser()
-    {
-        return $this->hasOne('App\OfficeUser', 'id', 'id');
-    }
-    /**
-     * A user can have many assigned tasks.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function tasks()
     {
         return $this->hasMany(Task::class, 'assigned_user_id');
     }
 
-    /**
-     * Get the user's assigned tasks that are not completed.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function dueTasks()
     {
         return $this->hasMany(Task::class, 'assigned_user_id')
@@ -171,6 +212,20 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function getNameLastFirstAttribute()
     {
         return $this->nameLastFirst();
+    }
+
+    public function getMaskedNameAttribute()
+    {
+        $first = $this->firstname;
+        if (strlen($first) > 1) {
+            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        }
+
+        $last = $this->lastname;
+        if (strlen($last) > 1) {
+            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        }
+        return "$first $last";
     }
 
     /**
@@ -205,7 +260,9 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
      */
     public function getRoleClass($type = null)
     {
-        if (!$type) $type = $this->role_type;
+        if (! $type) {
+            $type = $this->role_type;
+        }
 
         switch ($type) {
             case 'admin':
@@ -230,5 +287,35 @@ class User extends Authenticatable implements HasPaymentHold, Auditable
     public function changePassword($password)
     {
         return $this->update(['password' => bcrypt($password)]);
+    }
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return $this->role->getBusinessIds();
+    }
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->where(function($query) use ($businessIds) {
+            $query->whereHas('caregiver', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('client', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            })->orWhereHas('officeUser', function($q) use ($businessIds) {
+                $q->forBusinesses($businessIds);
+            });
+        });
     }
 }

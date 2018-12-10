@@ -20,20 +20,22 @@ class TasksController extends Controller
     public function index()
     {
         if (request()->wantsJson()) {
-            $tasks = activeBusiness()->tasks()
+            $query = Task::forRequestedBusinesses()->ordered()
                 ->createdBy(request()->created ? auth()->user()->id : null)
                 ->assignedTo(request()->assigned ? auth()->user()->id : null);
 
             if (request()->pending == 1) {
-                $tasks->whereNull('completed_at');
+                $query->whereNull('completed_at');
             } elseif (request()->overdue == 1) {
-                $tasks->where('due_date', '<', Carbon::now()->toDateTimeString())
+                $query->where('due_date', '<', Carbon::now()->toDateTimeString())
                     ->whereNull('completed_at');
             } elseif (request()->complete == 1) {
-                $tasks->whereNotNull('completed_at');
+                $query->whereNotNull('completed_at');
             }
 
-            return response()->json($tasks->latest()->get());
+            $tasks = $query->get();
+
+            return $tasks;
         }
 
         $users = activeBusiness()->officeUserList(true, true);
@@ -49,10 +51,10 @@ class TasksController extends Controller
      */
     public function store(CreateTaskRequest $request)
     {
-        $data = $request->validated();
-        $data['due_date'] = isset($data['due_date']) ? Carbon::parse($data['due_date']) : null;
+        $data = $request->filtered();
+        $this->authorize('create', [Task::class, $data]);
 
-        if ($task = activeBusiness()->tasks()->create($data)) {
+        if ($task = Task::create($data)) {
             return new SuccessResponse('Task has been created.', $task->fresh());
         }
 
@@ -67,13 +69,9 @@ class TasksController extends Controller
      */
     public function show(Task $task)
     {
-        if ($task->business_id != activeBusiness()->id) {
-            return new ErrorResponse(403, 'You do not have access to this task.');
-        }
+        $this->authorize('read', $task);
 
-        if (request()->wantsJson()) {
-            return response()->json($task);
-        }
+        return response()->json($task);
     }
 
     /**
@@ -85,12 +83,8 @@ class TasksController extends Controller
      */
     public function update(CreateTaskRequest $request, Task $task)
     {
-        if ($task->business_id != activeBusiness()->id) {
-            return new ErrorResponse(403, 'You do not have access to this task.');
-        }
-
-        $data = $request->validated();
-        $data['due_date'] = isset($data['due_date']) ? Carbon::parse($data['due_date']) : null;
+        $this->authorize('update', $task);
+        $data = $request->filtered();
 
         if ($task->update($data)) {
             return new SuccessResponse('Task has been updated.', $task->fresh());
@@ -108,9 +102,7 @@ class TasksController extends Controller
      */
     public function destroy(Task $task)
     {
-        if ($task->business_id != activeBusiness()->id) {
-            return new ErrorResponse(403, 'You do not have access to this task.');
-        }
+        $this->authorize('delete', $task);
 
         if ($task->delete()) {
             return new SuccessResponse('Task has been deleted.');

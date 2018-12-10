@@ -32,6 +32,9 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
+        body {
+            margin: 10px;
+        }
         .page-wrapper {
             margin-left: 0 !important;
         }
@@ -48,6 +51,9 @@
         div.page:last-of-type
         {
             page-break-after: avoid;
+        }
+        table, tr, td, th, tbody, thead, tfoot {
+            page-break-inside: avoid !important;
         }
     </style>
 

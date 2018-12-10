@@ -9,6 +9,10 @@
 @endsection
 
 @section('content')
+    @foreach($errors->all() as $message)
+        <div class="alert alert-danger alert-dismissible"><strong>Error:</strong> {{ $message }}</div>
+    @endforeach
+
     <div class="row">
         <div class="col-lg-12">
             <business-export-timesheets :clients="{{ $clients }}" :caregivers="{{ $caregivers }}" token="{{ csrf_token() }}"></business-export-timesheets>

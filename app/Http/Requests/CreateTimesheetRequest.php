@@ -1,20 +1,8 @@
 <?php
-
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class CreateTimesheetsRequest extends FormRequest
+class CreateTimesheetRequest extends BusinessClientRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
-    {
-        return true;
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -27,7 +15,7 @@ class CreateTimesheetsRequest extends FormRequest
             'caregiver_id' => 'required|exists:caregivers,id',
             'client_id' => 'required|exists:clients,id',
             'entries' => 'required|array|min:1',
-            
+
             'entries.*.mileage' => 'nullable|numeric|max:1000|min:0',
             'entries.*.other_expenses' => 'nullable|numeric|max:1000|min:0',
             'entries.*.checked_in_time' => 'required|date_format:Y-m-d H:i:s',
@@ -56,4 +44,5 @@ class CreateTimesheetsRequest extends FormRequest
             'activities.*' => 'You must select at least 1 activity.',
         ];
     }
+
 }

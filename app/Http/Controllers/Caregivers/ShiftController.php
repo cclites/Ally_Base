@@ -197,6 +197,7 @@ class ShiftController extends BaseController
             'longitude' => 'numeric|nullable',
             'goals' => 'nullable|array',
             'questions' => 'nullable|array',
+            'narrative_notes' => 'nullable',
         ]);
 
         $data['mileage'] = request('mileage', 0);
@@ -259,6 +260,9 @@ class ShiftController extends BaseController
                     $shift->issues()->save($issue);
                 }
                 Signature::onModelInstance($shift, request('signature'));
+                if ($narrativeNotes = $request->input('narrative_notes')) {
+                    $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
+                }
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
@@ -266,6 +270,9 @@ class ShiftController extends BaseController
         catch (UnverifiedLocationException $e) {
             $clockOut->setManual(true);
             if ($clockOut->clockOut($shift)) {
+                if ($data['narrative_notes']) {
+                    $shift->client->narrative()->create(['notes' => $data['narrative_notes'], 'creator_id' => auth()->id()]);
+                }
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');

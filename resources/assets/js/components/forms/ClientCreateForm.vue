@@ -48,16 +48,9 @@
                 </div>
                 <input-help :form="form" field="provider_pay" text="Set the payment method to the registry's bank account."></input-help>
             </b-form-group>
-            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
-                <b-form-select
-                        id="onboard_status"
-                        name="onboard_status"
-                        v-model="form.onboard_status"
-                >
-                    <option value="">--Select--</option>
-                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
-                </b-form-select>
-                <input-help :form="form" field="onboard_status" text="Select the Ally Agreement status of the client"></input-help>
+            <b-form-group label="Office Location" label-for="business_id">
+                <business-location-select v-model="form.business_id"></business-location-select>
+                <input-help :form="form" field="business_id" text="Select the business location for this client (if applicable)."></input-help>
             </b-form-group>
         </b-col>
         <b-col lg="6">
@@ -106,14 +99,27 @@
                 <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                 <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
             </b-form-group>
+            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
+                <b-form-select
+                        id="onboard_status"
+                        name="onboard_status"
+                        v-model="form.onboard_status"
+                >
+                    <option value="">--Select--</option>
+                    <option v-for="(display, value) in onboardStatuses" :value="value" :key="value">{{ display }}</option>
+                </b-form-select>
+                <input-help :form="form" field="onboard_status" text="Select the Ally Agreement status of the client"></input-help>
+            </b-form-group>
         </b-col>
     </b-row>
 </template>
 
 <script>
     import ClientForm from '../../mixins/ClientForm';
+    import BusinessLocationSelect from "../business/BusinessLocationSelect";
 
     export default {
+        components: {BusinessLocationSelect},
         mixins: [ClientForm],
 
         props: {
@@ -134,6 +140,7 @@
                     onboard_status: this.value.onboard_status || "",
                     override: false,
                     provider_pay: 0,
+                    business_id: this.value.business_id || "",
                 }),
             }
         },

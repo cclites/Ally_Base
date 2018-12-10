@@ -44,5 +44,6 @@ $factory->define(\App\Schedule::class, function(Faker $faker) {
         'duration' => $faker->randomElement([60, 60, 90, 120, 120, 150, 180, 240, 300, 480, 480, 720, 1440]),
         'caregiver_rate' => $faker->randomFloat(2, 10, 25),
         'provider_fee' => $faker->randomFloat(2, 5, 10),
+        'fixed_rates' => 0,
     ];
 });

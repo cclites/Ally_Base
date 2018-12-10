@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\BusinessChain;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,9 +27,9 @@ class QuickSearchTest extends TestCase
         $this->business = $this->client->business;
 
         $this->caregiver = factory('App\Caregiver')->create();
-        $this->business->caregivers()->save($this->caregiver);
+        $this->business->chain->caregivers()->save($this->caregiver);
         
-        $this->officeUser = factory('App\OfficeUser')->create();
+        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
     }
 
@@ -86,9 +87,10 @@ class QuickSearchTest extends TestCase
     {
         $this->actingAs($this->officeUser->user);
 
-        $anotherBusiness = factory(\App\Business::class)->create();
+        $anotherChain = factory(BusinessChain::class)->create();
+        $anotherBusiness = factory(\App\Business::class)->create(['chain_id' => $anotherChain->id]);
         $anotherCG = factory('App\Caregiver')->create();
-        $anotherBusiness->caregivers()->save($anotherCG);
+        $anotherChain->caregivers()->save($anotherCG);
         factory('App\Client', 5)->create([
             'business_id' => $anotherBusiness->id,
         ]);

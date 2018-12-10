@@ -10,6 +10,7 @@ use App\Events\UnverifiedShiftCreated;
 use App\PhoneNumber;
 use App\Shift;
 use App\ShiftIssue;
+use App\Shifts\ClockIn;
 use App\Shifts\ClockOut;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -63,6 +64,21 @@ class ClockOutTest extends TestCase
         $result = $clockOut->clockOut($shift);
     }
 
+    public function test_a_shift_is_unverified_until_clocked_out()
+    {
+        // Make a client phone number
+        $phone = factory(PhoneNumber::class)->make();
+        $this->client->phoneNumbers()->save($phone);
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->setNumber($phone->national_number)->clockInWithoutSchedule($this->business, $this->client);
+        $this->assertFalse($shift->isVerified());
+
+        $clockOut = new ClockOut($this->caregiver);
+        $clockOut->setNumber($phone->national_number)->clockOut($shift);
+        $this->assertTrue($shift->isVerified());
+    }
+
     public function test_verified_shift_with_phone_number()
     {
         // Make a client phone number
@@ -72,7 +88,7 @@ class ClockOutTest extends TestCase
         // Event should not go out
         $this->doesntExpectEvents(UnverifiedShiftCreated::class);
 
-        $shift = $this->createShift(['verified' => true, 'checked_in_number' => $phone->national_number]);
+        $shift = $this->createShift(['checked_in_verified' => true, 'checked_in_number' => $phone->national_number]);
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->setNumber($phone->national_number)
                            ->clockOut($shift);
@@ -90,7 +106,7 @@ class ClockOutTest extends TestCase
         $address = factory(\App\Address::class)->make(compact('type', 'latitude', 'longitude'));
         $this->client->addresses()->save($address);
 
-        $shift = $this->createShift(['verified' => true]);
+        $shift = $this->createShift(['checked_in_verified' => true]);
         $clockOut = new ClockOut($this->caregiver);
         $clockOut->setGeocode($latitude, $longitude)->clockOut($shift);
 
@@ -192,7 +208,7 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_does_create_unverified_exceptions()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => true]);
         $shift = $this->createShift();
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->clockOut($shift);
@@ -203,13 +219,13 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_creates_verified_shifts_waiting_for_authorization()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => true]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => true]);
 
         // Make a client phone number
         $phone = factory(PhoneNumber::class)->make();
         $this->client->phoneNumbers()->save($phone);
 
-        $shift = $this->createShift(['verified' => true, 'checked_in_number' => $phone->national_number]);
+        $shift = $this->createShift(['checked_in_verified' => true, 'checked_in_number' => $phone->national_number]);
         $clockOut = new ClockOut($this->caregiver);
         $result = $clockOut->setNumber($phone->national_number)
                            ->clockOut($shift);
@@ -219,7 +235,7 @@ class ClockOutTest extends TestCase
 
     public function test_auto_confirm_disabled_creates_verified_shifts_waiting_for_confirmation()
     {
-        $this->business = factory(Business::class)->create(['auto_confirm' => false]);
+        $this->business = factory(Business::class)->create(['auto_confirm_verified_shifts' => false]);
 
         // Make a client phone number
         $phone = factory(PhoneNumber::class)->make();

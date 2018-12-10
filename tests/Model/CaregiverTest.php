@@ -4,6 +4,7 @@ namespace Tests\Model;
 
 use App\BankAccount;
 use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,16 +48,53 @@ class CaregiverTest extends TestCase
         $this->assertEquals($this->caregiver->bankAccount->id, $account2->id);
     }
 
-    public function testCaregiverCanWorkForMultipleBusinesses()
+    public function testCaregiverCanWorkForMultipleChains()
     {
-        $business1 = factory(Business::class)->create();
-        $business2 = factory(Business::class)->create();
+        $chain1 = factory(BusinessChain::class)->create();
+        $chain2 = factory(BusinessChain::class)->create();
 
-        $this->caregiver->businesses()->attach($business1);
-        $this->caregiver->businesses()->attach($business2);
+        $this->caregiver->businessChains()->attach($chain1);
+        $this->caregiver->businessChains()->attach($chain2);
 
-        $this->assertCount(2, $this->caregiver->businesses);
+        $this->assertCount(2, $this->caregiver->businessChains);
     }
 
+    public function testCaregiverBusinessesAttributeCollectsFromChains()
+    {
+        $chain1 = factory(BusinessChain::class)->create();
+        $chain2 = factory(BusinessChain::class)->create();
+        $this->caregiver->businessChains()->attach($chain1);
+        $this->caregiver->businessChains()->attach($chain2);
 
+        // Create 3 businesses across the 2 chains
+        $business1 = $chain1->businesses()->save(factory(Business::class)->make());
+        $business2 = $chain1->businesses()->save(factory(Business::class)->make());
+        $business3 = $chain2->businesses()->save(factory(Business::class)->make());
+
+        $this->assertCount(3, $this->caregiver->businesses);
+        $this->assertCount(3, $this->caregiver->getBusinessIds());
+        $this->assertTrue(in_array($business3->id, $this->caregiver->getBusinessIds()));
+    }
+
+    public function testCaregiverForBusinessesQuery()
+    {
+        $chain1 = factory(BusinessChain::class)->create();
+        $chain2 = factory(BusinessChain::class)->create();
+        $this->caregiver->businessChains()->attach($chain1);
+        $this->caregiver->businessChains()->attach($chain2);
+
+        // New caregiver only attached to chain2 (should not show up in results)
+        $caregiver2 = factory(Caregiver::class)->create();
+        $caregiver2->businessChains()->attach($chain2);
+
+        // Create 3 businesses across the 2 chains
+        $business1 = $chain1->businesses()->save(factory(Business::class)->make());
+        $business2 = $chain1->businesses()->save(factory(Business::class)->make());
+        $business3 = $chain2->businesses()->save(factory(Business::class)->make());
+
+        $result = Caregiver::forBusinesses([$business2->id])->first();
+        $count = Caregiver::forBusinesses([$business2->id])->count();
+        $this->assertEquals($this->caregiver->id, $result->id);
+        $this->assertEquals(1, $count, 'Only one caregiver should show up as a result of the forBusinesses query.');
+    }
 }

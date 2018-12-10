@@ -69,11 +69,10 @@
                             </b-form-select>
                         </b-form-group>
                     </b-col>
-                    <b-col>
-                        <b-form-select v-model="location" class="mb-1" v-if="business.multi_location_registry == 'yes'">
-                            <option value="all">All Locations</option>
-                            <option :value="business.name">{{ business.name }}</option>
-                        </b-form-select>
+                    <b-col class="ml-auto">
+                        <b-form-group>
+                            <business-location-select v-model="filterBusinessId" :allow-all="true"></business-location-select>
+                        </b-form-group>
                     </b-col>
                 </b-row>
             </b-col>
@@ -209,8 +208,10 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
+    import BusinessLocationSelect from "../BusinessLocationSelect";
 
     export default {
+        components: {BusinessLocationSelect},
         props: {
             'business': Object,
             'caregiver': Object,
@@ -228,6 +229,7 @@
                 filtersReady: false,
                 filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
                 filterClientId: (this.client) ? this.client.id : -1,
+                filterBusinessId: (this.client) ? this.client.business_id : "",
                 header: {
                     left:   'prev,next today',
                     center: 'title',
@@ -278,20 +280,21 @@
                     return '';
                 }
 
-                let url = '/business/schedule/events?';
+                let url = '/business/schedule/events?start=' + this.start + '&end=' + this.end;
 
                 if (this.filterCaregiverId > -1) {
-                    url = url + 'caregiver_id=' + this.filterCaregiverId;
+                    url += '&caregiver_id=' + this.filterCaregiverId;
                     if (this.filterClientId > -1) {
-                        url = url + '&client_id=' + this.filterClientId;
+                        url += '&client_id=' + this.filterClientId;
                     }
                 }
                 else if (this.filterClientId > -1) {
-                    url = url + 'client_id=' + this.filterClientId;
+                    url += '&client_id=' + this.filterClientId;
                 }
 
-                url += '&start=' + this.start;
-                url += '&end=' + this.end;
+                if (this.filterBusinessId) {
+                    url += '&businesses[]=' + this.filterBusinessId;
+                }
 
                 return url;
             },
@@ -401,12 +404,15 @@
                 let items;
 
                 if (this.caregiverView) {
-                    items = this.caregivers;
                     this.resourceIdField = 'caregiver_id';
+                    items = this.caregivers;
                 }
                 else {
-                    items = this.clients;
                     this.resourceIdField = 'client_id';
+                    items = this.clients;
+                    if (this.filterBusinessId) {
+                        items = items.filter(client => client.business_id == this.filterBusinessId);
+                    }
                 }
 
 

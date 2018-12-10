@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Address;
-use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use App\User;
 
@@ -14,7 +14,7 @@ class ImportCaregivers extends BaseImport
      *
      * @var string
      */
-    protected $signature = 'import:caregivers {--meta=:A comma separated list of fields to import into meta data} {business_id} {file}';
+    protected $signature = 'import:caregivers {--meta=:A comma separated list of fields to import into meta data} {chain_id} {file}';
 
     /**
      * The console command description.
@@ -24,22 +24,34 @@ class ImportCaregivers extends BaseImport
     protected $description = 'Import an excel export of caregivers into the system.';
 
     /**
-     * @var \App\Business
+     * @var \App\BusinessChain
      */
-    protected $business;
+    protected $businessChain;
 
 
     /**
      * Return the current business model for who the data should be imported in to
      *
+     * @return \App\BusinessChain
+     */
+    protected function businessChain()
+    {
+        if ($this->businessChain) {
+            return $this->businessChain;
+        }
+        return $this->businessChain = BusinessChain::findOrFail($this->argument('chain_id'));
+    }
+
+
+    /**
+     * Return the current business model for who the data should be imported in to
+     * NOTE: Business Chain should be used for caregivers.  This is only for compatibility with business-only resources.
+     *
      * @return \App\Business
      */
     protected function business()
     {
-        if ($this->business) {
-            return $this->business;
-        }
-        return $this->business = Business::findOrFail($this->argument('business_id'));
+        return $this->businessChain()->businesses->first();
     }
 
     /**
@@ -79,7 +91,7 @@ class ImportCaregivers extends BaseImport
         }
 
         /** @var Caregiver $caregiver */
-        $caregiver = $this->business()->caregivers()->create($data);
+        $caregiver = $this->businessChain()->caregivers()->create($data);
         if ($caregiver) {
             // Replace placeholder email
             if (isset($noemail)) {
@@ -144,7 +156,7 @@ class ImportCaregivers extends BaseImport
      */
     protected function warningMessage()
     {
-        return 'Importing caregivers into ' . $this->business()->name . '..';
+        return 'Importing caregivers into ' . $this->businessChain()->name . '..';
     }
 
     /**
@@ -191,7 +203,5 @@ class ImportCaregivers extends BaseImport
     {
         return $this->transformDateValue($cellValue);
     }
-
-
 
 }

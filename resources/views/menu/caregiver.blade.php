@@ -44,3 +44,8 @@
         <i class="fa fa-users"></i><span class="hide-menu">My Clients</span>
     </a>
 </li>
+{{--<li>--}}
+    {{--<a class="" href="{{ route('knowledge.base') }}" aria-expanded="false">--}}
+        {{--<i class="fa fa-lightbulb-o"></i><span class="hide-menu">Knowledge Base</span>--}}
+    {{--</a>--}}
+{{--</li>--}}

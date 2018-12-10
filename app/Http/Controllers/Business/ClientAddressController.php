@@ -15,6 +15,8 @@ class ClientAddressController extends BaseController
      */
     public function index(Client $client)
     {
+        $this->authorize('read', $client);
+
         $numbers = $client->addresses->sort(function($a, $b) {
             $numberGen = function($type) {
                 switch($type) {
@@ -43,9 +45,7 @@ class ClientAddressController extends BaseController
      */
     public function show(Client $client, $type)
     {
-        if (!$this->businessHasClient($client)) {
-            return new ErrorResponse(403, 'You do not have access to this client.');
-        }
+        $this->authorize('read', $client);
 
         return response($client->addresses()->where('type', $type)->first());
     }

@@ -1,13 +1,29 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-
-class ShiftGoal extends Model implements Auditable
+/**
+ * App\ShiftGoal
+ *
+ * @property int $id
+ * @property int $shift_id
+ * @property int $client_goal_id
+ * @property string $comments
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Client $client
+ * @property-read \App\ClientGoal $goal
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereClientGoalId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereComments($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereShiftId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class ShiftGoal extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
     
     protected $table = 'shift_goals';
 

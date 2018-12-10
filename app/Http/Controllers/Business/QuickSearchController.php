@@ -26,19 +26,15 @@ class QuickSearchController extends BaseController
             ->whereIn('role_type', $roles)
             ->where('active', 1)
             ->orderBy('firstname')
-            ->orderBy('lastname');
-
-        if (!is_admin_now()) {
-            $query->leftJoin('clients', 'clients.id', '=', 'users.id')
-                ->leftJoin('business_caregivers', function($join) {
-                    $join->on('business_caregivers.business_id', '=', DB::raw((int) $this->business()->id));
-                    $join->on('business_caregivers.caregiver_id', '=', 'users.id');
-                })
-                ->where(function($query) {
-                    $query->where('business_caregivers.business_id', $this->business()->id)
-                        ->orWhere('clients.business_id', $this->business()->id);
+            ->orderBy('lastname')
+            ->where(function($query) {
+                $query->whereHas('caregiver', function($q) {
+                    $q->forAuthorizedChain();
+                })->orWhereHas('client', function($q) {
+                    $q->forRequestedBusinesses();
                 });
-        }
+            });
+
 
         $query->where(function($query) {
             $q = request('q');

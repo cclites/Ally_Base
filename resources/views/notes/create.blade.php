@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <note-create :business="{{ json_encode($business) }}"></note-create>
+    <note-create></note-create>
 @endsection

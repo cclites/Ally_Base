@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Events\UnverifiedShiftConfirmed;
+use App\Http\Requests\UpdateShiftRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -18,7 +19,7 @@ class ShiftController extends BaseController
 {
     public function index()
     {
-        // TODO: redirect to Shift Report
+        return redirect()->route('business.reports.shifts');
     }
 
     public function create()
@@ -27,44 +28,21 @@ class ShiftController extends BaseController
         return view('business.shifts.create', compact('activities'));
     }
 
-    public function store(Request $request)
+    /**
+     * @param \App\Http\Requests\UpdateShiftRequest $request
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
+    public function store(UpdateShiftRequest $request)
     {
-        $data = $request->validate(
-            [
-                'client_id' => 'required|exists:clients,id',
-                'caregiver_id' => 'required|exists:caregivers,id',
-                'caregiver_comments' => 'nullable',
-                'mileage' => 'nullable|numeric|max:1000|min:0',
-                'other_expenses' => 'nullable|numeric|max:1000|min:0',
-                'other_expenses_desc' => 'nullable',
-                'checked_in_time' => 'required|date',
-                'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
-                'fixed_rates' => 'required|boolean',
-                'caregiver_rate' => 'required|numeric|max:1000|min:0',
-                'provider_fee' => 'required|numeric|max:1000|min:0',
-                'hours_type' => 'required|in:default,overtime,holiday',
-                'issues.id' => 'nullable|numeric',
-                'issues.caregiver_injury' => 'boolean',
-                'issues.client_injury' => 'boolean',
-                'issues.comments' => 'nullable',
-            ],
-            [
-                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
-                'fixed_rates.*' => 'Please select a shift type of hourly or daily.',
-            ]
-        );
-
-        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
-        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
-        $data['business_id'] = $this->business()->id;
+        $data = $request->filtered();
         $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-        $data['mileage'] = request('mileage', 0);
-        $data['other_expenses'] = request('other_expenses', 0);
         $data['verified'] = false;
 
-        if ($shift = Shift::create(Arr::except($data, 'issues'))) {
-            $shift->activities()->sync($request->input('activities', []));
-            $shift->syncIssues($data['issues']);
+        $this->authorize('create', [Shift::class, $data]);
+
+        if ($shift = Shift::create($data)) {
+            $shift->activities()->sync($request->getActivities());
+            $shift->syncIssues($request->getIssues());
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -74,9 +52,7 @@ class ShiftController extends BaseController
 
     public function show(Request $request, Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('read', $shift);
 
         // Load needed relationships
         $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
@@ -114,11 +90,14 @@ class ShiftController extends BaseController
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
     }
 
-    public function update(Request $request, Shift $shift)
+    /**
+     * @param \App\Http\Requests\UpdateShiftRequest $request
+     * @param \App\Shift $shift
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     */
+    public function update(UpdateShiftRequest $request, Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('update', $shift);
 
         // Allow admin overrides on locked shifts
         if (is_admin() && $request->input('override')) {
@@ -127,31 +106,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
 
-        $data = $request->validate(
-            [
-                'client_id' => 'required|exists:clients,id',
-                'caregiver_id' => 'required|exists:caregivers,id',
-                'caregiver_comments' => 'nullable',
-                'mileage' => 'nullable|numeric|max:1000|min:0',
-                'other_expenses' => 'nullable|numeric|max:1000|min:0',
-                'other_expenses_desc' => 'nullable',
-                'checked_in_time' => 'required|date',
-                'checked_out_time' => 'required|date|after_or_equal:' . $request->input('checked_in_time'),
-                'fixed_rates' => 'required|boolean',
-                'caregiver_rate' => 'required|numeric|max:1000|min:0',
-                'provider_fee' => 'required|numeric|max:1000|min:0',
-                'hours_type' => 'required|in:default,overtime,holiday',
-                'issues.id' => 'nullable|numeric',
-                'issues.caregiver_injury' => 'boolean',
-                'issues.client_injury' => 'boolean',
-                'issues.comments' => 'nullable',
-                'questions' => 'nullable|array',
-            ],
-            [
-                'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
-                'fixed_rates.*' => 'Please select a shift type of hourly or daily.',
-            ]
-        );
+        $data = $request->filtered();
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
@@ -162,24 +117,19 @@ class ShiftController extends BaseController
                 }
             }
 
-            $request->validate($fields, ['questions.*' => 'Please answer all required questions.']);
+            $questionData = $this->validate($fields, ['questions.*' => 'Please answer all required questions.']);
         }
 
-        $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
-        $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
-        $data['mileage'] = request('mileage', 0);
-        $data['other_expenses'] = request('other_expenses', 0);
-
-        if ($shift->update(Arr::except($data, ['issues', 'questions']))) {
+        if ($shift->update($data)) {
             if (isset($adminOverride)) {
                 // Update persisted costs
                 $shift->costs()->persist();
             }
 
-            $shift->activities()->sync($request->input('activities', []));
-            $shift->syncIssues($data['issues']);
+            $shift->activities()->sync($request->getActivities());
+            $shift->syncIssues($request->getIssues());
             $shift->syncGoals($request->goals);
-            $shift->syncQuestions($allQuestions, $data['questions']);
+            $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
 
             return new SuccessResponse('You have successfully updated this shift.');
         }
@@ -188,9 +138,8 @@ class ShiftController extends BaseController
 
     public function destroy(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('delete', $shift);
+
         if ($shift->isReadOnly()) {
             return new ErrorResponse(400, 'This shift is locked for modification.');
         }
@@ -202,9 +151,7 @@ class ShiftController extends BaseController
 
     public function confirm(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('update', $shift);
 
         if ($shift->statusManager()->ackConfirmation()) {
             if (!$shift->isVerified()) {
@@ -221,9 +168,7 @@ class ShiftController extends BaseController
 
     public function unconfirm(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('update', $shift);
 
         if (!$shift->statusManager()->isConfirmed()) {
             return new ErrorResponse(400, 'The shift is already unconfirmed.');
@@ -238,9 +183,7 @@ class ShiftController extends BaseController
 
     public function printPage(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('read', $shift);
 
         // Load needed relationships
         $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver');
@@ -258,6 +201,8 @@ class ShiftController extends BaseController
 
     public function convertSchedule(Request $request, Schedule $schedule)
     {
+        $this->authorize('read', $schedule);
+
         $request->validate([
             'date' => 'required|date_format:Y-m-d',
         ]);
@@ -294,9 +239,7 @@ class ShiftController extends BaseController
 
     public function duplicate(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('read', $shift);
 
         // Duplicate an existing shift and advance one day
         $shift = $shift->replicate();
@@ -320,9 +263,7 @@ class ShiftController extends BaseController
      */
     public function officeClockOut(Shift $shift)
     {
-        if (!$this->businessHasShift($shift)) {
-            return new ErrorResponse(403, 'You do not have access to this shift.');
-        }
+        $this->authorize('update', $shift);
 
         $data = request()->validate(
             [
@@ -337,6 +278,10 @@ class ShiftController extends BaseController
         $data['checked_in_time'] = utc_date($data['checked_in_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_time'] = utc_date($data['checked_out_time'], 'Y-m-d H:i:s', null);
         $data['checked_out_method'] = Shift::METHOD_OFFICE;
+
+        if (app('settings')->get($shift->business_id, 'auto_confirm')) {
+            $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
+        }
 
         if ($shift->update($data)) {
             return new SuccessResponse('Shift was successfully clocked out.');

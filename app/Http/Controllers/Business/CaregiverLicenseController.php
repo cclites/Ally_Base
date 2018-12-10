@@ -18,9 +18,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function index(Caregiver $caregiver)
     {
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('read', $caregiver);
 
         return $caregiver->licenses;
     }
@@ -33,9 +31,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function store(Request $request, Caregiver $caregiver)
     {
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('update', $caregiver);
 
         $data = $request->validate([
             'name' => 'required|max:200',
@@ -61,9 +57,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function update(Request $request, Caregiver $caregiver, CaregiverLicense $license)
     {
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('update', $caregiver);
 
         $data = $request->validate([
             'name' => 'required|max:200',
@@ -87,9 +81,7 @@ class CaregiverLicenseController extends BaseController
      */
     public function destroy(Caregiver $caregiver, CaregiverLicense $license)
     {
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
+        $this->authorize('update', $caregiver);
 
         if ($license->delete()) {
             return new SuccessResponse('The license has been deleted.');
@@ -99,6 +91,8 @@ class CaregiverLicenseController extends BaseController
 
     public function expirationReminder(CaregiverLicense $license)
     {
+        $this->authorize('read', $license->caregiver);
+
         $license->caregiver->user->notify(new LicenseExpirationReminder($this->business(), $license));
     }
 }

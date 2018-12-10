@@ -19,9 +19,9 @@ Route::get('/', function () {
 
 Route::view('check-my-time', 'check-my-time');
 
-Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@create');
-Route::get('/{business}/caregiver-application/done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
-Route::post('/{business}/caregiver-application', 'CaregiverApplicationController@store');
+Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
+Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
+Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
 Route::get('/confirm/saved', 'CaregiverConfirmationController@saved')->name('confirm.saved');
 Route::get('/confirm/caregiver/{token}', 'CaregiverConfirmationController@show')->name('confirm.caregiver');
 Route::post('/confirm/caregiver/{token}', 'CaregiverConfirmationController@store')->name('confirm.caregiver.store');
@@ -50,18 +50,29 @@ Route::group(['middleware' => 'auth'], function() {
     Route::put('emergency-contacts/{user}/{contact}', 'EmergencyContactController@update');
     Route::delete('emergency-contacts/{contact}', 'EmergencyContactController@destroy');
     Route::patch('emergency-contacts/{user}/{contact}', 'EmergencyContactController@updatePriority');
+
+    Route::get('business-settings', 'Business\SettingController@index')->name('business-settings');
+
+    Route::get('knowledge-base', 'KnowledgeBaseController@index')->name('knowledge.base');
+    Route::get('knowledge-base/attachments/{attachment}', 'KnowledgeBaseController@attachment')->name('knowledge.attachment');
 });
 
 Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['client'],
 ], function () {
+    Route::get('client/caregivers', 'Clients\CaregiverController@index')->name('clients.caregivers');
+    Route::get('unconfirmed-shifts', 'Clients\UnconfirmedShiftsController@index')->name('client.unconfirmed-shifts');
+    Route::post('unconfirmed-shifts/{shift}/confirm', 'Clients\UnconfirmedShiftsController@confirm')->name('client.unconfirmed-shifts.confirm');
+    Route::patch('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@update')->name('client.unconfirmed-shifts.update');
+    Route::get('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@show')->name('client.unconfirmed-shifts.show');
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
-    Route::get('shift-history/{week?}', 'Clients\ShiftController@index');
+    Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
     Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
     Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
+    Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
 });
 
 Route::group([
@@ -71,6 +82,9 @@ Route::group([
 
     Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
     Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
+    Route::get('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@index')->name('caregivers.clients.narrative');
+    Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
+    Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
     Route::post('caregiver/verify_location/{client}', 'Caregivers\ClientController@verifyLocation')->name('clients.verify_location');
 
@@ -106,7 +120,7 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
-    Route::get('settings/bank-accounts', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
+    Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
@@ -226,7 +240,6 @@ Route::group([
     Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
-    Route::post('reports/sales-pipeline', 'Business\ReportsController@salesPipelineReport')->name('reports.generate-pipeline');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
@@ -252,8 +265,8 @@ Route::group([
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
     Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
-    Route::get('exceptions/{id}', 'Business\ExceptionController@show')->name('exceptions.show');
-    Route::post('exceptions/{id}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
+    Route::get('exceptions/{exception}', 'Business\ExceptionController@show')->name('exceptions.show');
+    Route::post('exceptions/{exception}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');
@@ -403,7 +416,23 @@ Route::group([
     Route::get('quickbooks-api/authorization', 'Admin\QuickBooksApiController@authorization')->name('quickbooks_api.authorization');
     Route::get('quickbooks-api/connection', 'Admin\QuickBooksApiController@connection')->name('quickbooks_api.connection');
     Route::post('quickbooks-api/create-invoice', 'Admin\QuickBooksApiController@createInvoice');
+
+    Route::get('knowledge-manager', 'Admin\KnowledgeManagerController@index')->name('knowledge.manager');
+    Route::post('knowledge-manager', 'Admin\KnowledgeManagerController@store');
+    Route::get('knowledge-manager/create', 'Admin\KnowledgeManagerController@create');
+    Route::get('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@edit')->name('knowledge.edit');
+    Route::patch('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@update');
+    Route::delete('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@destroy');
+    Route::post('knowledge-manager/attachments', 'Admin\KnowledgeAttachmentController@store');
+    Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
 Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');
+
+Route::group(['prefix' => '{slug}', 'as' => 'business_chain_routes.'], function() {
+    Route::get('/', 'CaregiverApplicationController@create');
+    Route::get('apply', 'CaregiverApplicationController@create')->name('apply');
+    Route::get('done/{application}', 'CaregiverApplicationController@done')->name('applications.done');
+    Route::post('apply', 'CaregiverApplicationController@store');
+});

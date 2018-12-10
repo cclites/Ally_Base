@@ -1,78 +1,88 @@
 <template>
-    <b-card
-        header="Create Message"
-        header-text-variant="white"
-        header-bg-variant="info"
-    >
-        <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
-            <b-row>
-                <b-col md="6">
-                    <div class="form-check">
-                        <label class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
-                            <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Send to all active Caregivers</span>
-                        </label>
-                        <input-help :form="form" field="accepted_terms" text=""></input-help>
-                    </div>
-                </b-col>
-                <b-col md="6" class="d-flex">
-                    <b-form-group class="ml-auto">
+    <div>
+        <div class="alert alert-warning" v-if="businesses.length === 0">
+            Please contact Ally to enable SMS messages on your account.
+        </div>
+        <b-card v-else
+                header="Create Message"
+                header-text-variant="white"
+                header-bg-variant="info"
+        >
+            <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
+                <b-row>
+                    <b-col md="6">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" name="can_reply" v-model="form.can_reply" value="1">
+                                <input type="checkbox" class="custom-control-input" name="all" v-model="form.all" value="1">
                                 <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Accept Replies</span>
+                                <span class="custom-control-description">Send to all active Caregivers</span>
                             </label>
                             <input-help :form="form" field="accepted_terms" text=""></input-help>
                         </div>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-form-group v-if="! form.all">
-                <div class="pb-2">
-                    <label>Recipients</label>
-                    <b-btn variant="success" class="ml-3" href="/business/care-match">Select Caregivers via CareMatch</b-btn>
-                </div>
-                <user-search-dropdown placeholder="Add Recipient"
-                    icon="fa-plus"
-                    :formatter="searchDisplay"
-                    @selectUser="addUser"
-                    type="sms"
-                    role="caregiver"
-                    :disabled="submitting" />
+                    </b-col>
+                    <b-col md="6" class="d-flex">
+                        <b-form-group class="ml-auto">
+                            <div class="form-check">
+                                <label class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="can_reply" v-model="form.can_reply" value="1">
+                                    <span class="custom-control-indicator"></span>
+                                    <span class="custom-control-description">Accept Replies</span>
+                                </label>
+                                <input-help :form="form" field="accepted_terms" text=""></input-help>
+                            </div>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-form-group v-if="! form.all">
+                    <div class="pb-2">
+                        <label>Recipients</label>
+                        <b-btn variant="success" class="ml-3" href="/business/care-match">Select Caregivers via CareMatch</b-btn>
+                    </div>
+                    <user-search-dropdown placeholder="Add Recipient"
+                                          icon="fa-plus"
+                                          :formatter="searchDisplay"
+                                          @selectUser="addUser"
+                                          type="sms"
+                                          role="caregiver"
+                                          :disabled="submitting" />
 
-                <div class="mt-2 user-pills">
-                    <b-badge pill
-                        :href="`/business/${user.role_type}s/${user.id}`"
-                        target="_blank"
-                        v-for="user in selectedUsers"
-                        :key="user.id"
-                        variant="light">
-                        {{ searchDisplay(user) }}
+                    <div class="mt-2 user-pills">
+                        <b-badge pill
+                                 :href="`/business/${user.role_type}s/${user.id}`"
+                                 target="_blank"
+                                 v-for="user in selectedUsers"
+                                 :key="user.id"
+                                 variant="light">
+                            {{ searchDisplay(user) }}
 
-                        <a href="#" class="delete-btn" @click.stop="removeUser(user.id)"><i class="fa fa-times"></i></a>
-                    </b-badge>
-                </div>
-                <input-help :form="form" field="recipients" text=""></input-help>
-            </b-form-group>
-            <b-form-group label="Message">
-                <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
-                <input-help :form="form" field="message" text=""></input-help>
-            </b-form-group>
-            <b-form-group>
-                <b-button variant="info" type="submit" :disabled="submitting">
-                    <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send
-                </b-button>
-            </b-form-group>
-        </form>
-    </b-card>
+                            <a href="#" class="delete-btn" @click.stop="removeUser(user.id)"><i class="fa fa-times"></i></a>
+                        </b-badge>
+                    </div>
+                    <input-help :form="form" field="recipients" text=""></input-help>
+                </b-form-group>
+                <b-form-group label="From Number">
+                    <business-location-select v-model="form.business_id" required></business-location-select>
+                    <input-help :form="form" field="business_id" text=""></input-help>
+                </b-form-group>
+                <b-form-group label="Message">
+                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
+                    <input-help :form="form" field="message" text=""></input-help>
+                </b-form-group>
+                <b-form-group>
+                    <b-button variant="info" type="submit" :disabled="submitting">
+                        <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send
+                    </b-button>
+                </b-form-group>
+            </form>
+        </b-card>
+    </div>
 </template>
 
 <script>
+import BusinessLocationSelect from "./BusinessLocationSelect";
 export default {
     name: "BusinessTextCaregivers",
-
+    components: {BusinessLocationSelect},
     props: {
         subject: false,
         fillMessage: '',
@@ -91,6 +101,12 @@ export default {
         }
     },
 
+    computed: {
+        businesses() {
+            return this.$store.state.business.businesses.filter(item => item.outgoing_sms_number);
+        }
+    },
+
     mounted() {
         this.resetForm();
         if (this.fillMessage) {
@@ -99,9 +115,6 @@ export default {
         if (this.fillRecipients) {
             this.selectedUsers = this.fillRecipients;
         }
-    },
-
-    computed: {
     },
 
     methods: {
@@ -157,6 +170,7 @@ export default {
                 all: 0,
                 message: '',
                 recipients: [],
+                business_id: "",
             });
             this.selectedUsers = [];
         },

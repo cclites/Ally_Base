@@ -1,9 +1,6 @@
 <?php
-
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * App\ShiftActivity
@@ -13,6 +10,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property int|null $activity_id
  * @property string|null $other
  * @property int $completed
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereActivityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereCompleted($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereId($value)
@@ -20,9 +19,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereShiftId($value)
  * @mixin \Eloquent
  */
-class ShiftActivity extends Model implements Auditable
+class ShiftActivity extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'shift_activities';
     public $timestamps = false;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Activity;
+use App\Http\Requests\UpdateActivityRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -16,29 +17,28 @@ class ActivityController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $activities = $this->business()->allActivities();
+        $activities = Activity::forRequestedBusinesses()->ordered()->get();
 
-        if (request()->expectsJson()) {
-            return response()->json($activities);
+        if ($request->expectsJson()) {
+            return $activities;
         }
-        
+
         return view('business.activities.index', compact('activities'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \App\Http\Requests\UpdateActivityRequest $request
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(Request $request)
+    public function store(UpdateActivityRequest $request)
     {
-        $data = $request->validate([
-            'code' => ['required', 'numeric', new ValidActivityCode($this->business()->id)],
-            'name' => 'required'
-        ]);
+        $data = $request->filtered();
+        $this->authorize('create', [Activity::class, $data]);
 
         $activity = new Activity($data);
         if ($this->business()->activities()->save($activity)) {
@@ -50,20 +50,15 @@ class ActivityController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Activity  $activity
+     * @param \App\Http\Requests\UpdateActivityRequest $request
+     * @param  \App\Activity $activity
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(Request $request, Activity $activity)
+    public function update(UpdateActivityRequest $request, Activity $activity)
     {
-        if ($activity->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this activity.');
-        }
-
-        $data = $request->validate([
-            'code' => ['required', 'numeric', new ValidActivityCode($this->business()->id, $activity->id)],
-            'name' => 'required'
-        ]);
+        $this->authorize('update', $activity);
+        $data = $request->filtered();
 
         if ($activity->update($data)) {
             return new SuccessResponse('The activity has been saved.');
@@ -79,13 +74,7 @@ class ActivityController extends BaseController
      */
     public function destroy(Activity $activity)
     {
-        if ($activity->business_id != $this->business()->id) {
-            return new ErrorResponse(403, 'You do not have access to this activity.');
-        }
-
-        if ($activity->carePlans()->exists()) {
-            return new ErrorResponse(403, 'You cannot delete this activity because it is attached to a Client Care Plan.');
-        }
+        $this->authorize('delete', $activity);
 
         if ($activity->delete()) {
             return new SuccessResponse('The activity has been deleted.');

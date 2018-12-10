@@ -2,32 +2,18 @@
 namespace App\Reports;
 
 use App\Business;
+use App\Contracts\BusinessReportInterface;
+use App\User;
 use DB;
 
-class ProviderReconciliationReport extends BaseReport
+class ProviderReconciliationReport extends BaseReport implements BusinessReportInterface
 {
     protected $query;
     protected $business;
 
-    public function __construct(Business $business)
+    public function __construct()
     {
-        $this->business = $business;
-
-        $deposits = DB::table('deposits')->join('gateway_transactions', 'gateway_transactions.id', '=', 'deposits.transaction_id')
-            ->selectRaw("gateway_transactions.id, deposits.amount as amount_deposited,'0' as amount_withdrawn, gateway_transactions.created_at")
-            ->where('business_id', $business->id)
-            ->where('deposits.amount', '>=', 0)
-            ->whereNull('caregiver_id');
-        $withdrawals = DB::table('deposits')->join('gateway_transactions', 'gateway_transactions.id', '=', 'deposits.transaction_id')
-                      ->selectRaw("gateway_transactions.id, '0' as amount_deposited, deposits.amount * -1  as amount_withdrawn, gateway_transactions.created_at")
-                      ->where('business_id', $business->id)
-                      ->where('deposits.amount', '<', 0)
-                      ->whereNull('caregiver_id');
-        $payments = DB::table('payments')->join('gateway_transactions', 'gateway_transactions.id', '=', 'payments.transaction_id')
-            ->selectRaw("gateway_transactions.id, '0' as amount_deposited, payments.amount as amount_withdrawn, gateway_transactions.created_at")
-            ->where('business_id', $business->id)
-            ->whereNull('client_id');
-        $this->query = $deposits->union($payments)->union($withdrawals);
+        $this->query = DB::table('view_business_reconciliation');
     }
 
     /**
@@ -48,5 +34,25 @@ class ProviderReconciliationReport extends BaseReport
     protected function results()
     {
         return $this->query()->get();
+    }
+
+    public function forBusinesses(array $businessIds = null)
+    {
+        $this->query()->whereIn('business_id', (array) $businessIds);
+
+        return $this;
+    }
+
+    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null)
+    {
+        if ($businessIds === null) $businessIds = array_filter((array) request()->input('businesses', []));
+        if ($authorizedUser === null) $authorizedUser = auth()->user();
+
+        $businessIds = $authorizedUser->filterAttachedBusinesses($businessIds);
+        if (!count($businessIds)) $businessIds = $authorizedUser->getBusinessIds();
+
+        $this->query()->whereIn('business_id', (array) $businessIds);
+
+        return $this;
     }
 }

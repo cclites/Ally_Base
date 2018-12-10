@@ -41,12 +41,18 @@ class PhoneNumberPolicy extends BasePolicy
 
     protected function check(User $user, PhoneNumber $phone)
     {
-        if ($phone->user_id != $user->id) {
-            if (!$this->isAdmin() && !$this->businessHasUser($phone->user)) {
-                return false;
-            }
+        if ($phone->user_id == $user->id) {
+            return true;
         }
 
-        return true;
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isOfficeUser() && $user->sharesBusinessWith($phone->user)) {
+            return true;
+        }
+
+        return false;
     }
 }
