@@ -26,6 +26,7 @@ abstract class BusinessClientRequest extends BusinessRequest
     public function getClient()
     {
         if (!$this->client) {
+            request()->validate([$this->clientField => 'required|exists:clients,id']);
             $this->client = Client::findOrFail($this->input($this->clientField));
         }
 

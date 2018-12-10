@@ -171,6 +171,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()
  * @mixin \Eloquent
+ * @property-read string $masked_ssn
+ * @property null|string $w9_ssn
  */
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {
@@ -315,12 +317,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     public function defaultPayment()
     {
-        return $this->morphTo('default_payment');
+        return $this->morphTo('defaultPayment', 'default_payment_type', 'default_payment_id');
     }
 
     public function backupPayment()
     {
-        return $this->morphTo('backup_payment', 'backup_payment_type', 'backup_payment_id');
+        return $this->morphTo('backupPayment', 'backup_payment_type', 'backup_payment_id');
     }
 
     public function notes()
@@ -543,6 +545,22 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         if ($method->persistChargeable() && $this->$relation()->associate($method)->save()) {
             return $method;
         }
+    }
+
+    /**
+     * Swap the client's primary and backup payment methods
+     *
+     * @throws \Exception
+     */
+    public function swapPaymentMethods()
+    {
+        $this->load(['defaultPayment', 'backupPayment']);
+        $backup = $this->backupPayment;
+        $default = $this->defaultPayment;
+        if (!$backup || !$default) throw new \Exception('Client needs a backup and primary payment method for this method to work.');
+
+        $this->defaultPayment()->associate($backup)->save();
+        $this->backupPayment()->associate($default)->save();
     }
 
     public function sendConfirmationEmail()

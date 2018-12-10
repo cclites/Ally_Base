@@ -59,13 +59,13 @@
                                 <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_hourly_rates" :value="0">
                                 <label for="create_hourly_rates" class="rate-label">Hourly</label>
                                 <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="create_fixed_rates" :value="1">
-                                <label for="create_fixed_rates" class="rate-label">Daily</label>
+                                <label for="create_fixed_rates" class="rate-label">Fixed/Daily</label>
                             </b-col>
                         </b-row>
 
                         <!-- FREE-TEXT RATES -->
 
-                        <b-row v-if="form.fixed_rates !== null && !usingRateCodes">
+                        <b-row v-if="form.fixed_rates !== null && !isUsingRateCodes(business)">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate">
                                     <b-form-input
@@ -80,7 +80,7 @@
                                 </b-form-group>
                             </b-col>
 
-                            <b-col sm="6" v-if="clientRateStructure">
+                            <b-col sm="6" v-if="hasClientRateStructure(business)">
                                 <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
                                     <b-form-input
                                             id="client_rate"
@@ -125,7 +125,7 @@
                         </b-row>
 
                         <!-- RATE CODES -->
-                        <b-row v-if="form.fixed_rates !== null && usingRateCodes">
+                        <b-row v-if="form.fixed_rates !== null && isUsingRateCodes(business)">
                             <b-col sm="6">
                                 <b-form-group :label="`Caregiver ${rateType} Rate`" label-for="caregiver_rate_id">
                                     <b-select v-model="form.caregiver_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
@@ -140,7 +140,7 @@
                                 </b-form-group>
                             </b-col>
                             <!-- No check is needed here because rate codes are only possible under clientRateStructure for now  (|| true) -->
-                            <b-col sm="6" v-if="clientRateStructure || true">
+                            <b-col sm="6" v-if="hasClientRateStructure(business) || true">
                                 <b-form-group :label="`Client ${rateType} Rate`" label-for="client_rate">
                                     <b-select v-model="form.client_rate_id" class="ml-1 mr-2" v-if="form.fixed_rates">
                                         <option value="">--Use Default--</option>
@@ -189,10 +189,8 @@
                                             id="endTime"
                                             name="endTime"
                                             v-model="endTime"
-                                            :readonly="!!form.fixed_rates"
                                     />
-                                    <input-help :form="form" field="duration" text="Confirm the ending time." v-if="!form.fixed_rates" />
-                                    <input-help :form="form" field="duration" text="End time is locked when daily rates are set." v-else />
+                                    <input-help :form="form" field="duration" text="Confirm the ending time." />
                                 </b-form-group>
                             </b-col>
                         </b-row>
@@ -330,11 +328,10 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateFactory from "../../../classes/RateFactory";
 
     export default {
-        mixins: [BusinessSettings, FormatsNumbers, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         props: {
             model: Boolean,
@@ -390,6 +387,28 @@
         },
 
         computed: {
+            selectedCaregiver() {
+                if (this.form.caregiver_id) {
+                    for(let index in this.clientCaregivers) {
+                        let caregiver = this.clientCaregivers[index];
+                        if (caregiver.id == this.form.caregiver_id) {
+                            return caregiver;
+                        }
+                    }
+                }
+                return {
+                    pivot: {}
+                };
+            },
+
+            selectedClient() {
+                return this.form.client_id ? this.clients.find(client => client.id == this.form.client_id) || {} : {};
+            },
+
+            business() {
+                return this.selectedClient.business_id ? this.$store.getters.getBusiness(this.selectedClient.business_id) : {};
+            },
+
             title() {
                 if (this.copiedSchedule.starts_at) {
                     return 'Copying Schedule';
@@ -421,7 +440,7 @@
             },
 
             chargedRate() {
-                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.clientRateStructure);
+                return RateFactory.getChargedRate(this.form.caregiver_rate, this.form.provider_fee, this.form.client_rate, this.hasClientRateStructure(this.business));
             },
 
             allyFee() {
@@ -430,20 +449,6 @@
 
             totalRate() {
                 return this.chargedRate + this.allyFee;
-            },
-
-            selectedCaregiver() {
-                if (this.form.caregiver_id) {
-                    for(let index in this.clientCaregivers) {
-                        let caregiver = this.clientCaregivers[index];
-                        if (caregiver.id == this.form.caregiver_id) {
-                            return caregiver;
-                        }
-                    }
-                }
-                return {
-                    pivot: {}
-                };
             },
 
             caregivers() {
@@ -465,13 +470,7 @@
             },
 
             rateType() {
-                if (this.form.fixed_rates === 0) {
-                    return 'Hourly';
-                }
-                if (this.form.fixed_rates === 1) {
-                    return 'Daily';
-                }
-                return '';
+                return (this.form.fixed_rates === 1) ? 'Fixed' : 'Hourly';
             },
 
             firstShiftEndDate() {
@@ -515,7 +514,7 @@
                     'duration': this.schedule.duration || 0,
                     'caregiver_id': this.schedule.caregiver_id || "",
                     'client_id': this.schedule.client_id || "",
-                    'fixed_rates': this.schedule.fixed_rates || 0,
+                    'fixed_rates': this.schedule.fixed_rates ? 1 : 0,
                     'caregiver_rate': this.schedule.caregiver_rate || "",
                     'caregiver_rate_id': this.schedule.caregiver_rate_id || "",
                     'client_rate': this.schedule.client_rate || "",
@@ -567,7 +566,7 @@
                     method = 'patch';
                     url = url + '/' + this.schedule.id;
                 }
-                this.form.submit(method, url)
+                this.form.hideErrorsFor(449).submit(method, url)
                     .then(response => {
                         this.refreshEvents();
                         this.submitting = false;
@@ -769,10 +768,6 @@
 
             startTime(val) {
                 this.form.duration = this.getDuration();
-                if (this.form.fixed_rates) {
-                    // Lock end time to start time for daily rates
-                    this.endTime = val;
-                }
             },
 
             endTime() {
@@ -781,10 +776,6 @@
 
             'form.fixed_rates': function(val, old_val) {
                 this.prefillRates();
-                if (val) {
-                    // Lock end time to start time for daily rates
-                    this.endTime = this.startTime;
-                }
             },
 
             'form.client_id': function(val, old_val) {

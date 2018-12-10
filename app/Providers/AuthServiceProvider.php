@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Activity;
 use App\Business;
 use App\Caregiver;
+use App\CaregiverApplication;
 use App\Client;
 use App\Deposit;
 use App\EmergencyContact;
@@ -13,6 +14,7 @@ use App\Payment;
 use App\PhoneNumber;
 use App\Policies\ActivityPolicy;
 use App\Policies\BusinessPolicy;
+use App\Policies\CaregiverApplicationPolicy;
 use App\Policies\CaregiverPolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
@@ -56,6 +58,7 @@ class AuthServiceProvider extends ServiceProvider
         Activity::class => ActivityPolicy::class,
         Business::class => BusinessPolicy::class,
         Caregiver::class => CaregiverPolicy::class,
+        CaregiverApplication::class => CaregiverApplicationPolicy::class,
         Client::class => ClientPolicy::class,
         Deposit::class => DepositPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,
@@ -83,5 +86,16 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
+
+        Gate::define('view-caregiver-statements', function (User $user, Caregiver $caregiver) {
+            return $user->role_type === 'admin'
+                || (
+                    $user->role_type === 'office_user'
+                    && $caregiver->shifts()
+                        ->has('deposits')
+                        ->whereNotIn('business_id', $user->getBusinessIds())
+                        ->doesntExist()
+                );
+        });
     }
 }

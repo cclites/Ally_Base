@@ -30,7 +30,7 @@ class ShiftsReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Shift::query();
+        $this->query = Shift::with(['business', 'caregiver', 'client', 'statusHistory', 'goals', 'questions', 'costHistory', 'client.defaultPayment']);
     }
 
     /**
@@ -50,7 +50,8 @@ class ShiftsReport extends BusinessResourceReport
      */
     protected function results()
     {
-        $shifts = $this->query->with(['business', 'caregiver', 'client', 'statusHistory', 'goals', 'questions', 'costHistory', 'client.defaultPayment'])->get();
+        $shifts = $this->query->get();
+        $this->generated = true;
         $rows = $shifts->map(function(Shift $shift) {
             $row = [
                 'id' => $shift->id,
@@ -78,6 +79,7 @@ class ShiftsReport extends BusinessResourceReport
                 'hours_type' => $shift->hours_type,
                 'confirmed' => $shift->statusManager()->isConfirmed(),
                 'confirmed_at' => $shift->confirmed_at,
+                'client_confirmed' => $shift->client_confirmed,
                 'charged' => !($shift->statusManager()->isPending()),
                 'charged_at' => $shift->charged_at,
                 'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
@@ -86,9 +88,21 @@ class ShiftsReport extends BusinessResourceReport
                 'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),
                 'goals' => $shift->goals,
                 'questions' => $shift->questions,
+                'flags' => $shift->flags,
             ];
             return $row;
         });
         return $rows;
+    }
+
+    /**
+     * Count the number of rows
+     *
+     * @return int
+     */
+    public function count()
+    {
+        if ($this->rows) return $this->rows->count();
+        return $this->query()->count();
     }
 }

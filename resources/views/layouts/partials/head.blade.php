@@ -20,7 +20,7 @@
 <script>
     try {
         window.gmapsKey = '{{ config('services.gmaps.key') }}';
-        window.AuthUser = JSON.parse('{!! auth()->user() !!}');
+        window.AuthUser = JSON.parse('@json(optional(auth()->user())->withImpersonationDetails())');
     }
     catch(e) { console.log(e); }
 </script>

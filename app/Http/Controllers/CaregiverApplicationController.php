@@ -2,63 +2,95 @@
 
 namespace App\Http\Controllers;
 
-use App\Address;
 use App\Business;
-use App\Caregiver;
+use App\BusinessChain;
 use App\CaregiverApplication;
 use App\CaregiverApplicationStatus;
 use App\CaregiverPosition;
+use App\Http\Controllers\Business\BaseController as BusinessBaseController;
 use App\Http\Requests\CaregiverApplicationStoreRequest;
 use App\Http\Requests\CaregiverApplicationUpdateRequest;
-use App\PhoneNumber;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use App\Traits\ActiveBusiness;
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class CaregiverApplicationController extends Controller
+class CaregiverApplicationController extends BusinessBaseController
 {
-    use ActiveBusiness;
-
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function index()
+    public function index(Request $request)
     {
-        $applications = CaregiverApplication::where('business_id', $this->business()->id)->get();
-        return view('caregivers.applications.index', compact('business', 'applications'));
+        $query = $this->businessChain()
+            ->caregiverApplications()
+            ->ordered();
+
+        if ($request->expectsJson()) {
+            $timezone = $this->businessChain()->businesses()->first()->timezone ?? 'America/New_York';
+
+            if ($status = $request->input('status')) {
+                $query->where('status', $status);
+            }
+            if ($startDate = $request->input('start_date')) {
+                $query->where('created_at', '>=', Carbon::parse($startDate, $timezone)->setTime(0,0,0));
+            }
+            if ($endDate = $request->input('end_date')) {
+                $query->where('created_at', '<', Carbon::parse($endDate, $timezone)->addDay());
+            }
+
+            return $query->get();
+        }
+
+        $applications = $query->get();
+        $applicationUrl = $this->businessChain()->getCaregiverApplicationUrl();
+        return view('caregivers.applications.index', compact('applicationUrl', 'applications'));
+    }
+
+    /**
+     * Backwards compatibility redirect
+     *
+     * @param \App\Business $business
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function oldRedirect(Business $business)
+    {
+        return redirect($business->chain->getCaregiverApplicationUrl());
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @param Business $business
+     * @param string $slug
      * @return \Illuminate\Http\Response
      */
-    public function create(Business $business)
+    public function create($slug)
     {
-        return view('caregivers.applications.create', compact('business'));
+        $businessChain = BusinessChain::whereSlug($slug)->firstOrFail();
+
+        return view('caregivers.applications.create', compact('businessChain'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  CaregiverApplicationStoreRequest $request
+     * @param CaregiverApplicationStoreRequest $request
+     * @param string $slug
      * @return CreatedResponse|ErrorResponse
      */
-    public function store(CaregiverApplicationStoreRequest $request)
+    public function store(CaregiverApplicationStoreRequest $request, $slug)
     {
+        $businessChain = BusinessChain::whereSlug($slug)->firstOrFail();
         $data = $request->filtered();
-        $application = CaregiverApplication::create($data);
+        $application = $businessChain->caregiverApplications()->create($data);
 
         if ($application) {
-            return new CreatedResponse('Application submitted successfully.', [], route('applications.done', [$request->business_id, $application]));
+            return new CreatedResponse('Application submitted successfully.', [], route('business_chain_routes.applications.done', ['slug' => $slug, 'application' => $application]));
         }
         return new ErrorResponse(500, 'The application could not be submitted.');
     }
@@ -72,10 +104,7 @@ class CaregiverApplicationController extends Controller
      */
     public function show(CaregiverApplication $application)
     {
-        if ($application->business_id != $this->business()->id) {
-            abort(403);
-        }
-
+        $this->authorize('read', $application);
         $application->updateStatus();
 
         return view('caregivers.applications.show', compact('application'));
@@ -90,10 +119,7 @@ class CaregiverApplicationController extends Controller
      */
     public function edit(CaregiverApplication $application)
     {
-        if ($application->business_id != $this->business()->id) {
-            abort(403);
-        }
-
+        $this->authorize('update', $application);
         $application->updateStatus();
 
         $business = $this->business();
@@ -107,16 +133,14 @@ class CaregiverApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\CaregiverApplicationUpdateRequest $request
+     * @param \App\Http\Requests\CaregiverApplicationStoreRequest $request
      * @param \App\CaregiverApplication $application
      * @return \Illuminate\Http\Response
-     * @throws \Exception
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(CaregiverApplicationUpdateRequest $request, CaregiverApplication $application)
+    public function update(CaregiverApplicationStoreRequest $request, CaregiverApplication $application)
     {
-        if ($application->business_id != $this->business()->id) {
-            abort(403);
-        }
+        $this->authorize('update', $application);
 
         $data = $request->filtered();
         $application->update($data);
@@ -134,46 +158,22 @@ class CaregiverApplicationController extends Controller
     public function destroy(CaregiverApplication $application)
     {
         abort(404); // not implemented
-        if ($application->business_id != $this->business()->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $application);
 
-        //
-    }
-
-    /**
-     * Filter the list of Caregiver Applications
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
-     */
-    public function search(Request $request)
-    {
-        $applications = CaregiverApplication::where('business_id', $this->business()->id)
-            ->when($request->filled('from_date'), function ($query) use ($request) {
-                return $query->where('created_at', '>=', Carbon::parse($request->from_date));
-            })
-            ->when($request->filled('to_date'), function ($query) use ($request) {
-                return $query->where('created_at', '<=', Carbon::parse($request->to_date)->addDay());
-            })
-            ->when($request->filled('status'), function ($query) use ($request) {
-                return $query->where('status', $request->status);
-            })
-            ->get();
-        return response()->json($applications);
     }
 
     /**
      * Show a completed page once an application is created
      *
-     * @param \App\Business $business
+     * @param string $slug
      * @param \App\CaregiverApplication $application
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function done(Business $business, CaregiverApplication $application)
+    public function done($slug, CaregiverApplication $application)
     {
-        return view('caregivers.applications.done', compact('business', 'application'));
+        $businessChain = BusinessChain::whereSlug($slug)->firstOrFail();
+
+        return view('caregivers.applications.done', compact('businessChain', 'application'));
     }
 
     /**
@@ -185,9 +185,7 @@ class CaregiverApplicationController extends Controller
      */
     public function convert(CaregiverApplication $application)
     {
-        if ($application->business_id != $this->business()->id) {
-            abort(403);
-        }
+        $this->authorize('update', $application);
 
         if ($application->status === CaregiverApplication::STATUS_CONVERTED) {
             return new ErrorResponse(409, 'This application has already been converted.');

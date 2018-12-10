@@ -39,22 +39,22 @@ abstract class BasePolicy
 
     protected function isAdmin()
     {
-        return auth()->user()->role_type === 'admin';
+        return auth()->check() && auth()->user()->role_type === 'admin';
     }
 
     protected function isOfficeUser()
     {
-        return auth()->user()->role_type === 'office_user';
+        return auth()->check() && auth()->user()->role_type === 'office_user';
     }
 
     protected function isCaregiver()
     {
-        return auth()->user()->role_type === 'caregiver';
+        return auth()->check() && auth()->user()->role_type === 'caregiver';
     }
 
     protected function isClient()
     {
-        return auth()->user()->role_type === 'client';
+        return auth()->check() && auth()->user()->role_type === 'client';
     }
 
     ////////////////////////////////////

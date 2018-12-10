@@ -26,6 +26,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     public $billing = [];
     public $shipping = [];
     public $responses = [];
+    public $lastResponseCode;
 
     private $login = [];
     private $cvvValidResponses = [
@@ -154,11 +155,11 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
         curl_setopt($ch, CURLOPT_POST, 1);
 
         if (!($data = curl_exec($ch))) {
-            return ERROR;
+            \Log::error('ECSPayments::post error.  Invalid Response. ' . print_r(curl_getinfo($ch)));
+            return false;
         }
+        $this->lastResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        unset($ch);
-//        print "\n$data\n";
         parse_str($data, $this->responses);
         return $this->responses['response'];
     }
@@ -183,6 +184,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     public function post($method)
     {
         if (!$this->params['type']) {
+            \Log::error('ECSPayments::post error.  Missing transaction type.');
             throw new PaymentMethodError('Missing transaction type');
         }
 
@@ -192,6 +194,8 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
         $text = $data['responsetext'] ?? 'UNKNOWN';
 
         if (!$response || empty($data['transactionid'])) {
+            $statusCode = $this->lastResponseCode;
+            \Log::error("ECSPayments::post error.  Error processing transaction. HTTP code: $statusCode.  Message: $text");
             throw new PaymentMethodError('Error processing transaction: ' . $text);
         }
 
@@ -213,6 +217,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
         $transaction->save();
 
         if ($response == ECSPayment::ERROR) {
+            \Log::error("ECSPayments::post error.  Transaction recorded but payment method errored.  Message: $text");
             echo 'Payment method error: ' . $text . "\n";
         }
 

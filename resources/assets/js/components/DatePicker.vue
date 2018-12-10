@@ -1,5 +1,4 @@
 <template>
-    <div>
         <input
                 ref="datepicker"
                 :class="cssClass"
@@ -12,7 +11,6 @@
                 :readonly="readonly"
                 @change="updateInput()"
         />
-    </div>
 </template>
 
 <script>

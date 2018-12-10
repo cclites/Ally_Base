@@ -2,7 +2,7 @@
 
 @section('title', 'Payment Details - Print')
 
-@section('content')
+@push('head')
     <style>
         .header-left,
         .footer-left {
@@ -40,7 +40,10 @@
             max-height: 80px;
         }
     </style>
-    <div class="container-fluid">
+@endpush
+
+@section('content')
+    <div>
         <div class="row print-header">
             <div class="header-left">
                 <div><a href="{{ is_office_user() ? route('business.caregivers.show', [$deposit->caregiver]) . '#payment_statement' : route('caregivers.reports.payment_history') }}" class="btn btn-info">Return to Payment History</a></div>
@@ -129,7 +132,7 @@
                                 @endforeach
                             </td>
                             <td>
-                                {{ $shift->client['name'] }}
+                                {{ $shift->client['masked_name'] }}
                             </td>
                             <td>
                                 ${{ $shift->caregiver_rate }}

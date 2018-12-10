@@ -34,14 +34,14 @@
                     {{ selectedItem.schedule.notes }}
                 </b-col>
             </b-row>
-            <b-row v-if="businessSettings().co_comments" class="with-padding-bottom">
+            <b-row v-if="business.co_comments" class="with-padding-bottom">
                 <b-col sm="12">
                     <strong>Caregiver Comments</strong><br />
                     {{ selectedItem.caregiver_comments ? selectedItem.caregiver_comments : 'No comments recorded' }}
                 </b-col>
             </b-row>
 
-            <b-row v-if="businessSettings().co_issues || businessSettings().co_injuries">
+            <b-row v-if="business.co_issues || business.co_injuries">
                 <b-col sm="12">
                     <strong>Issues on Shift</strong>
                     <p v-if="!selectedItem.issues || !selectedItem.issues.length">
@@ -62,7 +62,7 @@
                 </b-col>
             </b-row>
 
-            <b-row class="with-padding-bottom" v-if="businessSettings().co_signature && selectedItem.signature != null">
+            <b-row class="with-padding-bottom" v-if="business.co_signature && selectedItem.signature != null">
                 <b-col>
                     <strong>Client Signature</strong>
                     <div v-html="selectedItem.signature.content" class="signature"></div>
@@ -194,10 +194,7 @@
 </template>
 
 <script>
-    import BusinessSettings from "../../mixins/BusinessSettings";
-
     export default {
-        mixins: [BusinessSettings],
 
         props: {
             value: {},
@@ -213,6 +210,9 @@
                 set(value) {
                     this.$emit('input', value);
                 }
+            },
+            business() {
+                return this.selectedItem.business_id ? this.$store.getters.getBusiness(this.selectedItem.business_id) : {};
             },
         },
 

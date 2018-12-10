@@ -111,7 +111,7 @@
                                     <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="delete_hourly_rates" :value="0">
                                     <label for="delete_hourly_rates" class="rate-label">Hourly Shifts Only</label>
                                     <input name="fixed_rates" v-model="form.fixed_rates" type="radio" class="with-gap" id="delete_fixed_rates" :value="1">
-                                    <label for="delete_fixed_rates" class="rate-label">Daily Shifts Only</label>
+                                    <label for="delete_fixed_rates" class="rate-label">Fixed/Daily Shifts Only</label>
                                 </div>
                             </b-col>
                         </b-row>

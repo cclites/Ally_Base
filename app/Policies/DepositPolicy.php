@@ -9,7 +9,6 @@ use App\User;
  * Class DepositPolicy
  * @package App\Policies
  *
- * TODO: This needs to check for caregiver deposits as well as business deposits
  */
 class DepositPolicy extends BasePolicy
 {
@@ -18,17 +17,19 @@ class DepositPolicy extends BasePolicy
         return false;
     }
 
-    public function read(User $user, Deposit $payment)
+    public function read(User $user, Deposit $deposit)
     {
-        return $this->businessCheck($user, $payment);
+        return $deposit->caregiver_id == $user->id
+            || ($deposit->business_id && $this->businessCheck($user, $deposit)) // For business deposits
+            || $deposit->shifts()->count() === $deposit->shifts()->forRequestedBusinesses([], $user)->count(); // For caregiver deposits
     }
 
-    public function update(User $user, Deposit $payment)
+    public function update(User $user, Deposit $deposit)
     {
         return $user->role_type === 'admin';
     }
 
-    public function delete(User $user, Deposit $payment)
+    public function delete(User $user, Deposit $deposit)
     {
         return $user->role_type === 'admin';
     }

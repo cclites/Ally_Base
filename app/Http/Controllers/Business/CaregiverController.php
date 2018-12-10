@@ -227,10 +227,6 @@ class CaregiverController extends BaseController
         $caregiver = Caregiver::findOrFail($caregiver_id);
         $this->authorize('update', $caregiver);
 
-        if (!$this->businessHasCaregiver($caregiver)) {
-            return new ErrorResponse(403, 'You do not have access to this caregiver.');
-        }
-
         return (new AddressController())->update($request, $caregiver->user, $type, 'The caregiver\'s address');
     }
 

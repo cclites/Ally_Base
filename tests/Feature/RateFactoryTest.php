@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\BankAccount;
 use App\Business;
-use App\Businesses\Settings;
+use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
 use App\RateCode;
@@ -34,7 +35,7 @@ class RateFactoryTest extends TestCase
     public $business;
 
     /**
-     * @var Settings
+     * @var SettingsRepository
      */
     public $settings;
 
@@ -50,7 +51,7 @@ class RateFactoryTest extends TestCase
         $this->business = factory(Business::class)->create();
         $this->client = factory(Client::class)->create(['business_id' => $this->business->id]);
         $this->caregiver = factory(Caregiver::class)->create();
-        $this->settings = app(Settings::class);
+        $this->settings = app(SettingsRepository::class);
         $this->rateFactory = app(RateFactory::class);
     }
 
@@ -351,6 +352,50 @@ class RateFactoryTest extends TestCase
         $this->assertEquals($caregiverRate, $hourlyRates->caregiver_rate);
         $this->assertEquals($clientRate * 4, $fixedRates->client_rate);
         $this->assertEquals($caregiverRate * 4, $fixedRates->caregiver_rate);
+    }
+
+    public function test_that_a_different_payment_method_affects_the_ally_fee()
+    {
+        config()->set('ally.bank_account_fee', 0.03);
+        config()->set('ally.credit_card_fee', 0.05);
+        $this->setSettings(['use_rate_codes' => 0]);
+        $this->attachCaregiver([
+            'caregiver_hourly_rate' =>  10,
+            'provider_hourly_fee' => 5,
+        ]);
+
+        $bankAccount = factory(BankAccount::class)->create();
+        $this->client->setPaymentMethod($bankAccount);
+
+        $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver, false);
+        $this->assertEquals(0.45, $rates->ally_fee);
+        $this->assertEquals(15.45, $rates->total_rate);
+    }
+
+    public function test_that_a_different_payment_method_affects_the_ally_fee_from_scheduling()
+    {
+        config()->set('ally.bank_account_fee', 0.03);
+        config()->set('ally.credit_card_fee', 0.05);
+        $this->setSettings(['use_rate_codes' => 0]);
+
+        $schedule = $this->makeSchedule([
+            'caregiver_rate' =>  10,
+            'provider_fee' => 5,
+        ]);
+
+        $bankAccount = factory(BankAccount::class)->create();
+        $this->client->setPaymentMethod($bankAccount);
+
+        $rates = $this->rateFactory->getRatesForSchedule($schedule, false);
+        $this->assertEquals(0.45, $rates->ally_fee);
+        $this->assertEquals(15.45, $rates->total_rate);
+    }
+
+    public function test_missing_client_caregiver_pivot_results_in_zero_rates()
+    {
+        $rates = $this->rateFactory->getRatesForClientCaregiver($this->client, $this->caregiver);
+
+        $this->assertEquals(0, $rates->client_rate);
     }
 
     protected function makeSchedule(array $data) {

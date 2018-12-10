@@ -32,6 +32,12 @@ class PreventDuplicatePosts
     ];
 
     /**
+     * The number of seconds to prevent duplicate posts for
+     * @var int
+     */
+    protected $timeout = 8;
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -43,7 +49,6 @@ class PreventDuplicatePosts
         $method = $request->getMethod();
         $path = $request->path();
 
-
         if ($method === 'POST' && !$this->isExcluded()) {
             // Generate a hash
             $hash = md5($path . serialize($request->input()));
@@ -54,13 +59,17 @@ class PreventDuplicatePosts
             // Compare against previous requests
             $hashes = Cache::get('post_request_chain', []);
 
-            if (in_array($hash, $hashes)) {
+            if (isset($hashes[$hash]) && time() <= $hashes[$hash]) {
                 $this->releaseLock();
-                return (new ErrorResponse(409, 'You submitted the same form twice within 15 seconds. We\'ve prevented a duplicate entry.'))->toResponse($request);
+                return (new ErrorResponse(409, 'You submitted the same form twice. We\'ve prevented a duplicate entry.'))->toResponse($request);
             }
 
-            $hashes[] = $hash;
-            Cache::put('post_request_chain', $hashes, Carbon::now()->addSeconds(15));
+            // Add key to cache  ($hash => $expiration)
+            $expiration = time() + $this->timeout;
+            $hashes[$hash] = $expiration;
+            Cache::put('post_request_chain', $hashes, Carbon::now()->addSeconds($this->timeout * 2));
+
+            // Release lock
             $this->releaseLock();
         }
 

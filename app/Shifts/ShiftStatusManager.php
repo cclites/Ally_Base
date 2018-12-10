@@ -135,9 +135,13 @@ class ShiftStatusManager
         return [ Shift::WAITING_FOR_CONFIRMATION ] + self::getClockedInStatuses();
     }
 
-    public static function getConfirmedStatuses()
+    public static function getConfirmedStatuses($pendingOnly = false)
     {
-        return array_diff(self::$statuses, self::getUnconfirmedStatuses());
+        $statuses = array_diff(self::$statuses, self::getUnconfirmedStatuses());
+        if ($pendingOnly) {
+            $statuses = array_intersect($statuses, self::getPendingStatuses());
+        }
+        return $statuses;
     }
 
     public static function getClockedInStatuses()
@@ -256,7 +260,8 @@ class ShiftStatusManager
      */
     public function ackClockOut($verified)
     {
-        if ($verified && $this->shift->business->auto_confirm) {
+        if (app('settings')->get($this->shift->business, 'auto_confirm') 
+            || ($verified && app('settings')->get($this->shift->business, 'auto_confirm_verified_shifts'))) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return $this->update(Shift::WAITING_FOR_CONFIRMATION);
