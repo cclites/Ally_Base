@@ -7,11 +7,13 @@ use App\CustomField;
 use App\Business;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCustomFieldRequest;
+use App\Responses\SuccessResponse;
+use App\Responses\ErrorResponse;
 
 class CustomFieldController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource. 
      *
      * @param App\Business $business
      * @return \Illuminate\Http\Response
@@ -41,7 +43,9 @@ class CustomFieldController extends Controller
     public function store(UpdateCustomFieldRequest $request)
     {
         $data = $request->filtered();
-        $this->authorize('create', $request->getBusiness());
+        $data['key'] = snake_case($request->label);
+        $data['chain_id'] = activeBusiness()->chain_id;
+        $this->authorize('update', $request->getBusiness());
 
         if ($field = CustomField::create($data)) {
             return new SuccessResponse('Custom field has been created.', $field);
