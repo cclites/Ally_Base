@@ -5,6 +5,7 @@
                           :title="formatTitle(number.type)"
                           :type="number.type"
                           :phone="number"
+                          :allow-sms="true"
                           @created="refreshPhoneNumbers('The phone number has been saved.')"
                           @updated="refreshPhoneNumbers()"
                           @deleted="refreshPhoneNumbers()">

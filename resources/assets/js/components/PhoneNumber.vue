@@ -60,6 +60,10 @@
                 </b-col>
             </b-row>
         </form>
+        <div v-if="allowSms && this.phone.id">
+            <div v-if="phone.receives_sms == 1" class="alert alert-info">You are receiving text messages at this number</div>
+            <b-btn v-else variant="success" @click="setSmsNumber()">Receive text messages at this number</b-btn>
+        </div>
     </b-card>
 </template>
 
@@ -70,7 +74,8 @@
             'type': null,
             'phone': {},
             'user': {},
-            'action': {}
+            'action': {},
+            'allowSms': false,
         },
 
         data() {
@@ -139,7 +144,17 @@
             handleKeyDown(target) {
                 this.form.clearError(target);
                 this.buttonVisible = true;
-            }
+            },
+
+            setSmsNumber() {
+                axios.patch(`/profile/phone/${this.phone.id}/sms`)
+                    .then(response => {
+                        this.$emit('updated');
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    })
+            },
         },
     }
 </script>
