@@ -17,13 +17,18 @@ class CustomFieldController extends Controller
     /**
      * Display a listing of the resource. 
      *
-     * @param App\Business $business
      * @return \Illuminate\Http\Response
      */
-    public function index(Business $business)
+    public function index()
     {
-        $this->authorize('update', $business);
-        return response()->json(activeBusiness()->custom_fields);
+        $this->authorize('update', activeBusiness());
+        $fields = activeBusiness()->chain->fields;
+        $fields = $fields->map(function(CustomField $field) {
+            $field->options = $field->options;
+            return $field;
+        });
+
+        return response()->json($fields);
     }
 
     /**
