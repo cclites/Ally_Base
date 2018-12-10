@@ -57,20 +57,24 @@ export default {
                 label: 'From',
                 key: 'from_number',
                 sortable: true,
+                tdClass: 'text-nowrap',
             },
             {
                 label: 'User',
                 key: 'user',
                 sortable: true,
+                tdClass: 'text-nowrap',
             },
             {
                 key: 'message',
                 sortable: true,
+                tdClass: 'pb-4'
             },
             {
                 label: 'Received',
                 key: 'created_at',
                 sortable: true,
+                tdClass: 'text-nowrap',
             },
         ],
     }),
