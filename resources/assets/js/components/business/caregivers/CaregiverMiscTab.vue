@@ -7,6 +7,10 @@
                 <b-form-group>
                     <b-form-textarea v-model="form.misc" rows="3"></b-form-textarea>
                 </b-form-group>
+                <div v-if="customs.length > 0">
+                    <hr />
+                    <custom-field-form :form="options" :fields="customs" />
+                </div>
                 <b-form-group>
                     <b-btn @click="updateCaregiver">Save</b-btn>
                 </b-form-group>
@@ -18,18 +22,39 @@
 <script>
     export default {
         props: ['misc', 'caregiver'],
+        
+        async mounted() {
+            try {
+                const {data} = await axios.get('/business/custom-fields');
+                const options = {};
+
+                // Populate custom fields
+                data.forEach(({key}) => {
+                    const caregiverFieldValue = this.caregiver.meta.find(field => key == field.key);
+                    options[key] = caregiverFieldValue ? caregiverFieldValue.value : '';
+                });
+
+                this.customs = data;
+                this.options = new Form(options);
+            }catch(error) {}
+        },
 
         data() {
             return{
                 form: new Form({
-                    misc: this.misc
-                })
-            }
+                    misc: this.misc,
+                }),
+                options: new Form({}),
+                customs: [],
+            };
         },
 
         methods: {
             updateCaregiver() {
-                this.form.put('/business/caregivers/' + this.caregiver.id + '/misc');
+                const {id} = this.caregiver;
+
+                this.form.put(`/business/caregivers/${id}/misc`);
+                this.options.post(`/business/custom-fields/caregiver/${id}`);
             }
         }
 
