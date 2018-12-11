@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::resource('/profile/phone', 'PhoneController');
+    Route::patch('/profile/phone/{phone}/sms', 'PhoneController@updateSmsNumber');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
