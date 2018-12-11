@@ -25,6 +25,8 @@ class CreateCustomFieldsTable extends Migration
             $table->timestamps();
 
             $table->foreign('chain_id')->references('id')->on('business_chains')->onDelete('cascade');
+            $table->foreign('key')->references('key')->on('caregiver_meta')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('key')->references('key')->on('client_meta')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
