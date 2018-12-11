@@ -120,6 +120,7 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
+    Route::post('custom-fields/{account}/{id}', 'Business\CustomFieldController@storeValue')->name('custom_fields.value.update');
     Route::post('custom-fields/options/{field}', 'Business\CustomFieldController@storeOptions')->name('custom_fields.options.create');
     Route::resource('custom-fields', 'Business\CustomFieldController');
     Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');

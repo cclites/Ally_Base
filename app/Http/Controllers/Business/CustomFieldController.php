@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\CustomField;
 use App\CustomFieldOption;
 use App\Business;
+use App\Caregiver;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCustomFieldRequest;
 use App\Http\Requests\UpdateCustomFieldOptionsRequest;
@@ -87,6 +88,36 @@ class CustomFieldController extends Controller
         }
 
         return $field->options;
+    }
+
+    /**
+     * Store/Update the value for a custom field on a caregiver or client
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $account The type of account to service
+     * @param string $id The ID of the account
+     * @return void
+     */
+    public function storeValue(Request $request, string $account, string $id)
+    {
+        if($account != 'caregiver') {
+            return new ErrorResponse(422, 'An error occured while trying to save your custom fields, please try again.');
+        }
+        $instance;
+        if($account == 'caregiver') {
+            $instance = Caregiver::findOrFail($id);
+            $this->authorize('update', $instance);
+        }
+            
+        $customFields = activeBusiness()->chain->fields->pluck('key');
+
+        foreach ($customFields as $key) {
+            if($request->has($key) && $request->input($key)) {
+                $instance->setMeta($key, $request->input($key));
+            }
+        }
+
+        return new SuccessResponse('Your custom field values were successfully saved.');
     }
 
     /**
