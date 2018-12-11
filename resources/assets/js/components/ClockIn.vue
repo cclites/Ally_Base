@@ -19,12 +19,13 @@
                         <b-form-group label="Current Time" label-for="time">
                             <b-form-input v-model="time" readonly></b-form-input>
                         </b-form-group>
-                        <b-form-group label="Select the client you are clocking in for." label-for="client_id">
+                        <b-form-group label="Select the client you are clocking in for." label-for="client_id" label-class="required">
                             <b-form-select
                                     id="client_id"
                                     name="client_id"
                                     v-model="form.client_id"
                                     required
+                                    :disabled="authInactive"
                             >
                                 <option value="">--Select a Client--</option>
                                 <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
@@ -56,11 +57,11 @@
                 <b-row>
                     <b-col md="6">
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)" :disabled="authInactive">Clock in to your shift at {{ formatTime(schedule.starts_at.date) }}</b-button>
                         </div>
                         <div class="form-group" v-if="form.client_id">
-                            <b-button variant="success" @click="clockInWithoutSchedule()" v-if="schedules.length >= 1">Clock in to an unscheduled shift</b-button>
-                            <b-button variant="success" @click="clockInWithoutSchedule()" v-else>Clock in</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" v-if="schedules.length >= 1" :disabled="authInactive">Clock in to an unscheduled shift</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" v-else :disabled="authInactive">Clock in</b-button>
                         </div>
                     </b-col>
                     <b-col md="6">
@@ -86,9 +87,10 @@
 
 <script>
     import FormatsDates from "../mixins/FormatsDates";
+    import AuthUser from '../mixins/AuthUser';
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, AuthUser],
 
         props: {
             'selectedSchedule': {}

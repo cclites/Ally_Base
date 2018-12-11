@@ -139,6 +139,13 @@
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
+            <b-card
+                header="Client Narrative"
+                header-text-variant="white"
+                header-bg-variant="info"
+                >
+                    <client-narrative :client="{{ $client }}" mode="admin" />
+            </b-card>
             <business-client-care-details
                 :client="{{ $client }}" />
         </div>
@@ -175,16 +182,6 @@
 @push('scripts')
     <script>
         // Schedule fixes
-        $('.profile-tabs a[data-toggle="tab"]').click(function () {
-            var $link = $(this);
-
-            //remove active class from other tab-panes
-            $('.tab-content:not(.' + $link.attr('href').replace('#','') + ') .tab-pane').removeClass('active');
-
-            // activate tab-pane for active section
-            $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
-        });
-
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
             if (e.target.hash === '#schedule') {

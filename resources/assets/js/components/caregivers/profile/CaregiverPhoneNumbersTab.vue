@@ -11,7 +11,7 @@
             </phone-number>
         </b-col>
 
-        <b-col lg="6">
+        <b-col lg="6" v-if="authActive">
             <b-card class="text-center pt-4"
                     style="cursor: pointer;"
                     @click="addPhoneNumber()"

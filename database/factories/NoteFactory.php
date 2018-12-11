@@ -1,22 +1,27 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\Note;
+use App\Business;
+use App\Caregiver;
+use App\Client;
+use App\OfficeUser;
 
-$factory->define(\App\Note::class, function (Faker $faker) {
+$factory->define(Note::class, function (Faker $faker) {
     return [
         'business_id' => function () {
-            return factory('App\Business')->create()->id;
+            return factory(Business::class)->create()->id;
         },
         'caregiver_id' => function() {
-            return factory('App\Caregiver')->create()->id;
+            return factory(Caregiver::class)->create()->id;
         },
         'client_id' => function () {
-            return factory('App\Client')->create()->id;
+            return factory(Client::class)->create()->id;
         },
         'body' => $faker->paragraph,
         'tags' => $faker->word,
         'created_by' => function() {
-            return factory('App\OfficeUser')->create()->id;
+            return factory(OfficeUser::class)->create()->id;
         }
     ];
 });

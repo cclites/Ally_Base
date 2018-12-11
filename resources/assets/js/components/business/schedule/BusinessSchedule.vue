@@ -98,7 +98,8 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             @events-reloaded="loadKpiToolbar"
-            @event-mouseover="hover"
+            @event-mouseover="eventHover"
+            @event-mouseout="eventLeave"
             :loading="loading"
         />
 
@@ -261,6 +262,7 @@
                 previewTop: 0,
                 previewLeft: 0,
                 preview: false,
+                previewTimer: null,
                 hoverShift: {},
                 hoverTarget: '',
                 location: 'all',
@@ -560,25 +562,37 @@
             //     this.hidePreview();
             // },
 
-            hover(event, jsEvent, view) {
+            eventHover(event, jsEvent, view) {
                 let target = null;
-
+                
                 if ($(jsEvent.currentTarget).is('a')) {
                     target = $(jsEvent.currentTarget);
                 } else {
                     target = $(jsEvent.currentTarget).parent('a');
                 }
 
-                _.debounce((event, target, vm) => {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                }
+
+                this.previewTimer = setTimeout(function (event, target) {
                     axios.get('/business/schedule/' + event.id + '/preview')
                         .then(response => {
-                            vm.hoverShift = response.data;
-                            vm.showPreview(target, event.id);
+                            this.hoverShift = response.data;
+                            this.showPreview(target, event.id);
                         })
                         .catch(function(error) {
-                            vm.hoverShift = {};
+                            this.hoverShift = {};
                         });
-                }, 350)(event, target, this);
+                }.bind(this, event, target), 1000);
+
+            },
+
+            eventLeave() {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                    this.previewTimer = null;
+                }
             },
 
             showPreview(target, shift_id) {

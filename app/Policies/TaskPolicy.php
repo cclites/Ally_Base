@@ -15,12 +15,18 @@ class TaskPolicy extends BasePolicy
 
     public function read(User $user, Task $task)
     {
-        return $this->businessCheck($user, $task);
+        return ($user->id == $task->assigned_user_id) 
+            || $this->businessCheck($user, $task);
     }
 
     public function update(User $user, Task $task)
     {
-        return $this->businessCheck($user, $task);
+        if ($user->active == 0) {
+            return false;
+        }
+
+        return ($user->id == $task->assigned_user_id) 
+            || $this->businessCheck($user, $task);
     }
 
     public function delete(User $user, Task $task)

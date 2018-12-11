@@ -15,7 +15,7 @@ class ClientPolicy extends BasePolicy
     public function read(User $user, Client $client)
     {
         return $user->id == $client->id
-            || $this->caregiverCheck($user, $client)
+            || $this->caregiverClientCheck($user, $client)
             || $this->businessCheck($user, $client);
     }
 

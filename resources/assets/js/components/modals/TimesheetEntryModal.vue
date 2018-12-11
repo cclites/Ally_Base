@@ -5,14 +5,14 @@
                 <b-row>
                     <b-col md="6">
                         <!-- start_time -->
-                        <b-form-group label="Clocked In" label-for="start_time">
+                        <b-form-group label="Clocked In" label-for="start_time" label-class="required">
                             <time-picker v-model="form.start_time" placeholder="HH:MM"></time-picker>
                             <input-help :form="form" field="start_time" text=""></input-help>
                         </b-form-group>
                     </b-col>
                     <b-col md="6">
                         <!-- end_time -->
-                        <b-form-group label="Clocked Out" label-for="end_time">
+                        <b-form-group label="Clocked Out" label-for="end_time" label-class="required">
                             <time-picker v-model="form.end_time" placeholder="HH:MM"></time-picker>
                             <input-help :form="form" field="end_time" text=""></input-help>
                         </b-form-group>
@@ -20,7 +20,7 @@
 
                     <b-col md="12">
                         <!-- activities -->
-                            <b-form-group label="Activities Performed Out" label-for="">
+                            <b-form-group label="Activities Performed Out" label-for="" label-class="required">
                                 <input-help :form="form" field="activities" text=""></input-help>
                                 <div class="form-check">
                                     <b-row>

@@ -18,9 +18,7 @@ class ClientNarrativeController extends BaseController
      */
     public function index(Request $request, Client $client)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('read', $client);
 
         if ($request->expectsJson() && $request->has('json')) {
             $narrative = $client->narrative()->paginate($request->per_page);
@@ -39,6 +37,32 @@ class ClientNarrativeController extends BaseController
      */
     public function store(Request $request, Client $client)
     {
+        $data = array_merge($request->validate([
+            'notes' => 'required|min:1|max:63000',
+        ]), [
+            'creator_id' => auth()->id(),
+            'client_id' => $client->id,
+        ]);
+
+        $this->authorize('create', [ClientNarrative::class, $data]);
+
+        if ($narrative = ClientNarrative::create($data)) {
+            return new SuccessResponse('Your notes have been saved to the Client Narrative.', $narrative);
+        }
+
+        return new ErrorResponse(500, 'An unexpected error occurred, please try again.');
+    }
+
+    /**
+     * Update the client notes.
+     *
+     * @param Request $request
+     * @param Client $client
+     * @param ClientNarrative $narrative
+     * @return SuccessResponse
+     */
+    public function update(Request $request, Client $client, ClientNarrative $narrative)
+    {
         if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
             abort(403);
         }
@@ -47,15 +71,8 @@ class ClientNarrativeController extends BaseController
             'notes' => 'required|min:1|max:63000',
         ]);
 
-        $narrative = $client->narrative()->create([
-            'notes' => $request->notes,
-            'creator_id' => auth()->id(),
-        ]);
-
-        if (! $narrative) {
-            return new ErrorResponse(500, 'An unexpected error occurred, please try again.');
-        }
-
+        $narrative->update(['notes' => $request->notes]);
+        
         return new SuccessResponse('Your notes have been saved to the Client Narrative.', $narrative);
     }
 
@@ -68,9 +85,7 @@ class ClientNarrativeController extends BaseController
      */
     public function destroy(Request $request, Client $client, ClientNarrative $narrative)
     {
-        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
-            abort(403);
-        }
+        $this->authorize('delete', $narrative);
 
         if ($narrative->delete()) {
             return new SuccessResponse('Narrative notes were successfully deleted.');

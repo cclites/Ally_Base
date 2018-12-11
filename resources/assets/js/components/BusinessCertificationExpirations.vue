@@ -3,11 +3,29 @@
         <b-row class="mb-2">
             <b-col lg="3">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="caregiver_id">
+                    <b-form-select v-model="form.caregiver_id">
                         <option value="">All</option>
                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                     </b-form-select>
                 </b-form-group>
+            </b-col>
+            <b-col lg="3">
+                <b-form-group label="Show licenses expiring:">
+                <b-form-input
+                    type="number"
+                    v-model="form.days_range"
+                    placeholder="Number of days"
+                    class="days"
+                    :min="0"
+                    :max="999"
+                    :disabled="form.show_expired"
+                ></b-form-input> <span class="ml-2">Days from today</span>
+            </b-form-group>
+            </b-col>
+            <b-col lg="3" class="vertical-center">
+                <b-form-checkbox 
+                    v-model="form.show_expired"
+                >Show expired Licenses</b-form-checkbox>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -44,7 +62,6 @@
 </template>
 
 <script>
-
     import FormatsDates from '../mixins/FormatsDates';
     export default {
         props: {
@@ -63,7 +80,11 @@
 
         data() {
             return {
-                caregiver_id: '',
+                form: {
+                    caregiver_id: '',
+                    days_range: 30,
+                    show_expired: false,
+                },
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -104,16 +125,27 @@
 
         computed: {
             items() {
-                let certifications = _.map(this.certifications, (cert) => {
+                const {caregiver_id, show_expired, days_range} = this.form;
+                let certifications = this.certifications.map(cert => {
                     cert.sendingEmail = false;
                     return cert;
                 });
 
-                if (this.caregiver_id !== '') {
-                    return _.filter(certifications, (cert) => {
-                        return cert.caregiver_id === this.caregiver_id;
+                if(caregiver_id) {
+                    certifications = certifications.filter(cert => cert.caregiver_id == caregiver_id);
+                }
+                
+                if(show_expired) {
+                    certifications = certifications.filter(cert => moment(cert.expiration_date).isSameOrBefore(moment()));
+                }
+
+                if(days_range >= 0 && !show_expired) {
+                    certifications = certifications.filter(cert => {
+                        const expirateAt = moment(cert.expiration_date, 'YYYY-MM-DD');
+                        return expirateAt.isBetween(moment(), moment().add(days_range, 'days'));
                     });
                 }
+
                 return certifications;
             },
 
@@ -134,7 +166,7 @@
                 this.selectedItem = item;
                 this.modalDetails.data = JSON.stringify(item, null, 2);
                 this.modalDetails.index = index;
-//                this.$root.$emit('bv::show::modal','caregiverEditModal', button);
+                //this.$root.$emit('bv::show::modal','caregiverEditModal', button);
                 this.editModalVisible = true;
             },
 
@@ -165,5 +197,25 @@
                     });
             }
         }
+
+        ,
+        watch: {
+            'form.show_expired': function(isShowingExpired) {
+               if(isShowingExpired) {
+                   this.form.days_range = 0;
+               }
+            }
+        }
     }
 </script>
+
+<style scoped>
+    input.days {
+        width: 70px;
+    }
+
+    .vertical-center {
+        display: flex;
+        align-items: center;
+    }
+</style>
