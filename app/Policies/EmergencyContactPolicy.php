@@ -8,6 +8,17 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 class EmergencyContactPolicy extends BasePolicy
 {
+    /**
+     * Determine whether the user can create an emergencyContact.
+     *
+     * @param User $user
+     * @param array $data
+     * @return void
+     */
+    public function create(User $user, $data)
+    {
+        return $user->active == 1;
+    }
 
     /**
      * Determine whether the user can view the emergencyContact.
@@ -22,6 +33,22 @@ class EmergencyContactPolicy extends BasePolicy
     }
 
     /**
+     * Determine whether the user can update the emergencyContact.
+     *
+     * @param User $user
+     * @param EmergencyContact $emergencyContact
+     * @return bool
+     */
+    public function update(User $user, EmergencyContact $emergencyContact)
+    {
+        if (! $user->active) {
+            return false;
+        }
+
+        return $this->check($user, $emergencyContact);
+    }
+
+    /**
      * Determine whether the user can delete the emergencyContact.
      *
      * @param  \App\User  $user
@@ -30,6 +57,10 @@ class EmergencyContactPolicy extends BasePolicy
      */
     public function delete(User $user, EmergencyContact $emergencyContact)
     {
+        if (! $user->active) {
+            return false;
+        }
+
         return $this->check($user, $emergencyContact);
     }
 

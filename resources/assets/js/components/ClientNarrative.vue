@@ -2,10 +2,10 @@
     <div>
         <div v-if="mode == 'caregiver'" class="d-flex mb-2">
             <h3 class="f-1">Caregiver's Narrative:</h3>
-            <b-button class="ml-auto" variant="info" @click="showFormModal()">Add to Narrative</b-button>
+            <b-button class="ml-auto" variant="info" @click="showFormModal()" :disabled="authInactive">Add to Narrative</b-button>
         </div>
         <div v-else class="mb-2">
-            <b-button class="ml-auto" variant="info" @click="showFormModal()">Add to Narrative</b-button>
+            <b-button class="ml-auto" variant="info" @click="showFormModal()" :disabled="authInactive">Add to Narrative</b-button>
         </div>
 
         <loading-card v-if="loading" />
@@ -55,7 +55,7 @@
             @shown="focusTextarea()"
         >
             <b-container fluid>
-                <b-form-textarea :rows="5" v-model="form.notes" ref="form_notes"></b-form-textarea>
+                <b-form-textarea :rows="5" v-model="form.notes" ref="form_notes" :readonly="authInactive"></b-form-textarea>
             </b-container>
         </b-modal>
 
@@ -70,13 +70,14 @@
 </template>
 
 <script>
-import FormatsDates from "../mixins/FormatsDates";
-import FormatsStrings from "../mixins/FormatsStrings";
+import FormatsDates from "../../mixins/FormatsDates";
+import FormatsStrings from "../../mixins/FormatsStrings";
+import AuthUser from "../../mixins/AuthUser";
 
 export default {
     name: 'ClientNarrative',
 
-    mixins: [ FormatsDates, FormatsStrings ],
+    mixins: [ FormatsDates, FormatsStrings, AuthUser ],
 
     props: {
         client: {

@@ -5,7 +5,7 @@
             <b-row align-h="between">
                 <b-col>Emergency Contacts</b-col>
                 <b-col>
-                    <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || contacts.length >= 3">New Contact</b-btn>
+                    <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || contacts.length >= 3 || authInactive">New Contact</b-btn>
                 </b-col>
             </b-row>
         </div>
@@ -31,10 +31,10 @@
                      sort-by="priority"
                      :fields="fields">
                 <template slot="actions" scope="data">
-                    <b-btn v-if="data.item.priority > 1" variant="secondary" @click="raisePriority(data.item)">
+                    <b-btn v-if="data.item.priority > 1" variant="secondary" @click="raisePriority(data.item)" :disabled="authInactive">
                         <i class="fa fa-chevron-up"></i>
                     </b-btn>
-                    <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)">
+                    <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)" :disabled="authInactive">
                         <i class="fa fa-times"></i>
                     </b-btn>
                 </template>
@@ -44,7 +44,11 @@
 </template>
 
 <script>
+    import AuthUser from '../../mixins/AuthUser';
+
     export default {
+        mixins: [ AuthUser ],
+
         props: ['emergencyContacts', 'userId'],
         
         data() {

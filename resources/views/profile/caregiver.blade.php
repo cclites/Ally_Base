@@ -68,7 +68,8 @@
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
                             <bank-account-form :account="{{ $user->role->bankAccount OR '{}' }}" 
-                                :submit-url="'{{ '/profile/bank-account' }}'" />
+                                :submit-url="'{{ '/profile/bank-account' }}'" 
+                                :readonly="authInactive" />
                         </div>
                     </div>
                 </div>

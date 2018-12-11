@@ -50,6 +50,10 @@ class ShiftController extends Controller
 
     public function approveWeek(Request $request)
     {
+        if (auth()->user()->active == 0) {
+            abort(403);
+        }
+        
         $request->validate([
             'week' => 'required|integer',
             'name' => 'required|string|min:2',
