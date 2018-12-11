@@ -128,12 +128,16 @@ class CustomFieldController extends Controller
      */
     public function storeValue(Request $request, string $account, string $id)
     {
-        if($account != 'caregiver') {
+        if($account != 'caregiver' && $account != 'client') {
             return new ErrorResponse(422, 'An error occured while trying to save your custom fields, please try again.');
         }
+
         $instance;
         if($account == 'caregiver') {
             $instance = Caregiver::findOrFail($id);
+            $this->authorize('update', $instance);
+        }else if($account == 'client') {
+            $instance = Client::findOrFail($id);
             $this->authorize('update', $instance);
         }
             
