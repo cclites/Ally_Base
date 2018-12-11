@@ -6,7 +6,7 @@
         <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Provider Name" label-for="name">
+                    <b-form-group label="Provider Name" label-for="name" label-class="required">
                         <b-form-input
                                 id="name"
                                 name="name"
@@ -17,7 +17,7 @@
                         </b-form-input>
                         <input-help :form="form" field="name" text="Enter the provider name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Phone Number" label-for="phone1">
+                    <b-form-group label="Phone Number" label-for="phone1" label-class="required">
                         <b-form-input
                                 id="phone1"
                                 name="phone1"

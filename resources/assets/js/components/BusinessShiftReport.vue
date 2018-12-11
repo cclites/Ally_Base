@@ -154,15 +154,15 @@
                         <b-btn size="sm" @click="editingShiftId = row.item.id; editShiftModal = true" variant="info" v-b-tooltip.hover title="Edit"><i class="fa fa-edit"></i></b-btn>
                         <b-btn size="sm" @click.stop="details(row.item)" v-b-tooltip.hover title="View"><i class="fa fa-eye"></i></b-btn>
                         <span>
-                                <b-btn size="sm" @click.stop="unconfirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
-                                <b-btn size="sm" @click.stop="confirmShift(row.item.id)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="unconfirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Unconfirm" v-if="row.item.Confirmed"><i class="fa fa-calendar-times-o"></i></b-btn>
+                                <b-btn size="sm" @click.stop="confirmShift(row.item)" variant="primary" v-b-tooltip.hover title="Confirm" v-else-if="row.item.status !== 'Clocked In'"><i class="fa fa-calendar-check-o"></i></b-btn>
                             </span>
                         <b-btn size="sm" @click.stop="deleteShift(row.item)" variant="danger" v-b-tooltip.hover title="Delete"><i class="fa fa-times"></i></b-btn>
 
                         <!--<b-dropdown split variant="light" text="Edit" class="m-2" @click="editingShiftId = row.item.id; editShiftModal = true">-->
                         <!--<b-dropdown-item @click.stop="details(row.item)">View Details</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item.id)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
-                        <!--<b-dropdown-item @click.stop="confirmShift(row.item.id)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="unconfirmShift(row.item)" v-if="row.item.Confirmed">Unconfirm Shift</b-dropdown-item>-->
+                        <!--<b-dropdown-item @click.stop="confirmShift(row.item)" v-else-if="row.item.status !== 'Clocked In'">Confirm Shift</b-dropdown-item>-->
                         <!--<b-dropdown-divider></b-dropdown-divider>-->
                         <!--<b-dropdown-item @click="deleteShift(row.item)"><i class="fa fa-times"></i> Delete</b-dropdown-item>-->
                         <!--</b-dropdown>-->
@@ -310,7 +310,6 @@
 <script>
     import FormatsNumbers from "../mixins/FormatsNumbers";
     import FormatsDates from "../mixins/FormatsDates";
-    import BusinessSettings from "../mixins/BusinessSettings";
     import ShiftHistoryTable from "./shifts/ShiftHistoryTable";
     import FilterColumnsModal from "./modals/FilterColumnsModal";
     import ShiftDetailsModal from "./modals/ShiftDetailsModal";
@@ -332,7 +331,7 @@
             ShiftHistoryTable
         },
 
-        mixins: [FormatsDates, FormatsNumbers, BusinessSettings, LocalStorage, ShiftFlags],
+        mixins: [FormatsDates, FormatsNumbers, LocalStorage, ShiftFlags],
 
         props: {
             admin: Number,
@@ -424,15 +423,6 @@
                     'Charged',
                 ];
 
-                // remove certain fields completely based on business settings
-                if (! this.businessSettings().co_mileage) {
-                    fields.splice(fields.indexOf('Mileage'), 1);
-                    fields.splice(fields.indexOf('Mileage Costs'), 1);
-                }
-                if (! this.businessSettings().co_expenses) {
-                    fields.splice(fields.indexOf('Other Expenses'), 1);
-                }
-
                 return fields;
             },
 
@@ -484,6 +474,7 @@
                         'Charged': item.charged,
                         'charged_at': item.charged_at,
                         'status': item.status,
+                        'business_id': item.business_id,
                         '_rowVariant': (item.confirmed) ? null : 'warning'
                     }
                 });
@@ -706,8 +697,11 @@
                 }
             },
 
-            confirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            confirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to confirm this shift?')) {
                         return;
                     }
@@ -727,8 +721,11 @@
                     });
             },
 
-            unconfirmShift(id) {
-                if (this.businessSettings().ask_on_confirm === undefined || this.businessSettings().ask_on_confirm == 1) {
+            unconfirmShift(shift) {
+                let id = shift.id;
+                let business = this.$store.getters.getBusiness(shift.business_id) || {};
+
+                if (business.ask_on_confirm === undefined || business.ask_on_confirm == 1) {
                     if (!confirm('Are you sure you wish to un-confirm this shift?')) {
                         return;
                     }
@@ -749,11 +746,11 @@
             },
 
             confirmSelected() {
-                return this.confirmShift(this.selectedItem.id);
+                return this.confirmShift(this.selectedItem);
             },
 
             unconfirmSelected() {
-                return this.unconfirmShift(this.selectedItem.id);
+                return this.unconfirmShift(this.selectedItem);
             },
 
             printSelected() {

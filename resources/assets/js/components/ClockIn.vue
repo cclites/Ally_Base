@@ -19,7 +19,7 @@
                         <b-form-group label="Current Time" label-for="time">
                             <b-form-input v-model="time" readonly></b-form-input>
                         </b-form-group>
-                        <b-form-group label="Select the client you are clocking in for." label-for="client_id">
+                        <b-form-group label="Select the client you are clocking in for." label-for="client_id" label-class="required">
                             <b-form-select
                                     id="client_id"
                                     name="client_id"
