@@ -22,7 +22,7 @@ class ClientNarrativePolicy extends BasePolicy
 
         $narrative = new ClientNarrative($data);
 
-        return $this->caregiverBelongsToClientCheck($user, $narrative->client)
+        return $this->caregiverClientCheck($user, $narrative->client)
                 || $this->businessCheck($user, $narrative->client);
     }
 
@@ -39,7 +39,7 @@ class ClientNarrativePolicy extends BasePolicy
             return false;
         }
 
-        return $this->caregiverBelongsToClientCheck($user, $clientNarrative->client)
+        return $this->caregiverClientCheck($user, $clientNarrative->client)
                 || $this->businessCheck($user, $clientNarrative->client);
     }
 
@@ -56,7 +56,7 @@ class ClientNarrativePolicy extends BasePolicy
             return false;
         }
 
-        return $this->caregiverBelongsToClientCheck($user, $clientNarrative->client)
+        return $this->caregiverClientCheck($user, $clientNarrative->client)
                 || $this->businessCheck($user, $clientNarrative->client);
     }
 }
