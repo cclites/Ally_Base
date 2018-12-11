@@ -59,8 +59,6 @@
         methods: {
             update() {
                 const {id} = this.client;
-
-                this.form.put(`/business/clients/${id}/misc`);
                 this.options.post(`/business/custom-fields/client/${id}`);
             }
         }
