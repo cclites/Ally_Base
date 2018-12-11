@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="alert alert-warning" v-if="businesses.length === 0">
-            Please contact Ally to enable SMS messages on your account.
+            Please contact Ally to enable text messages on your account.
         </div>
         <b-card v-else
                 header="Create Message"
@@ -139,9 +139,9 @@ export default {
                 return;
             }
             
-            let confirmMessage = 'Are you sure you wish to send this SMS to the ' + this.selectedUsers.length + ' selected recipients?';
+            let confirmMessage = 'Are you sure you wish to send this text message to the ' + this.selectedUsers.length + ' selected recipients?';
             if (this.form.all) {
-                confirmMessage = 'Are you sure you wish to send this SMS to all active Caregivers?';
+                confirmMessage = 'Are you sure you wish to send this text message to all active Caregivers?';
             }
 
             if (!confirm(confirmMessage)) {
