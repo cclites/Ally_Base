@@ -22,7 +22,7 @@ class UpdateCustomFieldRequest extends BusinessRequest
     public function rules()
     {
         return [
-            'label' => 'required|string|unique:business_custom_fields',
+            'label' => 'required|string',
             'type' => 'required|string|in:dropdown,radio,input,textarea',
             'user_type' => 'required|string|in:client,caregiver',
             'required' => 'required|boolean',
