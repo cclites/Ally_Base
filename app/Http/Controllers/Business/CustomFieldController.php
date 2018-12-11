@@ -18,12 +18,19 @@ class CustomFieldController extends Controller
     /**
      * Display a listing of the resource. 
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('update', activeBusiness());
+        
+        if($request->type != 'caregiver' && $request->type != 'client') {
+            return new ErrorResponse(422, 'An error occured while trying to load custom fields, please try again.');
+        }
+
         $fields = activeBusiness()->chain->fields;
+        $fields = $fields->where('user_type', $request->type);
         $fields = $fields->map(function(CustomField $field) {
             $field->options = $field->options;
             return $field;

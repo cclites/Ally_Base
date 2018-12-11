@@ -25,7 +25,7 @@
         
         async mounted() {
             try {
-                const {data} = await axios.get('/business/custom-fields');
+                const {data} = await axios.get('/business/custom-fields?type=caregiver');
                 const options = {};
 
                 // Populate custom fields
