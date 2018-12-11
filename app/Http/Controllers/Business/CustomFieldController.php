@@ -31,7 +31,7 @@ class CustomFieldController extends Controller
         }
 
         $fields = activeBusiness()->chain->fields;
-        $fields = $fields->where('user_type', $request->type);
+        $fields = $fields->where('user_type', $request->type)->values();
         $fields = $fields->map(function(CustomField $field) {
             $field->options = $field->options;
             return $field;
