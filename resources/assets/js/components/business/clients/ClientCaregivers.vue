@@ -75,7 +75,7 @@
                     <tr v-if="item.rates.fixed.total_rate > 0">
                         <td :class="getTdClass(index)">Daily</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.caregiver_rate) }}</td>
-                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
                         <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.fixed.provider_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.total_rate) }}</td>
@@ -394,13 +394,11 @@
             },
 
             paymentText() {
-                const paymentMethodDetail = this.$store.getters.getPaymentMethodDetail();
-                return paymentMethodDetail.paymentText || this.paymentTypeMessage;
+                return this.paymentMethodDetail.paymentText || this.paymentTypeMessage;
             },
 
             allyRate() {
-                const paymentMethodDetail = this.$store.getters.getPaymentMethodDetail();
-                return paymentMethodDetail.allyRate || this.allyRateOriginal;
+                return this.paymentMethodDetail.allyRate || this.allyRateOriginal;
             },
 
             paymentMethodDetail() {

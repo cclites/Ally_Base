@@ -309,30 +309,18 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
 
         $backup = ($type === 'backup');
-        $redirect = route('business.clients.edit', [$client->id]) . '#payment';
 
         if ($request->input('use_business')) {
-            if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
-            if ($client->setPaymentMethod($this->business(), $backup)) {
-                $allyRate = $client->fresh()->getAllyPercentage();
-                $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
-                $response = new \stdClass();
-                $response -> paymentText = $paymentTypeMessage;
-                $response -> allyRate = $allyRate;
-                return response()->json($response);
-                //return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
+            if (!$client->business->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
+            if ($client->setPaymentMethod($client->business, $backup)) {
+                return $this->paymentMethodResponse($client, 'The payment method has been set to the provider payment account.');
             }
             return new ErrorResponse(500, 'The payment method could not be updated.');
         }
 
         $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
         if ($client->setPaymentMethod($method, $backup)) {
-            $allyRate = $client->fresh()->getAllyPercentage();
-            $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
-            $response = new \stdClass();
-            $response -> paymentText = $paymentTypeMessage;
-            $response -> allyRate = $allyRate;
-            return response()->json($response);
+            return $this->paymentMethodResponse($client, 'The payment method has been updated.');
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
@@ -349,12 +337,16 @@ class ClientController extends BaseController
         }
         $client->save();
 
-        $response = new \stdClass();
-        $allyRate = $client->fresh()->getAllyPercentage();
-        $response -> message = 'The payment method has been deleted.';
-        $response -> paymentText = "Active Payment Type: NONE" . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
-        $response -> allyRate = $allyRate;
-        return response()->json($response);
+        return $this->paymentMethodResponse($client, 'The payment method has been removed.');
+    }
+
+    protected function paymentMethodResponse(Client $client, $message)
+    {
+        $allyRate = $client->getAllyPercentage();
+        $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
+        $data['payment_text'] = $paymentTypeMessage;
+        $data['ally_rate'] = $allyRate;
+        return new SuccessResponse($message, $data);
     }
 
     public function sendConfirmationEmail(Client $client)

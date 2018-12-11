@@ -20,7 +20,7 @@
                 let form = new Form({'use_business': true});
                 form.post(this.submitUrl)
                     .then((response) => {
-                        this.$parent.onUpdatePaymentMethod(response.data);
+                        this.$parent.onUpdatePaymentMethod(response.data.data);
                     });
             }
         },
