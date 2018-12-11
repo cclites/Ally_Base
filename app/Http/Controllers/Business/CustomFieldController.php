@@ -7,6 +7,7 @@ use App\CustomField;
 use App\CustomFieldOption;
 use App\Business;
 use App\Caregiver;
+use App\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCustomFieldRequest;
 use App\Http\Requests\UpdateCustomFieldOptionsRequest;
@@ -62,7 +63,27 @@ class CustomFieldController extends Controller
         $data['chain_id'] = activeBusiness()->chain_id;
         $this->authorize('update', $request->getBusiness());
         
+        $alreadyExist = CustomField::where('chain_id', $data['chain_id'])
+            ->where('label', $data['label'])
+            ->where('user_type', $data['user_type'])
+            ->first();
+
+        if($alreadyExist) {
+            return new ErrorResponse(500, 'This custom field already exists. Please try again.');
+        }
+
         if ($field = CustomField::create($data)) {
+            if($field->required) {
+                // Set the given default value on all users if the field is required
+                $entities= $request->user_type == 'client'
+                    ? Client::forRequestedBusinesses()->get()
+                    : Caregiver::forRequestedBusinesses()->get();
+
+                $entities->each(function($entry) use($field) {
+                    $entry->setMeta($field->key, $field->default_value);
+                });
+            }
+
             return new SuccessResponse('Custom field has been created.', $field);
         }
 
