@@ -22,6 +22,12 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#skills" role="tab">Skills</a>
+        </li>
     </ul>
 
     <!-- Mobile nav tabs (drop down) -->
@@ -33,6 +39,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#bankaccount" role="tab">Direct Deposit</a>
+                <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
+                <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
             </div>
         </li>
     </ul>
@@ -74,6 +82,12 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="tab-pane" id="availability" role="tabpanel">
+            <business-caregiver-availability-tab :caregiver="{{ $user->role }}" updated-by="{{ $user->role->availability->updatedByUser->name ?? '' }}"></business-caregiver-availability-tab>
+        </div>
+        <div class="tab-pane" id="skills" role="tabpanel">
+            <business-caregiver-skills-tab :caregiver="{{ $user->role }}"></business-caregiver-skills-tab>
         </div>
     </div>
 @endsection

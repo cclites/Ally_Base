@@ -294,7 +294,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
                     <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>

@@ -91,11 +91,11 @@
                     <b-col lg="12">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
-                                <input type="checkbox" 
-                                    class="custom-control-input" 
-                                    name="receive_summary_email" 
-                                    v-model="form.receive_summary_email" 
-                                    :true-value="1" 
+                                <input type="checkbox"
+                                    class="custom-control-input"
+                                    name="receive_summary_email"
+                                    v-model="form.receive_summary_email"
+                                    :true-value="1"
                                     :false-value="0"
                                     :disabled="authInactive">
                                 <span class="custom-control-indicator"></span>
@@ -108,7 +108,7 @@
             </template>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit" :disabled="authInactive">Save Profile</b-button>
+                    <b-button variant="success" type="submit" :disabled="authInactive">Save Profile</b-button>
                 </b-col>
             </b-row>
         </form>

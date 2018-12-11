@@ -14,6 +14,7 @@ use App\Responses\SuccessResponse;
 use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
 use App\Traits\Request\BankAccountRequest;
+use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 
 class ProfileController extends Controller
 {
@@ -44,6 +45,8 @@ class ProfileController extends Controller
                     round($user->role->getAllyPercentage($user->role->backupPayment) * 100, 2) .
                     "% Processing Fee)"
             ];
+        } else if ($type == 'caregiver') {
+            $user->role->load(['availability', 'skills']);
         }
 
         return view('profile.' . $type, compact('user', 'payment_type_message'));
@@ -154,4 +157,48 @@ class ProfileController extends Controller
         $client->save();
         return new SuccessResponse('The payment method has been deleted.');
     }
+
+    /**
+     * Update caregiver availability preferences.
+     *
+     * @param UpdateCaregiverAvailabilityRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function preferences(UpdateCaregiverAvailabilityRequest $request)
+    {
+        if (auth()->user()->role_type != 'caregiver' || auth()->user()->active == 0) {
+            abort(403);
+        }
+
+        $caregiver = auth()->user()->role;
+
+        $caregiver->update(['preferences' => $request->input('preferences')]);
+        $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        return new SuccessResponse('Your availability preferences have been saved.');
+    }
+
+    /**
+     * Update caregiver skills preferences.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function skills(Request $request)
+    {
+        if (auth()->user()->role_type != 'caregiver' || auth()->user()->active == 0) {
+            abort(403);
+        }
+
+        $caregiver = auth()->user()->role;
+
+        $request->validate([
+            'skills' => 'array',
+            'skills.*' => 'integer',
+        ]);
+
+        $caregiver->skills()->sync($request->skills);
+
+        return new SuccessResponse('Caregiver skills updated');
+    }
+
 }

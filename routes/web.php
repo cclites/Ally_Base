@@ -79,7 +79,7 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver']
 ], function() {
-
+    Route::get('activities', 'Caregivers\ActivityController@index')->name('caregivers.activities');
     Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
     Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
     Route::get('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@index')->name('caregivers.clients.narrative');
@@ -108,6 +108,9 @@ Route::group([
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 
     Route::post('/profile/bank-account', 'ProfileController@bankAccount');
+    Route::put('/profile/preferences', 'ProfileController@preferences');
+    Route::put('/profile/skills', 'ProfileController@skills');
+
     Route::get('tasks', 'Caregivers\TasksController@index')->name('caregivers.tasks');
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
