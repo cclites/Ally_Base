@@ -6,7 +6,7 @@
         <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="First Name" label-for="firstname">
+                    <b-form-group label="First Name" label-for="firstname" label-class="required">
                         <b-form-input
                             id="firstname"
                             name="firstname"
@@ -18,7 +18,7 @@
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Enter your first name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Last Name" label-for="lastname">
+                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
                         <b-form-input
                             id="lastname"
                             name="lastname"

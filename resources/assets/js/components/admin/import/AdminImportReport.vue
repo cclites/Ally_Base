@@ -107,7 +107,6 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import ShiftHistoryTable from "../../shifts/ShiftHistoryTable";
     import FilterColumnsModal from "../../modals/FilterColumnsModal";
     import ShiftDetailsModal from "../../modals/ShiftDetailsModal";

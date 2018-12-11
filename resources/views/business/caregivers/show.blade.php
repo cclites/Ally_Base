@@ -172,16 +172,6 @@
 @push('scripts')
     <script>
         // Schedule fixes
-        $('.profile-tabs a[data-toggle="tab"]').click(function () {
-            var $link = $(this);
-
-            //remove active class from other tab-panes
-            $('.tab-content:not(.' + $link.attr('href').replace('#','') + ') .tab-pane').removeClass('active');
-
-            // activate tab-pane for active section
-            $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
-        });
-
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
             if (e.target.hash === '#schedule') {

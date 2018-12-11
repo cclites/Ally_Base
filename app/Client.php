@@ -547,6 +547,22 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         }
     }
 
+    /**
+     * Swap the client's primary and backup payment methods
+     *
+     * @throws \Exception
+     */
+    public function swapPaymentMethods()
+    {
+        $this->load(['defaultPayment', 'backupPayment']);
+        $backup = $this->backupPayment;
+        $default = $this->defaultPayment;
+        if (!$backup || !$default) throw new \Exception('Client needs a backup and primary payment method for this method to work.');
+
+        $this->defaultPayment()->associate($backup)->save();
+        $this->backupPayment()->associate($default)->save();
+    }
+
     public function sendConfirmationEmail()
     {
         $confirmation = new Confirmation($this);

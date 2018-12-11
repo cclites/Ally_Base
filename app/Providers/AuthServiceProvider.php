@@ -23,6 +23,7 @@ use App\Policies\GatewayTransactionPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\PhoneNumberPolicy;
 use App\Policies\ProspectPolicy;
+use App\Policies\OtherContactPolicy;
 use App\Policies\RateCodePolicy;
 use App\Policies\ReferralSourcePolicy;
 use App\Policies\SchedulePolicy;
@@ -42,6 +43,7 @@ use App\SystemException;
 use App\Task;
 use App\Timesheet;
 use App\User;
+use App\OtherContact;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\ClientNarrative;
@@ -60,9 +62,11 @@ class AuthServiceProvider extends ServiceProvider
         Caregiver::class => CaregiverPolicy::class,
         CaregiverApplication::class => CaregiverApplicationPolicy::class,
         Client::class => ClientPolicy::class,
+        ClientNarrative::class => ClientNarrativePolicy::class,
         Deposit::class => DepositPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
+        OtherContact::class => OtherContactPolicy::class,
         Payment::class => PaymentPolicy::class,
         PhoneNumber::class => PhoneNumberPolicy::class,
         Prospect::class => ProspectPolicy::class,
@@ -75,7 +79,6 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
-        ClientNarrative::class => ClientNarrativePolicy::class,
     ];
 
     /**

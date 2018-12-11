@@ -17,7 +17,8 @@ class ShiftFlagManager
         return $shift->checked_in_time
                 && $shift->checked_out_time
                 && $shift->isDirty()
-                && !$shift->isDirty('duplicated_by');
+                && !$shift->isDirty('duplicated_by') // avoid generating when attaching duplicates (causes loops)
+                && !$shift->isDirty('status'); // avoid generating when doing status updates (causes deadlocks)
     }
 
     /**

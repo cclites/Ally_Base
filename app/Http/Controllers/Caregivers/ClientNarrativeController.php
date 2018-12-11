@@ -54,6 +54,29 @@ class ClientNarrativeController extends BaseController
     }
 
     /**
+     * Update the client notes.
+     *
+     * @param Request $request
+     * @param Client $client
+     * @param ClientNarrative $narrative
+     * @return SuccessResponse
+     */
+    public function update(Request $request, Client $client, ClientNarrative $narrative)
+    {
+        if (! $this->caregiver()->clients()->where('client_id', $client->id)->exists()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'notes' => 'required|min:1|max:63000',
+        ]);
+
+        $narrative->update(['notes' => $request->notes]);
+        
+        return new SuccessResponse('Your notes have been saved to the Client Narrative.', $narrative);
+    }
+
+    /**
      * Delete narrative notes.
      *
      * @param Request $request
