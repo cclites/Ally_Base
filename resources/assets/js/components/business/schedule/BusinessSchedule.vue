@@ -98,8 +98,8 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             @events-reloaded="loadKpiToolbar"
-            @event-mouseover="hover"
-            @event-mouseout="leave"
+            @event-mouseover="eventHover"
+            @event-mouseout="eventLeave"
             :loading="loading"
         />
 
@@ -562,7 +562,7 @@
             //     this.hidePreview();
             // },
 
-            hover(event, jsEvent, view) {
+            eventHover(event, jsEvent, view) {
                 let target = null;
                 
                 if ($(jsEvent.currentTarget).is('a')) {
@@ -584,11 +584,11 @@
                         .catch(function(error) {
                             this.hoverShift = {};
                         });
-                }.bind(this, event, target), 1500);
+                }.bind(this, event, target), 1000);
 
             },
 
-            leave() {
+            eventLeave() {
                 if (this.previewTimer) {
                     clearTimeout(this.previewTimer);
                     this.previewTimer = null;
