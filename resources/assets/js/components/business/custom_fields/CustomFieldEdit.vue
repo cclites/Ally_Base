@@ -159,6 +159,12 @@
 
         mixins: [FormatsStrings],
 
+        mounted() {
+            if(this.field && this.field.options.length > 0) {
+                this.options = this.field.options.map(field => field.label);
+            }
+        },
+
         data() {
             return {
                 submitting: false,

@@ -151,7 +151,7 @@ class CustomFieldController extends Controller
      */
     public function show($id)
     {
-        $field = CustomField::findOrFail($id);
+        $field = CustomField::findOrFail($id)->load('options');
         return view('business.custom_fields.show', compact('field'));
     }
 
