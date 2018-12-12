@@ -460,6 +460,9 @@
                         </b-col>
                     </b-row>
                 </b-tab>
+                <b-tab title="Custom fields">
+                    <custom-field-list />
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
