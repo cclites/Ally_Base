@@ -11,7 +11,7 @@
                 @filtered="onFiltered"
             >
                 <template v-for="field in columns" :slot="field.key || field" scope="data">
-                    <slot v-bind="data" :name="field.key || field"> {{ data.item[field.key || field] }}</slot>
+                    <slot v-bind="data" :name="field.key || field"> {{ renderCell(data.item, field) }}</slot>
                 </template>
             </b-table>
         </div>
@@ -53,11 +53,16 @@ export default {
     },
 
     methods: {
-      onFiltered(filteredItems) {
+        onFiltered(filteredItems) {
             // Trigger pagination to update the number of buttons/pages due to filtering
             this.totalRows = filteredItems.length;
             this.currentPage = 1;
-        },  
+        },
+        
+        renderCell(row, field) {
+            const value = row[field.key || field];
+            return field.formatter ? field.formatter(value) : value;
+        },
     },
 }
 </script>
