@@ -42,10 +42,11 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the prospect will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Office Location" label-for="business_id">
-                        <business-location-select v-model="form.business_id"></business-location-select>
-                        <input-help :form="form" field="business_id" text="Select the type of payment the prospect will use."></input-help>
-                    </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                                                  form="form"
+                                                  field="business_id"
+                                                  help-text="Select the office location for the prospect.">
+                    </business-location-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -184,10 +185,11 @@
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
     import ReferralSourceSelect from "../referral/ReferralSourceSelect";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect, ReferralSourceSelect},
+        components: {BusinessLocationFormGroup, ReferralSourceSelect},
+
         props: ['prospect', 'referralsources'],
 
         data() {
