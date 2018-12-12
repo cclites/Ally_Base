@@ -72,7 +72,7 @@
                         key: 'created_at',
                         label: 'Date Created',
                         sortable: false,
-                        formatter: this.formatDate,
+                        formatter: (value) => this.formatDate(value),
                     },
                     'action',
                 ],
