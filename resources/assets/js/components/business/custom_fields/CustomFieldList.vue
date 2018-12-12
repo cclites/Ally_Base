@@ -4,17 +4,10 @@
 
         <div v-show="! loading">
             <b-btn variant="info" class="mb-3" href="/business/custom-fields/create">Create custom field</b-btn>
-
-            <h3>Caregiver fields</h3>
-            <div class="table-responsive">
-                <b-table bordered striped hover show-empty
-                        :items="fields.caregiver"
-                        :fields="tableColumns"
-                        :current-page="currentPage"
-                        :per-page="perPage"
-                        :sort-by.sync="sortBy"
-                        @filtered="onFiltered"
-                >
+            
+            <div v-for="(userType, i) in ['caregiver', 'client']" :key="i">
+                <h3>{{uppercaseWords(userType)}} fields</h3>
+                <ally-table :columns="tableColumns" :items="fields[userType]">
                     <template slot="type" scope="data">
                         {{ fromTypeToText(data.item.type) }}
                     </template>
@@ -29,26 +22,19 @@
                             <i class="fa fa-edit"></i>
                         </b-btn>
                     </template>
-                </b-table>
+                </ally-table>
+                <hr/>
             </div>
-
-            <b-row>
-                <b-col lg="6">
-                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage"/>
-                </b-col>
-                <b-col lg="6" class="text-right">
-                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-                </b-col>
-            </b-row>
         </div>
     </div>
 </template>
 
 <script>
     import FormatsDates from '../../../mixins/FormatsDates';
+    import FormatsStrings from '../../../mixins/FormatsStrings';
 
     export default {      
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, FormatsStrings ],
 
         mounted() {
             this.fetch();
@@ -86,6 +72,7 @@
                         key: 'created_at',
                         label: 'Date Created',
                         sortable: false,
+                        formatter: this.formatDate,
                     },
                     'action',
                 ],
