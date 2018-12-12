@@ -77,7 +77,7 @@ class CustomFieldController extends Controller
 
         if ($field = CustomField::create($data)) {
             if($field->required) {
-                // Set the given default value on all users if the field is required
+                // Set the given default value on all users
                 $entities= $request->user_type == 'client'
                     ? Client::forRequestedBusinesses()->get()
                     : Caregiver::forRequestedBusinesses()->get();
@@ -188,7 +188,8 @@ class CustomFieldController extends Controller
     public function update(UpdateCustomFieldRequest $request, $id)
     {
         $data = $request->filtered();
-        $this->authorize('update', $request->getBusiness());
+        $field = CustomField::findOrFail($id);
+        $this->authorize('update', $field);
 
         if ($field->update($data)) {
             return new SuccessResponse('Custom field has been saved.', $field->fresh());
@@ -205,7 +206,8 @@ class CustomFieldController extends Controller
      */
     public function destroy($id)
     {
-        $this->authorize('delete', $field->business);
+        $field = CustomField::findOrFail($id);
+        $this->authorize('delete', $field);
 
         if ($field->delete()) {
             return new SuccessResponse('The field has been deleted.');
