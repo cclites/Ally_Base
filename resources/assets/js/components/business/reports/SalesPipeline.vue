@@ -31,9 +31,11 @@
                         </b-col>
 
                         <b-col lg="3">
-                            <b-form-group label="Office Location">
-                                <business-location-select v-model="form.businesses[0]" :allow-all="true"></business-location-select>
-                            </b-form-group>
+                            <business-location-form-group v-model="form.business_id"
+                                                          form="form"
+                                                          field="business_id"
+                                                          :allow-all="true">
+                            </business-location-form-group>
                         </b-col>
 
                         <b-col lg="2">
@@ -69,14 +71,13 @@
 </template>
 
 <script>
-import axios from 'axios';
 import ECharts from 'vue-echarts';
 import moment from 'moment';
-import BusinessLocationSelect from "../BusinessLocationSelect";
+import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
 export default {
     components: {
-        BusinessLocationSelect,
+        BusinessLocationFormGroup,
         ECharts,
     },
     mounted() {

@@ -7,6 +7,7 @@
                     :phone="number"
                     :user="user"
                     :key="number.id || number.type"
+                    :allow-sms="true"
                     @created="refreshPhoneNumbers('The phone number has been saved.')"
                     @updated="refreshPhoneNumbers()"
                     @deleted="refreshPhoneNumbers()">

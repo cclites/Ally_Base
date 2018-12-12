@@ -24,10 +24,11 @@
                         <input-help :form="form" field="notes" text="" />
                     </b-form-group>
 
-                    <b-form-group label="Office Location" label-for="notes">
-                        <business-location-select v-model="form.business_id"></business-location-select>
-                        <input-help :form="form" field="business_id" text="" />
-                    </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                                                   form="form"
+                                                   field="business_id"
+                                                   help-text="">
+                    </business-location-form-group>
 
                     <b-form-group>
                         <label label-for="assigned_user_id">Assigned to
@@ -80,9 +81,11 @@
 
 <script>
     import FormatsDates from "../../../mixins/FormatsDates";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
+
         mixins: [FormatsDates],
 
         props: {

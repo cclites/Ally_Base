@@ -6,7 +6,6 @@
                  size="lg"
                  :no-close-on-backdrop="true"
                  v-model="scheduleModal"
-                 v-if="!maxHoursWarning"
         >
             <loading-card text="Loading details" v-show="isLoading"></loading-card>
             <b-card no-body v-if="!isLoading">
@@ -210,13 +209,13 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Care Plan Requested by Client" label-for="care_plan_id">
+                                <b-form-group label="Service Needs/ADL Groups" label-for="care_plan_id">
                                     <b-form-select
                                             id="care_plan_id"
                                             name="care_plan_id"
                                             v-model="form.care_plan_id"
                                     >
-                                        <option value="">--No Care Plan--</option>
+                                        <option value="">--None--</option>
                                         <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="care_plan_id" text="" />
@@ -310,18 +309,13 @@
                 <b-btn variant="default" @click="scheduleModal=false">Close</b-btn>
             </div>
         </b-modal>
-        <b-modal id="maxHoursWarning" title="Schedule Shift" v-model="scheduleModal" v-else-if="maxHoursWarning">
-            <b-container fluid>
-                <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn variant="default" @click="scheduleModal=false">No, Cancel</b-btn>
-                <b-btn variant="danger" @click="submitForm()" :disabled="submitting">
-                    <i class="fa fa-spinner fa-spin" v-show="submitting"></i>
-                    Yes, Save
-                </b-btn>
-            </div>
-        </b-modal>
+        <confirmation-modal v-model="maxHoursWarning"
+                            title="Confirm Service Auth Override"
+                            @confirm="overrideMaxHours()"
+                            @cancel="scheduleModal=false"
+        >
+            <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
+        </confirmation-modal>
     </div>
 </template>
 
@@ -329,8 +323,10 @@
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import RateCodes from "../../../mixins/RateCodes";
     import RateFactory from "../../../classes/RateFactory";
+    import ConfirmationModal from "../../modals/ConfirmationModal";
 
     export default {
+        components: {ConfirmationModal},
         mixins: [FormatsNumbers, RateCodes],
 
         props: {
@@ -534,7 +530,6 @@
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
-                    'care_plan_id': "",
                 });
                 this.setDateTimeFromSchedule();
             },
@@ -673,23 +668,18 @@
                 this.scheduleModal = false;
             },
 
-            showMaxHoursWarning(response) {
-                this.maxHoursWarning = true;
-                // Recreate the form with max override
+            overrideMaxHours() {
                 let data = this.form.data();
                 data.override_max_hours = 1;
                 this.form = new Form(data);
-            },
-
-            hideMaxHoursWarning() {
-                this.maxHoursWarning = false;
+                this.submitForm();
             },
 
             handleErrors(error) {
                 if (error.response) {
                     switch(error.response.status) {
                         case 449:
-                            this.showMaxHoursWarning(error.response);
+                            this.maxHoursWarning = true;
                             break;
                     }
                 }
@@ -737,11 +727,6 @@
 
         watch: {
             model(val) {
-                // Hide warning modal if hiding this modal
-                if (!val) {
-                    this.hideMaxHoursWarning();
-                }
-
                 // Update local modal bool
                 this.scheduleModal = val;
             },

@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::resource('/profile/phone', 'PhoneController');
+    Route::patch('/profile/phone/{phone}/sms', 'PhoneController@updateSmsNumber');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -249,6 +250,12 @@ Route::group([
     Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
+    Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
+    Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
+    Route::get('reports/caregiver-directory', 'Business\ReportsController@caregiverDirectory')->name('reports.caregiver_directory');
+    Route::get('reports/caregiver-directory/download', 'Business\ReportsController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
+    Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
+    Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
