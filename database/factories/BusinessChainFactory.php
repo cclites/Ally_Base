@@ -4,8 +4,10 @@ use Faker\Generator as Faker;
 use App\BusinessChain;
 
 $factory->define(BusinessChain::class, function(Faker $faker) {
+    $companyName = $faker->unique()->company;
     return [
-        'name' => $faker->unique()->company,
+        'name' => $companyName,
+        'slug' => str_Slug($companyName),
         'address1' => $faker->streetAddress,
         'address2' => null,
         'city' => $faker->city,
