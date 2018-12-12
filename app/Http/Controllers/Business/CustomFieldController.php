@@ -163,7 +163,8 @@ class CustomFieldController extends Controller
      */
     public function show($id)
     {
-        //
+        $field = CustomField::findOrFail($id);
+        return view('business.custom_fields.show', compact('field'));
     }
 
     /**
