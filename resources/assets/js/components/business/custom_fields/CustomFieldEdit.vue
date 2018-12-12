@@ -8,6 +8,7 @@
                             id="user_type"
                             name="user_type"
                             v-model="form.user_type"
+                            :disabled="!!field.id"
                         >
                             <option value="">--Select--</option>
                             <option value="client">Clients</option>
@@ -21,6 +22,7 @@
                             id="type"
                             name="type"
                             v-model="form.type"
+                            :disabled="!!field.id"
                             required
                         >
                             <option value="">--Select--</option>
@@ -49,8 +51,8 @@
                 <b-col lg="6">
                     <b-form-group label="Is this field required?" label-class="required">
                         <b-form-radio-group v-model="form.required" name="required" required>
-                            <b-form-radio :value="true">Yes</b-form-radio>
-                            <b-form-radio :value="false">No</b-form-radio>
+                            <b-form-radio :value="1">Yes</b-form-radio>
+                            <b-form-radio :value="0">No</b-form-radio>
                         </b-form-radio-group>
                         <input-help :form="form" field="required" />
                     </b-form-group>
@@ -88,8 +90,8 @@
                             name="default_value" 
                             required
                         >
-                            <b-form-radio :value="true">Yes</b-form-radio>
-                            <b-form-radio :value="false">No</b-form-radio>
+                            <b-form-radio :value="1">Yes</b-form-radio>
+                            <b-form-radio :value="0">No</b-form-radio>
                         </b-form-radio-group>
                         <input-help :form="form" field="default_value" :text="`Whenever an input is required then a default value will be given to all the existing ${form.user_type ? form.user_type : 'user'}s`" />
                     </b-form-group>
