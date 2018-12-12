@@ -15,6 +15,15 @@
                         :sort-by.sync="sortBy"
                         @filtered="onFiltered"
                 >
+                    <template slot="type" scope="data">
+                        {{ fromTypeToText(data.item.type) }}
+                    </template>
+                    <template slot="required" scope="data">
+                        {{ fromBoolToText(data.item.required) }}
+                    </template>
+                    <template slot="default_value" scope="data">
+                        {{ data.item.required ? convertDefault(data.item) : 'None' }}
+                    </template>
                     <template slot="action" scope="data">
                         <b-btn variant="secondary" :href="`/business/custom-fields/${data.item.id}`">
                             <i class="fa fa-edit"></i>
@@ -70,13 +79,13 @@
                     },
                     {
                         key: 'default_value',
-                        label: 'Default',
+                        label: 'Default answer',
                         sortable: false
                     },
                     {
                         key: 'created_at',
                         label: 'Date Created',
-                        sortable: false
+                        sortable: false,
                     },
                     'action',
                 ],
@@ -98,6 +107,32 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
+            },
+
+            fromBoolToText(boolean) {
+                return !!boolean ? 'Yes' : 'No';
+            },
+
+            fromTypeToText(type) {
+                if(type == 'input') {
+                    return 'Small text';
+                }else if (type == 'textarea') {
+                    return 'Big text';
+                }else if (type == 'radio') {
+                    return 'Yes/No Question';
+                }else if(type == 'dropdown') {
+                    return 'List';
+                }
+            },
+
+            convertDefault({default_value, type, options}) {
+                if(type == 'radio') {
+                    return this.fromBoolToText(default_value);
+                }else if(type == 'dropdown') {
+                    return options.find(option => option.value == default_value).label;
+                }else {
+                    return default_value.length > 25 ? default_value.substring(0, 25) : default_value;
+                }
             },
 
             async fetch() {
