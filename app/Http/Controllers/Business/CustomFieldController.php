@@ -26,12 +26,15 @@ class CustomFieldController extends Controller
     {
         $this->authorize('update', activeBusiness());
         
-        if($request->type != 'caregiver' && $request->type != 'client') {
+        if($request->type != 'caregiver' && $request->type != 'client' && $request->type != 'all') {
             return new ErrorResponse(422, 'An error occured while trying to load custom fields, please try again.');
         }
 
         $fields = activeBusiness()->chain->fields;
-        $fields = $fields->where('user_type', $request->type)->values();
+        if($request->type != 'all') {
+            $fields = $fields->where('user_type')->values();
+        }
+
         $fields = $fields->map(function(CustomField $field) {
             $field->options = $field->options;
             return $field;
