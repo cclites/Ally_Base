@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="alert alert-warning" v-if="businesses.length === 0">
-            Please contact Ally to enable SMS messages on your account.
+            Please contact Ally to enable text messages on your account.
         </div>
         <b-card v-else
                 header="Create Message"
@@ -60,11 +60,11 @@
                     </div>
                     <input-help :form="form" field="recipients" text=""></input-help>
                 </b-form-group>
-                <b-form-group label="From Number">
+                <b-form-group label="From Number" label-class="required">
                     <business-location-select v-model="form.business_id" required></business-location-select>
                     <input-help :form="form" field="business_id" text=""></input-help>
                 </b-form-group>
-                <b-form-group label="Message">
+                <b-form-group label="Message" label-class="required">
                     <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
                     <input-help :form="form" field="message" text=""></input-help>
                 </b-form-group>
@@ -139,9 +139,9 @@ export default {
                 return;
             }
             
-            let confirmMessage = 'Are you sure you wish to send this SMS to the ' + this.selectedUsers.length + ' selected recipients?';
+            let confirmMessage = 'Are you sure you wish to send this text message to the ' + this.selectedUsers.length + ' selected recipients?';
             if (this.form.all) {
-                confirmMessage = 'Are you sure you wish to send this SMS to all active Caregivers?';
+                confirmMessage = 'Are you sure you wish to send this text message to all active Caregivers?';
             }
 
             if (!confirm(confirmMessage)) {

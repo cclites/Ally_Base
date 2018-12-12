@@ -233,7 +233,7 @@
                         },
                         {
                             name: 'Caregiver Directory',
-                            url: 'caregivers',
+                            url: 'reports/caregiver-directory',
                             description: 'Shows the full list of caregivers',
                             category: 3
                         },
@@ -247,6 +247,12 @@
                             name: 'Prospects',
                             url: 'reports/prospects',
                             description: 'Shows the list of prospective clients',
+                            category: 1
+                        },
+                        {
+                            name: 'Prospects Directory',
+                            url: 'reports/prospect-directory',
+                            description: 'Shows the full list of prospective clients',
                             category: 1
                         },
                         {

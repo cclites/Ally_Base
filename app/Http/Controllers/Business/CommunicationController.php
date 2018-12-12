@@ -47,7 +47,7 @@ class CommunicationController extends Controller
                 ->with(['phoneNumbers', 'user'])
                 ->get()
                 ->map(function($caregiver) {
-                    $caregiver->phone = $caregiver->default_phone;
+                    $caregiver->phone = $caregiver->smsNumber ? $caregiver->smsNumber->number : $caregiver->default_phone;
                     $caregiver->role_type = $caregiver->user->role_type;
                     return $caregiver->only(['id', 'name', 'role_type', 'phone']);
                 })
@@ -118,7 +118,7 @@ class CommunicationController extends Controller
         $from = $business->outgoing_sms_number;
         if (empty($from)) {
             if ($request->input('can_reply')) {
-                return new ErrorResponse(422, 'You cannot receive SMS replies at this time because you have not been assigned a unique outgoing SMS number, please contact Ally.');
+                return new ErrorResponse(422, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
             }
 
             $from = PhoneNumber::formatNational(config('services.twilio.default_number'));
@@ -135,14 +135,9 @@ class CommunicationController extends Controller
         $this->authorize('create', [SmsThread::class, $data]);
         $thread = SmsThread::create($data);
 
-        // send txt to all primary AND mobile numbers
+        // send txt to caregivers default txt number
         foreach ($recipients as $recipient) {
-            if ($number = $recipient->phoneNumbers->where('type', 'primary')->first()) {
-                dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
-                $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
-            }
-
-            if ($number = $recipient->phoneNumbers->where('type', 'mobile')->first()) {
+            if ($number = $recipient->smsNumber) {
                 dispatch(new SendTextMessage($number->number(false), $request->message, $business->outgoing_sms_number));
                 $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
             }
@@ -269,7 +264,7 @@ class CommunicationController extends Controller
      */
     public function otherReplies()
     {
-        $replies = SmsThreadReply::where('business_id', activeBusiness()->id)
+        $replies = SmsThreadReply::forRequestedBusinesses()
             ->whereNull('sms_thread_id')
             ->latest()
             ->get();

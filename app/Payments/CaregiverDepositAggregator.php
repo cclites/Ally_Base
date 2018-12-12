@@ -82,11 +82,15 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
     {
         $deposit = $this->getDeposit();
         if ($deposit->amount <= 0) {
+            $this->log('Deposit amount < 0');
             return false;
         }
 
         $account = $this->caregiver->bankAccount;
-        if (!$account) return false;
+        if (!$account) {
+            $this->log('No bank account found');
+            return false;
+        }
 
         try {
             // Process Deposit and Update Status in a Transaction
@@ -95,6 +99,7 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
             // Attempt to update status of all shifts
             foreach($this->getShifts() as $shift) {
                 if (!$shift->statusManager()->ackCaregiverDeposit()) {
+                    $this->log('Unable to acknowledge caregiver deposits on shift status manager.');
                     DB::rollBack();
                     return false;
                 }
@@ -107,6 +112,7 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
             // Process Deposit
             $gateway = new ECSPayment();
             if (!$transaction = $gateway->depositFunds($account, $deposit->amount)) {
+                $this->log('Unable to get transaction from Gateway\'s depositFunds method.');
                 DB::rollBack();
                 return false;
             }
@@ -122,8 +128,14 @@ class CaregiverDepositAggregator implements DepositAggregatorInterface
             return $transaction;
         }
         catch(\Exception $e) {
+            $this->log('Exception: ' . $e->getMessage());
             DB::rollBack();
             return false;
         }
+    }
+
+    protected function log($message) {
+        $prefix = "[CaregiverDepositAggregator: " . $this->caregiver->id . "] ";
+        \Log::debug($prefix.$message);
     }
 }

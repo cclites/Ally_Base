@@ -1,23 +1,23 @@
 <template>
     <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
         <b-form-group label="Nickname" label-for="nickname">
-            <b-form-input type="text" v-model="form.nickname" />
+            <b-form-input type="text" v-model="form.nickname" :readonly="readonly" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this card."></input-help>
         </b-form-group>
         <b-form-group label="Name on Card" label-for="name_on_card">
-            <b-form-input type="text" v-model="form.name_on_card" />
+            <b-form-input type="text" v-model="form.name_on_card" :readonly="readonly" />
             <input-help :form="form" field="name_on_card" text="Please enter your name, as it appears on the card."></input-help>
         </b-form-group>
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Card Number" label-for="number">
-                    <b-form-input type="text" autocomplete="off" v-model="form.number" />
+                    <b-form-input type="text" autocomplete="off" v-model="form.number" :readonly="readonly" />
                     <input-help :form="form" field="number" text="Provide your credit card number"></input-help>
                 </b-form-group>
             </b-col>
             <b-col lg="6" >
                 <b-form-group label="Confirm Card Number" label-for="number_confirmation">
-                    <b-form-input type="text" autocomplete="off" v-model="form.number_confirmation" />
+                    <b-form-input type="text" autocomplete="off" v-model="form.number_confirmation" :readonly="readonly" />
                     <input-help :form="form" field="number_confirmation" text="Re-enter your credit card number"></input-help>
                 </b-form-group>
             </b-col>
@@ -25,7 +25,7 @@
         <b-row>
             <b-col lg="5">
                 <b-form-group label="CVV" label-for="cvv">
-                    <b-form-input type="text" autocomplete="off" v-model="form.cvv" />
+                    <b-form-input type="text" autocomplete="off" v-model="form.cvv" :readonly="readonly" />
                     <input-help :form="form" field="cvv" text="The code on the back of the card"></input-help>
                 </b-form-group>
             </b-col>
@@ -33,17 +33,17 @@
         <b-form-group label="Card Expiration" label-for="">
             <b-row>
                 <b-col lg="6">
-                    <b-form-select v-model="form.expiration_month" :options="months" />
+                    <b-form-select v-model="form.expiration_month" :options="months" :disabled="readonly" />
                     <input-help :form="form" field="expiration_month" text="Expiration Month"></input-help>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-select v-model="form.expiration_year" :options="years" />
+                    <b-form-select v-model="form.expiration_year" :options="years" :disabled="readonly" />
                     <input-help :form="form" field="expiration_year" text="Expiration Year"></input-help>
                 </b-col>
             </b-row>
         </b-form-group>
         <b-form-group>
-            <b-button variant="success" type="submit" size="">Save Credit Card</b-button>
+            <b-button variant="success" type="submit" size="" :disabled="readonly">Save Credit Card</b-button>
         </b-form-group>
     </form>
 </template>
@@ -55,6 +55,7 @@
             'client': {},
             'card': {},
             'source': {},
+            'readonly': false,
         },
 
         data() {

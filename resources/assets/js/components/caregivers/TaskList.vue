@@ -40,8 +40,8 @@
                     </template>
                     <template slot="actions" scope="row">
                         <b-btn size="sm" variant="secondary" @click.stop="view(row.item)" :disabled="busy"><i class="fa fa-eye"></i></b-btn>
-                        <b-btn v-if="! row.item.completed_at" size="sm" variant="info" @click.stop="complete(row.item)" :disabled="busy"><i class="fa fa-check"></i></b-btn>
-                        <b-btn v-else size="sm" variant="info" @click.stop="complete(row.item, false)" :disabled="busy"><i class="fa fa-undo"></i></b-btn>
+                        <b-btn v-if="! row.item.completed_at" size="sm" variant="info" @click.stop="complete(row.item)" :disabled="authInactive || busy"><i class="fa fa-check"></i></b-btn>
+                        <b-btn v-else size="sm" variant="info" @click.stop="complete(row.item, false)" :disabled="authInactive || busy"><i class="fa fa-undo"></i></b-btn>
                     </template>
                 </b-table>
             </b-col>
@@ -67,9 +67,10 @@
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
+    import AuthUser from '../../mixins/AuthUser';
 
     export default {
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, AuthUser ],
 
         props: {
         },

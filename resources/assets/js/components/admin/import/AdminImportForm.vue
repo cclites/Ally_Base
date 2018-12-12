@@ -1,7 +1,7 @@
 <template>
     <form @submit.prevent="startImport()" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="name">Import Name: </label>
+            <label for="name" label-class="required">Import Name: </label>
             <input id="name" v-model="localName" class="form-control" maxlength="16" required />
         </div>
 

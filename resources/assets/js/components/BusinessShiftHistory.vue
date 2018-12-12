@@ -136,7 +136,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ selectedItem.checked_in_distance }}m</td>
+                                <td>{{ convertToMiles(selectedItem.checked_in_distance) }} mi</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="selectedItem.checked_in_number">
@@ -166,7 +166,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ selectedItem.checked_out_distance }}m</td>
+                                <td>{{ convertToMiles(selectedItem.checked_out_distance) }} mi</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="selectedItem.checked_out_number">
@@ -194,6 +194,7 @@
 
 <script>
     import Form from "../classes/Form";
+    import FormatsDistance from "../mixins/FormatsDistance";
 
     export default {
         props: {
@@ -203,6 +204,8 @@
                 }
             },
         },
+
+        mixins: [FormatsDistance],
 
         data() {
             return {

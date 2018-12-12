@@ -1,11 +1,11 @@
 <template>
     <form @submit.prevent="submit()" @keydown="formKeyDown($event)">
         <b-form-group label="Nickname" label-for="nickname">
-            <b-form-input type="text" v-model="form.nickname" />
+            <b-form-input type="text" v-model="form.nickname" :readonly="readonly" />
             <input-help :form="form" field="nickname" text="Optionally provide a nickname for this account."></input-help>
         </b-form-group>
         <b-form-group label="Name on Account" label-for="name_on_account">
-            <b-form-input type="text" v-model="form.name_on_account" />
+            <b-form-input type="text" v-model="form.name_on_account" :readonly="readonly" />
             <input-help :form="form" field="name_on_account" text="Please enter your name, as it appears on the account."></input-help>
         </b-form-group>
         <b-row>
@@ -17,6 +17,7 @@
                             v-on:cut.native.prevent
                             v-on:copy.native.prevent
                             v-on:paste.native.prevent
+                            :readonly="readonly"
                     />
                     <input-help :form="form" field="routing_number" text="Provide your bank's routing number"></input-help>
                 </b-form-group>
@@ -29,6 +30,7 @@
                             v-on:cut.native.prevent
                             v-on:copy.native.prevent
                             v-on:paste.native.prevent
+                            :readonly="readonly"
                     />
                     <input-help :form="form" field="routing_number_confirmation" text="Re-enter your bank's routing number"></input-help>
                 </b-form-group>
@@ -43,6 +45,7 @@
                             v-on:cut.native.prevent
                             v-on:copy.native.prevent
                             v-on:paste.native.prevent
+                            :readonly="readonly"
                     />
                     <input-help :form="form" field="account_number" text="Provide your bank's account number"></input-help>
                 </b-form-group>
@@ -55,6 +58,7 @@
                             v-on:cut.native.prevent
                             v-on:copy.native.prevent
                             v-on:paste.native.prevent
+                            :readonly="readonly"
                     />
                     <input-help :form="form" field="account_number_confirmation" text="Re-enter your bank's account number"></input-help>
                 </b-form-group>
@@ -63,7 +67,7 @@
         <b-row>
             <b-col lg="6">
                 <b-form-group label="Account Type" label-for="account_type">
-                    <b-form-select v-model="form.account_type">
+                    <b-form-select v-model="form.account_type" :disabled="readonly">
                         <option value="checking">Checking</option>
                         <option value="savings">Savings</option>
                     </b-form-select>
@@ -72,7 +76,7 @@
             </b-col>
             <b-col lg="6">
                 <b-form-group label="Holder Type" label-for="account_holder_type">
-                    <b-form-select v-model="form.account_holder_type">
+                    <b-form-select v-model="form.account_holder_type" :disabled="readonly">
                         <option value="personal">Personal</option>
                         <option value="business">Business</option>
                     </b-form-select>
@@ -81,7 +85,7 @@
             </b-col>
         </b-row>
         <b-form-group>
-            <b-button :variant="buttonVariant" type="submit" size="" :disabled="submitting">
+            <b-button :variant="buttonVariant" type="submit" size="" :disabled="readonly || submitting">
                 <i class="fa fa-spin fa-spinner" v-show="submitting"></i> {{ buttonText }}
             </b-button>
         </b-form-group>
@@ -95,6 +99,7 @@
             'account': {},
             'source': {},
             'businessId': '',
+            'readonly': false,
         },
 
         data() {
