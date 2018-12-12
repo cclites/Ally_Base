@@ -190,7 +190,11 @@
         methods: {
 
             getOriginal(attribute, defaultValue = '') {
-                return this.field ? this.field[attribute] : defaultValue;
+                const defaultVal = this.field && this.field.required 
+                    ? this.field.default_value
+                    : defaultValue;
+
+                return this.field ? this.field[attribute] : defaultVal;
             },
 
             addOption() {
@@ -235,7 +239,7 @@
             destroy() {
                 if (!confirm(`Are you sure you wish to delete this field?`)) return;
                 const form = new Form({});
-                form.submit('delete', `/business/prospects/${this.field.id}`);
+                form.submit('delete', `/business/custom-fields/${this.field.id}`);
             },
         },
 

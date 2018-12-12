@@ -32,7 +32,7 @@ class CustomFieldController extends Controller
 
         $fields = activeBusiness()->chain->fields;
         if($request->type != 'all') {
-            $fields = $fields->where('user_type')->values();
+            $fields = $fields->where('user_type', $request->type)->values();
         }
 
         $fields = $fields->map(function(CustomField $field) {
@@ -76,17 +76,6 @@ class CustomFieldController extends Controller
         }
 
         if ($field = CustomField::create($data)) {
-            if($field->required) {
-                // Set the given default value on all users
-                $entities= $request->user_type == 'client'
-                    ? Client::forRequestedBusinesses()->get()
-                    : Caregiver::forRequestedBusinesses()->get();
-
-                $entities->each(function($entry) use($field) {
-                    $entry->setMeta($field->key, $field->default_value);
-                });
-            }
-
             return new SuccessResponse('Custom field has been created.', $field);
         }
 
@@ -143,9 +132,8 @@ class CustomFieldController extends Controller
             $instance = Client::findOrFail($id);
             $this->authorize('update', $instance);
         }
-            
-        $customFields = activeBusiness()->chain->fields->pluck('key');
 
+        $customFields = activeBusiness()->chain->fields->pluck('key');
         foreach ($customFields as $key) {
             if($request->has($key) && $request->input($key)) {
                 $instance->setMeta($key, $request->input($key));

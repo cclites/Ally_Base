@@ -29,14 +29,17 @@
                 const options = {};
 
                 // Populate custom fields
-                data.forEach(({key}) => {
+                data.forEach(({key, default_value}) => {
                     const caregiverFieldValue = this.caregiver.meta.find(field => key == field.key);
-                    options[key] = caregiverFieldValue ? caregiverFieldValue.value : '';
+                    const defaultVal = default_value || '';
+                    options[key] = caregiverFieldValue ? caregiverFieldValue.value : defaultVal;
                 });
 
                 this.customs = data;
                 this.options = new Form(options);
-            }catch(error) {}
+            }catch(error) {
+                console.error(error)
+            }
         },
 
         data() {
