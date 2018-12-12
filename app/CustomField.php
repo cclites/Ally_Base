@@ -5,9 +5,16 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\BusinessChain;
 use App\CustomFieldOption;
+use App\Contracts\BelongsToChainsInterface;
+use App\Traits\BelongsToBusinesses;
+use App\Traits\BelongsToOneChain;
+use App\Contracts\BelongsToBusinessesInterface;
+use Illuminate\Database\Eloquent\Builder;
 
-class CustomField extends Model
+class CustomField extends Model implements BelongsToBusinessesInterface, BelongsToChainsInterface
 {
+    use BelongsToBusinesses, BelongsToOneChain;
+
     /**
      * The database table associated with this model
      * 
@@ -48,5 +55,27 @@ class CustomField extends Model
     public function options()
     {
         return $this->hasMany(CustomFieldOption::class, 'field_id');
+    }
+
+    /**
+     * Return an array of business IDs the entity is attached to
+     *
+     * @return array
+     */
+    public function getBusinessIds()
+    {
+        return $this->businessChain->businesses->pluck('id')->toArray();
+    }
+
+    /**
+     * A query scope for filtering results by related business IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $businessIds
+     * @return void
+     */
+    public function scopeForBusinesses(Builder $builder, array $businessIds)
+    {
+        $builder->whereIn('id', $businessIds);
     }
 }
