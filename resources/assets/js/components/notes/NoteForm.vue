@@ -24,9 +24,11 @@
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>
-                <b-form-group label="Office Location">
-                    <business-location-select v-model="form.business_id"></business-location-select>
-                </b-form-group>
+                <business-location-form-group v-model="form.business_id"
+                                              form="form"
+                                              field="business_id"
+                                              help-text="">
+                </business-location-form-group>
                 <b-form-group label="Tags" label-for="tags">
                     <b-form-input
                             id="tags"
@@ -55,9 +57,11 @@
 </template>
 
 <script>
-    import BusinessLocationSelect from "../business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../business/BusinessLocationFormGroup";
+
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
+
         props: {
             client: {
                 type: Object,

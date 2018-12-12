@@ -48,10 +48,11 @@
                 </div>
                 <input-help :form="form" field="provider_pay" text="Set the payment method to the registry's bank account."></input-help>
             </b-form-group>
-            <b-form-group label="Office Location" label-for="business_id">
-                <business-location-select v-model="form.business_id"></business-location-select>
-                <input-help :form="form" field="business_id" text="Select the business location for this client (if applicable)."></input-help>
-            </b-form-group>
+            <business-location-form-group v-model="form.business_id"
+                                          form="form"
+                                          field="business_id"
+                                          help-text="Select the office location for the client.">
+            </business-location-form-group>
         </b-col>
         <b-col lg="6">
             <b-form-group label="Email Address" label-for="email">
@@ -116,10 +117,10 @@
 
 <script>
     import ClientForm from '../../mixins/ClientForm';
-    import BusinessLocationSelect from "../business/BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../business/BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         mixins: [ClientForm],
 
         props: {
