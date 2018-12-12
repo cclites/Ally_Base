@@ -65,6 +65,7 @@ Vue.component('shift-map', require('./components/ShiftMap'));
 Vue.component('edit-avatar', require('./components/EditAvatar'));
 Vue.component('user-avatar', require('./components/UserAvatar'));
 Vue.component('checkbox-group', require('./components/CheckboxGroup'));
+Vue.component('ally-table', require('./components/AllyTable'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
