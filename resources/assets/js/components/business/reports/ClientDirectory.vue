@@ -43,7 +43,8 @@
                 <b-card>
                     <b-row class="mb-2">
                         <b-col sm="6">
-                            <b-btn @click="columnsModal = true" variant="primary">Show or Hide Columns</b-btn>
+                            <!-- MODAL TO SELECT COLUMNS -->
+                            <report-column-picker prefix="caregiver_directory_" v-bind:columns.sync="columns" />
                         </b-col>
                         <b-col sm="6" class="text-right">
                             <b-btn :href="downloadableUrl" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
@@ -84,26 +85,6 @@
                 </b-card>
             </b-col>
         </b-row>
-
-        <!-- MODAL TO SELECT COLUMNS -->
-        <b-modal title="Show or Hide Columns" v-model="columnsModal">
-            <b-container fluid>
-                <b-row>
-                    <div class="form-check row">
-                        <div class="col-sm-auto" v-for="(field, key) in columns" :key="key">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" v-model="field.shouldShow" :value="true">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ field.label }}</span>
-                            </label>
-                        </div>
-                    </div>
-                </b-row>
-            </b-container>
-            <div slot="modal-footer">
-                <b-btn variant="default" @click="columnsModal = false">Close</b-btn>
-            </div>
-        </b-modal>
     </div>    
  </template>
  

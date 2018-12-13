@@ -4,7 +4,6 @@ export default {
             totalRows: 0,
             perPage: 15,
             currentPage: 1,
-            columnsModal: false,
             filters: {
                 start_date: '',
                 end_date: '',
