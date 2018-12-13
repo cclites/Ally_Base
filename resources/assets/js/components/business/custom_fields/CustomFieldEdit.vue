@@ -8,7 +8,7 @@
                             id="user_type"
                             name="user_type"
                             v-model="form.user_type"
-                            :disabled="!!field.id"
+                            :disabled="!!field"
                         >
                             <option value="">--Select--</option>
                             <option value="client">Clients</option>
@@ -22,7 +22,7 @@
                             id="type"
                             name="type"
                             v-model="form.type"
-                            :disabled="!!field.id"
+                            :disabled="!!field"
                             required
                         >
                             <option value="">--Select--</option>
