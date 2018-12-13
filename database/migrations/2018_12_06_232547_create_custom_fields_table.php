@@ -17,7 +17,7 @@ class CreateCustomFieldsTable extends Migration
             $table->increments('id');
             $table->integer('chain_id')->unsigned();
             $table->text('user_type');
-            $table->text('key');
+            $table->string('key', 32);
             $table->text('label');
             $table->text('type');
             $table->boolean('required');
@@ -25,8 +25,6 @@ class CreateCustomFieldsTable extends Migration
             $table->timestamps();
 
             $table->foreign('chain_id')->references('id')->on('business_chains')->onDelete('cascade');
-            $table->foreign('key')->references('key')->on('caregiver_meta')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('key')->references('key')->on('client_meta')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
