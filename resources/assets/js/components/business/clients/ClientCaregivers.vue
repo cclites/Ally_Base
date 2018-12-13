@@ -394,7 +394,7 @@
             },
 
             paymentText() {
-                return this.paymentMethodDetail.paymentText || this.paymentTypeMessage;
+                return this.paymentMethodDetail.payment_text || this.paymentTypeMessage;
             },
 
             allyRate() {
