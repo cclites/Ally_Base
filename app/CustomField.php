@@ -38,6 +38,25 @@ class CustomField extends Model implements BelongsToBusinessesInterface, Belongs
     ];
 
     /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
+        
+        // Delete all related options for dropdown
+        self::deleting(function($field) {
+            if($field->type == 'dropdown') {
+                $field->options->each(function($option) {
+                    $option->delete();
+                });
+            }
+        });
+    }
+
+    /**
      * Get the business chain that this field was created for
      *
      * @return \App\BusinessChain
