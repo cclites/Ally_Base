@@ -70,9 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <b-form-group>
-                            <business-location-select v-model="filterBusinessId" :allow-all="true"></business-location-select>
-                        </b-form-group>
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
                     </b-col>
                 </b-row>
             </b-col>
@@ -88,7 +86,7 @@
         </b-row>
         <div class="calendar-view">
             <div class="print-fc-head">
-                <h1>By Your Side Homecare</h1>
+                <h1>By {{business.name}}</h1>
                 <h4>(717) 394-5111</h4>
                 <h3 class="text-center">
                     Schedules for 
@@ -221,11 +219,11 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         props: {
             'business': Object,
             'caregiver': Object,

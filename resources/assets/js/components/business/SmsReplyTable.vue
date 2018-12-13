@@ -68,7 +68,7 @@ export default {
             {
                 key: 'message',
                 sortable: true,
-                tdClass: 'pb-4'
+                tdClass: 'pb-4 message-body'
             },
             {
                 label: 'Received',
