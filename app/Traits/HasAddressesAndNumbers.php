@@ -23,6 +23,17 @@ trait HasAddressesAndNumbers
         return $this->hasMany(PhoneNumber::class, 'user_id', 'id');
     }
 
+    /**
+     * Get the phone number where text messages should be sent.
+     *
+     * @return \App\PhoneNumber
+     */
+    public function smsNumber()
+    {
+        return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
+                    ->where('receives_sms', true);
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

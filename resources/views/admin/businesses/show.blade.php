@@ -21,7 +21,7 @@
             <a class="nav-link" data-toggle="tab" href="#point_of_contact" role="tab">Main Point of Contact</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#sms_settings" role="tab">SMS Settings</a>
+            <a class="nav-link" data-toggle="tab" href="#sms_settings" role="tab">Text Message Settings</a>
         </li>
     </ul>
 

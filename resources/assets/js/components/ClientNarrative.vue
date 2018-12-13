@@ -70,9 +70,9 @@
 </template>
 
 <script>
-import FormatsDates from "../../mixins/FormatsDates";
-import FormatsStrings from "../../mixins/FormatsStrings";
-import AuthUser from "../../mixins/AuthUser";
+import FormatsDates from "../mixins/FormatsDates";
+import FormatsStrings from "../mixins/FormatsStrings";
+import AuthUser from "../mixins/AuthUser";
 
 export default {
     name: 'ClientNarrative',

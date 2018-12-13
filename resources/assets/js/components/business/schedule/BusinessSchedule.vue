@@ -70,9 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <b-form-group>
-                            <business-location-select v-model="filterBusinessId" :allow-all="true"></business-location-select>
-                        </b-form-group>
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
                     </b-col>
                 </b-row>
             </b-col>
@@ -209,10 +207,10 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         props: {
             'business': Object,
             'caregiver': Object,
