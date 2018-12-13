@@ -122,6 +122,7 @@ Route::group([
 
     Route::post('custom-fields/{account}/{id}', 'Business\CustomFieldController@storeValue')->name('custom_fields.value.update');
     Route::post('custom-fields/options/{field}', 'Business\CustomFieldController@storeOptions')->name('custom_fields.options.create');
+    Route::put('custom-fields/options/{field}', 'Business\CustomFieldController@updateOptions')->name('custom_fields.options.update');
     Route::resource('custom-fields', 'Business\CustomFieldController');
     Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');

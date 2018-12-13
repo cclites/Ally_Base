@@ -235,7 +235,7 @@
                     if(this.form.type == 'dropdown') {
                         const optionForm = new Form({ options: this.options.join(',') });
                         const res = this.field 
-                            ? await optionForm.patch(`/business/custom-fields/options/${this.field.id}`)
+                            ? await optionForm.put(`/business/custom-fields/options/${this.field.id}`)
                             : await optionForm.post(`/business/custom-fields/options/${data.data.id}`);
                     }
                 } catch(error) {}

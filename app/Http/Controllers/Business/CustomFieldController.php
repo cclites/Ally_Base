@@ -187,6 +187,43 @@ class CustomFieldController extends Controller
     }
 
     /**
+     * Update the options for the specified dropdown field
+     *
+     * @param \App\Http\Requests\UpdateCustomFieldOptionsRequest $request
+     * @param \App\CustomField $field
+     * @return \Illuminate\Http\Response
+     */
+    public function updateOptions(UpdateCustomFieldOptionsRequest $request, CustomField $field)
+    {
+        $this->authorize('update', $request->getBusiness());
+
+        if($field->type != 'dropdown') {
+            return new ErrorResponse(500, 'Could not create the custom field options for a field that is not a drop down.  Please try again.');
+        }
+
+        $data = $request->filtered();
+        $options = array_unique(explode(',', $data['options']));
+        $optionsKey = [];
+
+        foreach ($options as $option) {
+            $optionsKey[] = $key = snake_case($option);
+            CustomFieldOption::firstOrCreate([
+                'field_id' => $field->id,
+                'value' => $key,
+                'label' => $option,
+            ]);
+        }
+
+        # Create options (or select if already exist) then delete every option that wasnt submitted
+        # since we're doing a replace-all type of updating
+        CustomFieldOption::where('field_id', $field->id)
+            ->whereNotIn('value', $optionsKey)
+            ->delete();
+
+        return $field->options;
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
