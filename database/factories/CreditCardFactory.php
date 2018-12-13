@@ -1,12 +1,12 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\CreditCard;
+use App\Client;
 
-$factory->define(\App\CreditCard::class, function (Faker $faker) {
+$factory->define(CreditCard::class, function (Faker $faker) {
     return [
-        'user_id' => function () {
-            return factory(\App\Client::class)->create()->user->id;
-        },
+        'user_id' => factory(Client::class)->create()->user->id,
         'nickname' => $faker->word,
         'name_on_card' => $faker->name,
         'type' => $faker->creditCardType,

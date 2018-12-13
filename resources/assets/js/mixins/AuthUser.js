@@ -1,0 +1,25 @@
+import Vue from 'vue';
+
+Vue.mixin({
+    computed: {
+        authUser() {
+            return window.AuthUser;
+        },
+
+        authRole() {
+            return window.AuthUser ? window.AuthUser.role_type : null;
+        },
+
+        authInactive() {
+            return window.AuthUser && window.AuthUser.active == 0;
+        },
+
+        authActive() {
+            return window.AuthUser && window.AuthUser.active == 1;
+        },
+
+        isLoggedIn() {
+            return window.AuthUser && window.AuthUser.id ? true : false;
+        },
+    }
+})

@@ -21,6 +21,14 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.prospects.index') }}">Prospect List</a></li>
         <li><a href="{{ route('business.prospects.create') }}">Add Prospect</a></li>
+        <li><a href="{{ route('business.referral-sources.index') }}">Referral Sources</a></li>
+    </ul>
+</li>
+<li>
+    <a class="has-arrow" href="{{ route('business.contacts.index') }}" aria-expanded="false"><i class="fa fa-user-plus"></i><span class="hide-menu">Contacts</span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.contacts.index') }}">Contact List</a></li>
+        <li><a href="{{ route('business.contacts.create') }}">Add Contact</a></li>
     </ul>
 </li>
 <li>
@@ -69,6 +77,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="{{ route('business.communication.text-caregivers') }}">Text Caregivers</a></li>
         <li><a href="{{ route('business.communication.sms-threads') }}">Sent Texts</a></li>
+        <li><a href="{{ route('business.communication.sms-other-replies') }}">View Unsorted replies</a></li>
     </ul>
 </li>
 <li>
@@ -96,14 +105,6 @@
             </div>
         </div>
     </a>
-</li>
-<li>
-    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
-    <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
-        <li><a href="{{ route('business.referral-sources.create') }}">Add Source</a></li>
-{{--        <li><a href="{{ route('business.reports.referral_sources') }}">Reports Referral Sources</a></li>--}}
-    </ul>
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>

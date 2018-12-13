@@ -43,7 +43,7 @@ const mutations = {
     },
 }
 
-const getBusinessFromState = (state, id) => state.businesses.find(business => business.id == id);
+const getBusinessFromState = (state, id) => state.businesses.find(business => business.id == id) || {};
 
 export default {
     state,

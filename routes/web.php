@@ -30,7 +30,7 @@ Route::post('/confirm/client/{token}', 'ClientConfirmationController@store')->na
 Route::get('/reconfirm/saved', 'ClientConfirmationController@saved')->name('reconfirm.saved');
 Route::get('/reconfirm/{token}', 'ClientConfirmationController@show')->name('reconfirm.encrypted_id');
 Route::post('/reconfirm/{token}', 'ClientConfirmationController@store')->name('reconfirm.store');
-Route::post('/twilio/incoming', 'Business\CommunicationController@incoming')->name('twilio.incoming');
+Route::redirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
 
 Auth::routes();
 Route::get('/logout', 'Auth\LoginController@logout');
@@ -43,6 +43,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::post('/profile/password', 'ProfileController@password');
     Route::post('/profile/address/{type}', 'ProfileController@address');
     Route::resource('/profile/phone', 'PhoneController');
+    Route::patch('/profile/phone/{phone}/sms', 'PhoneController@updateSmsNumber');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');
@@ -79,10 +80,11 @@ Route::group([
     'middleware' => ['auth', 'roles'],
     'roles' => ['caregiver']
 ], function() {
-
+    Route::get('activities', 'Caregivers\ActivityController@index')->name('caregivers.activities');
     Route::get('caregiver/clients', 'Caregivers\ClientController@index')->name('caregivers.clients');
     Route::get('caregiver/clients/{client}', 'Caregivers\ClientController@show')->name('caregivers.clients.show');
     Route::get('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@index')->name('caregivers.clients.narrative');
+    Route::patch('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@update')->name('caregivers.clients.narrative.update');
     Route::post('caregiver/clients/{client}/narrative', 'Caregivers\ClientNarrativeController@store')->name('caregivers.clients.narrative.store');
     Route::delete('caregiver/clients/{client}/narrative/{narrative}', 'Caregivers\ClientNarrativeController@destroy')->name('caregivers.clients.narrative.store');
     Route::get('caregiver/schedules/{client}', 'Caregivers\ClientController@currentSchedules')->name('clients.schedules');
@@ -107,6 +109,9 @@ Route::group([
     Route::get('reports/shifts', 'Caregivers\ReportsController@shifts')->name('caregivers.reports.shifts');
 
     Route::post('/profile/bank-account', 'ProfileController@bankAccount');
+    Route::put('/profile/preferences', 'ProfileController@preferences');
+    Route::put('/profile/skills', 'ProfileController@skills');
+
     Route::get('tasks', 'Caregivers\TasksController@index')->name('caregivers.tasks');
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
@@ -201,6 +206,11 @@ Route::group([
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
 
+    Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
+    Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
+    Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
+    Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
+
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
@@ -241,6 +251,12 @@ Route::group([
     Route::get('reports/revenue', 'Business\ReportsController@revenuePage')->name('reports.revenue');
     Route::post('reports/revenue', 'Business\ReportsController@revenueReport')->name('reports.generate-revenue');
     Route::get('reports/sales-pipeline', 'Business\ReportsController@showSalesPipeline')->name('reports.pipeline');
+    Route::get('reports/client-directory', 'Business\ReportsController@clientDirectory')->name('reports.client_directory');
+    Route::get('reports/client-directory/download', 'Business\ReportsController@generateClientDirectoryReport')->name('reports.client_directory.download');
+    Route::get('reports/caregiver-directory', 'Business\ReportsController@caregiverDirectory')->name('reports.caregiver_directory');
+    Route::get('reports/caregiver-directory/download', 'Business\ReportsController@generateCaregiverDirectoryReport')->name('reports.caregiver_directory.download');
+    Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
+    Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
@@ -302,6 +318,7 @@ Route::group([
 
     Route::post('prospects/{prospect}/convert', 'Business\ProspectController@convert')->name('prospects.convert');
     Route::resource('prospects', 'Business\ProspectController');
+    Route::resource('contacts', 'Business\OtherContactController');
 
     /*Quickbooks*/
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');

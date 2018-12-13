@@ -16,7 +16,7 @@
                 </b-row>
                 <b-row v-if="carePlanActivities().length > 0" class="with-padding-bottom-top blue-box">
                     <b-col lg="12">
-                        <h5>Recommended Care Plan Activities</h5>
+                        <h5>Recommended Activities</h5>
                         <div class="form-check">
                             <input-help :form="form" field="activities" text="Check off the activities of daily living that were performed."></input-help>
                             <label class="large-checkbox" v-for="activity in carePlanActivities()" :key="activity.id">
@@ -26,7 +26,7 @@
                         </div>
                     </b-col>
                     <b-col lg="12" class="with-padding-top" v-if="carePlanNotes">
-                        <h5>Care Plan Notes</h5>
+                        <h5>Notes</h5>
                         <p v-html="carePlanNotes"></p>
                     </b-col>
                 </b-row>
@@ -84,7 +84,7 @@
                 </b-row>
                 <b-row v-if="business.co_injuries">
                     <b-col lg="12">
-                        <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury">
+                        <b-form-group label="Were you injured on your shift?" label-for="caregiver_injury" label-class="required">
                             <b-form-select
                                     id="injuries"
                                     name="injuries"

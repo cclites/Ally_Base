@@ -19,7 +19,7 @@
                             <!--<b-form-group label="Logo">-->
                             <!--<b-form-file id="logo" v-model="businessSettings.logo" tabindex="0"></b-form-file>-->
                             <!--</b-form-group>-->
-                            <b-form-group label="Mileage Rate" label-for="mileageRate">
+                            <b-form-group label="Mileage Rate" label-for="mileageRate" label-class="required">
                                 <b-form-input type="number"
                                               step="any"
                                               id="mileageRate"
@@ -40,7 +40,7 @@
                                             text="Allow Caregivers to submit shift information manually."></input-help>
                             </b-form-group>
 
-                            <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions">
+                            <b-form-group label="Manual Timesheet Exceptions" label-for="timesheet_exceptions" label-class="required">
                                 <b-form-select id="timesheet_exceptions"
                                                v-model="businessSettings.timesheet_exceptions"
                                 >
@@ -51,7 +51,7 @@
                                             text="Generate an exception when a manual timesheet is entered by a caregiver."></input-help>
                             </b-form-group>
 
-                            <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions">
+                            <b-form-group label="Unverified Location Exceptions" label-for="location_exceptions"  label-class="required">
                                 <b-form-select id="location_exceptions"
                                                v-model="businessSettings.location_exceptions"
                                 >
@@ -62,7 +62,7 @@
                                             text="Generate an exception when a mobile app shift is not verified through geolocation."></input-help>
                             </b-form-group>
 
-                            <b-form-group label="Shift Rounding Method" label-for="shift_rounding_method">
+                            <b-form-group label="Shift Rounding Method" label-for="shift_rounding_method" label-class="required">
                                 <b-form-select id="shift_rounding_method"
                                                v-model="businessSettings.shift_rounding_method"
                                 >
@@ -75,7 +75,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Scheduling" label-for="scheduling">
+                            <b-form-group label="Scheduling" label-for="scheduling" label-class="required">
                                 <b-form-select id="scheduling"
                                                v-model="businessSettings.scheduling"
                                                disabled>
@@ -85,7 +85,7 @@
                                 <input-help :form="businessSettings" field="scheduling"
                                             text="Enable or disable shift scheduling functionality"></input-help>
                             </b-form-group>
-                            <b-form-group label="Calendar Default View" label-for="calendar_default_view">
+                            <b-form-group label="Calendar Default View" label-for="calendar_default_view" label-class="required">
                                 <b-form-select id="calendar_default_view"
                                                v-model="businessSettings.calendar_default_view">
                                     <option value="month">Month</option>
@@ -95,8 +95,7 @@
                                 <input-help :form="businessSettings" field="calendar_default_view"
                                             text="Choose the default view for the schedule"></input-help>
                             </b-form-group>
-                            <b-form-group label="Default Schedule Caregiver Filter"
-                                          label-for="calendar_caregiver_filter">
+                            <b-form-group label="Default Schedule Caregiver Filter" label-for="calendar_caregiver_filter" label-class="required">
                                 <b-form-select id="calendar_caregiver_filter"
                                                v-model="businessSettings.calendar_caregiver_filter">
                                     <option value="all">All Caregivers</option>
@@ -108,7 +107,7 @@
                                     Warning: We do not recommend using 'All Caregivers' for monthly views.
                                 </small>
                             </b-form-group>
-                            <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters">
+                            <b-form-group label="Remember Schedule Filters" label-for="calendar_remember_filters" label-class="required">
                                 <b-form-select id="calendar_remember_filters"
                                                v-model="businessSettings.calendar_remember_filters">
                                     <option :value="1">Yes</option>
@@ -117,7 +116,7 @@
                                 <input-help :form="businessSettings" field="calendar_remember_filters"
                                             text="Remember the last filters used when loading the schedule."></input-help>
                             </b-form-group>
-                            <b-form-group label="Calendar Span Multiple Days" label-for="calendar_next_day_threshold">
+                            <b-form-group label="Calendar Span Multiple Days" label-for="calendar_next_day_threshold" label-class="required">
                                 <b-form-select id="calendar_next_day_threshold"
                                                v-model="businessSettings.calendar_next_day_threshold">
                                     <option value="00:15:00">Yes</option>
@@ -188,7 +187,7 @@
                                               id="zip">
                                 </b-form-input>
                             </b-form-group>
-                            <b-form-group label="Timezone">
+                            <b-form-group label="Timezone" label-class="required">
                                 <b-form-select id="timezone" v-model="businessSettings.timezone" tabindex="13">
                                     <option v-for="timezone in timezones" :value="timezone" :key="timezone">{{ timezone
                                         }}
@@ -271,7 +270,7 @@
                             <hr/>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Allow Recording of Mileage?" label-for="co_mileage">
+                            <b-form-group label="Allow Recording of Mileage?" label-for="co_mileage" label-class="required">
                                 <b-form-select id="co_mileage"
                                                v-model="businessSettings.co_mileage">
                                     <option :value="1">Yes</option>
@@ -279,7 +278,7 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="co_mileage" text=""></input-help>
                             </b-form-group>
-                            <b-form-group label="Allow Recording of Other Expenses?" label-for="co_expenses">
+                            <b-form-group label="Allow Recording of Other Expenses?" label-for="co_expenses" label-class="required">
                                 <b-form-select id="co_expenses"
                                                v-model="businessSettings.co_expenses">
                                     <option :value="1">Yes</option>
@@ -290,7 +289,7 @@
 
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Allow General Comments / Notes?" label-for="co_comments">
+                            <b-form-group label="Allow General Comments / Notes?" label-for="co_comments" label-class="required">
                                 <b-form-select id="co_comments"
                                                v-model="businessSettings.co_comments">
                                     <option :value="1">Yes</option>
@@ -298,7 +297,7 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="co_comments" text=""></input-help>
                             </b-form-group>
-                            <b-form-group label="Client Signature" label-for="signatureOption">
+                            <b-form-group label="Client Signature" label-for="signatureOption" label-class="required">
                                 <b-form-select id="signatureOption"
                                                v-model="signatureOption">
                                     <option value="do_not_show">Do Not Show</option>
@@ -315,7 +314,7 @@
                             <hr/>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Were you injured on your shift?" label-for="co_injuries">
+                            <b-form-group label="Were you injured on your shift?" label-for="co_injuries" label-class="required">
                                 <b-form-select id="co_injuries"
                                                v-model="businessSettings.co_injuries">
                                     <option :value="1">Show</option>
@@ -325,7 +324,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Were there any other issues on your shift?" label-for="co_issues">
+                            <b-form-group label="Were there any other issues on your shift?" label-for="co_issues" label-class="required">
                                 <b-form-select id="co_issues"
                                                v-model="businessSettings.co_issues">
                                     <option :value="1">Show</option>
@@ -359,8 +358,8 @@
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
-                                          label-for="allow_client_confirmations">
-                                <b-form-select id="allow_client_confirmations"
+                                          label-for="allow_client_confirmations" label-class="required">
+                                 <b-form-select id="allow_client_confirmations"
                                                :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.allow_client_confirmations"
                                 >
@@ -368,8 +367,7 @@
                                     <option :value="1">Yes</option>
                                 </b-form-select>
                             </b-form-group>
-                            <b-form-group label="Automatically confirm visits that clients modify"
-                                          label-for="auto_confirm_modified">
+                            <b-form-group label="Automatically confirm visits that clients modify" label-for="auto_confirm_modified" label-class="required">
                                 <b-form-select id="auto_confirm_modified"
                                                :disabled="businessSettings.auto_confirm == 1 || businessSettings.allow_client_confirmations == 0"
                                                v-model="businessSettings.auto_confirm_modified"
@@ -380,7 +378,7 @@
                             </b-form-group>
                             <b-form-group
                                 label="Send client summary visits confirmation and pending charge email Monday of each week"
-                                label-for="shift_confirmation_email">
+                                    label-for="shift_confirmation_email" label-class="required">
                                 <b-form-select id="shift_confirmation_email"
                                                v-model="businessSettings.shift_confirmation_email"
                                 >
@@ -409,7 +407,7 @@
                             <!-- Follow-up email is disabled and set to no (by watcher) when allow_client_confirmation == 0 -->
                             <b-form-group
                                     label="Send follow up email to client if total charge differs after modifying or adding visits"
-                                    label-for="charge_diff_email">
+                                    label-for="charge_diff_email" label-class="required">
                                 <b-form-select id="charge_diff_email"
                                                disabled
                                                v-model="businessSettings.charge_diff_email"
@@ -420,7 +418,7 @@
                             </b-form-group>
                             <b-form-group
                                     label="Automatically append hours to visits in progress even after client confirms"
-                                    label-for="auto_append_hours">
+                                    label-for="auto_append_hours" label-class="required">
                                 <b-form-select id="auto_append_hours"
                                                :disabled="businessSettings.auto_confirm == 1 || true"
                                                v-model="businessSettings.auto_append_hours"
@@ -430,7 +428,7 @@
                                 </b-form-select>
                             </b-form-group>
                             <b-form-group label="Automatically confirm all visits if clients do not modify"
-                                          label-for="auto_confirm_unmodified_shifts">
+                                          label-for="auto_confirm_unmodified_shifts" label-class="required">
                                 <b-form-select id="auto_confirm_unmodified_shifts"
                                                :disabled="businessSettings.auto_confirm == 1 || true"
                                                v-model="businessSettings.auto_confirm_unmodified_shifts"
@@ -441,7 +439,7 @@
                             </b-form-group>
                             <b-form-group
                                     label="Automatically confirm visits that are successfully verified via GPS or telephony"
-                                    label-for="auto_confirm_verified_shifts">
+                                    label-for="auto_confirm_verified_shifts" label-class="required">
                                 <b-form-select id="auto_confirm_verified_shifts"
                                                :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.auto_confirm_verified_shifts"
@@ -450,7 +448,7 @@
                                     <option :value="1">Yes</option>
                                 </b-form-select>
                             </b-form-group>
-                            <b-form-group label="Automatically confirm ALL visits" label-for="auto_confirm">
+                            <b-form-group label="Automatically confirm ALL visits" label-for="auto_confirm" label-class="required">
                                 <b-form-select id="auto_confirm"
                                                v-model="businessSettings.auto_confirm"
                                 >
@@ -459,7 +457,7 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="auto_confirm" text="Automatically confirm shifts that are clocked in on the app or telephony."></input-help>
                             </b-form-group>
-                            <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm">
+                            <b-form-group label="Ask on Confirmation" label-for="ask_on_confirm" label-class="required">
                                 <b-form-select id="ask_on_confirm"
                                                :disabled="businessSettings.auto_confirm == 1"
                                                v-model="businessSettings.ask_on_confirm"
@@ -553,7 +551,7 @@
         },
 
         methods: {
-            ...mapMutations(['setCurrentBusiness']),
+            ...mapMutations(['updateBusiness']),
 
             ...mapGetters(['defaultBusiness', 'getBusiness']),
 
@@ -630,9 +628,18 @@
 
             updateReasons(event) {
                 let item = event.data;
-                this.deactivationReasons[item.type].push(item);
+                let business = JSON.parse(JSON.stringify(this.business));
+                switch (item.type) {
+                    case 'caregiver':
+                        business.caregiverDeactivationReasons.push(item)
+                        this.updateBusiness(business)
+                        break;
+                    case 'client':
+                        business.clientDeactivationReasons.push(item)
+                        this.updateBusiness(business)
+                        break;
+                }
             },
-
         },
 
         watch: {

@@ -76,7 +76,7 @@
                     },
                     {
                         key: 'outgoing_sms_number',
-                        label: 'SMS Number',
+                        label: 'Text Message Number',
                         sortable: true,
                     },
                     {

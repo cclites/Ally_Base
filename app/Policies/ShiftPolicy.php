@@ -25,7 +25,7 @@ class ShiftPolicy extends BasePolicy
     public function update(User $user, Shift $shift)
     {
         if ($this->isClient()) {
-            return $shift->client_id == $user->id;
+            return $user->active == 1 && $shift->client_id == $user->id;
         }
 
         return $this->businessCheck($user, $shift)
@@ -35,7 +35,7 @@ class ShiftPolicy extends BasePolicy
     public function delete(User $user, Shift $shift)
     {
         if ($this->isClient()) {
-            return $shift->client_id == $user->id;
+            return $user->active == 1 && $shift->client_id == $user->id;
         }
 
         return $this->businessCheck($user, $shift)

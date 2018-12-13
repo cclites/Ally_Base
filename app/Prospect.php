@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \App\Client|null $client
  * @property-read mixed $name
  * @property-read mixed $name_last_first
+ * @property-read mixed $full_address
  * @property-read \App\ReferralSource|null $referralSource
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
@@ -87,6 +88,7 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 
     protected $table = 'prospects';
     protected $guarded = ['id'];
+    protected $appends = ['full_address'];
 
     /**
      * Boot the model with the global scope to ignore converted records.
@@ -129,6 +131,11 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
         return $this->nameLastFirst();
     }
 
+    public function getFullAddressAttribute()
+    {
+        return $this->fullAddress();
+    }
+
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
@@ -141,6 +148,19 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
     public function nameLastFirst()
     {
         return $this->lastname . ', ' . $this->firstname;
+    }
+
+    public function fullAddress()
+    {
+        $fullAddress = $this->address1 ?: '';
+
+        if (!empty($this->address2)) {
+            $fullAddress .= ' ' . $this->address2;
+        }
+
+        $fullAddress .= ' ' . $this->city . ', ' . $this->state . ' ' . $this->country . ' ' . $this->zip;
+
+        return $fullAddress;
     }
 
     public function convert($username)

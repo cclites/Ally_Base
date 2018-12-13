@@ -19,7 +19,7 @@ trait CanImpersonate
     {
         if (\Auth::id() !== $this->id) return null; // This is only used for the currently authenticated user
 
-        return $this->toArray() + [
+        return $this->attributesToArray() + [
             'impersonating' => $this->isImpersonating(),
             'impersonator' => optional($this->impersonator())->toArray(),
         ];

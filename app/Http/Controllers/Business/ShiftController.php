@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Business;
 
 use App\Events\UnverifiedShiftConfirmed;
 use App\Http\Requests\UpdateShiftRequest;
+use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Shift;
+use App\ShiftFlag;
 use App\ShiftIssue;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,13 +42,24 @@ class ShiftController extends BaseController
 
         $this->authorize('create', [Shift::class, $data]);
 
+        \DB::beginTransaction();
+
         if ($shift = Shift::create($data)) {
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
+
+            $duplicate = $shift->duplicatedBy;
+            if ($duplicate && !$request->input('duplicate_confirm')) {
+                \DB::rollBack();
+                return new ConfirmationResponse('The shift may have a duplicate.', $duplicate->toArray());
+            }
+
+            \DB::commit();
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
 
+        \DB::rollBack();
         return new ErrorResponse(500, 'Error creating the shift.');
     }
 

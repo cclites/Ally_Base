@@ -49,6 +49,8 @@ class EmergencyContactController extends Controller
             'relationship' => 'nullable|string|max:80'
         ]);
 
+        $this->authorize('create', [EmergencyContact::class, $data]);
+
         $data['priority'] = EmergencyContact::getNextPriorityForUser($user->id);
 
         $contact = $user->emergencyContacts()->create($data);
@@ -101,6 +103,8 @@ class EmergencyContactController extends Controller
      */
     public function updatePriority(Request $request, User $user, EmergencyContact $contact)
     {
+        $this->authorize('update', $contact);
+
         $priority = $request->priority;
         if (empty($priority) || $priority < 1) {
             $priority = 1;

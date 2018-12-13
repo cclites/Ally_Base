@@ -90,6 +90,13 @@
                      :sort-desc.sync="sortDesc"
                      :filter="filter"
             >
+                <template slot="checked_in_distance" scope="row">
+                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_in_distance) }}
+                </template>
+
+                <template slot="checked_out_distance" scope="row">
+                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_out_distance) }}
+                </template>
             </b-table>
         </div>
     </b-card>
@@ -97,10 +104,11 @@
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
+    import FormatsDistance from "../../mixins/FormatsDistance";
 
     export default {
 
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, FormatsDistance],
 
         props: {},
 
@@ -161,7 +169,7 @@
                     },
                     {
                         key: 'checked_in_distance',
-                        label: 'Distance (m)',
+                        label: 'Distance (mi)',
                         formatter: this.distanceFormat,
                         sortable: true,
                     },
@@ -184,7 +192,7 @@
                     },
                     {
                         key: 'checked_out_distance',
-                        label: 'Distance (m)',
+                        label: 'Distance (mi)',
                         formatter: this.distanceFormat,
                         sortable: true,
                     },

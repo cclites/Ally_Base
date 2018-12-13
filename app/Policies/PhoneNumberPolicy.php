@@ -41,6 +41,10 @@ class PhoneNumberPolicy extends BasePolicy
 
     protected function check(User $user, PhoneNumber $phone)
     {
+        if (! $user->active) {
+            return false;
+        }
+
         if ($phone->user_id == $user->id) {
             return true;
         }

@@ -7,7 +7,9 @@
         <b-row class="mb-4">
             <b-col md="6">
                 <h4>Message:</h4>
-                {{ thread.message }}
+                <p class="message-body">
+                    {{ thread.message }}
+                </p>
             </b-col>
             <b-col md="6" class="d-flex">
                 <div class="ml-auto">
@@ -136,3 +138,9 @@ export default {
     },
 }
 </script>
+
+<style>
+    .message-body {
+        white-space: pre-line;
+    }
+</style>

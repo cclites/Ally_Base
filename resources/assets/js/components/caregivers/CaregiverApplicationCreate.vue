@@ -508,7 +508,7 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <hr v-if="i != 3">
+                <hr :key="i" v-if="i != 3">
             </template>
             <!-- How did you hear about us? -->
             <b-row>
@@ -519,6 +519,16 @@
                     </b-form-checkbox-group>
                 </b-col>
             </b-row>
+            <hr>
+            <b-row class="space-above">
+                <b-col>
+                    <h3><b>APPLICANT’S CERTIFICATION</b> – Please read carefully before signing/submitting</h3>
+                    <p>I authorize any of the persons or organizations referenced in the application to give you any and all information concerning my previous employment, education or any other information they might have, personal or otherwise, with regard to any of the subjects covered by this application and release all such parties from all liability for any damage that may result from furnishing such information to you. I authorize you to request and receive such information.</p>
+                    <p>I understand that my contract is contingent upon verification of past employment; school transcripts; licensures and certifications; satisfactory criminal background check. I hereby consent to such examinations and verifications.</p>
+                    <p>I further understand that I will be required to participate in direct deposit at a bank of your choosing for all payroll transactions.</p>
+                    <p>I certify that the answers given herein are true and complete to the best of my knowledge. I understand that any misrepresentations, omissions of facts or incomplete answers in any application document may disqualify me from further consideration for being a sub-contractor. I further understand that, if contracted, any misrepresentations or omissions of facts in any application document will be cause for my contract to be terminated at any time without prior notice. I understand that my contract may be terminated if I, at any time, reveal confidential information concerning the organization, patients or fellow team members.</p>
+                </b-col>
+           </b-row>
             <hr>
             <b-row>
                 <b-col>
@@ -654,3 +664,9 @@
         }
     }
 </script>
+
+<style scoped>
+.space-above {
+    margin-top: 25px;
+}
+</style>
