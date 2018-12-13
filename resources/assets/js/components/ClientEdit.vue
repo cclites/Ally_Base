@@ -316,7 +316,7 @@
                         <div v-if="client.future_schedules > 0">All <span class="text-danger">{{ this.client.future_schedules }}</span> of their future scheduled shifts will be deleted.</div>
                         <div v-else>They have no future scheduled shifts.</div>
 
-                        <b-form-group slabel-for="inactive_at" class="mt-4">
+                        <b-form-group label-for="inactive_at" class="mt-4">
                             <date-picker
                                 class="w-50 mx-auto"
                                 v-model="inactive_at"
@@ -324,6 +324,24 @@
                                 placeholder="Inactive Date">
                             </date-picker>
                             <input-help :form="form" field="inactive_at" text="Set a deactivated date (optional)"></input-help>
+                        </b-form-group>
+
+                        <b-form-group label="Reason for Deactivation">
+                            <b-form-select v-model="deactivation_reason_id" class="w-50 mx-auto">
+                                <option v-for="reason in defaultBusiness.clientDeactivationReasons" :value="reason.id">
+                                    {{ reason.name }}
+                                </option>
+                            </b-form-select>
+                        </b-form-group>
+
+                        <b-form-group label-for="inactive_at" class="mt-4">
+                            <date-picker
+                                class="w-50 mx-auto"
+                                v-model="reactivation_date"
+                                id="reactivation_date"
+                                placeholder="Reactivation Date">
+                            </date-picker>
+                            <input-help :form="form" field="reactivation_date" text="Set an automatic reactivation date (optional)"></input-help>
                         </b-form-group>
 
                     </b-col>
@@ -354,6 +372,8 @@
     import BusinessLocationSelect from './business/BusinessLocationSelect'
     import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
+    import { mapGetters } from 'vuex';
+
     window.croppie = require('croppie');
 
     export default {
@@ -415,6 +435,8 @@
                 activateModal: false,
                 inactive_at: '',
                 showReferralModal: false,
+                deactivation_reason_id: '',
+                reactivation_date: ''
             }
         },
 
@@ -423,6 +445,7 @@
         },
 
         methods: {
+
             newrefsourcedata(data) {
                 if(data) {
                     this.show = false;
@@ -447,7 +470,8 @@
 
             archiveClient() {
                 let form = new Form();
-                form.submit('delete', `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}`);
+                let url = `/business/clients/${this.client.id}?inactive_at=${this.inactive_at}&deactivation_reason_id=${this.deactivation_reason_id}&reactivation_date=${this.reactivation_date}`;
+                form.submit('delete', url);
             },
 
             reactivateClient() {
@@ -481,6 +505,8 @@
         },
 
         computed: {
+            ...mapGetters(['defaultBusiness']),
+
             lastStatusUpdated() {
                 return moment.utc(this.lastStatusDate).local().format('L') + ' at ' + moment.utc(this.lastStatusDate).local().format('LT');
             },

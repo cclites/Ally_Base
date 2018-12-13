@@ -245,7 +245,21 @@ class ClientController extends BaseController
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
 
-        if ($client->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        logger(request()->all());
+
+        $reactivation_date = null;
+        if (request()->filled('reactivation_date')) {
+            $reactivation_date = Carbon::parse(request('reactivation_date'));
+        }
+
+        $data = [
+            'active' => false,
+            'inactive_at' => $inactive_at,
+            'deactivation_reason_id' => request('deactivation_reason_id'),
+            'reactivation_date' => $reactivation_date
+        ];
+
+        if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
