@@ -190,6 +190,7 @@ Vue.component('sales-pipeline-report', require('./components/business/reports/Sa
 Vue.component('client-directory', require('./components/business/reports/ClientDirectory'));
 Vue.component('caregiver-directory', require('./components/business/reports/CaregiverDirectory'));
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
+Vue.component('report-column-picker', require('./components/business/reports/ReportColumnPicker'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
