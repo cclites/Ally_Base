@@ -1,19 +1,10 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\Business;
+use App\BusinessChain;
 
-/*
-|--------------------------------------------------------------------------
-| Model Factories
-|--------------------------------------------------------------------------
-|
-| This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
-| model instances for testing / seeding your application's database.
-|
-*/
-
-$factory->define(\App\Business::class, function(Faker $faker) {
+$factory->define(Business::class, function(Faker $faker) {
     return [
         'name' => $faker->unique()->company,
         'type' => 'Registry',
@@ -31,25 +22,9 @@ $factory->define(\App\Business::class, function(Faker $faker) {
         'contact_email' => $faker->safeEmail,
         'contact_phone' => $faker->phoneNumber,
         'chain_id' => function() {
-            $chain = \App\BusinessChain::inRandomOrder()->first();
-            if (!$chain) $chain = factory(\App\BusinessChain::class)->create();
+            $chain = BusinessChain::inRandomOrder()->first();
+            if (!$chain) $chain = factory(BusinessChain::class)->create();
             return $chain->id;
         }
-    ];
-});
-
-$factory->define(\App\BusinessChain::class, function(Faker $faker) {
-    $name = $faker->unique()->company;
-    return [
-        'name' => $name,
-        'slug' => str_slug($name),
-        'address1' => $faker->streetAddress,
-        'address2' => null,
-        'city' => $faker->city,
-        'state' => $faker->randomElement(['CA', 'OH', 'NY', 'MI', 'PA', 'FL', 'TX', 'WA']),
-        'country' => 'US',
-        'zip' => $faker->randomNumber(5),
-        'phone1' => $faker->phoneNumber,
-        'phone2' => $faker->phoneNumber,
     ];
 });

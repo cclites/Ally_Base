@@ -41,6 +41,12 @@
             }
         },
 
+        computed: {
+            isCaregiver() {
+                return window.AuthUser && window.AuthUser.role_type == 'caregiver';
+            },
+        },
+
         mounted() {
             this.loadActivities();
         },
@@ -48,7 +54,11 @@
         methods: {
             async loadActivities() {
                 this.loading = true;
-                const response = await axios.get('/business/activities?json=1');
+                var url = '/business/activities?json=1';
+                if (this.isCaregiver) {
+                    url = '/activities';
+                }
+                const response = await axios.get(url);
                 this.activities = response.data;
                 this.loading = false;
             },
@@ -59,8 +69,14 @@
             },
 
             saveSkills() {
+                var url = '/business/caregivers/' + this.caregiver.id + '/skills';
+
+                if (this.isCaregiver) {
+                    url = '/profile/skills';
+                }
+
                 let form = new Form({skills: this.skills});
-                form.put('/business/caregivers/' + this.caregiver.id + '/skills');
+                form.put(url);
             }
         }
     }

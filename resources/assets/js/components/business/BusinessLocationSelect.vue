@@ -55,6 +55,7 @@
 
         mounted() {
             this.emitLocationCount();
+            this.$emit('input', this.selectedBusiness);
         },
 
         watch: {

@@ -74,26 +74,36 @@
             </b-col>
         </b-row>
         <div class="table-responsive" v-if="loaded > 0">
-            <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     :filter="filter"
+            <b-table 
+                bordered
+                striped 
+                hover 
+                show-empty
+                :items="items"
+                :fields="fields"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :filter="filter"
             >
+                <template slot="checked_in_distance" scope="row">
+                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_in_distance) }}
+                </template>
+
+                <template slot="checked_out_distance" scope="row">
+                    {{ isNaN(row.item.checked_in_distance) ? row.item.checked_in_distance : convertToMiles(row.item.checked_out_distance) }}
+                </template>
             </b-table>
         </div>
     </b-card>
 </template>
 
 <script>
-    import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsDistance from "../../../mixins/FormatsDistance";
 
     export default {
-
-        mixins: [FormatsDates],
-
         props: {},
+
+        mixins: [FormatsDistance],
 
         data() {
             return {
@@ -151,7 +161,7 @@
                     },
                     {
                         key: 'checked_in_distance',
-                        label: 'Distance (m)',
+                        label: 'Distance (mi)',
                         formatter: this.distanceFormat,
                         sortable: true,
                     },
@@ -174,7 +184,7 @@
                     },
                     {
                         key: 'checked_out_distance',
-                        label: 'Distance (m)',
+                        label: 'Distance (mi)',
                         formatter: this.distanceFormat,
                         sortable: true,
                     },

@@ -70,9 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <b-form-group>
-                            <business-location-select v-model="filterBusinessId" :allow-all="true"></business-location-select>
-                        </b-form-group>
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
                     </b-col>
                 </b-row>
             </b-col>
@@ -98,7 +96,8 @@
             @event-render="renderEvent"
             @view-render="onLoadView"
             @events-reloaded="loadKpiToolbar"
-            @event-mouseover="hover"
+            @event-mouseover="eventHover"
+            @event-mouseout="eventLeave"
             :loading="loading"
         />
 
@@ -208,10 +207,10 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         props: {
             'business': Object,
             'caregiver': Object,
@@ -261,6 +260,7 @@
                 previewTop: 0,
                 previewLeft: 0,
                 preview: false,
+                previewTimer: null,
                 hoverShift: {},
                 hoverTarget: '',
                 location: 'all',
@@ -560,25 +560,37 @@
             //     this.hidePreview();
             // },
 
-            hover(event, jsEvent, view) {
+            eventHover(event, jsEvent, view) {
                 let target = null;
-
+                
                 if ($(jsEvent.currentTarget).is('a')) {
                     target = $(jsEvent.currentTarget);
                 } else {
                     target = $(jsEvent.currentTarget).parent('a');
                 }
 
-                _.debounce((event, target, vm) => {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                }
+
+                this.previewTimer = setTimeout(function (event, target) {
                     axios.get('/business/schedule/' + event.id + '/preview')
                         .then(response => {
-                            vm.hoverShift = response.data;
-                            vm.showPreview(target, event.id);
+                            this.hoverShift = response.data;
+                            this.showPreview(target, event.id);
                         })
                         .catch(function(error) {
-                            vm.hoverShift = {};
+                            this.hoverShift = {};
                         });
-                }, 350)(event, target, this);
+                }.bind(this, event, target), 1000);
+
+            },
+
+            eventLeave() {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                    this.previewTimer = null;
+                }
             },
 
             showPreview(target, shift_id) {

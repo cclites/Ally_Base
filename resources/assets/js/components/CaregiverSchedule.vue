@@ -3,7 +3,7 @@
         <b-card>
             <b-row>
                 <b-col lg="12" class="text-center">
-                    <b-btn href="/clock-in" size="lg" variant="info" class="btn-block">Press Here To Clock In</b-btn>
+                    <b-btn href="/clock-in" size="lg" variant="info" class="btn-block" :disabled="authInactive">Press Here To Clock In</b-btn>
                 </b-col>
             </b-row>
             <full-calendar ref="calendar" :events="events" defaultView="listDay" @event-selected="viewDetails" :header="header" />
@@ -43,7 +43,7 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="viewModal=false">Close</b-btn>
-                <b-btn variant="info" @click="clockIn()" v-if="canClockIn">Go to Clock In</b-btn>
+                <b-btn variant="info" @click="clockIn()" v-if="canClockIn" :disabled="authInactive">Go to Clock In</b-btn>
             </div>
         </b-modal>
     </div>
@@ -51,9 +51,10 @@
 
 <script>
     import CaregiverClientDetails from "./caregivers/CaregiverClientDetails";
+    import AuthUser from '../mixins/AuthUser';
 
     export default {
-        components: {CaregiverClientDetails},
+        components: {CaregiverClientDetails, AuthUser},
 
         props: {
             caregiver: {},

@@ -240,7 +240,7 @@
                         this.selectedPlan = response.data;
                     }
                     catch (error) {
-                        alert('Error fetching care plan details.  Try refreshing.');
+                        alert('Error fetching service needs/ADL groups.  Try refreshing.');
                     }
                     return;
                 }

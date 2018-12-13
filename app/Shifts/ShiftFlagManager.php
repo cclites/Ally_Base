@@ -6,6 +6,7 @@ use App\ShiftFlag;
 
 class ShiftFlagManager
 {
+
     /**
      * Return false when internal queries are being committed to prevent never-ending loops
      *
@@ -17,7 +18,12 @@ class ShiftFlagManager
         return $shift->checked_in_time
                 && $shift->checked_out_time
                 && $shift->isDirty()
-                && !$shift->isDirty('duplicated_by');
+                && !$shift->isDirty('duplicated_by') // avoid generating when attaching duplicates (causes loops)
+                && !$this->isAStatusUpdate($shift); // avoid generating when only doing status updates (causes deadlocks)
+    }
+
+    protected function isAStatusUpdate(Shift $shift) {
+        return $shift->isDirty('status') && !$shift->isDirty('checked_out_time');
     }
 
     /**

@@ -4,7 +4,7 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-card v-if="usingRateCodes">
+        <b-card v-if="isUsingRateCodes(business)">
             <h3>
                 Default Caregiver
                 <b-btn variant="info" size="sm" @click="rateCodeModal = true">Add a New Rate Code</b-btn>
@@ -36,7 +36,7 @@
                     <th>Client</th>
                     <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Caregiver Rate</th>
-                    <th :class="getTdClass(1)" v-if="clientRateStructure">Client Rate</th>
+                    <th :class="getTdClass(1)" v-if="hasClientRateStructure(business)">Client Rate</th>
                     <th :class="getTdClass(1)" v-else>Provider Fee</th>
                     <th :class="getTdClass(1)">Ally Fee</th>
                     <th :class="getTdClass(1)">Total</th>
@@ -49,7 +49,7 @@
                         <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
                         <td :class="getTdClass(index)">Hourly</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.caregiver_rate) }}</td>
-                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.hourly.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.hourly.client_rate) }}</td>
                         <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.hourly.provider_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.total_rate) }}</td>
@@ -67,7 +67,7 @@
                     <tr v-if="item.rates.fixed.total_rate > 0">
                         <td :class="getTdClass(index)">Daily</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.caregiver_rate) }}</td>
-                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
                         <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.fixed.provider_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.total_rate) }}</td>
@@ -275,7 +275,6 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
-    import BusinessSettings from "../../../mixins/BusinessSettings";
     import RateCodes from "../../../mixins/RateCodes";
     import RateCodeModal from "../rate_codes/RateCodeModal";
     import ClientCaregiverRateCodeModal from "../clients/ClientCaregiverRateCodeModal";
@@ -287,7 +286,7 @@
 
         components: {ClientCaregiverRateCodeModal, RateCodeModal},
 
-        mixins: [FormatsNumbers, BusinessSettings, RateCodes],
+        mixins: [FormatsNumbers, RateCodes],
 
         data() {
             return {
@@ -317,6 +316,9 @@
         },
         
         computed: {
+            business() {
+                return {} // TODO: Think of a way to plug in a business??
+            }
             // modalTitle() {
             //     if (this.selectedCaregiver.id) {
             //         return 'Edit Caregiver Assignment';

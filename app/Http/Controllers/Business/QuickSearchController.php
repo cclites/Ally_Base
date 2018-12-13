@@ -61,7 +61,11 @@ class QuickSearchController extends BaseController
 
         $users = $query->get()->map(function($user) use ($keys) {
             if ($user->relationLoaded('phoneNumbers')) {
-                $user->phone = $user->default_phone;
+                if (request('type') == 'sms') {
+                    $user->phone = $user->smsNumber ? $user->smsNumber->number : $user->default_phone;
+                } else {
+                    $user->phone = $user->default_phone;
+                }
             }
             return $user->only($keys);
         });

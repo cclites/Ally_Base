@@ -66,7 +66,7 @@
                 </b-form-group>
             </b-card>
         </b-col>
-        <b-col lg="12" v-if="updatedBy">
+        <b-col lg="12" v-if="! isCaregiver && updatedBy">
             <b-card>
                 Last updated {{ formatDateFromUTC(caregiver.availability.updated_at) }} by {{ updatedBy }}
             </b-card>
@@ -108,9 +108,21 @@
             }
         },
 
+        computed: {
+            isCaregiver() {
+                return window.AuthUser && window.AuthUser.role_type == 'caregiver';
+            },
+        },
+
         methods: {
             updatePreferences() {
-                this.form.put('/business/caregivers/' + this.caregiver.id + '/preferences');
+                var url = '/business/caregivers/' + this.caregiver.id + '/preferences';
+
+                if (this.isCaregiver) {
+                    url = '/profile/preferences';
+                }
+
+                this.form.put(url);
             }
         }
     }

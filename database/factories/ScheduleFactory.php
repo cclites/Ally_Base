@@ -1,27 +1,19 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\Schedule;
+use App\Client;
+use Carbon\Carbon;
 
-/*
-|--------------------------------------------------------------------------
-| Model Factories
-|--------------------------------------------------------------------------
-|
-| This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
-| model instances for testing / seeding your application's database.
-|
-*/
-
-$factory->define(\App\Schedule::class, function(Faker $faker) {
-    $datetime = $faker->date('Y-m-d', \Carbon\Carbon::now()->addMonths(3)) . ' '
+$factory->define(Schedule::class, function(Faker $faker) {
+    $datetime = $faker->date('Y-m-d', Carbon::now()->addMonths(3)) . ' '
         . str_pad(mt_rand(1,23), 2, '0', STR_PAD_LEFT) . $faker->randomElement(['00', '15', '30']);
-    $starts_at = new Carbon\Carbon($datetime);
+    $starts_at = new Carbon($datetime);
 
     // Create a client if one doesn't exist
-    $client = App\Client::inRandomOrder()->first();
+    $client = Client::inRandomOrder()->first();
     if (!$client) {
-        $client = factory(\App\Client::class)->create();
+        $client = factory(Client::class)->create();
     }
 
     // Attach a random caregiver to a client if client does not have caregivers already

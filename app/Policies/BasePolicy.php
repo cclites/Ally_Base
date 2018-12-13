@@ -102,10 +102,16 @@ abstract class BasePolicy
         return false;
     }
 
-    protected function caregiverCheck(User $user, $entity)
+    protected function caregiverBusinessCheck(User $user, $entity)
     {
         return $this->isCaregiver()
             && $user->caregiver->sharesBusinessWith($entity);
+    }
+
+    protected function caregiverClientCheck(User $user, $client)
+    {
+        return $this->isCaregiver()
+            && $user->caregiver->belongsToClient($client);
     }
 
     protected function checkOnRole(User $user, string $ability, User $entity)

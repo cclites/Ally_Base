@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="alert alert-warning" v-if="businesses.length === 0">
-            Please contact Ally to enable SMS messages on your account.
+            Please contact Ally to enable text messages on your account.
         </div>
         <b-card v-else
                 header="Sent Text History"

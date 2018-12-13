@@ -83,13 +83,13 @@
                         </b-row>
                         <b-row>
                             <b-col sm="12">
-                                <b-form-group label="Care Plan" label-for="care_plan_id">
+                                <b-form-group label="Service Needs/ADL Groups" label-for="care_plan_id">
                                     <b-form-select
                                             id="care_plan_id"
                                             name="care_plan_id"
                                             v-model="form.care_plan_id"
                                     >
-                                        <option value="">--No Care Plan--</option>
+                                        <option value="">--None--</option>
                                         <option v-for="plan in carePlans" :value="plan.id" :key="plan.id">{{ plan.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="care_plan_id" text=""></input-help>

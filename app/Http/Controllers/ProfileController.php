@@ -14,6 +14,7 @@ use App\Responses\SuccessResponse;
 use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
 use App\Traits\Request\BankAccountRequest;
+use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 
 class ProfileController extends Controller
 {
@@ -44,6 +45,8 @@ class ProfileController extends Controller
                     round($user->role->getAllyPercentage($user->role->backupPayment) * 100, 2) .
                     "% Processing Fee)"
             ];
+        } else if ($type == 'caregiver') {
+            $user->role->load(['availability', 'skills']);
         }
 
         return view('profile.' . $type, compact('user', 'payment_type_message'));
@@ -51,6 +54,8 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
+        $this->authorize('update', auth()->user());
+
         $data = $request->validated();
 
         if(auth()->user()->role_type == 'client') {
@@ -87,18 +92,24 @@ class ProfileController extends Controller
 
     public function address(Request $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $user = auth()->user();
         return (new AddressController())->update($request, $user, $type, 'Your address');
     }
 
     public function phone(Request $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $user = auth()->user();
         return (new PhoneController())->upsert($request, $user, $type, 'Your phone number');
     }
 
     public function paymentMethod(UpdatePaymentMethodRequest $request, $type)
     {
+        $this->authorize('update', auth()->user());
+
         $client = $request->user()->role;
         $backup = ($type === 'backup');
 
@@ -117,6 +128,8 @@ class ProfileController extends Controller
 
     public function bankAccount(Request $request)
     {
+        $this->authorize('update', auth()->user());
+        
         $caregiver = $request->user()->role;
 
         $existing = $caregiver->bankAccount;
@@ -129,6 +142,8 @@ class ProfileController extends Controller
     }
 
     public function destroyPaymentMethod($type) {
+        $this->authorize('update', auth()->user());
+        
         /**
          * @var Client $client
          */
@@ -142,4 +157,48 @@ class ProfileController extends Controller
         $client->save();
         return new SuccessResponse('The payment method has been deleted.');
     }
+
+    /**
+     * Update caregiver availability preferences.
+     *
+     * @param UpdateCaregiverAvailabilityRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function preferences(UpdateCaregiverAvailabilityRequest $request)
+    {
+        if (auth()->user()->role_type != 'caregiver' || auth()->user()->active == 0) {
+            abort(403);
+        }
+
+        $caregiver = auth()->user()->role;
+
+        $caregiver->update(['preferences' => $request->input('preferences')]);
+        $caregiver->setAvailability($request->validated() + ['updated_by' => auth()->id()]);
+        return new SuccessResponse('Your availability preferences have been saved.');
+    }
+
+    /**
+     * Update caregiver skills preferences.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function skills(Request $request)
+    {
+        if (auth()->user()->role_type != 'caregiver' || auth()->user()->active == 0) {
+            abort(403);
+        }
+
+        $caregiver = auth()->user()->role;
+
+        $request->validate([
+            'skills' => 'array',
+            'skills.*' => 'integer',
+        ]);
+
+        $caregiver->skills()->sync($request->skills);
+
+        return new SuccessResponse('Caregiver skills updated');
+    }
+
 }
