@@ -20,7 +20,7 @@ $factory->define(CustomField::class, function (Faker $faker) {
         'key' => $faker->word,
         'label' => $faker->word,
         'required' => $faker->boolean,
-        'default_value' => function(array $field) {
+        'default_value' => function(array $field) use(&$faker) {
             if(!$field['required']) return null;
 
             if($field['type'] == 'input') {
