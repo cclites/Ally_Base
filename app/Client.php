@@ -229,7 +229,12 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral_source_id',
         'qb_customer_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'discharge_reason',
+        'discharge_condition',
+        'discharge_goals_eval',
+        'discharge_disposition',
+        'discharge_internal_notes'
     ];
 
     ///////////////////////////////////////////
