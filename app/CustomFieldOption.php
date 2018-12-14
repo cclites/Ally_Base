@@ -33,6 +33,28 @@ class CustomFieldOption extends Model
     protected $appends = ['text'];
 
     /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
+        
+        // Delete all custom field values
+        self::deleting(function($option) {
+            $field = $option->field;
+            $field->caregivers->each(function($meta) {
+                $meta->delete();
+            });
+ 
+            $field->clients->each(function($meta) {
+                $meta->delete();
+            });
+        });
+    }
+
+    /**
      * Create an alias for the label attribute to simplify usage of custom field options in the front end
      *
      * @return string

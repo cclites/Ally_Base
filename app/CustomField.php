@@ -52,6 +52,14 @@ class CustomField extends Model implements BelongsToBusinessesInterface, Belongs
                 $field->options->each(function($option) {
                     $option->delete();
                 });
+
+                $field->caregivers->each(function($meta) {
+                    $meta->delete();
+                });
+    
+                $field->clients->each(function($meta) {
+                    $meta->delete();
+                });
             }
         });
     }
