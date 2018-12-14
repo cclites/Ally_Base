@@ -5,6 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\BusinessChain;
 use App\CustomFieldOption;
+use App\CaregiverMeta;
+use App\ClientMeta;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
@@ -82,6 +84,26 @@ class CustomField extends Model implements BelongsToBusinessesInterface, Belongs
     public function options()
     {
         return $this->hasMany(CustomFieldOption::class, 'field_id');
+    }
+
+    /**
+     * Get the value of the custom field for the caregivers who have set one
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function caregivers()
+    {
+        return $this->hasMany(CaregiverMeta::class, 'key', 'key');
+    }
+
+    /**
+     * Get the value of the custom field for the clients who have set one
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function clients()
+    {
+        return $this->hasMany(ClientMeta::class, 'key', 'key');
     }
 
     /**
