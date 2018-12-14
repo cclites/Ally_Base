@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="table-responsive">
+        <div :id="id" class="table-responsive">
             <b-table 
                 bordered striped hover show-empty
                 :items="items"
@@ -41,6 +41,10 @@ export default {
         items: {
             type: Array,
             required: true,
+        },
+        id: {
+            type: String,
+            default: () => null,
         },
     },
 
