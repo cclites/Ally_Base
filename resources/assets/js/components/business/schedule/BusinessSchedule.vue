@@ -86,7 +86,7 @@
         </b-row>
         <div class="calendar-view">
             <div class="print-fc-head">
-                <h1>By {{business.name}}</h1>
+                <h1>{{business.name}}</h1>
                 <h4>(717) 394-5111</h4>
                 <h3 class="text-center">
                     Schedules for 
