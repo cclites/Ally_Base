@@ -1,6 +1,34 @@
 export default {
+    props: {
+        customFields: {
+            type: Array,
+            required: true,
+        },
+    },
+
+    created() {
+        const obj = {};
+        const customKeys = [];
+        this.customFields.forEach(({key, label}) => {
+            customKeys.push(key);
+            obj[key] = {
+               sortable: true,
+               shouldShow: true,
+               key,
+               label,
+            };
+        });
+
+       this.customFieldKeys = customKeys;
+        this.columns = {
+            ...this.columns,
+            ...obj,
+        };
+    },
+
     data() {
         return {
+            customFieldKeys: [],
             totalRows: 0,
             perPage: 15,
             currentPage: 1,
@@ -73,5 +101,21 @@ export default {
         printTable() {
             $('#table').print();
         },
+
+        getFieldValue(meta, key) {
+            const metaField = meta.find(fieldValue => fieldValue.key == key);
+            const {required, default_value, options} = this.customFields.find(definition => definition.key == key);
+            const isDropdown = options.length > 0;
+
+            if(!metaField) {
+                return isDropdown && required ? this.getDropdownLabel(options, default_value) : default_value;
+            }
+
+            return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
+        },
+
+        getDropdownLabel(options, key) {
+            return options.find(option => option.value == key).label;
+        }
     }
 }

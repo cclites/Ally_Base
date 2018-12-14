@@ -102,39 +102,14 @@
              required: true,
              type: Array,
          },
-         customFields: {
-             type: Array,
-             required: true,
-         },
      },
 
      mixins: [FormatsListData, UserDirectory],
-
-     created() {
-         const obj = {};
-         const customKeys = [];
-         this.customFields.forEach(({key, label}) => {
-             customKeys.push(key);
-             obj[key] = {
-                sortable: true,
-                shouldShow: true,
-                key,
-                label,
-             };
-         });
-
-        this.customFieldKeys = customKeys;
-         this.columns = {
-             ...this.columns,
-             ...obj,
-         };
-     },
 
     data() {
         return {
             directoryType: 'caregiver',
             data: this.caregivers,
-            customFieldKeys: [],
             columns: {
                 firstname: {
                     key: 'firstname',
@@ -169,25 +144,6 @@
                 },
             },
         };
-    },
-
-    methods: {
-        getFieldValue(meta, key) {
-            const metaField = meta.find(fieldValue => fieldValue.key == key);
-            const {required, default_value, options} = this.customFields.find(definition => definition.key == key);
-            const isDropdown = options.length > 0;
-
-            if(!metaField) {
-                return isDropdown && required ? this.getDropdownLabel(options, default_value) : default_value;
-            }
-
-            return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
-        },
-
-        getDropdownLabel(options, key) {
-            console.log(options, key)
-            return options.find(option => option.value == key).label;
-        }
     },
  }
  </script>
