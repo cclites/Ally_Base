@@ -29,9 +29,6 @@ export default {
     data() {
         return {
             customFieldKeys: [],
-            totalRows: 0,
-            perPage: 15,
-            currentPage: 1,
             filters: {
                 start_date: '',
                 end_date: '',
@@ -90,12 +87,6 @@ export default {
     methods: {
         formatDate(date) {
             return moment(date).format('MM-DD-YYYY');
-        },
-
-        onFiltered(filteredItems) {
-            // Trigger pagination to update the number of buttons/pages due to filtering
-            this.totalRows = filteredItems.length;
-            this.currentPage = 1;
         },
 
         printTable() {

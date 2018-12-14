@@ -52,18 +52,7 @@
                         </b-col>
                     </b-row>
 
-                    <b-table
-                        id="table"
-                        bordered
-                        striped
-                        hover
-                        show-empty
-                        :items="items"
-                        :fields="fields"
-                        :current-page="currentPage"
-                        :per-page="perPage"
-                         @filtered="onFiltered"
-                    >
+                    <ally-table id="table" :columns="fields" :items="items">
                         <template slot="active" scope="row">
                             {{ row.item.active ? 'Active' : 'Inactive' }}
                         </template>
@@ -76,15 +65,7 @@
                         <template v-for="key in customFieldKeys" :slot="key" scope="row">
                             {{ getFieldValue(row.item.meta, key) }}
                         </template>
-                    </b-table>
-                    <b-row>
-                        <b-col lg="6" >
-                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
-                        </b-col>
-                        <b-col lg="6" class="text-right">
-                            Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
-                        </b-col>
-                    </b-row>
+                    </ally-table>
                 </b-card>
             </b-col>
         </b-row>
