@@ -198,8 +198,14 @@ class CaregiverController extends BaseController
         } catch (\Exception $ex) {
             return new ErrorResponse(422, 'Invalid inactive date.');
         }
+        $data = [
+            'active' => false,
+            'inactive_at' => $inactive_at,
+            'deactivation_reason_id' => request('deactivation_reason_id'),
+            'deactivation_note' => request('note')
+        ];
 
-        if ($caregiver->update(['active' => false, 'inactive_at' => $inactive_at])) {
+        if ($caregiver->update($data)) {
             $caregiver->unassignFromFutureSchedules();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
         }
