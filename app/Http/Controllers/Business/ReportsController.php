@@ -36,6 +36,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
+use App\CustomField;
 
 class ReportsController extends BaseController
 {
@@ -806,8 +807,17 @@ class ReportsController extends BaseController
      */
     public function caregiverDirectory()
     {
-        $caregivers = Caregiver::forRequestedBusinesses()->with('address')->get();
-        return view('business.reports.caregiver_directory', compact('caregivers'));
+        $caregivers = Caregiver::forRequestedBusinesses()
+            ->with('address')
+            ->with('meta')
+            ->get();
+            
+        $fields = CustomField::forAuthorizedChain()
+            ->where('user_type', 'caregiver')
+            ->with('options')
+            ->get();
+            
+        return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
     }
 
     /**
