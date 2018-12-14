@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <client-directory :clients="{{ $clients }}"></client-directory>
+            <client-directory :clients="{{ $clients }}" :custom-fields="{{ $fields }}"></client-directory>
         </div>
     </div>
 @endsection

@@ -796,8 +796,17 @@ class ReportsController extends BaseController
      */
     public function clientDirectory()
     {
-        $clients = Client::forRequestedBusinesses()->with('address')->get();
-        return view('business.reports.client_directory', compact('clients'));
+        $clients = Client::forRequestedBusinesses()
+            ->with('address')
+            ->with('meta')
+            ->get();
+
+        $fields = CustomField::forAuthorizedChain()
+            ->where('user_type', 'client')
+            ->with('options')
+            ->get();
+        
+        return view('business.reports.client_directory', compact('clients', 'fields'));
     }
 
     /**

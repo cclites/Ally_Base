@@ -44,7 +44,7 @@
                     <b-row class="mb-2">
                         <b-col sm="6">
                             <!-- MODAL TO SELECT COLUMNS -->
-                            <report-column-picker prefix="caregiver_directory_" v-bind:columns.sync="columns" />
+                            <report-column-picker prefix="client_directory_" v-bind:columns.sync="columns" />
                         </b-col>
                         <b-col sm="6" class="text-right">
                             <b-btn :href="downloadableUrl" variant="success"><i class="fa fa-file-excel-o"></i> Export to Excel</b-btn>
@@ -72,6 +72,9 @@
                         </template>
                         <template slot="created_at" scope="row">
                             {{ formatDate(row.item.user.created_at) }}
+                        </template>
+                        <template v-for="key in customFieldKeys" :slot="key" scope="row">
+                            {{ getFieldValue(row.item.meta, key) }}
                         </template>
                     </b-table>
                     <b-row>
