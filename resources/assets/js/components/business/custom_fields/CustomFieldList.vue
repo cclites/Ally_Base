@@ -118,7 +118,7 @@
                 }else if(type == 'dropdown') {
                     return options.find(option => option.value == default_value).label;
                 }else {
-                    return default_value.length > 25 ? default_value.substring(0, 25) : default_value;
+                    return default_value.length > 25 ? default_value.substring(0, 25) + '...' : default_value;
                 }
             },
 
