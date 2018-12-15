@@ -825,7 +825,7 @@ class ReportsController extends BaseController
             ->where('user_type', 'caregiver')
             ->with('options')
             ->get();
-            
+
         return view('business.reports.caregiver_directory', compact('caregivers', 'fields'));
     }
 
@@ -869,11 +869,12 @@ class ReportsController extends BaseController
     {
         $report = new CaregiverDirectoryReport();
         $report->forRequestedBusinesses();
-            $report->query()->join('users','caregivers.id','=','users.id');
+        $report->query()->join('users','caregivers.id','=','users.id');
 
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+            $report->with('meta');
         }
 
         if($request->has('active')) {
@@ -904,11 +905,12 @@ class ReportsController extends BaseController
     {
         $report = new ClientDirectoryReport();
         $report->forRequestedBusinesses();
-            $report->query()->join('users','clients.id','=','users.id');
+        $report->query()->join('users','clients.id','=','users.id');
 
         if($request->start_date && $request->end_date) {
             $report->where('users.created_at','>', (new Carbon($request->start_date))->format('Y-m-d'));
             $report->where('users.created_at','<', (new Carbon($request->end_date))->format('Y-m-d'));
+            $report->with('meta');
         }
 
         if($request->has('active')) {
