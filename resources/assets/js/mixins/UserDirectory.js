@@ -95,11 +95,11 @@ export default {
 
         getFieldValue(meta, key) {
             const metaField = meta.find(fieldValue => fieldValue.key == key);
-            const {required, default_value, options} = this.customFields.find(definition => definition.key == key);
+            const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
             const isDropdown = options.length > 0;
 
             if(!metaField) {
-                return isDropdown && required ? this.getDropdownLabel(options, default_value) : default_value;
+                return fieldDefault;
             }
 
             return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
