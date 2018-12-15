@@ -65,7 +65,7 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                     continue;
                 }
 
-                $result[$field->key] = $field->default();
+                $result[$field->key] = $field->default;
             }
 
             return $result;

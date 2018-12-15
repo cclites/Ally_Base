@@ -38,6 +38,13 @@ class CustomField extends Model implements BelongsToChainsInterface
     ];
 
     /**
+     * The ustom model attributes to add to the Eloquent model
+     */
+    protected $appends = [
+        'default',
+    ];
+
+    /**
      * The "booting" method of the model.
      *
      * @return void
@@ -69,7 +76,7 @@ class CustomField extends Model implements BelongsToChainsInterface
      *
      * @return string
      */
-    public function default()
+    public function getDefaultAttribute()
     {
         if($this->type == 'dropdown' && $this->default_value) {
             return $this->options->where('value', $this->default_value)->first()->label;
