@@ -65,6 +65,20 @@ class CustomField extends Model implements BelongsToChainsInterface
     }
 
     /**
+     * Get the displayable value of the default for this custom field
+     *
+     * @return string
+     */
+    public function default()
+    {
+        if($this->type == 'dropdown' && $this->default_value) {
+            return $this->options->where('value', $this->default_value)->first()->label;
+        }
+
+        return $this->default_value ?: '';
+    }
+
+    /**
      * Get the business chain that this field was created for
      *
      * @return \App\BusinessChain
