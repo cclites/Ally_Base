@@ -10,21 +10,21 @@ class CustomFieldPolicy extends BasePolicy
     public function create(User $user, $data)
     {
         $field = new CustomField($data);
-        return $this->businessCheck($user, $field);
+        return $this->businessChainCheck($user, $field);
     }
 
     public function read(User $user, CustomField $field)
     {
-        return $this->businessCheck($user, $field);
+        return $this->businessChainCheck($user, $field);
     }
 
     public function update(User $user, CustomField $field)
     {
-        return $this->businessCheck($user, $field);
+        return $this->businessChainCheck($user, $field);
     }
 
     public function delete(User $user, CustomField $field)
     {
-        return $this->businessCheck($user, $field);
+        return $this->businessChainCheck($user, $field);
     }
 }

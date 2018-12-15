@@ -9,22 +9,22 @@ class CustomFieldOptionPolicy extends BasePolicy
 {
     public function create(User $user, $data)
     {
-        $field = new CustomFieldOption($data);
-        return $this->businessCheck($user, $field);
+        $option = new CustomFieldOption($data);
+        return $this-businessCheckChain($user, $option->field);
     }
 
-    public function read(User $user, CustomFieldOption $field)
+    public function read(User $user, CustomFieldOption $option)
     {
-        return $this->businessCheck($user, $field);
+        return $this-businessCheckChain($user, $option->field);
     }
 
-    public function update(User $user, CustomFieldOption $field)
+    public function update(User $user, CustomFieldOption $option)
     {
-        return $this->businessCheck($user, $field);
+        return $this-businessCheckChain($user, $option->field);
     }
 
-    public function delete(User $user, CustomFieldOption $field)
+    public function delete(User $user, CustomFieldOption $option)
     {
-        return $this->businessCheck($user, $field);
+        return $this-businessCheckChain($user, $option->field);
     }
 }
