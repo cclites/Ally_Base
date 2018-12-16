@@ -42,6 +42,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \App\Client|null $client
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read mixed $name
  * @property-read mixed $name_last_first
  * @property-read mixed $full_address
@@ -115,6 +116,11 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
     }
 
     ///////////////////////////////////////////

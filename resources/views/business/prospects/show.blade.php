@@ -39,8 +39,7 @@
             </div>
         </div>
         <div class="tab-pane" id="client_notes" role="tabpanel">
-            Note
-            
+            <notes-tab :notes="{{ $prospect->notes }}" :business="{{ $business }}" :prospect="{{ $prospect }}"></notes-tab>
         </div>
     </div>
 @endsection

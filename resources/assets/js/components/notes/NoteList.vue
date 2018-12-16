@@ -52,13 +52,13 @@
                 <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
             </b-form-select>
 
-            <b-form-input
+            <!--<b-form-input
                 type="text"
                 id="tags"
                 v-model="searchForm.tags"
                 class="mr-2 mb-2"
                 placeholder="Tags">
-            </b-form-input>
+            </b-form-input>-->
 
             <b-button variant="info" type="submit" class="mb-2">
                 Filter
@@ -178,11 +178,11 @@
                         label: 'Referral Source',
                         sortable: true,
                     },
-                    {
-                        key: 'tags',
-                        label: 'Tags',
-                        sortable: true,
-                    },
+                    // {
+                    //     key: 'tags',
+                    //     label: 'Tags',
+                    //     sortable: true,
+                    // },
                     {
                         key: 'body',
                         label: 'Preview',

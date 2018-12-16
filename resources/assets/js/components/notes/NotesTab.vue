@@ -31,7 +31,7 @@
         </b-card>
         
         <b-modal id="noteModal" title="Add Note" v-model="noteModal" size="lg">
-            <note-form :client="client" :caregiver="caregiver" :note="note" ref="noteForm" :modal="1" />
+            <note-form :client="client" :caregiver="caregiver" :prospect="prospect" :referralSource="referralSource" :note="note" ref="noteForm" :modal="1" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="noteModal=false">Close</b-btn>
@@ -58,6 +58,8 @@
             notes: { type: Array, default: [] },
             caregiver: { type: Object, default: () => { return {} } },
             client: { type: Object, default: () => { return {} } },
+            prospect: { type: Object, default: () => { return {} } },
+            referralSource: { type: Object, default: () => { return {} } },
         },
 
         mixins: [ FormatsDates ],
@@ -68,6 +70,10 @@
                 note: {},
                 localNotes: [],
             };
+        },
+
+        mounted() {
+            console.log(this.notes, this.prospect);
         },
 
         methods: {
@@ -94,6 +100,10 @@
                     return this.client.id == note.client_id;
                 } else if (this.caregiver.id) {
                     return this.caregiver.id == note.caregiver_id;
+                } else if (this.prospect.id) {
+                    return this.prospect.id == note.prospect_id;
+                } else if (this.referralSource.id) {
+                    return this.referralSource.id == note.referral_source_id;
                 }
             },
         },
