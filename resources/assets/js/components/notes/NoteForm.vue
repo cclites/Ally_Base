@@ -24,6 +24,28 @@
                     </b-form-select>
                     <input-help :form="form" field="caregiver_id" text="Select a caregiver."></input-help>
                 </b-form-group>
+                <b-form-group label="Prospect" label-for="prospect_id">
+                    <b-form-select
+                            id="prospect_id"
+                            name="prospect_id"
+                            v-model="form.prospect_id"
+                    >
+                        <option value="">--Select--</option>
+                        <option :value="prospect.id" v-for="prospect in prospects" :key="prospect.id">{{ prospect.nameLastFirst }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="prospect_id" text="Select a Prospect."></input-help>
+                </b-form-group>
+                <b-form-group label="Referral Source" label-for="referral_source_id">
+                    <b-form-select
+                            id="referral_source_id"
+                            name="referral_source_id"
+                            v-model="form.referral_source_id"
+                    >
+                        <option value="">--Select--</option>
+                        <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
+                    </b-form-select>
+                    <input-help :form="form" field="referral_source_id" text="Select a Referral Source."></input-help>
+                </b-form-group>
                 <business-location-form-group v-model="form.business_id"
                                               form="form"
                                               field="business_id"
@@ -71,6 +93,14 @@
                 type: Object,
                 default: () => ({}),
             },
+            prospect: {
+                type: Object,
+                default: () => ({}),
+            },
+            referralSource: {
+                type: Object,
+                default: () => ({}),
+            },
             note: {
                 type: Object,
                 default: () => ({}),
@@ -85,6 +115,8 @@
             return {
                 clients: [],
                 caregivers: [],
+                prospects: [],
+                referral_sources: [],
                 form: new Form({}),
                 busy: false,
             }
@@ -93,6 +125,8 @@
         mounted() {
             this.loadClients();
             this.loadCaregivers();
+            this.loadProspects();
+            this.loadReferralSources();
             this.fillForm({});
             console.log('NoteForm mounted');
         },
@@ -110,6 +144,19 @@
                 this.caregivers = response.data;
             },
 
+            async loadProspects() {
+                console.log('loadProspects called');
+                const response = await axios.get('/business/prospects?json=1');
+                this.prospects = response.data;
+            },
+
+            async loadReferralSources() {
+                console.log('loadReferralSources called');
+                const response = await axios.get('/business/referral-sources?json=1');
+                this.referral_sources = response.data;
+            },
+
+
             submit() {
                 let path = '/notes';
                 let method = 'post';
@@ -124,6 +171,7 @@
                     this.form.submit(method, path)
                         .then( ({ data }) => {
                             this.busy = false;
+                            console.log('updated...', data);
                             resolve(data.data);
                         })
                         .catch(e => {
@@ -138,6 +186,8 @@
                     business_id: data.business_id || this.client.business_id || "",
                     caregiver_id: data.caregiver_id || this.caregiver.id || "",
                     client_id: data.client_id || this.client.id || "",
+                    prospect_id: data.prospect_id || this.prospect.id || "",
+                    referral_source_id: data.referral_source_id || this.referralSource.id || "",
                     body: data.body || "",
                     tags: data.tags || "",
                     modal: this.modal, // added so controller doesn't send redirect response

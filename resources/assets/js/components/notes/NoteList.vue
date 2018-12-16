@@ -36,6 +36,22 @@
                 <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
             </b-form-select>
 
+            <b-form-select v-model="searchForm.prospect" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- Prospect --</option>
+                </template>
+                <option :value="prospect.id" v-for="prospect in prospects" :key="prospect.id">{{ prospect.nameLastFirst }}</option>
+            </b-form-select>
+
+            <b-form-select v-model="searchForm.referral_source" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- Referral Source --</option>
+                </template>
+                <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
+            </b-form-select>
+
             <b-form-input
                 type="text"
                 id="tags"
@@ -64,10 +80,16 @@
                         @filtered="onFiltered"
                 >
                     <template slot="caregiver" scope="data">
-                        <span v-if="data.item.caregiver">{{ data.item.caregiver.name }}</span>
+                        <span v-if="data.item.caregiver">{{ data.item.caregiver.nameLastFirst }}</span>
                     </template>
                     <template slot="client" scope="data">
                         <span v-if="data.item.client">{{ data.item.client.name }}</span>
+                    </template>
+                    <template slot="prospect" scope="data">
+                        <span v-if="data.item.prospect">{{ data.item.prospect.name }}</span>
+                    </template>
+                    <template slot="referral_source" scope="data">
+                        <span v-if="data.item.referral_source">{{ data.item.referral_source.organization }}</span>
                     </template>
                     <template slot="action" scope="data">
                         <b-btn variant="secondary" @click="edit(data.item)">
@@ -88,7 +110,7 @@
         </div>
 
         <b-modal id="noteModal" :title="noteModalTitle" v-model="noteModal" size="lg">
-            <note-form :caregiver="{}" :client="{}" :note="note" ref="noteForm" />
+            <note-form :caregiver="{}" :client="{}" :prospect="{}" :referralSource="{}" :note="note" :modal="1" ref="noteForm" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="noteModal=false">Close</b-btn>
@@ -114,10 +136,14 @@
                 noteModal: false,
                 caregivers: [],
                 clients: [],
+                prospects: [],
+                referral_sources: [],
                 items: this.notes,
                 searchForm: {
                     caregiver: null,
                     client: null,
+                    prospect: null,
+                    referral_source: null,
                     tags: ''
                 },
                 totalRows: 0,
@@ -143,6 +169,16 @@
                         sortable: true,
                     },
                     {
+                        key: 'prospect',
+                        label: 'Prospect',
+                        sortable: true,
+                    },
+                    {
+                        key: 'referral_source',
+                        label: 'Referral Source',
+                        sortable: true,
+                    },
+                    {
                         key: 'tags',
                         label: 'Tags',
                         sortable: true,
@@ -160,6 +196,8 @@
         mounted() {
             this.loadClients();
             this.loadCaregivers();
+            this.loadProspects();
+            this.loadReferralSources();
             this.totalRows = this.items.length;
             let startDate = jQuery('#start-date');
             let endDate = jQuery('#end-date');
@@ -192,12 +230,48 @@
                 console.log('loadClients called');
                 const response = await axios.get('/business/clients?json=1');
                 this.clients = response.data;
+                this.items.forEach(item => {
+                    if (item.client_id) {
+                        const client = this.clients.find(x => x.id === item.client_id);
+                        item.client = client;
+                    }
+                });
             },
 
             async loadCaregivers() {
                 console.log('loadCaregivers called');
                 const response = await axios.get('/business/caregivers?json=1');
                 this.caregivers = response.data;
+                this.items.forEach(item => {
+                    if (item.caregiver_id) {
+                        const caregiver = this.caregivers.find(x => x.id === item.caregiver_id);
+                        item.caregiver = caregiver;
+                    }
+                });
+            },
+
+            async loadProspects() {
+                console.log('loadProspects called');
+                const response = await axios.get('/business/prospects?json=1');
+                this.prospects = response.data;
+                this.items.forEach(item => {
+                    if (item.prospect_id) {
+                        const prospect = this.prospects.find(x => x.id === item.prospect_id);
+                        item.prospect = prospect;
+                    }
+                });
+            },
+
+            async loadReferralSources() {
+                console.log('loadReferralSources called');
+                const response = await axios.get('/business/referral-sources?json=1');
+                this.referral_sources = response.data;
+                this.items.forEach(item => {
+                    if (item.referral_source_id) {
+                        const rs = this.referral_sources.find(x => x.id === item.referral_source_id);
+                        item.referral_source = rs;
+                    }
+                });
             },
 
             onFiltered(filteredItems) {
@@ -223,6 +297,8 @@
                 this.note = {
                     caregiver_id: this.searchForm.caregiver ? this.searchForm.caregiver : '',
                     client_id: this.searchForm.client ? this.searchForm.client : '',
+                    prospect_id: this.searchForm.prospect ? this.searchForm.prospect : '',
+                    referral_source_id: this.searchForm.referral_source ? this.searchForm.referral_source : '',
                 };
                 this.noteModal = true;
             },

@@ -51,7 +51,7 @@ class NoteController extends Controller
         ]))) {
 
             if ($request->input('modal')) {
-                return new CreatedResponse('Note Created', $note->load('creator', 'client', 'caregiver'));
+                return new CreatedResponse('Note Created', $note->load('creator', 'client', 'caregiver', 'prospect', 'referral_source'));
             }
 
             return new CreatedResponse('Note Created', [], '/notes');
@@ -71,10 +71,10 @@ class NoteController extends Controller
     {
         if ($note->update($request->validated())) {
             if ($request->input('modal')) {
-                return new SuccessResponse('Note has been updated.', $note->fresh()->load('creator', 'client', 'caregiver'));
+                return new SuccessResponse('Note has been updated.', $note->fresh()->load('creator', 'client', 'caregiver', 'prospect', 'referral_source'));
             }
 
-            return new SuccessResponse('Note has been updated', [], '/notes');
+            return new SuccessResponse('Note has been updated');
         }
 
         return new ErrorResponse(500, 'The note could not be created.');
@@ -103,7 +103,7 @@ class NoteController extends Controller
      */
     public function search(Request $request)
     {
-        $notes = Note::with('caregiver', 'client')
+        $notes = Note::with('caregiver', 'client', 'prospect', 'referral_source')
             ->where('business_id', OfficeUser::find(auth()->id())->businesses[0]->id)
             ->when($request->filled('start_date'), function ($query) use ($request) {
                 return $query->where('created_at', '>=', Carbon::parse($request->start_date)->subDay());
@@ -116,6 +116,12 @@ class NoteController extends Controller
             })
             ->when($request->filled('client'), function ($query) use ($request) {
                 return $query->where('client_id', $request->client);
+            })
+            ->when($request->filled('prospect'), function ($query) use ($request) {
+                return $query->where('prospect_id', $request->prospect);
+            })
+            ->when($request->filled('referral_source'), function ($query) use ($request) {
+                return $query->where('referral_source_id', $request->referral_source);
             })
             ->when($request->filled('tags'), function ($query) use ($request) {
                 return $query->where('tags', 'like', '%'.$request->tags.'%');

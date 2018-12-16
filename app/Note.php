@@ -9,6 +9,8 @@ use App\Traits\BelongsToOneBusiness;
  *
  * @property int $id
  * @property int|null $caregiver_id
+ * @property int|null $prospect_id
+ * @property int|null $referral_source_id
  * @property int|null $client_id
  * @property string $body
  * @property string|null $tags
@@ -20,6 +22,8 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\Business $business
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
+ * @property-read \App\Client|null $prospect
+ * @property-read \App\ReferralSource|null $referral_source
  * @property-read \App\User $creator
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
@@ -28,6 +32,8 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereBusinessId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCaregiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereProspectId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCreatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereId($value)
@@ -55,6 +61,16 @@ class Note extends AuditableModel implements BelongsToBusinessesInterface
     public function client()
     {
         return $this->belongsTo('App\Client');
+    }
+
+    public function prospect()
+    {
+        return $this->belongsTo('App\Prospect');
+    }
+
+    public function referral_source()
+    {
+        return $this->belongsTo('App\ReferralSource');
     }
 
     public function creator()

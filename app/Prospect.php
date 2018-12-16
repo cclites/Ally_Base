@@ -88,7 +88,7 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 
     protected $table = 'prospects';
     protected $guarded = ['id'];
-    protected $appends = ['full_address'];
+    protected $appends = ['full_address', 'nameLastFirst', 'name'];
 
     /**
      * Boot the model with the global scope to ignore converted records.
