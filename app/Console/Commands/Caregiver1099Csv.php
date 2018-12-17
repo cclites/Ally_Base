@@ -26,7 +26,7 @@ class Caregiver1099Csv extends Command
     /**
      * @var string
      */
-    protected $csvSeparator = ',';
+    protected $csvSeparator = ';';
 
     /**
      * @var int|float
