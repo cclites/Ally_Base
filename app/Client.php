@@ -399,7 +399,10 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->getAllyPercentage();
     }
 
-
+    public function getLastServiceDateAttribute()
+    {
+        return optional($this->shifts()->orderBy('checked_in_time', 'desc')->first())->checked_in_time;
+    }
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

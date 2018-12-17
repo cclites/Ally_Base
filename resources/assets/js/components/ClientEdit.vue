@@ -297,7 +297,10 @@
                     <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="danger" @click="$refs.deactivateClientModal.show()" v-if="active"><i class="fa fa-times"></i> Deactivate Client</b-button>
-                    <b-button variant="info" @click="activateModal = true" v-else><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                    <template v-else>
+                        <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
+                        <b-button variant="info" @click="$refs.dischargeSummaryModal.show()"><i class="fa fa-file mr-1"></i> Discharge Summary</b-button>
+                    </template>
                 </b-col>
             </b-row>
         </form>
@@ -314,6 +317,7 @@
         </b-modal>
 
         <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
+        <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
     </b-card>
 </template>
 
@@ -325,6 +329,7 @@
     import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     import DeactivateClientModal from './modals/DeactivateClientModal';
+    import DischargeSummaryModal from './modals/DischargeSummaryModal'
 
     window.croppie = require('croppie');
 
@@ -343,7 +348,8 @@
             ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
-            DeactivateClientModal
+            DeactivateClientModal,
+            DischargeSummaryModal
         },
 
         data() {
