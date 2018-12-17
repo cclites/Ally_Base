@@ -11,7 +11,13 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <caregiver-client-narrative :client="{{ $client }}" />
+            <b-card>
+                <div class="client-details mb-4">
+                    <h1>Client: {{ $client->name }}</h1>
+                </div>
+
+                <client-narrative :client="{{ $client }}" mode="caregiver" />
+            </b-card>
         </div>
     </div>
 @endsection

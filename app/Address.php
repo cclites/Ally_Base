@@ -46,6 +46,7 @@ use Packages\GMaps\NoGeocodeFoundException;
 class Address extends AuditableModel
 {
     protected $table = 'addresses';
+    protected $appends = ['full_address'];
     protected $guarded = ['id'];
 
     ///////////////////////////////////////////

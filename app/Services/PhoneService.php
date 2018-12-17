@@ -47,7 +47,7 @@ class PhoneService
     public function sendTextMessage($to, $message)
     {
         if (empty($this->client)) {
-            return Log::info("Send SMS Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
+            return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
         }
 
         $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);

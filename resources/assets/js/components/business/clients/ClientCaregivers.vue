@@ -34,7 +34,7 @@
                 <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
             </b-col>
             <b-col sm="6" class="text-right">
-                {{ paymentTypeMessage }}
+                {{ paymentText }}
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -75,7 +75,7 @@
                     <tr v-if="item.rates.fixed.total_rate > 0">
                         <td :class="getTdClass(index)">Daily</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.caregiver_rate) }}</td>
-                        <td :class="getTdClass(index)" v-if="clientRateStructure">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
+                        <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
                         <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.fixed.provider_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.total_rate) }}</td>
@@ -338,7 +338,7 @@
     export default {
         props: {
             'client': Object,
-            'allyRate': Number,
+            'allyRateOriginal': Number,
             'paymentTypeMessage': {
                 default() {
                     return '';
@@ -392,8 +392,26 @@
                 }
                 return 'Add Caregiver to Client';
             },
+
+            paymentText() {
+                return this.paymentMethodDetail.payment_text || this.paymentTypeMessage;
+            },
+
+            allyRate() {
+                return this.paymentMethodDetail.allyRate || this.allyRateOriginal;
+            },
+
+            paymentMethodDetail() {
+                return this.$store.getters.getPaymentMethodDetail();
+            }
         },
-        
+
+        watch: {
+            paymentMethodDetail(newData, oldData) {
+                this.items = [];
+                this.fetchAssignedCaregivers();
+            },
+        },
 
         methods: {
             addCaregiver() {

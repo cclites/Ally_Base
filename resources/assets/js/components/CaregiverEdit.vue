@@ -6,7 +6,7 @@
         <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="First Name" label-for="firstname">
+                    <b-form-group label="First Name" label-for="firstname" label-class="required">
                         <b-form-input
                             id="firstname"
                             name="firstname"
@@ -17,7 +17,7 @@
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Enter their first name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Last Name" label-for="lastname">
+                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
                         <b-form-input
                             id="lastname"
                             name="lastname"
@@ -103,7 +103,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button id="save-profile" variant="success" type="submit">Save Profile</b-button>
+                    <b-button variant="success" type="submit">Save Profile</b-button>
                     <b-button variant="primary" @click="passwordModal = true"><i class="fa fa-lock"></i> Reset Password</b-button>
                     <b-button variant="info" @click="welcomeEmailModal = true"><i class="fa fa-mail-forward"></i> Send Welcome Email</b-button>
                     <b-button variant="danger" @click="deactivateModal = true" v-if="active"><i class="fa fa-times"></i> Deactivate Caregiver</b-button>

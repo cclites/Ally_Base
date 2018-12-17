@@ -3,7 +3,7 @@
         <form v-show="showForm" @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Select a Client" label-for="client_id" required>
+                    <b-form-group label="Select a Client" label-for="client_id" label-class="required" required>
                         <b-form-select
                                 id="client_id"
                                 name="client_id"
@@ -61,14 +61,14 @@
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="activities" :true-value="1" :false-value="null">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver's skills match ALL of the client's ADL requirements (care plans)</span>
+                            <span class="custom-control-description">Caregiver's skills match ALL of the client's ADL requirements (service needs)</span>
                         </label>
                     </div>
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" v-model="activities" :true-value=".01" :false-value="null">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Caregiver's skills matches at least 1 of the client's ADL requirements</span>
+                            <span class="custom-control-description">Caregiver's skills match at least 1 of the client's ADL requirements</span>
                         </label>
                     </div>
                     <!--<div class="form-check">-->
@@ -99,46 +99,40 @@
                             <span class="custom-control-description">Located within a <input type="number" step="1" v-model="radius" :disabled="!radiusEnabled" class="form-control-sm col-2"/> mile radius of service address</span>
                         </label>
                     </div>
-                    <b-row>
-                        <b-col lg="4">
-                            <b-form-group label="Caregiver Gender" label-for="gender">
-                                <b-form-select id="gender"
-                                               v-model="gender"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_gender" text="" />
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
-                            <b-form-group label="Caregiver License" label-for="license">
-                                <b-form-select id="license"
-                                               v-model="license"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option value="CNA">CNA</option>
-                                    <option value="HHA">HHA</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_license" text="" />
-                            </b-form-group>
-                        </b-col>
-                        <b-col lg="4">
-                            <b-form-group label="Spoken Language" label-for="language">
-                                <b-form-select id="language"
-                                               v-model="language"
-                                >
-                                    <option value="">No Preference</option>
-                                    <option value="client">Match Client Preference</option>
-                                    <option v-for="lang in languages.getOptions()" :value="lang.value">{{ lang.text }}</option>
-                                </b-form-select>
-                                <input-help :form="form" field="matches_language" text="" />
-                            </b-form-group>
-                        </b-col>
-                    </b-row>
+                    <div>
+                        <b-form-group label="Caregiver Gender" label-for="gender">
+                            <b-form-select id="gender"
+                                            v-model="gender"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_gender" text="" />
+                        </b-form-group>
+                        <b-form-group label="Caregiver License" label-for="license">
+                            <b-form-select id="license"
+                                            v-model="license"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option value="CNA">CNA</option>
+                                <option value="HHA">HHA</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_license" text="" />
+                        </b-form-group>
+                        <b-form-group label="Spoken Language" label-for="language">
+                            <b-form-select id="language"
+                                            v-model="language"
+                            >
+                                <option value="">No Preference</option>
+                                <option value="client">Match Client Preference</option>
+                                <option v-for="lang in languages.getOptions()" :value="lang.value">{{ lang.text }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="matches_language" text="" />
+                        </b-form-group>
+                    </div>
 
                     <!--<div class="form-check">-->
                         <!--<label class="custom-control custom-checkbox">-->
@@ -161,7 +155,7 @@
                 <b-col lg="6">
                     <h4>
                         Matches: {{ matches.length }}
-                        <b-btn v-if="matches.length > 0" variant="success" class="ml-3" @click="SmsMatches()">SMS All Matching Caregivers</b-btn>
+                        <b-btn v-if="matches.length > 0" variant="success" class="ml-3" @click="SmsMatches()">Text Message All Matching Caregivers</b-btn>
                     </h4>
                 </b-col>
                 <b-col lg="6" class="text-right">
@@ -171,32 +165,35 @@
         </div>
 
         <loading-card v-show="loading"></loading-card>
-        <b-table bordered striped hover show-empty
-                 :items="matches"
-                 :fields="fields"
-                 :sort-by.sync="sortBy"
-                 :sort-desc.sync="sortDesc"
-                 v-show="!loading"
-        >
-            <template slot="rating" scope="row">
-
-            </template>
-            <template slot="actions" scope="row">
-                <slot :item="row.item">
-                    <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
-                    <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
-                </slot>
-            </template>
-        </b-table>
+        <div class="table-responsive">
+            <b-table bordered striped hover show-empty
+                     :items="matches"
+                     :fields="fields"
+                     :sort-by.sync="sortBy"
+                     :sort-desc.sync="sortDesc"
+                     v-show="!loading"
+            >
+                <template slot="distance" scope="row">
+                    {{ convertToMiles(row.item.distance) }}
+                </template>
+                <template slot="actions" scope="row">
+                    <slot :item="row.item">
+                        <b-button :href="'/business/caregivers/' + row.item.id" size="sm">View Caregiver</b-button>
+                        <b-button :href="'/business/clients/' + clientId" size="sm">View Client</b-button>
+                    </slot>
+                </template>
+            </b-table>
+        </div>
     </div>
 </template>
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import FormatsDistance from "../../mixins/FormatsDistance";
     import Languages from "../../classes/Languages";
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, FormatsDistance],
 
         props: {
             clients: Array,
@@ -245,7 +242,6 @@
                     {
                         key: 'distance',
                         sortable: true,
-                        formatter: this.numberFormat
                     },
                     {
                         key: 'activity_match',
@@ -253,7 +249,6 @@
                         sortable: true,
                         formatter: val => numeral(val).format('0%'),
                     },
-                    'rating',
                     'actions'
                 ],
                 sortBy: 'distance',

@@ -26,9 +26,11 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <b-form-group label="Office Location">
-                            <business-location-select name="business_id" required></business-location-select>
-                        </b-form-group>
+                        <business-location-form-group v-model="form.business_id"
+                                                      form="form"
+                                                      field="business_id"
+                                                      help-text="">
+                        </business-location-form-group>
                     </b-col>
                 </div>
                 <div class="row">
@@ -42,10 +44,11 @@
 </template>
 
 <script>
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+
     export default {
         name: "PrintableSchedules",
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         props: ['token'],
     }
 </script>

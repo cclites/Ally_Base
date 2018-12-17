@@ -1,8 +1,9 @@
 <?php
 
 use Faker\Generator as Faker;
+use App\CaregiverApplication;
 
-$factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
+$factory->define(CaregiverApplication::class, function (Faker $faker) {
     return [
         'first_name' => $faker->firstName,
         'last_name' => $faker->lastName,
@@ -22,6 +23,8 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'emergency_contact_phone' => $faker->phoneNumber,
         'worked_here_before' => $faker->boolean,
         'worked_before_location' => '',
+        'position' => $faker->word,
+        'status' => 'New',
         'preferred_start_date' => $faker->date(),
         'preferred_days' => 'Mon,Tues,Wed,Thurs,Fri',
         'preferred_times' => 'Mornings,Afternoons,Evenings,Nights',
@@ -82,18 +85,6 @@ $factory->define(\App\CaregiverApplication::class, function (Faker $faker) {
         'reference_2_relationship' => $faker->word,
         'reference_3_name' => $faker->name,
         'reference_3_phone' => '',
-        'reference_3_relationship' => $faker->word
-    ];
-});
-
-$factory->define(\App\CaregiverPosition::class, function (Faker $faker) {
-    return [
-        'name' => $faker->word
-    ];
-});
-
-$factory->define(\App\CaregiverApplicationStatus::class, function (Faker $faker) {
-    return [
-        'name' => $faker->word
+        'reference_3_relationship' => $faker->word,
     ];
 });

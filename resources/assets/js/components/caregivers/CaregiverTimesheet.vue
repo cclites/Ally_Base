@@ -15,7 +15,7 @@
             <b-col lg="6">
                 <b-form-group label="Client" label-for="client_id">
                     <b-form-select
-                            :disabled="! hasClients"
+                            :disabled="authInactive || ! hasClients"
                             id="client_id"
                             name="client_id"
                             v-model="form.client_id"
@@ -37,7 +37,7 @@
                             id="week"
                             name="week"
                             v-model="week"
-                            :disabled="!!timesheet.id"
+                            :disabled="authInactive || !!timesheet.id"
                     >
                         <option value="">-- Select Week --</option>
                         <option v-for="item in weekRanges" :value="item" :key="item.id">{{ item.display }}</option>
@@ -66,7 +66,7 @@
                             {{ formatEntryDisplay(shifts[index]) }}
                         </td>
                         <td>
-                            <b-button variant="info" size="xs" @click="editEntry(index)" :disabled="! canEdit">
+                            <b-button variant="info" size="xs" @click="editEntry(index)" :disabled="authInactive || ! canEdit">
                                 <i class="fa fa-edit"></i>
                             </b-button>
                         </td>
@@ -78,7 +78,7 @@
 
         <b-row class="mt-3">
             <b-col md="12">
-                <b-button variant="info" type="button" @click="submit()" :disabled="busy || isLocked">
+                <b-button variant="info" type="button" @click="submit()" :disabled="authInactive || busy || isLocked">
                     <i v-show="busy" class="fa fa-spinner fa-spin"></i>
                     Submit Timesheet
                 </b-button>
@@ -98,9 +98,10 @@
 <script>
     import TimesheetEntryModal from '../modals/TimesheetEntryModal';
     import ManageTimesheet from '../../mixins/ManageTimesheet';
+    import AuthUser from '../../mixins/AuthUser';
 
     export default {
-        mixins: [ ManageTimesheet ],
+        mixins: [ ManageTimesheet, AuthUser ],
         components: { TimesheetEntryModal },
 
         props: {

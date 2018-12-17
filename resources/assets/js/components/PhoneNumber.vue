@@ -11,7 +11,7 @@
                 </b-col>
                 <b-col>
                     <b-form-group horizontal label="Type" v-if="!isFixedType(type)" class="mb-0">
-                        <b-form-select v-model="form.type" :options="types" size="sm" @input="typeChange" style="background-color: white;"></b-form-select>
+                        <b-form-select v-model="form.type" :options="types" size="sm" @input="typeChange" style="background-color: white;" :readonly="authInactive"></b-form-select>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -20,7 +20,7 @@
             <b-row>
                 <b-col lg="6" sm="5" xs="12">
                     <b-form-group label="Phone Number" label-for="number">
-                        <mask-input v-model="form.number" name="number"></mask-input>
+                        <mask-input v-model="form.number" name="number" :readonly="authInactive"></mask-input>
                         <input-help :form="form" field="number" text="Enter full phone number."></input-help>
                     </b-form-group>
                 </b-col>
@@ -32,6 +32,7 @@
                                 maxlength="5"
                                 v-model="form.extension"
                                 class="input-sm"
+                                :readonly="authInactive"
                         >
                         </b-form-input>
                         <input-help :form="form" field="extension" text="Enter an extension (Optional)."></input-help>
@@ -41,7 +42,7 @@
                     <b-form-group>
                         <b-button variant="success"
                                   type="submit"
-                                  :disabled="submitting"
+                                  :disabled="authInactive || submitting"
                                   v-if="buttonVisible"
                         >
                             <i class="fa fa-spinner fa-spin" v-show="submitting"></i> Save Number
@@ -52,7 +53,7 @@
                                   v-if="this.phone.id"
                                   @click="destroy"
                                   title="Delete Number"
-                                  :disabled="submitting"
+                                  :disabled="authInactive || submitting"
                                   class="mt-2">
                             <i class="fa fa-times"></i>
                         </b-button>
@@ -60,17 +61,26 @@
                 </b-col>
             </b-row>
         </form>
+        <div v-if="allowSms && this.phone.id">
+            <div v-if="phone.receives_sms == 1" class="alert alert-info">You are receiving text messages at this number</div>
+            <b-btn v-else variant="success" @click="setSmsNumber()">Receive text messages at this number</b-btn>
+        </div>
     </b-card>
 </template>
 
 <script>
+    import AuthUser from '../mixins/AuthUser';
+
     export default {
+        mixins: [ AuthUser ],
+
         props: {
             'title': null,
             'type': null,
             'phone': {},
             'user': {},
-            'action': {}
+            'action': {},
+            'allowSms': false,
         },
 
         data() {
@@ -139,7 +149,17 @@
             handleKeyDown(target) {
                 this.form.clearError(target);
                 this.buttonVisible = true;
-            }
+            },
+
+            setSmsNumber() {
+                axios.patch(`/profile/phone/${this.phone.id}/sms`)
+                    .then(response => {
+                        this.$emit('updated');
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    })
+            },
         },
     }
 </script>

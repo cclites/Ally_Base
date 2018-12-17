@@ -4,7 +4,7 @@
         <b-card border-variant="secondary" header="Client Personal Data">
             <b-row>
                 <b-col lg="4">
-                    <b-form-group label="First Name" label-for="firstname">
+                    <b-form-group label="First Name" label-for="firstname" label-class="required">
                         <b-form-input
                             id="firstname"
                             name="firstname"
@@ -22,7 +22,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="4">
-                    <b-form-group label="Last Name" label-for="lastname">
+                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
                         <b-form-input
                             id="lastname"
                             name="lastname"

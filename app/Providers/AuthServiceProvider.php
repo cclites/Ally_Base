@@ -46,6 +46,8 @@ use App\User;
 use App\OtherContact;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\ClientNarrative;
+use App\Policies\ClientNarrativePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -60,9 +62,11 @@ class AuthServiceProvider extends ServiceProvider
         Caregiver::class => CaregiverPolicy::class,
         CaregiverApplication::class => CaregiverApplicationPolicy::class,
         Client::class => ClientPolicy::class,
+        ClientNarrative::class => ClientNarrativePolicy::class,
         Deposit::class => DepositPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
+        OtherContact::class => OtherContactPolicy::class,
         Payment::class => PaymentPolicy::class,
         PhoneNumber::class => PhoneNumberPolicy::class,
         Prospect::class => ProspectPolicy::class,
@@ -75,7 +79,6 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
-        OtherContact::class => OtherContactPolicy::class,
     ];
 
     /**

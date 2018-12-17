@@ -328,7 +328,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ in_distance }}m</td>
+                                <td>{{ convertToMiles(in_distance) }}m</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="shift.checked_in_number">
@@ -358,7 +358,7 @@
                             </tr> -->
                             <tr>
                                 <th>Distance</th>
-                                <td>{{ out_distance }}m</td>
+                                <td>{{ convertToMiles(out_distance) }}m</td>
                             </tr>
                             </tbody>
                             <tbody v-else-if="shift.checked_out_number">
@@ -426,15 +426,32 @@
                 </b-col>
             </b-row>
         </form>
+
+        <confirmation-modal title="Confirm Potential Duplicate"
+                            v-model="confirmModal"
+                            @confirm="confirmDuplicate()"
+        >
+            <div class="text-center">
+                <p>
+                    We believe this may be a duplicate shift.  Are you sure you want to continue?
+                </p>
+                <p>
+                    The potential duplicate occurred on {{ duplicateDate }}
+                </p>
+            </div>
+        </confirmation-modal>
     </div>
 </template>
 
 <script>
     import FormatsNumbers from '../mixins/FormatsNumbers'
     import FormatsDates from "../mixins/FormatsDates";
+    import FormatsDistance from "../mixins/FormatsDistance";
+    import ConfirmationModal from "./modals/ConfirmationModal";
 
     export default {
-        mixins: [FormatsNumbers, FormatsDates],
+        components: {ConfirmationModal},
+        mixins: [FormatsNumbers, FormatsDates, FormatsDistance],
 
         props: {
             'shift': {
@@ -466,6 +483,8 @@
                 clientAllyPct: 0.05,
                 paymentType: 'NONE',  // This is the client payment type, NOT the payment type necessarily used for this shift
                 submitting: false,
+                duplicateDate: '',
+                confirmModal: false,
             }
         },
         mounted() {
@@ -586,6 +605,7 @@
                     activities: this.getShiftActivityList(), //[],//('activities' in this.shift) ? this.shift.activities : [],
                     issues: ('issues' in this.shift) ? this.shift.issues : [],
                     override: false,
+                    duplicate_confirm: 0,
                     modal: this.is_modal,
                     goals: this.setupGoalsForm(),
                     questions: this.setupQuestionsForm(),
@@ -662,17 +682,27 @@
                 }
                 else {
                     // Create a shift (modal)
-                    this.form.post('/business/shifts').then(response => {
+                    this.form.hideErrorsFor(449).post('/business/shifts').then(response => {
                         this.$emit('shift-created', response.data.data.shift.id);
                         this.status = response.data.data.status;
                         this.submitting = false;
                     }).catch(error => {
+                        if (error.response.status === 449) {
+                            let duplicate = error.response.data.data;
+                            this.duplicateDate = this.formatDateTimeFromUTC(duplicate.checked_in_time) + ' - '
+                                + this.formatTimeFromUTC(duplicate.checked_out_time);
+                            this.confirmModal = true;
+                        }
                         this.submitting = false;
                     });
                 }
             },
             adminOverride() {
                 this.form.override = 1;
+                return this.saveShift();
+            },
+            confirmDuplicate() {
+                this.form.duplicate_confirm = 1;
                 return this.saveShift();
             },
             unconfirm() {
@@ -784,7 +814,7 @@
         },
         watch: {
             shift(newVal, oldVal) {
-                this.resetForm();
+                if (newVal.id !== oldVal.id) this.resetForm();
             },
             checked_in_date(val, old) {
                 if (old) {

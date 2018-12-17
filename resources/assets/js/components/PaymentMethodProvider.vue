@@ -1,6 +1,6 @@
 <template>
     <b-form-group>
-        <b-button variant="success" type="submit" size="" @click="save()">Save Payment Method</b-button>
+        <b-button variant="success" type="submit" size="" @click="save()" :disabled="readonly">Save Payment Method</b-button>
     </b-form-group>
 </template>
 
@@ -8,6 +8,7 @@
     export default {
         props: {
             'submitUrl': String,
+            'readonly': false,
         },
 
         data() {
@@ -19,7 +20,7 @@
                 let form = new Form({'use_business': true});
                 form.post(this.submitUrl)
                     .then((response) => {
-                        this.$parent.typeMessage = response.data;
+                        this.$parent.onUpdatePaymentMethod(response.data.data);
                     });
             }
         },

@@ -31,9 +31,11 @@
                                 </b-form-group>
                             </b-col>
                             <b-col lg="2">
-                                <b-form-group label="Office Location">
-                                    <business-location-select v-model="form.business_id" name="business_id" required></business-location-select>
-                                </b-form-group>
+                                <business-location-form-group v-model="form.business_id"
+                                                              form="form"
+                                                              field="business_id"
+                                                              help-text="">
+                                </business-location-form-group>
                             </b-col>
                             <b-col lg="2">
                                 <b-form-group label="Caregiver">
@@ -109,10 +111,11 @@
 <script>
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsDates from "../../../mixins/FormatsDates";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
+
         mixins: [FormatsDates, FormatsNumbers],
 
         props: ['clients', 'caregivers', 'token'],

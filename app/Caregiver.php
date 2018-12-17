@@ -484,6 +484,21 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         return $this->businessChains->pluck('id')->toArray();
     }
 
+    /**
+     * Determine if the caregiver is assigned to the given client.
+     *
+     * @param \App\Client|int $client
+     * @return bool
+     */
+    public function belongsToClient($client)
+    {
+        if (is_object($client)) {
+            $client = $client->id;
+        }
+
+        return $this->clients()->where('client_id', $client)->exists();
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

@@ -183,11 +183,14 @@ Vue.component('contacts-report', require('./components/business/reports/Contacts
 Vue.component('business-payroll-report', require('./components/business/reports/PayrollReport'));
 Vue.component('revenue-report', require('./components/business/reports/Revenue'));
 Vue.component('sales-pipeline-report', require('./components/business/reports/SalesPipeline'));
+Vue.component('client-directory', require('./components/business/reports/ClientDirectory'));
+Vue.component('caregiver-directory', require('./components/business/reports/CaregiverDirectory'));
+Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
-Vue.component('caregiver-client-narrative', require('./components/caregivers/ClientNarrative'));
+Vue.component('client-narrative', require('./components/ClientNarrative'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));

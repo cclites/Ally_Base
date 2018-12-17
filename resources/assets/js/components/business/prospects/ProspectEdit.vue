@@ -6,7 +6,7 @@
         <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="First Name" label-for="firstname">
+                    <b-form-group label="First Name" label-for="firstname" label-class="required">
                         <b-form-input
                                 id="firstname"
                                 name="firstname"
@@ -17,7 +17,7 @@
                         </b-form-input>
                         <input-help :form="form" field="firstname" text="Enter their first name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Last Name" label-for="lastname">
+                    <b-form-group label="Last Name" label-for="lastname" label-class="required">
                         <b-form-input
                                 id="lastname"
                                 name="lastname"
@@ -42,10 +42,11 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the prospect will use."></input-help>
                     </b-form-group>
-                    <b-form-group label="Office Location" label-for="business_id">
-                        <business-location-select v-model="form.business_id"></business-location-select>
-                        <input-help :form="form" field="business_id" text="Select the type of payment the prospect will use."></input-help>
-                    </b-form-group>
+                    <business-location-form-group v-model="form.business_id"
+                                                  form="form"
+                                                  field="business_id"
+                                                  help-text="Select the office location for the prospect.">
+                    </business-location-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -184,10 +185,11 @@
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
     import ReferralSourceSelect from "../referral/ReferralSourceSelect";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationSelect, ReferralSourceSelect},
+        components: {BusinessLocationFormGroup, ReferralSourceSelect},
+
         props: ['prospect', 'referralsources'],
 
         data() {
