@@ -8,7 +8,7 @@
                 <input type="hidden" name="_token" :value="token">
                 <div class="row">
                     <b-col lg="3">
-                        <b-form-group label="Start Date">
+                        <b-form-group label="Start Date" label-class="required">
                             <date-picker
                                     class="mb-1"
                                     name="start_date"
@@ -17,7 +17,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col lg="3">
-                        <b-form-group label="End Date">
+                        <b-form-group label="End Date" label-class="required">
                             <date-picker
                                     class="mb-1"
                                     name="end_date"
