@@ -396,7 +396,7 @@
                     // { name: 'Caregiver Online Setup', url: 'reports/caregivers-onboarded', description: '' },
                 ];
                 const {role_type} = this.role;
-                const filteredByRole = reports.filter(({allowed}) => allowed.find(role => role == 'role_type'));
+                const filteredByRole = reports.filter(({allowed}) => allowed.find(role => role == role_type));
 
                 if (this.role.role_type === 'office_user' && this.data.type === 'Agency') {
                     filteredByRole.push(
