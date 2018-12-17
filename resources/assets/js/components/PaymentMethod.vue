@@ -175,12 +175,22 @@
                     let form = new Form();
                     form.submit('delete', this.submitUrl)
                         .then(response => {
+                            this.onUpdatePaymentMethod(response.data.data);
                             this.type = null;
                             this.existing_account = {id: -1};
                             this.existing_card = {id: -1};
                         })
                 }
             },
+
+            onUpdatePaymentMethod(msg) {
+                if (typeof msg === 'string') {
+                    this.typeMessage = msg;
+                } else {
+                    this.typeMessage = msg.payment_text;
+                    this.$store.commit('setPaymentMethodDetail', msg);
+                }
+            }
         }
     }
 </script>
