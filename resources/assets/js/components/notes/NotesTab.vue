@@ -15,9 +15,9 @@
                         <b-col>
                             Created By: {{ note.creator.name }}
                         </b-col>
-                        <b-col>
+                        <!--<b-col>
                             <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>
-                        </b-col>
+                        </b-col>-->
                         <b-col>
                             <div class="pull-right">{{ formatDate(note.created_at) + ' ' + formatTime(note.created_at) }}</div>
                         </b-col>
@@ -31,7 +31,7 @@
         </b-card>
         
         <b-modal id="noteModal" title="Add Note" v-model="noteModal" size="lg">
-            <note-form :client="client" :caregiver="caregiver" :prospect="prospect" :referralSource="referralSource" :note="note" ref="noteForm" :modal="1" />
+            <note-form :client="client" :caregiver="caregiver" :prospect="prospect" :source="source" :note="note" ref="noteForm" :modal="1" />
 
             <div slot="modal-footer">
                <b-btn variant="default" @click="noteModal=false">Close</b-btn>
@@ -59,7 +59,7 @@
             caregiver: { type: Object, default: () => { return {} } },
             client: { type: Object, default: () => { return {} } },
             prospect: { type: Object, default: () => { return {} } },
-            referralSource: { type: Object, default: () => { return {} } },
+            source: { type: Object, default: () => { return {} } },
         },
 
         mixins: [ FormatsDates ],
@@ -73,7 +73,7 @@
         },
 
         mounted() {
-            console.log(this.notes, this.prospect);
+
         },
 
         methods: {
@@ -102,8 +102,8 @@
                     return this.caregiver.id == note.caregiver_id;
                 } else if (this.prospect.id) {
                     return this.prospect.id == note.prospect_id;
-                } else if (this.referralSource.id) {
-                    return this.referralSource.id == note.referral_source_id;
+                } else if (this.source.id) {
+                    return this.source.id == note.referral_source_id;
                 }
             },
         },

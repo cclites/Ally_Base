@@ -97,7 +97,7 @@
                 type: Object,
                 default: () => ({}),
             },
-            referralSource: {
+            source: {
                 type: Object,
                 default: () => ({}),
             },
@@ -186,7 +186,7 @@
                     caregiver_id: data.caregiver_id || this.caregiver.id || "",
                     client_id: data.client_id || this.client.id || "",
                     prospect_id: data.prospect_id || this.prospect.id || "",
-                    referral_source_id: data.referral_source_id || this.referralSource.id || "",
+                    referral_source_id: data.referral_source_id || this.source.id || "",
                     body: data.body || "",
                     tags: data.tags || "",
                     modal: this.modal, // added so controller doesn't send redirect response
