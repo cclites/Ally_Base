@@ -114,7 +114,7 @@
                 fields: [
                     {
                         key: 'date',
-                        formatter: this.dayFormat,
+                        formatter: (val) => this.formatDateFromUTC(val, 'ddd MMM D'),
                         sortable: true,
                     },
                     {
