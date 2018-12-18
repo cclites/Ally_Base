@@ -4,27 +4,41 @@
             <b-col lg="2">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
             </b-col>
-            <b-col lg="3">
-                <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
-            </b-col>
-            <b-col lg="2">
-                <b-form-select v-model="filters.active">
-                    <option :value="null">All Clients</option>
-                    <option :value="1">Active Clients</option>
-                    <option :value="0">Inactive Clients</option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="3">
-                <b-form-select v-model="filters.client_type">
-                    <option value="">--Select--</option>
-                    <option value="private_pay">Private Pay</option>
-                    <option value="medicaid">Medicaid</option>
-                    <option value="VA">VA</option>
-                    <option value="LTCI">LTC Insurance</option>
-                </b-form-select>
-            </b-col>
-            <b-col lg="2" class="text-right">
-                <b-form-input v-model.trim="filters.search" placeholder="Type to Search" />
+            <b-col lg="10">
+                <b-row>
+                    <b-col lg="3">
+                        <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
+                    </b-col>
+                    <b-col lg="3">
+                        <b-form-select v-model="filters.active">
+                            <option :value="null">All Clients</option>
+                            <option :value="1">Active Clients</option>
+                            <option :value="0">Inactive Clients</option>
+                        </b-form-select>
+                    </b-col>
+                    <b-col lg="3">
+                        <b-form-select v-model="filters.client_type">
+                            <option value="">--Select--</option>
+                            <option value="private_pay">Private Pay</option>
+                            <option value="medicaid">Medicaid</option>
+                            <option value="VA">VA</option>
+                            <option value="LTCI">LTC Insurance</option>
+                        </b-form-select>
+                    </b-col>
+                    <b-col lg="3" class="text-right">
+                        <b-form-input v-model.trim="filters.search" placeholder="Type to Search" />
+                    </b-col>
+                    <b-col lg="3">
+                        <b-form-group label="Payment Type" label-for="type">
+                            <b-form-select
+                                id="type"
+                                name="type"
+                                v-model="filters.payment_type"
+                                :options="paymentTypes"
+                            />
+                        </b-form-group>
+                    </b-col>
+                </b-row>
             </b-col>
         </b-row>
 
@@ -41,6 +55,9 @@
                     :sort-desc.sync="sortDesc"
                     @filtered="onFiltered"
                 >
+                    <template slot="payment_type" scope="row">
+                        {{ paymentTypes.find(type => type.value == row.item.payment_type).text }}
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" :href="'/business/clients/' + row.item.id">
@@ -82,6 +99,7 @@
                     active: 1,
                     client_type: '',
                     business_id: '',
+                    payment_type: '',
                     search: null,
                 },
                 totalRows: 0,
@@ -89,6 +107,32 @@
                 currentPage: 1,
                 sortBy: 'lastname',
                 sortDesc: false,
+                paymentTypes: [
+                    {
+                        value: '',
+                        text: '--- Select ---'
+                    },
+                    {
+                        value: 'CC',
+                        text: 'Credit Card'
+                    },
+                    {
+                        value: 'AMEX',
+                        text: 'American Express Credit Card'
+                    },
+                    {
+                        value: 'ACH',
+                        text: 'Bank Account'
+                    },
+                    {
+                        value: 'ACH-P',
+                        text: 'Provider Payment Account'
+                    },
+                    {
+                        value: 'NONE',
+                        text: 'None'
+                    },
+                ],
                 editModalVisible: false,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
@@ -121,6 +165,11 @@
                         formatter: this.formatUppercase,
                     },
                     {
+                        key: 'payment_type',
+                        label: 'Payment Method',
+                        sortable: true,
+                    },
+                    {
                         key: 'location',
                         label: 'Location',
                         sortable: true,
@@ -148,23 +197,23 @@
             },
 
             items() {
-                const {search, client_type, active, business_id} = this.filters;
+                const {search, active} = this.filters;
+                let simpleMatches = ['client_type', 'payment_type', 'business_id'];
                 let results = this.clients;
                 
-                if(client_type) {
-                    results = results.filter((client) => client.client_type == client_type);
-                }
+                simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
+                results = results.filter((client) => {
+                    const val = simpleMatches.every(key => client[key] == this.filters[key])
+                    debugger;
+                    return val;
+                });
                 
                 if(active === 1 || active === 0) {
                     results = results.filter((client) => client.active == active);
-                }
+                } 
 
                 if(search) {
                     results = results.filter(({firstname, lastname}) => fuzzysearch(search, firstname) || fuzzysearch(search, lastname));
-                }
-
-                if(business_id) {
-                    results = results.filter((client) => client.business_id == business_id);
                 }
 
                 return results;
