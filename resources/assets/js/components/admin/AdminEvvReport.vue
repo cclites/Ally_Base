@@ -124,7 +124,7 @@
                 fields: [
                     {
                         key: 'date',
-                        formatter: this.dayFormat,
+                        formatter: (val) => this.formatDateFromUTC(val, 'ddd MMM D'),
                         sortable: true,
                     },
                     {
@@ -226,7 +226,7 @@
                 axios.get(url)
                     .then(response => {
                         this.items = response.data.map(function (item) {
-                            item.date = item.checked_in_time.split(' ')[0];
+                            item.date = item.checked_in_time;
                             item.business_name = item.business.name;
                             item.caregiver_name = item.caregiver.nameLastFirst;
                             item.client_name = item.client.nameLastFirst;
