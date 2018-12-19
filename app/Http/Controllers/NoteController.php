@@ -89,7 +89,7 @@ class NoteController extends Controller
     public function destroy(Note $note)
     {
         if ($note->delete()) {
-            return new SuccessResponse('Note deleted.');
+            return new SuccessResponse('Note deleted.'.$note);
         }
 
         return new ErrorResponse(500, 'The note could not be deleted.');
