@@ -29,16 +29,6 @@ class NoteTemplateController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view('note-templates.create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -49,7 +39,13 @@ class NoteTemplateController extends Controller
         if ($template = NoteTemplate::create(array_merge($request->validated(), [
             'created_by' => auth()->id(),
         ]))) {
-            return new CreatedResponse('Note template Created', [], '/note-templates');
+
+            if ($request->input('modal')) {
+                return new CreatedResponse('Note template has been created', $note->load('creator'));
+            }
+
+            return new CreatedResponse('Note template has been created', [], '/notes');
+            
         }
         
         return new ErrorResponse(500, 'The note template could not be created.');
