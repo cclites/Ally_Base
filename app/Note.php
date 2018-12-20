@@ -14,6 +14,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property int|null $client_id
  * @property string $body
  * @property string|null $tags
+ * @property string|null $type
  * @property int $created_by
  * @property int $business_id
  * @property \Carbon\Carbon|null $created_at
@@ -38,6 +39,7 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCreatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereTags($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereUpdatedAt($value)
  * @mixin \Eloquent
  */

@@ -25,6 +25,11 @@ class NoteTemplateController extends Controller
             $template->note = str_limit($template->note, 70);
             return $template;
         });
+
+        if (request()->expectsJson()) {
+            return $templates;
+        }
+
         return view('note-templates.index', compact('templates'));
     }
 
@@ -41,7 +46,7 @@ class NoteTemplateController extends Controller
         ]))) {
 
             if ($request->input('modal')) {
-                return new CreatedResponse('Note template has been created', $note->load('creator'));
+                return new CreatedResponse('Note template has been created', $template->load('creator'));
             }
 
             return new CreatedResponse('Note template has been created', [], '/notes');
@@ -58,11 +63,11 @@ class NoteTemplateController extends Controller
      * @param  \App\NoteTemplate  $template
      * @return \Illuminate\Http\Response
      */
-    public function update(CreateNoteTemplateRequest $request, NoteTemplate $template)
+    public function update(CreateNoteTemplateRequest $request, NoteTemplate $noteTemplate)
     {
-        if ($template->update($request->validated())) {
+        if ($noteTemplate->update($request->validated())) {
             if ($request->input('modal')) {
-                return new SuccessResponse('Note template has been updated.', $template->fresh()->load('creator'));
+                return new SuccessResponse('Note template has been updated.', $noteTemplate->fresh()->load('creator'));
             }
 
             return new SuccessResponse('Note template has been updated');
@@ -77,12 +82,12 @@ class NoteTemplateController extends Controller
      * @param  \App\NoteTemplate  $template
      * @return \Illuminate\Http\Response
      */
-    public function destroy(NoteTemplate $template)
+    public function destroy(NoteTemplate $noteTemplate)
     {
-        if ($template->delete()) {
+        if ($noteTemplate->delete()) {
             return new SuccessResponse('Note template has been deleted.');
         }
 
-        return new ErrorResponse(500, 'The note template could not be deleted.'.$template);
+        return new ErrorResponse(500, 'The note template could not be deleted.');
     }
 }

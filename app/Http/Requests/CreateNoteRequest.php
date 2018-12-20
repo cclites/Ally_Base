@@ -16,6 +16,7 @@ class CreateNoteRequest extends BusinessRequest
             'prospect_id' => 'nullable|exists:prospects,id',
             'referral_source_id' => 'nullable|exists:referral_sources,id',
             'tags' => 'nullable|string',
+            'type' => 'nullable|string',
             'body' => 'required|string',
         ];
     }

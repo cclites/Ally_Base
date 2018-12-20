@@ -20,6 +20,14 @@
             >
             </b-form-input>
 
+            <b-form-select v-model="searchForm.type" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- Type --</option>
+                </template>
+                <option :value="type.value" v-for="type in types" :key="type.value">{{ type.text }}</option>
+            </b-form-select>
+
             <b-form-select v-model="searchForm.caregiver" class="mr-2 mb-2">
                 <template slot="first">
                     <!-- this slot appears above the options from 'options' prop -->
@@ -52,6 +60,14 @@
                 <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
             </b-form-select>
 
+            <b-form-select v-model="searchForm.user" class="mr-2 mb-2">
+                <template slot="first">
+                    <!-- this slot appears above the options from 'options' prop -->
+                    <option :value="null">-- User --</option>
+                </template>
+                <option :value="user.id" v-for="user in users" :key="user.id">{{ user.nameLastFirst }}</option>
+            </b-form-select>
+
             <!--<b-form-input
                 type="text"
                 id="tags"
@@ -68,7 +84,7 @@
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
-            <b-btn variant="info" class="mb-3" @click="create()">Add Note</b-btn>
+            <b-btn variant="info" class="mb-3" href="/notes/create">Add Note</b-btn>
 
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -134,6 +150,7 @@
             return {
                 note: {},
                 noteModal: false,
+                users: [],
                 caregivers: [],
                 clients: [],
                 prospects: [],
@@ -144,8 +161,14 @@
                     client: null,
                     prospect: null,
                     referral_source: null,
+                    user: null,
+                    type: null,
                     tags: ''
                 },
+                types: [
+                    { text: 'Phone', value: 'phone' },
+                    { text: 'Other', value: 'other' },
+                ],
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -157,6 +180,12 @@
                         label: 'Note Date',
                         sortable: true,
                         formatter: d => { return this.formatDateFromUTC(d) },
+                    },
+                    {
+                        key: 'type',
+                        label: 'Type',
+                        sortable: true,
+                        formatter: d => d && d.substr(0, 1).toUpperCase() + d.substr(1),
                     },
                     {
                         key: 'caregiver',
@@ -225,53 +254,39 @@
             },
         },
 
+        watch: {
+            notes(val) {
+                val.forEach(note => {
+                    if (!this.users.find(x => x.id === note.created_by)) {
+                        this.users.push(note.creator);
+                    }
+                });
+            },
+        },
+
         methods: {
             async loadClients() {
                 console.log('loadClients called');
                 const response = await axios.get('/business/clients?json=1');
                 this.clients = response.data;
-                this.items.forEach(item => {
-                    if (item.client_id) {
-                        const client = this.clients.find(x => x.id === item.client_id);
-                        item.client = client;
-                    }
-                });
             },
 
             async loadCaregivers() {
                 console.log('loadCaregivers called');
                 const response = await axios.get('/business/caregivers?json=1');
                 this.caregivers = response.data;
-                this.items.forEach(item => {
-                    if (item.caregiver_id) {
-                        const caregiver = this.caregivers.find(x => x.id === item.caregiver_id);
-                        item.caregiver = caregiver;
-                    }
-                });
             },
 
             async loadProspects() {
                 console.log('loadProspects called');
                 const response = await axios.get('/business/prospects?json=1');
                 this.prospects = response.data;
-                this.items.forEach(item => {
-                    if (item.prospect_id) {
-                        const prospect = this.prospects.find(x => x.id === item.prospect_id);
-                        item.prospect = prospect;
-                    }
-                });
             },
 
             async loadReferralSources() {
                 console.log('loadReferralSources called');
                 const response = await axios.get('/business/referral-sources?json=1');
                 this.referral_sources = response.data;
-                this.items.forEach(item => {
-                    if (item.referral_source_id) {
-                        const rs = this.referral_sources.find(x => x.id === item.referral_source_id);
-                        item.referral_source = rs;
-                    }
-                });
             },
 
             onFiltered(filteredItems) {

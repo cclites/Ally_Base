@@ -23,6 +23,7 @@ class NoteController extends Controller
         $notes = Note::forRequestedBusinesses()->ordered()->get();
         $notes = $notes->map(function ($note) {
             $note->body = str_limit($note->body, 70);
+            $note->load('creator', 'client', 'caregiver', 'prospect', 'referral_source');
             return $note;
         });
         return view('notes.index', compact('notes'));
@@ -123,9 +124,15 @@ class NoteController extends Controller
             ->when($request->filled('referral_source'), function ($query) use ($request) {
                 return $query->where('referral_source_id', $request->referral_source);
             })
-            ->when($request->filled('tags'), function ($query) use ($request) {
-                return $query->where('tags', 'like', '%'.$request->tags.'%');
+            ->when($request->filled('user'), function ($query) use ($request) {
+                return $query->where('created_by', $request->user);
             })
+            ->when($request->filled('type'), function ($query) use ($request) {
+                return $query->where('type', $request->type);
+            })
+            // ->when($request->filled('tags'), function ($query) use ($request) {
+            //     return $query->where('tags', 'like', '%'.$request->tags.'%');
+            // })
             ->get();
 
         $notes = $notes->map(function ($note) {

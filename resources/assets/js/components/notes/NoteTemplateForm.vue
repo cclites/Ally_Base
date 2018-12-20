@@ -11,7 +11,7 @@
                     <b-form-input v-model="form.short_name" placeholder="Short Name" />
                 </b-form-group>
                 <b-form-group label="Active" labe-for="active" id="active" name="active">
-                    <b-form-checkbox v-model="form.active">Active</b-form-checkbox>
+                    <b-form-checkbox v-model="form.active"></b-form-checkbox>
                 </b-form-group>
                 <b-form-group label="Notes" labe-for="note">
                     <b-form-textarea
@@ -81,11 +81,15 @@
             },
 
             fillForm(data) {
+                let active = true;
+                if (data.active === 0) {
+                    active = false;
+                }
                 this.form = new Form({
                     business_id: data.business_id || "",
                     short_name: data.short_name || "",
                     note: data.note || "",
-                    active: data.active || true,
+                    active,
                     modal: this.modal,
                 });
             },

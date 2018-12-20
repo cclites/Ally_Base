@@ -8,6 +8,5 @@
 @endsection
 
 @section('content')
-    Note Template here
     <note-template-list :templates="{{ $templates }}"></note-template-list>
 @endsection

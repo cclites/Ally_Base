@@ -3,7 +3,7 @@
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
-            <b-btn variant="info" class="mb-3" @click="create()">Add Note</b-btn>
+            <b-btn variant="info" class="mb-3" @click="create()">Add Note Template</b-btn>
 
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -70,20 +70,21 @@
                 loading: false,
                 fields: [
                     {
-                        key: 'created_at',
-                        label: 'Note Date',
-                        sortable: true,
-                        formatter: d => { return this.formatDateFromUTC(d) },
+                        key: 'short_name',
+                        label: 'Short Name',
+                        sortable: true
                     },
                     {
-                        key: 'active_name',
-                        label: 'Active Name',
-                        sortable: true
+                        key: 'active',
+                        label: 'Active',
+                        sortable: true,
+                        formatter: d => d ? 'Y' : 'N',
                     },
                     {
                         key: 'note',
                         label: 'Preview',
-                        sortable: false
+                        sortable: false,
+                        formatter: d => d.substr(0, 50)
                     },
                     'action'
                 ]

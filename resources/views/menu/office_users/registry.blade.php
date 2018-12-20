@@ -39,7 +39,7 @@
     <ul aria-expanded="false" class="collapse">
         <li><a href="/notes">Notes</a></li>
         <li><a href="/notes/create">Add Notes</a></li>
-        <li><a href="/notes/create">Note Templates</a></li>
+        <li><a href="/note-templates">Note Templates</a></li>
     </ul>
 </li>
 @if(activeBusiness()->use_rate_codes)
