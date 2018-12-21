@@ -22,14 +22,21 @@
                     $groups = [];
 
                     if ($group_by == 'none') {
-                        $groups = $schedules->groupBy('date');
+                        $groups = $schedules->groupBy('date')->sortBy(function($group) {
+                            return $group->first()->starts_at;
+                        });
                     } else if ($group_by == 'client') {
                         $groups = $schedules->groupBy('client_id');
                     } else if ($group_by == 'caregiver') {
                         $groups = $schedules->groupBy('caregiver_id');
                     }
                 @endphp
-                @foreach($groups as $scheduleGroup)
+                @foreach($groups as $group)
+                    @php
+                        $scheduleGroup = $group->sortBy(function($schedule) {
+                            return $schedule->starts_at;
+                        });
+                    @endphp
                     <h4 class="">
                         @if ($group_by == 'none') 
                             {{ $scheduleGroup->first()->date }}
