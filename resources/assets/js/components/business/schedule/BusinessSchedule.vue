@@ -87,7 +87,7 @@
         <div class="calendar-view">
             <div class="print-fc-head">
                 <h1>{{business.name}}</h1>
-                <h4>(717) 394-5111</h4>
+                <h4 v-if="business.phone1 || business.phone2">{{business.phone1 || business.phone2}}</h4>
                 <h3 class="text-center">
                     Schedules for 
                     <span v-if="!currentClient">All Clients</span>
