@@ -1,114 +1,126 @@
 <template>
-    <b-card header-bg-variant="info"
-            header-text-variant="white">
-        <div slot="header">
-            <b-row align-h="between">
-                <b-col>Emergency Contacts</b-col>
+    <b-card header="Emergency Contacts"
+        header-bg-variant="info"
+        header-text-variant="white"
+        >
+        <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
+
+            <b-row>
                 <b-col>
-                    <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || contacts.length >= 3 || authInactive">New Contact</b-btn>
+                    <p class="h6 text-primary">Power of Attorney</p>
+                    <hr>
                 </b-col>
             </b-row>
-        </div>
-        <b-row v-if="addingNew">
-            <b-col>
-                <b-form-group label="Name">
-                    <b-form-input v-model="form.name"></b-form-input>
-                </b-form-group>
-                <b-form-group label="Phone Number">
-                    <b-form-input v-model="form.phone_number"></b-form-input>
-                </b-form-group>
-                <b-form-group label="Relationship">
-                    <b-form-input v-model="form.relationship"></b-form-input>
-                </b-form-group>
-                <b-form-group>
-                    <b-btn variant="info" @click="save">Save</b-btn>
-                    <b-btn @click="cancel">Cancel</b-btn>
-                </b-form-group>
-            </b-col>
-        </b-row>
-        <div class="table-responsive">
-            <b-table :items="contacts"
-                     sort-by="priority"
-                     :fields="fields">
-                <template slot="actions" scope="data">
-                    <b-btn v-if="data.item.priority > 1" variant="secondary" @click="raisePriority(data.item)" :disabled="authInactive">
-                        <i class="fa fa-chevron-up"></i>
-                    </b-btn>
-                    <b-btn variant="danger" title="Delete" @click="destroy(data.item.id)" :disabled="authInactive">
-                        <i class="fa fa-times"></i>
-                    </b-btn>
-                </template>
-            </b-table>
-        </div>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name">
+                        <b-form-input id="poa_first_name"
+                                      v-model="form.poa_first_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Phone">
+                        <b-form-input id="poa_phone"
+                                      v-model="form.poa_phone"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Email">
+                        <b-form-input id="poa_email"
+                                      v-model="form.poa_email"
+                                      type="email"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name">
+                        <b-form-input id="poa_last_name"
+                                      v-model="form.poa_last_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Relationship">
+                        <b-form-input id="poa_relationship"
+                                      v-model="form.poa_relationship"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <p class="h6 text-primary">Physician</p>
+                    <hr>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="First Name">
+                        <b-form-input id="dr_first_name"
+                                      v-model="form.dr_first_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Phone">
+                        <b-form-input id="dr_phone"
+                                      v-model="form.dr_phone"></b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Last Name">
+                        <b-form-input id="dr_last_name"
+                                      v-model="form.dr_last_name"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Fax">
+                        <b-form-input id="dr_fax"
+                                      v-model="form.dr_fax"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+
+            <b-row>
+                <b-col lg="12">
+                    <b-button variant="success" type="submit">Save Emergency Contact</b-button>
+                </b-col>
+            </b-row>
+        </form>
     </b-card>
 </template>
 
 <script>
-    import AuthUser from '../../mixins/AuthUser';
-
+    
     export default {
-        mixins: [ AuthUser ],
+        props: {
+            'client': {}
+        },
 
-        props: ['emergencyContacts', 'userId'],
-        
+        components: {
+        },
+
         data() {
-            return{
-                addingNew: false,
+            return {
                 form: new Form({
-                    name: '',
-                    phone_number: '',
-                    relationship: ''
+                    poa_first_name: this.client.poa_first_name,
+                    poa_last_name: this.client.poa_last_name,
+                    poa_phone: this.client.poa_phone,
+                    poa_email: this.client.poa_email,
+                    poa_relationship: this.client.poa_relationship,
+                    dr_first_name: this.client.dr_first_name,
+                    dr_last_name: this.client.dr_last_name,
+                    dr_phone: this.client.dr_phone,
+                    dr_fax: this.client.dr_fax
                 }),
-                contacts: this.emergencyContacts,
-                fields: [
-                    'priority',
-                    'name',
-                    'phone_number',
-                    'relationship',
-                    'actions'
-                ]
             }
         },
-        
+
+        mounted() {
+            
+        },
+
         methods: {
-            save() {
-                this.form.post('/emergency-contacts/' + this.userId)
-                    .then(response => {
-                        this.contacts.push(response.data);
-                        alerts.addMessage('success', 'Emergency Contact Added');
-                        this.cancel();
-                    });
+            async saveProfile() {
+                let response = await this.form.patch(`/business/clients/${this.client.id}/emergency-contact`)
             },
+        },
 
-            cancel() {
-                this.addingNew = false;
-                this.form = new Form({
-                    name: '',
-                    phone_number: '',
-                    relationship: ''
-                });
-            },
+        computed: {
 
-            destroy(id) {
-                axios.delete('/emergency-contacts/'+id)
-                    .then(response => {
-                        alerts.addMessage('success', 'Emergency Contact Removed');
-                        this.contacts = response.data;
-                    }).catch(error => {
-                        console.error(error.response);
-                    });
-            },
-
-            raisePriority(contact) {
-                let priority = contact.priority - 1;
-                axios.patch(`/emergency-contacts/${this.userId}/${contact.id}`, { priority })
-                    .then(response => {
-                        alerts.addMessage('success', 'Emergency Contact Priority Updated');
-                        this.contacts = response.data;
-                    }).catch(error => {
-                        console.error(error.response);
-                    });
-            },
         }
+
     }
 </script>
+
+<style scoped>
+    .pad-top {
+        padding-top: 16px;
+    }
+</style>
