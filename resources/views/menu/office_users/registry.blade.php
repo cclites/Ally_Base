@@ -35,10 +35,11 @@
     <a href="{{ route('business.care-match') }}" ><i class="fa fa-clone"></i><span class="hide-menu">Care Match</span></a>
 </li>
 <li>
-    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Call Center</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="/notes">Notes</a></li>
         <li><a href="/notes/create">Add Notes</a></li>
+        <li><a href="/note-templates">Note Templates</a></li>
     </ul>
 </li>
 @if(activeBusiness()->use_rate_codes)

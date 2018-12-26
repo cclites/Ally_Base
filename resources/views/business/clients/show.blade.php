@@ -93,7 +93,6 @@
             </div>
         </li>
     </ul>
-    </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
