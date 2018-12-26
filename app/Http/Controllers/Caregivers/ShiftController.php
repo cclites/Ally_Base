@@ -170,7 +170,7 @@ class ShiftController extends BaseController
         $activities = $business->allActivities();
 
         // load questions related to the current client
-        $questions = $business->questions()->forType($shift->client->client_type)->get();
+        $questions = $business->questions()->forType($shift->client->client_type)->where('track_goal_progress', true)->get();
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
