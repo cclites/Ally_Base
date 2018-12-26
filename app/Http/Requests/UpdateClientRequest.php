@@ -43,6 +43,11 @@ class UpdateClientRequest extends BusinessRequest
             'hospital_number' => 'nullable|string|max:25',
             'avatar' => ['nullable', new Avatar()],
             'referral_source_id' => 'nullable|exists:referral_sources,id',
+            'hic' => 'nullable|string|max:50',
+            'travel_directions' => 'nullable|string|max:65535',
+            'disaster_code_plan' => 'nullable|string|max:50',
+            'disaster_planning' => 'nullable|string|max:65535',
+            'caregiver_1099' => 'nullable|boolean',
         ];
     }
 

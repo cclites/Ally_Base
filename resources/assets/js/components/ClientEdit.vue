@@ -56,8 +56,6 @@
                         <mask-input v-model="form.date_of_birth" id="date_of_birth" type="date"></mask-input>
                         <input-help :form="form" field="date_of_birth" text="Enter their date of birth. Ex: MM/DD/YYYY"></input-help>
                     </b-form-group>
-                </b-col>
-                <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
                         <b-row>
                             <b-col cols="8">
@@ -84,6 +82,8 @@
                         <input-help :form="form" field="email"
                                     text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
                     <b-form-group label="Username" label-for="username">
                         <b-form-input
                                 id="username"
@@ -100,6 +100,26 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                    </b-form-group>
+                    <b-form-group label="HIC" label-for="hic">
+                        <b-form-input
+                            id="hic"
+                            name="hic"
+                            type="text"
+                            v-model="form.hic"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="hic" text="Enter their HIC."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Travel Directions" label-for="travel_directions">
+                        <b-form-textarea
+                            id="travel_directions"
+                            name="travel_directions"
+                            rows="3"
+                            v-model="form.travel_directions"
+                        >
+                        </b-form-textarea>
+                        <input-help :form="form" field="travel_directions" text="Enter their Travel Directions."></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -120,6 +140,14 @@
                             Ambulatory
                         </b-form-checkbox>
                     </b-form-group>
+                    <b-form-group>
+                        <b-form-checkbox id="caregiver_1099"
+                                         v-model="form.caregiver_1099"
+                                         :value="true"
+                                         :unchecked-value="false">
+                            Send 1099 to caregivers on the client’s behalf
+                        </b-form-checkbox>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
@@ -128,9 +156,74 @@
                     <b-form-group label="Diagnosis">
                         <b-form-input id="diagnosis" v-model="form.diagnosis"></b-form-input>
                     </b-form-group>
+                    <b-form-group label="Disaster Code Plan" label-for="disaster_code_plan">
+                        <b-form-input
+                            id="disaster_code_plan"
+                            name="disaster_code_plan"
+                            type="text"
+                            v-model="form.disaster_code_plan"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="disaster_code_plan" text="Enter their Disaster Code Plan."></input-help>
+                    </b-form-group>
+                    <b-form-group label="Disaster Planning" label-for="disaster_planning">
+                        <b-form-textarea
+                            id="disaster_planning"
+                            name="disaster_planning"
+                            rows="3"
+                            v-model="form.disaster_planning"
+                        >
+                        </b-form-textarea>
+                        <input-help :form="form" field="disaster_planning" text="Enter their Disaster Planning."></input-help>
+                    </b-form-group>
                 </b-col>
             </b-row>
-
+            <b-row>
+                <b-col lg="6">
+                    <b-form-group label="Created On" label-for="created_at">
+                        <b-form-input
+                            id="created_at"
+                            name="created_at"
+                            type="text"
+                            v-model="form.created_at"
+                            readonly
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Created By" label-for="created_by">
+                        <b-form-input
+                            id="created_by"
+                            name="created_by"
+                            type="text"
+                            v-model="form.created_by"
+                            readonly
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Modified On" label-for="modified_at">
+                        <b-form-input
+                            id="modified_at"
+                            name="modified_at"
+                            type="text"
+                            v-model="form.modified_at"
+                            readonly
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Modified By" label-for="modified_by">
+                        <b-form-input
+                            id="modified_by"
+                            name="modified_by"
+                            type="text"
+                            v-model="form.modified_by"
+                            readonly
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col>
                     <p class="h6">Power of Attorney</p>
@@ -403,6 +496,15 @@
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
                     business_id: this.client.business_id,
+                    hic: this.client.hic,
+                    travel_directions: this.client.travel_directions,
+                    caregiver_1099: !!this.client.caregiver_1099,
+                    disaster_code_plan: this.client.disaster_code_plan,
+                    disaster_planning: this.client.disaster_planning,
+                    created_by: this.client.creator && this.client.creator.nameLastFirst,
+                    created_at: this.client.created_at,
+                    modified_by: this.client.updator && this.client.updator.nameLastFirst,
+                    modified_at: this.client.updated_at,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
