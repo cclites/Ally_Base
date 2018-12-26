@@ -65,7 +65,16 @@ class ProspectController extends BaseController
     {
         $this->authorize('read', $prospect);
 
-        return view('business.prospects.show', compact('prospect'));
+        $prospect->load([
+            'notes.creator',
+            'notes' => function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            },
+        ]);
+
+        $business = $this->business();
+
+        return view('business.prospects.show', compact('prospect', 'business'));
     }
 
     /**
