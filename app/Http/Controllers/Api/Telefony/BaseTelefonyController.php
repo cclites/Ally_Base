@@ -10,16 +10,6 @@ use Twilio\Security\RequestValidator;
 abstract class BaseTelefonyController extends Controller
 {
     /**
-     * @var \App\PhoneNumber
-     */
-    protected $number;
-
-    /**
-     * @var \App\Client|null
-     */
-    protected $client;
-
-    /**
      * @var \Illuminate\Http\Request
      */
     protected $request;

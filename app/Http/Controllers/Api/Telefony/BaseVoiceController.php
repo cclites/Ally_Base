@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 abstract class BaseVoiceController extends BaseTelefonyController
 {
+    /**
+     * @var \App\PhoneNumber
+     */
+    protected $number;
+
+    /**
+     * @var \App\Client|null
+     */
+    protected $client;
+
     public function __construct(Request $request, TelefonyManager $telefony, PhoneNumber $phoneNumber)
     {
         parent::__construct($request, $telefony, $phoneNumber);
