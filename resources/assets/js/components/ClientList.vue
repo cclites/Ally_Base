@@ -93,6 +93,7 @@
                 clients: [],
                 caseManagers: [],
                 caseManager: null,
+                filteredClients: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -162,6 +163,7 @@
                     return client;
                 });
                 this.filteredClients = this.clients;
+                this.filterCaseManager();
                 this.loading = false;
             },
             async loadOfficeUsers() {
@@ -183,7 +185,14 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
+            },
+            filterCaseManager() {
+                if (!this.caseManager) {
+                    this.filteredClients = this.clients;
+                } else {
+                    this.filteredClients = this.clients.filter(x => x.case_manager_id === this.caseManager);
+                }
+            },
         },
 
         watch: {
@@ -191,11 +200,7 @@
                 this.loadClients();
             },
             caseManager(value) {
-                if (!value) {
-                    this.filteredClients = this.clients;
-                } else {
-                    this.filteredClients = this.clients.filter(x => x.case_manager_id === value);
-                }
+                this.filterCaseManager(value);
             }
         }
     }
