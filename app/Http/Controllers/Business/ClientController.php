@@ -52,11 +52,7 @@ class ClientController extends BaseController
                 $query->with('carePlans');
             }
 
-            $clients = $query->get();
-            $clients = $clients->map(function ($client) {
-                $client->load('caseManager');
-                return $client;
-            });
+            $clients = $query->with('caseManager')->get();
             return $clients;
         }
 
