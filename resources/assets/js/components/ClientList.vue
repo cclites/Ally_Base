@@ -1,8 +1,19 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="3">
+            <b-col lg="12">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
+            </b-col>
+        </b-row>
+        <b-row class="mb-2">
+            <b-col lg="3">
+                <b-form-select v-model="caseManager" class="mr-2 mb-2">
+                    <template slot="first">
+                        <!-- this slot appears above the options from 'options' prop -->
+                        <option :value="null">-- Case Manager --</option>
+                    </template>
+                    <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
+                </b-form-select>
             </b-col>
             <b-col lg="3">
                 <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
@@ -23,7 +34,7 @@
         <div v-if="!loading">
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
-                         :items="clients"
+                         :items="filteredClients"
                          :fields="fields"
                          :current-page="currentPage"
                          :per-page="perPage"
@@ -80,6 +91,8 @@
                 selectedItem: {},
                 business_id: "",
                 clients: [],
+                caseManagers: [],
+                caseManager: null,
                 fields: [
                     {
                         key: 'firstname',
@@ -106,6 +119,11 @@
                         label: 'Type',
                         sortable: true,
                         formatter: this.formatUppercase,
+                    },
+                    {
+                        key: 'case_manager_name',
+                        label: 'Case Manager',
+                        sortable: true,
                     },
                     {
                         key: 'location',
@@ -139,8 +157,15 @@
                 const response = await axios.get(this.listUrl);
                 this.clients = response.data.map(client => {
                     client.county = client.address ? client.address.county : '';
+                    client.case_manager_name = client.case_manager ? client.case_manager.nameLastFirst : null;
                     return client;
                 });
+
+                this.filteredClients = this.clients;
+                this.caseManagers = this.clients.map(c => ({
+                    id: c.id,
+                    name: c.nameLastFirst
+                }));
                 this.loading = false;
             },
             details(item, index, button) {
@@ -164,6 +189,13 @@
         watch: {
             listUrl() {
                 this.loadClients();
+            },
+            caseManager(value) {
+                if (!value) {
+                    this.filteredClients = this.clients;
+                } else {
+                    this.filteredClients = this.clients.filter(x => x.case_manager_id === value);
+                }
             }
         }
     }

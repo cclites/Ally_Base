@@ -70,6 +70,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property int|null $onboarding_step
  * @property int|null $hourly_rate_id
  * @property int|null $fixed_rate_id
+ * @property int|null $case_manager_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
@@ -115,6 +116,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
+ * @property-read \App\User $case_manager
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
@@ -169,6 +171,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCaseManagerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client withMeta()
  * @mixin \Eloquent
  * @property-read string $masked_ssn
@@ -229,7 +232,8 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'referral_source_id',
         'qb_customer_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'case_manager_id'
     ];
 
     ///////////////////////////////////////////
@@ -290,6 +294,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
                         'provider_fixed_id',
                         'provider_fixed_fee',
                     ]);
+    }
+
+    public function caseManager()
+    {
+        return $this->belongsTo('App\Client', 'case_manager_id');
     }
 
     /**
