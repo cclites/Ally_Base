@@ -328,6 +328,7 @@ Route::group([
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
+    Route::resource('note-templates', 'NoteTemplateController');
 });
 
 Route::group([

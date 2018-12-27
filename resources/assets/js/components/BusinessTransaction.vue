@@ -315,31 +315,31 @@
             },
 
             clients() {
-                let results = {};
+                let results = [];
 
                 this.shifts.forEach( (item) => {
                     
-                    if (!results[item.client_id]) {
-                        results[item.client_id] = { id: item.client_id, name: item.client_name };
+                    if (!results.find(x => x.id === item.client_id)) {
+                        results.push({ id: item.client_id, name: item.client_name });
                     }
 
                 });
 
-                return results;
+                return results.sort(this.sortByName);
             },
 
             caregivers() {
-                let results = {};
+                let results = [];
 
                 this.shifts.forEach( (item) => {
                     
-                    if (!results[item.caregiver_id]) {
-                        results[item.caregiver_id] = { id: item.caregiver_id, name: item.caregiver_name };
+                    if (!results.find(x => x.id === item.caregiver_id)) {
+                        results.push({ id: item.caregiver_id, name: item.caregiver_name });
                     }
 
                 });
 
-                return results;
+                return results.sort(this.sortByName);
             },
 
         },
@@ -402,6 +402,19 @@
 
             showHideSummary() {
                 this.showSummary = !this.showSummary;
+            },
+
+            sortByName(a, b) {
+                var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+                var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                
+                return 0;
             }
         },
     }

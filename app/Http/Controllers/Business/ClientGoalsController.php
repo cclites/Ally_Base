@@ -40,6 +40,7 @@ class ClientGoalsController extends BaseController
         $data = $request->validate(
             [
                 'question' => 'required|max:255',
+                'track_goal_progress' => 'required|boolean',
             ],
             [
                 'question.required' => 'A Goal must have a question.',
@@ -68,6 +69,7 @@ class ClientGoalsController extends BaseController
         $data = $request->validate(
             [
                 'question' => 'required|max:255',
+                'track_goal_progress' => 'required|boolean',
             ],
             [
                 'question.required' => 'A Goal must have a question.',
