@@ -1,10 +1,10 @@
-<template>
+\<template>
     <b-card
         header="Certifications"
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn @click="createLicense()" variant="info">Add Certification</b-btn>
+        <b-btn @click="createLicense()" variant="info">Add Expiration</b-btn>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"

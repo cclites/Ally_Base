@@ -133,7 +133,7 @@
                     this.form.account_number_confirmation = '';
                     this.form.routing_number = '*********';
                     this.form.routing_number_confirmation = '';
-                    this.$parent.typeMessage = response.data;
+                    this.$parent.onUpdatePaymentMethod(response.data.data);
                 }
                 catch (e) {
                     let errors = e.response.data.errors;

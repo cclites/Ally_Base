@@ -17,6 +17,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business $business
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $client
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospect
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
@@ -53,5 +54,10 @@ class ReferralSource extends AuditableModel implements BelongsToBusinessesInterf
 
     public function prospect() {
         return $this->hasMany(Prospect::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
     }
 }
