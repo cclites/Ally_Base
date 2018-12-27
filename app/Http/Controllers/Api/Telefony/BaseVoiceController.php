@@ -10,9 +10,7 @@ abstract class BaseVoiceController extends BaseTelefonyController
 {
     public function __construct(Request $request, TelefonyManager $telefony, PhoneNumber $phoneNumber)
     {
-//        $this->middleware('twilio');
-        $this->request = $request;
-        $this->telefony = $telefony;
+        parent::__construct($request, $telefony, $phoneNumber);
 
         if (!$request->input('From')) {
             if (\App::runningInConsole()) {

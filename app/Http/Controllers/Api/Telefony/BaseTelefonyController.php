@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api\Telefony;
 
 use App\Http\Controllers\Controller;
+use App\PhoneNumber;
 use App\Services\TelefonyManager;
 use Illuminate\Http\Request;
 use Twilio\Security\RequestValidator;
@@ -27,6 +28,13 @@ abstract class BaseTelefonyController extends Controller
      * @var TelefonyManager
      */
     protected $telefony;
+
+    public function __construct(Request $request, TelefonyManager $telefony, PhoneNumber $phoneNumber)
+    {
+//        $this->middleware('twilio');
+        $this->request = $request;
+        $this->telefony = $telefony;
+    }
 
     /**
      * Return main menu response.
