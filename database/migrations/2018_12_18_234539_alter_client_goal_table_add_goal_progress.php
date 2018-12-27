@@ -27,6 +27,6 @@ class AlterClientGoalTableAddGoalProgress extends Migration
     {
         Schema::table('client_goals', function (Blueprint $table) {
             $table->dropColumn('track_goal_progress');
-        })
+        });
     }
 }
