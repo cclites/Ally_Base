@@ -147,7 +147,6 @@ a.franchisor-navlink {
 /* Datepicker */
 .datepicker {
   padding: .5rem .75rem;
-  z-index: 10000 !important;
 }
 
 /* Signature */
@@ -335,7 +334,7 @@ label.large-checkbox {
   height: 100%;
 }
 
-label.required::after {
+label.required::after, legend.required::after {
   content: " *";
   color: red;
 }

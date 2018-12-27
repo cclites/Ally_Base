@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', isset($prospect) ? 'Edit Prospect' : 'New Prospect')
+@section('title', isset($referralSource) ? 'Edit Referral Source' : 'New Referral Source')
 
 @section('breadcrumbs')
     <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('business.prospects.index') }}">Prospects</a></li>
-    <li class="breadcrumb-item active">{{ $prospect->name ?? 'New Prospect' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('business.referral-sources.index') }}">Refferal Sources</a></li>
+    <li class="breadcrumb-item active">{{ $rs->name ?? 'New Referral Source' }}</li>
 @endsection
 
 @section('content')
@@ -34,12 +34,12 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <prospect-edit :prospect="{{ $prospect ?? 'null' }}"></prospect-edit>
+                    <client-referral-edit :source="{{ $referralSource ?? 'null' }}"></client-referral-edit>
                 </div>
             </div>
         </div>
         <div class="tab-pane" id="client_notes" role="tabpanel">
-            <notes-tab :notes="{{ $prospect->notes }}" :business="{{ $business }}" :prospect="{{ $prospect }}"></notes-tab>
+            <notes-tab :notes="{{ $referralSource->notes }}" :business="{{ $business }}" :source="{{ $referralSource }}"></notes-tab>
         </div>
     </div>
 @endsection
