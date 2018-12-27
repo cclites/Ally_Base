@@ -17,6 +17,11 @@ class OfficeUserController extends Controller
         return $business->users;
     }
 
+    public function listForBusiness()
+    {
+        return OfficeUser::find(auth()->id())->businesses[0]->users;
+    }
+
     public function store(Request $request, Business $business)
     {
         $data = $request->validate([

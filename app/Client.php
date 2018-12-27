@@ -298,7 +298,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     public function caseManager()
     {
-        return $this->belongsTo('App\Client', 'case_manager_id');
+        return $this->belongsTo('App\OfficeUser', 'case_manager_id');
     }
 
     /**

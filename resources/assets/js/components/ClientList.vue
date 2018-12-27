@@ -142,6 +142,7 @@
 
         mounted() {
             this.loadClients();
+            this.loadOfficeUsers();
         },
 
         computed: {
@@ -157,16 +158,15 @@
                 const response = await axios.get(this.listUrl);
                 this.clients = response.data.map(client => {
                     client.county = client.address ? client.address.county : '';
-                    client.case_manager_name = client.case_manager ? client.case_manager.nameLastFirst : null;
+                    client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
-
                 this.filteredClients = this.clients;
-                this.caseManagers = this.clients.map(c => ({
-                    id: c.id,
-                    name: c.nameLastFirst
-                }));
                 this.loading = false;
+            },
+            async loadOfficeUsers() {
+                const response = await axios.get(`officeusers`);
+                this.caseManagers = response.data;
             },
             details(item, index, button) {
                 this.selectedItem = item;

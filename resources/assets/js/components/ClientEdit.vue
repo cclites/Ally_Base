@@ -42,6 +42,18 @@
                         </b-form-select>
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                     </b-form-group>
+                    <b-form-group label="Case Manager" label-for="case_manager">
+                        <b-form-select 
+                                v-model="form.case_manager_id" 
+                                id="case_manager_id"
+                                name="case_manager_id"
+                                class="mr-2 mb-2"
+                        >
+                            <option :value="null">-- Case Manager --</option>
+                            <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="case_manager_id" text="Select case manager for the client."></input-help>
+                    </b-form-group>
                     <business-location-form-group v-model="form.business_id"
                                                   :form="form"
                                                   field="business_id"
@@ -403,6 +415,7 @@
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
                     business_id: this.client.business_id,
+                    case_manager_id: this.client.case_manager_id,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
@@ -415,11 +428,13 @@
                 activateModal: false,
                 inactive_at: '',
                 showReferralModal: false,
+                caseManagers: [],
             }
         },
 
         mounted() {
             this.checkForNoEmailDomain();
+            this.loadOfficeUsers();
         },
 
         methods: {
@@ -429,6 +444,11 @@
                     this.referralsources.push(data);
                     this.form.referral_source_id = data.id;
                 }
+            },
+
+            async loadOfficeUsers() {
+                const response = await axios.get(`/business/officeusers`);
+                this.caseManagers = response.data;
             },
 
             closemodal(status) {
