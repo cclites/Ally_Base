@@ -5,7 +5,7 @@ use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
 use App\Shifts\ClockIn;
 
-class TelefonyCheckInController extends BaseTelefonyController
+class TelefonyCheckInController extends BaseVoiceController
 {
     /**
      * Return check in response.

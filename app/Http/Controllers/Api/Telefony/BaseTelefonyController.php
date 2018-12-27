@@ -1,9 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api\Telefony;
 
-use App\Exceptions\TelefonyMessageException;
 use App\Http\Controllers\Controller;
-use App\PhoneNumber;
 use App\Services\TelefonyManager;
 use Illuminate\Http\Request;
 use Twilio\Security\RequestValidator;
@@ -29,30 +27,6 @@ abstract class BaseTelefonyController extends Controller
      * @var TelefonyManager
      */
     protected $telefony;
-
-    public function __construct(Request $request, TelefonyManager $telefony, PhoneNumber $phoneNumber)
-    {
-//        $this->middleware('twilio');
-        $this->request = $request;
-        $this->telefony = $telefony;
-
-        if (!$request->input('From')) {
-            if (\App::runningInConsole()) {
-                return;
-            }
-            abort(403);
-        }
-
-//        if ($request->getContentType() !== 'xml') {
-//            abort(403);
-//        }
-
-        $this->number = $phoneNumber->input($request->input('From'));
-        $this->client = $telefony->findClientByNumber($this->number);
-        if (!$this->client) {
-            throw new TelefonyMessageException('The number you are calling from is not recognized.  The phone number needs to be linked to the client account for verification purposes.');
-        }
-    }
 
     /**
      * Return main menu response.
