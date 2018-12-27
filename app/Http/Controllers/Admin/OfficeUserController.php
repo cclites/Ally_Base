@@ -19,7 +19,22 @@ class OfficeUserController extends Controller
 
     public function listForBusiness()
     {
-        return OfficeUser::find(auth()->id())->businesses[0]->users;
+        $officeUsers = [];
+
+        if (is_office_user()) {
+            $officeUsers = auth()->user()->officeUser->businesses[0]->chain->users()->with('businesses')->get()->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'business_ids' => $item->businesses->pluck('id'),
+                    'name' => $item->name,
+                    'nameLastFirst' => $item->nameLastFirst,
+                ];
+            });
+        } elseif (is_admin()) {
+
+        }
+
+        return response()->json($officeUsers);
     }
 
     public function store(Request $request, Business $business)

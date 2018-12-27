@@ -12,7 +12,7 @@
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Case Manager --</option>
                     </template>
-                    <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
+                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
                 </b-form-select>
             </b-col>
             <b-col lg="3">
@@ -93,6 +93,7 @@
                 clients: [],
                 caseManagers: [],
                 caseManager: null,
+                filteredCaseManagers: [],
                 filteredClients: [],
                 fields: [
                     {
@@ -162,8 +163,7 @@
                     client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
-                this.filteredClients = this.clients;
-                this.filterCaseManager();
+                this.filterClients();
                 this.loading = false;
             },
             async loadOfficeUsers() {
@@ -186,11 +186,18 @@
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
             },
-            filterCaseManager() {
-                if (!this.caseManager) {
+            filterClients() {
+                if (! this.caseManager) {
                     this.filteredClients = this.clients;
                 } else {
                     this.filteredClients = this.clients.filter(x => x.case_manager_id === this.caseManager);
+                }
+            },
+            filterCaseManagers() {
+                if (! this.business_id) {
+                    this.filteredCaseManagers = this.caseManagers;
+                } else {
+                    this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))
                 }
             },
         },
@@ -200,7 +207,11 @@
                 this.loadClients();
             },
             caseManager(value) {
-                this.filterCaseManager(value);
+                this.filterClients();
+            },
+            business_id(value) {
+                this.filterCaseManagers();
+                this.filterClients();
             }
         }
     }
