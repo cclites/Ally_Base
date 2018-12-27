@@ -5,11 +5,11 @@
             <b-table show-empty :items="items" :fields="fields">
                 <template scope="data" slot="actions">
                     <div v-if="data.item.confirmed" class="text-muted">
-                        <b-button @click="unconfirm(data.item)" variant="primary">Un-confirm</b-button>
+                        <b-button @click="unconfirm(data.item)" variant="primary" :disabled="authInactive">Un-confirm</b-button>
                     </div>
                     <div v-else>
-                        <b-button @click="confirm(data.item)" variant="info">Confirm</b-button>
-                        <b-button @click="modify(data.item)" variant="danger">Modify</b-button>
+                        <b-button @click="confirm(data.item)" variant="info" :disabled="authInactive">Confirm</b-button>
+                        <b-button @click="modify(data.item)" variant="danger" :disabled="authInactive">Modify</b-button>
                     </div>
                 </template>
             </b-table>
@@ -25,12 +25,11 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
-    import BusinessSettings from "../../mixins/BusinessSettings";
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     export default {
         props: ['shifts', 'activities'],
 
-        mixins: [ FormatsDates, FormatsNumbers, BusinessSettings ],
+        mixins: [ FormatsDates, FormatsNumbers ],
 
         data() {
             return {
@@ -75,6 +74,12 @@
             }
         },
 
+        computed: {
+            authInactive() {
+                return window.AuthUser && window.AuthUser.active == 0;
+            },
+        },
+        
         methods: {
             shiftWasUpdated() {
                 this.showModifyModal = false;
@@ -91,7 +96,7 @@
             },
 
             confirm(shift, confirmed=true) {
-                if (this.businessSettings().ask_on_confirm && ! confirm('Are you sure you want to confirm this shift?')) {
+                if (!confirm('Are you sure you want to confirm this shift?')) {
                     return;
                 }
 

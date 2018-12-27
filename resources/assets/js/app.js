@@ -183,11 +183,14 @@ Vue.component('contacts-report', require('./components/business/reports/Contacts
 Vue.component('business-payroll-report', require('./components/business/reports/PayrollReport'));
 Vue.component('revenue-report', require('./components/business/reports/Revenue'));
 Vue.component('sales-pipeline-report', require('./components/business/reports/SalesPipeline'));
+Vue.component('client-directory', require('./components/business/reports/ClientDirectory'));
+Vue.component('caregiver-directory', require('./components/business/reports/CaregiverDirectory'));
+Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
 Vue.component('caregiver-client-list', require('./components/caregivers/CaregiverClientList'));
-Vue.component('caregiver-client-narrative', require('./components/caregivers/ClientNarrative'));
+Vue.component('client-narrative', require('./components/ClientNarrative'));
 Vue.component('caregiver-license-list', require('./components/CaregiverLicenseList.vue'));
 Vue.component('caregiver-license-modal', require('./components/CaregiverLicenseModal.vue'));
 Vue.component('caregiver-list', require('./components/CaregiverList.vue'));
@@ -222,6 +225,9 @@ Vue.component('client-caregiver-list', require('./components/clients/ClientCareg
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));
 
+Vue.component('contact-edit', require('./components/business/contacts/ContactEdit.vue'));
+Vue.component('contact-list', require('./components/business/contacts/ContactList.vue'));
+
 Vue.component('credit-card-form', require('./components/CreditCardForm.vue'));
 Vue.component('bank-account-form', require('./components/BankAccountForm.vue'));
 
@@ -253,6 +259,9 @@ Vue.component('note-list', require('./components/notes/NoteList'));
 Vue.component('notes-tab', require('./components/notes/NotesTab'));
 Vue.component('note-form', require('./components/notes/NoteForm'));
 Vue.component('note-create', require('./components/notes/NoteCreate'));
+
+Vue.component('note-template-list', require('./components/notes/NoteTemplateList'));
+Vue.component('note-template-form', require('./components/notes/NoteTemplateForm'));
 
 // caregiver applications
 Vue.component('caregiver-application-create', require('./components/caregivers/CaregiverApplicationCreate'));
@@ -293,6 +302,7 @@ Vue.component('quickbooks-caregiver-mapping', require('./components/business/qui
 Vue.component('business-apply-payment', require('./components/business/accounting/ApplyPayment'));
 Vue.component('client-referral', require('./components/business/referral/ClientReferral'));
 Vue.component('client-referral-modal', require('./components/business/referral/ClientReferralModal'));
+Vue.component('client-referral-edit', require('./components/business/referral/ClientReferralEdit.vue'));
 
 /* Quickbooks API */
 Vue.component('quickbooks-api', require('./components/admin/QuickbooksApi'));

@@ -58,6 +58,10 @@ class ShiftController extends BaseController
 
     public function clockIn(Request $request)
     {
+        if (auth()->user()->active == 0) {
+            abort(403);
+        }
+
         if ($this->caregiver()->isClockedIn()) {
             return redirect()->route('clocked_in')->with('error', 'You are already clocked in.');
         }
@@ -166,7 +170,7 @@ class ShiftController extends BaseController
         $activities = $business->allActivities();
 
         // load questions related to the current client
-        $questions = $business->questions()->forType($shift->client->client_type)->get();
+        $questions = $business->questions()->forType($shift->client->client_type)->where('track_goal_progress', true)->get();
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
@@ -183,6 +187,10 @@ class ShiftController extends BaseController
 
     public function clockOut(Request $request)
     {
+        if (auth()->user()->active == 0) {
+            abort(403);
+        }
+        
         if (!$this->caregiver()->isClockedIn()) {
             return new ErrorResponse(400, 'You are not currently clocked in.');
 //            return redirect()->route('shift.index');

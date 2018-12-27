@@ -12,7 +12,7 @@
         </b-container>
         <div slot="modal-footer">
             <submit-button variant="success"
-                           type="submit"
+                           type="button"
                            @click.native="saveShift()"
                            :submitting="submitting"
                            icon="fa fa-save"
@@ -46,8 +46,8 @@
                 },
                 set(value) {
                     this.$refs.businessShift.resetForm();
-                    this.$refs.businessShift.form.caregiver_id = this.caregiver;
-                    this.$refs.businessShift.form.client_id = this.client;
+                    if (this.caregiver) this.$refs.businessShift.form.caregiver_id = this.caregiver;
+                    if (this.client) this.$refs.businessShift.form.client_id = this.client;
                     this.$emit('input', value);
                 }
             },

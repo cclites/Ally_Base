@@ -35,7 +35,16 @@ class ReferralSourceController extends BaseController
     {
         $this->authorize('read', $referralSource);
 
-        return $this->index($referralSource->id);
+        $referralSource->load([
+            'notes.creator',
+            'notes' => function ($query) {
+                return $query->orderBy('created_at', 'desc');
+            },
+        ]);
+
+        $business = $this->business();
+
+        return view('business.referral.show', compact('referralSource', 'business'));
     }
 
     public function store(UpdateReferralSourceRequest $request)

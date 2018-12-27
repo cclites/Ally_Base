@@ -6,8 +6,8 @@
         <form @submit.prevent="saveAddress()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Address Line 1" label-for="address1">
-                        <b-form-input v-model="form.address1" type="text" required />
+                    <b-form-group label="Address Line 1" label-for="address1" label-class="required">
+                        <b-form-input v-model="form.address1" type="text" required  />
                         <input-help :form="form" field="address1" text="Enter your street number and name here."></input-help>
                     </b-form-group>
                     <b-form-group label="Address Line 2" label-for="address2">
@@ -38,7 +38,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-button variant="success" type="submit">Save Address</b-button>
+                    <b-button variant="success" type="submit" :disabled="authInactive">Save Address</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -47,8 +47,11 @@
 
 <script>
     import Countries from '../classes/Countries';
+    import AuthUser from '../mixins/AuthUser';
 
     export default {
+        mixins: [ AuthUser ],
+
         props: {
             'title': '',
             'type': '',

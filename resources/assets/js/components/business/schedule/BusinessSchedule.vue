@@ -1,6 +1,6 @@
 <template>
     <b-card id="schedule-card">
-        <b-row>
+        <b-row class="no-print">
             <b-col md="6">
                 <b-row>
                     <b-col class="statusFilters">
@@ -47,7 +47,7 @@
                 </b-row>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row class="no-print">
             <b-col lg="6">
                 <b-row>
                     <b-col class="ml-auto" v-if="!caregiver">
@@ -70,9 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <b-form-group>
-                            <business-location-select v-model="filterBusinessId" :allow-all="true"></business-location-select>
-                        </b-form-group>
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
                     </b-col>
                 </b-row>
             </b-col>
@@ -86,22 +84,38 @@
                 </div>
             </b-col>
         </b-row>
+        <div class="calendar-view">
+            <div class="print-fc-head">
+                <h1>{{business.name}}</h1>
+                <h4 v-if="business.phone1 || business.phone2">{{business.phone1 || business.phone2}}</h4>
+                <h3 class="text-center">
+                    Schedules for 
+                    <span v-if="!currentClient">All Clients</span>
+                    <span v-else>{{currentClient.nameLastFirst}} <span v-if="currentClient.phone_number">{{currentClient.phone_number.number}}</span></span>
+                    - visits by 
+                    <span v-if="!currentCaregiver">All Caregivers</span>
+                    <span v-else>{{currentCaregiver.nameLastFirst}}</span>
+                </h3>
+            </div>
 
-        <full-calendar ref="calendar"
-            :events="filteredEvents"
-            :resources="resources"
-            :default-view="defaultView"
-            :header="header"
-            :config="config"
-            @event-created="createSchedule"
-            @event-selected="editSchedule"
-            @event-render="renderEvent"
-            @view-render="onLoadView"
-            @events-reloaded="loadKpiToolbar"
-            @event-mouseover="hover"
-            :loading="loading"
-        />
-
+            <full-calendar ref="calendar"
+                :events="filteredEvents"
+                :resources="resources"
+                :default-view="defaultView"
+                :header="header"
+                :config="config"
+                @event-created="createSchedule"
+                @event-selected="editSchedule"
+                @event-render="renderEvent"
+                @view-render="onLoadView"
+                @events-reloaded="loadKpiToolbar"
+                @event-mouseover="eventHover"
+                @event-mouseout="eventLeave"
+                :loading="loading"
+            />
+            <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
+        </div>
+        
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
                                 @updateEvent="updateEvent"
@@ -196,9 +210,6 @@
                 </b-form-select>
             </div>
         </div>
-
-        <iframe id="printFrame" width="0" height="0" src="/calendar-print.html">
-        </iframe>
     </b-card>
 </template>
 
@@ -208,10 +219,11 @@
     import FormatsDates from "../../../mixins/FormatsDates";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
-    import BusinessLocationSelect from "../BusinessLocationSelect";
+    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+    import moment from 'moment';
 
     export default {
-        components: {BusinessLocationSelect},
+        components: {BusinessLocationFormGroup},
         props: {
             'business': Object,
             'caregiver': Object,
@@ -261,6 +273,7 @@
                 previewTop: 0,
                 previewLeft: 0,
                 preview: false,
+                previewTimer: null,
                 hoverShift: {},
                 hoverTarget: '',
                 location: 'all',
@@ -373,6 +386,20 @@
 
             filteredClientResources() {
                 return (this.filterClientId > -1 && !this.client) || this.filterClientId === -2;
+            },
+
+            currentClient() {
+                if (this.clients && this.filterClientId !== -1) {
+                    return this.clients.find(x => x.id === this.filterClientId);
+                }
+                return this.client;
+            },
+
+            currentCaregiver() {
+                if (this.caregivers && this.filterCaregiverId !== -1) {
+                    return this.caregivers.find(x => x.id === this.filterCaregiverId);
+                }
+                return this.caregiver;
             }
         },
 
@@ -398,6 +425,10 @@
                 }
 
                 return events;
+            },
+
+            currentTime() {
+                return moment().format('YYYY-MM-DD HH:mm:ss A');
             },
 
             getResources() {
@@ -560,25 +591,37 @@
             //     this.hidePreview();
             // },
 
-            hover(event, jsEvent, view) {
+            eventHover(event, jsEvent, view) {
                 let target = null;
-
+                
                 if ($(jsEvent.currentTarget).is('a')) {
                     target = $(jsEvent.currentTarget);
                 } else {
                     target = $(jsEvent.currentTarget).parent('a');
                 }
 
-                _.debounce((event, target, vm) => {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                }
+
+                this.previewTimer = setTimeout(function (event, target) {
                     axios.get('/business/schedule/' + event.id + '/preview')
                         .then(response => {
-                            vm.hoverShift = response.data;
-                            vm.showPreview(target, event.id);
+                            this.hoverShift = response.data;
+                            this.showPreview(target, event.id);
                         })
                         .catch(function(error) {
-                            vm.hoverShift = {};
+                            this.hoverShift = {};
                         });
-                }, 350)(event, target, this);
+                }.bind(this, event, target), 1000);
+
+            },
+
+            eventLeave() {
+                if (this.previewTimer) {
+                    clearTimeout(this.previewTimer);
+                    this.previewTimer = null;
+                }
             },
 
             showPreview(target, shift_id) {
@@ -922,10 +965,7 @@
             },
 
             printCalendar() {
-                console.log($(this.$refs.calendar.$el));
-                let html = $(this.$refs.calendar.$el).html();
-                $("#printFrame").contents().find('body').html(html);
-                document.getElementById("printFrame").contentWindow.print();
+                window.print();
             },
         },
 
@@ -972,99 +1012,158 @@
     }
 </script>
 
-<style type="scss">
-.fc-view-container { font-size: 0.9em; }
-.fc-event { text-align: left!important; }
-.fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
-.fc-event { cursor: pointer; }
-.fc-note-btn:hover {
-    filter: brightness(85%);
-    cursor: pointer;
-}
-.fa-commenting {
-    color: #F2F214;
-}
-.fc-toolbar {
-    padding: 0;
-}
-.fc-toolbar .dropdown-item {
-    padding: 3px 6px;
-}
-.fc-toolbar .fc-center h2 {
-    text-align: center;
-    width: 100%;
-}
-.fc-toolbar h6 {
-    /* Toolbar KPIs */
-    clear: both;
-}
-.color-sample {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin: 3px 3px 0 3px;
-    border: 1px solid #000;
-}
-.fc-fullscreen-button:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f0b2";
-}
-.fc-print-button:before {
-    font: normal normal normal 14px/1 FontAwesome;
-    content: "\f02f";
-}
-.fullscreen-calendar {
-    z-index: 101;
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-}
-.fc-resource-area .fc-content {
-    background-color: #fff;
-}
-.fc-resource-area .fc-cell-content {
-    padding-left: 2px; padding-right: 2px;
-}
-.fc-resource-area .fc-widget-content:not(:first-child) .fc-cell-content {
-    overflow: visible;
-}
-.statusFilters .badge { cursor: pointer; }
-.badge.scheduled { background-color: #1c81d9; }
-.badge.clocked_in { background-color: #27c11e; }
-.badge.confirmed { background-color: #849290; }
-.badge.unconfirmed { background-color: #D0C3D3; }
-.badge.client_canceled { background-color: #730073; }
-.badge.cg_canceled { background-color: #ff8c00; }
-.badge.open { background-color: #d9c01c; }
-.badge.attention { background-color: #C30000; }
-.badge.missed_clock_in { background-color: #E468B2; }
+<style lang="scss">
+    .fc-view-container { font-size: 0.9em; }
+    .fc-event { text-align: left!important; }
+    .fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
+    .fc-event { cursor: pointer; }
+    .fc-note-btn:hover {
+        filter: brightness(85%);
+        cursor: pointer;
+    }
+    .fa-commenting {
+        color: #F2F214;
+    }
+    .fc-toolbar {
+        padding: 0;
+    }
+    .fc-toolbar .dropdown-item {
+        padding: 3px 6px;
+    }
+    .fc-toolbar .fc-center h2 {
+        text-align: center;
+        width: 100%;
+    }
+    .fc-toolbar h6 {
+        /* Toolbar KPIs */
+        clear: both;
+    }
+    .color-sample {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin: 3px 3px 0 3px;
+        border: 1px solid #000;
+    }
+    .fc-fullscreen-button:before {
+        font: normal normal normal 14px/1 FontAwesome;
+        content: "\f0b2";
+    }
+    .fc-print-button:before {
+        font: normal normal normal 14px/1 FontAwesome;
+        content: "\f02f";
+    }
+    .fullscreen-calendar {
+        z-index: 101;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+    }
+    .fc-resource-area .fc-content {
+        background-color: #fff;
+    }
+    .fc-resource-area .fc-cell-content {
+        padding-left: 2px; padding-right: 2px;
+    }
+    .fc-resource-area .fc-widget-content:not(:first-child) .fc-cell-content {
+        overflow: visible;
+    }
+    .statusFilters .badge { cursor: pointer; }
+    .badge.scheduled { background-color: #1c81d9; }
+    .badge.clocked_in { background-color: #27c11e; }
+    .badge.confirmed { background-color: #849290; }
+    .badge.unconfirmed { background-color: #D0C3D3; }
+    .badge.client_canceled { background-color: #730073; }
+    .badge.cg_canceled { background-color: #ff8c00; }
+    .badge.open { background-color: #d9c01c; }
+    .badge.attention { background-color: #C30000; }
+    .badge.missed_clock_in { background-color: #E468B2; }
 
-.fc-resource-area .fc-scroller {
-    /* disables horizontal scroll bar in resource area */
-    overflow: hidden !important;
-}
-.fc-time-area td, .fc-month-view tbody td {
-    /* calendar borders, event borders are in the config property */
-    border-color: rgba(120, 130, 140, 0.25) !important;
-}
-.fc-timeline-event {
-    margin-right: 4px !important;
-}
-.fc-cell-text {
-    color: #222;
-    font-weight: 500;
-}
-.preview-window {
-  z-index: 9999!important;
-  position: absolute;
-  background-color: #fff;
-  padding: 1em;
-  border: 1px solid #456789;
-  width: 420px;
-}
-.resource-popover {
-    margin-right: 12px !important;
-    white-space: pre-line;
-}
+    .fc-resource-area .fc-scroller {
+        /* disables horizontal scroll bar in resource area */
+        overflow: hidden !important;
+    }
+    .fc-time-area td, .fc-month-view tbody td {
+        /* calendar borders, event borders are in the config property */
+        border-color: rgba(120, 130, 140, 0.25) !important;
+    }
+    .fc-timeline-event {
+        margin-right: 4px !important;
+    }
+    .fc-cell-text {
+        color: #222;
+        font-weight: 500;
+    }
+    .preview-window {
+        z-index: 9999!important;
+        position: absolute;
+        background-color: #fff;
+        padding: 1em;
+        border: 1px solid #456789;
+        width: 420px;
+    }
+    .resource-popover {
+        margin-right: 12px !important;
+        white-space: pre-line;
+    }
+
+    .print-fc-head {
+        display: none;
+        max-width: 85%;
+        margin: 0 auto;
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        h4 {
+            font-weight: bold;
+        }
+
+        h3 {
+            font-weight: bold;
+        }
+    }
+
+    .print-date {
+        display: none;
+    }
+
+    @media print {
+        .print-date {
+            display: block;
+            text-align: center;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .print-fc-head {
+            display: block;
+        }
+
+        #schedule-card {
+            border: none !important;
+        }
+
+        .fc-month-view tbody td {
+            border-color: #888 !important;
+        }
+
+        .fc-view-container {
+            border: 1px solid #888;
+        }
+
+        .fc-toolbar {
+            h2 {
+                font-weight: bold;
+            }
+            
+            h6 {
+                display: none;
+            }
+        }
+    }
 </style>
 
 <style scoped>

@@ -52,7 +52,7 @@ class ClientNarrative extends Model
      *
      * @var array
      */
-    protected $appends = [];
+    protected $appends = ['is_owner'];
     
     // **********************************************************
     // RELATIONSHIPS
@@ -68,10 +68,30 @@ class ClientNarrative extends Model
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /**
+     * Get the client relatioship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\
+    */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
-    
+
+    /**
+     * Flag for if the note is owned by the current user.
+     *
+     * @return void
+     */
+    public function getIsOwnerAttribute()
+    {
+        return $this->creator_id === auth()->id();
+    }
+
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************

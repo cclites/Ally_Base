@@ -11,7 +11,7 @@
         </b-row>
         <b-row>
             <b-col class="text-right hidden-xs-down">
-                <b-btn @click="deleteMethod()">Delete <i class="fa fa-times"></i></b-btn>
+                <b-btn @click="deleteMethod()" :disabled="authInactive">Delete <i class="fa fa-times"></i></b-btn>
             </b-col>
         </b-row>
         <b-row v-if="!restricted">
@@ -22,14 +22,31 @@
                             name="type"
                             v-model="type"
                             :options="types"
+                            :disabled="authInactive"
                     >
                     </b-form-select>
                 </b-form-group>
-                <credit-card-form v-if="type == 'credit_card'" :source="source" :card="existing_card" :client="client" :submit-url="submitUrl" :key="existing_card.id" />
-                <bank-account-form v-if="type == 'bank_account'" :source="source" :account="existing_account" :submit-url="submitUrl" :key="existing_account.id"/>
-                <payment-method-provider v-if="business == true && type == 'provider'" :submit-url="submitUrl"/>
+                <credit-card-form v-if="type == 'credit_card'" 
+                    :source="source" 
+                    :card="existing_card" 
+                    :client="client" 
+                    :submit-url="submitUrl" 
+                    :key="existing_card.id" 
+                    :readonly="authInactive" 
+                />
+                <bank-account-form v-if="type == 'bank_account'" 
+                    :source="source" 
+                    :account="existing_account" 
+                    :submit-url="submitUrl" 
+                    :key="existing_account.id" 
+                    :readonly="authInactive" 
+                />
+                <payment-method-provider v-if="business == true && type == 'provider'" 
+                    :submit-url="submitUrl" 
+                    :readonly="authInactive"
+                />
                 <span class="hidden-sm-up">
-                    <b-btn @click="deleteMethod()">Delete This Payment Method</b-btn>
+                    <b-btn @click="deleteMethod()" :disabled="authInactive">Delete This Payment Method</b-btn>
                 </span>
                 <small class="form-text text-muted">
                     {{ typeMessage }}
@@ -46,9 +63,10 @@
 
 <script>
     import FormatsDates from "../mixins/FormatsDates";
+    import AuthUser from "../mixins/AuthUser";
 
     export default {
-        mixins: [FormatsDates],
+        mixins: [FormatsDates, AuthUser],
 
         props: {
             'role': String,
@@ -157,12 +175,22 @@
                     let form = new Form();
                     form.submit('delete', this.submitUrl)
                         .then(response => {
+                            this.onUpdatePaymentMethod(response.data.data);
                             this.type = null;
                             this.existing_account = {id: -1};
                             this.existing_card = {id: -1};
                         })
                 }
             },
+
+            onUpdatePaymentMethod(msg) {
+                if (typeof msg === 'string') {
+                    this.typeMessage = msg;
+                } else {
+                    this.typeMessage = msg.payment_text;
+                    this.$store.commit('setPaymentMethodDetail', msg);
+                }
+            }
         }
     }
 </script>

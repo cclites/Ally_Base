@@ -346,7 +346,12 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
 
     public function duplicates()
     {
-        return $this->hasMany(Shift::class, 'duplicated_by', 'id');
+        return $this->hasMany(Shift::class, 'duplicated_by');
+    }
+
+    public function duplicatedBy()
+    {
+        return $this->belongsTo(Shift::class, 'duplicated_by');
     }
 
     ///////////////////////////////////////////
@@ -512,6 +517,11 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $this->statusManager()->isReadOnly();
     }
 
+    /**
+     * Look for an EXACT duplicate.  This is different than the 'duplicate' flag which looks for potential duplicates.
+     *
+     * @return bool
+     */
     public function hasDuplicate()
     {
         $query = self::where('checked_in_time', $this->checked_in_time)

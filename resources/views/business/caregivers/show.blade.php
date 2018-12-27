@@ -42,7 +42,7 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
+            <a class="nav-link" data-toggle="tab" href="#licenses" role="tab">Expirations</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#availability" role="tab">Availability</a>
@@ -76,7 +76,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#clients" role="tab">Clients</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregiver_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
-                <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Certifications</a>
+                <a class="dropdown-item" data-toggle="tab" href="#licenses" role="tab">Expirations</a>
                 <a class="dropdown-item" data-toggle="tab" href="#availability" role="tab">Availability</a>
                 <a class="dropdown-item" data-toggle="tab" href="#skills" role="tab">Skills</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
@@ -172,16 +172,6 @@
 @push('scripts')
     <script>
         // Schedule fixes
-        $('.profile-tabs a[data-toggle="tab"]').click(function () {
-            var $link = $(this);
-
-            //remove active class from other tab-panes
-            $('.tab-content:not(.' + $link.attr('href').replace('#','') + ') .tab-pane').removeClass('active');
-
-            // activate tab-pane for active section
-            $('.tab-content.' + $link.attr('href').replace('#','') + ' .tab-pane:first').addClass('active');
-        });
-
         $('.profile-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // Render calendar upon switching tabs
             if (e.target.hash === '#schedule') {

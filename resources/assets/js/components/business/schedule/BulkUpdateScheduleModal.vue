@@ -216,14 +216,14 @@
                                 </b-form-group>
                             </b-col>
                             <b-col sm="6">
-                                <b-form-group label="Care Plan" label-for="new_care_plan_id">
+                                <b-form-group label="Service Needs / ADL Groups" label-for="new_care_plan_id">
                                     <b-form-select
                                             id="new_care_plan_id"
                                             name="new_care_plan_id"
                                             v-model="form.new_care_plan_id"
                                     >
                                         <option value="">No Change</option>
-                                        <option value="0">No Care Plan</option>
+                                        <option value="0">None</option>
                                         <option v-for="item in care_plans" :value="item.id" :key="item.id">{{ item.name }}</option>
                                     </b-form-select>
                                     <input-help :form="form" field="new_care_plan_id" text="" />

@@ -16,7 +16,8 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <b-btn size="sm" @click="edit(row.item.id)">
+                    <!--<b-btn size="sm" @click="edit(row.item.id)">-->
+                    <b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
                         <i class="fa fa-edit"></i>
                     </b-btn>
                 </template>

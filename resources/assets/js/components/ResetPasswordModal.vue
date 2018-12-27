@@ -1,10 +1,11 @@
 <template>
-    <b-modal title="Reset Password" v-model="showModal">
+    <b-modal title="Reset Password" v-model="showModal" @shown="focus">
         <b-container fluid>
             <b-row>
                 <b-col sm="12">
                     <b-form-group label="New Password" label-for="password">
                         <b-form-input
+                            ref="password"
                             id="password"
                             name="password"
                             type="password"
@@ -68,6 +69,10 @@
                     .then(function(response) {
                         component.showModal = false;
                     });
+            },
+
+            focus(e) {
+                this.$refs.password.focus();
             }
         },
     }

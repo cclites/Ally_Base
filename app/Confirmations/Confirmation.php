@@ -36,13 +36,15 @@ class Confirmation
             return false;
         }
 
-        if (!$timestamp = $this->user->email_sent_at) {
-            return false;
-        }
+        if(Carbon::now()->diffInDays($this->user->created_at) > 7) {
+            if (!$timestamp = $this->user->email_sent_at) {
+                return false;
+            }
 
-        $timestamp = new Carbon($timestamp);
-        if (Carbon::now()->diffInHours($timestamp) > 72) {
-            return false;
+            $timestamp = new Carbon($timestamp);
+            if (Carbon::now()->diffInHours($timestamp) > 72) {
+                return false;
+            }
         }
 
         return true;
