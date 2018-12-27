@@ -209,16 +209,28 @@
                         sortable: true,
                     },
                     {
-                        key: 'ally_pct',
-                        label: 'Ally %',
+                        key: 'created_at',
+                        label: 'Added',
                         sortable: true,
-                        formatter: this.percentageFormat
+                        formatter: ts => ts ? this.formatDateTimeFromUTC(ts) : '-'
                     },
                     {
-                        key: 'EVV',
-                        label: 'EVV Verified',
+                        key: 'confirmed_at',
+                        label: 'Confirmed',
                         sortable: true,
-                    }
+                        formatter: ts => ts ? this.formatDateTimeFromUTC(ts) : '-'
+                    },
+                    // {
+                    //     key: 'ally_pct',
+                    //     label: 'Ally %',
+                    //     sortable: true,
+                    //     formatter: this.percentageFormat
+                    // },
+                    // {
+                    //     key: 'EVV',
+                    //     label: 'EVV Verified',
+                    //     sortable: true,
+                    // }
                 ]
             }
         },
@@ -245,7 +257,6 @@
                         // remove commas
                         item[prop].replace(/,/g, '')
                     )
-                    console.log({[`${prop} parsed`]: parsed})
                     
                     return sum + parsed
                 }, total);
