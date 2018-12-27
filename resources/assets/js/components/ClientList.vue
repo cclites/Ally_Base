@@ -167,8 +167,9 @@
                 this.loading = false;
             },
             async loadOfficeUsers() {
-                const response = await axios.get(`officeusers`);
+                const response = await axios.get(`/business/office-users`);
                 this.caseManagers = response.data;
+                this.filterCaseManagers();
             },
             details(item, index, button) {
                 this.selectedItem = item;
@@ -194,7 +195,7 @@
                 }
             },
             filterCaseManagers() {
-                if (! this.business_id) {
+                if (this.business_id == '') {
                     this.filteredCaseManagers = this.caseManagers;
                 } else {
                     this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))

@@ -447,7 +447,7 @@
             },
 
             async loadOfficeUsers() {
-                const response = await axios.get(`/business/officeusers`);
+                const response = await axios.get(`/business/${this.client.business_id}/office-users`);
                 this.caseManagers = response.data;
             },
 
