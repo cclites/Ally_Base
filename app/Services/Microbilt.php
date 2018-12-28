@@ -48,7 +48,7 @@ class Microbilt {
                 <glob:MemberPwd>{$this->member_password}</glob:MemberPwd> 
                 <glob:RequestType>N</glob:RequestType> 
                 <glob:ReasonCode>3</glob:ReasonCode> 
-                <glob:RefNum>1</glob:RefNum>
+                <glob:RefNum>RVDLITE</glob:RefNum>
             </glob:MsgRqHdr>
             <glob:PersonInfo xmlns="http://schema.microbilt.com/globals">
                 <glob:PersonName> 
