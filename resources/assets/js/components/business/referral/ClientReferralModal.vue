@@ -17,7 +17,7 @@
                             <input-help :form="form" field="phone"></input-help>
                         </b-form-group>
                         <business-location-form-group v-model="form.business_id"
-                                                      form="form"
+                                                      :form="form"
                                                       field="business_id"
                                                       help-text="">
                         </business-location-form-group>

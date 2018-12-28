@@ -43,7 +43,7 @@
                         <input-help :form="form" field="client_type" text="Select the type of payment the prospect will use."></input-help>
                     </b-form-group>
                     <business-location-form-group v-model="form.business_id"
-                                                  form="form"
+                                                  :form="form"
                                                   field="business_id"
                                                   help-text="Select the office location for the prospect.">
                     </business-location-form-group>
