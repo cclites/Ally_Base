@@ -31,7 +31,7 @@
                         </b-col>
                         <b-col lg="3">
                             <business-location-form-group v-model="form.business_id"
-                                                          form="form"
+                                                          :form="form"
                                                           field="business_id"
                                                           :allow-all="true">
                             </business-location-form-group>
