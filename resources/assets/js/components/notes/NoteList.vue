@@ -1,5 +1,8 @@
 <template>
     <b-card>
+        <div class="mb-4">
+            <b-btn variant="info" class="mb-3" href="/notes/create">Add Note</b-btn>
+        </div>
         <b-form inline @submit.prevent="filter" class="mb-4">
             <b-form-input
                     type="text"
@@ -7,7 +10,6 @@
                     class="datepicker mr-2 mb-2"
                     v-model="searchForm.start_date"
                     placeholder="Start Date"
-                    @change="filter"
             >
             </b-form-input>
 
@@ -77,14 +79,13 @@
             </b-form-input>-->
 
             <b-button variant="info" type="submit" class="mb-2">
-                Filter
+                Generate
             </b-button>
         </b-form>
 
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
-            <b-btn variant="info" class="mb-3" href="/notes/create">Add Note</b-btn>
 
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -143,7 +144,6 @@
         mixins: [ FormatsDates ],
 
         props: {
-            'notes': Array,
         },
 
         data() {
@@ -155,7 +155,7 @@
                 clients: [],
                 prospects: [],
                 referral_sources: [],
-                items: this.notes,
+                items: [],
                 searchForm: {
                     caregiver: null,
                     client: null,
@@ -185,7 +185,7 @@
                         key: 'type',
                         label: 'Type',
                         sortable: true,
-                        formatter: d => d && d.substr(0, 1).toUpperCase() + d.substr(1),
+                        formatter: d => d.toLowerCase() === 'other' ? 'Note' : 'Phone Call'
                     },
                     {
                         key: 'caregiver',
@@ -255,13 +255,7 @@
         },
 
         watch: {
-            notes(val) {
-                val.forEach(note => {
-                    if (!this.users.find(x => x.id === note.created_by)) {
-                        this.users.push(note.creator);
-                    }
-                });
-            },
+           
         },
 
         methods: {
