@@ -70,6 +70,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property int|null $onboarding_step
  * @property int|null $hourly_rate_id
  * @property int|null $fixed_rate_id
+ * @property int|null $case_manager_id
  * @property string|null $hic;
  * @property string|null $travel_directions;
  * @property \Carbon\Carbon|null $created_at
@@ -124,6 +125,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
+ * @property-read \App\User $case_manager
  * @property-read \App\User $creator
  * @property-read \App\User $updator
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
@@ -180,6 +182,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCaseManagerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHIC($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereTravelDirections($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCreatedBy($value)
@@ -256,7 +259,8 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         'updated_by',
         'disaster_code_plan',
         'disaster_planning',
-        'caregiver_1099'
+        'caregiver_1099',
+        'case_manager_id',
     ];
 
     ///////////////////////////////////////////
@@ -327,6 +331,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
                         'provider_fixed_id',
                         'provider_fixed_fee',
                     ]);
+    }
+
+    public function caseManager()
+    {
+        return $this->belongsTo('App\OfficeUser', 'case_manager_id');
     }
 
     /**

@@ -52,7 +52,8 @@ class ClientController extends BaseController
                 $query->with('carePlans');
             }
 
-            return $query->get();
+            $clients = $query->with('caseManager')->get();
+            return $clients;
         }
 
         return view('business.clients.index');
@@ -160,6 +161,7 @@ class ClientController extends BaseController
             'notes.creator',
             'careDetails',
             'carePlans',
+            'caseManager',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },

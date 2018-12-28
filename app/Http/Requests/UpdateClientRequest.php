@@ -24,6 +24,7 @@ class UpdateClientRequest extends BusinessRequest
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
+            'case_manager_id' => 'nullable',
             'ssn' => ['nullable', new ValidSSN()],
             'gender' => 'nullable|in:M,F',
             'onboard_status' => 'required',
