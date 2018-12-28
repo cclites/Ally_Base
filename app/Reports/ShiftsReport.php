@@ -89,6 +89,7 @@ class ShiftsReport extends BusinessResourceReport
                 'goals' => $shift->goals,
                 'questions' => $shift->questions,
                 'flags' => $shift->flags,
+                'created_at' => optional($shift->created_at)->toDateTimeString(),
             ];
             return $row;
         });

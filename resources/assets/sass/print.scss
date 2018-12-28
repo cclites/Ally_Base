@@ -1,0 +1,63 @@
+.print-only {
+  display: none !important;
+}
+
+@media print {
+  .page-titles {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .footer {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .fc-license-message {
+    display: none !important;
+  }
+
+  .fc th.fc-widget-header,
+  .fc-day-header {
+      background: #CCC !important;
+      -webkit-print-color-adjust: exact;
+      color: black !important;
+      font-weight: bold;
+  }
+
+  .fc-view-container {
+    .fc-day-grid-container {
+      td {
+        padding: 10px !important;
+      }
+    }
+
+    .fc-day-grid-event {
+      color: black !important;
+      background: transparent !important;
+      border: none !important;
+
+      .fc-note-btn {
+        display: none !important;
+      }
+    }
+
+    .fc-day-header {
+      border: 1px solid #888 !important;
+    }
+
+    .fc-day-top.fc-other-month {
+      opacity: 1 !important;
+
+      .fc-day-number {
+        color: #ccc !important;
+      }
+    }
+  }
+}

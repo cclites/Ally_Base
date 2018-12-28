@@ -353,5 +353,4 @@
 </script>
 
 <style>
-.datepicker { z-index: 1000!important };
 </style>

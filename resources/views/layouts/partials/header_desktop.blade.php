@@ -26,6 +26,15 @@
                     @include('layouts.partials.active_business')
                 @endif
                 <!-- ============================================================== -->
+                <!-- Exceptions -->
+                <!-- ============================================================== -->
+                @if(is_office_user())
+                    <system-notifications></system-notifications>
+                @endif
+                @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']))
+                    <tasks-icon role="{{ Auth::user()->role_type }}"></tasks-icon>
+                @endif
+                <!-- ============================================================== -->
                 <!-- Profile -->
                 <!-- ============================================================== -->
                 <li class="nav-item dropdown">

@@ -172,13 +172,13 @@
                         });
                 }
                 else {
-                    component.form.post('/business/activities')
+                    this.form.post('/business/activities')
                         .then(function(response) {
-                            component.activityModal = false;
-                            component.items.unshift({
+                            this.activityModal = false;
+                            this.items.unshift({
                                 id: response.data.data.id,
-                                code: component.form.code,
-                                name: component.form.name,
+                                code: this.form.code,
+                                name: this.form.name,
                                 new: true,
                             })
                         });
