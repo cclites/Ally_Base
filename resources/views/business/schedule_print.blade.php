@@ -34,8 +34,8 @@
                 @foreach($groups as $group)
                     @php
                         $scheduleGroup = $group->sortBy(function($schedule) {
-                            return $schedule->date;
-                        });
+                            return $schedule->starts_at;
+                        }, SORT_REGULAR, false);
                     @endphp
                     <h4 class="">
                         @if ($group_by == 'none') 
