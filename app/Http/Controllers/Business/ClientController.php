@@ -114,7 +114,7 @@ class ClientController extends BaseController
                 return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
             }
         }
-
+        $data['created_by'] = auth()->id();
         if ($client = Client::create($data)) {
             if ($request->input('no_email')) {
                 $client->setAutoEmail()->save();
@@ -148,6 +148,8 @@ class ClientController extends BaseController
 
         $client->load([
             'user',
+            'creator',
+            'updator',
             'addresses',
             'phoneNumbers',
             'preferences',
@@ -206,6 +208,7 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
         $data = $request->filtered();
+        $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
         if ($client->onboard_status != $data['onboard_status']) {
