@@ -1,6 +1,6 @@
 <template>
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-muted text-muted" id="tasksDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-check-square fa-lg"></i>
+    <li class="nav-item dropdown pr-2">
+        <a class="nav-link dropdown-toggle text-muted text-muted" id="tasksDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-check-square fa-2x pt9"></i>
             <span class="badge badge-warning badge-notifications" v-if="tasks.length">{{ tasks.length }}</span>
             <b-tooltip target="tasksDropdown" placement="left" show title="You have been assigned tasks" v-if="showTooltip"></b-tooltip>
         </a>
@@ -100,11 +100,13 @@
     .badge-notifications {
         position: absolute;
         top: 18px;
-        left: 32px;
+        left: 34px;
+        font-size: 13px;
     }
     .mdi-message {
         font-size: 24px;
         margin-right: -7px;
         padding-left: 7px;
     }
+    .pt9 { padding-top: 9px; }
 </style>
