@@ -29,10 +29,6 @@ abstract class BaseVoiceController extends BaseTelefonyController
             abort(403);
         }
 
-//        if ($request->getContentType() !== 'xml') {
-//            abort(403);
-//        }
-
         $this->number = $phoneNumber->input($request->input('From'));
         $this->client = $telefony->findClientByNumber($this->number);
         if (!$this->client) {

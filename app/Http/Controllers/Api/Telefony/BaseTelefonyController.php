@@ -41,23 +41,20 @@ abstract class BaseTelefonyController extends Controller
         $twilioSid = config('services.twilio.sid');
         $twilioToken = config('services.twilio.token');
 
-        $requestValidator = new RequestValidator($twilioToken);
-        if (app()->environment() === 'production' && ! $requestValidator->validate(
-                $request->header('X-Twilio-Signature'),
-                $request->fullUrl(),
-                $request->toArray()
-            )) {
-            return false;
-        }
+//        $requestValidator = new RequestValidator($twilioToken);
+//        if (app()->environment() === 'production' && ! $requestValidator->validate(
+//                $request->header('X-Twilio-Signature'),
+//                $request->fullUrl(),
+//                $request->toArray()
+//            )) {
+//            return false;
+//        }
 
-        if (\Validator::make($request->all(), [
-            'MessageSid' => 'required|string|max:34|min:34',
-            'AccountSid' => "required|string|max:34|min:34|in:$twilioSid",
-            // 'MessagingServiceSid' => 'required|string|max:34|min:34',
-            'To' => 'required|string',
+        $validator = \Validator::make($request->all(), [
+            'AccountSid' => 'required|string|in:' . $twilioSid,
             'From' => 'required|string',
-            'Body' => 'required|string',
-        ])->fails()) {
+        ]);
+        if ($validator->fails()) {
             return false;
         }
 
