@@ -62,7 +62,7 @@ class Caregiver1099Csv extends Command
 a1.address1 as client_address1, a1.address2 as client_address2, a1.city as client_city, a1.state as client_state, a1.zip as client_zip,
 u2.id as caregiver_id, CONCAT(u2.firstname, ' ', u2.lastname) as caregiver_name, u2.email as caregiver_email, c2.ssn as caregiver_ssn,
 a2.address1 as caregiver_address1, a2.address2 as caregiver_address2, a2.city as caregiver_city, a2.state as caregiver_state, a2.zip as caregiver_zip,
- sum(h.caregiver_total) as payment_total
+ sum(h.caregiver_shift) as payment_total
 FROM clients c
 INNER JOIN shifts s ON s.client_id = c.id
 INNER JOIN payments p ON s.payment_id = p.id
