@@ -15,6 +15,7 @@ use App\Rules\PhonePossible;
 use Illuminate\Http\Request;
 use App\Traits\Request\BankAccountRequest;
 use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
 
 class ProfileController extends Controller
 {
@@ -202,4 +203,24 @@ class ProfileController extends Controller
         return new SuccessResponse('Caregiver skills updated');
     }
 
+    /**
+     * Update notification options settings from profile page.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request)
+    {
+        $data = $request->validated();
+
+        if (! $data['allow_sms_notifications'] && ! $data['notification_email'] && ! $data['allow_system_notifications']) {
+            return new ErrorResponse(422, 'You must select at least one notification type');
+        }
+
+        if (auth()->user()->update($data)) {
+            return new SuccessResponse('Notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating notification options.  Please try again.');
+    }
 }
