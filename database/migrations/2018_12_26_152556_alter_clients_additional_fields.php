@@ -21,6 +21,9 @@ class AlterClientsAdditionalFields extends Migration
             $table->string('disaster_code_plan', 50)->nullable();
             $table->text('disaster_planning', 65535)->nullable();
             $table->boolean('caregiver_1099')->nullable()->default(0);
+
+            $table->foreign('created_by', 'fk_client_created_by')->references('id')->on('users');
+            $table->foreign('updated_by', 'fk_client_updated_by')->references('id')->on('users');
         });
     }
 
