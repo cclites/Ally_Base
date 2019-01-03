@@ -112,7 +112,7 @@
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">Text Message</span>
                             </label>
-                            <label class="custom-control custom-checkbox">
+                            <label class="custom-control custom-checkbox" v-if="user.role_type == 'office_user'">
                                 <input type="checkbox"
                                     class="custom-control-input"
                                     name="sms"

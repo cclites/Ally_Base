@@ -29,7 +29,7 @@ class CertificationExpired extends BaseNotification
     protected $action = 'View Caregiver Profile';
 
     /**
-     * The related shift.
+     * The related license.
      *
      * @var \App\CaregiverLicense
      */

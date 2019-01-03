@@ -388,6 +388,8 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         switch ($this->role_type) {
             case 'office_user':
                 return collect(OfficeUser::$availableNotifications);
+            case 'caregiver':
+                return collect(Caregiver::$availableNotifications);
             default:
                 return collect([]);
         }

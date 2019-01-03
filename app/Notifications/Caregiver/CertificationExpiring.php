@@ -1,32 +1,34 @@
 <?php
 
-namespace App\Notifications\Business;
+namespace App\Notifications\Caregiver;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
 
 class CertificationExpiring extends BaseNotification
 {
+    public static $disabled = true;
+    
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    protected static $title = '30 Days Before a Caregiver Certification Expires';
+    protected static $title = '30 Days Before one of my Certification Expires';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# - #CERTNAME# expires in 30 days.';
+    protected static $message = 'Your #CERTNAME# expires in 30 days.';
 
     /**
      * The action text.
      *
      * @var string
      */
-    protected $action = 'View Caregiver Profile';
+    protected $action = 'Login';
 
     /**
      * The related license.
@@ -44,7 +46,7 @@ class CertificationExpiring extends BaseNotification
     public function __construct($license)
     {
         $this->license = $license;
-        $this->url = route('business.caregivers.show', ['caregiver' => $this->license->caregiver]);
+        $this->url = route('home');
     }
 
     /**
@@ -54,9 +56,7 @@ class CertificationExpiring extends BaseNotification
      */
     public function getMessage()
     {
-        $message = str_replace('#CAREGIVER#', $this->license->caregiver->name, static::$message);
-        $message = str_replace('#CERTNAME#', $this->license->name, $message);
-        return $message;
+        return str_replace('#CERTNAME#', $this->license->name, static::$message);
     }
 
     /**
@@ -68,6 +68,6 @@ class CertificationExpiring extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        // TODO: handle sending to all business chains the caregiver belongs to
+        return $this->toSmsFromBusiness($notifiable, $this->license->caregiver->business);
     }
 }

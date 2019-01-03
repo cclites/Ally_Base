@@ -30,7 +30,10 @@ class UpdateNotificationPreferencesRequest extends FormRequest
             $rules[$cls::getKey()] = 'required|array';
             $rules[$cls::getKey().'.sms'] = 'boolean';
             $rules[$cls::getKey().'.email'] = 'boolean';
-            $rules[$cls::getKey().'.system'] = 'boolean';
+
+            if (auth()->user()->role_type == 'office_user') {
+                $rules[$cls::getKey().'.system'] = 'boolean';
+            }
         }
 
         return $rules;

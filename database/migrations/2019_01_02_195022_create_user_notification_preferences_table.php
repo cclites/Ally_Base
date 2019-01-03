@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use App\OfficeUser;
+use App\Caregiver;
 
-class CreateUserNotificationsTable extends Migration
+class CreateUserNotificationPreferencesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -44,7 +45,16 @@ class CreateUserNotificationsTable extends Migration
         // ======================================================
         // implement defaults for all caregiver notifications
         // ======================================================
-        // TODO: implement
+        foreach(Caregiver::all() as $user) {
+            foreach (Caregiver::$availableNotifications as $cls) {
+                $user->notificationPreferences()->create([
+                    'key' => $cls::getKey(),
+                    'sms' => false,
+                    'email' => false,
+                    'system' => false,
+                ]);
+            }
+        }
     }
 
     /**

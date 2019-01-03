@@ -157,6 +157,20 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
 
     public $dates = ['onboarded', 'hire_date', 'deleted_at'];
 
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        \App\Notifications\Caregiver\ShiftReminder::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\ClockInReminder::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\ClockOutReminder::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\VisitAccuracyCheck::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\CertificationExpiring::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\CertificationExpired::class, // TODO: implement trigger
+    ];
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
