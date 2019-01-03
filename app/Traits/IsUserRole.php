@@ -10,7 +10,7 @@ use App\User;
 use App\Document;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\UserNotifications;
+use App\UserNotificationPreferences;
 
 trait IsUserRole
 {
@@ -312,13 +312,13 @@ trait IsUserRole
     }
     
     /**
-     * Get the user notifications relationship.
+     * Get the user notification preferences relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-    public function notifications()
+    public function notificationPreferences()
     {
-        return $this->hasMany(UserNotifications::class, 'user_id', 'id');
+        return $this->hasMany(UserNotificationPreferences::class, 'user_id', 'id');
     }
 
     ////////////////////////////////////

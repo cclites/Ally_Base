@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserNotifications extends Model
+class UserNotificationPreferences extends Model
 {
     /**
      * The attributes that aren't mass assignable.

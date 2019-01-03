@@ -25,7 +25,7 @@ class ProfileController extends Controller
     public function index()
     {
         $type = auth()->user()->role_type;
-        $user = auth()->user()->load(['phoneNumbers', 'notifications']);
+        $user = auth()->user()->load(['phoneNumbers', 'notificationPreferences']);
         
         // include a placeholder for the primary number if one doesn't already exist
         if ($user->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -246,7 +246,7 @@ class ProfileController extends Controller
         \DB::beginTransaction();
 
         foreach ($notifications as $key => $data) {
-            auth()->user()->notifications()
+            auth()->user()->notificationPreferences()
                 ->where('key', $key)
                 ->update($data);
         }

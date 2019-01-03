@@ -189,7 +189,7 @@
         },
 
         mounted() {
-            this.user.notifications.forEach(n => {
+            this.user.notification_preferences.forEach(n => {
                 this.preferences[n.key] = {
                     sms: n.sms,
                     email: n.email,

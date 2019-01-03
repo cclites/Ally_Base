@@ -201,13 +201,13 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     }
 
     /**
-     * Get the user notifications relationship.
+     * Get the user notification preferences relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-    public function notifications()
+    public function notificationPreferences()
     {
-        return $this->hasMany(UserNotifications::class);
+        return $this->hasMany(UserNotificationPreferences::class);
     }
 
     ///////////////////////////////////////////
@@ -339,7 +339,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
      */
     public function shouldNotify($notification, $via)
     {
-        $preference = $this->notifications()->where('notification', $notification)->first();
+        $preference = $this->notificationPreferences()->where('notification', $notification)->first();
 
         if (! $preference) {
             return false;

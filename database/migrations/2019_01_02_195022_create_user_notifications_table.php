@@ -15,7 +15,7 @@ class CreateUserNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_notifications', function (Blueprint $table) {
+        Schema::create('user_notification_preferences', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('user_id');
             $table->string('key')->index();
@@ -33,7 +33,7 @@ class CreateUserNotificationsTable extends Migration
         // ======================================================
         foreach(OfficeUser::all() as $user) {
             foreach (OfficeUser::$availableNotifications as $cls) {
-                $user->notifications()->create([
+                $user->notificationPreferences()->create([
                     'key' => $cls::getKey(),
                     'sms' => false,
                     'email' => false,
@@ -55,6 +55,6 @@ class CreateUserNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_notifications');
+        Schema::dropIfExists('user_notification_preferences');
     }
 }
