@@ -21,11 +21,6 @@ class AlterClientsAdditionalFields extends Migration
             $table->string('disaster_code_plan', 50)->nullable();
             $table->text('disaster_planning', 65535)->nullable();
             $table->boolean('caregiver_1099')->nullable()->default(0);
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
-
-            $table->foreign('created_by', 'fk_client_created_by')->references('id')->on('users');
-            $table->foreign('updated_by', 'fk_client_updated_by')->references('id')->on('users');
         });
     }
 
@@ -44,8 +39,6 @@ class AlterClientsAdditionalFields extends Migration
             $table->dropColumn('travel_directions');
             $table->dropColumn('created_by');
             $table->dropColumn('updated_by');
-            $table->dropColumn('created_at');
-            $table->dropColumn('updated_at');
             $table->dropColumn('disaster_code_plan');
             $table->dropColumn('disaster_planning');
             $table->dropColumn('caregiver_1099');
