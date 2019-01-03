@@ -6,21 +6,21 @@ use Illuminate\Console\Command;
 use App\Client;
 use App\Notifications\Business\ClientBirthday;
 
-class CronTriggerNotifications extends Command
+class CronDailyNotifications extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'cron:trigger_notifications';
+    protected $signature = 'cron:daily_notifications';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Checks for all events that trigger notifications.';
+    protected $description = 'Checks for daily event triggers and dispatches notifications.';
 
     /**
      * Create a new command instance.
@@ -39,7 +39,16 @@ class CronTriggerNotifications extends Command
      */
     public function handle()
     {
-        $this->handleClientBirthdays();
+        // ======================================
+        // OFFICE USER NOTIFICATIONS
+        // ======================================
+        
+        $this->clientBirthdays();
+
+        // ======================================
+        // CAREGIVER NOTIFICATIONS
+        // ======================================
+        
     }
 
     /**
@@ -48,7 +57,7 @@ class CronTriggerNotifications extends Command
      *
      * @return void
      */
-    public function handleClientBirthdays()
+    public function clientBirthdays()
     {
         $clients = Client::whereHas('user', function ($q) {
             $today = date('m-d');

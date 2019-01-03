@@ -10,7 +10,7 @@ use App\Console\Commands\ScheduledPaymentsCsv;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\CronShiftSummaryEmails;
-use App\Console\Commands\CronTriggerNotifications;
+use App\Console\Commands\CronDailyNotifications;
 
 class Kernel extends ConsoleKernel
 {
@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
         CronUpdateTransactionLog::class,
         CronScheduleConverter::class,
         CronShiftSummaryEmails::class,
-        CronTriggerNotifications::class,
+        CronDailyNotifications::class,
     ];
 
     /**
@@ -46,7 +46,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('cron:shift_summary_emails')
             ->weeklyOn(1, '14:30'); // 9:30am EST / 10:30am EDT
 
-        $schedule->command('cron:trigger_notifications')
+        $schedule->command('cron:daily_notifications')
             ->dailyAt('8:59'); // 8:59 EST / 9:59 EDT
     }
 
