@@ -385,26 +385,11 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
      */
     public function getAvailableNotifications()
     {
-        $classes = [];
-
         switch ($this->role_type) {
             case 'office_user':
-                $classes = OfficeUser::$availableNotifications;
-                break;
+                return collect(OfficeUser::$availableNotifications);
             default:
                 return collect([]);
         }
-
-        $notifications = [];
-
-        foreach ($classes as $cls) {
-            $notifications[$cls::getKey()] = [
-                'class' => $cls,
-                'key' => $cls::getKey(),
-                'title' => $cls::getTitle(),
-            ];
-        }
-
-        return collect($notifications);
     }
 }

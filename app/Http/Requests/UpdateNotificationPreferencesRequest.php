@@ -24,21 +24,15 @@ class UpdateNotificationPreferencesRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'new_application' => 'required|array',
-            'new_application.sms' => 'boolean',
-            'new_application.email' => 'boolean',
-            'new_application.system' => 'boolean',
-        ];
-    }
+        $rules = [];
+    
+        foreach (auth()->user()->getAvailableNotifications() as $cls) {
+            $rules[$cls::getKey()] = 'required|array';
+            $rules[$cls::getKey().'.sms'] = 'boolean';
+            $rules[$cls::getKey().'.email'] = 'boolean';
+            $rules[$cls::getKey().'.system'] = 'boolean';
+        }
 
-    // protected function getValidatorInstance() {
-    //     $validator = parent::getValidatorInstance();
-    
-    //     $validator->sometimes('notification_email', 'required|email', function ($input) {
-    //         return $input->allow_email_notifications == 1;
-    //     });
-    
-    //     return $validator;
-    // }
+        return $rules;
+    }
 }

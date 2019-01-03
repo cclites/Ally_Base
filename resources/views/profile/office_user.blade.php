@@ -84,7 +84,7 @@
         <div class="tab-pane" id="notifications" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <notification-preferences :user="{{ $user }}" :notifications="{{ $user->getAvailableNotifications() }}"></notification-preferences>
+                    <notification-preferences :user="{{ $user }}" :notifications="{{ $notifications }}"></notification-preferences>
                 </div>
             </div>
         </div>

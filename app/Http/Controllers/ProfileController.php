@@ -51,7 +51,15 @@ class ProfileController extends Controller
             $user->role->load(['availability', 'skills']);
         }
 
-        return view('profile.' . $type, compact('user', 'payment_type_message'));
+        $notifications = $user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+            ];
+        });
+
+        return view('profile.' . $type, compact('user', 'payment_type_message', 'notifications'));
     }
 
     public function update(UpdateProfileRequest $request)
