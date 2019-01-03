@@ -15,7 +15,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Notifications\ApplicationSubmitted;
+use App\Notifications\Business\ApplicationSubmitted;
 
 class CaregiverApplicationController extends BusinessBaseController
 {

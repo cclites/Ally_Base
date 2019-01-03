@@ -9,7 +9,7 @@ use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
 use App\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
-use App\Notifications\ClientConfirmation;
+use App\Notifications\Business\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
 use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;

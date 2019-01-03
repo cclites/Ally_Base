@@ -2,10 +2,13 @@
 
 namespace App\Notifications;
 
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Channels\SystemChannel;
 use App\Channels\SmsChannel;
 use Illuminate\Bus\Queueable;
+use App\PhoneNumber;
+use App\Jobs\SendTextMessage;
 
 class BaseNotification extends Notification
 {
@@ -33,6 +36,20 @@ class BaseNotification extends Notification
     protected static $message;
 
     /**
+     * The action text.
+     *
+     * @var string
+     */
+    protected $action;
+
+    /**
+     * The action URL.
+     *
+     * @var string
+     */
+    protected $url;
+
+    /**
      * Get the notification's unique identifier.
      *
      * @return string
@@ -40,7 +57,7 @@ class BaseNotification extends Notification
     public static function getKey()
     {
         if (empty(static::$key)) {
-            return static::class;
+            return snake_case(basename(str_replace('\\', '/', get_called_class())));
         }
 
         return static::$key;
@@ -89,5 +106,87 @@ class BaseNotification extends Notification
         }
 
         return $via;
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Illuminate\Notifications\Messages\MailMessage
+     */
+    public function toMail($notifiable)
+    {
+        $message = (new MailMessage)
+            ->line($this->getMessage());
+
+        if (! empty($this->action) && ! empty($this->url) ) {
+            $message->action($this->action, $this->url);
+        }
+
+        return $message;
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toArray($notifiable)
+    {
+        return [
+            'message' => $this->getMessage(),
+            'action' => $this->action,
+            'url' => $this->url,
+        ];
+    }
+
+    /**
+     * Get the SMS representation of the notification from a business chain.
+     *
+     * @param  mixed  $notifiable
+     * @return SendTextMessage
+     * @throws \Exception
+     */
+    public function toSmsFromChain($notifiable, $businessChain)
+    {
+        $number = new PhoneNumber();
+        $number->input($notifiable->notification_phone);
+
+        // send from the first business on the chain that has an outgoing number set up
+        $business = $businessChain->businesses()->whereNotNull('outgoing_sms_number')->first();
+        if (empty($business)) {
+            return null;
+        }
+
+        return new SendTextMessage(
+            $number->number(false),
+            $this->getMessage() . ' ' . $this->url,
+            $business->outgoing_sms_number
+        );
+    }
+
+    /**
+     * Get the SMS representation of the notification from a business chain.
+     *
+     * @param  mixed  $notifiable
+     * @return SendTextMessage
+     * @throws \Exception
+     */
+    public function toSmsFromBusiness($notifiable, $business)
+    {
+        $number = new PhoneNumber();
+        $number->input($notifiable->notification_phone);
+
+        // send from the current business if an outgoing number set up
+        if (empty($business->outgoing_sms_number)) {
+            return null;
+        }
+
+        return new SendTextMessage(
+            $number->number(false),
+            $this->getMessage() . ' ' . $this->url,
+            $business->outgoing_sms_number
+        );
     }
 }

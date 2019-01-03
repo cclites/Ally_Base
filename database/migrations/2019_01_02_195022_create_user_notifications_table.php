@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use App\OfficeUser;
-use App\Notifications\ApplicationSubmitted;
 
 class CreateUserNotificationsTable extends Migration
 {

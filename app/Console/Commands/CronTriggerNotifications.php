@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Client;
-use App\Notifications\ClientBirthday;
+use App\Notifications\Business\ClientBirthday;
 
 class CronTriggerNotifications extends Command
 {
