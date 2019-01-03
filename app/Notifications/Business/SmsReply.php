@@ -49,19 +49,9 @@ class SmsReply extends BaseNotification
             $this->action = 'View Text History';
             $this->url = route('business.communication.sms-threads');
         } else {
-            $this->action = 'View Text History';
+            $this->action = 'View Thread';
             $this->url = route('business.communication.sms-threads.show', ['thread' => $this->reply->thread]);
         }
-    }
-
-    /**
-     * Get the notification's message.
-     *
-     * @return string
-     */
-    public function getMessage()
-    {
-        return static::$message;
     }
 
     /**

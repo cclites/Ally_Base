@@ -7,6 +7,7 @@ use App\SmsThread;
 use App\SmsThreadRecipient;
 use App\SmsThreadReply;
 use Illuminate\Http\Request;
+use App\Notifications\Business\SmsReply;
 
 class TelephonySMSController extends BaseTelefonyController
 {
@@ -55,12 +56,15 @@ class TelephonySMSController extends BaseTelefonyController
             'twilio_message_id' => $request->MessageSid,
         ]);
 
-        if (!$reply) {
+        if (! $reply) {
             return $this->xmlResponse('<error>Failed to record reply</error>', 500);
+        }
+
+        if (! empty($reply->business)) {
+            \Notification::send($reply->business->usersToNotify(SmsReply::class), new SmsReply($reply));
         }
 
         // Empty twiml response for now
         return $this->telefony->response();
     }
-
 }
