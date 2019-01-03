@@ -691,6 +691,25 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return [$this->id];
     }
 
+    /**
+     * Get a list of users that should be notified for the given notification.
+     *
+     * @param string $notification
+     * @return array|Collection
+     */
+    public function usersToNotify($notification)
+    {
+        return $this->users()->with(['user', 'notificationPreferences'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->whereHas('notificationPreferences', function ($q) use ($notification) {
+                $q->where('key', $notification::getKey());
+            })
+            ->get()
+            ->pluck('user');
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

@@ -8,6 +8,7 @@ use App\Traits\BelongsToOneChain;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
 use App\Notifications\ApplicationSubmitted;
+use App\Notifications\ClientBirthday;
 
 /**
  * App\OfficeUser
@@ -65,6 +66,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      */
     public static $availableNotifications = [
         ApplicationSubmitted::class,
+        ClientBirthday::class,
     ];
 
     ///////////////////////////////////////////
