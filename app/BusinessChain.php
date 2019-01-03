@@ -100,12 +100,12 @@ class BusinessChain extends AuditableModel
      */
     public function usersToNotify($notification)
     {
-        return $this->users()->with(['user', 'notifications'])
+        return $this->users()->with(['user', 'notificationPreferences'])
             ->whereHas('user', function ($q) {
                 $q->where('active', true);
             })
-            ->whereHas('notifications', function ($q) use ($notification) {
-                $q->where('notification', $notification);
+            ->whereHas('notificationPreferences', function ($q) use ($notification) {
+                $q->where('key', $notification::getKey());
             })
             ->get()
             ->pluck('user');

@@ -339,7 +339,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
      */
     public function shouldNotify($notification, $via)
     {
-        $preference = $this->notificationPreferences()->where('notification', $notification)->first();
+        $preference = $this->notificationPreferences()->where('key', $notification)->first();
 
         if (! $preference) {
             return false;
