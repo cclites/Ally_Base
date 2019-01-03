@@ -5,9 +5,12 @@ namespace App\Notifications;
 use Illuminate\Notifications\Notification;
 use App\Channels\SystemChannel;
 use App\Channels\SmsChannel;
+use Illuminate\Bus\Queueable;
 
 class BaseNotification extends Notification
 {
+    use Queueable;
+    
     /**
      * The unique key to identify the notification type.
      *
