@@ -66,6 +66,7 @@
                         :current-page="currentPage"
                         :per-page="perPage"
                         :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
                         @filtered="onFiltered"
                 >
                     <template slot="caregiver" scope="data">
@@ -145,6 +146,7 @@
                 perPage: 15,
                 currentPage: 1,
                 sortBy: 'created_at',
+                sortDesc: true,
                 loading: false,
                 fields: [
                     {

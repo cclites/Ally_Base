@@ -154,6 +154,16 @@ trait IsUserRole
         return $this->user->active;
     }
 
+    public function getCreatedAtAttribute()
+    {
+        return $this->user->created_at;
+    }
+
+    public function getUpdatedAtAttribute()
+    {
+        return $this->user->updated_at;
+    }
+
     public function getInActiveAtAttribute()
     {
         return $this->user->inactive_at;

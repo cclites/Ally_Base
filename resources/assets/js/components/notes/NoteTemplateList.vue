@@ -46,8 +46,9 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsStrings from "../../mixins/FormatsStrings";
     export default {      
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, FormatsStrings ],
 
         props: {
             'templates': Array,
@@ -78,7 +79,7 @@
                         key: 'active',
                         label: 'Active',
                         sortable: true,
-                        formatter: d => d ? 'Y' : 'N',
+                        formatter: this.boolToYesNo,
                     },
                     {
                         key: 'note',
