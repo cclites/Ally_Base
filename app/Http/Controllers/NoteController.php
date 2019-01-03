@@ -20,13 +20,7 @@ class NoteController extends Controller
      */
     public function index()
     {
-        $notes = Note::forRequestedBusinesses()->ordered()->get();
-        $notes = $notes->map(function ($note) {
-            $note->body = str_limit($note->body, 70);
-            $note->load('creator', 'client', 'caregiver', 'prospect', 'referral_source');
-            return $note;
-        });
-        return view('notes.index', compact('notes'));
+        return view('notes.index');
     }
 
     /**
@@ -135,10 +129,6 @@ class NoteController extends Controller
             // })
             ->get();
 
-        $notes = $notes->map(function ($note) {
-            $note->body = str_limit($note->body, 70);
-            return $note;
-        });
         return response()->json($notes);
     }
 }

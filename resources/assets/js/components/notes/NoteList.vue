@@ -113,8 +113,10 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsStrings from "../../mixins/FormatsStrings";
+
     export default {      
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, FormatsStrings ],
 
         props: {
         },
@@ -189,7 +191,8 @@
                     {
                         key: 'body',
                         label: 'Preview',
-                        sortable: false
+                        sortable: false,
+                        formatter: val => this.stringLimit(val, 70),
                     },
                     'action'
                 ]
