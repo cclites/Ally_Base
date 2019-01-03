@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Notifications\Business;
+
+use App\Notifications\BaseNotification;
+use App\Jobs\SendTextMessage;
+
+class ManualTimesheet extends BaseNotification
+{
+    /**
+     * The label of the notification (used for preferences).
+     *
+     * @var string
+     */
+    protected static $title = 'A Caregiver Submits a Manual Timesheet';
+
+    /**
+     * The template for the message to transmit.
+     *
+     * @var string
+     */
+    protected static $message = 'Caregiver #CAREGIVER# has submitted a system timesheet.';
+
+    /**
+     * The action text.
+     *
+     * @var string
+     */
+    protected $action = 'View Timesheet';
+
+    /**
+     * The related timesheet.
+     *
+     * @var \App\Timesheet
+     */
+    protected $timesheet;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @var \App\Timesheet $timesheet
+     * @return void
+     */
+    public function __construct($timesheet)
+    {
+        $this->timesheet = $timesheet;
+        $this->url = route('business.timesheet', ['timesheet' => $this->timesheet]);
+    }
+
+    /**
+     * Get the notification's message.
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return str_replace('#CAREGIVER#', $this->timesheet->caregiver->name, static::$message);
+    }
+
+    /**
+     * Get the SMS representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SendTextMessage
+     * @throws \Exception
+     */
+    public function toSms($notifiable)
+    {
+        return $this->toSmsFromBusiness($notifiable, $this->timesheet->business);
+    }
+}

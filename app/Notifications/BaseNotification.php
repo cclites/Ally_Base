@@ -15,6 +15,13 @@ class BaseNotification extends Notification
     use Queueable;
     
     /**
+     * Switch to disable notification in the system.
+     *
+     * @var boolean
+     */
+    public static $disabled = false;
+
+    /**
      * The unique key to identify the notification type.
      *
      * @var string

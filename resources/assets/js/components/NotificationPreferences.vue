@@ -85,13 +85,17 @@
             <form @submit.prevent="savePreferences()">
                 <b-row v-for="item in notifications" :key="item.key" v-if="! loading">
                     <b-col lg="6">
-                        <div class="mb-2">{{ item.title }}</div>
+                        <div class="mb-2" :class="{ 'text-muted': item.disabled }">
+                            {{ item.title }}
+                            <span v-if="item.disabled"> (Coming Soon)</span>
+                        </div>
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox"
                                     class="custom-control-input"
                                     name="sms"
                                     v-model="preferences[item.key].email"
+                                    :disabled="item.disabled"
                                     :true-value="1"
                                     :false-value="0">
                                 <span class="custom-control-indicator"></span>
@@ -102,6 +106,7 @@
                                     class="custom-control-input"
                                     name="sms"
                                     v-model="preferences[item.key].sms"
+                                    :disabled="item.disabled"
                                     :true-value="1"
                                     :false-value="0">
                                 <span class="custom-control-indicator"></span>
@@ -112,10 +117,11 @@
                                     class="custom-control-input"
                                     name="sms"
                                     v-model="preferences[item.key].system"
+                                    :disabled="item.disabled"
                                     :true-value="1"
                                     :false-value="0">
                                 <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">System Exception</span>
+                                <span class="custom-control-description">System Notification</span>
                             </label>
                         </div>
                     </b-col>

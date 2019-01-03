@@ -63,10 +63,18 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
      * @return array
      */
     public static $availableNotifications = [
-        \App\Notifications\Business\DeclinedVisit::class, // TODO: implement trigger for this notification
-        \App\Notifications\Business\CaregiverAvailable::class, // TODO: implement trigger for this notification
+        \App\Notifications\Business\DeclinedVisit::class, // TODO: implement trigger
+        \App\Notifications\Business\CaregiverAvailable::class, // TODO: implement trigger
+        \App\Notifications\Business\UnverifiedShift::class, // TODO: implement trigger
+        \App\Notifications\Business\CertificationExpiring::class, // TODO: implement trigger
+        \App\Notifications\Business\CertificationExpired::class, // TODO: implement trigger
         \App\Notifications\Business\ApplicationSubmitted::class,
-        \App\Notifications\Business\CaregiverAvailable::class,
+        \App\Notifications\Business\ManualTimesheet::class, // TODO: implement trigger
+        \App\Notifications\Business\SmsReply::class, // TODO: implement trigger
+        \App\Notifications\Business\FailedCharge::class, // TODO: implement trigger
+        \App\Notifications\Business\ClientBirthday::class,
+        \App\Notifications\Business\BiAnualVisitDue::class, // TODO: implement trigger
+        \App\Notifications\Business\NoProspectContact::class, // TODO: implement trigger
     ];
 
     ///////////////////////////////////////////

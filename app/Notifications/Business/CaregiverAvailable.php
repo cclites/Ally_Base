@@ -7,6 +7,8 @@ use App\Jobs\SendTextMessage;
 
 class CaregiverAvailable extends BaseNotification
 {
+    public static $disabled = true;
+    
     /**
      * The label of the notification (used for preferences).
      *
@@ -19,7 +21,7 @@ class CaregiverAvailable extends BaseNotification
      *
      * @var string
      */
-    protected static $message = 'Caregiver #CAREGIVER# is available to work for Client #CLIENT# #TIMESTAMP#.';
+    protected static $message = 'Caregiver #CAREGIVER# is available to work for Client #CLIENT# #TIMESTAMP#.  Go to the Open Shifts page to see more details.';
 
     /**
      * The related caregiver.
@@ -40,7 +42,7 @@ class CaregiverAvailable extends BaseNotification
      *
      * @var string
      */
-    protected $action = 'View Client Schedule';
+    protected $action = 'View Open Shifts';
 
     /**
      * Create a new notification instance.

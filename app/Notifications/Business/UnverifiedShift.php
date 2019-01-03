@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Notifications\Business;
+
+use App\Notifications\BaseNotification;
+use App\Jobs\SendTextMessage;
+
+class UnverifiedShift extends BaseNotification
+{
+    /**
+     * The label of the notification (used for preferences).
+     *
+     * @var string
+     */
+    protected static $title = 'An Unverified Clock-In or Clock-Out Occurs';
+
+    /**
+     * The template for the message to transmit.
+     *
+     * @var string
+     */
+    protected static $message = 'Caregiver #CAREGIVER# an unverified clock-#MODE# for Client #CLIENT# #TIMESTAMP#.';
+
+    /**
+     * Clock in or out.
+     *
+     * @var string
+     */
+    protected $mode;
+
+    /**
+     * The related shift.
+     *
+     * @var \App\Shift
+     */
+    protected $shift;
+
+    /**
+     * The action text.
+     *
+     * @var string
+     */
+    protected $action = 'View Shift';
+
+    /**
+     * Create a new notification instance.
+     *
+     * @var \App\Caregiver $caregiver
+     * @var \App\Schedule $schedule
+     * @return void
+     */
+    public function __construct($shift)
+    {
+        $this->shift = $shift;
+        $this->mode = empty($this->shift->checked_out_time) ? 'in' : 'out';
+        $this->url = route('business.shifts.show', ['shift' => $this->shift]);
+    }
+
+    /**
+     * Get the notification's message.
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        $message = str_replace('#CAREGIVER#', $this->shift->caregiver->name, static::$message);
+        $message = str_replace('#CLIENT#', $this->shift->client->name, $message);
+        $message = str_replace('#MODE#', $this->mode, $message);
+        return str_replace('#TIMESTAMP#', $this->shift->starts_at->toDateTimeString(), $message);
+    }
+
+    /**
+     * Get the SMS representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SendTextMessage
+     * @throws \Exception
+     */
+    public function toSms($notifiable)
+    {
+        return $this->toSmsFromBusiness($notifiable, $this->shift->business);
+    }
+}

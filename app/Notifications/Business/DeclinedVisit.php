@@ -9,6 +9,8 @@ use App\PhoneNumber;
 
 class DeclinedVisit extends BaseNotification
 {
+    public static $disabled = true;
+
     /**
      * The label of the notification (used for preferences).
      *
