@@ -7,6 +7,7 @@ use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
 use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
+use App\Notifications\ApplicationSubmitted;
 
 /**
  * App\OfficeUser
@@ -56,6 +57,15 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     protected $table = 'office_users';
     public $timestamps = false;
     public $fillable = ['chain_id'];
+
+    /**
+     * The notification classes related to this user role.
+     *
+     * @return array
+     */
+    public static $availableNotifications = [
+        ApplicationSubmitted::class,
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods

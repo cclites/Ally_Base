@@ -12,6 +12,7 @@ use App\Traits\PreventsDelete;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Packages\MetaData\HasMetaData;
 
@@ -162,7 +163,6 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasOne(OfficeUser::class, 'id', 'id');
     }
 
-
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -198,6 +198,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     {
         return $this->hasMany(Task::class, 'assigned_user_id')
             ->whereNull('completed_at');
+    }
+
+    /**
+     * Get the user notifications relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function notifications()
+    {
+        return $this->hasMany(UserNotifications::class);
     }
 
     ///////////////////////////////////////////
@@ -317,5 +327,84 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 $q->forBusinesses($businessIds);
             });
         });
+    }
+
+    /**
+     * Determine if the system shound notify the user for the given notification class and
+     * notification method.
+     *
+     * @param string $notification
+     * @param string $via
+     * @return boolean
+     */
+    public function shouldNotify($notification, $via)
+    {
+        $preference = $this->notifications()->where('notification', $notification)->first();
+
+        if (! $preference) {
+            return false;
+        }
+        
+        switch ($via) {
+            case 'mail': 
+                if (! $this->allow_email_notifications || empty($this->notification_email)) {
+                    return false;
+                }
+                if (! $preference->email) {
+                    return false;
+                }
+                break;
+
+            case 'sms': 
+                if (! $this->allow_sms_notifications || empty($this->notification_phone)) {
+                    return false;
+                }
+                if (! $preference->sms) {
+                    return false;
+                }
+                break;
+
+            case 'system':
+                if (! $this->allow_system_notifications || $this->role_type != 'office_user') {
+                    return false;
+                }
+                if (! $preference->system) {
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get a collection of the available notification
+     * types based on the current user role.
+     *
+     * @return Collection
+     */
+    public function getAvailableNotifications()
+    {
+        $classes = [];
+
+        switch ($this->role_type) {
+            case 'office_user':
+                $classes = OfficeUser::$availableNotifications;
+                break;
+            default:
+                return collect([]);
+        }
+
+        $notifications = [];
+
+        foreach ($classes as $cls) {
+            $notifications[$cls::getKey()] = [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+            ];
+        }
+
+        return collect($notifications);
     }
 }

@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth'], function() {
     Route::resource('/profile/phone', 'PhoneController');
     Route::patch('/profile/phone/{phone}/sms', 'PhoneController@updateSmsNumber');
     Route::patch('/profile/notification-options', 'ProfileController@updateNotificationOptions');
+    Route::post('/profile/notification-preferences', 'ProfileController@updateNotificationPreferences');
 
     Route::get('emergency-contacts/{user}/{contact}', 'EmergencyContactController@show');
     Route::get('emergency-contacts/{user}', 'EmergencyContactController@index');

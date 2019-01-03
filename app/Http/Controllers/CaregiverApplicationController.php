@@ -15,6 +15,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Notifications\ApplicationSubmitted;
 
 class CaregiverApplicationController extends BusinessBaseController
 {
@@ -90,6 +91,7 @@ class CaregiverApplicationController extends BusinessBaseController
         $application = $businessChain->caregiverApplications()->create($data);
 
         if ($application) {
+            \Notification::send($users, new ApplicationSubmitted($application));
             return new CreatedResponse('Application submitted successfully.', [], route('business_chain_routes.applications.done', ['slug' => $slug, 'application' => $application]));
         }
         return new ErrorResponse(500, 'The application could not be submitted.');

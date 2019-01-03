@@ -91,4 +91,23 @@ class BusinessChain extends AuditableModel
     {
         return route('business_chain_routes.apply', ['slug' => $this->slug]);
     }
+
+    /**
+     * Get a list of users that should be notified for the given notification.
+     *
+     * @param string $notification
+     * @return array|Collection
+     */
+    public function usersToNotify($notification)
+    {
+        return $this->users()->with(['user', 'notifications'])
+            ->whereHas('user', function ($q) {
+                $q->where('active', true);
+            })
+            ->whereHas('notifications', function ($q) use ($notification) {
+                $q->where('notification', $notification);
+            })
+            ->get()
+            ->pluck('user');
+    }
 }

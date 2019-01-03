@@ -82,30 +82,42 @@
             header-bg-variant="info"
             header-text-variant="white"
         >
-            <form @submit.prevent="save()" @keydown="form.clearError($event.target.name)">
-                <b-row>
+            <form @submit.prevent="savePreferences()">
+                <b-row v-for="item in notifications" :key="item.key" v-if="! loading">
                     <b-col lg="6">
+                        <div class="mb-2">{{ item.title }}</div>
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox"
                                     class="custom-control-input"
                                     name="sms"
-                                    v-model="form.sms"
+                                    v-model="preferences[item.key].email"
+                                    :true-value="1"
+                                    :false-value="0">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Email</span>
+                            </label>
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox"
+                                    class="custom-control-input"
+                                    name="sms"
+                                    v-model="preferences[item.key].sms"
                                     :true-value="1"
                                     :false-value="0">
                                 <span class="custom-control-indicator"></span>
                                 <span class="custom-control-description">Text Message</span>
                             </label>
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox"
+                                    class="custom-control-input"
+                                    name="sms"
+                                    v-model="preferences[item.key].system"
+                                    :true-value="1"
+                                    :false-value="0">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">System Exception</span>
+                            </label>
                         </div>
-                        <b-form-input
-                            name="notification_phone"
-                            type="text"
-                            v-model="form.notification_phone"
-                            required
-                            :readonly="authInactive"
-                            class="ml-4 mb-3"
-                        >
-                        </b-form-input>
                     </b-col>
                 </b-row>
                 <b-row>
@@ -133,12 +145,14 @@
     export default {
         props: {
             'user': {},
+            'notifications': {},
         },
 
         mixins: [FormatsDates, AuthUser],
 
         data() {
             return {
+                loading: true,
                 busy: false,
                 form: new Form({
                     allow_sms_notifications: this.user.allow_sms_notifications,
@@ -146,7 +160,8 @@
                     allow_system_notifications: this.user.allow_system_notifications,
                     notification_phone: this.user.notification_phone,
                     notification_email: this.user.notification_email,
-                })
+                }),
+                preferences: {},
             }
         },
 
@@ -160,7 +175,28 @@
                     .catch(e => {
                         this.busy = false;
                     })
-            }
+            },
+
+            savePreferences() {
+                let form = new Form(this.preferences);
+
+                form.post(`/profile/notification-preferences`)
+                    .then(response => {
+                    })
+                    .catch(e => {
+                    })
+            },
+        },
+
+        mounted() {
+            this.user.notifications.forEach(n => {
+                this.preferences[n.key] = {
+                    sms: n.sms,
+                    email: n.email,
+                    system: n.system,
+                };
+            });
+            this.loading = false;
         }
     }
 </script>

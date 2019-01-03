@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Traits\Request\BankAccountRequest;
 use App\Http\Requests\UpdateCaregiverAvailabilityRequest;
 use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 
 class ProfileController extends Controller
 {
@@ -24,7 +25,7 @@ class ProfileController extends Controller
     public function index()
     {
         $type = auth()->user()->role_type;
-        $user = auth()->user()->load('phoneNumbers');
+        $user = auth()->user()->load(['phoneNumbers', 'notifications']);
         
         // include a placeholder for the primary number if one doesn't already exist
         if ($user->phoneNumbers->where('type', 'primary')->count() == 0) {
@@ -204,7 +205,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update notification options settings from profile page.
+     * Update user notification settings.
      *
      * @param UpdateNotificationOptionsRequest $request
      * @return \Illuminate\Http\Response
@@ -222,5 +223,28 @@ class ProfileController extends Controller
         }
 
         return new ErrorResponse(500, 'Unexpected error updating notification options.  Please try again.');
+    }
+
+    /**
+     * Update user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request)
+    {
+        $notifications = $request->validated();
+
+        \DB::beginTransaction();
+
+        foreach ($notifications as $key => $data) {
+            auth()->user()->notifications()
+                ->where('key', $key)
+                ->update($data);
+        }
+
+        \DB::commit();
+
+        return new SuccessResponse('Notification preferences have been saved.');
     }
 }
