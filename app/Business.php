@@ -348,11 +348,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(NoteTemplate::class);
     }
 
-    public function caregiverApplications()
-    {
-        return $this->hasMany(CaregiverApplication::class);
-    }
-
     public function chargedTransactions()
     {
         if ($this->paymentAccount) {
