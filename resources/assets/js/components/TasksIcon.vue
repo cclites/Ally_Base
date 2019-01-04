@@ -1,6 +1,6 @@
 <template>
     <li class="nav-item dropdown pr-2">
-        <a class="nav-link dropdown-toggle text-muted text-muted" id="tasksDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-check-square fa-2x pt9"></i>
+        <a class="nav-link dropdown-toggle text-muted text-muted" id="tasksDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-check-square notification-icon"></i>
             <span class="badge badge-warning badge-notifications" v-if="tasks.length">{{ tasks.length }}</span>
             <b-tooltip target="tasksDropdown" placement="left" show title="You have been assigned tasks" v-if="showTooltip"></b-tooltip>
         </a>
@@ -108,5 +108,4 @@
         margin-right: -7px;
         padding-left: 7px;
     }
-    .pt9 { padding-top: 9px; }
 </style>
