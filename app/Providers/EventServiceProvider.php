@@ -19,9 +19,9 @@ use App\Listeners\UpdateDepositOnFailedTransaction;
 use App\Listeners\UpdatePaymentOnFailedTransaction;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\TimesheetCreated;
-use App\Listeners\CreateTimesheetException;
 use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
+use App\Listeners\SendManualTimesheetNotification;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -58,7 +58,7 @@ class EventServiceProvider extends ServiceProvider
             AddPaymentHoldsOnFailedTransaction::class,
         ],
         TimesheetCreated::class => [
-            CreateTimesheetException::class,
+            SendManualTimesheetNotification::class,
         ],
     ];
 
