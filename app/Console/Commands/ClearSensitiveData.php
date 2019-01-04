@@ -108,6 +108,7 @@ class ClearSensitiveData extends Command
             \DB::beginTransaction();
             $collection->each(function(BankAccount $account) {
                 $account->name_on_account = $this->faker->name;
+                $account->routing_number = "091000019";
                 $account->account_number = $this->faker->bankAccountNumber;
                 $account->save();
             });
