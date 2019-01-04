@@ -3,17 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 
-class TriggeredReminder extends Model
+class SystemNotification extends AuditableModel
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    public $table = 'reminders_triggered';
-
     /**
      * The attributes that aren't mass assignable.
      *
@@ -35,21 +27,15 @@ class TriggeredReminder extends Model
      */
     protected $appends = [];
     
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        //
-        parent::boot();
-    }
-    
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
     
+    public function reference()
+    {
+        return $this->morphTo('reference');
+    }
+
     // **********************************************************
     // MUTATORS
     // **********************************************************
@@ -58,35 +44,26 @@ class TriggeredReminder extends Model
     // QUERY SCOPES
     // **********************************************************
     
-    // **********************************************************
-    // STATIC METHODS
-    // **********************************************************
-
-    /**
-     * Get records of reminders that have been triggered.
-     *
-     * @param string $key
-     * @param array|Collection $reference_ids
-     * @return mixed
-     */
-    public static function getTriggered($key, $reference_ids)
+    public function scopeNotAcknowledged($query)
     {
-        return TriggeredReminder::where('key', $key)
-            ->whereIn('reference_id', $reference_ids)
-            ->get()
-            ->pluck('reference_id');
+        return $query->whereNull('acknowledged_at');
     }
 
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
+
     /**
-     * @param string $key
-     * @param int $reference_id
-     * @return mixed
+     * Set notification as acknowledged.
+     *
+     * @param string $note
+     * @return bool
      */
-    public static function markTriggered($key, $reference_id)
+    public function acknowledged($note = null)
     {
-        return TriggeredReminder::create([
-            'reference_id' => $reference_id,
-            'key' => $key,
+        return $this->update([
+            'acknowledged_at' => Carbon::now(),
+            'notes' => $note,
         ]);
     }
 }

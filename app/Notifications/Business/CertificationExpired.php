@@ -4,6 +4,7 @@ namespace App\Notifications\Business;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
+use App\CaregiverLicense;
 
 class CertificationExpired extends BaseNotification
 {
@@ -69,5 +70,17 @@ class CertificationExpired extends BaseNotification
     public function toSms($notifiable)
     {
         // TODO: handle sending to all business chains the caregiver belongs to
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->license->id,
+            'reference_type' => CaregiverLicense::class
+        ]);
     }
 }

@@ -9,6 +9,7 @@ use App\Channels\SmsChannel;
 use Illuminate\Bus\Queueable;
 use App\PhoneNumber;
 use App\Jobs\SendTextMessage;
+use App\SystemNotification;
 
 class BaseNotification extends Notification
 {
@@ -195,5 +196,21 @@ class BaseNotification extends Notification
             $this->getMessage() . ' ' . $this->url,
             $business->outgoing_sms_number
         );
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return SystemNotification::make(array_merge([
+            'user_id' => $notifiable->id,
+            'key' => static::getKey(),
+            'message' => static::getMessage(),
+            'reference_url' => $this->url,
+        ], $data));
     }
 }

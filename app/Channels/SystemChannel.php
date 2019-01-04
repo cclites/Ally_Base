@@ -15,6 +15,9 @@ class SystemChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        // TODO: implement system notifications
+        // Create system notification
+        if ($message = $notification->toSystem($notifiable)) {
+            $message->save();
+        }
     }
 }
