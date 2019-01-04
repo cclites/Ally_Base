@@ -613,7 +613,7 @@
                         .catch(function(error) {
                             this.hoverShift = {};
                         });
-                }.bind(this, event, target), 1000);
+                }.bind(this, event, target), 500);
 
             },
 
@@ -915,12 +915,16 @@
                     title: resource.title,
                     trigger: 'manual',
                 }).on('mouseenter', function () {
-                    let $this = $(this);
-                    $this.popover('show');
-                    $('.popover').on('mouseleave', function () {
-                        $this.popover('hide');
-                    });
+                    this.previewTimer = setTimeout((event, target) => {
+                        let $this = $(this);
+                        $this.popover('show');
+                        $('.popover').on('mouseleave', function () {
+                            $this.popover('hide');
+                        });
+                    }, 750);
                 }).on('mouseleave', function () {
+                    clearTimeout(this.previewTimer);
+                    this.previewTimer = null;
                     let $this = $(this);
                     setTimeout(function () {
                         if (!$('.popover:hover').length) {

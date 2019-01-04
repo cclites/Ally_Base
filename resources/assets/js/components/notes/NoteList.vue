@@ -132,6 +132,8 @@
                 referral_sources: [],
                 items: [],
                 searchForm: {
+                    start_date: moment().utc().subtract(1, 'days').format('MM/DD/YYYY'), // todo, make this local, but backend needs to know what the local timezone is
+                    end_date: moment.utc().format('MM/DD/YYYY'),
                     caregiver: null,
                     client: null,
                     prospect: null,
@@ -204,25 +206,7 @@
             this.loadCaregivers();
             this.loadProspects();
             this.loadReferralSources();
-            this.totalRows = this.items.length;
-            let startDate = jQuery('#start-date');
-            let endDate = jQuery('#end-date');
-            let component = this;
-            startDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.start_date = startDate.val();
-            });
-            endDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.end_date = endDate.val();
-            });
-
+            this.filter();
         },
 
         computed: {

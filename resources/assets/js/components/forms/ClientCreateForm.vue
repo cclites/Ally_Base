@@ -23,7 +23,7 @@
                 </b-form-input>
                 <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
             </b-form-group>
-            <b-form-group label="Client Type" label-for="client_type">
+            <b-form-group label="Client Type" label-for="client_type" label-class="required">
                 <b-form-select
                         id="client_type"
                         name="client_type"
@@ -82,7 +82,7 @@
                 <input-help :form="form" field="email"
                             text="Enter their email address or check the box if client does not have an email. Ex: user@domain.com"></input-help>
             </b-form-group>
-            <b-form-group label="Username" label-for="username">
+            <b-form-group label="Username" label-for="username" label-class="required">
                 <b-form-input
                         id="username"
                         name="username"
@@ -100,7 +100,7 @@
                 <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn"></mask-input>
                 <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
             </b-form-group>
-            <b-form-group label="Ally Onboard Status" label-for="onboard_status">
+            <b-form-group label="Ally Onboard Status" label-for="onboard_status" label-class="required">
                 <b-form-select
                         id="onboard_status"
                         name="onboard_status"

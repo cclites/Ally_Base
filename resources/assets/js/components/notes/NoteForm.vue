@@ -235,7 +235,7 @@
                     title: data.title || "",
                     body: data.body || "",
                     tags: data.tags || "",
-                    type: data.type || "phone",
+                    type: data.type || "other",
                     call_direction: data.call_direction || "inbound",
                     modal: this.modal, // added so controller doesn't send redirect response
                 });
