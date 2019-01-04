@@ -70,7 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" :label="null" />
                     </b-col>
                 </b-row>
             </b-col>
