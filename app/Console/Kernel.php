@@ -47,7 +47,7 @@ class Kernel extends ConsoleKernel
             ->weeklyOn(1, '14:30'); // 9:30am EST / 10:30am EDT
 
         $schedule->command('cron:daily_notifications')
-            ->dailyAt('8:59'); // 8:59 EST / 9:59 EDT
+            ->dailyAt('13:59'); // 8:59am EST / 9:59 EDT
 
         $schedule->command('cron:visit_accuracy')
             ->weeklyOn(1, '18:00'); // Mondays @ 1:00pm EST
