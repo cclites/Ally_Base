@@ -16,7 +16,7 @@ class CreateTriggeredRemindersTable extends Migration
         Schema::create('reminders_triggered', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('notification')->index();
+            $table->string('key')->index();
             $table->unsignedInteger('reference_id')->index();
 
             $table->timestamps();

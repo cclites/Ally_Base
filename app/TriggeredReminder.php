@@ -57,19 +57,35 @@ class TriggeredReminder extends Model
     // QUERY SCOPES
     // **********************************************************
     
+    // **********************************************************
+    // STATIC METHODS
+    // **********************************************************
+
     /**
-     * Look up record by notification key.
+     * Get records of reminders that have been triggered.
      *
-     * @param \Illuminate\Database\Query\Builder query
-     * @param string $notification
-     * @return \Illuminate\Database\Query\Builder
+     * @param string $key
+     * @param array $reference_ids
+     * @return mixed
      */
-    public function scopeForReminder($query, $notification)
+    public static function getTriggered($key, $reference_ids)
     {
-        return $query->where('notification', $notification);
+        return TriggeredReminder::where('key', $key)
+            ->whereIn('reference_id', $reference_ids)
+            ->get()
+            ->pluck('reference_id');
     }
 
-    // **********************************************************
-    // OTHER FUNCTIONS
-    // **********************************************************
+    /**
+     * @param string $key
+     * @param int $reference_id
+     * @return mixed
+     */
+    public static function markTriggered($key, $reference_id)
+    {
+        return TriggeredReminder::create([
+            'reference_id' => $reference_id,
+            'key' => $key,
+        ]);
+    }
 }

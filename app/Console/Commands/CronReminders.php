@@ -11,6 +11,9 @@ use App\Notifications\Caregiver\ClockInReminder;
 use App\Notifications\Caregiver\ClockOutReminder;
 use App\Shift;
 use App\Caregiver;
+use App\CaregiverLicense;
+use App\Notifications\Caregiver\CertificationExpiring;
+use App\Notifications\Caregiver\CertificationExpired;
 
 class CronReminders extends Command
 {
@@ -78,21 +81,16 @@ class CronReminders extends Command
         $schedules = Schedule::whereBetween('starts_at', [Carbon::now(), Carbon::now()->addMinutes(20)])
             ->get();
         
-        $triggered = TriggeredReminder::forReminder(ShiftReminder::getKey())
-            ->whereIn('reference_id', $schedules->pluck('id'))
-            ->get();
+        $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
 
         foreach ($schedules as $schedule) {
-            if ($triggered->where('reference_id', $schedule->id)->count() > 0) {
+            if ($triggered->contains($schedule->id)) {
                 continue;
             }
 
             \Notification::send($schedule->caregiver->user, new ShiftReminder($schedule));
 
-            TriggeredReminder::create([
-                'reference_id' => $schedule->id,
-                'notification' => ShiftReminder::getKey(),
-            ]);
+            TriggeredReminder::markTriggered(ShiftReminder::getKey(), $schedule->id);
         }
     }
 
@@ -107,12 +105,10 @@ class CronReminders extends Command
             ->whereBetween('starts_at', [Carbon::now()->addMinutes(20), Carbon::now()->addMinutes(60)])
             ->get();
 
-        $triggered = TriggeredReminder::forReminder(ClockInReminder::getKey())
-            ->whereIn('reference_id', $schedules->pluck('id'))
-            ->get();
+        $triggered = TriggeredReminder::getTriggered(ClockInReminder::getKey(), $schedules->pluck('id'));
 
         foreach ($schedules as $schedule) {
-            if ($triggered->where('reference_id', $schedule->id)->count() > 0) {
+            if ($triggered->contains($schedule->id)) {
                 continue;
             }
 
@@ -123,10 +119,7 @@ class CronReminders extends Command
 
             \Notification::send($schedule->caregiver->user, new ClockInReminder($schedule));
 
-            TriggeredReminder::create([
-                'reference_id' => $schedule->id,
-                'notification' => ClockInReminder::getKey(),
-            ]);
+            TriggeredReminder::markTriggered(ClockInReminder::getKey(), $schedule->id);
         }
     }
 
@@ -141,16 +134,14 @@ class CronReminders extends Command
             ->where('id', '99818')
             ->get();
 
-        $triggered = TriggeredReminder::forReminder(ClockOutReminder::getKey())
-            ->whereIn('reference_id', $shifts->pluck('id'))
-            ->get();
+        $triggered = TriggeredReminder::getTriggered(ClockOutReminder::getKey(), $shifts->pluck('id'));
 
         foreach ($shifts as $shift) {
             if (empty($shift->schedule)) {
                 continue;
             }
 
-            if ($triggered->where('reference_id', $shift->id)->count() > 0) {
+            if ($triggered->contains($shift->id)) {
                 continue;
             }
             
@@ -159,10 +150,7 @@ class CronReminders extends Command
             if ($shift->scheduledEndTime()->setTimezone('UTC')->between($start, $end)) {
                 \Notification::send($shift->caregiver->user, new ClockOutReminder($shift));
 
-                TriggeredReminder::create([
-                    'reference_id' => $shift->id,
-                    'notification' => ClockOutReminder::getKey(),
-                ]);
+                TriggeredReminder::markTriggered(ClockOutReminder::getKey(), $shift->id);
             }
         }
     }
@@ -174,6 +162,26 @@ class CronReminders extends Command
      */
     public function expiringCertifications()
     {
+        $licenses = CaregiverLicense::whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(30)])
+            ->get();
+
+        $triggered = TriggeredReminder::getTriggered(CertificationExpiring::getKey(), $licenses->pluck('id'));
+        foreach ($licenses as $license) {
+            if ($triggered->contains($license->id)) {
+                continue;
+            }
+
+            // notify the Caregiver that owns the license
+            \Notification::send($license->caregiver->user, new CertificationExpiring($license));
+
+            // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            foreach ($license->caregiver->businesses as $business) {
+                $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpiring::class);
+                \Notification::send($users, new \App\Notifications\Business\CertificationExpiring($license));
+            }
+
+            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $license->id);
+        }
     }
 
     /**
@@ -183,5 +191,26 @@ class CronReminders extends Command
      */
     public function expiredCertifcations()
     {
+        $licenses = CaregiverLicense::whereBetween('expires_at', [Carbon::now()->subDays(30), Carbon::now()])
+            ->get();
+
+        $triggered = TriggeredReminder::getTriggered(CertificationExpired::getKey(), $licenses->pluck('id'));
+
+        foreach ($licenses as $license) {
+            if ($triggered->contains($license->id)) {
+                continue;
+            }
+
+            // notify the Caregiver that owns the license
+            \Notification::send($license->caregiver->user, new CertificationExpired($license));
+
+            // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            foreach ($license->caregiver->businesses as $business) {
+                $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpired::class);
+                \Notification::send($users, new \App\Notifications\Business\CertificationExpired($license));
+            }
+
+            TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id);
+        }
     }
 }

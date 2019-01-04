@@ -21,7 +21,7 @@ class CertificationExpired extends BaseNotification
      *
      * @var string
      */
-    protected static $message = 'Your #CERTNAME# expires today!';
+    protected static $message = 'Your #CERTNAME# has expired!';
 
     /**
      * The action text.
