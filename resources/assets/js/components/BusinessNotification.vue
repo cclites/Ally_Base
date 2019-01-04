@@ -1,6 +1,6 @@
 <template>
     <b-card
-        :header="exception.title"
+        :header="notification.title"
         header-text-variant="white"
         header-bg-variant="info"
         >
@@ -8,7 +8,7 @@
             <b-col lg="12">
                 <p><strong>Description</strong></p>
                 <p>
-                    {{ exception.description | nl2br }}
+                    {{ notification.message | nl2br }}
                 </p>
             </b-col>
         </b-row>
@@ -16,8 +16,8 @@
             <b-col lg="12" v-if="acknowledger">
                 <p>Acknowledged by {{ acknowledger.firstname }} {{ acknowledger.lastname }} at {{ time }}</p>
                 <p><strong>Notes</strong></p>
-                <p>{{ exception.notes }}</p>
-                <b-button variant="secondary" :href="exception.reference_url">{{ referenceUrlTitle }}</b-button>
+                <p>{{ notification.notes }}</p>
+                <b-button variant="secondary" :href="notification.action_url">{{ referenceUrlTitle }}</b-button>
             </b-col>
             <b-col lg="12" v-else>
                 <b-form-group label="Add Notes" label-for="notes">
@@ -29,8 +29,8 @@
                         >
                     </b-textarea>
                     <input-help :form="form" field="notes" text=""></input-help>
-                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledge()">Acknowledge Exception</b-button>
-                    <b-button variant="secondary" :href="exception.reference_url">{{ referenceUrlTitle }}</b-button>
+                    <b-button v-show="! isTimesheet" variant="info" @click="acknowledge()">Acknowledge Notification</b-button>
+                    <b-button variant="secondary" :href="notification.action_url">{{ referenceUrlTitle }}</b-button>
                 </b-form-group>
             </b-col>
         </b-row>
@@ -40,35 +40,32 @@
 <script>
     export default {
         props: {
-            'exception': {},
+            'notification': {},
             'acknowledger': {},
         },
         data() {
             return {
                 'form': new Form({
-                    'notes': null,
+                    'notes': this.notification.notes,
                 }),
             }
         },
         computed: {
             time() {
-                return moment.utc(this.exception.created_at).local().format('L LT');
+                return moment.utc(this.notification.created_at).local().format('L LT');
             },
             referenceUrlTitle() {
-                if (this.exception.reference_type === 'App\\Shift') {
-                    return 'View Shift';
-                } else if (this.isTimesheet) {
-                    return 'View Timesheet';
+                if (this.notification.action) {
+                    return this.notification.action || 'Reference Link';
                 }
-                return 'Reference Link';
             },
             isTimesheet() {
-                return this.exception.reference_type === 'App\\Timesheet';
+                return this.notification.reference_type === 'App\\Timesheet';
             },
         },
         methods: {
             acknowledge() {
-                this.form.post('/business/exceptions/' + this.exception.id + '/acknowledge');
+                this.form.post('/business/notifications/' + this.notification.id + '/acknowledge');
             }
         }
     }

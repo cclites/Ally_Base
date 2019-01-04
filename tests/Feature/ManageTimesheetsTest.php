@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Timesheet;
-use App\SystemException;
 use App\Events\TimesheetCreated;
 
 class ManageTimesheetsTest extends TestCase

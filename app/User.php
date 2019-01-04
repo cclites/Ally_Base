@@ -167,7 +167,6 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     /// Relationship Methods
     ///////////////////////////////////////////
 
-
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);
@@ -210,6 +209,16 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasMany(UserNotificationPreferences::class);
     }
 
+    /**
+     * A user can have many SystemNotifications 
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function systemNotifications()
+    {
+        return $this->hasMany(SystemNotification::class);
+    }
+    
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

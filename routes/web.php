@@ -282,9 +282,9 @@ Route::group([
 
     Route::get('transactions/{transaction}', 'Business\TransactionController@show')->name('transactions.show');
 
-    Route::get('exceptions', 'Business\ExceptionController@index')->name('exceptions.index');
-    Route::get('exceptions/{exception}', 'Business\ExceptionController@show')->name('exceptions.show');
-    Route::post('exceptions/{exception}/acknowledge', 'Business\ExceptionController@acknowledge')->name('exceptions.acknowledge');
+    Route::get('notifications', 'Business\SystemNotificationController@index')->name('notifications.index');
+    Route::get('notifications/{notification}', 'Business\SystemNotificationController@show')->name('notifications.show');
+    Route::post('notifications/{notification}/acknowledge', 'Business\SystemNotificationController@acknowledge')->name('notifications.acknowledge');
 
     Route::get('users/{user}/documents', 'Business\DocumentController@index');
     Route::post('documents', 'Business\DocumentController@store');

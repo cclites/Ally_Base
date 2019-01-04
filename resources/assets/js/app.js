@@ -142,8 +142,8 @@ Vue.component('business-clients-missing-payment-methods-report', require('./comp
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
 Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
-Vue.component('business-exception', require('./components/BusinessException.vue'));
-Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
+Vue.component('business-notification', require('./components/BusinessNotification.vue'));
+Vue.component('business-notification-list', require('./components/BusinessNotificationList.vue'));
 Vue.component('business-medicaid-report', require('./components/business/reports/MedicaidReport.vue'));
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));

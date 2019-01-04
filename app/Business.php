@@ -96,7 +96,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clientsUsingProviderPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\NoteTemplate[] $noteTemplates
  * @property-read \App\BankAccount|null $paymentAccount
@@ -281,10 +280,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function deposits()
     {
         return $this->hasMany(Deposit::class);
-    }
-
-    public function exceptions() {
-        return $this->hasMany(SystemException::class);
     }
 
     public function payments()

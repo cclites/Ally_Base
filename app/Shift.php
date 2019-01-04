@@ -66,7 +66,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $notifications
  * @property-read mixed $ally_pct
  * @property-read mixed $charged_at
  * @property-read mixed $confirmed_at
@@ -292,9 +292,9 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $this->hasMany(ShiftIssue::class);
     }
 
-    public function exceptions()
+    public function systemNotifications()
     {
-        return $this->morphMany(SystemException::class, 'reference');
+        return $this->morphMany(SystemNotification::class, 'reference');
     }
 
     public function costHistory()
