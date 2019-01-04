@@ -29,31 +29,10 @@ class CreateUserNotificationPreferencesTable extends Migration
         });
 
         // ======================================================
-        // implement defaults for all office user notifications
+        // implement defaults for all user notifications preferences
         // ======================================================
-        foreach(OfficeUser::all() as $user) {
-            foreach (OfficeUser::$availableNotifications as $cls) {
-                $user->notificationPreferences()->create([
-                    'key' => $cls::getKey(),
-                    'sms' => false,
-                    'email' => false,
-                    'system' => true,
-                ]);
-            }
-        }
-
-        // ======================================================
-        // implement defaults for all caregiver notifications
-        // ======================================================
-        foreach(Caregiver::all() as $user) {
-            foreach (Caregiver::$availableNotifications as $cls) {
-                $user->notificationPreferences()->create([
-                    'key' => $cls::getKey(),
-                    'sms' => false,
-                    'email' => false,
-                    'system' => false,
-                ]);
-            }
+        foreach(User::where('active', 1)->get() as $user) {
+            $user->ensureNotificationPreferences();
         }
     }
 
