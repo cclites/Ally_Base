@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class TriggeredReminder extends Model
 {
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    public $table = 'reminders_triggered';
+
+    /**
      * The attributes that aren't mass assignable.
      *
      * @var array
@@ -26,8 +33,6 @@ class TriggeredReminder extends Model
      * @var array
      */
     protected $appends = [];
-    
-    public $table = 'reminders_triggered';
     
     /**
      * The "booting" method of the model.
@@ -53,17 +58,15 @@ class TriggeredReminder extends Model
     // **********************************************************
     
     /**
-     * Look up record by notifiation and reference id.
+     * Look up record by notification key.
      *
      * @param \Illuminate\Database\Query\Builder query
      * @param string $notification
-     * @param int $reference
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeForReminder($query, $notification, $reference)
+    public function scopeForReminder($query, $notification)
     {
-        return $query->where('notification', $notification)
-                ->where('reference_id', $reference);
+        return $query->where('notification', $notification);
     }
 
     // **********************************************************
