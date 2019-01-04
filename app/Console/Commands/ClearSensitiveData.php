@@ -117,9 +117,11 @@ class ClearSensitiveData extends Command
         // Reset all SMS numbers
         SmsThreadRecipient::select('user_id')->groupBy('user_id')->get()->each(function(SmsThreadRecipient $recipient) {
             $phoneNumber = PhoneNumber::where('user_id', $recipient->user_id)->first();
-            $newNumber = $phoneNumber->national_number;
-            SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $newNumber]);
-            SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $newNumber]);
+            if ($phoneNumber) {
+                $newNumber = $phoneNumber->national_number;
+                SmsThreadRecipient::where('user_id', $recipient->user_id)->update(['number' => $newNumber]);
+                SmsThreadReply::where('user_id', $recipient->user_id)->update(['from_number' => $newNumber]);
+            }
         });
 
         // Reset all notes
