@@ -68,6 +68,12 @@ class CertificationExpiring extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        return $this->toSmsFromBusiness($notifiable, $this->license->caregiver->business);
+        $business = optional($this->license->caregiver->businesses)->first();
+
+        if (empty($business)) {
+            return false;
+        }
+
+        return $this->toSmsFromBusiness($notifiable, $business);
     }
 }

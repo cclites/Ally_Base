@@ -47,7 +47,7 @@ class VisitAccuracyCheck extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        $business = optional($notifiable->businesses)->first();
+        $business = optional($notifiable->role->businesses)->first();
 
         if (empty($business)) {
             return false;

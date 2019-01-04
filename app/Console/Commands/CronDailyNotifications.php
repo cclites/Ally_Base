@@ -5,6 +5,11 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Client;
 use App\Notifications\Business\ClientBirthday;
+use App\CaregiverLicense;
+use App\Notifications\Caregiver\CertificationExpiring;
+use App\Notifications\Caregiver\CertificationExpired;
+use Illuminate\Support\Carbon;
+use App\TriggeredReminder;
 
 class CronDailyNotifications extends Command
 {
@@ -45,10 +50,19 @@ class CronDailyNotifications extends Command
         
         $this->clientBirthdays();
 
+        $this->noProspectContact();
+
         // ======================================
         // CAREGIVER NOTIFICATIONS
         // ======================================
         
+        // ======================================
+        // MULTI-USER REMINDERS
+        // ======================================
+        
+        $this->expiringCertifications();
+
+        $this->expiredCertifications();
     }
 
     /**
@@ -61,12 +75,86 @@ class CronDailyNotifications extends Command
     {
         $clients = Client::whereHas('user', function ($q) {
             $today = date('m-d');
-            $q->where('date_of_birth', 'like', "%-$today");
+            $q->where('date_of_birth', 'like', "%-$today")
+                ->where('active', 1);
         })->get();
 
         foreach ($clients as $client) {
             $users = $client->business->usersToNotify(ClientBirthday::class);
             \Notification::send($users, new ClientBirthday($client));
+        }
+    }
+
+    /**
+     * Find prospects that have not had contact for over 14 days.
+     *
+     * @return void
+     */
+    public function noProspectContact()
+    {
+        // TODO: pull prospects that have not been converted to 
+        // clients and do not have any record of notes in the past 
+        // 14 days
+    }
+
+    /**
+     * Find any Caregiver certifications that are expiring soon.
+     *
+     * @return void
+     */
+    public function expiringCertifications()
+    {
+        $licenses = CaregiverLicense::with('caregiver')
+            ->whereBetween('expires_at', [Carbon::now(), Carbon::now()->addDays(30)])
+            ->get();
+
+        $triggered = TriggeredReminder::getTriggered(CertificationExpiring::getKey(), $licenses->pluck('id'));
+        foreach ($licenses as $license) {
+            if ($triggered->contains($license->id)) {
+                continue;
+            }
+
+            // notify the Caregiver that owns the license
+            \Notification::send($license->caregiver->user, new CertificationExpiring($license));
+
+            // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            foreach ($license->caregiver->businesses as $business) {
+                $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpiring::class);
+                \Notification::send($users, new \App\Notifications\Business\CertificationExpiring($license));
+            }
+
+            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $license->id);
+        }
+    }
+
+    /**
+     * Find any Caregiver certifications that have expired.
+     *
+     * @return void
+     */
+    public function expiredCertifications()
+    {
+        $licenses = CaregiverLicense::with('caregiver')
+            ->whereBetween('expires_at', [Carbon::now()->subDays(30), Carbon::now()])
+            ->get();
+
+        $triggered = TriggeredReminder::getTriggered(CertificationExpired::getKey(), $licenses->pluck('id'));
+
+        foreach ($licenses as $license) {
+            if ($triggered->contains($license->id)) {
+                continue;
+            }
+
+            // notify the Caregiver that owns the license
+            \Notification::send($license->caregiver->user, new CertificationExpired($license));
+
+            // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            foreach ($license->caregiver->businesses as $business) {
+                $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpired::class);
+                \Notification::send($users, new \App\Notifications\Business\CertificationExpired($license));
+            }
+
+            TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id);
         }
     }
 }

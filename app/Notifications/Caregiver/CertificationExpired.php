@@ -4,6 +4,8 @@ namespace App\Notifications\Caregiver;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
+use App\SystemNotification;
+use App\CaregiverLicense;
 
 class CertificationExpired extends BaseNotification
 {
@@ -68,6 +70,12 @@ class CertificationExpired extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        return $this->toSmsFromBusiness($notifiable, $this->license->caregiver->business);
+        $business = optional($this->license->caregiver->businesses)->first();
+
+        if (empty($business)) {
+            return false;
+        }
+
+        return $this->toSmsFromBusiness($notifiable, $business);
     }
 }
