@@ -25,6 +25,7 @@
                 :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" 
                 :business="{{ $business }}" 
                 :questions="{{ $questions }}"
+                :goals="{{ $goals }}"
             />
         </div>
         <div class="col-lg-6">

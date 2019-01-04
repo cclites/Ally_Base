@@ -170,7 +170,10 @@ class ShiftController extends BaseController
         $activities = $business->allActivities();
 
         // load questions related to the current client
-        $questions = $business->questions()->forType($shift->client->client_type)->where('track_goal_progress', true)->get();
+        $questions = $business->questions()->forType($shift->client->client_type)->get();
+
+        // load tracked goals
+        $goals = $shift->client->goals()->tracked()->get();
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
@@ -182,7 +185,7 @@ class ShiftController extends BaseController
             }
         }
 
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions'));
+        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions', 'goals'));
     }
 
     public function clockOut(Request $request)

@@ -95,9 +95,9 @@ class ClientGoalsController extends BaseController
         $this->authorize('update', $client);
 
         if ($goal->delete()) {
-            return new SuccessResponse('The goal has been archived.', []);
+            return new SuccessResponse('The goal has been deleted.', []);
         }
 
-        return new ErrorResponse(500, 'The goal could not be archived.');
+        return new ErrorResponse(500, 'The goal could not be deleted.');
     }
 }
