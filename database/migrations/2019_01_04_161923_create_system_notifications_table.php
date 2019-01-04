@@ -18,7 +18,8 @@ class CreateSystemNotificationsTable extends Migration
             $table->unsignedInteger('user_id');
             $table->string('key')->nullable();
             $table->text('message')->nullable();
-            $table->string('reference_url')->nullable();
+            $table->string('action')->nullable();
+            $table->string('action_url')->nullable();
             $table->string('reference_type')->nullable();
             $table->string('reference_id')->nullable();
             $table->timestamp('acknowledged_at')->nullable();

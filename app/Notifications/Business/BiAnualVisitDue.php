@@ -3,6 +3,7 @@
 namespace App\Notifications\Business;
 
 use App\Notifications\BaseNotification;
+use App\Client;
 
 class BiAnualVisitDue extends BaseNotification
 {
@@ -68,5 +69,19 @@ class BiAnualVisitDue extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->client->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->client->id,
+            'reference_type' => Client::class
+        ]);
     }
 }

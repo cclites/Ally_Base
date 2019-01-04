@@ -6,6 +6,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
 use App\PhoneNumber;
+use App\Schedule;
 
 class DeclinedVisit extends BaseNotification
 {
@@ -74,5 +75,19 @@ class DeclinedVisit extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->client->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->schedule->id,
+            'reference_type' => Schedule::class
+        ]);
     }
 }

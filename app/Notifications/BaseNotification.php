@@ -210,7 +210,8 @@ class BaseNotification extends Notification
             'user_id' => $notifiable->id,
             'key' => static::getKey(),
             'message' => static::getMessage(),
-            'reference_url' => $this->url,
+            'action_url' => $this->url,
+            'action' => $this->action,
         ], $data));
     }
 }

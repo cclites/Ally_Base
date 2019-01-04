@@ -70,4 +70,19 @@ class FailedCharge extends BaseNotification
     {
         return $this->toSmsFromBusiness($notifiable, $this->client->business);
     }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        // TODO: handle failed charge system notification
+        // return parent::toSystem($notifiable, [
+        //     'reference_id' => ,
+        //     'reference_type' => 
+        // ]);
+    }
 }

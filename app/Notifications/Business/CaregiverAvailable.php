@@ -4,6 +4,7 @@ namespace App\Notifications\Business;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
+use App\Schedule;
 
 class CaregiverAvailable extends BaseNotification
 {
@@ -81,5 +82,19 @@ class CaregiverAvailable extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->schedule->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->schedule->id,
+            'reference_type' => Schedule::class
+        ]);
     }
 }

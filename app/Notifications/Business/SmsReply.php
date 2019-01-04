@@ -4,6 +4,7 @@ namespace App\Notifications\Business;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
+use App\SmsThreadReply;
 
 class SmsReply extends BaseNotification
 {
@@ -64,5 +65,19 @@ class SmsReply extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->reply->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->reply->id,
+            'reference_type' => SmsThreadReply::class
+        ]);
     }
 }

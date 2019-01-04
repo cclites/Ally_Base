@@ -4,6 +4,7 @@ namespace App\Notifications\Business;
 
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
+use App\Timesheet;
 
 class ManualTimesheet extends BaseNotification
 {
@@ -67,5 +68,19 @@ class ManualTimesheet extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->timesheet->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->timesheet->id,
+            'reference_type' => Timesheet::class
+        ]);
     }
 }

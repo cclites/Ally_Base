@@ -6,6 +6,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
 use App\PhoneNumber;
+use App\Client;
 
 class ClientBirthday extends BaseNotification
 {
@@ -70,5 +71,19 @@ class ClientBirthday extends BaseNotification
     public function toSms($notifiable)
     {
         return $this->toSmsFromBusiness($notifiable, $this->client->business);
+    }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->client->id,
+            'reference_type' => Client::class
+        ]);
     }
 }

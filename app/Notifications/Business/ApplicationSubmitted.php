@@ -61,4 +61,18 @@ class ApplicationSubmitted extends BaseNotification
     {
         return $this->toSmsFromChain($notifiable, $this->application->businessChain);
     }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->application->id,
+            'reference_type' => CaregiverApplication::class
+        ]);
+    }
 }

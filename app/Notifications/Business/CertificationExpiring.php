@@ -76,4 +76,18 @@ class CertificationExpiring extends BaseNotification
 
         return $this->toSmsFromBusiness($notifiable, $business);
     }
+
+    /**
+     * Get the SystemNotification representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return SystemNotification
+     */
+    public function toSystem($notifiable, $data = [])
+    {
+        return parent::toSystem($notifiable, [
+            'reference_id' => $this->license->id,
+            'reference_type' => CaregiverLicense::class
+        ]);
+    }
 }
