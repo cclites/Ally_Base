@@ -613,7 +613,7 @@
                         .catch(function(error) {
                             this.hoverShift = {};
                         });
-                }.bind(this, event, target), 1000);
+                }.bind(this, event, target), 500);
 
             },
 
