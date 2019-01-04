@@ -22,6 +22,7 @@ use App\Events\TimesheetCreated;
 use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
 use App\Listeners\SendManualTimesheetNotification;
+use App\Listeners\SendUnverifiedShiftNotification;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -35,7 +36,7 @@ class EventServiceProvider extends ServiceProvider
 //            SendAssignedTaskEmail::class,
         ],
         UnverifiedShiftLocation::class   => [
-            UnverifiedLocationException::class,
+            SendUnverifiedShiftNotification::class,
         ],
         UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,
