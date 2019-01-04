@@ -1,5 +1,9 @@
 <?php
 
+require __DIR__ . '/bootstrap.php';
+
+\DB::beginTransaction();
+
 $chain = \App\BusinessChain::create([
     'name' => 'VIP America',
     'slug' => 'vip-america',
@@ -147,7 +151,23 @@ foreach($locations as $location) {
     $businesses[$location] = \App\Business::create([
         'name' => $chain->name . ' ' . $location,
         'timezone' => 'America/New_York',
+        'chain_id' => $chain->id,
+    ]);
+}
+
+foreach($users as $user) {
+    $user = \App\OfficeUser::create([
+        'username' => $user['email'],
+        'email' => $user['email'],
+        'password' => bcrypt(str_random()),
+        'firstname' => $user['firstname'],
+        'lastname' => $user['lastname'],
+        'chain_id' => $chain->id,
     ]);
 
-
+    foreach($businesses as $business) {
+        $business->users()->attach($user);
+    }
 }
+
+\DB::commit();
