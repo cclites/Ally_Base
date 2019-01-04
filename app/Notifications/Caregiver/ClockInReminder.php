@@ -54,8 +54,10 @@ class ClockInReminder extends BaseNotification
      */
     public function getMessage()
     {
+        $timestamp = local_date($this->schedule->starts_at, 'm/d/Y g:iA', $this->schedule->business->timezone);
+
         $message = str_replace('#CLIENT#', $this->schedule->client->name, static::$message);
-        return str_replace('#TIMESTAMP#', $this->schedule->starts_at->toDateTimeString(), $message);
+        return str_replace('#TIMESTAMP#', $timestamp, $message);
     }
 
     /**
