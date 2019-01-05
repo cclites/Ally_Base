@@ -163,7 +163,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         parent::boot();
         self::recalculateDurationOnChange();
-        self::regenerateFlagsOnChange();
+//        self::regenerateFlagsOnChange();
     }
 
     public static function recalculateDurationOnChange()
@@ -177,22 +177,22 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         });
     }
 
-//    public static function regenerateFlagsOnChange()
-//    {
-//        $flagManager = app(ShiftFlagManager::class);
-//
-//        self::saved(function(Shift $shift) use ($flagManager) {
-//            if ($flagManager->shouldGenerate($shift)) {
-//                $flagManager->generateFlags($shift);
-//            }
-//        });
-//
-//        self::deleted(function(Shift $shift) use ($flagManager) {
-//            foreach($shift->duplicates as $duplicate) {
-//                $flagManager->generateFlags($duplicate);
-//            }
-//        });
-//    }
+    public static function regenerateFlagsOnChange()
+    {
+        $flagManager = app(ShiftFlagManager::class);
+
+        self::saved(function(Shift $shift) use ($flagManager) {
+            if ($flagManager->shouldGenerate($shift)) {
+                $flagManager->generateFlags($shift);
+            }
+        });
+
+        self::deleted(function(Shift $shift) use ($flagManager) {
+            foreach($shift->duplicates as $duplicate) {
+                $flagManager->generateFlags($duplicate);
+            }
+        });
+    }
 
     ///////////////////////////////////////
     /// Shift Statuses
