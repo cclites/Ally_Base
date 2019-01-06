@@ -255,7 +255,21 @@ class ReportsController extends BaseController
     public function reconciliation(Request $request, ProviderReconciliationReport $report)
     {
         if ($request->expectsJson() && $request->input('json')) {
-            return $report->forRequestedBusinesses()
+            $dates = collect([
+                'start' => Carbon::now()->addWeeks(-8)->toDateString(),
+                'end' => Carbon::now()->toDateString()
+            ]);
+
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $dates = collect([
+                    'start' => Carbon::parse($request->input('start_date')),
+                    'end' => Carbon::parse($request->input('end_date'))
+                ]);
+            }
+
+            $types = $request->input('types');
+
+            return $report->forRequestedBusinesses(null, null, $dates, $types)
                 ->orderBy('created_at', 'DESC')
                 ->rows();
         }

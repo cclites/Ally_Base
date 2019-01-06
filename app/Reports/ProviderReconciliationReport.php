@@ -43,8 +43,12 @@ class ProviderReconciliationReport extends BaseReport implements BusinessReportI
         return $this;
     }
 
-    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null)
+    public function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null, $dates = null, $types = [])
     {
+        if ($types === null) {
+            $types = [];
+        }
+
         if ($businessIds === null) $businessIds = array_filter((array) request()->input('businesses', []));
         if ($authorizedUser === null) $authorizedUser = auth()->user();
 
@@ -52,6 +56,16 @@ class ProviderReconciliationReport extends BaseReport implements BusinessReportI
         if (!count($businessIds)) $businessIds = $authorizedUser->getBusinessIds();
 
         $this->query()->whereIn('business_id', (array) $businessIds);
+        
+        if ($dates !== null) {
+            $this->query()->whereBetween('created_at', $dates->values()->toArray());
+        }
+        if (in_array('deposits', $types)) {
+            $this->query()->where('amount_deposited', '!=', 0);
+        }
+        if (in_array('withdrawls', $types)) {
+            $this->query()->where('amount_withdrawn', '!=', 0);
+        }
 
         return $this;
     }
