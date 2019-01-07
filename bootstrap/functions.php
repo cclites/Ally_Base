@@ -130,3 +130,12 @@ if (! function_exists('activeBusiness')) {
         return $business;
     }
 }
+
+if (! function_exists('faker')) {
+    /**
+     * @return \Faker\Generator
+     */
+    function faker() {
+        return $faker = Faker\Factory::create();
+    }
+}
