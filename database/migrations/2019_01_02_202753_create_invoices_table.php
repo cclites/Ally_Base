@@ -68,13 +68,6 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('services', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->unsignedInteger('chain_id')->nullable(); // If null, services are global
-            $table->timestamps();
-        });
-
         Schema::create('payer_rates', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('payer_id');
@@ -115,7 +108,7 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('schedule_rates', function (Blueprint $table) {
+        Schema::create('schedule_services', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('schedule_id');
             $table->unsignedInteger('service_id');
@@ -127,7 +120,7 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('shift_rates', function (Blueprint $table) {
+        Schema::create('shift_services', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('shift_id');
             $table->unsignedInteger('service_id');
@@ -136,6 +129,7 @@ class CreateInvoicesTable extends Migration
             $table->decimal('duration', 7, 2);
             $table->decimal('client_rate', 7, 2);
             $table->decimal('caregiver_rate', 7, 2);
+            $table->decimal('ally_rate', 7, 2)->nullable();
             $table->timestamps();
         });
     }
