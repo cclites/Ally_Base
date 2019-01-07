@@ -426,6 +426,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
             ->latest();
     }
 
+    public function payers()
+    {
+        return $this->hasMany(ClientPayer::class, 'client_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////

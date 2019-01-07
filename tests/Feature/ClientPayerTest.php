@@ -1,0 +1,152 @@
+<?php
+namespace Tests\Feature;
+
+use App\Billing\ClientPayerValidator;
+use App\Client;
+use App\ClientPayer;
+use App\Payer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ClientPayerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @var \App\Client */
+    protected $client;
+
+    /** @var ClientPayerValidator */
+    protected $validator;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->client = factory(Client::class)->create();
+        $this->validator = new ClientPayerValidator();
+    }
+
+    protected function createPayer(string $allocationType, array $clientPayerOptions = [], array $payerOptions = []): ClientPayer {
+        $payer = factory(Payer::class)->create($payerOptions);
+        return factory(ClientPayer::class)->create([
+            'payer_id' => $payer->id,
+            'client_id' => $this->client->id,
+            'payment_allocation' => $allocationType
+        ] + $clientPayerOptions + ['effective_start' => '2019-01-01']);
+    }
+
+    protected function validate($client = null)
+    {
+        $client = $client ?? $this->client;
+        return $this->validator->validate($client);
+    }
+
+    /**
+     * @test
+     */
+    function a_payer_can_be_added_to_a_client()
+    {
+        $clientPayer = $this->createPayer('balance');
+        $this->assertEquals($this->client->id, $clientPayer->client_id);
+    }
+
+    /**
+     * @test
+     */
+    function a_single_balance_payer_is_valid()
+    {
+        $this->createPayer('balance');
+
+        $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+
+    /**
+     * @test
+     */
+    function an_allowance_type_without_a_balance_payer_is_invalid()
+    {
+        $this->createPayer('weekly');
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function a_split_type_that_adds_up_to_1_is_valid()
+    {
+        $this->createPayer('split', ['split_percentage' => 0.49]);
+        $this->createPayer('split', ['split_percentage' => 0.51]);
+
+        $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+
+    /**
+     * @test
+     */
+    function a_split_type_that_adds_up_to_less_than_1_is_invalid()
+    {
+        $this->createPayer('split', ['split_percentage' => 0.49]);
+        $this->createPayer('split', ['split_percentage' => 0.50]);
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function a_split_type_less_than_1_that_has_a_balance_payer_is_valid()
+    {
+        $this->createPayer('split', ['split_percentage' => 0.49]);
+        $this->createPayer('balance');
+
+        $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+
+
+    /**
+     * @test
+     */
+    function two_balance_payers_that_overlap_is_invalid()
+    {
+        $this->createPayer('balance', ['effective_start' => '2019-01-01', 'effective_end' => '2021-12-31']);
+        $this->createPayer('balance', ['effective_start' => '2020-01-01']);
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function two_balance_payers_that_do_not_overlap_is_valid()
+    {
+        $this->createPayer('balance', ['effective_start' => '2019-01-01', 'effective_end' => '2021-12-31']);
+        $this->createPayer('balance', ['effective_start' => '2022-01-01']);
+
+        $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+
+    /**
+     * @test
+     */
+    function a_split_payer_in_the_future_that_adds_up_to_more_than_1_is_invalid()
+    {
+        $this->createPayer('split', ['split_percentage' => 0.49]);
+        $this->createPayer('split', ['split_percentage' => 0.51, 'effective_end' => '2019-12-31']);
+        $this->createPayer('split', ['split_percentage' => 0.52, 'effective_start' => '2020-01-01']);
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function a_split_payer_in_the_future_that_equals_1_is_valid()
+    {
+        $this->createPayer('split', ['split_percentage' => 0.49, 'effective_end' => '2019-12-31']);
+        $this->createPayer('split', ['split_percentage' => 0.51, 'effective_end' => '2019-12-31']);
+        $this->createPayer('split', ['split_percentage' => 0.52, 'effective_start' => '2020-01-01']);
+        $this->createPayer('split', ['split_percentage' => 0.48, 'effective_start' => '2020-01-01']);
+
+        $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+}
