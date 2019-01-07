@@ -20,6 +20,9 @@ class ServiceTest extends TestCase
         $this->assertGreaterThan(0, $service->id);
     }
 
+    /**
+     * @test
+     */
     function a_default_service_for_a_chain_can_be_retrieved()
     {
         $chainA = factory(BusinessChain::class)->create();
