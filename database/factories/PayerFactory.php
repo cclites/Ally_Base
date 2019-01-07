@@ -2,7 +2,7 @@
 
 use Faker\Generator as Faker;
 
-$factory->define(\App\Payer::class, function (Faker $faker) {
+$factory->define(\App\Billing\Payer::class, function (Faker $faker) {
     return [
         'name' => $faker->company,
         'npi_number' => $faker->bankAccountNumber,

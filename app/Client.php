@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Billing\ClientPayer;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;

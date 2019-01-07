@@ -3,8 +3,8 @@ namespace Tests\Feature;
 
 use App\Billing\ClientPayerValidator;
 use App\Client;
-use App\ClientPayer;
-use App\Payer;
+use App\Billing\ClientPayer;
+use App\Billing\Payer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

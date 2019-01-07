@@ -2,14 +2,14 @@
 
 use Faker\Generator as Faker;
 
-$factory->define(\App\ClientPayer::class, function (Faker $faker) {
+$factory->define(\App\Billing\ClientPayer::class, function (Faker $faker) {
     return [
         'client_id' => function() {
             $client = \App\Client::inRandomOrder()->first() ?? factory(\App\Client::class)->create();
             return $client->id;
         },
         'payer_id' => function() {
-            $payer = \App\Payer::inRandomOrder()->first() ?? factory(\App\Payer::class)->create();
+            $payer = \App\Billing\Payer::inRandomOrder()->first() ?? factory(\App\Billing\Payer::class)->create();
             return $payer->id;
         },
         'policy_number' => $faker->bankAccountNumber,

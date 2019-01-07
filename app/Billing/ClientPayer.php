@@ -1,5 +1,8 @@
 <?php
-namespace App;
+namespace App\Billing;
+
+use App\AuditableModel;
+use App\Client;
 
 class ClientPayer extends AuditableModel
 {

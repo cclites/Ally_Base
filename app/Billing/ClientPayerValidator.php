@@ -2,7 +2,7 @@
 namespace App\Billing;
 
 use App\Client;
-use App\ClientPayer;
+use App\Billing\ClientPayer;
 use Illuminate\Support\Collection;
 
 class ClientPayerValidator
@@ -94,7 +94,7 @@ class ClientPayerValidator
 
     /**
      *
-     * @param \Illuminate\Support\Collection|\App\ClientPayer[] $payers
+     * @param \Illuminate\Support\Collection|\App\Billing\ClientPayer[] $payers
      * @return bool
      */
     function validatePayerTypes(Collection $payers): bool
@@ -145,9 +145,9 @@ class ClientPayerValidator
     }
 
     /**
-     * @param \Illuminate\Support\Collection|\App\ClientPayer[] $payers
+     * @param \Illuminate\Support\Collection|\App\Billing\ClientPayer[] $payers
      * @param string $type
-     * @return null|\App\ClientPayer
+     * @return null|\App\Billing\ClientPayer
      */
     protected function findType(Collection $payers, string $type)
     {
@@ -157,7 +157,7 @@ class ClientPayerValidator
     }
 
     /**
-     * @param \Illuminate\Support\Collection|\App\ClientPayer[] $payers
+     * @param \Illuminate\Support\Collection|\App\Billing\ClientPayer[] $payers
      * @param string $type
      * @return int
      */
