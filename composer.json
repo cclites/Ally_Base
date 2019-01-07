@@ -5,7 +5,7 @@
     "license": "",
     "type": "project",
     "require": {
-        "php": ">=7.0.0",
+        "php": ">=7.2.0",
         "ext-bcmath": "*",
         "ext-curl": "*",
         "ext-dom": "*",
@@ -82,7 +82,7 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php": "7.0.30"
+            "php": "7.2.10"
         }
     }
 }
