@@ -19,7 +19,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt install -y libsqlite3-dev libpng-dev
-      - run: sudo docker-php-ext-install bcmath curl xml
+      - run: sudo docker-php-ext-install bcmath
       # Composer
       - restore_cache:
           keys:
