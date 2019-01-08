@@ -66,17 +66,22 @@ class CreateInvoicesTable extends Migration
             $table->string('npi_number')->nullable();
             $table->unsignedInteger('chain_id');
             $table->timestamps();
+
+            $table->foreign('chain_id')->references('id')->on('business_chains')->onDelete('cascade')->onUpdate('cascade');
         });
 
         Schema::create('payer_rates', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('payer_id');
-            $table->unsignedInteger('service_id');
+            $table->unsignedInteger('service_id')->nullable();
             $table->date('effective_start');
             $table->date('effective_end');
             $table->decimal('hourly_rate', 7, 2);
             $table->decimal('fixed_rate', 7, 2);
             $table->timestamps();
+
+            $table->foreign('payer_id')->references('id')->on('payers')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade')->onUpdate('cascade');
         });
 
         Schema::create('client_rates', function (Blueprint $table) {

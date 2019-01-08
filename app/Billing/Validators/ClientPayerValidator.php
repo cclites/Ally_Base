@@ -1,8 +1,9 @@
 <?php
-namespace App\Billing;
+namespace App\Billing\Validators;
 
 use App\Client;
 use App\Billing\ClientPayer;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class ClientPayerValidator
@@ -38,11 +39,7 @@ class ClientPayerValidator
         }
 
         // Build dates array based on the ranges
-        $dates = [];
-        foreach($payers as $payer) {
-            $dates[] = $payer->effective_start;
-            $dates[] = $payer->effective_end;
-        }
+        $dates = $this->buildDatesArray($payers);
 
         // Validate against each date
         foreach($dates as $date) {
@@ -176,5 +173,26 @@ class ClientPayerValidator
     {
         $this->error = $message;
         return false;
+    }
+
+    /**
+     * @param $payers
+     * @return array
+     */
+    protected function buildDatesArray($payers): array
+    {
+        $checkUntilYear = date('Y') + 5;
+        $dates = [Carbon::now()->toDateString()]; // handles gaps in front
+        foreach ($payers as $payer) {
+            $dates[] = $payer->effective_start;
+            $dates[] = $payer->effective_end;
+
+            $end = Carbon::parse($payer->effective_end);
+            if ($end->year < $checkUntilYear) {
+                $dates[] = $end->addDay()->toDateString(); // handles gaps between and at the end
+            }
+        }
+
+        return $dates;
     }
 }

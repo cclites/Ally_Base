@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Activity;
+use App\Billing\Payer;
 use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
@@ -21,6 +22,7 @@ use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
 use App\Policies\EmergencyContactPolicy;
 use App\Policies\GatewayTransactionPolicy;
+use App\Policies\PayerPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\PhoneNumberPolicy;
 use App\Policies\ProspectPolicy;
@@ -69,6 +71,7 @@ class AuthServiceProvider extends ServiceProvider
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
         OtherContact::class => OtherContactPolicy::class,
+        Payer::class => PayerPolicy::class,
         Payment::class => PaymentPolicy::class,
         PhoneNumber::class => PhoneNumberPolicy::class,
         Prospect::class => ProspectPolicy::class,

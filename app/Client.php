@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Billing\ClientPayer;
+use App\Billing\ClientRate;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;
@@ -432,6 +433,11 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return $this->hasMany(ClientPayer::class, 'client_id');
     }
 
+    public function rates()
+    {
+        return $this->hasMany(ClientRate::class, 'client_id');
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -448,8 +454,27 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    /**
+     * Get the default ClientRate for this client
+     *
+     * @param string $date
+     * @return \App\Billing\ClientRate|null
+     */
+    public function getDefaultRate(string $date = 'now'): ?ClientRate
+    {
+        $date = Carbon::parse($date, 'UTC')->setTime(0, 0, 0);
+
+        return $this->rates()
+            ->whereNull('caregiver_id')
+            ->whereNull('payer_id')
+            ->whereNull('service_id')
+            ->where('effective_start', '<=', $date)
+            ->where('effective_end', '>=', $date)
+            ->first();
+    }
 
     /**
      * Set the client's preference data

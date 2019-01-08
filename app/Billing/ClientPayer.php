@@ -6,6 +6,7 @@ use App\Client;
 
 class ClientPayer extends AuditableModel
 {
+    protected $orderedColumn = 'priority';
     protected $guarded = ['id'];
     protected $with = ['payer'];
 

@@ -1,10 +1,11 @@
 <?php
 namespace Tests\Feature;
 
-use App\Billing\ClientPayerValidator;
+use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Billing\ClientPayer;
 use App\Billing\Payer;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -148,5 +149,44 @@ class ClientPayerTest extends TestCase
         $this->createPayer('split', ['split_percentage' => 0.48, 'effective_start' => '2020-01-01']);
 
         $this->assertTrue($this->validate(), $this->validator->getErrorMessage());
+    }
+
+    /**
+     * @test
+     */
+    function a_gap_in_dates_is_invalid()
+    {
+        $this->createPayer('balance', ['effective_start' => '2019-01-01', 'effective_end' => '2021-12-31']);
+        $this->createPayer('balance', ['effective_start' => '2022-01-04']);
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function a_gap_from_now_is_invalid()
+    {
+        // Dates start from 2 days in the future..
+        $start = Carbon::now()->addDays(2);
+        $end = $start->copy()->addYear();
+
+        $this->createPayer('balance', ['effective_start' => $start->toDateString(), 'effective_end' => $end->toDateString()]);
+        $this->createPayer('balance', ['effective_start' => $end->addDay()->toDateString()]);
+
+        $this->assertFalse($this->validate());
+    }
+
+    /**
+     * @test
+     */
+    function a_gap_at_the_end_is_invalid()
+    {
+        // Dates only go 1 year in the future
+        $end = Carbon::now()->addYear();
+
+        $this->createPayer('balance', ['effective_start' => '2019-01-01', 'effective_end' => $end->toDateString()]);
+
+        $this->assertFalse($this->validate());
     }
 }
