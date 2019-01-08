@@ -23,41 +23,39 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('client_invoice_items', function (Blueprint $table) {
+        Schema::create('caregiver_invoices', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('client_invoice_id');
 
+            $table->string('name');
+            $table->unsignedInteger('caregiver_id');
+
+            $table->timestamps();
+        });
+
+        Schema::create('business_invoices', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->string('name');
+            $table->unsignedInteger('business_id');
+
+            $table->timestamps();
+        });
+
+        Schema::create('invoice_items', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('invoice_type');
+            $table->unsignedInteger('invoice_id');
             $table->string('invoiceable_type');
-            $table->string('invoiceable_id');
+            $table->unsignedInteger('invoiceable_id');
             $table->string('group')->nullable();
             $table->string('name');
             $table->decimal('units', 7, 2);
             $table->decimal('rate', 7, 2); // client rate
             $table->decimal('total', 9, 2); // client rate x units
             $table->decimal('amount_due', 9, 2); // total x payer allocation
-        });
-
-        Schema::create('invoices', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->decimal('amount_due', 9, 2);
-            $table->unsignedInteger('client_id')->nullable();
-            $table->unsignedInteger('payer_id')->nullable();
-            $table->unsignedInteger('caregiver_id')->nullable();
-            $table->unsignedInteger('business_id')->nullable();
-            $table->text('note');
-            $table->timestamps();
-        });
-
-        Schema::create('invoice_items', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('invoiceable_type');
-            $table->string('invoiceable_id');
-            $table->string('name');
-            $table->decimal('units', 7, 2);
-            $table->decimal('rate', 7, 2);
-            $table->decimal('total', 9, 2);
-            $table->decimal('amount_due', 9, 2);
+            
+            $table->index(['invoice_type', 'invoice_id']);
+            $table->index(['invoiceable_type', 'invoiceable_id']);
         });
 
         Schema::create('payers', function (Blueprint $table) {
@@ -137,6 +135,22 @@ class CreateInvoicesTable extends Migration
             $table->decimal('ally_rate', 7, 2)->nullable();
             $table->timestamps();
         });
+
+        Schema::create('shift_adjustments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('business_id');
+            $table->unsignedInteger('client_id');
+            $table->unsignedInteger('caregiver_id');
+            $table->unsignedInteger('payer_id')->nullable();
+            $table->unsignedInteger('service_id')->nullable();
+            $table->unsignedInteger('shift_id')->nullable();
+            $table->decimal('units', 7, 2);
+            $table->decimal('client_rate', 7, 2);
+            $table->decimal('caregiver_rate', 7, 2);
+            $table->decimal('ally_rate', 7, 2)->nullable();
+            $table->string('status');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -146,6 +160,16 @@ class CreateInvoicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('client_invoices');
+        Schema::dropIfExists('caregiver_invoices');
+        Schema::dropIfExists('business_invoices');
+        Schema::dropIfExists('invoice_items');
+        Schema::dropIfExists('payers');
+        Schema::dropIfExists('payer_rates');
+        Schema::dropIfExists('client_payers');
+        Schema::dropIfExists('client_rates');
+        Schema::dropIfExists('schedule_services');
+        Schema::dropIfExists('shift_services');
+        Schema::dropIfExists('shift_adjustments');
     }
 }
