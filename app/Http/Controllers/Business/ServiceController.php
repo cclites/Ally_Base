@@ -15,7 +15,8 @@ class ServiceController extends BaseController
      */
     public function index()
     {
-        $services = Service::where('chain_id', Auth::user()->officeUser->chain_id)->get();
+        $query = Service::forAuthorizedChain()->ordered();
+        $services = $query->get();
         
         return view('business.service', compact('services'));
     }
