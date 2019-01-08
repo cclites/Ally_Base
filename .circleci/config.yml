@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/php:7.0-node-browsers
+      - image: circleci/php:7.2-node-browsers
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - checkout
-      - run: sudo apt install -y libsqlite3-dev
+      - run: sudo apt install -y libsqlite3-dev libpng-dev
       - run: sudo docker-php-ext-install bcmath
       # Composer
       - restore_cache:
@@ -41,7 +41,7 @@ jobs:
 
       # run tests!
       # replace this with the whole test suite eventually
-      - run: php scripts/testcore.php
+      - run: php scripts/test_core.php
 
       # compile assets properly
       - run: npm run dev
