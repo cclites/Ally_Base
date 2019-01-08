@@ -15,11 +15,6 @@
                             <span class="custom-control-description">Default</span>
                         </label>
                     </div>
-                    <business-location-form-group v-model="form.business_id"
-                                                    :form="form"
-                                                    field="business_id"
-                                                    help-text="">
-                    </business-location-form-group>
                 </b-col>
             </b-row>
         </b-container>
@@ -37,10 +32,8 @@
 </template>
 
 <script>
-    import BusinessLocationFormGroup from "./BusinessLocationFormGroup";
-
     export default {
-        components: {BusinessLocationFormGroup},
+        components: {},
 
         props: {
             value: Boolean,
@@ -68,8 +61,7 @@
             makeForm(defaults = {}) {
                 return new Form({
                     name: defaults.name,
-                    default: defaults.default,
-                    business_id: defaults.business_id || ""
+                    default: defaults.default
                 });
             },
 

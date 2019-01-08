@@ -1,8 +1,22 @@
 <?php
 namespace App\Http\Requests;
 
-class CreateServiceRequest extends BusinessRequest
+use Auth;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+
+class CreateServiceRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -13,13 +27,12 @@ class CreateServiceRequest extends BusinessRequest
         return [
             'name' => 'required|string|max:100',
             'default' => 'nullable|boolean',
-            'business_id' => 'nullable|integer'
         ];
     }
 
     public function filtered() {
         $data = $this->validated();
-        $data['chain_id'] = auth()->user()->officeUser->chain_id;
+        $data['chain_id'] = Auth::user()->officeUser->chain_id;
         return $data;
     }
 

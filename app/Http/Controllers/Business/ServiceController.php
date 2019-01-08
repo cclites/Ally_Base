@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Business;
 
+use Auth;
 use App\Billing\Service;
 use App\Http\Requests\CreateServiceRequest;
 use App\Responses\CreatedResponse;
@@ -14,7 +15,7 @@ class ServiceController extends BaseController
      */
     public function index()
     {
-        $services = Service::all()->where('chain_id', auth()->user()->officeUser->chain_id);
+        $services = Service::where('chain_id', Auth::user()->officeUser->chain_id)->get();
         
         return view('business.service', compact('services'));
     }
@@ -27,6 +28,9 @@ class ServiceController extends BaseController
      */
     public function store(CreateServiceRequest $request)
     {
+        $data = $request->filtered();
+        $this->authorize('create', [Service::class, $data]);
+
         if ($service = Service::create($request->filtered())) {
             return new CreatedResponse('New Service has been created', $service);
         }
@@ -43,6 +47,8 @@ class ServiceController extends BaseController
      */
     public function update(CreateServiceRequest $request, Service $service)
     {
+        $this->authorize('update', $service);
+
         if ($service->update($request->filtered())) {
             return new SuccessResponse('Service has been updated.', $service);
         }
@@ -58,6 +64,8 @@ class ServiceController extends BaseController
      */
     public function destroy(Service $service)
     {
+        $this->authorize('delete', $service);
+
         try {
             if ($service->delete()) {
                 return new SuccessResponse('Service has been deleted.');
