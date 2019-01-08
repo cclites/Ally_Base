@@ -14,14 +14,11 @@ class ClientRateValidator
 
     public function validate(Client $client): bool
     {
+        /** @var \App\Billing\ClientRate[] $rates */
         $rates = $client->rates;
 
         // Build dates array based on the ranges
-        $dates = [];
-        foreach($rates as $rate) {
-            $dates[] = $rate->effective_start;
-            $dates[] = $rate->effective_end;
-        }
+        $dates = $this->buildDatesArray($rates);
 
         // Validate against each date
         foreach($dates as $date) {
@@ -70,5 +67,19 @@ class ClientRateValidator
     {
         $this->error = $message;
         return false;
+    }
+
+    /**
+     * @param $rates
+     * @return array
+     */
+    protected function buildDatesArray($rates): array
+    {
+        $dates = [];
+        foreach ($rates as $rate) {
+            $dates[] = $rate->effective_start;
+            $dates[] = $rate->effective_end;
+        }
+        return $dates;
     }
 }

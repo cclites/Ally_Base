@@ -14,14 +14,11 @@ class PayerRateValidator
 
     public function validate(Payer $payer): bool
     {
+        /** @var \App\Billing\PayerRate[] $rates */
         $rates = $payer->rates;
 
         // Build dates array based on the ranges
-        $dates = [];
-        foreach($rates as $rate) {
-            $dates[] = $rate->effective_start;
-            $dates[] = $rate->effective_end;
-        }
+        $dates = $this->buildDatesArray($rates);
 
         // Validate against each date
         foreach($dates as $date) {
@@ -69,5 +66,19 @@ class PayerRateValidator
     {
         $this->error = $message;
         return false;
+    }
+
+    /**
+     * @param $rates
+     * @return array
+     */
+    protected function buildDatesArray($rates): array
+    {
+        $dates = [];
+        foreach ($rates as $rate) {
+            $dates[] = $rate->effective_start;
+            $dates[] = $rate->effective_end;
+        }
+        return $dates;
     }
 }
