@@ -41,7 +41,7 @@ jobs:
 
       # run tests!
       # replace this with the whole test suite eventually
-      - run: php scripts/testcore.php
+      - run: php scripts/test_core.php
 
       # compile assets properly
       - run: npm run dev
