@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Activity;
+use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverApplication;
@@ -27,6 +28,7 @@ use App\Policies\OtherContactPolicy;
 use App\Policies\RateCodePolicy;
 use App\Policies\ReferralSourcePolicy;
 use App\Policies\SchedulePolicy;
+use App\Policies\ServicePolicy;
 use App\Policies\ShiftPolicy;
 use App\Policies\SmsThreadPolicy;
 use App\Policies\SystemExceptionPolicy;
@@ -73,6 +75,7 @@ class AuthServiceProvider extends ServiceProvider
         RateCode::class => RateCodePolicy::class,
         ReferralSource::class => ReferralSourcePolicy::class,
         Schedule::class => SchedulePolicy::class,
+        Service::class => ServicePolicy::class,
         Shift::class => ShiftPolicy::class,
         SmsThread::class => SmsThreadPolicy::class,
         SystemException::class => SystemExceptionPolicy::class,
