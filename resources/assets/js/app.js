@@ -281,6 +281,8 @@ Vue.component('business-sms-reply-table', require('./components/business/SmsRepl
 Vue.component('business-task-list', require('./components/business/tasks/TaskList'));
 Vue.component('business-task-form', require('./components/business/tasks/TaskForm'));
 Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
+Vue.component('business-service', require('./components/business/Service'));
+Vue.component('business-service-modal', require('./components/business/ServiceModal'));
 
 Vue.component('report-list', require('./components/ReportList'));
 

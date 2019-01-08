@@ -261,6 +261,11 @@ Route::group([
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
+    Route::get('service', 'Business\ServiceController@index')->name('service.index');
+    Route::post('service', 'Business\ServiceController@store');
+    Route::patch('service/{service}', 'Business\ServiceController@update');
+    Route::delete('service/{service}', 'Business\ServiceController@destroy');
+
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');

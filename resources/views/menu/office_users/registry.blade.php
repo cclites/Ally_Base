@@ -70,7 +70,9 @@
         <a href="{{ route('business.timesheet.create') }}" aria-expanded="false"><i class="fa fa-calendar-plus-o"></i><span class="hide-menu">Enter Timesheet</span></a>
     </li>
 @endif
-
+<li>
+    <a href="{{ route('business.service.index') }}" aria-expanded="false"><i class="fa fa-cogs" aria-hidden="true"></i><span class="hide-menu">Service</span></a>
+</li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
         <i class="fa fa-envelope"></i><span class="hide-menu">Communication</span>
