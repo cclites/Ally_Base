@@ -17,6 +17,27 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Polymorphic Relationship Map (string to Model)
+    |--------------------------------------------------------------------------
+    */
+
+    'polymorphism' => \App\Billing\Generators\BaseInvoicer::$invoiceables + [
+        // User Types
+        'admins' => \App\Admin::class,
+        'caregivers' => \App\Caregiver::class,
+        'clients' => \App\Client::class,
+        'office_users' => \App\OfficeUser::class,
+
+        // Invoice Types
+        'business_invoices' => \App\Billing\BusinessInvoice::class,
+        'caregiver_invoices' => \App\Billing\CaregiverInvoice::class,
+        'client_invoices' => \App\Billing\ClientInvoice::class,
+
+        // Payment Methods and Shifts (for Signatures/Exceptions) haven't been converted yet
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
     |
