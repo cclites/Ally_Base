@@ -1,17 +1,34 @@
 <template>
     <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-    <b-modal id="filterColumnsModal" :title="title" v-model="showModal">
+    <b-modal id="filterColumnsModal" 
+        :title="title"
+        v-model="showModal"
+        size="lg"
+        class="modal-fit-more"
+        @cancel="onCancel"
+    >
         <b-container fluid>
-            <b-row>
-                <b-col lg="12">
+            <b-row class="mb-2">
+                <b-col lg="6">
                     <b-form-group label="Payer Name" label-for="name" label-class="required">
                         <b-form-input v-model="form.name" type="text" required />
                         <input-help :form="form" field="name"></input-help>
                     </b-form-group>
+                </b-col>
+                <b-col lg="6">
                     <b-form-group label="Account Number" label-for="npi_number">
                         <b-form-input v-model="form.npi_number" type="text" />
                         <input-help :form="form" field="npi_number"></input-help>
                     </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col lg="12">
+                    <business-payer-rates-table 
+                        ref="ratesTable"
+                        :rates="form.rates" 
+                        :services="services"
+                    ></business-payer-rates-table>
                 </b-col>
             </b-row>
         </b-container>
@@ -22,7 +39,7 @@
             >
                 {{ buttonText }}
             </b-button>
-            <b-btn variant="default" @click="showModal=false">Close</b-btn>
+            <b-btn variant="default" @click="showModal=false">Cancel</b-btn>
         </div>
     </b-modal>
     </form>
@@ -35,6 +52,7 @@
         props: {
             value: Boolean,
             source: Object,
+            services: Array,
         },
 
         data() {
@@ -58,12 +76,14 @@
             makeForm(defaults = {}) {
                 return new Form({
                     name: defaults.name,
-                    npi_number: defaults.npi_number
+                    npi_number: defaults.npi_number,
+                    rates: defaults.rates,
                 });
             },
 
             submitForm() {
                 this.loading = true;
+                this.form.rates = this.$refs.ratesTable.items;
                 let method = this.source.id ? 'patch' : 'post';
                 let url = this.source.id ? `/business/payers/${this.source.id}` : '/business/payers';
                 this.form.submit(method, url)
@@ -73,11 +93,21 @@
                     })
                     .finally(() => this.loading = false)
             },
+
+            onCancel() {
+                this.value = {};
+            },
         },
 
         watch: {
             value(val) {
-                this.form = this.makeForm(this.source);
+                if (! val) {
+                    // clear the form on close so the data updates if the
+                    // edit modal is opened again for the same object.
+                    this.form = this.makeForm({});
+                } else {
+                    this.form = this.makeForm(this.source);
+                }
                 this.showModal = val;
             },
             showModal(val) {

@@ -3,5 +3,5 @@
 @section('title', 'Payers')
 
 @section('content')
-    <business-payer-list :payers="{{ $payers }}"></business-payer-list>
+    <business-payer-list :payers="{{ $payers }}" :services="{{ $services }}"></business-payer-list>
 @endsection

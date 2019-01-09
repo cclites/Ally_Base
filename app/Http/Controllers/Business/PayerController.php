@@ -10,7 +10,6 @@ use App\Responses\SuccessResponse;
 use App\Http\Requests\CreatePayerRequest;
 use App\Http\Requests\UpdatePayerRequest;
 use App\Responses\ErrorResponse;
-use Illuminate\Database\QueryException;
 
 class PayerController extends BaseController
 {
@@ -21,13 +20,20 @@ class PayerController extends BaseController
      */
     public function index(Request $request)
     {
-        $payers = $this->businessChain()->payers()->ordered()->get();
+        $payers = $this->businessChain()->payers()
+            ->with(['rates', 'rates.service'])
+            ->ordered()
+            ->get();
 
         if ($request->wantsJson() && $request->json) {
             return response()->json($payers);
         }
 
-        return view('business.payers', compact('payers'));
+        $services = $this->businessChain()->services()
+            ->ordered()
+            ->get();
+            
+        return view('business.payers', compact(['payers', 'services']));
     }
 
     /**
@@ -38,26 +44,26 @@ class PayerController extends BaseController
      */
     public function store(CreatePayerRequest $request)
     {
-        $data = array_merge($request->validated(), ['chain_id' => $this->businessChain()->id]);
+        $data = $request->filtered();
 
         $this->authorize('create', [Payer::class, $data]);
 
-        if ($payer = Payer::create($data)) {
-            return new SuccessResponse('Payer added successfully.', $payer);
+        \DB::beginTransaction();
+        try {
+            if (! $payer = Payer::create($data)) {
+                throw new \Exception();
+            }
+    
+            if (! $payer->syncRates($data['rates'] ?? [])) {
+                throw new \Exception();
+            }
+            
+            \DB::commit();
+            return new SuccessResponse('Payer added successfully.', $payer->fresh());
+        } catch (\Exception $ex) {
+            \DB::rollBack();
+            return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
-
-        return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Payer  $payer
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Payer $payer)
-    {
-        //
     }
 
     /**
@@ -69,15 +75,27 @@ class PayerController extends BaseController
      */
     public function update(UpdatePayerRequest $request, Payer $payer)
     {
-        $data = array_merge($request->validated(), ['chain_id' => $this->businessChain()->id]);
+        $data = $request->filtered();
 
         $this->authorize('update', $payer);
 
-        if ($payer->update($data)) {
-            return new SuccessResponse('Payer details updated successfully.', $payer);
+        \DB::beginTransaction();
+        try {
+            if (! $payer->update($data)) {
+                throw new \Exception();
+            }
+    
+            if (! $payer->syncRates($data['rates'] ?? [])) {
+                throw new \Exception();
+            }
+            
+            \DB::commit();
+            return new SuccessResponse('Payer details updated successfully.', $payer->fresh());
+        } catch (\Exception $ex) {
+            \Log::debug($ex->getMessage());
+            \DB::rollBack();
+            return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
-
-        return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
     }
 
     /**

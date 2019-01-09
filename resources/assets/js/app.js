@@ -188,6 +188,7 @@ Vue.component('caregiver-directory', require('./components/business/reports/Care
 Vue.component('prospect-directory', require('./components/business/reports/ProspectDirectory'));
 Vue.component('business-payer-list', require('./components/business/PayerList'));
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
+Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

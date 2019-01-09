@@ -154,4 +154,161 @@ class ManagePayersTest extends TestCase
 
         $this->assertCount(1, $otherChain->fresh()->payers);
     }
+
+    /** @test */
+    public function an_office_user_can_create_a_payer_with_rates()
+    {
+        $payer = factory('App\Billing\Payer')->make(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $this->assertCount(0, $this->chain->payers);
+
+        $this->postJson(route('business.payers.store'), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $this->chain->fresh()->payers);
+
+        $this->assertCount(1, $this->chain->fresh()->payers->first()->rates);
+    }
+
+    /** @test */
+    public function an_office_user_can_update_the_payer_rates()
+    {
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $this->assertCount(0, $payer->rates);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $payer->fresh()->rates);
+    }
+
+    /** @test */
+    public function missing_payer_rates_should_automatically_remove_on_update()
+    {
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->create(['payer_id' => $payer->id]);
+        $otherRate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $this->assertCount(1, $payer->rates);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$otherRate->toArray()],
+        ]);
+
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $payer->fresh()->rates);
+        $this->assertNotEquals($rate->id, $payer->fresh()->rates->first()->id);
+    }
+
+    /** @test */
+    public function existing_payer_rates_should_auto_update()
+    {
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->create(['payer_id' => $payer->id]);
+
+        $this->assertCount(1, $payer->rates);
+
+        $rate->hourly_rate = 55;
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $payer->fresh()->rates);
+        $this->assertEquals($rate->id, $payer->fresh()->rates->first()->id);
+    }
+
+    /** @test */
+    public function payer_rates_can_be_created_without_a_service_id()
+    {
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $this->assertCount(0, $payer->rates);
+
+        $rate->service_id = null;
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(200);
+
+        $this->assertCount(1, $payer->fresh()->rates);
+        $this->assertNull($payer->fresh()->rates->first()->service_id);
+    }
+
+    /** @test */
+    public function payer_rates_must_have_valid_hourly_rates()
+    {
+        $this->withExceptionHandling();
+
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $this->assertCount(0, $payer->rates);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $data['rates'][0]['hourly_rate'] = -25;
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $data['rates'][0]['hourly_rate'] = 99999;
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $data['rates'][0]['fixed_rate'] = -25;
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $data['rates'][0]['fixed_rate'] = 99999;
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+    
+        $this->assertCount(0, $payer->fresh()->rates);
+    }
+
+    /** @test */
+    public function payer_rates_must_have_valid_dates()
+    {
+        $this->withExceptionHandling();
+
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+
+        $this->assertCount(0, $payer->rates);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $data['rates'][0]['effective_start'] = 'invalid';
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $data['rates'][0]['effective_end'] = 'invalid';
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $this->assertCount(0, $payer->fresh()->rates);
+    }
 }

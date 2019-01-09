@@ -42,7 +42,8 @@
         <business-payer-modal 
             @saved="save"
             v-model="showModal" 
-            :source="payer">
+            :source="payer"
+            :services="services">
         </business-payer-modal>
     </b-card>
 </template>
@@ -52,6 +53,7 @@
     export default {
         props: {
             payers: {},
+            services: Array,
         },
 
         mixins: [FormatsDates],
@@ -106,6 +108,7 @@
             },
             
             edit(id) {
+                this.payer = {};
                 this.payer = this.items.find(x => x.id == id);
                 this.showModal = true;
             },
@@ -115,6 +118,7 @@
                 if (item) {
                     item.name = data.name;
                     item.npi_number = data.npi_number;
+                    item.rates = data.rates;
                 } else {
                     this.items.push(data);
                 }
