@@ -10,6 +10,7 @@ use App\Responses\SuccessResponse;
 use App\Http\Requests\CreatePayerRequest;
 use App\Http\Requests\UpdatePayerRequest;
 use App\Responses\ErrorResponse;
+use Illuminate\Database\QueryException;
 
 class PayerController extends BaseController
 {
@@ -89,10 +90,14 @@ class PayerController extends BaseController
     {
         $this->authorize('delete', $payer);
 
-        if ($payer->delete()) {
-            return new SuccessResponse('Payer deleted successfully.', $payer);
+        try {
+            if ($payer->delete()) {
+                return new SuccessResponse('Payer deleted successfully.', $payer);
+            }
+        } catch (\Exception $ex) {
+            logger($e->getMessage());
         }
 
-        return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
+        return new ErrorResponse(500, 'Payer could not be deleted.');
     }
 }
