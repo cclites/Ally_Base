@@ -79,7 +79,6 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
 
             $table->foreign('payer_id')->references('id')->on('payers')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade')->onUpdate('cascade');
         });
 
         Schema::create('client_rates', function (Blueprint $table) {
@@ -160,16 +159,16 @@ class CreateInvoicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('client_invoices');
-        Schema::dropIfExists('caregiver_invoices');
-        Schema::dropIfExists('business_invoices');
-        Schema::dropIfExists('invoice_items');
-        Schema::dropIfExists('payers');
-        Schema::dropIfExists('payer_rates');
+        Schema::dropIfExists('shift_adjustments');
+        Schema::dropIfExists('shift_services');
+        Schema::dropIfExists('schedule_services');
         Schema::dropIfExists('client_payers');
         Schema::dropIfExists('client_rates');
-        Schema::dropIfExists('schedule_services');
-        Schema::dropIfExists('shift_services');
-        Schema::dropIfExists('shift_adjustments');
+        Schema::dropIfExists('payer_rates');
+        Schema::dropIfExists('payers');
+        Schema::dropIfExists('invoice_items');
+        Schema::dropIfExists('business_invoices');
+        Schema::dropIfExists('caregiver_invoices');
+        Schema::dropIfExists('client_invoices');
     }
 }

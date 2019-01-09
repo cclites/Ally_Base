@@ -22,6 +22,11 @@ class CreateServicesMigration extends Migration
 
             $table->foreign('chain_id')->references('id')->on('business_chains')->onDelete('cascade')->onUpdate('cascade');
         });
+
+		Schema::table('payer_rates', function(Blueprint $table)
+		{
+            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade')->onUpdate('cascade');
+		});
     }
 
     /**
@@ -31,6 +36,11 @@ class CreateServicesMigration extends Migration
      */
     public function down()
     {
+		Schema::table('payer_rates', function(Blueprint $table)
+		{
+            $table->dropForeign(['service_id']);
+        });
+        
         Schema::dropIfExists('services');
     }
 }
