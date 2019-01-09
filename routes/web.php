@@ -329,6 +329,8 @@ Route::group([
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
+
+    Route::resource('payers', 'Business\PayerController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
