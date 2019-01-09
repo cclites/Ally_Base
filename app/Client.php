@@ -84,7 +84,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|HasAllyFeeInterface $backupPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
  * @property-read \App\CareDetails $careDetails
@@ -93,7 +93,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|HasAllyFeeInterface $defaultPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \App\Address $evvAddress
  * @property-read \App\PhoneNumber $evvPhone
@@ -198,6 +198,11 @@ use Packages\MetaData\HasOwnMetaData;
  * @mixin \Eloquent
  * @property-read string $masked_ssn
  * @property null|string $w9_ssn
+ * @property-read \App\OfficeUser|null $caseManager
+ * @property-read mixed $masked_name
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {

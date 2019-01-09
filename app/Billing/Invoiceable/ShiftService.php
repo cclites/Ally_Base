@@ -7,6 +7,17 @@ use App\Caregiver;
 use App\Billing\Payer;
 use App\Shift;
 
+/**
+ * App\Billing\Invoiceable\ShiftService
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Billing\Payer $payer
+ * @property-read \App\Billing\Service $service
+ * @property-read \App\Shift $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @mixin \Eloquent
+ */
 class ShiftService extends AuditableModel
 {
     protected $guarded = ['id'];
