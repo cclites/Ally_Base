@@ -10,6 +10,8 @@ use App\Traits\BelongsToOneChain;
  *
  * @property int $id
  * @property int $chain_id
+ * @property string $name
+ * @property string|null $code
  * @property bool $default
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BusinessChain $businessChain
