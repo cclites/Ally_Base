@@ -62,8 +62,9 @@ class ShiftController extends BaseController
             abort(403);
         }
 
-        if ($this->caregiver()->isClockedIn()) {
-            return redirect()->route('clocked_in')->with('error', 'You are already clocked in.');
+        if ($this->caregiver()->isClockedIn($request->input('client_id'))) {
+            return new ErrorResponse(500, 'You are already clocked in for this client.');
+            // return redirect()->route('clocked_in')->with('error', 'You are already clocked in.');
         }
 
         if ($request->input('debugMode')) {
