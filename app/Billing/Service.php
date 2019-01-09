@@ -26,7 +26,7 @@ class Service extends AuditableModel implements BelongsToChainsInterface
 
     protected $orderedColumn = 'name';
 
-    protected $fillable = ['name', 'default', 'chain_id'];
+    protected $fillable = ['name', 'code', 'default', 'chain_id'];
 
     protected $casts = [
         'default' => 'bool',
