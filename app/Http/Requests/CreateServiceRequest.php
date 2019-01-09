@@ -25,7 +25,7 @@ class CreateServiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:100',
+            'name' => 'required|string|max:70',
             'code' => 'required|string|max:10',
             'default' => 'nullable|boolean',
         ];
