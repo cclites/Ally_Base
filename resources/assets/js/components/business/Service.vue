@@ -70,6 +70,11 @@
                         sortable: true
                     },
                     {
+                        key: 'code',
+                        label: 'code',
+                        sortable: true
+                    },
+                    {
                         key: 'default',
                         label: 'Default',
                         sortable: true,
@@ -95,6 +100,7 @@
                 let item = this.items.find(x => x.id === data.id);
                 if (item) {
                     item.name = data.name;
+                    item.code = data.code;
                     item.default = data.default;
                 } else {
                     this.items.push(data);
