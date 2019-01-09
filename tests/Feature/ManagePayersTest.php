@@ -301,7 +301,7 @@ class ManagePayersTest extends TestCase
             'rates' => [$rate->toArray()],
         ]);
 
-        $data['rates'][0]['effective_start'] = 'invalid';
+        $data['rates'][0]['effective_start'] = '2019-3301-01';
         $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
             ->assertStatus(422);
 
@@ -310,5 +310,12 @@ class ManagePayersTest extends TestCase
             ->assertStatus(422);
 
         $this->assertCount(0, $payer->fresh()->rates);
+
+        $data['rates'][0]['effective_start'] = '01/01/2017';
+        $data['rates'][0]['effective_end'] = '12/31/9999';
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(200);
+    
+        $this->assertCount(1, $payer->fresh()->rates);
     }
 }

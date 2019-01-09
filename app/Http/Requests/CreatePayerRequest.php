@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Payer;
+use Illuminate\Support\Carbon;
 
 class CreatePayerRequest extends FormRequest
 {
@@ -49,8 +50,8 @@ class CreatePayerRequest extends FormRequest
             $data['rates'] = collect($data['rates'])->map(function ($rate) {
                 unset($rate['service']);
                 return array_merge($rate, [
-                    'effective_start' => utc_date($rate['effective_start'], 'Y-m-d H:i:s', null),
-                    'effective_end' => utc_date($rate['effective_end'], 'Y-m-d H:i:s', null),
+                    'effective_start' => Carbon::createFromFormat('m/d/Y', $rate['effective_start'])->format('Y-m-d'),
+                    'effective_end' => Carbon::createFromFormat('m/d/Y', $rate['effective_end'])->format('Y-m-d'),
                 ]);
             })->toArray();
         } else {

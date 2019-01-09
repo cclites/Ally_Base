@@ -15,40 +15,42 @@
                     :sort-desc.sync="sortDesc"
             >
                 <template slot="service_id" scope="row">
-                    <b-select v-model="row.item.service_id">
+                    <b-select v-model="row.item.service_id" size="sm">
                         <option value="">None</option>
                         <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">
-                    <date-picker v-model="row.item.effective_start" placeholder="MM/DD/YYYY"></date-picker>
+                    <mask-input v-model="row.item.effective_start" type="date"></mask-input>
                 </template>
                 <template slot="effective_end" scope="row">
-                    <date-picker v-model="row.item.effective_end" placeholder="MM/DD/YYYY"></date-picker>
+                    <mask-input v-model="row.item.effective_end" type="date"></mask-input>
                 </template>
                 <template slot="hourly_rate" scope="row">
                     <b-form-input
                         name="hourly_rate"
+                        class="money-input"
                         type="number"
                         step="any"
                         min="0"
                         max="999.99"
                         required
                         v-model="row.item.hourly_rate"
-                    >
-                    </b-form-input>
+                        size="sm"
+                    ></b-form-input>
                 </template>
                 <template slot="fixed_rate" scope="row">
                     <b-form-input
                         name="fixed_rate"
+                        class="money-input"
                         type="number"
                         step="any"
                         min="0"
                         max="999.99"
                         required
                         v-model="row.item.fixed_rate"
-                    >
-                    </b-form-input>
+                        size="sm"
+                    ></b-form-input>
                 </template>
                 <template slot="actions" scope="data">
                     <b-btn size="sm" @click="remove(data.index)">
@@ -136,8 +138,8 @@
                     this.items = data.map(x => {
                         x.hourly_rate = parseFloat(x.hourly_rate).toFixed(2);
                         x.fixed_rate = parseFloat(x.fixed_rate).toFixed(2);
-                        x.effective_start = moment.utc(x.effective_start).local().format('MM/DD/YYYY');
-                        x.effective_end = moment.utc(x.effective_end).local().format('MM/DD/YYYY');
+                        x.effective_start = moment(x.effective_start).format('MM/DD/YYYY');
+                        x.effective_end = moment(x.effective_end).format('MM/DD/YYYY');
                         return x;
                     });
                 } else {
@@ -160,4 +162,6 @@
 </script>
 
 <style scoped>
+.money-input { width: 90px!important }
+.date-input { max-width: 130px!important }
 </style>
