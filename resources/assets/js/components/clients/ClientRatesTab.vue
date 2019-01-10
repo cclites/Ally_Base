@@ -20,13 +20,13 @@
                      ref="table"
             >
                 <template slot="service_id" scope="row">
-                    <b-select v-model="row.item.service_id" size="sm">
+                    <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
                         <option value="">(All)</option>
                         <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
                     </b-select>
                 </template>
                 <template slot="payer_id" scope="row">
-                    <b-select v-model="row.item.payer_id" size="sm">
+                    <b-select v-model="row.item.payer_id" size="sm" @change="(e) => onChangePayer(e, row.item)">
                         <option value="">(All)</option>
                         <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
                     </b-select>
@@ -38,10 +38,10 @@
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">
-                    <mask-input v-model="row.item.effective_start" type="date" class="date-input"></mask-input>
+                    <mask-input v-model="row.item.effective_start" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
                 <template slot="effective_end" scope="row">
-                    <mask-input v-model="row.item.effective_end" type="date" class="date-input"></mask-input>
+                    <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
                 <template slot="caregiver_hourly_rate" scope="row">
                     <b-form-input name="caregiver_hourly_rate"
@@ -96,6 +96,18 @@
                         <i class="fa fa-trash"></i>
                     </b-btn>
                 </template>
+                <template slot="provider_hourly_fee" scope="row">
+                    {{ getProviderFee(row.item.client_hourly_rate, row.item.caregiver_hourly_rate) }}
+                </template>
+                <template slot="ally_hourly_fee" scope="row">
+                    {{ getAllyFee(row.item.client_hourly_rate) }}
+                </template>
+                <template slot="provider_fixed_fee" scope="row">
+                    {{ getProviderFee(row.item.client_fixed_rate, row.item.caregiver_fixed_rate) }}
+                </template>
+                <template slot="ally_fixed_fee" scope="row">
+                    {{ getAllyFee(row.item.client_fixed_rate) }}
+                </template>
             </b-table>
 
             <b-btn @click="save()" variant="success">Save Client Rates</b-btn>
@@ -110,6 +122,7 @@
         props: {
             'client': {},
             'rates': Array,
+            'allyRateOriginal': Number,
         },
 
         mixins: [ FormatsDates ],
@@ -163,6 +176,14 @@
                         sortable: true,
                     },
                     {
+                        key: 'provider_hourly_fee',
+                        label: 'Provider Hourly Fee*'
+                    },
+                    {
+                        key: 'ally_hourly_fee',
+                        label: 'Ally Hourly Fee*'
+                    },
+                    {
                         key: 'client_fixed_rate',
                         label: 'Client Fixed Rate',
                         sortable: true,
@@ -173,14 +194,26 @@
                         sortable: true,
                     },
                     {
+                        key: 'provider_fixed_fee',
+                        label: 'Provider Fixed Fee*'
+                    },
+                    {
+                        key: 'ally_fixed_fee',
+                        label: 'Ally Fixed Fee*'
+                    },
+                    {
                         key: 'actions',
+                        label: '',
                         class: 'hidden-print'
-                    }
+                    },
                 ],
             }
         },
 
         computed: {
+            allyRate() {
+                return this.allyRateOriginal;
+            },
         },
 
         methods: {
@@ -226,16 +259,10 @@
             save() {
                 let form = new Form({
                     rates: this.items,
-                    // rates: this.items.map(item => {
-                    //     item.effective_start = moment(item.effective_start).format('YYYY-MM-DD');
-                    //     item.effective_end = moment(item.effective_end).format('YYYY-MM-DD');
-                    //     return item;
-                    // })
                 });
-                console.log('submiting form: ', form);
                 form.patch(`/business/clients/${this.client.id}/rates`)
                     .then( ({ data }) => {
-                        this.setItems(data);
+                        this.setItems(data.data);
                     })
                     .catch(e => {
                     })
@@ -266,6 +293,56 @@
                 } else {
                     this.services = [];
                 }
+            },
+
+            getAllyFee(clientRate) {
+                let computed = (clientRate) * this.allyRate;
+                return computed.toFixed(2);
+            },
+
+            getProviderFee(clientRate, caregiverRate) {
+                let allyFee = this.getAllyFee(clientRate);
+                let computed = clientRate - caregiverRate - allyFee;
+                return computed.toFixed(2);
+            },
+
+            onChangePayer(e, item) {
+                console.log(e);
+                this.setDefaultRates(item, e, item.service_id);
+            },
+
+            onChangeService(e, item) {
+                console.log(e);
+                this.setDefaultRates(item, item.payer_id, e);
+            },
+
+            setDefaultRates(item, payer_id, service_id) {
+                // TODO: load between dates
+                let payer = this.payers.find(x => x.id == payer_id);
+                
+                if (! payer) {
+                    // no matching rate for payer / service
+                    console.log('no payer matches effective dates');
+                    item.client_hourly_rate = 0.00;
+                    item.client_fixed_rate = 0.00;
+                    return;
+                }
+
+                let rate = payer.rates.find(x => {
+                    console.log('effective dates: ' + x.effective_start + ' - ' + x.effective_end);
+                    return x.service_id == service_id &&
+                        moment().isBetween(x.effective_start, x.effective_end)
+                });
+
+                if (! rate) {
+                    console.log('no matching rate for payer '+payer_id+' / service '+service_id);
+                    item.client_hourly_rate = 0.00;
+                    item.client_fixed_rate = 0.00;
+                    return;
+                }
+                item.client_hourly_rate = rate.hourly_rate;
+                item.client_fixed_rate = rate.fixed_rate;
+                console.log('payer / service default rates set', rate);
             },
         },
 

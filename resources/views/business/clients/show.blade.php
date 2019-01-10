@@ -187,7 +187,7 @@
             <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
         </div>
         <div class="tab-pane" id="rates" role="tabpanel">
-            <client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" />
+            <client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" :ally-rate-original="{{ floatval($client->allyFee) }}" />
         </div>
     </div>
 @endsection
