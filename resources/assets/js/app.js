@@ -189,6 +189,8 @@ Vue.component('prospect-directory', require('./components/business/reports/Prosp
 Vue.component('business-payer-list', require('./components/business/PayerList'));
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
+Vue.component('business-client-payers-tab', require('./components/business/Clients/ClientPayersTab'));
+Vue.component('business-client-rates-tab', require('./components/business/Clients/ClientRatesTab'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

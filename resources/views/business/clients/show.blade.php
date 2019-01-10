@@ -66,6 +66,12 @@
                 <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
             </li>
         @endif
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Client Payers</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#rates" class="nav-link">Client Rates</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -86,6 +92,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Client Payers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Client Rates</a>
             </div>
         </li>
     </ul>
@@ -174,6 +182,12 @@
         </div>
         <div class="tab-pane" id="ltci">
             <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
+        </div>
+        <div class="tab-pane" id="payers" role="tabpanel">
+            <business-client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" />
+        </div>
+        <div class="tab-pane" id="rates" role="tabpanel">
+            <business-client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" />
         </div>
     </div>
 @endsection
