@@ -53,7 +53,8 @@ class CreateInvoicesTable extends Migration
             $table->decimal('rate', 7, 2); // client rate
             $table->decimal('total', 9, 2); // client rate x units
             $table->decimal('amount_due', 9, 2); // total x payer allocation
-            
+            $table->dateTime('date')->nullable(); // used for ordering
+
             $table->index(['invoice_type', 'invoice_id']);
             $table->index(['invoiceable_type', 'invoiceable_id']);
         });
@@ -115,7 +116,6 @@ class CreateInvoicesTable extends Migration
             $table->unsignedInteger('schedule_id');
             $table->unsignedInteger('service_id');
             $table->unsignedInteger('payer_id')->nullable();
-            $table->unsignedInteger('caregiver_id')->nullable();
             $table->decimal('duration', 7, 2);
             $table->decimal('client_rate', 7, 2);
             $table->decimal('caregiver_rate', 7, 2);
@@ -127,7 +127,6 @@ class CreateInvoicesTable extends Migration
             $table->unsignedInteger('shift_id');
             $table->unsignedInteger('service_id');
             $table->unsignedInteger('payer_id')->nullable();
-            $table->unsignedInteger('caregiver_id')->nullable();
             $table->decimal('duration', 7, 2);
             $table->decimal('client_rate', 7, 2);
             $table->decimal('caregiver_rate', 7, 2);

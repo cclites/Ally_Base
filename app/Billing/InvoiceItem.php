@@ -12,5 +12,19 @@ use App\AuditableModel;
  */
 class InvoiceItem extends AuditableModel
 {
+    protected $guarded = ['id', 'amount_invoiced'];
 
+    ////////////////////////////////////
+    //// Relationship Methods
+    ////////////////////////////////////
+
+    function invoice()
+    {
+        return $this->morphTo();
+    }
+
+    function invoiceable()
+    {
+        return $this->morphTo();
+    }
 }

@@ -43,22 +43,20 @@ class ClientPayerValidator
 
         // Validate against each date
         foreach($dates as $date) {
-            if (!$this->validateByDate($payers, $date)) return false;
+            if (!$this->validateByDate($client, $date)) return false;
         }
 
         return true;
     }
 
     /**
-     * @param \Illuminate\Support\Collection $allPayers
+     * @param \App\Client $client
      * @param string $date
      * @return bool
      */
-    function validateByDate(Collection $allPayers, string $date): bool
+    public function validateByDate(Client $client, string $date = 'now'): bool
     {
-        $payers = $allPayers->filter(function(ClientPayer $payer) use ($date) {
-            return $payer->effective_start <= $date && $payer->effective_end >= $date;
-        });
+        $payers = $client->getPayers($date);
 
         if (!$payers->count()) {
             return $this->error("Client has no payers assigned on $date.");
