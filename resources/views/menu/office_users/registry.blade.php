@@ -35,10 +35,11 @@
     <a href="{{ route('business.care-match') }}" ><i class="fa fa-clone"></i><span class="hide-menu">Care Match</span></a>
 </li>
 <li>
-    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Notes</span></a>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-sticky-note"></i><span class="hide-menu">Call Center</span></a>
     <ul aria-expanded="false" class="collapse">
         <li><a href="/notes">Notes</a></li>
-        <li><a href="/notes/create">Add Notes</a></li>
+        <li><a href="/notes/create">Add Note</a></li>
+        <li><a href="/note-templates">Templates</a></li>
     </ul>
 </li>
 @if(activeBusiness()->use_rate_codes)
@@ -51,11 +52,11 @@
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
-        <i class="fa fa-usd" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Accounting</span>
+        <i class="fa fa-building-o" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Payers</span>
     </a>
     <ul aria-expanded="false" class="collapse">
-        <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li>
         <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li>
+        <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li>
         @if(app()->environment() === 'demo')
             <li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li>
         @endif
@@ -81,30 +82,12 @@
     </ul>
 </li>
 <li>
-    <a href="{{ route('business.tasks.index') }}">
-        <div class="row">
-            <div class="col-8">
-                <i class="fa fa-check-square-o"></i><span class="hide-menu">Tasks</span>
-            </div>
-            <div class="col-4">
-                <span class="badge badge-warning badge-notifications hide-menu menu-badge">{{ auth()->user()->dueTasks()->count() }}</span>
-            </div>
-        </div>
-    </a>
-</li>
-<li>
-    <a href="{{ route('business.exceptions.index') }}">
-        <div class="row">
-            <div class="col-8">
-                <i class="fa fa-exclamation" style="margin-left: 6px; margin-right: -6px;"></i><span class="hide-menu">Exceptions</span>
-            </div>
-            <div class="col-4">
-                    <span class="badge badge-danger badge-notifications hide-menu menu-badge">
-                        {{ activeBusiness()->exceptions()->notAcknowledged()->count() }}
-                    </span>
-            </div>
-        </div>
-    </a>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-cart-arrow-down"></i><span class="hide-menu">Referral Sources </span></a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.referral-sources.index') }}">List Sources</a></li>
+        <li><a href="{{ route('business.referral-sources.create') }}">Add Source</a></li>
+{{--        <li><a href="{{ route('business.reports.referral_sources') }}">Reports Referral Sources</a></li>--}}
+    </ul>
 </li>
 <li>
     <a class="has-arrow" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-gear"></i><span class="hide-menu">Settings </span></a>

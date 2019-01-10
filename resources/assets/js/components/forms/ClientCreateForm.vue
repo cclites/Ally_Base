@@ -49,7 +49,7 @@
                 <input-help :form="form" field="provider_pay" text="Set the payment method to the registry's bank account."></input-help>
             </b-form-group>
             <business-location-form-group v-model="form.business_id"
-                                          form="form"
+                                          :form="form"
                                           field="business_id"
                                           help-text="Select the office location for the client.">
             </business-location-form-group>

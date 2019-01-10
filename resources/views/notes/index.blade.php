@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <note-list :notes="{{ $notes }}"></note-list>
+    <note-list></note-list>
 @endsection

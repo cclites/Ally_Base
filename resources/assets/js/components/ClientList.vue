@@ -1,8 +1,19 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="3">
+            <b-col lg="12">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
+            </b-col>
+        </b-row>
+        <b-row class="mb-2">
+            <b-col lg="3">
+                <b-form-select v-model="caseManager" class="mr-2 mb-2">
+                    <template slot="first">
+                        <!-- this slot appears above the options from 'options' prop -->
+                        <option :value="null">-- Case Manager --</option>
+                    </template>
+                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
+                </b-form-select>
             </b-col>
             <b-col lg="3">
                 <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
@@ -23,7 +34,7 @@
         <div v-if="!loading">
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
-                         :items="clients"
+                         :items="filteredClients"
                          :fields="fields"
                          :current-page="currentPage"
                          :per-page="perPage"
@@ -80,6 +91,10 @@
                 selectedItem: {},
                 business_id: "",
                 clients: [],
+                caseManagers: [],
+                caseManager: null,
+                filteredCaseManagers: [],
+                filteredClients: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -108,6 +123,11 @@
                         formatter: this.formatUppercase,
                     },
                     {
+                        key: 'case_manager_name',
+                        label: 'Case Manager',
+                        sortable: true,
+                    },
+                    {
                         key: 'location',
                         label: 'Location',
                         sortable: true,
@@ -124,6 +144,7 @@
 
         mounted() {
             this.loadClients();
+            this.loadOfficeUsers();
         },
 
         computed: {
@@ -139,9 +160,16 @@
                 const response = await axios.get(this.listUrl);
                 this.clients = response.data.map(client => {
                     client.county = client.address ? client.address.county : '';
+                    client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
+                this.filterClients();
                 this.loading = false;
+            },
+            async loadOfficeUsers() {
+                const response = await axios.get(`/business/office-users`);
+                this.caseManagers = response.data;
+                this.filterCaseManagers();
             },
             details(item, index, button) {
                 this.selectedItem = item;
@@ -158,12 +186,33 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
+            },
+            filterClients() {
+                if (! this.caseManager) {
+                    this.filteredClients = this.clients;
+                } else {
+                    this.filteredClients = this.clients.filter(x => x.case_manager_id === this.caseManager);
+                }
+            },
+            filterCaseManagers() {
+                if (this.business_id == '') {
+                    this.filteredCaseManagers = this.caseManagers;
+                } else {
+                    this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))
+                }
+            },
         },
 
         watch: {
             listUrl() {
                 this.loadClients();
+            },
+            caseManager(value) {
+                this.filterClients();
+            },
+            business_id(value) {
+                this.filterCaseManagers();
+                this.filterClients();
             }
         }
     }

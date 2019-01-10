@@ -52,7 +52,8 @@ class ClientController extends BaseController
                 $query->with('carePlans');
             }
 
-            return $query->get();
+            $clients = $query->with('caseManager')->get();
+            return $clients;
         }
 
         return view('business.clients.index');
@@ -114,7 +115,7 @@ class ClientController extends BaseController
                 return new ConfirmationResponse('There is already a client with the name ' . $request->firstname . ' ' . $request->lastname . '.');
             }
         }
-
+        $data['created_by'] = auth()->id();
         if ($client = Client::create($data)) {
             if ($request->input('no_email')) {
                 $client->setAutoEmail()->save();
@@ -148,6 +149,8 @@ class ClientController extends BaseController
 
         $client->load([
             'user',
+            'creator',
+            'updator',
             'addresses',
             'phoneNumbers',
             'preferences',
@@ -159,6 +162,7 @@ class ClientController extends BaseController
             'notes.creator',
             'careDetails',
             'carePlans',
+            'caseManager',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
@@ -207,6 +211,7 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
         $data = $request->filtered();
+        $data['updated_by'] = auth()->id();
 
         $addOnboardRecord = false;
         if ($client->onboard_status != $data['onboard_status']) {
@@ -310,22 +315,18 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
 
         $backup = ($type === 'backup');
-        $redirect = route('business.clients.edit', [$client->id]) . '#payment';
 
         if ($request->input('use_business')) {
-            if (!$this->business()->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
-            if ($client->setPaymentMethod($this->business(), $backup)) {
-                $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
-                return response()->json($paymentTypeMessage);
-                //return new SuccessResponse('The payment method has been set to the provider payment account.', [], $redirect);
+            if (!$client->business->paymentAccount) return new ErrorResponse(400, 'There is no provider payment account on file.');
+            if ($client->setPaymentMethod($client->business, $backup)) {
+                return $this->paymentMethodResponse($client, 'The payment method has been set to the provider payment account.');
             }
             return new ErrorResponse(500, 'The payment method could not be updated.');
         }
 
         $method = $this->validatePaymentMethod($request, $client->getPaymentMethod($backup));
         if ($client->setPaymentMethod($method, $backup)) {
-            $paymentTypeMessage = "Active Payment Type: " . $client->fresh()->getPaymentType() . " (" . round($client->fresh()->getAllyPercentage() * 100, 2) . "% Processing Fee)";
-            return response()->json($paymentTypeMessage);
+            return $this->paymentMethodResponse($client, 'The payment method has been updated.');
         }
         return new ErrorResponse(500, 'The payment method could not be updated.');
     }
@@ -341,7 +342,17 @@ class ClientController extends BaseController
             $client->defaultPayment()->dissociate();
         }
         $client->save();
-        return new SuccessResponse('The payment method has been deleted.');
+
+        return $this->paymentMethodResponse($client, 'The payment method has been removed.');
+    }
+
+    protected function paymentMethodResponse(Client $client, $message)
+    {
+        $allyRate = $client->getAllyPercentage();
+        $paymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($allyRate * 100, 2) . "% Processing Fee)";
+        $data['payment_text'] = $paymentTypeMessage;
+        $data['ally_rate'] = $allyRate;
+        return new SuccessResponse($message, $data);
     }
 
     public function sendConfirmationEmail(Client $client)
