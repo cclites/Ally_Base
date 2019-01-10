@@ -77,7 +77,7 @@
                     },
                     {
                         key: 'npi_number',
-                        label: 'Account Number',
+                        label: 'NPI Number',
                         sortable: true,
                     },
                     {

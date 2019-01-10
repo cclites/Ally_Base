@@ -15,7 +15,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Account Number" label-for="npi_number">
+                    <b-form-group label="NPI Number" label-for="npi_number">
                         <b-form-input v-model="form.npi_number" type="text" />
                         <input-help :form="form" field="npi_number"></input-help>
                     </b-form-group>
