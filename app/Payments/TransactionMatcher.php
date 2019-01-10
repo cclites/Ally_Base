@@ -24,7 +24,7 @@ class TransactionMatcher {
      * Find a payment method matching the transaction information
      *
      * @param $transaction_id
-     * @return \App\Contracts\ChargeableInterface|null
+     * @return \App\Billing\Contracts\ChargeableInterface|null
      */
     public function findMethod($transaction_id)
     {

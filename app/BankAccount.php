@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
@@ -198,5 +198,15 @@ class BankAccount extends AuditableModel implements ChargeableInterface
     public function getAllyPercentage()
     {
         return (float) config('ally.bank_account_fee');
+    }
+
+    /**
+     * Return the owner of the payment method or account
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getOwnerModel()
+    {
+        return $this->user ?? $this->business;
     }
 }

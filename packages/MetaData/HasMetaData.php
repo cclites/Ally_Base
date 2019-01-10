@@ -45,7 +45,7 @@ trait HasMetaData
      * @param int|null $limit
      * @return \Illuminate\Support\Collection|\Packages\MetaData\MetaData[]
      */
-    public function getMetaData($keys = null, ?int $limit = null): Collection
+    public function getMeta($keys = null, ?int $limit = null): Collection
     {
         $query = $this->meta()->select(['key', 'value']);
 

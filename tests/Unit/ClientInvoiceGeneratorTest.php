@@ -2,15 +2,17 @@
 
 namespace Tests\Unit;
 
-use App\Billing\Contracts\Invoiceable;
+use App\Billing\ClientPayer;
+use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Generators\BaseInvoiceGenerator;
 use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
+use Mockery\Mock;
 use Tests\TestCase;
 
-class ClientInvoicerTest extends TestCase
+class ClientInvoiceGeneratorTest extends TestCase
 {
     /**
      * @var Client
@@ -58,7 +60,7 @@ class ClientInvoicerTest extends TestCase
      */
     public function invoiceables_are_collected_from_their_classes()
     {
-        $invoiceable = \Mockery::mock(Invoiceable::class);
+        $invoiceable = \Mockery::mock(InvoiceableInterface::class);
         $invoiceable->shouldReceive('getItemsForPayment')->with($this->client);
         BaseInvoiceGenerator::$invoiceables = ['mock' => $invoiceable];
 
@@ -70,7 +72,7 @@ class ClientInvoicerTest extends TestCase
      */
     public function invoiceables_provide_the_correct_item_data()
     {
-        $invoiceable = \Mockery::mock(Invoiceable::class);
+        $invoiceable = \Mockery::mock(InvoiceableInterface::class);
         $name = "Hello World";
         $group = "Group";
         $units = 1.25;
@@ -93,5 +95,14 @@ class ClientInvoicerTest extends TestCase
         $this->assertSame($rate, $data['rate']);
         $this->assertSame($total, $data['total']);
         $this->assertSame($total, $data['amount_due']);
+    }
+
+    /**
+     * @test
+     */
+    public function get_payer_allowance_should_return_a_float()
+    {
+        $mockPayer = \Mockery::mock(ClientPayer::class);
+        $this->assertInternalType('float', $this->invoicer()->getPayerAllowance($mockPayer));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Reports;
 
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\GatewayTransaction;
 
 class AdminReconciliationReport extends BaseReport
@@ -13,7 +13,7 @@ class AdminReconciliationReport extends BaseReport
     protected $reconcilable;
 
     /**
-     * @param \App\Contracts\ReconcilableInterface $reconcilable
+     * @param \App\Billing\Contracts\ReconcilableInterface $reconcilable
      */
     public function __construct(ReconcilableInterface $reconcilable)
     {
