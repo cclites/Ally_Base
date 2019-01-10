@@ -112,6 +112,7 @@
 
             <b-btn @click="save()" variant="success">Save Client Rates</b-btn>
         </div>
+        <div class="mt-5">* Provider fees and Ally fees are estimated based on the primary payment method.</div>
     </b-card>
 </template>
 
