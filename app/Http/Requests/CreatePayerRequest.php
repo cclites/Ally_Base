@@ -49,9 +49,10 @@ class CreatePayerRequest extends FormRequest
         if (isset($data['rates'])) {
             $data['rates'] = collect($data['rates'])->map(function ($rate) {
                 unset($rate['service']);
+
                 return array_merge($rate, [
-                    'effective_start' => Carbon::createFromFormat('m/d/Y', $rate['effective_start'])->format('Y-m-d'),
-                    'effective_end' => Carbon::createFromFormat('m/d/Y', $rate['effective_end'])->format('Y-m-d'),
+                    'effective_start' => (new Carbon($rate['effective_start']))->format('Y-m-d'),
+                    'effective_end' => (new Carbon($rate['effective_end']))->format('Y-m-d'),
                 ]);
             })->toArray();
         } else {
