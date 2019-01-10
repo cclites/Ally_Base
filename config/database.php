@@ -21,7 +21,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'polymorphism' => \App\Billing\Generators\BaseInvoicer::$invoiceables + [
+    'polymorphism' => \App\Billing\Generators\BaseInvoiceGenerator::$invoiceables + [
         // User Types
         'admins' => \App\Admin::class,
         'caregivers' => \App\Caregiver::class,

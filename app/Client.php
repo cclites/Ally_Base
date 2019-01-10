@@ -4,6 +4,7 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
+use App\Businesses\Timezone;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\ChargeableInterface;
@@ -20,6 +21,7 @@ use App\Traits\HasPaymentHold as HasPaymentHoldTrait;
 use App\Traits\HasSSNAttribute;
 use App\Traits\IsUserRole;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
 
@@ -84,7 +86,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property int|null $caregiver_1099;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Model|HasAllyFeeInterface $backupPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
  * @property-read \App\CareDetails $careDetails
@@ -93,7 +95,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Model|HasAllyFeeInterface $defaultPayment
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $defaultPayment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \App\Address $evvAddress
  * @property-read \App\PhoneNumber $evvPhone
@@ -463,6 +465,32 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     ///////////////////////////////////////////
 
     /**
+     * Get the client timezone (currently retrieved from the business record)
+     *
+     * @return mixed
+     */
+    public function getTimezone()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
+
+    /**
+     * Get effective client payers
+     *
+     * @param string $date
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[]
+     */
+    public function getPayers(string $date = 'now'): Collection
+    {
+        $date = Carbon::parse($date, $this->getTimezone());
+
+        return $query = $this->payers()
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
+            ->get();
+    }
+
+    /**
      * Get the default ClientRate for this client
      *
      * @param string $date
@@ -470,14 +498,14 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      */
     public function getDefaultRate(string $date = 'now'): ?ClientRate
     {
-        $date = Carbon::parse($date, 'UTC')->setTime(0, 0, 0);
+        $date = Carbon::parse($date, $this->getTimezone());
 
         return $this->rates()
             ->whereNull('caregiver_id')
             ->whereNull('payer_id')
             ->whereNull('service_id')
-            ->where('effective_start', '<=', $date)
-            ->where('effective_end', '>=', $date)
+            ->where('effective_start', '<=', $date->toDateString())
+            ->where('effective_end', '>=', $date->toDateString())
             ->first();
     }
 
