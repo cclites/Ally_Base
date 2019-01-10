@@ -37,6 +37,7 @@
             <b-form-radio-group
                 v-if="field.type == 'radio'"
                 v-model="form[field.key]" 
+                :id="field.key"
                 :name="field.key" 
                 :required="!!field.required || null"
             >

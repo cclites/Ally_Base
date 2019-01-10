@@ -36,9 +36,9 @@
                 const options = {};
 
                 // Populate custom fields
-                data.forEach(({key}) => {
+                data.forEach(({key, default_value}) => {
                     const clientFieldValue = this.client.meta.find(field => key == field.key);
-                    options[key] = clientFieldValue ? clientFieldValue.value : '';
+                    options[key] = clientFieldValue ? clientFieldValue.value : default_value;
                 });
 
                 this.customs = data;
@@ -58,10 +58,8 @@
 
         methods: {
             update() {
-                const {id} = this.client;
-                this.options.post(`/business/custom-fields/client/${id}`);
-            }
-        }
-
+                this.options.post(`/business/custom-fields/client/${this.client.id}`);
+            },
+        },
     }
 </script>

@@ -238,6 +238,8 @@
                             ? await optionForm.put(`/business/custom-fields/options/${this.field.id}`)
                             : await optionForm.post(`/business/custom-fields/options/${data.data.id}`);
                     }
+
+                    window.location.href = '/business/settings';
                 } catch(error) {}
                 this.submitting = false;
             },

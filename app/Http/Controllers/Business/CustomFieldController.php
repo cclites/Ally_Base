@@ -62,7 +62,7 @@ class CustomFieldController extends Controller
     public function store(UpdateCustomFieldRequest $request)
     {
         $data = $request->filtered();
-        $data['key'] = snake_case($request->label);
+        $data['key'] = preg_replace('/[^A-Za-z0-9]/', '', snake_case($request->label));
         $data['chain_id'] = activeBusiness()->chain_id;
         $this->authorize('update', $request->getBusiness());
         
@@ -72,11 +72,11 @@ class CustomFieldController extends Controller
             ->first();
 
         if($alreadyExist) {
-            return new ErrorResponse(500, 'This custom field already exists. Please try again.');
+            return new ErrorResponse(500, 'A custom field with this label already exists. Please try again.');
         }
 
         if ($field = CustomField::create($data)) {
-            return new SuccessResponse('Custom field has been created.', $field);
+            return new SuccessResponse('Custom field has been created.', ['id' => $field->id]);
         }
 
         return new ErrorResponse(500, 'Could not create the custom field.  Please try again.');
@@ -100,9 +100,10 @@ class CustomFieldController extends Controller
         $data = $request->filtered();
         $options = array_unique(explode(',', $data['options']));
         foreach ($options as $option) {
+            $strippedString = preg_replace('/[^A-Za-z0-9]/', '', $option);
             CustomFieldOption::create([
                 'field_id' => $field->id,
-                'value' => snake_case($option),
+                'value' => snake_case($strippedString),
                 'label' => $option,
             ]);
         }
@@ -133,10 +134,16 @@ class CustomFieldController extends Controller
             $this->authorize('update', $instance);
         }
 
-        $customFields = activeBusiness()->chain->fields->pluck('key');
-        foreach ($customFields as $key) {
-            if($request->has($key) && $request->input($key)) {
-                $instance->setMeta($key, $request->input($key));
+        $customFields = activeBusiness()->chain->fields->where('user_type', $account);
+        foreach ($customFields as $field) {
+            $value = $request->input($field->key) ?: '';
+
+            if($field->required && strlen($value) == 0) {
+                return new ErrorResponse(422, 'The custom field '. $field->label . ' value is required.');
+            }
+            
+            if($request->has($field->key) && $field->default_value !== $value) {
+                $instance->setMeta($field->key, $value);
             }
         }
 
@@ -206,7 +213,7 @@ class CustomFieldController extends Controller
         $optionsKey = [];
 
         foreach ($options as $option) {
-            $optionsKey[] = $key = snake_case($option);
+            $optionsKey[] = $key = preg_replace('/[^A-Za-z0-9]/', '', snake_case($option));
             CustomFieldOption::firstOrCreate([
                 'field_id' => $field->id,
                 'value' => $key,
