@@ -16,11 +16,19 @@
                 :sort-desc.sync="sortDesc"
                 ref="table"
             >
-                <template slot="effective_start" scope="row">
-                    {{ formatDate(row.item.effective_start, 'MM/DD/YYYY', 'YYYY-MM-DD') }}
+                <template slot="priority" scope="row">
+                    <b-btn size="sm" @click="shiftPriority(row.item, -1)" :disabled="row.item.priority <= 1">
+                        <i class="fa fa-arrow-up"></i>
+                    </b-btn>
                 </template>
-                <template slot="effective_end" scope="row">
-                    {{ formatDate(row.item.effective_end, 'MM/DD/YYYY', 'YYYY-MM-DD') }}
+                <template slot="payment_allocation" scope="row">
+                    {{ stringFormat(row.item.payment_allocation) }}
+                    <span v-if="row.item.payment_allocation == 'split'">
+                        ({{ row.item.split_percentage }}%)
+                    </span>
+                    <span v-if="['daily', 'weekly', 'monthly'].includes(row.item.payment_allocation)">
+                        (${{ parseFloat(row.item.payment_allowance).toFixed(2) }})
+                    </span>
                 </template>
                 <template slot="actions" scope="row">
                     <b-btn size="sm" @click="edit(row.item)">
@@ -44,6 +52,7 @@
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
+    import FormatsStrings from "../../mixins/FormatsStrings";
 
     export default {
         props: {
@@ -52,7 +61,7 @@
             'payerOptions': Array,
         },
 
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, FormatsStrings ],
 
         data() {
             return {
@@ -65,6 +74,11 @@
                 sortBy: null,
                 sortDesc: false,
                 fields: [
+                    {
+                        key: 'priority',
+                        label: 'Priority',
+                        sortable: true,
+                    },
                     {
                         key: 'payer_name',
                         label: 'Payer',
@@ -86,34 +100,15 @@
                         sortable: true,
                     },
                     {
-                        key: 'policy_number',
-                        label: 'Policy Number',
-                        sortable: true,
-                    },
-                    {
-                        key: 'policy_number',
-                        label: 'Policy Number',
-                        sortable: true,
-                    },
-                    {
-                        key: 'policy_number',
-                        label: 'Policy Number',
-                        sortable: true,
-                    },
-                    {
-                        key: 'policy_number',
-                        label: 'Policy Number',
-                        sortable: true,
-                    },
-                    {
-                        key: 'policy_number',
-                        label: 'Policy Number',
+                        key: 'payment_allocation',
+                        label: 'Payment Allocation',
                         sortable: true,
                     },
                     {
                         key: 'actions',
-                        class: 'hidden-print'
-                    }
+                        class: 'hidden-print',
+                        sortable: false,
+                    },
                 ],
             }
         },
@@ -138,20 +133,11 @@
             },
 
             onSave(data) {
-                let item = this.items.find(x => x.id === data.id);
-                if (item) {
-                    item.payer_id = data.payer_id;
-                    item.policy_number = data.policy_number;
-                    item.effective_start = data.effective_start;
-                    item.effective_end = data.effective_end;
-                    item.payment_allocation = data.payment_allocation;
-                    item.payment_allowance = data.payment_allowance;
-                    item.split_percentage = data.split_percentage;
-                    item.priority = data.priority;
-                    item.client_id = data.client_id;
-                    item.payer_name = data.payer_name;
+                let index = this.items.findIndex(item => item.id == data.id);
+                if (index != -1) {
+                    this.items.splice(index, 1, this.castItem(data));
                 } else {
-                    this.items.push(data);
+                    this.items.push(this.castItem(data));
                 }
             },
 
@@ -170,10 +156,33 @@
                 this.payer = item;
                 this.showModal = true;
             },
+
+            shiftPriority(item, upOrDown = -1) {
+                let form = new Form({ priority: item.priority + upOrDown });
+                form.submit('patch', `/business/clients/${this.client.id}/payers/${item.id}/priority`)
+                    .then( ({ data }) => {
+                        this.setItems(data);
+                    });
+            },
+            
+            setItems(items) {
+                this.items = items.map(item => {
+                    return this.castItem(item);
+                })
+            },
+
+            castItem(data) {
+                let item = JSON.parse(JSON.stringify(data));
+                item.payer = item.payer ? item.payer : '';
+                item.effective_start = moment(item.effective_start, 'YYYY-MM-DD').format('MM/DD/YYYY');
+                item.effective_end = moment(item.effective_end, 'YYYY-MM-DD').format('MM/DD/YYYY');
+                item.split_percentage = item.split_percentage ? (parseFloat(item.split_percentage) * 100).toFixed(0) : 0;
+                return item;
+            },
         },
 
         mounted() {
-            this.items = this.payers;
+            this.setItems(this.payers);
         },
     }
 </script>

@@ -117,7 +117,7 @@ class ManageClientPayersTest extends TestCase
     }
 
     /** @test */
-    public function new_client_payers_cannot_contain_duplicate_payer_ids()
+    public function adding_client_payers_should_fail_if_effective_dates_overlap_for_the_same_payer_id()
     {
         $this->withExceptionHandling();
 
@@ -126,26 +126,108 @@ class ManageClientPayersTest extends TestCase
         $this->assertCount(0, $this->client->payers);
 
         $data['payer_id'] = $this->payer->id;
+        $data['effective_start'] = '2018-01-01';
+        $data['effective_end'] = '2018-12-31';
         $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
             ->assertStatus(200);
 
         $this->assertCount(1, $this->client->fresh()->payers);
 
-        // must change something else about the data or server returns 409 conflict
-        $data['policy_number'] = 'new';
+        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
+        $data['effective_end'] = '2019-12-31';
         $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422);
-    
-        // test again with null value because it requires seperate validation
-        $data['payer_id'] = null;
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('payer_id');
+
+        $this->assertCount(1, $this->client->fresh()->payers);
+    }
+
+    /** @test */
+    public function adding_client_payers_should_fail_if_effective_dates_overlap_for_a_null_payer_id()
+    {
+        $this->withExceptionHandling();
+
+        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
+
+        $this->assertCount(0, $this->client->payers);
+
+        $data['payer_id'] = '';
+        $data['effective_start'] = '2018-01-01';
+        $data['effective_end'] = '2018-12-31';
         $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
             ->assertStatus(200);
-        $this->assertCount(2, $this->client->fresh()->payers);
 
-        $data['policy_number'] = 'new again';
+        $this->assertCount(1, $this->client->fresh()->payers);
+
+        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
+        $data['effective_end'] = '2019-12-31';
         $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422);
-        $this->assertCount(2, $this->client->fresh()->payers);
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('payer_id');
+
+        $this->assertCount(1, $this->client->fresh()->payers);
+    }
+
+    /** @test */
+    public function updating_client_payers_should_fail_if_effective_dates_overlap_for_the_same_payer_id()
+    {
+        $this->withExceptionHandling();
+
+        factory('App\Billing\ClientPayer')->create([
+            'client_id' => $this->client->id,
+            'payer_id' => $this->payer->id,
+            'effective_start' => '2018-01-01',
+            'effective_start' => '2018-12-31',
+        ])->toArray();
+
+        $data = factory('App\Billing\ClientPayer')->create([
+            'client_id' => $this->client->id,
+            'payer_id' => $this->payer->id,
+            'effective_start' => '2019-01-01',
+            'effective_start' => '2019-12-31',
+        ])->toArray();
+
+        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
+        $data['effective_end'] = '2019-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('payer_id');
+
+        $data['effective_start'] = '2019-01-02';
+        $data['effective_end'] = '2019-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
+            ->assertStatus(200);
+    }
+
+    /** @test */
+    public function updating_client_payers_should_fail_if_effective_dates_overlap_for_null_payer_ids()
+    {
+        $this->withExceptionHandling();
+
+        factory('App\Billing\ClientPayer')->create([
+            'client_id' => $this->client->id,
+            'payer_id' => null,
+            'effective_start' => '2018-01-01',
+            'effective_start' => '2018-12-31',
+        ])->toArray();
+
+        $data = factory('App\Billing\ClientPayer')->create([
+            'client_id' => $this->client->id,
+            'payer_id' => null,
+            'effective_start' => '2019-01-01',
+            'effective_start' => '2019-12-31',
+        ])->toArray();
+
+        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
+        $data['effective_end'] = '2019-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('payer_id');
+
+        $data['effective_start'] = '2019-01-02';
+        $data['effective_end'] = '2019-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
+            ->assertStatus(200);
     }
 
     /** @test */

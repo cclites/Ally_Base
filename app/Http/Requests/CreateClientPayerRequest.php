@@ -27,15 +27,7 @@ class CreateClientPayerRequest extends FormRequest
     public function rules()
     {
         return [
-            'payer_id' => [
-                'nullable',
-                Rule::exists('payers', 'id')->where(function ($query) {
-                    $query->where('chain_id', $this->route('client')->business->chain_id);
-                }),
-                Rule::unique('client_payers')->where(function ($query) {
-                    $query->where('client_id', request()->client->id);
-                }),
-            ],
+            'payer_id' => $this->getPayerIdRules(),
             'policy_number' => 'nullable|string',
             'effective_start' => 'required|date',
             'effective_end' => 'required|date',
@@ -44,7 +36,52 @@ class CreateClientPayerRequest extends FormRequest
                 Rule::in(ClientPayer::$allocationTypes),
             ],
             'payment_allowance' => 'nullable|numeric|between:0,99999.99|required_if:payment_allocation,daily|required_if:payment_allocation,weekly|required_if:payment_allocation,monthly',
-            'split_percentage' => 'nullable|numeric|between:0,1|required_if:payment_allocation,split',
+            'split_percentage' => 'nullable|numeric|between:0,100|required_if:payment_allocation,split',
+        ];
+    }
+
+    /**
+     * Get the conditional validation rules for payer_id.
+     *
+     * @return void
+     */
+    public function getPayerIdRules()
+    {
+        $rules = ['sometimes'];
+
+        if (! empty($this->payer_id)) {
+            array_push($rules, 
+                Rule::exists('payers', 'id')->where(function ($query) {
+                    $query->where('chain_id', $this->route('client')->business->chain_id);
+                })
+            );
+        }
+
+        // conditionally add the ignore on update
+        array_push($rules, 
+            Rule::unique('client_payers')->ignore(optional($this->route('payer'))->id)->where(function ($query) {
+                $query->where('client_id', request()->client->id)
+                    ->where(function ($query) {
+                        $start = (new Carbon(request()->effective_start))->format('Y-m-d');
+                        $end = (new Carbon(request()->effective_end))->format('Y-m-d');
+                        $query->whereBetween('effective_start', [$start, $end])
+                            ->orWhereBetween('effective_end', [$start, $end]);
+                    });
+            })
+        );
+
+        return $rules;
+    }
+
+    /**
+     * Get the custom validation error messages.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'payer_id.unique' => 'That payer is already attached to the client for those effective dates.',
         ];
     }
 

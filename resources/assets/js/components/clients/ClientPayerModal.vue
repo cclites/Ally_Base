@@ -133,8 +133,8 @@
                 return new Form({
                     payer_id: defaults.payer_id ? defaults.payer_id : '',
                     policy_number: defaults.policy_number,
-                    effective_start: moment(defaults.effective_start).format('MM/DD/YYYY'),
-                    effective_end: moment(defaults.effective_end).format('MM/DD/YYYY'),
+                    effective_start: defaults.effective_start,
+                    effective_end: defaults.effective_end,
                     payment_allocation: defaults.payment_allocation,
                     payment_allowance: defaults.payment_allowance,
                     split_percentage: defaults.split_percentage,

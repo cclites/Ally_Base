@@ -25,10 +25,6 @@ class ClientPayerController extends Controller
 
         $data = $request->filtered();
 
-        if (empty($request->payer_id) && $client->payers()->whereNull('payer_id')->exists()) {
-            return new ErrorResponse(422, "A 'Client' Payer entry already exists for this client.");
-        }
-
         if ($payer = $client->payers()->create($data)) {
             return new SuccessResponse('Payer added to client successfully.', $payer->fresh()->load('payer'));
         }
