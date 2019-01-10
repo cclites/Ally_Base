@@ -1,14 +1,13 @@
 <template>
     <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-    <b-modal id="filterColumnsModal" 
-        :title="title"
-        v-model="showModal"
-        size="lg"
-        class="modal-fit-more"
-        @cancel="onCancel"
-    >
-        <b-container fluid>
-            <b-row class="mb-2">
+        <b-modal id="filterColumnsModal" 
+            :title="title"
+            v-model="showModal"
+            size="lg"
+            class="modal-fit-more"
+            @cancel="onCancel"
+        >
+            <b-row class="mb-2 p-2">
                 <b-col lg="6">
                     <b-form-group label="Payer Name" label-for="name" label-class="required">
                         <b-form-input v-model="form.name" type="text" required />
@@ -31,17 +30,16 @@
                     ></business-payer-rates-table>
                 </b-col>
             </b-row>
-        </b-container>
-        <div slot="modal-footer">
-            <b-button variant="success"
-                      type="submit"
-                      :disabled="loading"
-            >
-                {{ buttonText }}
-            </b-button>
-            <b-btn variant="default" @click="showModal=false">Cancel</b-btn>
-        </div>
-    </b-modal>
+            <div slot="modal-footer">
+                <b-button variant="success"
+                        type="submit"
+                        :disabled="loading"
+                >
+                    {{ buttonText }}
+                </b-button>
+                <b-btn variant="default" @click="showModal=false">Cancel</b-btn>
+            </div>
+        </b-modal>
     </form>
 </template>
 

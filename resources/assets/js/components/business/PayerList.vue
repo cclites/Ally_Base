@@ -43,8 +43,8 @@
             @saved="save"
             v-model="showModal" 
             :source="payer"
-            :services="services">
-        </business-payer-modal>
+            :services="services"
+        />
     </b-card>
 </template>
 

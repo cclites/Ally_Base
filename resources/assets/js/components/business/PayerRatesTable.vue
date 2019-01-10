@@ -21,10 +21,10 @@
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">
-                    <mask-input v-model="row.item.effective_start" type="date"></mask-input>
+                    <mask-input v-model="row.item.effective_start" type="date" class="date-input"></mask-input>
                 </template>
                 <template slot="effective_end" scope="row">
-                    <mask-input v-model="row.item.effective_end" type="date"></mask-input>
+                    <mask-input v-model="row.item.effective_end" type="date" class="date-input"></mask-input>
                 </template>
                 <template slot="hourly_rate" scope="row">
                     <b-form-input
@@ -162,6 +162,6 @@
 </script>
 
 <style scoped>
-.money-input { width: 90px!important }
-.date-input { max-width: 130px!important }
+    .money-input { width: 85px!important }
+    .date-input { max-width: 100px!important }
 </style>
