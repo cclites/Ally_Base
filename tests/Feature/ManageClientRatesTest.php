@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Payer;
 
-class ManageClientPayersTest extends TestCase
+class ManageClientRatesTest extends TestCase
 {
     use RefreshDatabase;
 

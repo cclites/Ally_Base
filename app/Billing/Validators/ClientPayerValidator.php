@@ -9,17 +9,6 @@ use Illuminate\Support\Collection;
 class ClientPayerValidator
 {
     /**
-     * @var string[]
-     */
-    protected $allocationTypes = [
-        'balance',
-        'daily',
-        'weekly',
-        'monthly',
-        'split',
-    ];
-
-    /**
      * @var string|null
      */
     protected $error;
@@ -95,7 +84,7 @@ class ClientPayerValidator
     function validatePayerTypes(Collection $payers): bool
     {
         foreach($payers as $payer) {
-            if (!in_array($payer->payment_allocation, $this->allocationTypes)) {
+            if (!in_array($payer->payment_allocation, ClientPayer::$allocationTypes)) {
                 return $this->error($payer->payment_allocation . " is not a valid payment allocation type.");
             }
         }

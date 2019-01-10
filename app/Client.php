@@ -437,7 +437,8 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     public function payers()
     {
-        return $this->hasMany(ClientPayer::class, 'client_id');
+        return $this->hasMany(ClientPayer::class, 'client_id')
+            ->orderBy('priority');
     }
 
     public function rates()

@@ -162,6 +162,8 @@ class ClientController extends BaseController
             'careDetails',
             'carePlans',
             'caseManager',
+            'payers',
+            'rates',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
@@ -190,8 +192,9 @@ class ClientController extends BaseController
 
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
+        $payers = $this->businessChain()->payers;
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers'));
     }
 
     public function edit(Client $client)

@@ -10,7 +10,7 @@
                     <b-form-group label="Payer" label-for="payer_id" label-class="required">
                         <b-select v-model="form.payer_id">
                             <option value="">(Client)</option>
-                            <!-- <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option> -->
+                            <option v-for="payer in payers" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                         </b-select>
                         <input-help :form="form" field="payer_id"></input-help>
                     </b-form-group>
@@ -102,7 +102,7 @@
         props: {
             value: Boolean,
             source: Object,
-            services: Array,
+            payers: Array,
         },
 
         data() {
@@ -131,10 +131,10 @@
         methods: {
             makeForm(defaults = {}) {
                 return new Form({
-                    payer_id: defaults.payer_id,
+                    payer_id: defaults.payer_id ? defaults.payer_id : '',
                     policy_number: defaults.policy_number,
-                    effective_start: defaults.effective_start,
-                    effective_end: defaults.effective_end,
+                    effective_start: moment(defaults.effective_start).format('MM/DD/YYYY'),
+                    effective_end: moment(defaults.effective_end).format('MM/DD/YYYY'),
                     payment_allocation: defaults.payment_allocation,
                     payment_allowance: defaults.payment_allowance,
                     split_percentage: defaults.split_percentage,
@@ -143,9 +143,8 @@
 
             submit() {
                 this.loading = true;
-                this.form.rates = this.$refs.ratesTable.items;
                 let method = this.source.id ? 'patch' : 'post';
-                let url = this.source.id ? `/business/payers/${this.source.id}` : '/business/payers';
+                let url = this.source.id ? `/business/clients/${this.source.client_id}/payers/${this.source.id}` : `/business/clients/${this.source.client_id}/payers`;
                 this.form.submit(method, url)
                     .then(response => {
                         this.$emit('saved', response.data.data);
