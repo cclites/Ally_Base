@@ -10,6 +10,7 @@ use App\Responses\SuccessResponse;
 use App\Http\Requests\CreatePayerRequest;
 use App\Http\Requests\UpdatePayerRequest;
 use App\Responses\ErrorResponse;
+use App\Billing\Validators\PayerRateValidator;
 
 class PayerController extends BaseController
 {
@@ -58,6 +59,11 @@ class PayerController extends BaseController
                 throw new \Exception();
             }
             
+            $validator = new PayerRateValidator();
+            if (! $validator->validate($payer->fresh())) {
+                return new ErrorResponse(422, $validator->getErrorMessage());
+            }
+
             \DB::commit();
             return new SuccessResponse('Payer added successfully.', $payer->fresh());
         } catch (\Exception $ex) {
@@ -75,9 +81,9 @@ class PayerController extends BaseController
      */
     public function update(UpdatePayerRequest $request, Payer $payer)
     {
-        $data = $request->filtered();
-
         $this->authorize('update', $payer);
+
+        $data = $request->filtered();
 
         \DB::beginTransaction();
         try {
@@ -89,6 +95,11 @@ class PayerController extends BaseController
                 throw new \Exception();
             }
             
+            $validator = new PayerRateValidator();
+            if (! $validator->validate($payer->fresh())) {
+                return new ErrorResponse(422, $validator->getErrorMessage());
+            }
+
             \DB::commit();
             return new SuccessResponse('Payer details updated successfully.', $payer->fresh());
         } catch (\Exception $ex) {
