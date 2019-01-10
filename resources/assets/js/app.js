@@ -189,8 +189,6 @@ Vue.component('prospect-directory', require('./components/business/reports/Prosp
 Vue.component('business-payer-list', require('./components/business/PayerList'));
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
-Vue.component('business-client-payers-tab', require('./components/business/Clients/ClientPayersTab'));
-Vue.component('business-client-rates-tab', require('./components/business/Clients/ClientRatesTab'));
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));
@@ -226,6 +224,9 @@ Vue.component('clients-without-emails-report', require('./components/business/re
 Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
+Vue.component('client-payer-modal', require('./components/clients/ClientPayerModal'));
+Vue.component('client-payers-tab', require('./components/clients/ClientPayersTab'));
+Vue.component('client-rates-tab', require('./components/clients/ClientRatesTab'));
 
 Vue.component('prospect-edit', require('./components/business/prospects/ProspectEdit.vue'));
 Vue.component('prospect-list', require('./components/business/prospects/ProspectList.vue'));

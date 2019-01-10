@@ -1,7 +1,6 @@
 <template>
     <form @submit.prevent="submitForm()" @keydown="form.clearError($event.target.name)">
-        <b-modal id="filterColumnsModal" 
-            :title="title"
+        <b-modal :title="title"
             v-model="showModal"
             size="lg"
             class="modal-fit-more"

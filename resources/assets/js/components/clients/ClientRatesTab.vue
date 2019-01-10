@@ -1,11 +1,9 @@
 <template>
     <b-card
-        header="Client Payers"
+        header="Client Rates"
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn variant="info" class="mb-2" @click="showModal()">Add Payer</b-btn>
-
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -22,7 +20,7 @@
 </template>
 
 <script>
-    import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsDates from "../../mixins/FormatsDates";
 
     export default {
         props: {

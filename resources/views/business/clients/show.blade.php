@@ -184,10 +184,10 @@
             <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
         </div>
         <div class="tab-pane" id="payers" role="tabpanel">
-            <business-client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" />
+            <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" />
         </div>
         <div class="tab-pane" id="rates" role="tabpanel">
-            <business-client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" />
+            <client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" />
         </div>
     </div>
 @endsection
