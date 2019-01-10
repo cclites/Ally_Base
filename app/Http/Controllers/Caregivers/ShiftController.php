@@ -16,7 +16,6 @@ use App\ShiftIssue;
 use App\Signature;
 use Illuminate\Http\Request;
 
-
 class ShiftController extends BaseController
 {
     public function index(Schedule $schedule = null)
@@ -152,14 +151,9 @@ class ShiftController extends BaseController
         throw new \Exception('ShiftController: Missing client or schedule to clock into.');
     }
 
-    public function showClockOut()
+    public function showClockOutForClient($client_id) 
     {
-        if (!$this->caregiver()->isClockedIn()) {
-            return redirect()->route('shift.index');
-        }
-
-        // Get the active shift
-        $shift = $this->caregiver()->getActiveShift();
+        $shift = $this->caregiver()->getActiveShift($client_id);
 
         // Load the client relationship
         $shift->load('client');
@@ -187,6 +181,27 @@ class ShiftController extends BaseController
         }
 
         return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions', 'goals'));
+    }
+
+    public function showClockOut()
+    {
+        if (!$this->caregiver()->isClockedIn()) {
+            return redirect()->route('shift.index');
+        }
+
+        // Get the active shifts
+        $shifts = $this->caregiver()->getActiveShifts();
+
+        if (sizeof($shifts) > 1) {
+            // redirect to active shift list page
+            foreach($shifts as $s) {
+                $s->load('client');
+            }
+
+            return view('caregivers.shifts', compact('shifts'));
+        } else {
+            return $this->showClockOutForClient($shifts[0]->client->id);
+        }
     }
 
     public function clockOut(Request $request)
