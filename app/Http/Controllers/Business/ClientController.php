@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
@@ -16,6 +17,9 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
+use App\Billing\Service;
+use App\Billing\Payer;
+use App\Billing\ClientAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -191,7 +195,14 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
+        $services = Service::forAuthorizedChain()->ordered()->get();
+        $payers = Payer::forAuthorizedChain()->ordered()->get();
+        $auth = ClientAuthorization::where("client_id", $client->id)->first();
+        if ($auth == null) {
+            $auth = "";
+        }
+        
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auth'));
     }
 
     public function edit(Client $client)
@@ -382,8 +393,27 @@ class ClientController extends BaseController
             'max_weekly_hours'
         ]);
 
-        if($client->update($data)) {
-            return new SuccessResponse('Client info updated.');
+        // prepare client service auth data
+        $authData = $request->only([
+            'service_id',
+            'payer_id',
+            'effective_start',
+            'effective_end',
+            'units',
+            'unit_type',
+            'period',
+            'notes'
+        ]);
+        $authData['client_id'] = $client->id;
+
+        $authRequest = new Request($authData);
+
+        if ($client->update($data)) {
+            if ((new ClientAuthController())->save($authRequest)) {    
+                return new SuccessResponse('Client info updated.');
+            } else {
+                return new ErrorResponse(500, 'Error updating client authroization info.');
+            }
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }

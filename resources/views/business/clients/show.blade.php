@@ -16,6 +16,9 @@
     <?php
         $defaultPaymentTypeMessage = "Active Payment Type: " . $client->getPaymentType() . " (" . round($client->getAllyPercentage() * 100, 2) . "% Processing Fee)";
         $backupPaymentTypeMessage = "Active Payment Type: " . $client->getPaymentType($client->backupPayment) . " (" . round($client->getAllyPercentage($client->backupPayment) * 100, 2) . "% Processing Fee)";
+        if ($auth == null) {
+            $auth = "{}";
+        }
     ?>
 
     <!-- Nav tabs -->
@@ -167,7 +170,7 @@
                                     :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
         <div class="tab-pane" id="insurance_service_auth">
-            <client-insurance-service-auth :client="{{ $client }}"></client-insurance-service-auth>
+            <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auth="{{ $auth }}"></client-insurance-service-auth>
         </div>
     </div>
 @endsection
