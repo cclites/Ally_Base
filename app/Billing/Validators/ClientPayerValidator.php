@@ -104,14 +104,14 @@ class ClientPayerValidator
 
     function validateSplitPayers(Collection $payers, bool $hasBalancePayer): bool
     {
-        // Validate priorities (split should never precede anything but balance)
+        // Validate priorities (split should never precede anything but balance/another split)
         $lastNonBalance = -1;
         $nonBalanceType = "";
         $firstSplit = 999;
         foreach($payers as $payer) {
             if ($payer->payment_allocation === "split" && $payer->priority < $firstSplit) {
                 $firstSplit = $payer->priority;
-            } else if ($payer->payment_allocation !== "balance" && $payer->priority > $lastNonBalance) {
+            } else if (!in_array($payer->payment_allocation, ["balance", "split"]) && $payer->priority > $lastNonBalance) {
                 $lastNonBalance = $payer->priority;
                 $nonBalanceType = $payer->payment_allocation;
             }
