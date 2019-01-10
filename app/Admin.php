@@ -42,6 +42,10 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereName($firstname = null, $lastname = null)
  * @mixin \Eloquent
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class Admin extends AuditableModel implements UserRole
 {

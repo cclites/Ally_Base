@@ -6,6 +6,17 @@ use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 use Carbon\Carbon;
 
+/**
+ * App\Billing\Payer
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\BusinessChain $businessChain
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PayerRate[] $rates
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @mixin \Eloquent
+ */
 class Payer extends AuditableModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;

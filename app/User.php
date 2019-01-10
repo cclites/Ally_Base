@@ -77,6 +77,8 @@ use Packages\MetaData\HasMetaData;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User whereUsername($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\User withMeta()
  * @mixin \Eloquent
+ * @property-read mixed $masked_name
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface
 {

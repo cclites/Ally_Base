@@ -10,6 +10,8 @@ use App\Traits\BelongsToOneChain;
  *
  * @property int $id
  * @property int $chain_id
+ * @property string $name
+ * @property string|null $code
  * @property bool $default
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\BusinessChain $businessChain
@@ -24,7 +26,7 @@ class Service extends AuditableModel implements BelongsToChainsInterface
 
     protected $orderedColumn = 'name';
 
-    protected $fillable = ['name', 'default', 'chain_id'];
+    protected $fillable = ['name', 'code', 'default', 'chain_id'];
 
     protected $casts = [
         'default' => 'bool',

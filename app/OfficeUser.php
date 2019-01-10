@@ -48,6 +48,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereName($firstname = null, $lastname = null)
  * @mixin \Eloquent
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface
 {

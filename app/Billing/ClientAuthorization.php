@@ -1,44 +1,42 @@
 <?php
-namespace App\Billing\Invoiceable;
+namespace App\Billing;
 
 use App\AuditableModel;
-use App\Billing\Service;
-use App\Caregiver;
-use App\Billing\Payer;
-use App\Shift;
+use App\Client;
 
 /**
- * App\Billing\Invoiceable\ShiftService
+ * App\Billing\ClientAuthorization
  *
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
  * @property-read \App\Billing\Payer $payer
  * @property-read \App\Billing\Service $service
- * @property-read \App\Shift $shift
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
-class ShiftService extends AuditableModel
+class ClientAuthorization extends AuditableModel
 {
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'client_id' => 'int',
+        'service_id' => 'int',
+        'payer_id' => 'int',
+        'units' => 'float',
+    ];
 
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
 
-    function caregiver()
+    function client()
     {
-        return $this->belongsTo(Caregiver::class);
+        return $this->belongsTo(Client::class);
     }
 
     function payer()
     {
         return $this->belongsTo(Payer::class);
-    }
-
-    function shift()
-    {
-        return $this->belongsTo(Shift::class);
     }
 
     function service()

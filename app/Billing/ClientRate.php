@@ -5,6 +5,17 @@ use App\AuditableModel;
 use App\Caregiver;
 use App\Client;
 
+/**
+ * App\Billing\ClientRate
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @property-read \App\Billing\Payer $payer
+ * @property-read \App\Billing\Service $service
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @mixin \Eloquent
+ */
 class ClientRate extends AuditableModel
 {
     protected $guarded = ['id'];

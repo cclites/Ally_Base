@@ -138,6 +138,15 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
+ * @property int $client_confirmed
+ * @property int|null $duplicated_by
+ * @property-read \App\Shift|null $duplicatedBy
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $duplicates
+ * @property-read array $flags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftFlag[] $shiftFlags
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientConfirmed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  */
 class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
