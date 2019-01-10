@@ -38,7 +38,9 @@ class CustomField extends Model implements BelongsToChainsInterface
     ];
 
     /**
-     * The ustom model attributes to add to the Eloquent model
+     * The custom model attributes to add to the Eloquent model
+     * 
+     * @var array
      */
     protected $appends = [
         'default',
