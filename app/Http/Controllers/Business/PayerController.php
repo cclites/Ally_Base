@@ -17,6 +17,7 @@ class PayerController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param \Illuminate\Http\Request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -97,6 +98,7 @@ class PayerController extends BaseController
             
             $validator = new PayerRateValidator();
             if (! $validator->validate($payer->fresh())) {
+                \DB::rollBack();
                 return new ErrorResponse(422, $validator->getErrorMessage());
             }
 

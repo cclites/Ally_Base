@@ -2,85 +2,64 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Billing\ClientRate;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Responses\SuccessResponse;
+use App\Responses\ErrorResponse;
+use Illuminate\Http\Request;
+use App\Billing\ClientRate;
+use App\Client;
+use App\Http\Requests\UpdateClientRatesRequest;
+use App\Billing\Validators\ClientRateValidator;
 
 class ClientRatesController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
+     * @param  Request  $request
+     * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, Client $client)
     {
-        //
-    }
+        $this->authorize('read', $client);
+        
+        $data = $client->rates()->ordered()->get();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Billing\ClientRate  $clientRate
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ClientRate $clientRate)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Billing\ClientRate  $clientRate
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ClientRate $clientRate)
-    {
-        //
+        return response()->json($data);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Billing\ClientRate  $clientRate
+     * @param  UpdateClientRatesRequest  $request
+     * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ClientRate $clientRate)
+    public function update(UpdateClientRatesRequest $request, Client $client)
     {
-        //
-    }
+        $this->authorize('update', $client);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Billing\ClientRate  $clientRate
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(ClientRate $clientRate)
-    {
-        //
+        $data = $request->filtered();
+        
+        \DB::beginTransaction();
+        try {
+            if ($client->syncRates($data['rates'])) {
+                $validator = new ClientRateValidator();
+                if (! $validator->validate($client->fresh())) {
+                    \DB::rollBack();
+                    return new ErrorResponse(422, $validator->getErrorMessage());
+                }
+
+                \DB::commit();
+                return new SuccessResponse('Client Rates saved successfully.', $client->fresh()->rates);
+            } 
+
+            throw new \Exception();
+        } catch (\Exception $ex) {
+            \Log::debug($ex->getMessage());
+            \DB::rollBack();
+            return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
+        }
     }
 }

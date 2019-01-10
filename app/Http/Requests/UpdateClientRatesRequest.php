@@ -3,11 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Payer;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 
-class CreatePayerRequest extends FormRequest
+class UpdateClientRatesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,20 +26,34 @@ class CreatePayerRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string',
-            'npi_number' => 'nullable|string',
             'rates' => 'nullable|array',
             'rates.*.service_id' => [
                 'nullable',
                 'numeric',
                 Rule::exists('services', 'id')->where(function ($query) {
-                    $query->where('chain_id', auth()->user()->officeUser->chain_id);
+                    $query->where('chain_id', $this->route('client')->business->chain_id);
                 })
             ],
-            'rates.*.fixed_rate' => 'required|numeric|between:0,999.99',
-            'rates.*.hourly_rate' => 'required|numeric|between:0,999.99',
+            'rates.*.payer_id' => [
+                'nullable',
+                'numeric',
+                Rule::exists('payers', 'id')->where(function ($query) {
+                    $query->where('chain_id', $this->route('client')->business->chain_id);
+                })
+            ],
+            'rates.*.caregiver_id' => [
+                'nullable',
+                'numeric',
+                Rule::exists('client_caregivers', 'caregiver_id')->where(function ($query) {
+                    $query->where('client_id', $this->route('client')->id);
+                })
+            ],
             'rates.*.effective_start' => 'required|date',
-            'rates.*.effective_end' => 'required|date', //|after_or_equal:' . $this->input('rates.*.effective_start'),
+            'rates.*.effective_end' => 'required|date', 
+            'rates.*.caregiver_fixed_rate' => 'required|numeric|between:0,999.99',
+            'rates.*.caregiver_hourly_rate' => 'required|numeric|between:0,999.99',
+            'rates.*.client_fixed_rate' => 'required|numeric|between:0,999.99',
+            'rates.*.client_hourly_rate' => 'required|numeric|between:0,999.99',
         ];
     }
 
@@ -52,11 +65,8 @@ class CreatePayerRequest extends FormRequest
     public function filtered() : array
     {
         $data = $this->validated();
-        $data['chain_id'] = auth()->user()->officeUser->chain_id;
         if (isset($data['rates'])) {
             $data['rates'] = collect($data['rates'])->map(function ($rate) {
-                unset($rate['service']);
-
                 return array_merge($rate, [
                     'effective_start' => (new Carbon($rate['effective_start']))->format('Y-m-d'),
                     'effective_end' => (new Carbon($rate['effective_end']))->format('Y-m-d'),

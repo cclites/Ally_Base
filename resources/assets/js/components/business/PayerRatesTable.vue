@@ -27,8 +27,7 @@
                     <mask-input v-model="row.item.effective_end" type="date" class="date-input"></mask-input>
                 </template>
                 <template slot="hourly_rate" scope="row">
-                    <b-form-input
-                        name="hourly_rate"
+                    <b-form-input name="hourly_rate"
                         class="money-input"
                         type="number"
                         step="any"
@@ -40,8 +39,7 @@
                     ></b-form-input>
                 </template>
                 <template slot="fixed_rate" scope="row">
-                    <b-form-input
-                        name="fixed_rate"
+                    <b-form-input name="fixed_rate"
                         class="money-input"
                         type="number"
                         step="any"
@@ -73,7 +71,6 @@
             return {
                 items: [],
                 payer: {},
-                showModal: false,
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
@@ -163,5 +160,5 @@
 
 <style scoped>
     .money-input { width: 85px!important }
-    .date-input { max-width: 100px!important }
+    .date-input { max-width: 120px!important }
 </style>

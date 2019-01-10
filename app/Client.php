@@ -751,4 +751,15 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
         return (float) config('ally.credit_card_fee');
     }
 
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $rates
+     * @return bool
+     */
+    public function syncRates($rates)
+    {
+        return ClientRate::sync($this, $rates);
+    }
 }

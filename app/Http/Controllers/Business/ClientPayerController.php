@@ -17,6 +17,7 @@ class ClientPayerController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  CreateClientPayerRequest  $request
+     * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
     public function store(CreateClientPayerRequest $request, Client $client)

@@ -318,4 +318,29 @@ class ManagePayersTest extends TestCase
     
         $this->assertCount(1, $payer->fresh()->rates);
     }
+
+    /** @test */
+    public function payer_rates_must_have_a_valid_service_id()
+    {
+        $this->withExceptionHandling();
+
+        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
+        $rate = factory('App\Billing\PayerRate')->make(['payer_id' => $payer->id]);
+        $otherChain = factory('App\BusinessChain')->create();
+        $otherService = factory('App\Billing\Service')->create(['chain_id' => $otherChain->id]);
+
+        $data = array_merge($payer->toArray(), [
+            'rates' => [$rate->toArray()],
+        ]);
+
+        $data['rates'][0]['service_id'] = 2345355467; // fake id number
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $data['rates'][0]['service_id'] = $otherService->id; 
+        $this->patchJson(route('business.payers.update', ['payer' => $payer]), $data)
+            ->assertStatus(422);
+
+        $this->assertCount(0, $payer->fresh()->rates);
+    }
 }
