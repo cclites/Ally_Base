@@ -100,6 +100,55 @@ a.franchisor-navlink {
   }
 }
 
+/* Customize modals, make wider, but slimmed down padding */
+.modal-header {
+  padding: 10px 15px;
+  .modal-title {
+    font-weight: 500;
+  }
+}
+@media (min-width: 992px) {
+  .modal-lg {
+    max-width: 900px;
+  }
+}
+@media (min-width: 1170px) {
+  .modal-lg {
+    max-width: 1020px;
+  }
+}
+
+
+.modal-fit-more {
+  .modal-body {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+  .custom-control-description {
+    padding-top: 3px;
+  }
+  .form-control {
+    font-size: 14px;
+    min-height: 24px;
+    padding: 0.25rem 0.5rem;
+  }
+  select.form-control {
+    height: 2rem !important;
+  }
+  .form-group {
+    margin-bottom: 15px;
+  }
+  .col-form-label {
+    padding-bottom: 2px;
+  }
+}
+
 
 /* Smaller device adjustments */
 @media (max-width: 768px) {
@@ -238,28 +287,6 @@ td .fc-event-container {
   }
   .col-sm-1 {
     width: 8.33333333%;
-  }
-}
-
-.modal-fit-more {
-  .modal-body {
-    font-size: 14px;
-  }
-  .card-title {
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 0;
-  }
-  .custom-control-description {
-    padding-top: 2px;
-  }
-  .form-control {
-    font-size: 14px;
-    min-height: 28px;
-  }
-  .form-group {
-    margin-bottom: 15px;
   }
 }
 
