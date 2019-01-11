@@ -239,7 +239,9 @@
                             : await optionForm.post(`/business/custom-fields/options/${data.data.id}`);
                     }
 
-                    window.location.href = '/business/settings';
+                    if (! this.field) {
+                        window.location.href = '/business/settings#custom-fields';
+                    }
                 } catch(error) {}
                 this.submitting = false;
             },
