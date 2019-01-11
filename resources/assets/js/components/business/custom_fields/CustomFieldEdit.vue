@@ -222,6 +222,7 @@
 
                 if(this.form.type == 'dropdown' && this.options.length < 1) {
                     alert('You need more than 1 option for this list field to be valid.');
+                    this.submitting = false;
                     return;
                 }
 
