@@ -17,5 +17,6 @@ $factory->define(\App\Billing\Payer::class, function (Faker $faker) {
         'zip' => $faker->randomNumber(5),
         'phone_number' => $faker->phoneNumber,
         'fax_number' => $faker->phoneNumber,
+        'week_start' => $faker->numberBetween(0, 6),
     ];
 });
