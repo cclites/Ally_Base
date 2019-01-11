@@ -171,7 +171,7 @@ class ClientPayer extends AuditableModel
      * @param int $priority
      * @return void
      */
-    public static function shiftPriorityUpAt($client_id, $priority)
+    public static function shiftPriorityUpAt(int $client_id, int $priority) : void
     {
         $index = $priority;
 
