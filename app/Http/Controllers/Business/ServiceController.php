@@ -33,6 +33,9 @@ class ServiceController extends BaseController
         $this->authorize('create', [Service::class, $data]);
 
         if ($service = Service::create($request->filtered())) {
+            if ($request->input('default')) {
+                Service::setDefault($service->chain_id, $service);
+            }
             return new CreatedResponse('New Service has been created', $service);
         }
         
@@ -51,6 +54,10 @@ class ServiceController extends BaseController
         $this->authorize('update', $service);
 
         if ($service->update($request->filtered())) {
+            if ($request->input('default')) {
+                Service::setDefault($service->chain_id, $service);
+            }
+
             return new SuccessResponse('Service has been updated.', $service);
         }
 
@@ -66,6 +73,10 @@ class ServiceController extends BaseController
     public function destroy(Service $service)
     {
         $this->authorize('delete', $service);
+
+        if ($service->default) {
+            return new ErrorResponse(400, 'You cannot delete the default billing service.');
+        }
 
         try {
             if ($service->delete()) {
