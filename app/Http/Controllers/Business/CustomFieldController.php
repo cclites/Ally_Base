@@ -242,7 +242,7 @@ class CustomFieldController extends Controller
         $this->authorize('delete', $field);
 
         if ($field->delete()) {
-            return new SuccessResponse('The field has been deleted.');
+            return new SuccessResponse('The field has been deleted.', null, route('business-settings').'#custom-fields');
         }
 
         return new ErrorResponse(500, 'Could not delete the field.  Please try again.');
