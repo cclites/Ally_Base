@@ -84,7 +84,7 @@ class ClientAuthController extends BaseController
     public function destroy(ClientAuthorization $auth)
     {
         $auth->load('client');
-        $this->authorize('delete', $auth->client);
+        $this->authorize('update', $auth->client);
 
         try {
             if ($auth->delete()) {
