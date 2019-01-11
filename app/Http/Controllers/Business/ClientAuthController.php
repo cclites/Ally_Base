@@ -2,13 +2,14 @@
 namespace App\Http\Controllers\Business;
 
 use Auth;
+use App\Client;
 use App\Billing\ClientAuthorization;
 use App\Http\Requests\CreateClientAuthRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
-
+use Log;
 class ClientAuthController extends BaseController
 {
     /**
@@ -36,8 +37,13 @@ class ClientAuthController extends BaseController
      */
     public function store(CreateClientAuthRequest $request)
     {
+        $client = Client::forRequestedBusinesses()
+            ->where('id', $request->client_id)
+            ->first();
+
+        $this->authorize('update', $client);
+
         $data = $request->filtered();
-        $this->authorize('create', [ClientAuthorization::class, $data]);
 
         if ($auth = ClientAuthorization::create($request->filtered())) {
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
@@ -57,7 +63,8 @@ class ClientAuthController extends BaseController
      */
     public function update(CreateClientAuthRequest $request, ClientAuthorization $auth)
     {
-        $this->authorize('update', $auth);
+        $auth->load('client');
+        $this->authorize('update', $auth->client);
 
         if ($auth->update($request->filtered())) {
             $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
@@ -76,7 +83,8 @@ class ClientAuthController extends BaseController
      */
     public function destroy(ClientAuthorization $auth)
     {
-        $this->authorize('delete', $auth);
+        $auth->load('client');
+        $this->authorize('delete', $auth->client);
 
         try {
             if ($auth->delete()) {
