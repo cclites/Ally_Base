@@ -758,8 +758,20 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
      * @param array|null $rates
      * @return bool
      */
-    public function syncRates($rates)
+    public function syncRates(?iterable $rates) : bool
     {
         return ClientRate::sync($this, $rates);
+    }
+
+    /**
+     * Remove missing ClientRates and update existing with the given
+     * request values.
+     *
+     * @param array|null $payers
+     * @return bool
+     */
+    public function syncPayers(?iterable $payers) : bool
+    {
+        return ClientPayer::sync($this, $payers);
     }
 }

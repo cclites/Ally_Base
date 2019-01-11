@@ -18,7 +18,7 @@ use Carbon\Carbon;
 class ClientPayer extends AuditableModel
 {
     protected $orderedColumn = 'priority';
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'payer_name', 'payer'];
     protected $with = ['payer'];
     protected $appends = ['payer_name'];
 
@@ -59,10 +59,6 @@ class ClientPayer extends AuditableModel
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($obj) {
-            $obj->priority = self::getNextPriority($obj->client_id);
-        });
     }
 
     public static $allowanceTypes = [
@@ -107,6 +103,54 @@ class ClientPayer extends AuditableModel
     ////////////////////////////////////
 
     /**
+     * Remove missing ClientPayers and update existing with the given
+     * request values.
+     *
+     * @param \App\Client $client
+     * @param array|null $payers
+     * @return bool
+     */
+    public static function sync(Client $client, ?iterable $payers) : bool
+    {
+        try {
+            $new = collect($payers)->filter(function($item) {
+                return ! isset($item['id']);
+            });
+
+            $existing = collect($payers)->filter(function($item) {
+                return isset($item['id']);
+            });
+
+            $ids = $existing->pluck('id');
+            if (count($ids)) {
+                // remove all items with ids that aren't in the current array
+                ClientPayer::where('client_id', $client->id)
+                    ->whereNotIn('id', $ids)
+                    ->delete();
+
+                // update the existing items in case they changed
+                foreach($existing as $item) {
+                    if ($payer = ClientPayer::where('id', $item['id'])->first()) {
+                        $payer->update($item);
+                    }
+                }
+            } else {
+                // clear
+                ClientPayer::where('client_id', $client->id)->delete();
+            }
+
+            // create new issues from the issues that have no id
+            foreach($new as $item) {
+                ClientPayer::create(array_merge($item, ['client_id' => $client->id]));
+            }
+            
+            return true;
+        } catch (\Exception $ex) {
+            \Log::debug($ex->getMessage());
+            return false;
+        }
+    }
+    /**
      * Get the payment method for this payer
      *
      * @return \App\Billing\Contracts\ChargeableInterface
@@ -120,69 +164,6 @@ class ClientPayer extends AuditableModel
 
         // Fall back to provider pay for all other payments.
         return $this->client->business;
-    }
-
-    /**
-     * Returns the next free number for priority in the order sequence.
-     *
-     * @param int $client
-     * @return int
-     */
-    public static function getNextPriority(int $client) : int
-    {
-        return self::select(\DB::raw('coalesce(max(`priority`), 0) as max_priority'))
-            ->where('client_id', $client)
-            ->get()
-            ->first()
-            ->max_priority + 1;
-    }
-
-    /**
-     * Increases the priority value for all of the users contacts
-     * at the given index and above, while skipping the excluded contact ID.
-     * Used to shift priority down in order to raise the priority for a specific contact.
-     *
-     * @param int $client_id
-     * @param int $priority
-     * @param int $exclude_id
-     * @return void
-     */
-    public static function shiftPriorityDownAt(int $client_id, int $priority, int $exclude_id) : void
-    {
-        $index = $priority;
-
-        self::where('client_id', $client_id)
-            ->where('priority', '>=', $priority)
-            ->where('id', '!=', $exclude_id)
-            ->orderBy('priority')
-            ->get()
-            ->each(function ($item, $key) use (&$index) {
-                $index = $index + 1;
-                $item->update(['priority' => $index]);
-            });
-    }
-
-    /**
-     * Decreases the priority value for all of the users contacts
-     * above the given index.  Used to bump the priority up when a 
-     * contact is deleted.
-     *
-     * @param int $client_id
-     * @param int $priority
-     * @return void
-     */
-    public static function shiftPriorityUpAt(int $client_id, int $priority) : void
-    {
-        $index = $priority;
-
-        self::where('client_id', $client_id)
-            ->where('priority', '>', $priority)
-            ->orderBy('priority')
-            ->get()
-            ->each(function ($item, $key) use (&$index) {
-                $item->update(['priority' => $index]);
-                $index = $index + 1;
-            });
     }
 
     /**
