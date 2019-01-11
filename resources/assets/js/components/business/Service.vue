@@ -2,7 +2,7 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="12">
-                <a @click="onNewService()" class="btn btn-info">Add Service</a>
+                <b-btn variant="info" @click="addService()">Add Service</b-btn>
             </b-col>
         </b-row>
         <div>
@@ -19,10 +19,10 @@
                 >
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                        <b-btn size="sm" @click="onEditService(row.item.id)">
+                        <b-btn size="sm" @click="editService(row.item.id)">
                             <i class="fa fa-edit"></i>
                         </b-btn>
-                        <b-btn size="sm" @click="onDeleteService(row.item.id)">
+                        <b-btn size="sm" @click="deleteService(row.item.id)">
                             <i class="fa fa-trash"></i>
                         </b-btn>
                     </template>
@@ -39,7 +39,7 @@
             </b-row>
         </div>
         <business-service-modal 
-            @saved="newService"
+            @saved="serviceSaved"
             v-model="showServiceModal" 
             :source="service">
         </business-service-modal>
@@ -96,7 +96,7 @@
         },
 
         methods: {
-            newService(data) {
+            serviceSaved(data) {
                 let item = this.items.find(x => x.id === data.id);
                 if (item) {
                     item.name = data.name;
@@ -105,21 +105,30 @@
                 } else {
                     this.items.push(data);
                 }
+
+                if (data.default) {
+                    this.items.map(item => {
+                        item.default = item.id === data.id;
+                        return item;
+                    });
+                }
             },
-            onNewService() {
+            addService() {
                 this.service = {};
                 this.showServiceModal = true;
             },
-            onEditService(id) {
+            editService(id) {
                 this.service = this.items.find(x => x.id == id);
                 this.showServiceModal = true;
             },
-            onDeleteService(id) {
-                let form = new Form();
-                form.submit('delete', `/business/service/${id}`)
-                    .then( ({ data }) => {
-                        this.items = this.items.filter(x => x.id !== id);
-                    });
+            deleteService(id) {
+                if (confirm("Are you sure you wish to delete this service?")) {
+                    let form = new Form();
+                    form.submit('delete', `/business/service/${id}`)
+                        .then( ({ data }) => {
+                            this.items = this.items.filter(x => x.id !== id);
+                        });
+                }
             },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
