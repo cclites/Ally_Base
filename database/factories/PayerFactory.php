@@ -14,7 +14,7 @@ $factory->define(\App\Billing\Payer::class, function (Faker $faker) {
         'address2' => $faker->randomElement([null, 'Apt' . mt_rand(1,2000), 'Suite #' . mt_rand(100,200)]),
         'city' => $faker->city,
         'state' => $faker->randomElement(['CA', 'OH', 'NY', 'MI', 'PA', 'FL', 'TX', 'WA']),
-        'zip' => $faker->randomNumber(5),
+        'zip' => $faker->postcode,
         'phone_number' => $faker->phoneNumber,
         'fax_number' => $faker->phoneNumber,
         'week_start' => $faker->numberBetween(0, 6),
