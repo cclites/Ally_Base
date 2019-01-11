@@ -308,29 +308,31 @@
             },
 
             onChangePayer(e, item) {
-                console.log(e);
+                // automatically load the rates for the business and use
+                // them as the default values when the payer is changed.
                 this.setDefaultRates(item, e, item.service_id);
             },
 
             onChangeService(e, item) {
-                console.log(e);
+                // automatically load the rates for the business and use
+                // them as the default values when the service is changed.
                 this.setDefaultRates(item, item.payer_id, e);
             },
 
             setDefaultRates(item, payer_id, service_id) {
-                // TODO: load between dates
                 let payer = this.payers.find(x => x.id == payer_id);
                 
                 if (! payer) {
                     // no matching rate for payer / service
-                    console.log('no payer matches effective dates');
+                    console.log('no payer matche for the business');
                     item.client_hourly_rate = 0.00;
                     item.client_fixed_rate = 0.00;
                     return;
                 }
 
                 let rate = payer.rates.find(x => {
-                    console.log('effective dates: ' + x.effective_start + ' - ' + x.effective_end);
+                    // filter rate by effective dates so if there are multiple entries for
+                    // a payer/service combo, it will pull the active one.
                     return x.service_id == service_id &&
                         moment().isBetween(x.effective_start, x.effective_end)
                 });
