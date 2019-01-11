@@ -67,7 +67,7 @@ class ClientRate extends AuditableModel
      * @param array|null $rates
      * @return bool
      */
-    public static function sync(Client $client, iterable $rates) : bool
+    public static function sync(Client $client, ?iterable $rates) : bool
     {
         try {
             $new = collect($rates)->filter(function($item) {
