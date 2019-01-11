@@ -71,7 +71,7 @@ class ClientPayerController extends Controller
                 return new SuccessResponse('Payer was successfully removed from the Client.', $payer);
             }
         } catch (\Exception $ex) {
-            logger($e->getMessage());
+            logger($ex->getMessage());
         }
 
         return new ErrorResponse(500, 'Client Payer could not be removed.');
