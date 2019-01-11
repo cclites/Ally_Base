@@ -2,20 +2,23 @@
     <form @submit.prevent="submit()" @keydown="form.clearError($event.target.name)">
         <b-row>
             <b-col lg="4">
-                <b-form-group label="Type" class="type-icons">
-                    <b-form-radio-group id="note-type" v-model="form.type" name="noteType">
+                <b-form-group label="Type">
+                    <b-form-radio-group v-model="form.type" name="noteType" button-variant="success">
                         <b-form-radio value="other">
                             <span class="type-icon type-icon-first">
-                                <i class="fa fa-sticky-note"></i>
+                                <i class="fa fa-sticky-note" style="color: khaki"></i> General Note
                             </span>
                         </b-form-radio>
-                        
                         <b-form-radio value="phone">
                             <span class="type-icon type-icon-last">
-                                <i class="fa fa-phone"></i>
+                                <i class="fa fa-phone" style="color: green"></i> Phone Call
                             </span>
                         </b-form-radio>
                     </b-form-radio-group>
+                    <b-form-select v-model="form.call_direction" v-if="form.type === 'phone'">
+                        <option value="inbound">Inbound Phone Call</option>
+                        <option value="outbound">Outbound Phone Call</option>
+                    </b-form-select>
                 </b-form-group>
                 <business-location-form-group v-model="form.business_id"
                                               :form="form"
@@ -88,15 +91,17 @@
                             @change="onChangeTemplate()"
                     >
                         <option value="">--Select--</option>
-                        <option :value="template.note" v-for="template in templates" :key="template.id">{{ template.short_name }}</option>
+                        <option :value="template" v-for="template in templates" :key="template.id">{{ template.short_name }}</option>
                     </b-form-select>
                     <input-help :form="form" field="note_template_id" text="Select a note template."></input-help>
                 </b-form-group>
-                <b-form-group label="Note" labe-for="body">
+                <b-form-group label="Title">
+                    <b-form-input type="text" v-model="form.title"></b-form-input>
+                </b-form-group>
+                <b-form-group label="Note">
                     <b-form-textarea
-                            id="body"
                             name="body"
-                            :rows="14"
+                            :rows="11"
                             v-model="form.body"
                     >
                     </b-form-textarea>
@@ -227,16 +232,19 @@
                     client_id: data.client_id || this.client.id || "",
                     prospect_id: data.prospect_id || this.prospect.id || "",
                     referral_source_id: data.referral_source_id || this.source.id || "",
+                    title: data.title || "",
                     body: data.body || "",
                     tags: data.tags || "",
-                    type: data.type || "phone",
+                    type: data.type || "other",
+                    call_direction: data.call_direction || "inbound",
                     modal: this.modal, // added so controller doesn't send redirect response
                 });
             },
 
-            onChangeTemplate(value) {
+            onChangeTemplate() {
                 setTimeout(() => {
-                    this.form.body = this.noteTemplate;
+                    this.form.title = this.noteTemplate.short_name;
+                    this.form.body = this.noteTemplate.note;
                 });
             }
         },

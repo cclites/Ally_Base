@@ -20,5 +20,10 @@ export default {
         toSnakeCase(str) {
             return _.snakeCase(str);
         },
+        stringLimit(str, limit=100)
+        {
+            if (typeof(str) !== "string") return "";
+            return (str.length > 70) ? str.substr(0, 70) + '..' : str;
+        }
     }
 }

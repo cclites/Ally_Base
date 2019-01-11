@@ -28,7 +28,7 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Type" label-for="client_type">
+                    <b-form-group label="Client Type" label-for="client_type" label-class="required">
                         <b-form-select
                                 id="client_type"
                                 name="client_type"
@@ -96,7 +96,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Username" label-for="username">
+                    <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
                                 name="username"

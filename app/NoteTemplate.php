@@ -36,7 +36,7 @@ class NoteTemplate extends AuditableModel implements BelongsToBusinessesInterfac
     use BelongsToOneBusiness;
 
     protected $guarded = ['id'];
-    protected $orderedColumn = 'id';
+    protected $orderedColumn = 'short_name';
 
     public function business()
     {
