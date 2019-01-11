@@ -192,7 +192,7 @@ class ClientPayer extends AuditableModel
      */
     function getStartOfWeek(): int
     {
-        return 1;
+        return $this->payer->week_start;
     }
 
     /**
