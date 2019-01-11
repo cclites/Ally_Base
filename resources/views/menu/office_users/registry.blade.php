@@ -50,18 +50,19 @@
 <li>
     <a href="{{ route('business.reports.shifts') }}?autoload=0" aria-expanded="false"><i class="fa fa-clock-o"></i><span class="hide-menu">Shift History</span></a>
 </li>
-{{--<li>--}}
-    {{--<a class="has-arrow" href="javascript:void(0)" aria-expanded="false">--}}
-        {{--<i class="fa fa-building-o" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Payers</span>--}}
-    {{--</a>--}}
-    {{--<ul aria-expanded="false" class="collapse">--}}
-        {{--<li><a href="{{ route('business.accounting.claims') }}">Claims</a></li>--}}
-        {{--<li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li>--}}
-        {{--@if(app()->environment() === 'demo')--}}
-            {{--<li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li>--}}
-        {{--@endif--}}
-    {{--</ul>--}}
-{{--</li>--}}
+<li>
+    <a class="has-arrow" href="javascript:void(0)" aria-expanded="false">
+        <i class="fa fa-building-o" style="margin-left: 3px; margin-right: -3px;"></i><span class="hide-menu">Payers</span>
+    </a>
+    <ul aria-expanded="false" class="collapse">
+        <li><a href="{{ route('business.payers.index') }}">Payers</a></li>
+        {{-- <li><a href="{{ route('business.accounting.claims') }}">Claims</a></li> --}}
+        {{-- <li><a href="{{ route('business.accounting.apply-payment.index') }}">Receivables</a></li> --}}
+        {{-- @if(app()->environment() === 'demo') --}}
+            {{-- <li><a href="{{ route('business.quickbooks.index') }}">Export to Quickbooks</a></li> --}}
+        {{-- @endif --}}
+    </ul>
+</li>
 <li>
     <a href="{{ route('business.reports.index') }}" ><i class="fa fa-bar-chart"></i><span class="hide-menu">Reports</span></a>
 </li>

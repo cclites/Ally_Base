@@ -58,12 +58,18 @@
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
         </li>
-        
+
         @if($client->client_type === 'medicaid')
             <li class="nav-item">
                 <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
             </li>
         @endif
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Client Payers</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#rates" class="nav-link">Client Rates</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -82,6 +88,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Client Payers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Client Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -168,6 +176,12 @@
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>
+        </div>
+        <div class="tab-pane" id="payers" role="tabpanel">
+            <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
+        </div>
+        <div class="tab-pane" id="rates" role="tabpanel">
+            <client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" :ally-rate-original="{{ floatval($client->allyFee) }}" />
         </div>
     </div>
 @endsection

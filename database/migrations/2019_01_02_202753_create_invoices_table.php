@@ -63,6 +63,14 @@ class CreateInvoicesTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('npi_number')->nullable();
+            $table->unsignedTinyInteger('week_start')->default(0);
+			$table->string('address1')->nullable();
+			$table->string('address2')->nullable();
+			$table->string('city', 45)->nullable();
+			$table->string('state', 45)->nullable();
+			$table->string('zip', 45)->nullable();
+            $table->string('phone_number', 45)->nullable();
+            $table->string('fax_number', 45)->nullable();
             $table->unsignedInteger('chain_id');
             $table->timestamps();
 

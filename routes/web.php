@@ -204,6 +204,10 @@ Route::group([
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
+    Route::resource('clients/{client}/payers', 'Business\ClientPayerController', ['as' => 'clients']);
+    Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
+    Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
+    Route::patch('clients/{client}/rates', 'Business\ClientRatesController@update')->name('clients.rates.update');
 
     Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
@@ -333,6 +337,8 @@ Route::group([
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
+
+    Route::resource('payers', 'Business\PayerController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

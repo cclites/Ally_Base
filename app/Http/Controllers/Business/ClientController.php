@@ -165,6 +165,8 @@ class ClientController extends BaseController
             'careDetails',
             'carePlans',
             'caseManager',
+            'payers',
+            'rates',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },
@@ -193,11 +195,10 @@ class ClientController extends BaseController
 
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
-
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
-        
+
         return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths'));
     }
 

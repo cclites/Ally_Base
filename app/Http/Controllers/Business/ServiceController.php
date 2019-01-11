@@ -7,17 +7,25 @@ use App\Http\Requests\CreateServiceRequest;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Http\Request;
 
 class ServiceController extends BaseController
 {   
     /**
      * Display a list of services
+     * 
+     * @param \Illuminate\Http\Request
+     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $query = Service::forAuthorizedChain()->ordered();
         $services = $query->get();
         
+        if ($request->wantsJson() && $request->json) {
+            return response()->json($services);
+        }
+
         return view('business.service', compact('services'));
     }
 
