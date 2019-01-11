@@ -20,7 +20,6 @@
                      ref="table"
             >
                 <template slot="priority" scope="data">
-                    {{ data.value }}
                     <b-btn size="sm" @click="shiftPriority(data.index)">
                         <i class="fa fa-arrow-up"></i>
                     </b-btn>
@@ -175,8 +174,6 @@
                 console.log('shift priority at index: ' + index);
                 this.items.splice(index-1, 0, this.items.splice(index, 1)[0]);
                 this.resetPriorities();
-
-                // this.items = this.array_move(this.items, index, index - 1);
             },
 
             add() {
@@ -227,15 +224,15 @@
             },
 
             save() {
-                // let form = new Form({
-                //     rates: this.items,
-                // });
-                // form.patch(`/business/clients/${this.client.id}/rates`)
-                //     .then( ({ data }) => {
-                //         this.setItems(data.data);
-                //     })
-                //     .catch(e => {
-                //     })
+                let form = new Form({
+                    payers: this.items,
+                });
+                form.patch(`/business/clients/${this.client.id}/payers`)
+                    .then( ({ data }) => {
+                        this.setItems(data.data);
+                    })
+                    .catch(e => {
+                    })
             },
         },
 
