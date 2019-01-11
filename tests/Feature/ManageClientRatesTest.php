@@ -6,6 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Payer;
+use App\Billing\ClientRate;
 
 class ManageClientRatesTest extends TestCase
 {
@@ -57,7 +58,7 @@ class ManageClientRatesTest extends TestCase
     /** @test */
     public function a_user_can_update_the_clients_rates()
     {
-        $rates = factory('App\Billing\ClientRate', 5)->make(['client_id' => $this->client->id]);
+        $rates = factory('App\Billing\ClientRate', 1)->make(['client_id' => $this->client->id]);
 
         $this->assertCount(0, $this->client->rates);
 
@@ -66,7 +67,7 @@ class ManageClientRatesTest extends TestCase
         $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), $data)
             ->assertStatus(200);
 
-        $this->assertCount(5, $this->client->fresh()->rates);
+        $this->assertCount(1, $this->client->fresh()->rates);
     }
 
     /** @test */
@@ -241,7 +242,7 @@ class ManageClientRatesTest extends TestCase
         $this->patchJson(route('business.clients.rates.update', ['client' => $this->client]), ['rates' => [$data]])
             ->assertStatus(200);
 
-        $this->assertCount(0, $this->client->fresh()->rates);
+        $this->assertCount(1, $this->client->fresh()->rates);
     }
 
     /** @test */
