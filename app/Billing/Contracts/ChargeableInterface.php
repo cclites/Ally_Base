@@ -1,6 +1,7 @@
 <?php
-namespace App\Contracts;
+namespace App\Billing\Contracts;
 
+use App\Contracts\HasAllyFeeInterface;
 use App\GatewayTransaction;
 
 interface ChargeableInterface extends HasAllyFeeInterface
@@ -54,4 +55,18 @@ interface ChargeableInterface extends HasAllyFeeInterface
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function chargedTransactions();
+
+    /**
+     * Return the owner of the payment method or account
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getOwnerModel();
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray();
 }

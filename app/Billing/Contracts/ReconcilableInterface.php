@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contracts;
+namespace App\Billing\Contracts;
 
 interface ReconcilableInterface
 {

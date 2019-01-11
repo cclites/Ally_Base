@@ -8,15 +8,15 @@
                         <b-form-input v-model="form.name" type="text" required />
                         <input-help :form="form" field="name"></input-help>
                     </b-form-group>
-                    <b-form-group label="Service Code" label-for="code" label-class="required">
-                        <b-form-input v-model="form.code" type="text" required />
+                    <b-form-group label="Service Code" label-for="code">
+                        <b-form-input v-model="form.code" type="text" />
                         <input-help :form="form" field="code"></input-help>
                     </b-form-group>
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" name="default" v-model="form.default" value="1">
                             <span class="custom-control-indicator"></span>
-                            <span class="custom-control-description">Default</span>
+                            <span class="custom-control-description">Default Service for Billing</span>
                         </label>
                     </div>
                 </b-col>

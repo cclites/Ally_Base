@@ -39,7 +39,8 @@ $phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConf
 $phpunitCmds = [
     "$phpunit --testsuite Model",
     "$phpunit --testsuite Bugs",
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData/'",
+    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|RateFactory/'", // core feature tests
+    "$phpunit --filter '/Payer|ClientRateTest/'", // new billing tests (add invoice generators once done)
 ];
 
 foreach($phpunitCmds as $cmdline) {

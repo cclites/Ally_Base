@@ -14,7 +14,7 @@ abstract class BaseInvoiceGenerator
     ];
 
     /**
-     * @return \App\Billing\Contracts\Invoiceable[]
+     * @return \App\Billing\Contracts\InvoiceableInterface[]
      */
     public function getInvoiceableClasses()
     {

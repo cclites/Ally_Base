@@ -7,10 +7,10 @@ use App\Billing\ClientRate;
 use App\Businesses\Timezone;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Contracts\HasPaymentHold;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Notifications\ClientConfirmation;
 use App\Scheduling\ScheduleAggregator;
@@ -551,7 +551,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
 
     /**
      * @param bool $backup
-     * @return \App\Contracts\ChargeableInterface
+     * @return \App\Billing\Contracts\ChargeableInterface
      */
     public function getPaymentMethod($backup = false)
     {
@@ -636,7 +636,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     }
 
     /**
-     * @param \App\Contracts\ChargeableInterface $method
+     * @param \App\Billing\Contracts\ChargeableInterface $method
      * @param bool $backup
      * @return ChargeableInterface|false
      */

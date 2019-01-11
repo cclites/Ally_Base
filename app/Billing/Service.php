@@ -43,4 +43,25 @@ class Service extends AuditableModel implements BelongsToChainsInterface
     {
         return self::where('default', true)->where('chain_id', $chainId)->first();
     }
+
+    /**
+     * Set the default service for a business chain
+     *
+     * @param int $chainId
+     * @param \App\Billing\Service $service
+     * @return bool
+     * @throws \Exception
+     */
+    public static function setDefault(int $chainId, Service $service): bool
+    {
+        if ($service->chain_id !== $chainId) throw new \Exception('Unable to set a default, chain id mismatch.');
+
+        if ($service->update(['default' => true])) {
+            return self::where('chain_id', $chainId)
+                ->where('id', '!=', $service->id)
+                ->update(['default' => false]);
+        }
+
+        return false;
+    }
 }

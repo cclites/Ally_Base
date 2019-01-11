@@ -4,9 +4,9 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasPaymentHold;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
@@ -689,6 +689,16 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getBusinessIds()
     {
         return [$this->id];
+    }
+
+    /**
+     * Return the owner of the payment method or account
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getOwnerModel()
+    {
+        return $this;
     }
 
     ////////////////////////////////////
