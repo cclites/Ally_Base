@@ -9,6 +9,7 @@
         "ext-bcmath": "*",
         "ext-curl": "*",
         "ext-dom": "*",
+        "ext-json": "*",
         "ext-simplexml": "*",
         "barryvdh/laravel-snappy": "^0.4.0",
         "bizhub/impersonate": "^0.2.0",

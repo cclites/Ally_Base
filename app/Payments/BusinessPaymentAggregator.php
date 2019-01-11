@@ -2,7 +2,7 @@
 namespace App\Payments;
 
 use App\Business;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
 use App\Events\FailedTransactionFound;
 use App\Payment;
@@ -18,7 +18,7 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
     protected $business;
 
     /**
-     * @var \App\Contracts\ChargeableInterface
+     * @var \App\Billing\Contracts\ChargeableInterface
      */
     protected $method;
 

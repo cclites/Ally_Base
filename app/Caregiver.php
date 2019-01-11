@@ -6,7 +6,7 @@ use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Contracts\UserRole;
 use App\Exceptions\ExistingBankAccountException;
 use App\Mail\CaregiverConfirmation;

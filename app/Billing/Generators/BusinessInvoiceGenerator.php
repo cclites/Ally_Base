@@ -1,18 +1,20 @@
 <?php
 namespace App\Billing\Generators;
 
-use App\Billing\Contracts\Invoiceable;
+use App\Billing\Contracts\InvoiceableInterface;
 use App\Business;
 
 class BusinessInvoiceGenerator extends BaseInvoiceGenerator
 {
     public function generate(Business $business) {
-
+        /**
+         * TODO:  Make sure BankAccount implements the DepositableInterface
+         */
     }
 
     /**
      * @param \App\Business $business
-     * @return \App\Billing\Contracts\Invoiceable[]
+     * @return \App\Billing\Contracts\InvoiceableInterface[]
      */
     public function getInvoiceables(Business $business): array
     {
@@ -24,12 +26,12 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
     }
 
     /**
-     * @param \App\Billing\Contracts\Invoiceable $invoiceable
+     * @param \App\Billing\Contracts\InvoiceableInterface $invoiceable
      * @param float $split
      * @param float $allowance
      * @return array
      */
-    public function getItemData(Invoiceable $invoiceable): array
+    public function getItemData(InvoiceableInterface $invoiceable): array
     {
         $total = round(bcmul($invoiceable->getItemUnits(), $invoiceable->getClientRate(), 4), 2);
 

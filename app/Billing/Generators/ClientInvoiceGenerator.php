@@ -2,13 +2,14 @@
 namespace App\Billing\Generators;
 
 use App\Billing\ClientInvoice;
-use App\Billing\Contracts\Invoiceable;
+use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\InvoiceItem;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Billing\ClientPayer;
+use Carbon\Carbon;
 use DB;
 
 class ClientInvoiceGenerator extends BaseInvoiceGenerator
@@ -35,31 +36,37 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             throw new InvalidClientPayers("Client has invalid payers structure.", $client->id);
         }
 
-        $payers = $client->getPayers();
+
+        /**
+         * TODO: Faulty logic, need to get the date of the item to determine the effective payer PER item.
+         * Past items should not use today's effective payer, we can use the Invoiceable::getItemDate() method.
+         * Invoiceables should be grouped by date first, potentially creating a new entity to keep track of items for each payer to ultimately invoice.
+         *
+         * We also have to account for the scenarios in ClientInvoiceTest
+         */
+
         $invoiceables = $this->getInvoiceables($client);
+        $payers = $client->getPayers();
+        $allowancePayers = $payers->filter(function($payer) {
+            return in_array($payer->payment_allocation, ClientPayer::$allowanceTypes);
+        });
+        $splitPayers = $payers->filter(function($payer) {
+            return $payer->payment_allocation === 'split';
+        });
+        $balancePayer = $payers->first(function($payer) {
+            return $payer->payment_allocation === 'balance';
+        });
 
         DB::beginTransaction();
         $invoices = [];
-        $balancePayer = null;
-        foreach($payers as $payer) {
-            switch($payer->payment_allocation) {
-                case 'daily':
-                case 'weekly':
-                case 'monthly':
-                    $invoices[] = $this->generateAllowancePayerInvoice($client, $payer, $invoiceables);
-                    break;
-                case 'split':
-                    $invoices[] = $this->generateSplitPayerInvoice($client, $payer, $invoiceables);
-                    break;
-                case 'balance':
-                    $balancePayer = $payer; // Always process the balance payer last
-                    break;
-                default:
-                    throw new InvalidClientPayers("The payer allocation type " . $payer->payment_allocation . " is not implemented.");
-            }
+        foreach($allowancePayers as $allowancePayer) {
+            $invoices[] = $this->generateInvoice($client, $allowancePayer, $invoiceables);
+        }
+        foreach($splitPayers as $splitPayer) {
+            $invoices[] = $this->generateInvoice($client, $splitPayer, $invoiceables, $splitPayer->split_percentage);
         }
         if ($balancePayer) {
-            $this->generateBalancePayerInvoice($client, $balancePayer, $invoiceables);
+            $invoices[] = $this->generateInvoice($client, $balancePayer, $invoiceables);
         }
         DB::commit();
 
@@ -68,7 +75,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
 
     /**
      * @param \App\Client $client
-     * @return \App\Billing\Contracts\Invoiceable[]
+     * @return \App\Billing\Contracts\InvoiceableInterface[]
      */
     public function getInvoiceables(Client $client): array
     {
@@ -80,12 +87,12 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     }
 
     /**
-     * @param \App\Billing\Contracts\Invoiceable $invoiceable
+     * @param \App\Billing\Contracts\InvoiceableInterface $invoiceable
      * @param float $split
      * @param float $allowance
      * @return array
      */
-    public function getItemData(Invoiceable $invoiceable, $split = 1.0, $allowance = 999999.99): array
+    public function getItemData(InvoiceableInterface $invoiceable, $split = 1.0, $allowance = 999999.99): array
     {
         $total = round(bcmul($invoiceable->getItemUnits(), $invoiceable->getClientRate(), 4), 2);
         $amountDue = ($split < 1.0)
@@ -119,13 +126,13 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     /**
      * @param \App\Client $client
      * @param \App\Billing\ClientPayer $clientPayer
-     * @param Invoiceable[] $invoiceables
+     * @param InvoiceableInterface[] $invoiceables
      * @param float $split
      * @param float $allowance
      * @return \App\Billing\ClientInvoice
      * @throws PayerAllowanceExceeded
      */
-    public function generateInvoice(Client $client, ClientPayer $clientPayer, array $invoiceables, float $split = 1.0, float $allowance = 999999.99): ?ClientInvoice
+    public function generateInvoice(Client $client, ClientPayer $clientPayer, array $invoiceables, float $split = 1.0): ?ClientInvoice
     {
         // Get invoiceables assigned to this payer or on auto
         $invoiceables = array_merge(
@@ -136,7 +143,10 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
 
         $items = [];
         foreach($invoiceables as $invoiceable) {
-            /** @var Invoiceable|\Illuminate\Database\Eloquent\Model $invoiceable */
+            /** @var InvoiceableInterface|\Illuminate\Database\Eloquent\Model $invoiceable */
+            // Get date and allowance
+            $date = Carbon::parse($invoiceable->getItemDate())->toDateString();
+            $allowance = $this->getPayerAllowance($clientPayer, $date);
 
             // Get invoiceable item data
             $data = $this->getItemData($invoiceable, $split, $allowance);
@@ -149,8 +159,9 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             // Reduce allowance by the amount due of the item
             $allowance -= $data['amount_due'];
 
-            // Add amount invoiced to invoiceable item
+            // Add amount invoiced to invoiceable item and payer
             $invoiceable->addAmountInvoiced($data['amount_due']);
+            $clientPayer->addAmountInvoiced($data['amount_due'], $data['date']);
 
             if ($allowance <= 0.0
                 && $invoiceable->getPayerId() === $clientPayer->payer_id
@@ -183,51 +194,24 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     }
 
     /**
-     * @param \App\Client $client
      * @param \App\Billing\ClientPayer $clientPayer
-     * @param array $invoiceables
-     * @return \App\Billing\ClientInvoice|null
-     * @throws \App\Billing\Exceptions\PayerAllowanceExceeded
+     * @param string $date
+     * @return float
      */
-    protected function generateSplitPayerInvoice(Client $client, ClientPayer $clientPayer, array $invoiceables): ?ClientInvoice
+    public function getPayerAllowance(ClientPayer $clientPayer, string $date): float
     {
-        $split = $clientPayer->split_percentage;
-        return $this->generateInvoice($client, $clientPayer, $invoiceables, $split);
+        return $clientPayer->getAllowance($date);
     }
 
     /**
-     * @param \App\Client $client
-     * @param \App\Billing\ClientPayer $clientPayer
-     * @param array $invoiceables
-     * @return \App\Billing\ClientInvoice|null
-     * @throws \App\Billing\Exceptions\PayerAllowanceExceeded
-     */
-    protected function generateAllowancePayerInvoice(Client $client, ClientPayer $clientPayer, array $invoiceables): ?ClientInvoice
-    {
-        $allowance = $clientPayer->payment_allowance ?? 999999.99;
-        return $this->generateInvoice($client, $clientPayer, $invoiceables, 1.0, $allowance);
-    }
-
-    /**
-     * @param \App\Client $client
-     * @param \App\Billing\ClientPayer $clientPayer
-     * @param array $invoiceables
-     * @return \App\Billing\ClientInvoice|null
-     */
-    protected function generateBalancePayerInvoice(Client $client, ClientPayer $clientPayer, array $invoiceables): ?ClientInvoice
-    {
-        return $this->generateInvoice($client, $clientPayer, $invoiceables);
-    }
-
-    /**
-     * @param Invoiceable[] $invoiceables
+     * @param InvoiceableInterface[] $invoiceables
      * @param int|null $payerId
-     * @return Invoiceable[]
+     * @return InvoiceableInterface[]
      */
     protected function filterInvoiceablesByPayer(array $invoiceables, ?int $payerId)
     {
         return array_filter($invoiceables, function($invoiceable) use ($payerId) {
-            /** @var Invoiceable $invoiceable */
+            /** @var InvoiceableInterface $invoiceable */
             return $invoiceable->getPayerId() === $payerId;
         });
     }

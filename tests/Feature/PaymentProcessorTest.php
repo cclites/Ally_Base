@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Business;
 use App\Client;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\CreditCard;
 use App\Gateway\CreditCardPaymentInterface;
 use App\GatewayTransaction;

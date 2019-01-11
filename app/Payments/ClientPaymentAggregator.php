@@ -3,7 +3,7 @@ namespace App\Payments;
 
 use App\BankAccount;
 use App\Client;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
 use App\CreditCard;
 use App\Events\FailedTransactionFound;
@@ -24,7 +24,7 @@ class ClientPaymentAggregator implements PaymentAggregatorInterface
     protected $client;
 
     /**
-     * @var \App\Contracts\ChargeableInterface
+     * @var \App\Billing\Contracts\ChargeableInterface
      */
     protected $method;
 

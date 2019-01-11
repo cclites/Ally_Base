@@ -1,7 +1,7 @@
 <?php
 namespace App;
 
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
@@ -195,5 +195,15 @@ class CreditCard extends AuditableModel implements ChargeableInterface
             return (float) bcadd($fee, '0.01', 4);
         }
         return (float) $fee;
+    }
+
+    /**
+     * Return the owner of the payment method or account
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getOwnerModel()
+    {
+        return $this->user;
     }
 }
