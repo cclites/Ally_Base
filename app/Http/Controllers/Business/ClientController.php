@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Client;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Business\ClientAuthController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientPreferencesRequest;
@@ -16,6 +17,8 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
+use App\Billing\Service;
+use App\Billing\Payer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -191,7 +194,11 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
+        $services = Service::forAuthorizedChain()->ordered()->get();
+        $payers = Payer::forAuthorizedChain()->ordered()->get();
+        $auths = (new ClientAuthController())->listByClient($client->id);
+        
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths'));
     }
 
     public function edit(Client $client)
@@ -272,27 +279,6 @@ class ClientController extends BaseController
             return new SuccessResponse('The client has been re-activated.');
         }
         return new ErrorResponse('Could not re-activate the selected client.');
-    }
-
-    /**
-     * Updates relating to the service orders tab
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Client $client
-     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
-     */
-    public function serviceOrders(Request $request, Client $client)
-    {
-        $this->authorize('update', $client);
-
-        $data = $request->validate([
-            'max_weekly_hours' => 'required|numeric|min:0|max:999',
-        ]);
-
-        if ($client->update($data)) {
-            return new SuccessResponse('The service orders have been updated');
-        }
-        return new ErrorResponse(500, 'Unable to update service orders.');
     }
 
     public function address(Request $request, Client $client, $type)
@@ -399,10 +385,11 @@ class ClientController extends BaseController
             'ltci_phone',
             'ltci_fax',
             'medicaid_id',
-            'medicaid_diagnosis_codes'
+            'medicaid_diagnosis_codes',
+            'max_weekly_hours'
         ]);
 
-        if($client->update($data)) {
+        if ($client->update($data)) {
             return new SuccessResponse('Client info updated.');
         } else {
             return new ErrorResponse(500, 'Error updating client info.');

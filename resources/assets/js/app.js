@@ -139,7 +139,6 @@ Vue.component('cc-expiration-report', require('./components/business/reports/Cre
 Vue.component('caregivers-missing-bank-accounts', require('./components/business/reports/CaregiversMissingBankAccounts'));
 Vue.component('business-clients-missing-payment-methods-report', require('./components/business/reports/ClientsMissingPaymentMethods'));
 Vue.component('business-client-caregivers-report', require('./components/BusinessClientCaregiversReport.vue'));
-Vue.component('business-client-service-orders', require('./components/business/ClientServiceOrders.vue'));
 Vue.component('business-deposit-history', require('./components/BusinessDepositHistory.vue'));
 Vue.component('business-exception', require('./components/BusinessException.vue'));
 Vue.component('business-exception-list', require('./components/BusinessExceptionList.vue'));
@@ -218,7 +217,7 @@ Vue.component('client-profile', require('./components/ClientProfile.vue'));
 Vue.component('client-statements-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('client-addresses-tab', require('./components/business/clients/ClientStatementsTab'));
 Vue.component('clients-without-emails-report', require('./components/business/reports/ClientsWithoutEmailsReport'));
-Vue.component('client-ltc-insurance', require('./components/business/clients/LTCInsuranceTab'));
+Vue.component('client-insurance-service-auth', require('./components/business/clients/InsuranceServiceAuthTab'));
 Vue.component('client-onboarding-wizard', require('./components/business/clients/onboarding/ClientOnboardingWizard'));
 Vue.component('client-caregiver-list', require('./components/clients/ClientCaregiverList'));
 
@@ -283,7 +282,6 @@ Vue.component('business-task-form', require('./components/business/tasks/TaskFor
 Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
 Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
-
 Vue.component('report-list', require('./components/ReportList'));
 
 /* Nacha Ach */

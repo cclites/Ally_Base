@@ -38,9 +38,6 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
-        </li>
         @if($business->scheduling)
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
@@ -59,11 +56,12 @@
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
+            <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
         </li>
+        
         @if($client->client_type === 'medicaid')
             <li class="nav-item">
-                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
+                <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
             </li>
         @endif
     </ul>
@@ -79,13 +77,12 @@
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
                 <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
-                <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
-                <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
+                <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
     </ul>
@@ -148,9 +145,6 @@
             <business-client-care-details
                 :client="{{ $client }}" />
         </div>
-        <div class="tab-pane" id="service_orders" role="tabpanel">
-            <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
-        </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
                 <business-schedule :client="{{ $client }}" :business="{{ activeBusiness() }}"></business-schedule>
@@ -172,8 +166,8 @@
             <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
                                     :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
-        <div class="tab-pane" id="ltci">
-            <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
+        <div class="tab-pane" id="insurance_service_auth">
+            <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>
         </div>
     </div>
 @endsection

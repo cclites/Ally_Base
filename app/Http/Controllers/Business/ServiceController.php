@@ -24,7 +24,7 @@ class ServiceController extends BaseController
     /**
      * Store a newly created service in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CreateServiceRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(CreateServiceRequest $request)
@@ -45,7 +45,7 @@ class ServiceController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CreateServiceRequest  $request
      * @param  \App\Billing\Service  $service
      * @return \Illuminate\Http\Response
      */

@@ -23,7 +23,7 @@ class CreateClientAuthorizationsTable extends Migration
             $table->decimal('units', 5, 2);
             $table->string('unit_type')->default('hourly'); // hourly, fixed
             $table->string('period')->default('weekly'); // daily, weekly, monthly
-            $table->text('notes');
+            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade')->onUpdate('cascade');
