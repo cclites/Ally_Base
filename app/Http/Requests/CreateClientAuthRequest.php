@@ -31,10 +31,10 @@ class CreateClientAuthRequest extends FormRequest
             'payer_id' => 'nullable|numeric',
             'effective_start' => 'required|date',
             'effective_end' => 'required|date',
-            'units' => 'required|numeric',
-            'unit_type' => 'required|string|max:10',
-            'period' => 'required|string|max:10',
-            'notes' => 'required|string',
+            'units' => 'required|numeric|min:0',
+            'unit_type' => 'required|string',
+            'period' => 'required|string',
+            'notes' => 'nullable|string|max:255',
         ];
     }
 

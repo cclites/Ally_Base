@@ -1,10 +1,8 @@
 <template>
-    <b-card header="Service Authorization"
-            header-text-variant="white"
-            header-bg-variant="info">
+    <div>
         <b-row class="mb-2">
             <b-col lg="12">
-                <a @click="onNewAuth()" class="btn btn-info">Add Authorization</a>
+                <b-btn variant="info" @click="addAuth()">Add Authorization</b-btn>
             </b-col>
         </b-row>
         <div>
@@ -21,10 +19,10 @@
                 >
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
-                        <b-btn size="sm" @click="onEditAuth(row.item.id)">
+                        <b-btn size="sm" @click="editAuth(row.item.id)">
                             <i class="fa fa-edit"></i>
                         </b-btn>
-                        <b-btn size="sm" @click="onDeleteAuth(row.item.id)">
+                        <b-btn size="sm" @click="deleteAuth(row.item.id)">
                             <i class="fa fa-trash"></i>
                         </b-btn>
                     </template>
@@ -46,36 +44,38 @@
                 <b-container fluid>
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Service ID">
+                            <b-form-group label="Service ID" label-class="required">
                                 <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
+                                    <option :value="null">--Select--</option>
                                     <option v-for="s in services" :value="s.id" :key="s.id">{{ s.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Player ID">
+                            <b-form-group label="Payer ID">
                                 <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
+                                    <option :value="null">(Any Payer)</option>
                                     <option v-for="p in payers" :value="p.id" :key="p.id">{{ p.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Effective Start">
+                            <b-form-group label="Effective Start" label-class="required">
                                 <date-picker v-model="form.effective_start"></date-picker>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Effective End">
+                            <b-form-group label="Effective End" label-class="required">
                                 <date-picker v-model="form.effective_end"></date-picker>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Units">
+                            <b-form-group label="Units" label-class="required">
                                 <b-form-input v-model="form.units"></b-form-input>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Unit Type">
+                            <b-form-group label="Unit Type" label-class="required">
                                 <b-form-select v-model="form.unit_type" class="mr-1 mb-1" name="report_type">
                                     <option value="hourly">Hourly</option>
                                     <option value="fixed">Fixed</option>
@@ -83,7 +83,7 @@
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Period">
+                            <b-form-group label="Period" label-class="required">
                                 <b-form-select v-model="form.period" class="mr-1 mb-1" name="report_type">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
@@ -109,7 +109,7 @@
                 </div>
             </b-modal>
         </form>
-    </b-card>
+    </div>
 </template>
 
 <script>
@@ -196,7 +196,7 @@
         },
 
         methods: {
-            newAuth(data) {
+            authSaved(data) {
                 let item = this.items.find(x => x.id === data.id);
                 if (item) {
                     item = Object.assign(item, data);
@@ -204,22 +204,24 @@
                     this.items.push(data);
                 }
             },
-            onNewAuth() {
+            addAuth() {
                 this.auth = {};
                 this.form = this.makeForm(this.auth);
                 this.showAuthModal = true;
             },
-            onEditAuth(id) {
+            editAuth(id) {
                 this.auth = this.items.find(x => x.id == id);
                 this.form = this.makeForm(this.auth);
                 this.showAuthModal = true;
             },
-            onDeleteAuth(id) {
-                let form = new Form();
-                form.submit('delete', `/business/authorization/${id}`)
-                    .then( ({ data }) => {
-                        this.items = this.items.filter(x => x.id !== id);
-                    });
+            deleteAuth(id) {
+                if (confirm("Are you sure you wish to delete this authorization?")) {
+                    let form = new Form();
+                    form.submit('delete', `/business/authorization/${id}`)
+                        .then( ({ data }) => {
+                            this.items = this.items.filter(x => x.id !== id);
+                        });
+                }
             },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
@@ -229,14 +231,14 @@
             makeForm(defaults = {}) {
                 return new Form({
                     client_id: this.clientId,
-                    service_id: defaults.service_id,
-                    payer_id: defaults.payer_id,
-                    effective_start: defaults.effective_start,
-                    effective_end: defaults.effective_end,
-                    units: defaults.units,
-                    unit_type: defaults.unit_type,
-                    period: defaults.period,
-                    notes: defaults.notes,
+                    service_id: defaults.service_id || null,
+                    payer_id: defaults.payer_id || null,
+                    effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
+                    effective_end: defaults.effective_end || "",
+                    units: defaults.units || "",
+                    unit_type: defaults.unit_type || "hourly",
+                    period: defaults.period || "weekly",
+                    notes: defaults.notes || "",
                 });
             },
             submitForm() {
@@ -245,7 +247,7 @@
                 let url = this.auth.id ? `/business/authorization/${this.auth.id}` : '/business/authorization';
                 this.form.submit(method, url)
                     .then(response => {
-                        this.newAuth(response.data.data);
+                        this.authSaved(response.data.data);
                         this.showAuthModal = false;
                     })
                     .finally(() => this.loading = false)
