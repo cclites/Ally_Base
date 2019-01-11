@@ -3,56 +3,89 @@ namespace App\Http\Controllers\Business;
 
 use Auth;
 use App\Billing\ClientAuthorization;
+use App\Http\Requests\CreateClientAuthRequest;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class ClientAuthController extends BaseController
 {
     /**
-     * Display a list of services
+     * Display a list of authorizations
      */
-    // public function index()
-    // {
-    //     $query = Service::forAuthorizedChain()->ordered();
-    //     $services = $query->get();
+    public function listByClient($client_id)
+    {
+        $query = ClientAuthorization::where('client_id', $client_id)->ordered();
+        $auths = $query->get();
+
+        foreach($auths as $auth) {
+            $auth->load('payer', 'service');
+            $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
+            $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+        }
         
-    //     return view('business.service', compact('services'));
-    // }
+        return $auths;
+    }
 
     /**
-     * Store a newly created service in storage.
+     * Store a newly created authorization in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\CreateClientAuthRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function save(Request $request)
+    public function store(CreateClientAuthRequest $request)
     {
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'service_id' => 'required|exists:services,id',
-            'payer_id' => 'nullable|numeric',
-            'effective_start' => 'required|date',
-            'effective_end' => 'required|date',
-            'units' => 'required|numeric',
-            'unit_type' => 'required|string|max:10',
-            'period' => 'required|string|max:10',
-            'notes' => 'required|string',
-        ]);
-        
-        $data['effective_start'] = Carbon::parse($data['effective_start']);
-        $data['effective_end'] = Carbon::parse($data['effective_end']);
+        $data = $request->filtered();
+        $this->authorize('create', [ClientAuthorization::class, $data]);
 
-        $auth = ClientAuthorization::where('client_id', $request->client_id)->first();
-        if ($auth != null) {
-            $auth->update($data);
-            return true;
-        } else {
-            $auth = ClientAuthorization::create($data);
-            return true;
+        if ($auth = ClientAuthorization::create($request->filtered())) {
+            $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
+            $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+            return new CreatedResponse('New authorization has been created', $auth->load('payer', 'service'));
+        }
+        
+        return new ErrorResponse(500, 'The authorization could not be created.');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \App\Http\Requests\CreateClientAuthRequest  $request
+     * @param  \App\Billing\ClientAuthorization  $auth
+     * @return \Illuminate\Http\Response
+     */
+    public function update(CreateClientAuthRequest $request, ClientAuthorization $auth)
+    {
+        $this->authorize('update', $auth);
+
+        if ($auth->update($request->filtered())) {
+            $auth['effective_start'] = Carbon::parse($auth['effective_start'])->format('m/d/Y');
+            $auth['effective_end'] = Carbon::parse($auth['effective_end'])->format('m/d/Y');
+            return new SuccessResponse('Authorization has been updated.', $auth->load('payer', 'service'));
         }
 
-        return false;
+        return new ErrorResponse(500, 'The authorization could not be updated.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Billing\ClientAuthorization  $auth
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(ClientAuthorization $auth)
+    {
+        $this->authorize('delete', $auth);
+
+        try {
+            if ($auth->delete()) {
+                return new SuccessResponse('Authorization has been deleted.');
+            }
+        } catch (\Exception $e) {
+            logger($e->getMessage());
+        }
+
+        return new ErrorResponse(500, 'The authorization could not be deleted.');
     }
 }

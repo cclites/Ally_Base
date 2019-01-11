@@ -282,7 +282,7 @@ Vue.component('business-task-form', require('./components/business/tasks/TaskFor
 Vue.component('business-task-details', require('./components/business/tasks/TaskDetails'));
 Vue.component('business-service', require('./components/business/Service'));
 Vue.component('business-service-modal', require('./components/business/ServiceModal'));
-
+Vue.component('client-service-auth', require('./components/business/ClientAuth'));
 Vue.component('report-list', require('./components/ReportList'));
 
 /* Nacha Ach */

@@ -97,70 +97,14 @@
                 </b-row>
             </form>
         </b-card>
-        <b-card header="Service Authorization"
-                header-text-variant="white"
-                header-bg-variant="info">
-            <b-row>
-                <b-col lg="6">
-                    <b-form-group label="Service ID">
-                        <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
-                            <option v-for="s in services" :value="s.id" :key="s.id">{{ s.name }}</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Player ID">
-                        <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
-                            <option v-for="p in payers" :value="p.id" :key="p.id">{{ p.name }}</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Effective Start">
-                        <date-picker v-model="form.effective_start"></date-picker>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Effective End">
-                        <date-picker v-model="form.effective_end"></date-picker>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Units">
-                        <b-form-input v-model="form.units"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Unit Type">
-                        <b-form-select v-model="form.unit_type" class="mr-1 mb-1" name="report_type">
-                            <option value="hourly">Hourly</option>
-                            <option value="fixed">Fixed</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Period">
-                        <b-form-select v-model="form.period" class="mr-1 mb-1" name="report_type">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Notes">
-                        <b-form-input v-model="form.notes"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-        </b-card>
+        <client-service-auth :clientId="client.id" :auths="auths" :services="services" :payers="payers"></client-service-auth>
         <b-btn variant="success" @click="updateInsuranceInfo()">Save</b-btn> 
     </div>
 </template>
 
 <script>
     export default {
-        props: ['client', 'auth', 'payers', 'services'],
+        props: ['client', 'auths', 'payers', 'services'],
 
         data() {
             return {
@@ -177,14 +121,6 @@
                     medicaid_id: this.client.medicaid_id,
                     medicaid_diagnosis_codes: this.client.medicaid_diagnosis_codes || '',
                     max_weekly_hours: this.client.max_weekly_hours,
-                    service_id: this.auth.service_id,
-                    payer_id: this.auth.payer_id,
-                    effective_start: this.auth.effective_start,
-                    effective_end: this.auth.effective_end,
-                    units: this.auth.units,
-                    unit_type: this.auth.unit_type,
-                    period: this.auth.period,
-                    notes: this.auth.notes,
                 }),
                 diagnosis_codes: this.splitDiagnosisCodes(this.client.medicaid_diagnosis_codes || ''),
             }

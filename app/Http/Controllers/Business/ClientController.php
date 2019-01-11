@@ -19,7 +19,6 @@ use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use App\Billing\Service;
 use App\Billing\Payer;
-use App\Billing\ClientAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -197,12 +196,9 @@ class ClientController extends BaseController
 
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
-        $auth = ClientAuthorization::where("client_id", $client->id)->first();
-        if ($auth == null) {
-            $auth = "";
-        }
+        $auths = (new ClientAuthController())->listByClient($client->id);
         
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auth'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths'));
     }
 
     public function edit(Client $client)
@@ -393,27 +389,8 @@ class ClientController extends BaseController
             'max_weekly_hours'
         ]);
 
-        // prepare client service auth data
-        $authData = $request->only([
-            'service_id',
-            'payer_id',
-            'effective_start',
-            'effective_end',
-            'units',
-            'unit_type',
-            'period',
-            'notes'
-        ]);
-        $authData['client_id'] = $client->id;
-
-        $authRequest = new Request($authData);
-
         if ($client->update($data)) {
-            if ((new ClientAuthController())->save($authRequest)) {    
-                return new SuccessResponse('Client info updated.');
-            } else {
-                return new ErrorResponse(500, 'Error updating client authroization info.');
-            }
+            return new SuccessResponse('Client info updated.');
         } else {
             return new ErrorResponse(500, 'Error updating client info.');
         }

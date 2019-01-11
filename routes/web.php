@@ -266,6 +266,10 @@ Route::group([
     Route::patch('service/{service}', 'Business\ServiceController@update');
     Route::delete('service/{service}', 'Business\ServiceController@destroy');
 
+    Route::post('authorization', 'Business\ClientAuthController@store');
+    Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
+    Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
+
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
