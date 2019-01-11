@@ -6,7 +6,7 @@
             class="modal-fit-more"
             @cancel="onCancel"
         >
-            <b-row class="mb-2 p-2">
+            <b-row class="">
                 <b-col lg="6">
                     <b-form-group label="Payer Name" label-for="name" label-class="required">
                         <b-form-input v-model="form.name" type="text" required />
@@ -17,6 +17,64 @@
                     <b-form-group label="NPI Number" label-for="npi_number">
                         <b-form-input v-model="form.npi_number" type="text" />
                         <input-help :form="form" field="npi_number"></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="">
+                <b-col lg="6">
+                    <b-form-group label="Start of Service Week" label-for="week_start" label-class="required">
+                        <b-select v-model="form.week_start">
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </b-select>
+                        <input-help :form="form" field="week_start"></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="">
+                <b-col lg="6">
+                    <b-form-group label="Address Line 1" label-for="address1">
+                        <b-form-input v-model="form.address1" type="text" />
+                        <input-help :form="form" field="address1" text=""></input-help>
+                    </b-form-group>
+                    <b-form-group label="Address Line 2" label-for="address2">
+                        <b-form-input type="text" v-model="form.address2" />
+                        <input-help :form="form" field="address2" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="City" label-for="city">
+                        <b-form-input type="text" v-model="form.city" />
+                        <input-help :form="form" field="city" text=""></input-help>
+                    </b-form-group>
+                    <b-form-group label="State" label-for="state">
+                        <b-form-input type="text" v-model="form.state" />
+                        <input-help :form="form" field="state" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Zip Code" label-for="zip">
+                        <b-form-input type="text" v-model="form.zip" />
+                        <input-help :form="form" field="zip" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row class="mb-2">
+                <b-col lg="6">
+                    <b-form-group label="Phone Number" label-for="phone_number">
+                        <b-form-input v-model="form.phone_number" type="text" />
+                        <input-help :form="form" field="phone_number" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Fax Number" label-for="fax_number">
+                        <b-form-input type="text" v-model="form.fax_number" />
+                        <input-help :form="form" field="fax_number" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -74,7 +132,15 @@
                 return new Form({
                     name: defaults.name,
                     npi_number: defaults.npi_number,
+                    week_start: defaults.week_start,
                     rates: defaults.rates,
+                    address1: defaults.address1,
+                    address2: defaults.address2,
+                    city: defaults.city,
+                    state: defaults.state,
+                    zip: defaults.zip,
+                    phone_number: defaults.phone_number,
+                    fax_number: defaults.fax_number,
                 });
             },
 

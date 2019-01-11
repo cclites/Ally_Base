@@ -23,10 +23,11 @@ class Payer extends AuditableModel implements BelongsToChainsInterface
 
     protected $orderedColumn = 'name';
 
-    protected $fillable = ['name', 'npi_number', 'chain_id'];
+    protected $guarded = ['id', 'rates'];
 
     protected $casts = [
         'chain_id' => 'int',
+        'week_start' => 'int',
     ];
 
     protected $with = ['rates'];

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Payer;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use App\Rules\PhonePossible;
 
 class CreatePayerRequest extends FormRequest
 {
@@ -29,6 +30,14 @@ class CreatePayerRequest extends FormRequest
         return [
             'name' => 'required|string',
             'npi_number' => 'nullable|string',
+            'week_start' => 'required|numeric|between:0,6',
+            'address1' => 'nullable',
+            'address2' => 'nullable',
+            'city' => 'nullable',
+            'state' => 'nullable',
+            'zip' => 'nullable|min:5',
+            'phone_number' => ['nullable', new PhonePossible()],
+            'fax_number' => ['nullable', new PhonePossible()],
             'rates' => 'nullable|array',
             'rates.*.service_id' => [
                 'nullable',
