@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Billing\Payer;
 use App\Billing\ClientPayer;
+use Illuminate\Support\Carbon;
 
 class ManageClientPayersTest extends TestCase
 {
@@ -41,15 +42,65 @@ class ManageClientPayersTest extends TestCase
     }
 
     /** @test */
-    public function an_office_user_can_add_a_client_payer()
+    public function a_user_can_update_the_client_payers()
     {
-        $payer = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id]);
+        $this->withoutExceptionHandling();
+
+        $payers = factory('App\Billing\ClientPayer', 1)->make(['client_id' => $this->client->id]);
 
         $this->assertCount(0, $this->client->payers);
 
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $payer->toArray())
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => $payers])
             ->assertStatus(200);
 
+        $this->assertCount(1, $this->client->fresh()->payers);
+    }
+
+    /** @test */
+    public function client_payers_priority_should_be_sorted_as_shown_on_save()
+    {
+        $payer1 = factory('App\Billing\ClientPayer')->create(['priority' => 1, 'client_id' => $this->client->id, 'effective_start' => '2019-01-02', 'effective_end' => '2019-01-03']);
+        $payer2 = factory('App\Billing\ClientPayer')->create(['priority' => 2, 'client_id' => $this->client->id, 'effective_start' => '2019-01-04', 'effective_end' => '2019-01-05']);
+        $payer3 = factory('App\Billing\ClientPayer')->create(['priority' => 3, 'client_id' => $this->client->id, 'effective_start' => '2019-01-06', 'effective_end' => '9999-12-31']);
+
+        $this->assertCount(3, $this->client->payers);
+
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$payer1, $payer3, $payer2]])
+            ->assertStatus(200);
+
+        $this->assertCount(3, $this->client->fresh()->payers);
+        $this->assertEquals(1, $payer1->fresh()->priority);
+        $this->assertEquals(2, $payer3->fresh()->priority);
+        $this->assertEquals(3, $payer2->fresh()->priority);
+    }
+
+    /** @test */
+    public function client_payers_require_valid_dates()
+    {
+        $this->withExceptionHandling();
+
+        $payer = factory('App\Billing\ClientPayer')->create(['client_id' => $this->client->id]);
+
+        $this->assertCount(1, $this->client->payers);
+
+        $data = $payer->toArray();
+        $data['effective_start'] = 'sdgfhghg';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
+            ->assertStatus(422);
+
+        $this->assertCount(1, $this->client->fresh()->payers);
+
+        $data['effective_end'] = 'invalid';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
+            ->assertStatus(422);
+
+        $this->assertCount(1, $this->client->fresh()->payers);
+
+        $data['effective_start'] = '01/01/2017';
+        $data['effective_end'] = '12/31/9999';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
+            ->assertStatus(200);
+                
         $this->assertCount(1, $this->client->fresh()->payers);
     }
 
@@ -59,7 +110,7 @@ class ManageClientPayersTest extends TestCase
         $payer = factory('App\Billing\ClientPayer')->create(['client_id' => $this->client->id]);
 
         $payer->policy_number = '1234';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'clientPayer' => $payer]), $payer->toArray())
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$payer->toArray()]])
             ->assertStatus(200);
 
         $this->assertEquals('1234', $payer->fresh()->policy_number);
@@ -68,14 +119,14 @@ class ManageClientPayersTest extends TestCase
     /** @test */
     public function an_office_user_can_remove_a_client_payer()
     {
-        $payer = factory('App\Billing\ClientPayer')->create(['client_id' => $this->client->id]);
+        $payer = factory('App\Billing\ClientPayer', 2)->create(['client_id' => $this->client->id]);
 
-        $this->assertCount(1, $this->client->payers);
+        $this->assertCount(2, $this->client->payers);
 
-        $this->deleteJson(route('business.clients.payers.destroy', ['client' => $this->client, 'clientPayer' => $payer]))
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$this->client->payers->first()]])
             ->assertStatus(200);
 
-        $this->assertCount(0, $this->client->fresh()->payers);
+        $this->assertCount(1, $this->client->fresh()->payers);
     }
 
     /** @test */
@@ -90,13 +141,13 @@ class ManageClientPayersTest extends TestCase
         $this->assertCount(0, $this->client->payers);
 
         $data['payer_id'] = 12345;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(422);
 
         $data['payer_id'] = $otherPayer->id;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(422);
-    
+
         $this->assertCount(0, $this->client->fresh()->payers);
     }
     
@@ -110,7 +161,7 @@ class ManageClientPayersTest extends TestCase
         $this->assertCount(0, $this->client->payers);
 
         $data['payer_id'] = null;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(200);
 
         $this->assertCount(1, $this->client->fresh()->payers);
@@ -127,17 +178,16 @@ class ManageClientPayersTest extends TestCase
 
         $data['payer_id'] = $this->payer->id;
         $data['effective_start'] = '2018-01-01';
-        $data['effective_end'] = '2018-12-31';
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $data['effective_end'] = '9999-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(200);
 
         $this->assertCount(1, $this->client->fresh()->payers);
 
         $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
         $data['effective_end'] = '2019-12-31';
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payer_id');
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
+            ->assertStatus(422);
 
         $this->assertCount(1, $this->client->fresh()->payers);
     }
@@ -153,214 +203,17 @@ class ManageClientPayersTest extends TestCase
 
         $data['payer_id'] = '';
         $data['effective_start'] = '2018-01-01';
-        $data['effective_end'] = '2018-12-31';
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $data['effective_end'] = '9999-12-31';
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(200);
 
         $this->assertCount(1, $this->client->fresh()->payers);
 
         $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
         $data['effective_end'] = '2019-12-31';
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payer_id');
-
-        $this->assertCount(1, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function updating_client_payers_should_fail_if_effective_dates_overlap_for_the_same_payer_id()
-    {
-        $this->withExceptionHandling();
-
-        factory('App\Billing\ClientPayer')->create([
-            'client_id' => $this->client->id,
-            'payer_id' => $this->payer->id,
-            'effective_start' => '2018-01-01',
-            'effective_start' => '2018-12-31',
-        ])->toArray();
-
-        $data = factory('App\Billing\ClientPayer')->create([
-            'client_id' => $this->client->id,
-            'payer_id' => $this->payer->id,
-            'effective_start' => '2019-01-01',
-            'effective_start' => '2019-12-31',
-        ])->toArray();
-
-        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
-        $data['effective_end'] = '2019-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payer_id');
-
-        $data['effective_start'] = '2019-01-02';
-        $data['effective_end'] = '2019-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
-            ->assertStatus(200);
-    }
-
-    /** @test */
-    public function updating_client_payers_should_fail_if_effective_dates_overlap_for_null_payer_ids()
-    {
-        $this->withExceptionHandling();
-
-        factory('App\Billing\ClientPayer')->create([
-            'client_id' => $this->client->id,
-            'payer_id' => null,
-            'effective_start' => '2018-01-01',
-            'effective_start' => '2018-12-31',
-        ])->toArray();
-
-        $data = factory('App\Billing\ClientPayer')->create([
-            'client_id' => $this->client->id,
-            'payer_id' => null,
-            'effective_start' => '2019-01-01',
-            'effective_start' => '2019-12-31',
-        ])->toArray();
-
-        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
-        $data['effective_end'] = '2019-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payer_id');
-
-        $data['effective_start'] = '2019-01-02';
-        $data['effective_end'] = '2019-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client, 'payer' => $data['id']]), $data)
-            ->assertStatus(200);
-    }
-
-    /** @test */
-    public function new_client_payers_should_be_added_to_the_bottom_priority()
-    {
-        $this->withExceptionHandling();
-
-        factory('App\Billing\ClientPayer', 5)->create(['client_id' => $this->client->id]);
-        $payer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id, 'payer_id' => $payer])->toArray();
-
-        $this->assertCount(5, $this->client->payers);
-
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertJsonFragment(['priority' => 6])
-            ->assertStatus(200);
-
-        $this->assertCount(6, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function an_office_user_can_update_the_client_payer_priority()
-    {
-        factory('App\Billing\ClientPayer', 5)->create(['client_id' => $this->client->id]);
-        $chainPayer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
-        $payer = factory('App\Billing\ClientPayer')->create(['client_id' => $this->client->id, 'payer_id' => $chainPayer]);
-
-        $this->assertCount(6, $this->client->payers);
-        $this->assertEquals($payer->priority, 6);
-
-        $this->patchJson(route('business.clients.payers.priority', ['client' => $this->client, 'payer' => $payer]), [
-            'priority' => 2,
-        ])->assertStatus(200)
-            ->assertJsonFragment(['priority' => 2]);
-
-        $this->assertEquals($payer->fresh()->priority, 2);
-        $this->assertEquals([1, 2, 3, 4, 5, 6], $this->client->fresh()->payers->pluck('priority')->toArray());
-    }
-
-    /** @test */
-    public function when_a_client_payer_is_removed_it_should_shift_all_other_priorities_up()
-    {
-        factory('App\Billing\ClientPayer', 5)->create(['client_id' => $this->client->id]);
-        $chainPayer = factory('App\Billing\Payer')->create(['chain_id' => $this->chain->id]);
-        $payer = $this->client->payers->where('priority', 3)->first();
-
-        $this->assertCount(5, $this->client->payers);
-        $this->assertEquals($payer->priority, 3);
-
-        $this->deleteJson(route('business.clients.payers.destroy', ['client' => $this->client, 'clientPayer' => $payer]))
-            ->assertStatus(200);
-
-        $this->assertCount(4, $this->client->fresh()->payers);
-        $this->assertEquals([1, 2, 3, 4], $this->client->fresh()->payers->pluck('priority')->toArray());
-    }
-
-    /** @test */
-    public function client_payers_must_have_a_valid_payment_allocation_method()
-    {
-        $this->withExceptionHandling();
-
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
-
-        $this->assertCount(0, $this->client->payers);
-
-        $data['payment_allocation'] = 'invalid';
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
+        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(422);
 
-        $this->assertCount(0, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function if_a_client_payers_allocation_method_is_balance_then_split_and_allowance_are_not_required()
-    {
-        $this->withExceptionHandling();
-
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
-
-        $this->assertCount(0, $this->client->payers);
-
-        $data['payment_allocation'] = ClientPayer::ALLOCATION_BALANCE;
-        $data['payment_allowance'] = null;
-        $data['payment_split'] = null;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(200);
-
         $this->assertCount(1, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function if_a_client_payers_allocation_method_is_daily_weekly_or_monthly_then_allowance_is_required()
-    {
-        $this->withExceptionHandling();
-
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
-
-        $this->assertCount(0, $this->client->payers);
-
-        $data['payment_allocation'] = ClientPayer::ALLOCATION_DAILY;
-        $data['payment_allowance'] = null;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payment_allowance');
-
-        $data['payment_allocation'] = ClientPayer::ALLOCATION_WEEKLY;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payment_allowance');
-
-        $data['payment_allocation'] = ClientPayer::ALLOCATION_MONTHLY;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('payment_allowance');
-            
-        $this->assertCount(0, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function if_a_client_payers_allocation_method_is_split_then_split_field_is_required()
-    {
-        $this->withExceptionHandling();
-
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
-
-        $this->assertCount(0, $this->client->payers);
-
-        $data['payment_allocation'] = ClientPayer::ALLOCATION_SPLIT;
-        $data['split_percentage'] = null;
-        $this->postJson(route('business.clients.payers.store', ['client' => $this->client]), $data)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('split_percentage');
-
-        $this->assertCount(0, $this->client->fresh()->payers);
     }
 }

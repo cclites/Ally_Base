@@ -204,7 +204,7 @@ Route::group([
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
-    Route::resource('clients/{client}/payers', 'Business\ClientPayerController', ['as' => 'clients']);
+    Route::patch('clients/{client}/payers', 'Business\ClientPayerController@update')->name('clients.payers.update');
     Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
     Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
     Route::patch('clients/{client}/rates', 'Business\ClientRatesController@update')->name('clients.rates.update');
