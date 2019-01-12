@@ -17,13 +17,13 @@ $appDir = base_path('app');
 $packageDir = base_path('packages');
 $vendorDir = base_path('vendor');
 
-$cmd = sprintf('find %s %s -type f -name \'*.php\' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )',
+$cmd = sprintf($vendorDir.'/bin/phplint',
     escapeshellarg($appDir), escapeshellarg($packageDir));
 
 $recursiveLint = new Process($cmd);
 $recursiveLint->run();
+echo($recursiveLint->getOutput() . "\n");
 if (!$recursiveLint->isSuccessful()) {
-    echo($recursiveLint->getOutput() . "\n");
     echo($recursiveLint->getErrorOutput() . "\n");
     exit(1);
 }
@@ -39,7 +39,7 @@ $phpunit = sprintf("$phpunitBin --configuration %s", escapeshellarg($phpunitConf
 $phpunitCmds = [
     "$phpunit --testsuite Model",
     "$phpunit --testsuite Bugs",
-    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|RateFactory/'", // core feature tests
+    "$phpunit --filter '/ClockIn|ClockOut|Telefony|EncryptedData|RateFactory|ScheduleConverter/'", // core feature tests
     "$phpunit --filter '/Payer|ClientRateTest/'", // new billing tests (add invoice generators once done)
 ];
 
