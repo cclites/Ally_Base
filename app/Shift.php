@@ -6,7 +6,9 @@ use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
+use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\CostCalculator;
+use App\Shifts\ShiftFactory;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
@@ -230,7 +232,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     const METHOD_OFFICE = 'Office';  //  The shift was manually created or clocked out from the office user interface
     const METHOD_TELEPHONY = 'Telephony';  //  The shift was clocked in/out from the telephony system
     const METHOD_TIMESHEET = 'Timesheet';  //  The shift was created from a manual timesheet submitted by the caregiver
+    const METHOD_IMPORTED = 'Imported';  //  The shift was imported manually or through a third party interface
     const METHOD_UNKNOWN = 'Unknown';  //  The check in/out method is unknown, most likely from before we implemented this logic
+
+    ////////////////////////////////////
+    //// Shift Hour Types
+    ////////////////////////////////////
+
+    const HOURS_DEFAULT = 'default';
+    const HOURS_OVERTIME = 'overtime';
+    const HOURS_HOLIDAY = 'holiday';
 
     //////////////////////////////////////
     /// Relationship Methods

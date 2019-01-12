@@ -1,6 +1,12 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Caregiver;
+use App\Client;
+use App\Shift;
+use App\Shifts\Data\ClockOutData;
+use App\Shifts\ShiftFactory;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 class UpdateShiftRequest extends BusinessClientRequest
@@ -22,8 +28,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date|after_or_equal:' . $this->input('checked_in_time'),
             'fixed_rates' => 'required|boolean',
-            'caregiver_rate' => 'required|numeric|max:1000|min:0',
-            'provider_fee' => 'required|numeric|max:1000|min:0',
+            'client_rate' => 'required|numeric|max:1000|min:0',
+            'caregiver_rate' => 'required|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
             'hours_type' => 'required|in:default,overtime,holiday',
             'issues.id' => 'nullable|numeric',
             'issues.caregiver_injury' => 'boolean',
@@ -38,6 +44,7 @@ class UpdateShiftRequest extends BusinessClientRequest
         return [
             'checked_out_time.after_or_equal' => 'The clock out time cannot be less than the clock in time.',
             'fixed_rates.*' => 'Please select a shift type of hourly or daily.',
+            'caregiver_rate.max' => 'The caregiver rate cannot be greater than the client rate.',
         ];
     }
 
@@ -60,5 +67,41 @@ class UpdateShiftRequest extends BusinessClientRequest
     public function getActivities()
     {
         return $this->validated()['activities'] ?? [];
+    }
+
+    public function getShiftArray(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): array
+    {
+        return $this->getShiftFactory($status, $clockInMethod, $clockOutMethod)->toArray();
+    }
+
+    public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): ShiftFactory
+    {
+        $clockOutData = new ClockOutData(
+            $this->input('mileage') ?? 0.0,
+            $this->input('other_expenses') ?? 0.0,
+            $this->input('other_expenses_desc'),
+            $this->input('caregiver_comments')
+        );
+        $shiftData = ShiftFactory::withoutSchedule(
+            $this->getClient(),
+            Caregiver::findOrFail($this->input('caregiver_id')),
+            $this->input('hours_type'),
+            $this->input('fixed_rates'),
+            $this->input('client_rate'),
+            $this->input('caregiver_rate'),
+            $clockInMethod,
+            Carbon::parse($this->input('checked_in_time')),
+            $clockOutMethod ?? $clockInMethod,
+            Carbon::parse($this->input('checked_out_time')),
+            $status
+        )->withData($clockOutData);
+
+        return $shiftData;
+    }
+
+    public function createShift(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): Shift
+    {
+        $shiftFactory = $this->getShiftFactory($status, $clockInMethod, $clockOutMethod);
+        return $shiftFactory->create();
     }
 }

@@ -18,7 +18,7 @@ use App\Shift;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
-class ShiftService extends InvoiceableModel
+class ShiftService #extends InvoiceableModel
 {
     protected $guarded = ['id'];
 

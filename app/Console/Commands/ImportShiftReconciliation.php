@@ -55,6 +55,7 @@ class ImportShiftReconciliation extends Command
      */
     public function handle()
     {
+        exit('This command is not compatible with new shift properties.');
         $objPHPExcel = $this->loadFile();
 
         $this->importShifts();
