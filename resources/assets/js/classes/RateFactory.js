@@ -1,3 +1,5 @@
+import moment from "moment";
+
 class RateFactory {
 
     static getChargedRate(caregiverRate, providerFee = 0.0, clientRate = 0.0, clientRateStructure = false)
@@ -24,8 +26,14 @@ class RateFactory {
         return this.getChargedRate(caregiverRate, providerFee);
     }
 
-    static findMatchingRate(ratesArray, serviceId, payerId, caregiverId, fixedRates = false)
+    static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
     {
+        effectiveDate = moment(effectiveDate).format('YYYY-MM-DD');
+        let effectiveRates = ratesArray.filter(item => {
+            return item.effective_start <= effectiveDate
+                && item.effective_end >=effectiveDate;
+        });
+
         const search = (serviceId, payerId, caregiverId) => {
             return item => {
                 return item.service_id === serviceId
@@ -38,23 +46,25 @@ class RateFactory {
             let result;
 
             // First: check for an exact match
-            result = ratesArray.find(search(serviceId, payerId, caregiverId));
+            result = effectiveRates.find(search(serviceId, payerId, caregiverId));
             if (result) return result;
 
             // Find partial matches in order of caregiver ID, payer ID, then service ID
-            result = ratesArray.find(search(null, payerId, caregiverId));
+            result = effectiveRates.find(search(null, payerId, caregiverId));
             if (result) return result;
-            result = ratesArray.find(search(serviceId, null, caregiverId));
+            result = effectiveRates.find(search(serviceId, null, caregiverId));
             if (result) return result;
-            result = ratesArray.find(search(null, null, caregiverId));
+            result = effectiveRates.find(search(null, null, caregiverId));
             if (result) return result;
-            result = ratesArray.find(search(serviceId, payerId, null));
+            result = effectiveRates.find(search(serviceId, payerId, null));
             if (result) return result;
-            result = ratesArray.find(search(serviceId, null, null));
+            result = effectiveRates.find(search(null, payerId, null));
+            if (result) return result;
+            result = effectiveRates.find(search(serviceId, null, null));
             if (result) return result;
 
             // Use fallback rates or 0
-            result = ratesArray.find(search(null, null, null));
+            result = effectiveRates.find(search(null, null, null));
             if (result) return result;
 
             return {};

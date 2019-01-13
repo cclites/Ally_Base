@@ -16,12 +16,12 @@ class UpdateScheduleRequest extends CreateScheduleRequest
             'fixed_rates' => 'required|boolean',
             'caregiver_rate' => 'nullable|numeric|min:0|max:999.99',
             'client_rate' => 'nullable|numeric|min:0|max:999.99',
-            'provider_fee' => 'nullable|numeric|min:0|max:999.99',
+//            'provider_fee' => 'nullable|numeric|min:0|max:999.99',
             'caregiver_rate_id' => 'nullable|exists:rate_codes,id',
             'client_rate_id' => 'nullable|exists:rate_codes,id',
             'notes' => 'nullable|max:1024',
             'hours_type' => 'required|in:default,overtime,holiday',
-            'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
+//            'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
             'care_plan_id' => 'nullable|exists:care_plans,id',
             'status' => 'sometimes|required|string|min:2',
             'services' => 'array|required_without:service_id',
@@ -30,8 +30,8 @@ class UpdateScheduleRequest extends CreateScheduleRequest
             'services.*.payer_id' => 'nullable|exists:payers,id',
             'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
-            'services.*.client_rate' => 'required_with:services|numeric|min:0|max:999.99',
-            'services.*.caregiver_rate' => 'required_with:services|numeric|min:0|max:999.99',
+            'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
+            'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99',
         ];
     }
 

@@ -35,8 +35,8 @@ class CreateScheduleRequest extends BusinessClientRequest
             'services.*.payer_id' => 'nullable|exists:payers,id',
             'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
-            'services.*.client_rate' => 'required_with:services|numeric|min:0|max:999.99',
-            'services.*.caregiver_rate' => 'required_with:services|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
+            'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
+            'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
         ];
     }
 

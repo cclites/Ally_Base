@@ -18,6 +18,7 @@
                                             id="client_id"
                                             name="client_id"
                                             v-model="form.client_id"
+                                            @input="changedClient(form.client_id)"
                                             required
                                     >
                                         <option value="">--Select a Client--</option>
@@ -41,6 +42,7 @@
                                             id="caregiver_id"
                                             name="caregiver_id"
                                             v-model="form.caregiver_id"
+                                            @input="changedCaregiver(form.caregiver_id)"
                                     >
                                         <option value="">--Not Assigned--</option>
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
@@ -73,16 +75,16 @@
                                         <tbody>
                                         <tr>
                                             <td>
-                                                <date-picker v-model="startDate" />
+                                                <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
                                             </td>
                                             <td>
                                                 <date-picker v-model="firstShiftEndDate" disabled />
                                             </td>
                                             <td>
-                                                <time-picker name="startTime" v-model="startTime"/>
+                                                <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
                                             </td>
                                             <td>
-                                                <time-picker name="endTime" v-model="endTime"/>
+                                                <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
                                             </td>
                                             <td class="text-only">
                                                 {{ scheduledHours }}
@@ -105,11 +107,11 @@
                         <b-row>
                             <b-col lg="12">
                                 <strong>Scheduled Billing: </strong>
-                                <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly" @change="newBillingType('hourly')">
+                                <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
                                 <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
-                                <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed" @change="newBillingType('fixed')">
+                                <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
                                 <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
-                                <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services" @change="newBillingType('services')">
+                                <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
                                 <label for="create_service_rates" class="rate-label">Service Breakout</label>
                             </b-col>
                         </b-row>
@@ -136,7 +138,7 @@
                                         <!-- Actual Hours / Fixed -->
                                         <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                             <td>
-                                                <b-form-select v-model="form.service_id" class="services">
+                                                <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
                                                     <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
                                                 </b-form-select>
                                             </td>
@@ -150,28 +152,40 @@
                                             <td class="text-only">
                                                 {{ billingType === 'hourly' ? 'Actual' : 'Fixed' }}
                                             </td>
-                                            <td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.client_rate) }}
+                                            </td>
+                                            <td v-else>
                                                 <b-form-input
                                                         name="client_rate"
                                                         type="number"
                                                         step="any"
                                                         v-model="form.client_rate"
-                                                        @change="recalculateRates(form)"
+                                                        @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                 />
                                             </td>
-                                            <td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(form.default_rates.caregiver_rate) }}
+                                            </td>
+                                            <td v-else>
                                                 <b-form-input
                                                     name="caregiver_rate"
                                                     type="number"
                                                     step="any"
                                                     v-model="form.caregiver_rate"
-                                                    @change="recalculateRates(form)"
+                                                    @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
                                                 />
                                             </td>
-                                            <td class="text-only">{{ numberFormat(form.provider_fee) }}</td>
-                                            <td class="text-only">{{ numberFormat(form.ally_fee) }}</td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
+                                                <span v-else>{{ numberFormat(form.provider_fee) }}</span>
+                                            </td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
+                                                <span v-else>{{ numberFormat(form.ally_fee) }}</span>
+                                            </td>
                                             <td colspan="2">
-                                                <b-form-select v-model="form.payer_id" class="payers">
+                                                <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
@@ -181,8 +195,8 @@
                                         <!-- Service Breakout -->
                                         <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
                                             <td>
-                                                <b-form-select v-model="service.service_id" class="services">
-                                                    <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                                <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
+                                                    <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td>
@@ -199,28 +213,40 @@
                                                     step="any"
                                                     v-model="service.duration" />
                                             </td>
-                                            <td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.client_rate) }}
+                                            </td>
+                                            <td v-else>
                                                 <b-form-input
                                                         name="client_rate"
                                                         type="number"
                                                         step="any"
                                                         v-model="service.client_rate"
-                                                        @change="recalculateRates(service)"
+                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                 />
                                             </td>
-                                            <td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.caregiver_rate) }}
+                                            </td>
+                                            <td v-else>
                                                 <b-form-input
                                                         name="caregiver_rate"
                                                         type="number"
                                                         step="any"
                                                         v-model="service.caregiver_rate"
-                                                        @change="recalculateRates(service)"
+                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
                                                 />
                                             </td>
-                                            <td class="text-only">{{ numberFormat(service.provider_fee) }}</td>
-                                            <td class="text-only">{{ numberFormat(service.ally_fee) }}</td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
+                                                <span v-else>{{ numberFormat(service.provider_fee) }}</span>
+                                            </td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
+                                                <span v-else>{{ numberFormat(service.ally_fee) }}</span>
+                                            </td>
                                             <td>
-                                                <b-form-select v-model="service.payer_id" class="payers">
+                                                <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
                                                     <option :value="null">(Auto)</option>
                                                     <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
@@ -238,9 +264,19 @@
 
                                         </tbody>
                                     </table>
-
-                                    <small>* Provider Fee &amp; Ally Fee are estimated.  (Payment Type: {{ paymentType }} {{ displayAllyPct }}%)</small>
                                 </div>
+                            </b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col lg="6">
+                                <label>
+                                    <b-form-checkbox v-model="defaultRates">
+                                        Use Default Rates from Client Rates Tab
+                                    </b-form-checkbox>
+                                </label>
+                            </b-col>
+                            <b-col lg="6" class="text-right">
+                                <small>* Provider Fee &amp; Ally Fee are estimated.  (Payment Type: {{ paymentType }} {{ displayAllyPct }}%)</small>
                             </b-col>
                         </b-row>
                     </b-tab>
@@ -399,6 +435,7 @@
                 services: [],
                 clientPayers: [],
                 clientRates: [],
+                defaultRates: true,
             }
         },
 
@@ -409,8 +446,6 @@
         },
 
         computed: {
-
-
 
             selectedCaregiver() {
                 if (this.form.caregiver_id) {
@@ -515,6 +550,80 @@
 
         methods: {
 
+            changedSchedule(schedule) {
+                // initiated from watcher
+                this.makeForm(schedule);
+                this.changedClient(schedule.client_id);
+            },
+
+            changedClient(clientId) {
+                this.loadCaregivers(clientId);
+                this.loadAllyPctFromClient(clientId);
+                this.loadCarePlans(clientId);
+                this.loadClientRates(clientId);
+                this.loadClientPayers(clientId);
+            },
+
+            changedCaregiver(caregiverId) {
+                this.fetchAllRates();
+            },
+
+            changedStartDate(startDate) {
+                this.fetchAllRates();
+            },
+
+            changedStartTime(startTime) {
+                this.form.duration = this.getDuration();
+            },
+
+            changedEndTime(endTime) {
+                this.form.duration = this.getDuration();
+            },
+
+            changedPayer(service, payerId) {
+                this.fetchDefaultRate(service);
+            },
+
+            changedService(service, serviceId) {
+                this.fetchDefaultRate(service);
+            },
+
+            changedBillingType(type) {
+                // initiated from watcher
+                if (type === 'services') {
+                    this.form.service_id = null;
+                    this.form.fixed_rates = false;
+                    if (!this.form.services.length) {
+                        this.addService();
+                    }
+                } else {
+                    this.form.service_id = this.defaultService.id;
+                    this.form.fixed_rates = type === 'fixed';
+                }
+                this.fetchAllRates();
+            },
+
+            changedDefaultRates(value) {
+                // initiated from watcher
+                if (value) {
+                    this.form.client_rate = null;
+                    this.form.caregiver_rate = null;
+                    for(let service in this.form.services) {
+                        service.client_rate = null;
+                        service.caregiver_rate = null;
+                    }
+                } else {
+                    this.form.client_rate = this.form.default_rates.client_rate || 0;
+                    this.form.caregiver_rate = this.form.default_rates.caregiver_rate || 0;
+                    this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
+                    for(let service in this.form.services) {
+                        service.client_rate = service.default_rates.client_rate || 0;
+                        service.caregiver_rate = service.default_rates.caregiver_rate || 0;
+                        this.recalculateRates(service, service.client_rate, service.caregiver_rate);
+                    }
+                }
+            },
+
             selectCaregiver(id) {
                 this.cgMode = 'all';
                 this.form.caregiver_id = id;
@@ -531,45 +640,57 @@
                 }
             },
 
-            makeForm() {
+            makeForm(schedule) {
+                if (!schedule) schedule = this.schedule;
                 this.form = new Form({
-                    'starts_at': this.schedule.starts_at || "",
-                    'duration': this.schedule.duration || 0,
-                    'caregiver_id': this.schedule.caregiver_id || "",
-                    'client_id': this.schedule.client_id || "",
-                    'fixed_rates': this.schedule.fixed_rates ? 1 : 0,
-                    'caregiver_rate': this.schedule.caregiver_rate || "",
-                    'caregiver_rate_id': this.schedule.caregiver_rate_id || "",
-                    'client_rate': this.schedule.client_rate || "",
-                    'client_rate_id': this.schedule.client_rate_id || "",
-                    'provider_fee': this.schedule.provider_fee || "",
-                    'notes': this.schedule.notes || "",
-                    'hours_type': this.schedule.hours_type || "default",
-                    'overtime_duration': this.schedule.overtime_duration || 0,
-                    'care_plan_id': this.schedule.care_plan_id || '',
-                    'status': this.schedule.status || 'OK',
-                    'service_id': this.schedule.service_id || this.defaultService.id,
+                    'starts_at': schedule.starts_at || "",
+                    'duration': schedule.duration || 0,
+                    'caregiver_id': schedule.caregiver_id || "",
+                    'client_id': schedule.client_id || "",
+                    'fixed_rates': schedule.fixed_rates ? 1 : 0,
+                    'caregiver_rate': schedule.caregiver_rate || null,
+                    'caregiver_rate_id': schedule.caregiver_rate_id || "",
+                    'client_rate': schedule.client_rate || null,
+                    'client_rate_id': schedule.client_rate_id || "",
+                    'notes': schedule.notes || "",
+                    'hours_type': schedule.hours_type || "default",
+                    'overtime_duration': schedule.overtime_duration || 0,
+                    'care_plan_id': schedule.care_plan_id || '',
+                    'status': schedule.status || 'OK',
+                    'service_id': schedule.service_id || this.defaultService.id,
                     'payer_id': null,
                     'interval_type': "",
                     'recurring_end_date': "",
                     'bydays': [],
                     'services': [],
+                    'provider_fee': null,
+                    'ally_fee': null,
+                    'default_rates': {
+                        'client_rate': null,
+                        'caregiver_rate': null,
+                        'provider_fee': null,
+                        'ally_fee': null,
+                    }
                 });
+                this.defaultRates = this.form.client_rate === null;
                 this.billingType = this.form.fixed_rates ? 'fixed' : 'hourly';
-                if (this.schedule.services) {
-                    for(let service of this.schedule.services) {
+                if (schedule.services) {
+                    for(let service of schedule.services) {
                         this.billingType = 'services';
                         this.addService(service);
+                        if (service.client_rate !== null) {
+                            this.defaultRates = false;
+                        }
                     }
                 }
-                this.setDateTimeFromSchedule();
+                this.setDateTimeFromSchedule(schedule);
             },
 
-            setDateTimeFromSchedule() {
-                let start = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
+            setDateTimeFromSchedule(schedule) {
+                let start = moment(schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
                 this.startDate = start.format('MM/DD/YYYY');
                 this.startTime = (start._ambigTime) ? '09:00' : start.format('HH:mm');
-                let end = moment(start).add(this.form.duration || 60, 'minutes');
+                let end = moment(start).add(schedule.duration || 60, 'minutes');
                 this.endTime = (end._ambigTime) ? '10:00' : end.format('HH:mm');
             },
 
@@ -659,12 +780,11 @@
                 });
             },
 
-            loadCaregivers() {
-                if (this.form.client_id) {
-                    axios.get('/business/clients/' + this.form.client_id + '/caregivers')
+            loadCaregivers(clientId) {
+                if (clientId) {
+                    axios.get('/business/clients/' + clientId + '/caregivers')
                         .then(response => {
                             this.clientCaregivers = response.data;
-                            this.prefillRates();
                         });
                 }
             },
@@ -672,14 +792,14 @@
             loadClientData() {
                 if (this.client_id) {
                     // Load caregivers and ally pct immediately
-                    this.loadCaregivers();
+                    this.loadCaregivers(this.client_id);
                     this.loadAllyPctFromClient(this.client_id);
                     this.loadClientRates();
                     this.loadClientPayers();
                 }
             },
 
-            async loadClientPayers(resetPayers = false) {
+            async loadClientPayers(clientId, resetPayers = false) {
                 if (this.form.client_id) {
                     const response = await axios.get(`/business/clients/${this.form.client_id}/payers/unique`);
                     this.clientPayers = response.data;
@@ -687,16 +807,16 @@
                 }
             },
 
-            async loadClientRates(resetRates = false) {
+            async loadClientRates(clientId) {
                 if (this.form.client_id) {
                     const response = await axios.get(`/business/clients/${this.form.client_id}/rates`);
                     this.clientRates = response.data;
-                    if (resetRates) this.fetchAllRates();
+                    this.fetchAllRates();
                 }
             },
 
             async fetchServices() {
-                let response = await axios.get('/business/service?json=1');
+                let response = await axios.get('/business/services?json=1');
                 if (Array.isArray(response.data)) {
                     this.services = response.data;
                 } else {
@@ -777,33 +897,6 @@
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
 
-            prefillRates()
-            {
-                if (this.schedule.id) {
-                    // Use the schedule's rates if the caregiver_id matches the schedule's caregiver_id
-                    if (this.schedule.caregiver_id == this.selectedCaregiver.id) {
-                        this.form.caregiver_rate = this.schedule.caregiver_rate;
-                        this.form.provider_fee = this.schedule.provider_fee
-                        return;
-                    }
-                }
-
-                this.form.caregiver_rate = this.selectedCaregiver.pivot[`caregiver_${this.rateType.toLowerCase()}_rate`];
-                this.form.provider_fee = this.selectedCaregiver.pivot[`provider_${this.rateType.toLowerCase()}_fee`];
-            },
-
-            newBillingType(type) {
-                console.log(type);
-                if (type === 'services') {
-                    this.form.service_id = null;
-                    if (!this.form.services.length) {
-                        this.addService();
-                    }
-                } else {
-                    this.form.service_id = this.defaultService.id;
-                }
-            },
-
             addService(service = {}) {
                 const newService = {
                     id: service.id || null,
@@ -811,15 +904,21 @@
                     payer_id: service.payer_id || null,
                     hours_type: service.hours_type || 'default',
                     duration: service.duration || 1,
-                    caregiver_rate: service.caregiver_rate || 0,
-                    client_rate: service.client_rate || 0,
-                    ally_fee: 0, // just for show
-                    provider_fee: 0, // just for show
+                    caregiver_rate: service.caregiver_rate || null,
+                    client_rate: service.client_rate || null,
+                    provider_fee: null,
+                    ally_fee: null,
+                    default_rates: {
+                        'client_rate': null,
+                        'caregiver_rate': null,
+                        'provider_fee': null,
+                        'ally_fee': null,
+                    }
                 };
                 if (!service.id) {
                     this.fetchDefaultRate(newService);
                 } else {
-                    this.recalculateRates(newService);
+                    this.recalculateRates(newService, newService.client_rate, newService.caregiver_rate);
                 }
                 this.form.services.push(newService);
             },
@@ -840,24 +939,24 @@
                 });
             },
 
-            recalculateRates(service) {
-                service.ally_fee = RateFactory.getAllyFee(this.allyPct, service.client_rate);
-                service.provider_fee = RateFactory.getProviderFee(service.client_rate, service.caregiver_rate, this.allyPct, true);
+            recalculateRates(rates, clientRate, caregiverRate) {
+                rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate);
+                rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true);
             },
 
             fetchDefaultRate(service) {
-                const ratesObj = RateFactory.findMatchingRate(this.clientRates, service.service_id, service.payer_id, this.form.caregiver_id);
-                service.client_rate = ratesObj.client_rate;
-                service.caregiver_rate = ratesObj.caregiver_rate;
-                this.recalculateRates(service);
+                const ratesObj = RateFactory.findMatchingRate(this.clientRates, this.startDate, service.service_id, service.payer_id, this.form.caregiver_id, this.form.fixed_rates);
+                service.default_rates.client_rate = ratesObj.client_rate;
+                service.default_rates.caregiver_rate = ratesObj.caregiver_rate;
+                this.recalculateRates(service.default_rates, service.default_rates.client_rate, service.default_rates.caregiver_rate);
             },
 
             fetchAllRates() {
                 this.fetchDefaultRate(this.form);
-                for(service of this.form.services) {
+                for(let service of this.form.services) {
                     this.fetchDefaultRate(service);
                 }
-            }
+            },
         },
 
         watch: {
@@ -874,7 +973,7 @@
                 this.copiedSchedule = {};
 
                 // Re-create the form object
-                this.makeForm();
+                this.changedSchedule(val);
 
                 // Use cg all mode if an caregiver is pre-selected
                 if (this.schedule.caregiver_id) {
@@ -892,44 +991,13 @@
                 }
             },
 
-            startTime(val) {
-                this.form.duration = this.getDuration();
+            defaultRates(val) {
+                this.changedDefaultRates(val);
             },
 
-            endTime() {
-                this.form.duration = this.getDuration();
-            },
-
-            'form.fixed_rates': function(val, old_val) {
-                this.prefillRates();
-            },
-
-            'form.client_id': function(val, old_val) {
-                this.loadCarePlans(val, old_val);
-                this.loadCaregivers();
-                this.loadAllyPctFromClient(val);
-                if (old_val && val != old_val) {
-                    this.loadClientRates(true);
-                    this.loadClientPayers(true);
-                } else if (val != old_val) {
-                    this.loadClientRates();
-                    this.loadClientPayers();
-                }
-            },
-
-            'form.caregiver_id': function(val, old_val) {
-                this.prefillRates();
-            },
-
-            'form.hours_type': function(val, old_val) {
-                if (old_val) {
-                    if (val === 'holiday' || val === 'overtime') {
-                        this.specialHoursChange = true;
-                        return;
-                    }
-                }
-                this.specialHoursChange = false;
-            },
+            billingType(val) {
+                this.changedBillingType(val);
+            }
         },
     }
 </script>
