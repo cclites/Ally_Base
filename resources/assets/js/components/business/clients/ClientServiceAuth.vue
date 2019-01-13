@@ -44,15 +44,15 @@
                 <b-container fluid>
                     <b-row>
                         <b-col lg="6">
-                            <b-form-group label="Service ID" label-class="required">
+                            <b-form-group label="Service Code" label-class="required">
                                 <b-form-select v-model="form.service_id" class="mr-1 mb-1" name="report_type">
                                     <option :value="null">--Select--</option>
-                                    <option v-for="s in services" :value="s.id" :key="s.id">{{ s.name }}</option>
+                                    <option v-for="s in services" :value="s.id" :key="s.id">{{ s.code}} {{ s.name }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
-                            <b-form-group label="Payer ID">
+                            <b-form-group label="Payer">
                                 <b-form-select v-model="form.payer_id" class="mr-1 mb-1" name="report_type">
                                     <option :value="null">(Any Payer)</option>
                                     <option v-for="p in payers" :value="p.id" :key="p.id">{{ p.name }}</option>
@@ -61,12 +61,12 @@
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Effective Start" label-class="required">
-                                <date-picker v-model="form.effective_start"></date-picker>
+                                <mask-input v-model="form.effective_start" type="date" class="date-input"></mask-input>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Effective End" label-class="required">
-                                <date-picker v-model="form.effective_end"></date-picker>
+                                <mask-input v-model="form.effective_end" type="date" class="date-input"></mask-input>
                             </b-form-group>
                         </b-col>
                         <b-col lg="6">
@@ -91,9 +91,11 @@
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
-                        <b-col lg="6">
+                    </b-row>
+                    <b-row>
+                        <b-col lg="12">
                             <b-form-group label="Notes">
-                                <b-form-input v-model="form.notes"></b-form-input>
+                                <b-form-textarea :rows="2" v-model="form.notes"></b-form-textarea>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -234,7 +236,7 @@
                     service_id: defaults.service_id || null,
                     payer_id: defaults.payer_id || null,
                     effective_start: defaults.effective_start || moment().format('MM/DD/YYYY'),
-                    effective_end: defaults.effective_end || "",
+                    effective_end: defaults.effective_end || "12/31/9999",
                     units: defaults.units || "",
                     unit_type: defaults.unit_type || "hourly",
                     period: defaults.period || "weekly",
