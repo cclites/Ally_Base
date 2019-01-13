@@ -13,6 +13,24 @@ use App\Billing\Validators\ClientPayerValidator;
 
 class ClientPayerController extends Controller
 {
+    public function index(Client $client)
+    {
+        return $client->payers()->with('payer')->get();
+    }
+
+    public function uniquePayers(Client $client)
+    {
+        $query = ClientPayer::where('client_id', $client->id)->with('payer')->groupBy('payer_id')->select('payer_id');
+        $results = $query->get();
+
+        return $results->map(function(ClientPayer $clientPayer) use ($client) {
+             return [
+                 'id' => $clientPayer->payer_id,
+                 'name' => $clientPayer->payer_id === 0 ? $client->name : $clientPayer->payer->name,
+             ];
+        });
+    }
+
     /**
      * Update the specified resource in storage.
      *

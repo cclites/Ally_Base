@@ -72,7 +72,7 @@ class ScheduleController extends BaseController
     {
         $this->authorize('read', $schedule);
 
-        return new ScheduleResponse($schedule->load('client'));
+        return new ScheduleResponse($schedule->load('client', 'services'));
     }
 
     /**
@@ -95,8 +95,9 @@ class ScheduleController extends BaseController
         $startsAt = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
         $creator->startsAt($startsAt)
             ->duration($request->duration)
-            ->assignments($business->id, $request->client_id, $request->caregiver_id)
-            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
+            ->assignments($business->id, $request->client_id, $request->caregiver_id, $request->service_id, $request->payer_id)
+            ->rates($request->caregiver_rate, $request->provider_fee, $request->fixed_rates)
+            ->addServices($request->getServices());
 
         if ($request->hours_type == 'overtime') {
             $creator->overtime($request->overtime_duration);
@@ -149,7 +150,6 @@ class ScheduleController extends BaseController
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule, ScheduleAggregator $aggregator)
     {
-        $data = $request->filtered();
         $business = $request->getBusiness();
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
@@ -166,6 +166,8 @@ class ScheduleController extends BaseController
 
         $this->ensureCaregiverAssignment($request->client_id, $request->caregiver_id, $request->caregiver_rate, $request->provider_fee, $request->fixed_rates);
 
+        \DB::beginTransaction();
+
         if ($schedule->notes != $notes) {
             if (strlen($notes)) {
                 $note = ScheduleNote::create(['note' => $notes]);
@@ -175,10 +177,13 @@ class ScheduleController extends BaseController
             }
         }
 
-        $data = $request->validated();
+        $data = $request->getScheduleData();
         $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
-        unset($data['notes']);
         $schedule->update($data);
+        $schedule->syncServices($request->getServices());
+
+        \DB::commit();
+
         return new SuccessResponse('The schedule has been updated.');
     }
 

@@ -28,7 +28,11 @@ class ClientPayer extends AuditableModel
      * @var array
      */
     protected $casts = [
+        'client_id' => 'integer',
+        'payer_id' => 'integer',
         'priority' => 'integer',
+        'payment_allowance' => 'float',
+        'split_percentage' => 'float',
     ];
 
     ///////////////////////////////////////

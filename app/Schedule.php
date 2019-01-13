@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Billing\ScheduleService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
@@ -182,6 +183,11 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(ScheduleNote::class, 'note_id');
     }
 
+    public function services()
+    {
+        return $this->hasMany(ScheduleService::class);
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -224,8 +230,30 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    /**
+     * @param iterable $services
+     */
+    public function syncServices(iterable $services)
+    {
+        $savedIds = [];
+        foreach($services as $data) {
+            $service = null;
+            if (isset($data['id'])) {
+                $service = $this->services()->find($data['id']);
+            }
+            if (!$service) {
+                $service = new ScheduleService();
+            }
+            $service->fill($data);
+            $this->services()->save($service);
+            $savedIds[] = $service->id;
+        }
+        // Delete Others
+        $this->services()->whereNotIn('id', $savedIds)->delete();
+    }
 
     /**
      * Return the related shift status

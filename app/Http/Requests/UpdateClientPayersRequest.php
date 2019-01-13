@@ -32,7 +32,8 @@ class UpdateClientPayersRequest extends FormRequest
                 'nullable',
                 'numeric',
                 Rule::exists('payers', 'id')->where(function ($query) {
-                    $query->where('chain_id', $this->route('client')->business->chain_id);
+                    $query->where('chain_id', $this->route('client')->business->chain_id)
+                        ->orWhereNull('chain_id');
                 })
             ],
             'payers.*.policy_number' => 'nullable|string',

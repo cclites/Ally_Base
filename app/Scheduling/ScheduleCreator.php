@@ -52,6 +52,11 @@ class ScheduleCreator
     protected $data = [];
 
     /**
+     * @var iterable
+     */
+    protected $services = [];
+
+    /**
      * @var \App\Scheduling\RuleGenerator
      */
     protected $ruleGenerator;
@@ -145,11 +150,13 @@ class ScheduleCreator
      * @param int $business_id
      * @param int $client_id
      * @param int|null $caregiver_id
+     * @param int|null $service_id
+     * @param int|null $payer_id
      * @return $this
      */
-    public function assignments(int $business_id, int $client_id, int $caregiver_id = null)
+    public function assignments(int $business_id, int $client_id, int $caregiver_id = null, int $service_id = null, int $payer_id = null)
     {
-        $this->data = array_merge($this->data, compact('business_id', 'client_id', 'caregiver_id'));
+        $this->data = array_merge($this->data, compact('business_id', 'client_id', 'caregiver_id', 'service_id', 'payer_id'));
         return $this;
     }
 
@@ -157,13 +164,13 @@ class ScheduleCreator
      * Set the rates for the created schedules
      *
      * @param int $caregiver_rate
-     * @param int $provider_fee
+     * @param int $client_rate
      * @param bool $fixed_rates
      * @return $this
      */
-    public function rates($caregiver_rate = 0, $provider_fee = 0, $fixed_rates = false)
+    public function rates($caregiver_rate = 0, $client_rate = 0, $fixed_rates = false)
     {
-        $this->data = array_merge($this->data, compact('caregiver_rate', 'provider_fee', 'fixed_rates'));
+        $this->data = array_merge($this->data, compact('caregiver_rate', 'client_rate', 'fixed_rates'));
         return $this;
     }
 
@@ -177,6 +184,14 @@ class ScheduleCreator
     {
         $this->note = $note;
         return $this;
+    }
+
+    /**
+     * @param iterable $services
+     */
+    public function addServices(iterable $services): void
+    {
+        $this->services = $services;
     }
 
     /**
@@ -325,7 +340,7 @@ class ScheduleCreator
 
         try {
             foreach ($occurrences as $date) {
-                $schedules[] = Schedule::create(
+                 $schedule = Schedule::create(
                     array_merge(
                         $this->data,
                         [
@@ -334,6 +349,10 @@ class ScheduleCreator
                         ]
                     )
                 );
+                 if (!$schedule->service_id) {
+                     $schedule->syncServices($this->services);
+                 }
+                $schedules[] = $schedule;
                 $this->validateMaxHours(Carbon::instance($date));
             }
             \DB::commit();

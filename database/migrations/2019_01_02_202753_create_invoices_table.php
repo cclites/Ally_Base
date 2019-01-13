@@ -124,6 +124,7 @@ class CreateInvoicesTable extends Migration
             $table->unsignedInteger('schedule_id');
             $table->unsignedInteger('service_id');
             $table->unsignedInteger('payer_id')->nullable();
+            $table->string('hours_type')->default('default');
             $table->decimal('duration', 7, 2);
             $table->decimal('client_rate', 7, 2);
             $table->decimal('caregiver_rate', 7, 2);
@@ -135,6 +136,7 @@ class CreateInvoicesTable extends Migration
             $table->unsignedInteger('shift_id');
             $table->unsignedInteger('service_id');
             $table->unsignedInteger('payer_id')->nullable();
+            $table->string('hours_type')->default('default');
             $table->decimal('duration', 7, 2);
             $table->decimal('client_rate', 7, 2);
             $table->decimal('caregiver_rate', 7, 2);

@@ -21,6 +21,8 @@ class Payer extends AuditableModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;
 
+    const PRIVATE_PAY_ID = 0;
+
     protected $orderedColumn = 'name';
 
     protected $guarded = ['id', 'rates'];

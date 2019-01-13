@@ -3,7 +3,7 @@ namespace App\Http\Requests;
 
 use Carbon\Carbon;
 
-class UpdateScheduleRequest extends BusinessClientRequest
+class UpdateScheduleRequest extends CreateScheduleRequest
 {
     public function rules() {
         $minDate = Carbon::parse('2017-01-01');
@@ -24,6 +24,14 @@ class UpdateScheduleRequest extends BusinessClientRequest
             'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
             'care_plan_id' => 'nullable|exists:care_plans,id',
             'status' => 'sometimes|required|string|min:2',
+            'services' => 'array|required_without:service_id',
+            'services.*.id' => 'nullable|exists:schedule_services,id',
+            'services.*.service_id' => 'required_with:services|exists:services,id',
+            'services.*.payer_id' => 'nullable|exists:payers,id',
+            'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
+            'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
+            'services.*.client_rate' => 'required_with:services|numeric|min:0|max:999.99',
+            'services.*.caregiver_rate' => 'required_with:services|numeric|min:0|max:999.99',
         ];
     }
 

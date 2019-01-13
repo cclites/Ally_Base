@@ -26,7 +26,7 @@
                 </template>
                 <template slot="payer_id" scope="row">
                     <b-select v-model="row.item.payer_id">
-                        <option value="">(Client)</option>
+                        <option :value="0">({{ client.name }})</option>
                         <option v-for="payer in payerOptions" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                     </b-select>
                 </template>
@@ -180,7 +180,7 @@
                 this.items.push({
                     id: null,
                     priority: 0,
-                    payer_id: '',
+                    payer_id: 0,
                     policy_number: '',
                     effective_start: moment().format('MM/DD/YYYY'),
                     effective_end: moment('9999-12-31').format('MM/DD/YYYY'),
@@ -208,7 +208,7 @@
 
             castItem(data) {
                 let item = JSON.parse(JSON.stringify(data));
-                item.payer_id = item.payer_id ? item.payer_id : '';
+                item.payer_id = item.payer_id ? item.payer_id : 0;
                 item.effective_start = moment(item.effective_start, 'YYYY-MM-DD').format('MM/DD/YYYY');
                 item.effective_end = moment(item.effective_end, 'YYYY-MM-DD').format('MM/DD/YYYY');
                 item.split_percentage = item.split_percentage ? (parseFloat(item.split_percentage) * 100).toFixed(0) : 0;
