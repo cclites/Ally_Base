@@ -275,7 +275,7 @@
             async fetchAssignedCaregivers() {
                 let response = await axios.get('/business/clients/' + this.client.id + '/caregivers')
                 if (Array.isArray(response.data)) {
-                    this.caregivers = _.sortBy(response.data, ['lastname', 'firstname']);
+                    this.caregivers = response.data;
                 } else {
                     this.caregivers = [];
                 }
@@ -284,14 +284,14 @@
             async fetchPayers() {
                 let response = await axios.get('/business/payers?json=1');
                 if (Array.isArray(response.data)) {
-                    this.payers = _.sortBy(response.data, ['lastname', 'firstname']);
+                    this.payers = response.data;
                 } else {
                     this.payers = [];
                 }
             },
 
             async fetchServices() {
-                let response = await axios.get('/business/service?json=1')
+                let response = await axios.get('/business/services?json=1')
                 if (Array.isArray(response.data)) {
                     this.services = response.data;
                 } else {
@@ -327,9 +327,7 @@
                 
                 if (! payer) {
                     // no matching rate for payer / service
-                    console.log('no payer matche for the business');
-                    item.client_hourly_rate = 0.00;
-                    item.client_fixed_rate = 0.00;
+                    console.log('no payer match for the business');
                     return;
                 }
 
@@ -340,15 +338,28 @@
                         moment().isBetween(x.effective_start, x.effective_end)
                 });
 
-                if (! rate) {
-                    console.log('no matching rate for payer '+payer_id+' / service '+service_id);
-                    item.client_hourly_rate = 0.00;
-                    item.client_fixed_rate = 0.00;
+                if (rate) {
+                    item.client_hourly_rate = rate.hourly_rate;
+                    item.client_fixed_rate = rate.fixed_rate;
+                    console.log('payer service rates set', rate);
                     return;
                 }
-                item.client_hourly_rate = rate.hourly_rate;
-                item.client_fixed_rate = rate.fixed_rate;
-                console.log('payer / service default rates set', rate);
+
+                console.log('no matching rate for payer '+payer_id+' / service '+service_id);
+
+                rate = payer.rates.find(x => {
+                    // pull the default rate for the payer (if one exists)
+                    return x.service_id == null &&
+                        moment().isBetween(x.effective_start, x.effective_end)
+                });
+                if (rate) {
+                    item.client_hourly_rate = rate.hourly_rate;
+                    item.client_fixed_rate = rate.fixed_rate;
+                    console.log('payer default rates set', rate);
+                    return;
+                }
+
+                console.log('no default rate for payer '+payer_id);
             },
         },
 
