@@ -118,6 +118,13 @@ a.franchisor-navlink {
   }
 }
 
+.table-fit-more {
+  .money-input { width: 85px!important }
+  .date-input { max-width: 120px!important }
+  th { font-size: 13px; font-weight: 500; }
+  .form-control { min-width: 80px; }
+  select.form-control { min-width: 120px; }
+}
 
 .modal-fit-more {
   .modal-body {

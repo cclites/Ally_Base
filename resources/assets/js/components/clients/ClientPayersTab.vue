@@ -3,13 +3,14 @@
         header="Client Payers"
         header-text-variant="white"
         header-bg-variant="info"
+        class="pb-3"
         >
 
         <div class="ml-auto mb-3">
             <b-btn variant="info" @click="add()">Add Client Payer</b-btn>
         </div>
 
-        <div class="table-responsive mb-3">
+        <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -18,6 +19,7 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
                      ref="table"
+                     class="table-fit-more"
             >
                 <template slot="priority" scope="data">
                     <b-btn size="sm" @click="shiftPriority(data.index)">
@@ -25,13 +27,13 @@
                     </b-btn>
                 </template>
                 <template slot="payer_id" scope="row">
-                    <b-select v-model="row.item.payer_id">
+                    <b-select v-model="row.item.payer_id" class="form-control-sm">
                         <option :value="0">({{ client.name }})</option>
                         <option v-for="payer in payerOptions" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                     </b-select>
                 </template>
                 <template slot="policy_number" scope="row">
-                    <b-form-input v-model="row.item.policy_number" type="text" />
+                    <b-form-input v-model="row.item.policy_number" type="text" class="date-input form-control-sm" />
                 </template>
                 <template slot="effective_start" scope="row">
                     <mask-input v-model="row.item.effective_start" type="date" class="date-input form-control-sm"></mask-input>
@@ -40,7 +42,7 @@
                     <mask-input v-model="row.item.effective_end" type="date" class="date-input form-control-sm"></mask-input>
                 </template>
                 <template slot="payment_allocation" scope="row">
-                    <b-select v-model="row.item.payment_allocation">
+                    <b-select v-model="row.item.payment_allocation" class="form-control-sm" >
                         <option value="balance">Balance</option>
                         <option value="split">Split</option>
                         <option value="daily">Daily</option>
@@ -51,7 +53,7 @@
                 <template slot="payment_allowance" scope="row">
                     <span v-if="['daily', 'weekly', 'monthly'].includes(row.item.payment_allocation)">
                         <b-form-input name="payment_allowance"
-                            class="money-input"
+                            class="money-input form-control-sm"
                             type="number"
                             step="any"
                             min="0"
@@ -65,7 +67,7 @@
                 <template slot="split_percentage" scope="row">
                     <span v-if="row.item.payment_allocation == 'split'">
                         <b-form-input name="split_percentage"
-                            class="money-input"
+                            class="money-input form-control-sm"
                             type="number"
                             step="any"
                             min="0"
@@ -82,9 +84,8 @@
                     </b-btn>
                 </template>
             </b-table>
-
-            <b-btn @click="save()" variant="success">Save Client Payers</b-btn>
         </div>
+        <b-btn @click="save()" variant="success">Save Client Payers</b-btn>
     </b-card>
 </template>
 
@@ -200,10 +201,13 @@
             },
 
             remove(index) {
-                if (index >= 0) {
-                    this.items.splice(index, 1);
+                if (confirm('Are you sure you wish to remove this payer line?  You\'ll still need to save your changes afterwards.')) {
+                    if (index >= 0) {
+                        this.items.splice(index, 1);
+                    }
+                    this.resetPriorities();
                 }
-                this.resetPriorities();
+
             },
 
             castItem(data) {
@@ -242,7 +246,6 @@
     }
 </script>
 
-<style scoped>
-    .money-input { width: 85px!important }
-    .date-input { max-width: 120px!important }
+<style>
+
 </style>

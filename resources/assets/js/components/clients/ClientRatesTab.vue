@@ -9,7 +9,7 @@
             <b-btn variant="info" @click="add()">Add Rate</b-btn>
         </div>
 
-        <div class="table-responsive mb-3">
+        <div class="table-responsive">
             <b-table bordered striped hover show-empty
                      :items="items"
                      :fields="fields"
@@ -18,6 +18,7 @@
                      :sort-by.sync="sortBy"
                      :sort-desc.sync="sortDesc"
                      ref="table"
+                     class="table-fit-more"
             >
                 <template slot="service_id" scope="row">
                     <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
@@ -109,10 +110,10 @@
                     {{ getAllyFee(row.item.client_fixed_rate) }}
                 </template>
             </b-table>
-
-            <b-btn @click="save()" variant="success">Save Client Rates</b-btn>
         </div>
-        <div class="mt-5">* Provider fees and Ally fees are estimated based on the primary payment method.</div>
+        <b-btn @click="save()" variant="success">Save Client Rates</b-btn>
+
+        <div class="mt-4"><small>* Provider fees and Ally fees are estimated based on the primary payment method.</small></div>
     </b-card>
 </template>
 
@@ -233,8 +234,10 @@
             },
 
             remove(index) {
-                if (index >= 0) {
-                    this.items.splice(index, 1);
+                if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
+                    if (index >= 0) {
+                        this.items.splice(index, 1);
+                    }
                 }
             },
 
@@ -359,6 +362,5 @@
 </script>
 
 <style scoped>
-    .money-input { width: 85px!important }
-    .date-input { max-width: 120px!important }
+
 </style>

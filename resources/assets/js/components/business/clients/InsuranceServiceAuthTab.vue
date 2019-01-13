@@ -49,6 +49,11 @@
                 </b-col>
             </b-row>
             <b-row>
+                <b-col lg="12" class="pb-2">
+                    <small>
+                        * Ally does not guarantee insurance claim submission in any way.  It is the responsibility of the client to follow up with the insurance company on receipt and payment of claims.
+                    </small>
+                </b-col>
                 <b-col lg="12">
                     <b-btn variant="success" @click="updateInsuranceInfo()">Save Changes</b-btn>
                 </b-col>
@@ -87,20 +92,22 @@
         </b-card>
 
         <!-- Service Authorizations -->
-        <b-card header="Service Authorization"
+        <b-card header="Service Authorizations"
                 header-text-variant="white"
                 header-bg-variant="info">
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Maximum Weekly Hours" label-for="max_weekly_hours" class="form-inline">
-                        <b-form-input
-                                id="max_weekly_hours"
-                                type="number"
-                                step="any"
-                                v-model="form.max_weekly_hours"
-                        >
-                        </b-form-input>
-                        <b-btn variant="success" @click="updateInsuranceInfo()">Save Changes</b-btn>
+                    <b-form-group label="Maximum Weekly Hours" label-for="max_weekly_hours">
+                        <div class="form-inline">
+                            <b-form-input
+                                    id="max_weekly_hours"
+                                    type="number"
+                                    step="any"
+                                    v-model="form.max_weekly_hours"
+                            >
+                            </b-form-input>
+                            <b-btn variant="success" @click="updateInsuranceInfo()">Save Changes</b-btn>
+                        </div>
                         <input-help :form="form" field="max_weekly_hours" text="The maximum number of hours this client can be scheduled for per week."></input-help>
                     </b-form-group>
                 </b-col>
