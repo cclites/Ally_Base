@@ -267,10 +267,10 @@ Route::group([
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
-    Route::get('service', 'Business\ServiceController@index')->name('service.index');
-    Route::post('service', 'Business\ServiceController@store');
-    Route::patch('service/{service}', 'Business\ServiceController@update');
-    Route::delete('service/{service}', 'Business\ServiceController@destroy');
+    Route::get('services', 'Business\ServiceController@index')->name('services.index');
+    Route::post('services', 'Business\ServiceController@store');
+    Route::patch('services/{service}', 'Business\ServiceController@update');
+    Route::delete('services/{service}', 'Business\ServiceController@destroy');
 
     Route::post('authorization', 'Business\ClientAuthController@store');
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
