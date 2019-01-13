@@ -152,7 +152,7 @@ class ManageClientPayersTest extends TestCase
     }
     
     /** @test */
-    public function client_payers_can_have_a_blank_payer_id_to_represent_the_client()
+    public function client_payers_can_have_a_payer_id_of_zero_to_represent_the_client()
     {
         $this->withExceptionHandling();
 
@@ -160,7 +160,7 @@ class ManageClientPayersTest extends TestCase
 
         $this->assertCount(0, $this->client->payers);
 
-        $data['payer_id'] = null;
+        $data['payer_id'] = 0;
         $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
             ->assertStatus(200);
 
@@ -177,31 +177,6 @@ class ManageClientPayersTest extends TestCase
         $this->assertCount(0, $this->client->payers);
 
         $data['payer_id'] = $this->payer->id;
-        $data['effective_start'] = '2018-01-01';
-        $data['effective_end'] = '9999-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
-            ->assertStatus(200);
-
-        $this->assertCount(1, $this->client->fresh()->payers);
-
-        $data['effective_start'] = '2018-12-31'; // overlaps by 1 day
-        $data['effective_end'] = '2019-12-31';
-        $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
-            ->assertStatus(422);
-
-        $this->assertCount(1, $this->client->fresh()->payers);
-    }
-
-    /** @test */
-    public function adding_client_payers_should_fail_if_effective_dates_overlap_for_a_null_payer_id()
-    {
-        $this->withExceptionHandling();
-
-        $data = factory('App\Billing\ClientPayer')->make(['client_id' => $this->client->id])->toArray();
-
-        $this->assertCount(0, $this->client->payers);
-
-        $data['payer_id'] = '';
         $data['effective_start'] = '2018-01-01';
         $data['effective_end'] = '9999-12-31';
         $this->patchJson(route('business.clients.payers.update', ['client' => $this->client]), ['payers' => [$data]])
