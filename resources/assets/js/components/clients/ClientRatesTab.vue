@@ -1,17 +1,94 @@
 <template>
     <b-card
-        header="Client Rates"
+        header="Caregivers &amp; Rates"
         header-text-variant="white"
         header-bg-variant="info"
         >
 
+        <b-row class="mb-2">
+            <b-col sm="7">
+                <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
+                <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
+            </b-col>
+            <b-col sm="5" class="text-right">
+                {{ paymentText }}
+            </b-col>
+        </b-row>
+
+        <b-row>
+            <b-col lg="7">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="client-cg-table">
+                        <thead>
+                        <tr>
+                            <th>Referred Caregiver</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="caregiver in caregivers" :key="caregiver.id">
+                            <td>{{ caregiver.firstname }} {{ caregiver.lastname }}</td>
+                            <td>
+                                <b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(caregiver.id)">
+                                    <i class="fa fa-times"></i>
+                                </b-btn>
+                            </td>
+                        </tr>
+                        <tr v-if="!caregivers.length">
+                            <td colspan="3">There are no referred, or assigned, caregivers for this client.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </b-col>
+            <b-col lg="5">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Excluded Caregiver</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="exGiver in excludedCaregivers">
+                            <td class="sized">
+                                {{ exGiver.caregiver.name }}
+                            </td>
+                            <td class="sized">{{ exGiver.note }}</td>
+                            <td class="sized" style="white-space: nowrap">
+                                <b-btn @click="removeExcludedCaregiver(exGiver.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
+                            </td>
+                        </tr>
+                        <tr v-if="!excludedCaregivers.length">
+                            <td colspan="3">There are no excluded caregivers for this client.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </b-col>
+        </b-row>
+
+        <hr />
+
         <div class="ml-auto mb-3">
-            <b-btn variant="info" @click="add()">Add Rate</b-btn>
+            <b-btn variant="info" @click="addRate()">Add Rate</b-btn>
+        </div>
+
+        <div v-if="filterByCaregiverId">
+            Active Filters (Filters break form input keys):
+            <b-badge pill
+                     size="lg"
+                     variant="light">
+                Caregiver {{ filterByCaregiverId }}
+
+                <a href="javascript:void(0)" @click="filterByCaregiverId = null"><i class="fa fa-times"></i></a>
+            </b-badge>
         </div>
 
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="items"
+                     :items="filteredItems"
                      :fields="fields"
                      :current-page="currentPage"
                      :per-page="perPage"
@@ -22,20 +99,20 @@
             >
                 <template slot="service_id" scope="row">
                     <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
-                        <option value="">(All)</option>
+                        <option :value="null">(All)</option>
                         <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
                     </b-select>
                 </template>
                 <template slot="payer_id" scope="row">
                     <b-select v-model="row.item.payer_id" size="sm" @change="(e) => onChangePayer(e, row.item)">
-                        <option value="">(All)</option>
+                        <option :value="null">(All)</option>
                         <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
                     </b-select>
                 </template>
                 <template slot="caregiver_id" scope="row">
                     <b-select v-model="row.item.caregiver_id" size="sm">
-                        <option value="">(All)</option>
-                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                        <option :value="null">(All)</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">
@@ -93,7 +170,7 @@
                     ></b-form-input>
                 </template>
                 <template slot="actions" scope="data">
-                    <b-btn size="sm" @click="remove(data.index)">
+                    <b-btn size="sm" @click="removeRate(data.index)">
                         <i class="fa fa-trash"></i>
                     </b-btn>
                 </template>
@@ -111,20 +188,79 @@
                 </template>
             </b-table>
         </div>
-        <b-btn @click="save()" variant="success">Save Client Rates</b-btn>
+        <b-btn @click="saveRates()" variant="success">Save Client Rates</b-btn>
 
         <div class="mt-4"><small>* Provider fees and Ally fees are estimated based on the primary payment method.</small></div>
+
+
+        <!-- MODALS -->
+        <b-modal id="clientExcludeCargiver"
+                 title="Exclude Caregiver"
+                 v-model="clientExcludeCaregiverModal">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
+                            <b-form-select name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
+                                <option value="">--Select a Caregiver--</option>
+                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </b-form-select>
+                        </b-form-group>
+                        <b-form-group label="Note" label-for="note">
+                            <b-form-textarea v-model="excludeForm.note"
+                                             :rows="3">
+                            </b-form-textarea>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="clientExcludeCaregiverModal=false">Close</b-btn>
+                <b-btn variant="info" @click="excludeCaregiver()" :disabled="!excludeForm.caregiver_id">Exclude Caregiver</b-btn>
+            </div>
+        </b-modal>
+
+        <b-modal title="Add Caregiver Assignment"
+                 v-model="clientCaregiverModal"
+                 ref="clientCaregiverModal">
+            <b-container fluid>
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group label="Caregiver" label-for="caregiver_id">
+                            <select2
+                                    v-model="caregiverForm.caregiver_id"
+                                    class="form-control"
+                            >
+                                <option value="">-- Select Caregiver --</option>
+                                <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
+                            </select2>
+                            <input-help :form="caregiverForm" field="caregiver_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+            </b-container>
+            <div slot="modal-footer">
+                <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
+                <b-btn variant="info" @click="saveCaregiver()" :disabled="!caregiverForm.caregiver_id">Add Caregiver</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
+    import RateFactory from "../../classes/RateFactory";
 
     export default {
         props: {
             'client': {},
             'rates': Array,
             'allyRateOriginal': Number,
+            'paymentTypeMessage': {
+                default() {
+                    return '';
+                }
+            }
         },
 
         mixins: [ FormatsDates ],
@@ -133,7 +269,20 @@
             return {
                 payers: [],
                 caregivers: [],
+                excludedCaregivers: [],
+                otherCaregivers: [],
                 services: [],
+
+                filterByCaregiverId: null,
+
+                clientCaregiverModal: false,
+                clientExcludeCaregiverModal: false,
+
+                excludeForm: new Form({
+                    caregiver_id: "",
+                    note: "",
+                }),
+                caregiverForm: new Form({caregiver_id: ""}),
 
                 items: [],
                 totalRows: 0,
@@ -213,17 +362,49 @@
         },
 
         computed: {
+            paymentText() {
+                return this.paymentMethodDetail.payment_text || this.paymentTypeMessage;
+            },
+
             allyRate() {
-                return this.allyRateOriginal;
+                return this.paymentMethodDetail.allyRate || this.allyRateOriginal;
+            },
+
+            paymentMethodDetail() {
+                return this.$store.getters.getPaymentMethodDetail();
+            },
+
+            filteredItems() {
+                let rates = this.items;
+                let filtered = false;
+
+                if (this.filterByCaregiverId) {
+                    rates = rates.filter(rate => {
+                        return [this.filterByCaregiverId, null].includes(rate.caregiver_id)
+                    });
+                    filtered = true;
+                }
+
+                if (filtered) {
+                    // Sort by most specific first
+                    rates = rates.sort((rateA, rateB) => {
+                        rateA.specificity = RateFactory.getRateSpecificity(rateA); // debug
+                        rateB.specificity = RateFactory.getRateSpecificity(rateB); // debug
+                        return RateFactory.getRateSpecificity(rateA) - RateFactory.getRateSpecificity(rateB);
+                    }).reverse();
+                }
+
+                return rates;
             },
         },
 
         methods: {
-            add() {
+
+            addRate() {
                 this.items.push({
-                    service_id: '',
-                    payer_id: '',
-                    caregiver_id: '',
+                    service_id: null,
+                    payer_id: null,
+                    caregiver_id: null,
                     effective_start: moment().format('MM/DD/YYYY'),
                     effective_end: moment('9999-12-31').format('MM/DD/YYYY'),
                     caregiver_hourly_rate: '0.00',
@@ -233,7 +414,7 @@
                 })
             },
 
-            remove(index) {
+            removeRate(index) {
                 if (confirm('Are you sure you wish to remove this rate line?  You\'ll still need to save your changes afterwards.')) {
                     if (index >= 0) {
                         this.items.splice(index, 1);
@@ -241,12 +422,67 @@
                 }
             },
 
+            saveRates() {
+                let form = new Form({
+                    rates: this.items,
+                });
+                form.patch(`/business/clients/${this.client.id}/rates`)
+                    .then( ({ data }) => {
+                        this.setItems(data.data);
+                    })
+                    .catch(e => {
+                    })
+            },
+
+            addCaregiver() {
+                this.caregiverForm = new Form({
+                    caregiver_id: null,
+                });
+                this.clientCaregiverModal = true;
+            },
+
+            async saveCaregiver() {
+                await this.caregiverForm.post('/business/clients/' + this.client.id + '/caregivers');
+                this.fetchAssignedCaregivers();
+                this.fetchOtherCaregivers();
+                this.clientCaregiverModal = false;
+            },
+
+            async removeAssignedCaregiver(caregiver_id) {
+                if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
+                    let form = new Form({caregiver_id: caregiver_id});
+                    await form.post('/business/clients/'+this.client.id+'/detach-caregiver');
+                    this.fetchAssignedCaregivers();
+                    this.fetchOtherCaregivers();
+                }
+            },
+
+            async excludeCaregiver() {
+                const response = await this.excludeForm.post('/business/clients/'+this.client.id+'/exclude-caregiver');
+                this.fetchExcludedCaregivers();
+                this.fetchOtherCaregivers();
+                this.excludeForm = new Form({
+                    caregiver_id: "",
+                    note: "",
+                });
+                this.clientExcludeCaregiverModal = false;
+            },
+
+            removeExcludedCaregiver(id) {
+                if (confirm('Are you sure you want to re-include this caregiver for this client?')) {
+                    axios.delete('/business/clients/excluded-caregiver/'+id)
+                        .then(response => {
+                            this.fetchExcludedCaregivers();
+                            this.fetchOtherCaregivers();
+                        }).catch(error => {
+                        console.error(error.response);
+                    });
+                }
+            },
+
             setItems(data) {
                 if (data) {
                     this.items = data.map(x => {
-                        x.payer_id = x.payer_id ? x.payer_id : '',
-                        x.service_id = x.service_id ? x.service_id : '',
-                        x.caregiver_id = x.caregiver_id ? x.caregiver_id : '',
                         x.caregiver_hourly_rate = parseFloat(x.caregiver_hourly_rate).toFixed(2);
                         x.caregiver_fixed_rate = parseFloat(x.caregiver_fixed_rate).toFixed(2);
                         x.client_hourly_rate = parseFloat(x.client_hourly_rate).toFixed(2);
@@ -260,18 +496,6 @@
                 }
             },
 
-            save() {
-                let form = new Form({
-                    rates: this.items,
-                });
-                form.patch(`/business/clients/${this.client.id}/rates`)
-                    .then( ({ data }) => {
-                        this.setItems(data.data);
-                    })
-                    .catch(e => {
-                    })
-            },
-
             async fetchAssignedCaregivers() {
                 let response = await axios.get('/business/clients/' + this.client.id + '/caregivers')
                 if (Array.isArray(response.data)) {
@@ -280,7 +504,21 @@
                     this.caregivers = [];
                 }
             },
-            
+
+            async fetchExcludedCaregivers() {
+                const response = await axios.get('/business/clients/' + this.client.id + '/excluded-caregivers');
+                if (Array.isArray(response.data)) {
+                    this.excludedCaregivers = response.data;
+                }
+            },
+
+            async fetchOtherCaregivers() {
+                const response = await axios.get('/business/clients/' + this.client.id + '/potential-caregivers');
+                if (Array.isArray(response.data)) {
+                    this.otherCaregivers = response.data;
+                }
+            },
+
             async fetchPayers() {
                 let response = await axios.get('/business/payers?json=1');
                 if (Array.isArray(response.data)) {
@@ -291,7 +529,7 @@
             },
 
             async fetchServices() {
-                let response = await axios.get('/business/services?json=1')
+                let response = await axios.get('/business/services?json=1');
                 if (Array.isArray(response.data)) {
                     this.services = response.data;
                 } else {
@@ -363,10 +601,12 @@
             },
         },
 
-        async mounted() {
-            await this.fetchServices();
-            await this.fetchPayers();
-            await this.fetchAssignedCaregivers();
+        mounted() {
+            this.fetchAssignedCaregivers();
+            this.fetchExcludedCaregivers();
+            this.fetchServices();
+            this.fetchPayers();
+            this.fetchOtherCaregivers();
             this.setItems(this.rates);
         },
     }

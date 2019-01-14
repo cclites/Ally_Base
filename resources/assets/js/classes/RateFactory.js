@@ -80,6 +80,14 @@ class RateFactory {
             client_rate: (fixedRates ? rateObj.client_fixed_rate : rateObj.client_hourly_rate) || 0,
         }
     }
+
+    static getRateSpecificity(rateObj) {
+        let specificity = 0;
+        specificity += rateObj.caregiver_id === null ? 0 : 1;
+        specificity += rateObj.payer_id === null ? 0 : 1;
+        specificity += rateObj.service_id === null ? 0 : 1;
+        return specificity;
+    }
 }
 
 export default RateFactory;

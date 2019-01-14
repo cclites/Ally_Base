@@ -948,7 +948,7 @@
                         str = resource.phone_number.number  + "\n";
                     }
                     str = str + this.addressFormat(resource.address);
-                } catch (e) { console.log(e); }
+                } catch (e) {}
                 return str || 'No address on file.';
             },
 

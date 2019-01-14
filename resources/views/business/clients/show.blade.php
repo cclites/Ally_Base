@@ -33,7 +33,10 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+            <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Payers</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#rates" class="nav-link">Caregivers &amp; Rates</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
@@ -64,12 +67,6 @@
                 <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
             </li>
         @endif
-        <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Client Payers</a>
-        </li>
-        <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#rates" class="nav-link">Client Rates</a>
-        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -81,15 +78,14 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
-                <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Payers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Caregivers &amp; Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
-                <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Client Payers</a>
-                <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Client Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
@@ -134,12 +130,23 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="caregivers" role="tabpanel">
-            <business-client-caregivers :client="{{ $client }}"
-                                        :ally-rate-original="{{ floatval($client->allyFee) }}"
-                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
-            ></business-client-caregivers>
+        <div class="tab-pane" id="payers" role="tabpanel">
+            <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
         </div>
+        <div class="tab-pane" id="rates" role="tabpanel">
+            <!-- Includes caregivers -->
+            <client-rates-tab :client="{{ $client }}"
+                              :rates="{{ $client->rates }}"
+                              :ally-rate-original="{{ floatval($client->allyFee) }}"
+                              payment-type-message="{{ $defaultPaymentTypeMessage }}"
+            />
+        </div>
+        {{--<div class="tab-pane" id="caregivers" role="tabpanel">--}}
+            {{--<business-client-caregivers :client="{{ $client }}"--}}
+                                        {{--:ally-rate-original="{{ floatval($client->allyFee) }}"--}}
+                                        {{--payment-type-message="{{ $defaultPaymentTypeMessage }}"--}}
+            {{--></business-client-caregivers>--}}
+        {{--</div>--}}
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
@@ -176,12 +183,6 @@
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>
-        </div>
-        <div class="tab-pane" id="payers" role="tabpanel">
-            <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
-        </div>
-        <div class="tab-pane" id="rates" role="tabpanel">
-            <client-rates-tab :client="{{ $client }}" :rates="{{ $client->rates }}" :ally-rate-original="{{ floatval($client->allyFee) }}" />
         </div>
     </div>
 @endsection
