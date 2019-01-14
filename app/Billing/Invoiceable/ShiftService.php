@@ -40,4 +40,5 @@ class ShiftService extends InvoiceableModel
     {
         return $this->belongsTo(Service::class);
     }
+
 }

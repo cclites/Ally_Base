@@ -37,7 +37,7 @@ class RateFactory
     {
         $effectiveRates = $client->rates()
             ->where('effective_start', '<=', $effectiveDateYMD)
-            ->where('effective_end', '<=', $effectiveDateYMD)
+            ->where('effective_end', '>=', $effectiveDateYMD)
             ->get();
 
         $clientRate = $this->findMatchingClientRate($effectiveRates, $serviceId, $payerId, $caregiverId);
