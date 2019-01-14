@@ -73,7 +73,7 @@
             submitForm() {
                 this.loading = true;
                 let method = this.source.id ? 'patch' : 'post';
-                let url = this.source.id ? `/business/service/${this.source.id}` : '/business/service';
+                let url = this.source.id ? `/business/services/${this.source.id}` : '/business/services';
                 this.form.submit(method, url)
                     .then(response => {
                         this.$emit('saved', response.data.data);

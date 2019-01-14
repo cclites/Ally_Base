@@ -19,9 +19,9 @@ use Illuminate\Contracts\Support\Arrayable;
  */
 class ShiftFactory implements Arrayable
 {
-    protected $attributes;
-    protected $services;
-    protected $activities;
+    protected $attributes = [];
+    protected $services = [];
+    protected $activities = [];
 
     protected function __construct(array $attributes) {
         $this->attributes = $attributes;

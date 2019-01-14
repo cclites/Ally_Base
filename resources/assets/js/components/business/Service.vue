@@ -124,7 +124,7 @@
             deleteService(id) {
                 if (confirm("Are you sure you wish to delete this service?")) {
                     let form = new Form();
-                    form.submit('delete', `/business/service/${id}`)
+                    form.submit('delete', `/business/services/${id}`)
                         .then( ({ data }) => {
                             this.items = this.items.filter(x => x.id !== id);
                         });
