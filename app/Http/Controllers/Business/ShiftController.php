@@ -65,7 +65,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['services', 'activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info
@@ -140,6 +140,7 @@ class ShiftController extends BaseController
             $shift->syncIssues($request->getIssues());
             $shift->syncGoals($request->goals);
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
+            $shift->syncServices($request->getServices());
 
             return new SuccessResponse('You have successfully updated this shift.');
         }

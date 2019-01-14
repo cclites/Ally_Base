@@ -480,6 +480,10 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         }
         // Delete Others
         $this->services()->whereNotIn('id', $savedIds)->delete();
+        if (count($savedIds)) {
+            // Enforce either a single service shift or a service breakout shift, not both
+            $this->update(['service_id' => null]);
+        }
     }
 
     /**

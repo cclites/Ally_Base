@@ -57,11 +57,11 @@ export default {
             const obj = objectThatContainsServices;
             if (obj.services) {
                 for(let service of obj.services) {
-                    this.billingType = 'services';
                     this.addService(service);
                     if (service.client_rate !== null) {
                         this.defaultRates = false;
                     }
+                    this.billingType = 'services';
                 }
             }
         },
@@ -115,7 +115,6 @@ export default {
 
         fetchDefaultRate(service) {
             const ratesObj = RateFactory.findMatchingRate(this.clientRates, this.startDate, service.service_id, service.payer_id, this.form.caregiver_id, this.form.fixed_rates);
-            console.log('fetchDefaultRate', service, ratesObj);
             service.default_rates.client_rate = ratesObj.client_rate;
             service.default_rates.caregiver_rate = ratesObj.caregiver_rate;
             this.recalculateRates(service.default_rates, service.default_rates.client_rate, service.default_rates.caregiver_rate);
@@ -135,6 +134,7 @@ export default {
                 this.form.service_id = null;
                 this.form.fixed_rates = false;
                 if (!this.form.services.length) {
+                    console.log('added service from handleChangedBillingType');
                     this.addService();
                 }
             } else {
@@ -149,7 +149,7 @@ export default {
             if (value) {
                 form.client_rate = null;
                 form.caregiver_rate = null;
-                for(let service in form.services) {
+                for(let service of form.services) {
                     service.client_rate = null;
                     service.caregiver_rate = null;
                 }
@@ -157,7 +157,7 @@ export default {
                 form.client_rate = form.default_rates.client_rate || 0;
                 form.caregiver_rate = form.default_rates.caregiver_rate || 0;
                 this.recalculateRates(form, form.client_rate, form.caregiver_rate);
-                for(let service in form.services) {
+                for(let service of form.services) {
                     service.client_rate = service.default_rates.client_rate || 0;
                     service.caregiver_rate = service.default_rates.caregiver_rate || 0;
                     this.recalculateRates(service, service.client_rate, service.caregiver_rate);

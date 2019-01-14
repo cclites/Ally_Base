@@ -1,537 +1,541 @@
 <template>
     <div>
-        <div v-if="! isClient">
-            <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
-                <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
-            </div>
-            <div class="alert alert-warning" v-if="status === 'WAITING_FOR_CONFIRMATION'">
-                <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
-            </div>
-        </div>
-        <form @submit.prevent="" @keydown="form.clearError($event.target.name)" :class="formClass">
-            <b-row v-if="isClient">
-                <b-col lg="6">
-                    <b-form-group label="Caregiver" label-for="caregiver">
-                        <b-input type="text" readonly :value="shift.caregiver.name" id="caregiver" />
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row v-else>
-                <b-col lg="6">
-                    <b-form-group label="Client" label-for="client_id">
-                        <b-form-select
-                                name="client_id"
-                                v-model="form.client_id"
-                                @input="changedClient(form.client_id)"
-                        >
-                            <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="client_id" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6">
-                    <b-form-group label="Caregiver" label-for="caregiver_id">
-                        <b-form-select
-                                name="caregiver_id"
-                                v-model="form.caregiver_id"
-                                @input="changedCaregiver(form.caregiver_id)"
-                        >
-                            <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
-                        </b-form-select>
-                        <input-help :form="form" field="caregiver_id" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-
-
-            <!-- START NEW SHIFT STRUCTURE -->
-
-            <b-row class="mt-2">
-                <b-col lg="12" class="pb-2">
-                    <strong>Actual Shift Timing & Expenses</strong>
-                </b-col>
-                <b-col>
-                    <div class="table-responsive">
-                        <table class="table table-bordered mb-0">
-                            <thead>
-                            <tr>
-                                <th style="width: 20%;">Start Date</th>
-                                <th style="width: 20%;">End Date</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th v-if="business.co_mileage">Mileage</th>
-                                <th v-if="business.co_expenses">Other Expenses</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
-                                </td>
-                                <td>
-                                    <date-picker v-model="endDate" @input="changedEndDate(endDate)"  />
-                                </td>
-                                <td>
-                                    <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
-                                </td>
-                                <td>
-                                    <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
-                                </td>
-                                <td v-if="business.co_mileage">
-                                    <b-form-input
-                                            name="mileage"
-                                            type="number"
-                                            v-model="form.mileage"
-                                            step="any"
-                                            :readonly="isClient"
-                                    />
-                                </td>
-                                <td v-if="business.co_expenses">
-                                    <b-form-input
-                                            name="other_expenses"
-                                            type="number"
-                                            v-model="form.other_expenses"
-                                            step="any"
-                                            :readonly="isClient"
-                                    />
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <input-help :form="form" field="checked_in_time" text="" />
-                    <input-help :form="form" field="checked_out_time" text="" />
-                    <input-help :form="form" field="mileage" text="" />
-                    <input-help :form="form" field="other_expenses" text="" />
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col v-if="business.co_expenses && form.other_expenses > 0">
-                    <b-form-group label="Other Expenses Description" label-for="other_expenses_desc">
-                        <b-textarea
-                                id="other_expenses_desc"
-                                name="other_expenses_desc"
-                                :rows="2"
-                                v-model="form.other_expenses_desc"
-                                :readonly="isClient"
-                        >
-                        </b-textarea>
-                        <input-help :form="form" field="other_expenses_desc" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-
-            <b-row class="mt-2">
-                <b-col lg="12">
-                    <strong>Shift Billing Type: </strong>
-                    <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
-                    <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
-                    <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
-                    <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
-                    <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
-                    <label for="create_service_rates" class="rate-label">Service Breakout</label>
-                </b-col>
-            </b-row>
-
-            <b-row>
-                <b-col>
-                    <div class="table-responsive">
-                        <table class="table table-bordered mb-0">
-                            <thead>
-                            <tr>
-                                <th>Service</th>
-                                <th>Hours Type</th>
-                                <th width="10%">Hours</th>
-                                <th width="12%">Client Rate</th>
-                                <th width="13%">Caregiver Rate</th>
-                                <th>Provider Fee</th>
-                                <th>Ally Fee</th>
-                                <th>Payer</th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            <!-- Actual Hours / Fixed -->
-                            <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
-                                <td>
-                                    <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                        <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
-                                    </b-form-select>
-                                </td>
-                                <td>
-                                    <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type">
-                                        <option value="default">REG</option>
-                                        <option value="holiday">HOL</option>
-                                        <option value="overtime">OT</option>
-                                    </b-form-select>
-                                </td>
-                                <td class="text-only">
-                                    {{ billingType === 'hourly' ? 'Actual' : 'Fixed' }}
-                                </td>
-                                <td class="text-only" v-if="defaultRates">
-                                    {{ numberFormat(form.default_rates.client_rate) }}
-                                </td>
-                                <td v-else>
-                                    <b-form-input
-                                            name="client_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="form.client_rate"
-                                            @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
-                                    />
-                                </td>
-                                <td class="text-only" v-if="defaultRates">
-                                    {{ numberFormat(form.default_rates.caregiver_rate) }}
-                                </td>
-                                <td v-else>
-                                    <b-form-input
-                                            name="caregiver_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="form.caregiver_rate"
-                                            @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
-                                    />
-                                </td>
-                                <td class="text-only">
-                                    <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
-                                    <span v-else>{{ numberFormat(form.provider_fee) }}</span>
-                                </td>
-                                <td class="text-only">
-                                    <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
-                                    <span v-else>{{ numberFormat(form.ally_fee) }}</span>
-                                </td>
-                                <td colspan="2">
-                                    <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
-                                        <option :value="null">(Auto)</option>
-                                        <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
-                                    </b-form-select>
-                                </td>
-                            </tr>
-
-                            <!-- Service Breakout -->
-                            <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
-                                <td>
-                                    <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                        <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
-                                    </b-form-select>
-                                </td>
-                                <td>
-                                    <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type">
-                                        <option value="default">REG</option>
-                                        <option value="holiday">HOL</option>
-                                        <option value="overtime">OT</option>
-                                    </b-form-select>
-                                </td>
-                                <td>
-                                    <b-form-input
-                                            name="duration"
-                                            type="number"
-                                            step="any"
-                                            v-model="service.duration" />
-                                </td>
-                                <td class="text-only" v-if="defaultRates">
-                                    {{ numberFormat(service.default_rates.client_rate) }}
-                                </td>
-                                <td v-else>
-                                    <b-form-input
-                                            name="client_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="service.client_rate"
-                                            @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
-                                    />
-                                </td>
-                                <td class="text-only" v-if="defaultRates">
-                                    {{ numberFormat(service.default_rates.caregiver_rate) }}
-                                </td>
-                                <td v-else>
-                                    <b-form-input
-                                            name="caregiver_rate"
-                                            type="number"
-                                            step="any"
-                                            v-model="service.caregiver_rate"
-                                            @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
-                                    />
-                                </td>
-                                <td class="text-only">
-                                    <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
-                                    <span v-else>{{ numberFormat(service.provider_fee) }}</span>
-                                </td>
-                                <td class="text-only">
-                                    <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
-                                    <span v-else>{{ numberFormat(service.ally_fee) }}</span>
-                                </td>
-                                <td>
-                                    <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
-                                        <option :value="null">(Auto)</option>
-                                        <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
-                                    </b-form-select>
-                                </td>
-                                <td class="text-nowrap">
-                                    <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
-                                        <i class="fa fa-times"></i>
-                                    </b-btn>
-                                    <b-btn size="xs" variant="success" style="background-color: green;" @click="addService()" v-if="index === form.services.length - 1">
-                                        <i class="fa fa-plus"></i>
-                                    </b-btn>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <label class="mt-1">
-                        <b-form-checkbox v-model="defaultRates">
-                            Use Default Rates from Client Rates Tab
-                        </b-form-checkbox>
-                    </label>
-                </b-col>
-                <b-col lg="12">
-                    <input-help :form="form" field="service_id" text=""></input-help>
-                    <input-help :form="form" field="payer_id" text=""></input-help>
-                    <input-help :form="form" field="caregiver_rate" text=""></input-help>
-                    <input-help :form="form" field="client_rate" text=""></input-help>
-                </b-col>
-            </b-row>
-
-            <!-- END NEW SHIFT STRUCTURE -->
-
-            <b-row>
-                <b-col lg="12">
-                    <b-form-group v-if="business.co_comments && !isClient" label="Shift Notes &amp; Caregiver Comments" label-for="caregiver_comments">
-                        <b-textarea
-                                id="caregiver_comments"
-                                name="caregiver_comments"
-                                :rows="4"
-                                v-model="form.caregiver_comments"
-                        >
-                        </b-textarea>
-                        <input-help :form="form" field="caregiver_comments" text=""></input-help>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <b-row>
-                <b-col lg="12">
-                    <h5><strong>Activities Performed</strong></h5>
-                    <b-row>
-                        <b-col cols="12" md="6">
-                            <div class="form-check">
-                                <label class="custom-control custom-checkbox" v-for="activity in leftHalfActivities" :key="activity.id" style="clear: left; float: left;">
-                                    <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                                </label>
-                            </div>
-                        </b-col>
-                        <b-col cols="12" md="6">
-                            <div class="form-check">
-                                <label class="custom-control custom-checkbox" v-for="activity in rightHalfActivities" :key="activity.id" style="clear: left; float: left;">
-                                    <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
-                                </label>
-                            </div>
-                        </b-col>
-                    </b-row>
-                </b-col>
-            </b-row>
+        <loading-card v-show="loading" text="Loading Data"></loading-card>
+        <div v-show="!loading">
             <div v-if="! isClient">
-                <b-row v-if="shift.questions && shift.questions.length" class="with-padding-top">
-                    <b-col lg="12">
-                        <b-form-group v-for="q in shift.questions"
-                            :key="q.id"
-                            :label="q.question + (q.required ? ' *' : '')">
-                            <textarea v-model="form.questions[q.id]" class="form-control" rows="3" wrap="soft"></textarea>
-                            <input-help :form="form" :field="`questions.${q.id}`"></input-help>
+                <div class="alert alert-warning" v-if="shift.id && !form.checked_out_time">
+                    <b>Warning!</b> This shift is currently clocked in.  To clock out this shift, set a Clocked Out Time and click "Save".
+                </div>
+                <div class="alert alert-warning" v-if="status === 'WAITING_FOR_CONFIRMATION'">
+                    <b>Warning!</b> This shift is unconfirmed.  Confirm the details and click "Save &amp; Confirm".
+                </div>
+            </div>
+            <form @submit.prevent="" @keydown="form.clearError($event.target.name)" :class="formClass">
+                <b-row v-if="isClient">
+                    <b-col lg="6">
+                        <b-form-group label="Caregiver" label-for="caregiver">
+                            <b-input type="text" readonly :value="shift.caregiver.name" id="caregiver" />
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
-                    <b-col lg="12">
-                        <h4>Goals:</h4>
-                        <b-form-group v-for="goal in shift.client.goals"
-                            :key="goal.id"
-                            :label="goal.question">
-                            <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
-                            <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                <b-row v-else>
+                    <b-col lg="6">
+                        <b-form-group label="Client" label-for="client_id">
+                            <b-form-select
+                                    name="client_id"
+                                    v-model="form.client_id"
+                                    @input="changedClient(form.client_id)"
+                            >
+                                <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="client_id" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                    <b-col lg="6">
+                        <b-form-group label="Caregiver" label-for="caregiver_id">
+                            <b-form-select
+                                    name="caregiver_id"
+                                    v-model="form.caregiver_id"
+                                    @input="changedCaregiver(form.caregiver_id)"
+                            >
+                                <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.nameLastFirst }}</option>
+                            </b-form-select>
+                            <input-help :form="form" field="caregiver_id" text=""></input-help>
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row class="with-padding-top" v-if="(business.co_issues || business.co_injuries) && !is_modal">
-                    <b-col lg="12">
-                        <h5>
-                            <strong>Shift Issues</strong>
-                            <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
-                        </h5>
-                        <div class="table-responsive" v-if="form.issues.length">
-                            <table class="table table-bordered">
+
+
+                <!-- START NEW SHIFT STRUCTURE -->
+
+                <b-row class="mt-2">
+                    <b-col lg="12" class="pb-2">
+                        <strong>Actual Shift Timing & Expenses</strong>
+                    </b-col>
+                    <b-col>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
                                 <thead>
                                 <tr>
-                                    <th>Caregiver Injury</th>
-                                    <th>Client Injury</th>
-                                    <th>Comments</th>
-                                    <th></th>
+                                    <th style="width: 20%;">Start Date</th>
+                                    <th style="width: 20%;">End Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th v-if="business.co_mileage">Mileage</th>
+                                    <th v-if="business.co_expenses">Other Expenses</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr v-for="(issue, index) in form.issues" :key="issue.id">
+                                <tr>
                                     <td>
-                                        <label class="custom-control custom-checkbox" style="clear: left; float: left;">
-                                            <input type="checkbox" class="custom-control-input" v-model="form.issues[index].caregiver_injury">
-                                            <span class="custom-control-indicator"></span>
-                                            <span class="custom-control-description">Yes</span>
-                                        </label>
+                                        <date-picker v-model="startDate" @input="changedStartDate(startDate)" />
                                     </td>
                                     <td>
-                                        <label class="custom-control custom-checkbox" style="clear: left; float: left;">
-                                            <input type="checkbox" class="custom-control-input" v-model="form.issues[index].client_injury">
-                                            <span class="custom-control-indicator"></span>
-                                            <span class="custom-control-description">Yes</span>
-                                        </label>
+                                        <date-picker v-model="endDate" @input="changedEndDate(endDate)"  />
                                     </td>
                                     <td>
-                                        <b-textarea :rows="2" v-model="form.issues[index].comments" />
+                                        <time-picker name="startTime" v-model="startTime" @input="changedStartTime(startTime)" />
                                     </td>
-                                    <td><b-btn size="sm" variant="danger" @click="removeIssue(index)"><i class="fa fa-times"></i></b-btn></td>
+                                    <td>
+                                        <time-picker name="endTime" v-model="endTime" @input="changedEndTime(endTime)" />
+                                    </td>
+                                    <td v-if="business.co_mileage">
+                                        <b-form-input
+                                                name="mileage"
+                                                type="number"
+                                                v-model="form.mileage"
+                                                step="any"
+                                                :readonly="isClient"
+                                        />
+                                    </td>
+                                    <td v-if="business.co_expenses">
+                                        <b-form-input
+                                                name="other_expenses"
+                                                type="number"
+                                                v-model="form.other_expenses"
+                                                step="any"
+                                                :readonly="isClient"
+                                        />
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="with-padding-bottom" v-else>
-                            No recorded issues on this shift.
+                        <input-help :form="form" field="checked_in_time" text="" />
+                        <input-help :form="form" field="checked_out_time" text="" />
+                        <input-help :form="form" field="mileage" text="" />
+                        <input-help :form="form" field="other_expenses" text="" />
+                    </b-col>
+                </b-row>
+
+                <b-row>
+                    <b-col v-if="business.co_expenses && form.other_expenses > 0">
+                        <b-form-group label="Other Expenses Description" label-for="other_expenses_desc">
+                            <b-textarea
+                                    id="other_expenses_desc"
+                                    name="other_expenses_desc"
+                                    :rows="2"
+                                    v-model="form.other_expenses_desc"
+                                    :readonly="isClient"
+                            >
+                            </b-textarea>
+                            <input-help :form="form" field="other_expenses_desc" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+
+                <b-row class="mt-2">
+                    <b-col lg="12">
+                        <strong>Shift Billing Type: </strong>
+                        <input type="radio" class="with-gap" id="create_hourly_rates" v-model="billingType" value="hourly">
+                        <label for="create_hourly_rates" class="rate-label">Actual Hours</label>
+                        <input type="radio" class="with-gap" id="create_fixed_rates" v-model="billingType" value="fixed">
+                        <label for="create_fixed_rates" class="rate-label">Fixed Rate</label>
+                        <input type="radio" class="with-gap" id="create_service_rates" v-model="billingType" value="services">
+                        <label for="create_service_rates" class="rate-label">Service Breakout</label>
+                    </b-col>
+                </b-row>
+
+                <b-row>
+                    <b-col>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Hours Type</th>
+                                    <th width="10%">Hours</th>
+                                    <th width="12%">Client Rate</th>
+                                    <th width="13%">Caregiver Rate</th>
+                                    <th>Provider Fee</th>
+                                    <th>Ally Fee</th>
+                                    <th>Payer</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                <!-- Actual Hours / Fixed -->
+                                <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
+                                    <td>
+                                        <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
+                                            <option v-for="service in services" :value="service.id">{{ service.code }} {{ service.name }}</option>
+                                        </b-form-select>
+                                    </td>
+                                    <td>
+                                        <b-form-select id="hours_type" v-model="form.hours_type" name="hours_type">
+                                            <option value="default">REG</option>
+                                            <option value="holiday">HOL</option>
+                                            <option value="overtime">OT</option>
+                                        </b-form-select>
+                                    </td>
+                                    <td class="text-only">
+                                        {{ billingType === 'hourly' ? 'Actual' : 'Fixed' }}
+                                    </td>
+                                    <td class="text-only" v-if="defaultRates">
+                                        {{ numberFormat(form.default_rates.client_rate) }}
+                                    </td>
+                                    <td v-else>
+                                        <b-form-input
+                                                name="client_rate"
+                                                type="number"
+                                                step="any"
+                                                v-model="form.client_rate"
+                                                @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                        />
+                                    </td>
+                                    <td class="text-only" v-if="defaultRates">
+                                        {{ numberFormat(form.default_rates.caregiver_rate) }}
+                                    </td>
+                                    <td v-else>
+                                        <b-form-input
+                                                name="caregiver_rate"
+                                                type="number"
+                                                step="any"
+                                                v-model="form.caregiver_rate"
+                                                @change="recalculateRates(form, form.client_rate, form.caregiver_rate)"
+                                        />
+                                    </td>
+                                    <td class="text-only">
+                                        <span v-if="defaultRates">{{ numberFormat(form.default_rates.provider_fee) }}</span>
+                                        <span v-else>{{ numberFormat(form.provider_fee) }}</span>
+                                    </td>
+                                    <td class="text-only">
+                                        <span v-if="defaultRates">{{ numberFormat(form.default_rates.ally_fee) }}</span>
+                                        <span v-else>{{ numberFormat(form.ally_fee) }}</span>
+                                    </td>
+                                    <td colspan="2">
+                                        <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
+                                            <option :value="null">(Auto)</option>
+                                            <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                        </b-form-select>
+                                    </td>
+                                </tr>
+
+                                <!-- Service Breakout -->
+                                <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
+                                    <td>
+                                        <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
+                                            <option v-for="s in services" :value="s.id">{{ s.code }} {{ s.name }}</option>
+                                        </b-form-select>
+                                    </td>
+                                    <td>
+                                        <b-form-select id="hours_type" v-model="service.hours_type" name="hours_type">
+                                            <option value="default">REG</option>
+                                            <option value="holiday">HOL</option>
+                                            <option value="overtime">OT</option>
+                                        </b-form-select>
+                                    </td>
+                                    <td>
+                                        <b-form-input
+                                                name="duration"
+                                                type="number"
+                                                step="any"
+                                                v-model="service.duration" />
+                                    </td>
+                                    <td class="text-only" v-if="defaultRates">
+                                        {{ numberFormat(service.default_rates.client_rate) }}
+                                    </td>
+                                    <td v-else>
+                                        <b-form-input
+                                                name="client_rate"
+                                                type="number"
+                                                step="any"
+                                                v-model="service.client_rate"
+                                                @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                        />
+                                    </td>
+                                    <td class="text-only" v-if="defaultRates">
+                                        {{ numberFormat(service.default_rates.caregiver_rate) }}
+                                    </td>
+                                    <td v-else>
+                                        <b-form-input
+                                                name="caregiver_rate"
+                                                type="number"
+                                                step="any"
+                                                v-model="service.caregiver_rate"
+                                                @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                        />
+                                    </td>
+                                    <td class="text-only">
+                                        <span v-if="defaultRates">{{ numberFormat(service.default_rates.provider_fee) }}</span>
+                                        <span v-else>{{ numberFormat(service.provider_fee) }}</span>
+                                    </td>
+                                    <td class="text-only">
+                                        <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
+                                        <span v-else>{{ numberFormat(service.ally_fee) }}</span>
+                                    </td>
+                                    <td>
+                                        <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
+                                            <option :value="null">(Auto)</option>
+                                            <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                        </b-form-select>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
+                                            <i class="fa fa-times"></i>
+                                        </b-btn>
+                                        <b-btn size="xs" variant="success" style="background-color: green;" @click="addService()" v-if="index === form.services.length - 1">
+                                            <i class="fa fa-plus"></i>
+                                        </b-btn>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <label class="mt-1">
+                            <b-form-checkbox v-model="defaultRates">
+                                Use Default Rates from Client Rates Tab
+                            </b-form-checkbox>
+                        </label>
+                    </b-col>
+                    <b-col lg="12">
+                        <input-help :form="form" field="service_id" text=""></input-help>
+                        <input-help :form="form" field="payer_id" text=""></input-help>
+                        <input-help :form="form" field="caregiver_rate" text=""></input-help>
+                        <input-help :form="form" field="client_rate" text=""></input-help>
+                    </b-col>
+                </b-row>
+
+                <!-- END NEW SHIFT STRUCTURE -->
+
+                <b-row>
+                    <b-col lg="12">
+                        <b-form-group v-if="business.co_comments && !isClient" label="Shift Notes &amp; Caregiver Comments" label-for="caregiver_comments">
+                            <b-textarea
+                                    id="caregiver_comments"
+                                    name="caregiver_comments"
+                                    :rows="4"
+                                    v-model="form.caregiver_comments"
+                            >
+                            </b-textarea>
+                            <input-help :form="form" field="caregiver_comments" text=""></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col lg="12">
+                        <h5><strong>Activities Performed</strong></h5>
+                        <b-row>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in leftHalfActivities" :key="activity.id" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                            <b-col cols="12" md="6">
+                                <div class="form-check">
+                                    <label class="custom-control custom-checkbox" v-for="activity in rightHalfActivities" :key="activity.id" style="clear: left; float: left;">
+                                        <input type="checkbox" class="custom-control-input" v-model="form.activities" :value="activity.id">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">{{ activity.code }} - {{ activity.name }}</span>
+                                    </label>
+                                </div>
+                            </b-col>
+                        </b-row>
+                    </b-col>
+                </b-row>
+                <div v-if="! isClient">
+                    <b-row v-if="shift.questions && shift.questions.length" class="with-padding-top">
+                        <b-col lg="12">
+                            <b-form-group v-for="q in shift.questions"
+                                          :key="q.id"
+                                          :label="q.question + (q.required ? ' *' : '')">
+                                <textarea v-model="form.questions[q.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                                <input-help :form="form" :field="`questions.${q.id}`"></input-help>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="shift.client && shift.client.goals.length" class="with-padding-top">
+                        <b-col lg="12">
+                            <h4>Goals:</h4>
+                            <b-form-group v-for="goal in shift.client.goals"
+                                          :key="goal.id"
+                                          :label="goal.question">
+                                <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
+                                <textarea v-model="form.goals[goal.id]" class="form-control" rows="3" wrap="soft"></textarea>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row class="with-padding-top" v-if="(business.co_issues || business.co_injuries) && !is_modal">
+                        <b-col lg="12">
+                            <h5>
+                                <strong>Shift Issues</strong>
+                                <b-btn size="sm" variant="info" @click="createIssue()" v-if="!deleted">Add an Issue</b-btn>
+                            </h5>
+                            <div class="table-responsive" v-if="form.issues.length">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Caregiver Injury</th>
+                                        <th>Client Injury</th>
+                                        <th>Comments</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(issue, index) in form.issues" :key="issue.id">
+                                        <td>
+                                            <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                                <input type="checkbox" class="custom-control-input" v-model="form.issues[index].caregiver_injury">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Yes</span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label class="custom-control custom-checkbox" style="clear: left; float: left;">
+                                                <input type="checkbox" class="custom-control-input" v-model="form.issues[index].client_injury">
+                                                <span class="custom-control-indicator"></span>
+                                                <span class="custom-control-description">Yes</span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <b-textarea :rows="2" v-model="form.issues[index].comments" />
+                                        </td>
+                                        <td><b-btn size="sm" variant="danger" @click="removeIssue(index)"><i class="fa fa-times"></i></b-btn></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="with-padding-bottom" v-else>
+                                No recorded issues on this shift.
+                            </div>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="shift.id">
+                        <b-col sm="6">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th colspan="2">Clock In EVV</th>
+                                </tr>
+                                </thead>
+                                <tbody v-if="shift.checked_in_latitude || shift.checked_in_longitude">
+                                <!-- <tr>
+                                    <th>Geocode</th>
+                                    <td>{{ shift.checked_in_latitude.slice(0,8) }},<br />{{ shift.checked_in_longitude.slice(0,8) }}</td>
+                                </tr> -->
+                                <tr>
+                                    <th>Distance</th>
+                                    <td>{{ convertToMiles(in_distance) }}m</td>
+                                </tr>
+                                </tbody>
+                                <tbody v-else-if="shift.checked_in_number">
+                                <tr>
+                                    <th>Phone Number</th>
+                                    <td>{{ shift.checked_in_number }}</td>
+                                </tr>
+                                </tbody>
+                                <tbody v-else>
+                                <tr>
+                                    <td colspan="2">No EVV data</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </b-col>
+                        <b-col sm="6">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th colspan="2">Clock Out EVV</th>
+                                </tr>
+                                </thead>
+                                <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
+                                <!-- <tr>
+                                    <th>Geocode</th>
+                                    <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
+                                </tr> -->
+                                <tr>
+                                    <th>Distance</th>
+                                    <td>{{ convertToMiles(out_distance) }}m</td>
+                                </tr>
+                                </tbody>
+                                <tbody v-else-if="shift.checked_out_number">
+                                <tr>
+                                    <th>Phone Number</th>
+                                    <td>{{ shift.checked_out_number }}</td>
+                                </tr>
+                                </tbody>
+                                <tbody v-else>
+                                <tr>
+                                    <td colspan="2">No EVV data</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </b-col>
+                    </b-row>
+                </div> <!-- // end ! isClient -->
+                <b-row v-if="isClient">
+                    <b-col lg="12" class="text-right mt-3">
+                        <b-button variant="info" type="submit" @click="saveShift(false)">
+                            Modify Shift
+                        </b-button>
+                    </b-col>
+                </b-row>
+                <b-row v-else-if="!is_modal">
+                    <b-col lg="4">
+                        <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
+                        <b-row>
+                            <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
+                            <span v-else><strong>Not Confirmed</strong></span>
+                        </b-row>
+                        <b-row>
+                            <span v-if="shift.charged_at"><strong>Charged:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.charged_at) }}</span>
+                            <span v-else><strong>Not Charged</strong></span>
+                        </b-row>
+                    </b-col>
+                    <b-col lg="8" class="text-right" v-if="!shift.readOnly">
+                        <div v-if="!deleted">
+                            <b-button variant="info" type="button" @click="saveShift(false)">
+                                <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
+                            </b-button>
+                            <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
+                            <b-dropdown variant="light" v-if="shift.id">
+                                <template slot="button-content">
+                                    <i class='fa fa-list'></i> Actions
+                                </template>
+                                <b-dropdown-item @click="unconfirm()" v-if="confirmed"><i class="fa fa-backward"></i> Unconfirm Shift</b-dropdown-item>
+                                <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
+                                <b-dropdown-divider></b-dropdown-divider>
+                                <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
+                            </b-dropdown>
                         </div>
                     </b-col>
-                </b-row>
-                <b-row v-if="shift.id">
-                    <b-col sm="6">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th colspan="2">Clock In EVV</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="shift.checked_in_latitude || shift.checked_in_longitude">
-                            <!-- <tr>
-                                <th>Geocode</th>
-                                <td>{{ shift.checked_in_latitude.slice(0,8) }},<br />{{ shift.checked_in_longitude.slice(0,8) }}</td>
-                            </tr> -->
-                            <tr>
-                                <th>Distance</th>
-                                <td>{{ convertToMiles(in_distance) }}m</td>
-                            </tr>
-                            </tbody>
-                            <tbody v-else-if="shift.checked_in_number">
-                            <tr>
-                                <th>Phone Number</th>
-                                <td>{{ shift.checked_in_number }}</td>
-                            </tr>
-                            </tbody>
-                            <tbody v-else>
-                            <tr>
-                                <td colspan="2">No EVV data</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </b-col>
-                    <b-col sm="6">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th colspan="2">Clock Out EVV</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="shift.checked_out_latitude || shift.checked_out_longitude">
-                            <!-- <tr>
-                                <th>Geocode</th>
-                                <td>{{ shift.checked_out_latitude.slice(0,8) }},<br />{{ shift.checked_out_longitude.slice(0,8) }}</td>
-                            </tr> -->
-                            <tr>
-                                <th>Distance</th>
-                                <td>{{ convertToMiles(out_distance) }}m</td>
-                            </tr>
-                            </tbody>
-                            <tbody v-else-if="shift.checked_out_number">
-                            <tr>
-                                <th>Phone Number</th>
-                                <td>{{ shift.checked_out_number }}</td>
-                            </tr>
-                            </tbody>
-                            <tbody v-else>
-                            <tr>
-                                <td colspan="2">No EVV data</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </b-col>
-                </b-row>
-            </div> <!-- // end ! isClient -->
-            <b-row v-if="isClient">
-                <b-col lg="12" class="text-right mt-3">
-                    <b-button variant="info" type="submit" @click="saveShift(false)">
-                        Modify Shift
-                    </b-button>
-                </b-col>
-            </b-row>
-            <b-row v-else-if="!is_modal">
-                <b-col lg="4">
-                    <b-row><span><strong>Added:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.created_at) }}</span></b-row>
-                    <b-row>
-                        <span v-if="shift.confirmed_at"><strong>Confirmed:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.confirmed_at) }}</span>
-                        <span v-else><strong>Not Confirmed</strong></span>
-                    </b-row>
-                    <b-row>
-                        <span v-if="shift.charged_at"><strong>Charged:</strong>&nbsp;{{ formatDateTimeFromUTC(shift.charged_at) }}</span>
-                        <span v-else><strong>Not Charged</strong></span>
-                    </b-row>
-                </b-col>
-                <b-col lg="8" class="text-right" v-if="!shift.readOnly">
-                    <div v-if="!deleted">
-                        <b-button variant="info" type="button" @click="saveShift(false)">
-                            <i class="fa fa-save"></i> Save <span v-if="!confirmed">Only</span><span v-else>Changes</span>
-                        </b-button>
-                        <b-button variant="success" type="button" @click="saveShift(true)" v-if="!confirmed">Save &amp; Confirm</b-button>
-                        <b-dropdown variant="light" v-if="shift.id">
+                    <b-col lg="8" class="text-right" v-else>
+                        <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
+                        <b-dropdown variant="light">
                             <template slot="button-content">
                                 <i class='fa fa-list'></i> Actions
                             </template>
-                            <b-dropdown-item @click="unconfirm()" v-if="confirmed"><i class="fa fa-backward"></i> Unconfirm Shift</b-dropdown-item>
+                            <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
                             <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
                             <b-dropdown-divider></b-dropdown-divider>
                             <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
                         </b-dropdown>
-                    </div>
-                </b-col>
-                <b-col lg="8" class="text-right" v-else>
-                    <b-button variant="light" disabled><i class="fa fa-lock"></i> This Shift is Locked For Modification</b-button>
-                    <b-dropdown variant="light">
-                        <template slot="button-content">
-                            <i class='fa fa-list'></i> Actions
-                        </template>
-                        <b-dropdown-item @click="adminOverride()" v-if="admin"><i class="fa fa-save"></i> Admin Override: Save Anyways</b-dropdown-item>
-                        <b-dropdown-item :href="'/business/shifts/' + shift.id + '/duplicate'"><i class="fa fa-copy"></i> Duplicate to a New Shift</b-dropdown-item>
-                        <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item @click="deleteShift()"><i class="fa fa-times"></i> Delete Shift</b-dropdown-item>
-                    </b-dropdown>
-                </b-col>
-            </b-row>
-        </form>
+                    </b-col>
+                </b-row>
+            </form>
 
-        <confirmation-modal title="Confirm Potential Duplicate"
-                            v-model="confirmModal"
-                            @confirm="confirmDuplicate()"
-        >
-            <div class="text-center">
-                <p>
-                    We believe this may be a duplicate shift.  Are you sure you want to continue?
-                </p>
-                <p>
-                    The potential duplicate occurred on {{ duplicateDate }}
-                </p>
-            </div>
-        </confirmation-modal>
+            <confirmation-modal title="Confirm Potential Duplicate"
+                                v-model="confirmModal"
+                                @confirm="confirmDuplicate()"
+            >
+                <div class="text-center">
+                    <p>
+                        We believe this may be a duplicate shift.  Are you sure you want to continue?
+                    </p>
+                    <p>
+                        The potential duplicate occurred on {{ duplicateDate }}
+                    </p>
+                </div>
+            </confirmation-modal>
+        </div>
     </div>
+
 </template>
 
 <script>
@@ -577,6 +581,7 @@
                 submitting: false,
                 duplicateDate: '',
                 confirmModal: false,
+                loading: false,
             }
         },
         mounted() {
@@ -658,10 +663,17 @@
                 this.changedClient(shift.client_id);
             },
 
-            changedClient(clientId) {
-                this.loadAllyPctFromClient(clientId);
-                this.loadClientRates(clientId);
-                this.loadClientPayers(clientId);
+            async changedClient(clientId) {
+                if (clientId) {
+                    this.loading = true;
+                    try {
+                        this.loadAllyPctFromClient(clientId);
+                        await this.loadClientRates(clientId);
+                        await this.loadClientPayers(clientId);
+                    }
+                    catch (e) {}
+                    this.loading = false
+                }
             },
 
             changedCaregiver(caregiverId) {
@@ -706,11 +718,22 @@
             },
 
             resetForm(shift) {
+                // Reset values
                 this.deleted = false;
+
+                // Initialize form
                 this.form = new Form(this.initForm(shift));
-                this.initServicesFromObject(shift);
-                this.status = (this.shift) ? this.shift.status : null;
-                this.fixDateTimes();
+
+                if (shift) {
+                    // Initialize form values from services
+                    this.defaultRates = this.form.client_rate === null;
+                    this.billingType = this.form.fixed_rates ? 'fixed' : 'hourly';
+                    this.initServicesFromObject(shift);
+
+                    // Initialize additional data from shift
+                    this.status = (this.shift) ? this.shift.status : null;
+                    this.fixDateTimes();
+                }
             },
 
             setDefaultDateTimes() {
@@ -761,7 +784,7 @@
                     modal: this.is_modal,
                     goals: this.setupGoalsForm(),
                     questions: this.setupQuestionsForm(),
-                    services: shift.services || [],
+                    services: [], // added by initServicesFromObject
                     default_rates: {
                         'client_rate': null,
                         'caregiver_rate': null,
