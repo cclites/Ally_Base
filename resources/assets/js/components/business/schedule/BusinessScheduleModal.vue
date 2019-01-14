@@ -381,10 +381,11 @@
     import RateCodes from "../../../mixins/RateCodes";
     import RateFactory from "../../../classes/RateFactory";
     import ConfirmationModal from "../../modals/ConfirmationModal";
+    import ShiftServices from "../../../mixins/ShiftServices";
 
     export default {
         components: {ConfirmationModal},
-        mixins: [FormatsNumbers, RateCodes],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices],
 
         props: {
             model: Boolean,
@@ -408,7 +409,6 @@
             return {
                 activeTab: 0,
                 submitting: false,
-                billingType: "hourly",
                 startDate: "",
                 startTime: "",
                 endTime: "",
@@ -432,16 +432,11 @@
                 },
                 specialHoursChange: false,
                 maxHoursWarning: false,
-                services: [],
-                clientPayers: [],
-                clientRates: [],
-                defaultRates: true,
             }
         },
 
         mounted() {
             this.loadClientData();
-            this.fetchServices();
             this.fetchRateCodes();
         },
 
@@ -542,10 +537,6 @@
                     client_id: this.form.client_id,
                 }
             },
-
-            defaultService() {
-                return this.services.find(item => item.default === true) || {};
-            }
         },
 
         methods: {
@@ -590,38 +581,14 @@
 
             changedBillingType(type) {
                 // initiated from watcher
-                if (type === 'services') {
-                    this.form.service_id = null;
-                    this.form.fixed_rates = false;
-                    if (!this.form.services.length) {
-                        this.addService();
-                    }
-                } else {
-                    this.form.service_id = this.defaultService.id;
-                    this.form.fixed_rates = type === 'fixed';
-                }
-                this.fetchAllRates();
+                // pass to mixin
+                this.handleChangedBillingType(this.form, type);
             },
 
             changedDefaultRates(value) {
                 // initiated from watcher
-                if (value) {
-                    this.form.client_rate = null;
-                    this.form.caregiver_rate = null;
-                    for(let service in this.form.services) {
-                        service.client_rate = null;
-                        service.caregiver_rate = null;
-                    }
-                } else {
-                    this.form.client_rate = this.form.default_rates.client_rate || 0;
-                    this.form.caregiver_rate = this.form.default_rates.caregiver_rate || 0;
-                    this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
-                    for(let service in this.form.services) {
-                        service.client_rate = service.default_rates.client_rate || 0;
-                        service.caregiver_rate = service.default_rates.caregiver_rate || 0;
-                        this.recalculateRates(service, service.client_rate, service.caregiver_rate);
-                    }
-                }
+                // pass to mixin
+                this.handleChangedDefaultRates(this.form, value);
             },
 
             selectCaregiver(id) {
@@ -674,15 +641,7 @@
                 });
                 this.defaultRates = this.form.client_rate === null;
                 this.billingType = this.form.fixed_rates ? 'fixed' : 'hourly';
-                if (schedule.services) {
-                    for(let service of schedule.services) {
-                        this.billingType = 'services';
-                        this.addService(service);
-                        if (service.client_rate !== null) {
-                            this.defaultRates = false;
-                        }
-                    }
-                }
+                this.initServicesFromObject(schedule);
                 this.setDateTimeFromSchedule(schedule);
             },
 
@@ -716,7 +675,7 @@
                 if (this.billingType === 'services') {
                     this.form.service_id = null;
                     this.form.payer_id = null;
-                    this.form.fixed_rates = true;
+                    this.form.fixed_rates = false;
                 } else {
                     this.form.services = [];
                     this.form.fixed_rates = (this.billingType === 'fixed');
@@ -744,7 +703,7 @@
                 if (this.selectedSchedule.id) {
                     this.copiedSchedule = Object.assign({}, this.selectedSchedule);
                     Vue.delete(this.copiedSchedule, 'id');
-                    this.makeForm();
+                    this.changedSchedule(this.copiedSchedule);
                 }
             },
 
@@ -796,31 +755,6 @@
                     this.loadAllyPctFromClient(this.client_id);
                     this.loadClientRates();
                     this.loadClientPayers();
-                }
-            },
-
-            async loadClientPayers(clientId, resetPayers = false) {
-                if (this.form.client_id) {
-                    const response = await axios.get(`/business/clients/${this.form.client_id}/payers/unique`);
-                    this.clientPayers = response.data;
-                    if (resetPayers) this.resetServicePayers();
-                }
-            },
-
-            async loadClientRates(clientId) {
-                if (this.form.client_id) {
-                    const response = await axios.get(`/business/clients/${this.form.client_id}/rates`);
-                    this.clientRates = response.data;
-                    this.fetchAllRates();
-                }
-            },
-
-            async fetchServices() {
-                let response = await axios.get('/business/services?json=1');
-                if (Array.isArray(response.data)) {
-                    this.services = response.data;
-                } else {
-                    this.services = [];
                 }
             },
 
@@ -896,67 +830,6 @@
             toggleCaregivers() {
                 this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
-
-            addService(service = {}) {
-                const newService = {
-                    id: service.id || null,
-                    service_id: service.service_id || this.defaultService ? this.defaultService.id : null,
-                    payer_id: service.payer_id || null,
-                    hours_type: service.hours_type || 'default',
-                    duration: service.duration || 1,
-                    caregiver_rate: service.caregiver_rate || null,
-                    client_rate: service.client_rate || null,
-                    provider_fee: null,
-                    ally_fee: null,
-                    default_rates: {
-                        'client_rate': null,
-                        'caregiver_rate': null,
-                        'provider_fee': null,
-                        'ally_fee': null,
-                    }
-                };
-                if (!service.id) {
-                    this.fetchDefaultRate(newService);
-                } else {
-                    this.recalculateRates(newService, newService.client_rate, newService.caregiver_rate);
-                }
-                this.form.services.push(newService);
-            },
-
-            removeService(index) {
-                Vue.delete(this.form.services, index);
-            },
-
-            resetServicePayers() {
-                if (this.form.payer_id) {
-                    let index = this.clientPayers.findIndex(payer => payer.id == service.payer_id);
-                    this.form.payer_id = (index >= 0) ? this.form.payer_id : null;
-                }
-                this.form.services = this.form.services.map(service => {
-                    let index = this.clientPayers.findIndex(payer => payer.id == service.payer_id);
-                    service.payer_id = (index >= 0) ? service.payer_id : null;
-                    return service;
-                });
-            },
-
-            recalculateRates(rates, clientRate, caregiverRate) {
-                rates.ally_fee = RateFactory.getAllyFee(this.allyPct, clientRate);
-                rates.provider_fee = RateFactory.getProviderFee(clientRate, caregiverRate, this.allyPct, true);
-            },
-
-            fetchDefaultRate(service) {
-                const ratesObj = RateFactory.findMatchingRate(this.clientRates, this.startDate, service.service_id, service.payer_id, this.form.caregiver_id, this.form.fixed_rates);
-                service.default_rates.client_rate = ratesObj.client_rate;
-                service.default_rates.caregiver_rate = ratesObj.caregiver_rate;
-                this.recalculateRates(service.default_rates, service.default_rates.client_rate, service.default_rates.caregiver_rate);
-            },
-
-            fetchAllRates() {
-                this.fetchDefaultRate(this.form);
-                for(let service of this.form.services) {
-                    this.fetchDefaultRate(service);
-                }
-            },
         },
 
         watch: {
@@ -991,13 +864,6 @@
                 }
             },
 
-            defaultRates(val) {
-                this.changedDefaultRates(val);
-            },
-
-            billingType(val) {
-                this.changedBillingType(val);
-            }
         },
     }
 </script>

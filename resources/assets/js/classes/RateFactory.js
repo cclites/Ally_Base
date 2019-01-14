@@ -28,6 +28,7 @@ class RateFactory {
 
     static findMatchingRate(ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates = false)
     {
+        console.log('rateFactory', ratesArray, effectiveDate, serviceId, payerId, caregiverId, fixedRates);
         effectiveDate = moment(effectiveDate).format('YYYY-MM-DD');
         let effectiveRates = ratesArray.filter(item => {
             return item.effective_start <= effectiveDate
@@ -71,6 +72,7 @@ class RateFactory {
         }
 
         const rateObj = findMatch();
+        console.log('rateObj', rateObj);
         return this.getRatesByType(rateObj, fixedRates)
     }
 

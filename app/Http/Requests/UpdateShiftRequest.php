@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Billing\Payer;
+use App\Billing\Service;
 use App\Caregiver;
 use App\Client;
 use App\Shift;
@@ -28,14 +30,24 @@ class UpdateShiftRequest extends BusinessClientRequest
             'checked_in_time' => 'required|date',
             'checked_out_time' => 'required|date|after_or_equal:' . $this->input('checked_in_time'),
             'fixed_rates' => 'required|boolean',
-            'client_rate' => 'required|numeric|max:1000|min:0',
-            'caregiver_rate' => 'required|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
+            'client_rate' => 'nullable|numeric|max:1000|min:0',
+            'caregiver_rate' => 'nullable|numeric|min:0|max:' . $this->input('client_rate') ?? "0",
             'hours_type' => 'required|in:default,overtime,holiday',
+            'service_id' => 'nullable|exists:services,id',
+            'payer_id' => 'nullable|exists:payers,id',
             'issues.id' => 'nullable|numeric',
             'issues.caregiver_injury' => 'boolean',
             'issues.client_injury' => 'boolean',
             'issues.comments' => 'nullable',
             'activities' => 'array|nullable',
+            'services' => 'array|required_without:service_id',
+            'services.*.id' => 'nullable|exists:schedule_services,id',
+            'services.*.service_id' => 'required_with:services|exists:services,id',
+            'services.*.payer_id' => 'nullable|exists:payers,id',
+            'services.*.hours_type' => 'required_with:services|string|in:default,overtime,holiday',
+            'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
+            'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
+            'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
         ];
     }
 
@@ -69,6 +81,13 @@ class UpdateShiftRequest extends BusinessClientRequest
         return $this->validated()['activities'] ?? [];
     }
 
+    public function getServices(): array
+    {
+        return array_map(function($service) {
+            return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate']);
+        }, $this->validated()['services'] ?? []);
+    }
+
     public function getShiftArray(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): array
     {
         return $this->getShiftFactory($status, $clockInMethod, $clockOutMethod)->toArray();
@@ -93,8 +112,10 @@ class UpdateShiftRequest extends BusinessClientRequest
             Carbon::parse($this->input('checked_in_time')),
             $clockOutMethod ?? $clockInMethod,
             Carbon::parse($this->input('checked_out_time')),
-            $status
-        )->withData($clockOutData);
+            $status,
+            $this->input('service_id') ? Service::find($this->input('service_id')) : null,
+            $this->input('payer') ? Payer::find($this->input('payer')) : null
+        )->withData($clockOutData)->withServices($this->getServices());
 
         return $shiftData;
     }

@@ -8,7 +8,7 @@ use App\Billing\Contracts\InvoiceableInterface;
 use Packages\MetaData\HasMetaData;
 use Packages\MetaData\HasMetaInterface;
 
-abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface, HasMetaInterface
+abstract class InvoiceableModel extends AuditableModel // implements HasMetaData, InvoiceableInterface
 {
     use HasMetaData;
 

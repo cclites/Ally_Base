@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use App\Billing\Invoiceable\ShiftService;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -250,7 +251,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     /**
      * Get the shift's address relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function address()
     {
@@ -373,6 +374,12 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $this->belongsTo(Shift::class, 'duplicated_by');
     }
 
+    public function services()
+    {
+        return $this->hasMany(ShiftService::class);
+    }
+
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
@@ -452,6 +459,28 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////
+
+    /**
+     * @param iterable $services
+     */
+    public function syncServices(iterable $services)
+    {
+        $savedIds = [];
+        foreach($services as $data) {
+            $service = null;
+            if (isset($data['id'])) {
+                $service = $this->services()->find($data['id']);
+            }
+            if (!$service) {
+                $service = new ShiftService();
+            }
+            $service->fill($data);
+            $this->services()->save($service);
+            $savedIds[] = $service->id;
+        }
+        // Delete Others
+        $this->services()->whereNotIn('id', $savedIds)->delete();
+    }
 
     /**
      * Return the number of hours worked, calculate if not persisted
