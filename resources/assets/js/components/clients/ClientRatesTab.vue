@@ -18,7 +18,7 @@
         <b-row>
             <b-col lg="7">
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="client-cg-table">
+                    <table class="table table-bordered caregiver-list-table">
                         <thead>
                         <tr>
                             <th>Referred Caregiver</th>
@@ -43,7 +43,7 @@
             </b-col>
             <b-col lg="5">
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered caregiver-list-table">
                         <thead>
                         <tr>
                             <th>Excluded Caregiver</th>
@@ -72,7 +72,10 @@
         <hr />
 
         <div class="ml-auto mb-3">
-            <b-btn variant="info" @click="addRate()">Add Rate</b-btn>
+            <h5>
+                <strong>Client Rates </strong>
+                <b-btn variant="info" @click="addRate()" class="ml-2">Add Rate</b-btn>
+            </h5>
         </div>
 
         <div v-if="filterByCaregiverId">
@@ -188,7 +191,7 @@
                 </template>
             </b-table>
         </div>
-        <b-btn @click="saveRates()" variant="success">Save Client Rates</b-btn>
+        <b-btn id="save-rates" @click="saveRates()" variant="success">Save Client Rates</b-btn>
 
         <div class="mt-4"><small>* Provider fees and Ally fees are estimated based on the primary payment method.</small></div>
 
@@ -411,7 +414,12 @@
                     caregiver_fixed_rate: '0.00',
                     client_hourly_rate: '0.00',
                     client_fixed_rate: '0.00',
-                })
+                });
+
+                // Scroll to bottom of table
+                $('html, body').animate({
+                    scrollTop: $('#save-rates').offset().top
+                }, 500, 'linear');
             },
 
             removeRate(index) {
@@ -613,5 +621,7 @@
 </script>
 
 <style scoped>
-
+    .caregiver-list-table th, .caregiver-list-table td {
+        padding: 0.5rem 0.75rem;
+    }
 </style>
