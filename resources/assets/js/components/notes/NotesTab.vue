@@ -13,7 +13,7 @@
                 <div slot="header">
                     <b-row align-h="between">
                         <b-col>
-                            Created By: {{ note.creator.name }}
+                            <strong>{{ note.title }}</strong> Created By: {{ note.creator.name }}
                         </b-col>
                         <!--<b-col>
                             <div class="text-center">Tags: <span v-if="note.tags">{{ note.tags }}</span><span v-else>None</span></div>

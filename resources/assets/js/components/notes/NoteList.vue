@@ -1,90 +1,63 @@
 <template>
     <b-card>
-        <b-form inline @submit.prevent="filter" class="mb-4">
-            <b-form-input
-                    type="text"
-                    id="start-date"
-                    class="datepicker mr-2 mb-2"
-                    v-model="searchForm.start_date"
-                    placeholder="Start Date"
-                    @change="filter"
-            >
-            </b-form-input>
-
-            <b-form-input
-                    type="text"
-                    id="end-date"
-                    class="datepicker mr-2 mb-2"
-                    v-model="searchForm.end_date"
-                    placeholder="End Date"
-            >
-            </b-form-input>
-
-            <b-form-select v-model="searchForm.type" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- Type --</option>
-                </template>
-                <option :value="type.value" v-for="type in types" :key="type.value">{{ type.text }}</option>
-            </b-form-select>
-
-            <b-form-select v-model="searchForm.caregiver" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- Caregiver --</option>
-                </template>
-                <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-            </b-form-select>
-
-            <b-form-select v-model="searchForm.client" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- Client --</option>
-                </template>
-                <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
-            </b-form-select>
-
-            <b-form-select v-model="searchForm.prospect" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- Prospect --</option>
-                </template>
-                <option :value="prospect.id" v-for="prospect in prospects" :key="prospect.id">{{ prospect.nameLastFirst }}</option>
-            </b-form-select>
-
-            <b-form-select v-model="searchForm.referral_source" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- Referral Source --</option>
-                </template>
-                <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
-            </b-form-select>
-
-            <b-form-select v-model="searchForm.user" class="mr-2 mb-2">
-                <template slot="first">
-                    <!-- this slot appears above the options from 'options' prop -->
-                    <option :value="null">-- User --</option>
-                </template>
-                <option :value="user.id" v-for="user in users" :key="user.id">{{ user.nameLastFirst }}</option>
-            </b-form-select>
-
-            <!--<b-form-input
-                type="text"
-                id="tags"
-                v-model="searchForm.tags"
-                class="mr-2 mb-2"
-                placeholder="Tags">
-            </b-form-input>-->
-
-            <b-button variant="info" type="submit" class="mb-2">
-                Filter
-            </b-button>
+        <div class="mb-4">
+            <b-btn variant="info" class="mb-3" href="/notes/create">Add Note</b-btn>
+        </div>
+        <b-form @submit.prevent="filter" class="mb-2">
+            <b-row>
+                <b-col lg="2">
+                    <date-picker class="mb-2" v-model="searchForm.start_date"  placeholder="Start Date" />
+                </b-col>
+                <b-col lg="2">
+                    <date-picker class="mb-2" v-model="searchForm.end_date"  placeholder="End Date" />
+                </b-col>
+                <b-col lg="2">
+                    <b-form-select v-model="searchForm.type" class="mb-2">
+                        <option :value="null">-- Type --</option>
+                        <option :value="type.value" v-for="type in types" :key="type.value">{{ type.text }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.client" class="mb-2">
+                        <option :value="null">-- Client --</option>
+                        <option :value="client.id" v-for="client in clients" :key="client.id">{{ client.nameLastFirst }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.caregiver" class="mb-2">
+                        <option :value="null">-- Caregiver --</option>
+                        <option :value="caregiver.id" v-for="caregiver in caregivers" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.prospect" class="mb-2">
+                        <option :value="null">-- Prospect --</option>
+                        <option :value="prospect.id" v-for="prospect in prospects" :key="prospect.id">{{ prospect.nameLastFirst }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.referral_source" class="mb-2">
+                        <option :value="null">-- Referral Source --</option>
+                        <option :value="rs.id" v-for="rs in referral_sources" :key="rs.id">{{ rs.organization }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.user" class="mb-2">
+                        <option :value="null">-- User --</option>
+                        <option :value="user.id" v-for="user in users" :key="user.id">{{ user.nameLastFirst }}</option>
+                    </b-form-select>
+                </b-col>
+                <b-col lg="3">
+                    <b-button variant="info" type="submit" class="mb-2">
+                        Generate List
+                    </b-button>
+                </b-col>
+            </b-row>
         </b-form>
 
         <loading-card v-show="loading"></loading-card>
 
         <div v-show="! loading">
-            <b-btn variant="info" class="mb-3" href="/notes/create">Add Note</b-btn>
 
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -93,6 +66,7 @@
                         :current-page="currentPage"
                         :per-page="perPage"
                         :sort-by.sync="sortBy"
+                        :sort-desc.sync="sortDesc"
                         @filtered="onFiltered"
                 >
                     <template slot="caregiver" scope="data">
@@ -139,11 +113,12 @@
 
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
+    import FormatsStrings from "../../mixins/FormatsStrings";
+
     export default {      
-        mixins: [ FormatsDates ],
+        mixins: [ FormatsDates, FormatsStrings ],
 
         props: {
-            'notes': Array,
         },
 
         data() {
@@ -155,8 +130,10 @@
                 clients: [],
                 prospects: [],
                 referral_sources: [],
-                items: this.notes,
+                items: [],
                 searchForm: {
+                    start_date: moment().utc().subtract(1, 'days').format('MM/DD/YYYY'), // todo, make this local, but backend needs to know what the local timezone is
+                    end_date: moment.utc().format('MM/DD/YYYY'),
                     caregiver: null,
                     client: null,
                     prospect: null,
@@ -173,6 +150,7 @@
                 perPage: 15,
                 currentPage: 1,
                 sortBy: 'created_at',
+                sortDesc: true,
                 loading: false,
                 fields: [
                     {
@@ -185,7 +163,7 @@
                         key: 'type',
                         label: 'Type',
                         sortable: true,
-                        formatter: d => d && d.substr(0, 1).toUpperCase() + d.substr(1),
+                        formatter: d => d.toLowerCase() === 'other' ? 'Note' : 'Phone Call'
                     },
                     {
                         key: 'caregiver',
@@ -215,7 +193,8 @@
                     {
                         key: 'body',
                         label: 'Preview',
-                        sortable: false
+                        sortable: false,
+                        formatter: val => this.stringLimit(val, 70),
                     },
                     'action'
                 ]
@@ -227,25 +206,7 @@
             this.loadCaregivers();
             this.loadProspects();
             this.loadReferralSources();
-            this.totalRows = this.items.length;
-            let startDate = jQuery('#start-date');
-            let endDate = jQuery('#end-date');
-            let component = this;
-            startDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.start_date = startDate.val();
-            });
-            endDate.datepicker({
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            }).on("changeDate", function () {
-                component.searchForm.end_date = endDate.val();
-            });
-
+            this.filter();
         },
 
         computed: {
@@ -255,13 +216,7 @@
         },
 
         watch: {
-            notes(val) {
-                val.forEach(note => {
-                    if (!this.users.find(x => x.id === note.created_by)) {
-                        this.users.push(note.creator);
-                    }
-                });
-            },
+           
         },
 
         methods: {

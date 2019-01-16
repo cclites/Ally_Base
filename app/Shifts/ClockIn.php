@@ -23,24 +23,16 @@ class ClockIn extends ClockBase
     {
         $this->validateSchedule($schedule);
 
-        $shift = new Shift([
+        $shiftData = [
             'business_id' => $schedule->business_id,
             'client_id' => $schedule->client_id,
             'schedule_id' => $schedule->id,
-            'checked_in_verified' => false,
-            'checked_in_method' => $this->getMethod(),
-            'checked_in_time' => Carbon::now(),
-            'checked_in_latitude' => $this->latitude,
-            'checked_in_longitude' => $this->longitude,
-            'checked_in_number' => $this->number,
-            'checked_in_ip' => \Request::ip(),
-            'checked_in_agent' => \Request::userAgent(),
-            'fixed_rates' => false,
-            'status' => Shift::CLOCKED_IN,
+            'fixed_rates' => $schedule->fixed_rates,
             'caregiver_rate' => $schedule->getCaregiverRate(),
             'provider_fee' => $schedule->getProviderFee(),
             'address_id' => $schedule->address ? $schedule->address->id : null,
-        ]);
+        ];
+        $shift = $this->makeShift($shiftData);
 
         // Attempt to verify EVV regardless of previous status,
         // but only throw the exception if it's an attempt at a verified clock in (non-manual)
@@ -70,38 +62,21 @@ class ClockIn extends ClockBase
      */
     public function clockInWithoutSchedule(Business $business, Client $client)
     {
-        // Find rates through relationship, if no rates, set to 0
-        $relationship = $client->caregivers()->where('caregiver_id', $this->caregiver->id)->first();
-        if ($relationship && isset($relationship->pivot)) {
-            $rates = $relationship->pivot;
-        }
-        else {
-            $rates = new \stdClass();
-            $rates->caregiver_hourly_rate = 0;
-            $rates->provider_hourly_fee = 0;
-        }
+        // Find rates
+        $rates = app(RateFactory::class)->getRatesForClientCaregiver($client, $this->caregiver, false);
 
         // Get address information
         $address = $client->addresses()->where('type', 'evv')->first();
 
-        $shift = new Shift([
+        $shiftData = [
             'business_id' => $business->id,
             'client_id' => $client->id,
             'schedule_id' => null,
-            'checked_in_verified' => false,
-            'checked_in_method' => $this->getMethod(),
-            'checked_in_time' => Carbon::now(),
-            'checked_in_latitude' => $this->latitude,
-            'checked_in_longitude' => $this->longitude,
-            'checked_in_number' => $this->number,
-            'checked_in_ip' => \Request::ip(),
-            'checked_in_agent' => \Request::userAgent(),
-            'fixed_rates' => false,
-            'status' => Shift::CLOCKED_IN,
-            'caregiver_rate' => $rates->caregiver_hourly_rate,
-            'provider_fee' => $rates->provider_hourly_fee,
+            'caregiver_rate' => $rates->caregiver_rate ?? 0,
+            'provider_fee' => $rates->provider_fee ?? 0,
             'address_id' => $address ? $address->id : null,
-        ]);
+        ];
+        $shift = $this->makeShift($shiftData);
 
         // Attempt to verify EVV regardless of previous status,
         // but only throw the exception if it's an attempt at a verified clock in (non-manual)
@@ -121,4 +96,20 @@ class ClockIn extends ClockBase
         return false;
     }
 
+    protected function makeShift(array $options = [])
+    {
+        $shift = new Shift($options + [
+            'checked_in_verified' => false,
+            'checked_in_method' => $this->getMethod(),
+            'checked_in_time' => Carbon::now(),
+            'checked_in_latitude' => $this->latitude,
+            'checked_in_longitude' => $this->longitude,
+            'checked_in_number' => $this->number,
+            'checked_in_ip' => \Request::ip(),
+            'checked_in_agent' => \Request::userAgent(),
+            'fixed_rates' => false,
+            'status' => Shift::CLOCKED_IN,
+        ]);
+        return $shift;
+    }
 }

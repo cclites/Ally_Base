@@ -21,10 +21,6 @@ class NoteTemplateController extends Controller
     public function index()
     {
         $templates = NoteTemplate::forRequestedBusinesses()->ordered()->get();
-        $templates = $templates->map(function ($template) {
-            $template->note = str_limit($template->note, 70);
-            return $template;
-        });
 
         if (request()->expectsJson()) {
             return $templates;

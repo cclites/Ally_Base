@@ -1,6 +1,6 @@
 <template>
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-muted text-muted" id="notificationsDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-bell fa-lg"></i>
+    <li class="nav-item dropdown pr-2">
+        <a class="nav-link dropdown-toggle text-muted text-muted" id="notificationsDropdown" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-bell notification-icon"></i>
             <span class="badge badge-danger badge-notifications" v-if="notifications.length">{{ notifications.length }}</span>
             <b-tooltip target="notificationsDropdown" placement="left" show title="You have notifications that require action" v-if="showTooltip"></b-tooltip>
         </a>
@@ -85,7 +85,7 @@
     .badge-notifications {
         position: absolute;
         top: 18px;
-        left: 32px;
+        left: 34px;
     }
     .mdi-message {
         font-size: 24px;
