@@ -6,6 +6,7 @@ use App\Client;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Schedule;
+use App\ScheduleGroup;
 use App\ScheduleNote;
 use Carbon\Carbon;
 
@@ -33,6 +34,11 @@ class ScheduleCreator
 
     /**
      * @var string
+     */
+    protected $intervalType;
+
+    /**
+     * @var \Carbon\Carbon
      */
     protected $endingDate;
 
@@ -218,6 +224,7 @@ class ScheduleCreator
      */
     public function interval($intervalType, Carbon $endingDate, $byDays = [])
     {
+        $this->intervalType = $intervalType;
         $this->endingDate = $endingDate;
 
         if (in_array($intervalType, ['weekly', 'biweekly'])) {
@@ -235,7 +242,7 @@ class ScheduleCreator
         }
         $byMonthDay = $this->startsAt->format('j');
         $this->rrule = $this->ruleGenerator->setIntervalType($intervalType)
-                                           ->bymonthdays($byMonthDay)
+                                           ->bymonthday($byMonthDay)
                                            ->getRule();
         return $this;
     }
@@ -266,10 +273,25 @@ class ScheduleCreator
         $occurrences = $this->generateOccurrences();
         $this->validateStartDate($occurrences);
 
-        $schedules = $this->createSchedulesFromOccurrences($occurrences);
+        $group = null;
+        if (count($occurrences) > 1 && $this->rrule) {
+            $group = $this->createGroup();
+        }
+
+        $schedules = $this->createSchedulesFromOccurrences($occurrences, $group);
         $this->attachNoteToSchedules($schedules);
 
         return collect($schedules);
+    }
+
+    protected function createGroup()
+    {
+        return ScheduleGroup::create([
+            'starts_at' => $this->startsAt->toDateTimeString(),
+            'end_date' => $this->endingDate->toDateString(),
+            'rrule' => $this->rrule,
+            'interval_type' => $this->intervalType,
+        ]);
     }
 
     protected function checkRequired($required = [])
@@ -333,7 +355,13 @@ class ScheduleCreator
                                 ->getOccurrencesBetween($this->startsAt, $endsAt, 730);
     }
 
-    protected function createSchedulesFromOccurrences($occurrences)
+    /**
+     * @param \DateTime[] $occurrences
+     * @param \App\ScheduleGroup|null $group
+     * @return array
+     * @throws \Exception
+     */
+    protected function createSchedulesFromOccurrences($occurrences, ?ScheduleGroup $group = null)
     {
         $schedules = [];
         \DB::beginTransaction();
@@ -344,8 +372,9 @@ class ScheduleCreator
                     array_merge(
                         $this->data,
                         [
-                            'starts_at' => $date, // keep in business timezone
+                            'starts_at' => $date->format('Y-m-d H:i:s'), // keep in business timezone
                             'weekday'   => $date->format('w'),
+                            'group_id'  => $group->id ?? null,
                         ]
                     )
                 );

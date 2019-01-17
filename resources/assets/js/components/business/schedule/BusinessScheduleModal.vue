@@ -48,7 +48,7 @@
                                         <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
                                     </b-form-select>
                                     <small v-if="cgMode == 'all' && !selectedCaregiver.id" class="form-text text-muted">
-                                        <span class="text-danger">Caregivers that are not currently assigned to the client will use the rates below as their defaults upon saving.</span>
+                                        <span class="text-warning">Caregivers that are not currently assigned to the client will be automatically assigned.</span>
                                     </small>
                                     <input-help v-else :form="form" field="caregiver_id" text="Select the caregiver for this schedule." />
                                 </b-form-group>
@@ -373,6 +373,13 @@
         >
             <h4>This will put the client over the maximum weekly hours.  Are you sure you want to do this?</h4>
         </confirmation-modal>
+        <schedule-group-modal v-if="selectedSchedule.group_data"
+                              :group-data="selectedSchedule.group_data"
+                              :weekday-int="scheduledWeekdayInt"
+                              :day-change="scheduledWeekdayInt !== currentWeekdayInt"
+                              v-model="groupModal"
+                              @submit="submitWithGroup"
+        />
     </div>
 </template>
 
@@ -382,9 +389,10 @@
     import RateFactory from "../../../classes/RateFactory";
     import ConfirmationModal from "../../modals/ConfirmationModal";
     import ShiftServices from "../../../mixins/ShiftServices";
+    import ScheduleGroupModal from "../../modals/ScheduleGroupModal";
 
     export default {
-        components: {ConfirmationModal},
+        components: {ScheduleGroupModal, ConfirmationModal},
         mixins: [FormatsNumbers, RateCodes, ShiftServices],
 
         props: {
@@ -432,6 +440,7 @@
                 },
                 specialHoursChange: false,
                 maxHoursWarning: false,
+                groupModal: false,
             }
         },
 
@@ -537,6 +546,14 @@
                     client_id: this.form.client_id,
                 }
             },
+
+            scheduledWeekdayInt() {
+                return this.selectedSchedule ? moment(this.selectedSchedule.starts_at).day() : 0;
+            },
+
+            currentWeekdayInt() {
+                return this.startDate ? moment(this.startDate).day() : 0;
+            }
         },
 
         methods: {
@@ -632,6 +649,7 @@
                     'services': [],
                     'provider_fee': null,
                     'ally_fee': null,
+                    'group_update': null,
                     'default_rates': {
                         'client_rate': null,
                         'caregiver_rate': null,
@@ -653,7 +671,19 @@
                 this.endTime = (end._ambigTime) ? '10:00' : end.format('HH:mm');
             },
 
-            submitForm() {
+            submitWithGroup(groupUpdate)
+            {
+                return this.submitForm(groupUpdate);
+            },
+
+            submitForm(groupUpdate = null) {
+                if (this.selectedSchedule.group_id && !groupUpdate) {
+                    this.groupModal = true;
+                    return;
+                } else {
+                    this.form.group_update = groupUpdate;
+                }
+
                 this.submitting = true;
 
                 if (this.form.hours_type !== 'default') {
@@ -669,7 +699,7 @@
                 // Fill/format form values
                 this.form.duration = this.getDuration();
                 this.form.starts_at = this.getStartsAt();
-                this.form.recurring_end_date = moment(this.endDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').add(1, 'minutes').format('X');
+                this.form.recurring_end_date = moment(this.endDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').add(1, 'minutes').format();
 
                 // Finalize form billing type
                 if (this.billingType === 'services') {
@@ -780,7 +810,7 @@
 
             getStartsAt() {
                 if (this.startDate && this.startTime) {
-                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format('X');
+                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format();
                 }
                 return null;
             },
