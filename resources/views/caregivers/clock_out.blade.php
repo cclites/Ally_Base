@@ -18,14 +18,44 @@
                 </div>
             </div>
         @endif
+        @if (count($caregiverSchedules['before']) || count($caregiverSchedules['after']))
+            <div class="col-12 hidden-sm-up">
+                <div class="card">
+                    <div class="card-body">
+                        @if (count($caregiverSchedules['before']))
+                            <h4 class="card-title">Previous Shift Caregiver</h4>
+                            @foreach ($caregiverSchedules['before'] as $schedule)
+                                <div>
+                                    {{ $schedule->caregiver->name }}
+                                    @if ($schedule->caregiver->phoneNumber)
+                                        - {{ $schedule->caregiver->phoneNumber }}
+                                    @endif
+                                </div>
+                            @endforeach
+                        @endif
+                        @if (count($caregiverSchedules['after']))
+                            <h4 class="card-title">Next Shift Caregiver</h4>
+                                @foreach ($caregiverSchedules['after'] as $schedule)
+                                    <div>
+                                        {{ $schedule->caregiver->name }}
+                                        @if ($schedule->caregiver->phoneNumber)
+                                            - {{ $schedule->caregiver->phoneNumber }}
+                                        @endif
+                                    </div>
+                                @endforeach
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="col-lg-6">
-            <clock-out 
-                :shift="{{ $shift }}" 
-                :activities="{{ $activities }}" 
-                :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}" 
-                :business="{{ $business }}" 
-                :questions="{{ $questions }}"
-                :goals="{{ $goals }}"
+            <clock-out
+                    :shift="{{ $shift }}"
+                    :activities="{{ $activities }}"
+                    :care-plan-activity-ids="{{ json_encode($carePlanActivityIds) }}"
+                    :business="{{ $business }}"
+                    :questions="{{ $questions }}"
+                    :goals="{{ $goals }}"
             />
         </div>
         <div class="col-lg-6">
@@ -41,9 +71,37 @@
                     </div>
                 </div>
             @endif
-
+            @if (count($caregiverSchedules['before']) || count($caregiverSchedules['after']))
+                <div class="card hidden-xs-down">
+                    <div class="card-body">
+                        @if (count($caregiverSchedules['before']))
+                            <h4 class="card-title">Previous Shift Caregiver</h4>
+                            @foreach ($caregiverSchedules['before'] as $schedule)
+                                <div>
+                                    {{ $schedule->caregiver->name }}
+                                    @if ($schedule->caregiver->phoneNumber)
+                                        - {{ $schedule->caregiver->phoneNumber }}
+                                    @endif
+                                </div>
+                            @endforeach
+                        @endif
+                        @if (count($caregiverSchedules['after']))
+                            <h4 class="card-title">Next Shift Caregiver</h4>
+                                @foreach ($caregiverSchedules['after'] as $schedule)
+                                    <div>
+                                        {{ $schedule->caregiver->name }}
+                                        @if ($schedule->caregiver->phoneNumber)
+                                            - {{ $schedule->caregiver->phoneNumber }}
+                                        @endif
+                                    </div>
+                                @endforeach
+                        @endif
+                    </div>
+                </div>
+            @endif
             @if(config('services.gmaps.key') && $shift->verified)
-                <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ config('services.gmaps.key') }}"></iframe>
+                <iframe width="100%" height="450" frameborder="0" style="border:0"
+                        src="https://www.google.com/maps/embed/v1/place?q={{ $shift->checked_in_latitude }},{{ $shift->checked_in_longitude }}&amp;key={{ config('services.gmaps.key') }}"></iframe>
             @endif
         </div>
     </div>

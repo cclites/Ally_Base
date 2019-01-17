@@ -16,7 +16,6 @@ use App\ShiftIssue;
 use App\Signature;
 use Illuminate\Http\Request;
 
-
 class ShiftController extends BaseController
 {
     public function index(Schedule $schedule = null)
@@ -109,14 +108,13 @@ class ShiftController extends BaseController
 
         try {
             $clockIn = new ClockIn($this->caregiver());
-            $clockIn->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
+            $clockIn->setGeocode($data['latitude'] ?? null, $data['longitude'] ?? null);
             $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
             if ($shift) {
                 return new SuccessResponse('You have successfully clocked in.');
             }
             return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
-        }
-        catch (UnverifiedLocationException $e) {
+        } catch (UnverifiedLocationException $e) {
             // Create an unverified/manual shift
             $clockIn->setManual(true);
             $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
@@ -124,8 +122,7 @@ class ShiftController extends BaseController
                 return new SuccessResponse('You have successfully clocked in.');
             }
             return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
-        }
-        catch (InvalidScheduleParameters $e) {
+        } catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
         }
     }
@@ -177,7 +174,7 @@ class ShiftController extends BaseController
 
         // Load care plan and notes from the schedule (if one exists)
         $carePlanActivityIds = [];
-        $notes =  '';
+        $notes = '';
         if ($shift && $shift->schedule) {
             $notes = $shift->schedule->notes;
             if ($shift->schedule->carePlan) {
@@ -185,7 +182,18 @@ class ShiftController extends BaseController
             }
         }
 
-        return view('caregivers.clock_out', compact('shift', 'activities', 'notes', 'carePlanActivityIds', 'business', 'questions', 'goals'));
+        $caregiverSchedules = $shift->getNextAndPreviousShiftCaregiverInfo();
+
+        return view('caregivers.clock_out', compact(
+            'shift',
+            'activities',
+            'notes',
+            'carePlanActivityIds',
+            'business',
+            'questions',
+            'goals',
+            'caregiverSchedules'
+        ));
     }
 
     public function clockOut(Request $request)
@@ -193,7 +201,7 @@ class ShiftController extends BaseController
         if (auth()->user()->active == 0) {
             abort(403);
         }
-        
+
         if (!$this->caregiver()->isClockedIn()) {
             return new ErrorResponse(400, 'You are not currently clocked in.');
 //            return redirect()->route('shift.index');
@@ -243,7 +251,7 @@ class ShiftController extends BaseController
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
             $fields = [];
-            foreach($allQuestions as $q) {
+            foreach ($allQuestions as $q) {
                 if ($q->required == 1) {
                     $fields['questions.' . $q->id] = 'required';
                 }
@@ -259,7 +267,7 @@ class ShiftController extends BaseController
             if ($data['caregiver_comments']) $clockOut->setComments($data['caregiver_comments']);
             $clockOut->setGoals($data['goals']);
             $clockOut->setQuestions($data['questions'], $allQuestions);
-            $clockOut->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
+            $clockOut->setGeocode($data['latitude'] ?? null, $data['longitude'] ?? null);
             if ($clockOut->clockOut($shift, $request->input('activities', []))) {
                 // Attach issues
                 $issueText = trim($request->input('issue_text'));
@@ -277,8 +285,7 @@ class ShiftController extends BaseController
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
-        }
-        catch (UnverifiedLocationException $e) {
+        } catch (UnverifiedLocationException $e) {
             $clockOut->setManual(true);
             if ($clockOut->clockOut($shift)) {
                 if ($data['narrative_notes']) {
@@ -287,8 +294,7 @@ class ShiftController extends BaseController
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
-        }
-        catch (InvalidScheduleParameters $e) {
+        } catch (InvalidScheduleParameters $e) {
             return new ErrorResponse(400, $e->getMessage());
         }
     }

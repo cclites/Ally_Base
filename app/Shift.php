@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use App\Businesses\Timezone;
@@ -168,9 +169,9 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
 
     public static function recalculateDurationOnChange()
     {
-        self::saving(function(Shift $shift) {
+        self::saving(function (Shift $shift) {
             if ($shift->checked_out_time &&
-                ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
+                ($shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time'))
             ) {
                 $shift->hours = $shift->duration(true);
             }
@@ -181,14 +182,14 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         $flagManager = app(ShiftFlagManager::class);
 
-        self::saved(function(Shift $shift) use ($flagManager) {
+        self::saved(function (Shift $shift) use ($flagManager) {
             if ($flagManager->shouldGenerate($shift)) {
                 $flagManager->generateFlags($shift);
             }
         });
 
-        self::deleted(function(Shift $shift) use ($flagManager) {
-            foreach($shift->duplicates as $duplicate) {
+        self::deleted(function (Shift $shift) use ($flagManager) {
+            foreach ($shift->duplicates as $duplicate) {
                 $flagManager->generateFlags($duplicate);
             }
         });
@@ -250,13 +251,13 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function client()
     {
         return $this->belongsTo(Client::class)
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class)
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     public function business()
@@ -272,8 +273,8 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function activities()
     {
         return $this->belongsToMany(Activity::class, 'shift_activities')
-                    ->orderBy('code')
-                    ->withPivot(['completed', 'other']);
+            ->orderBy('code')
+            ->withPivot(['completed', 'other']);
     }
 
     public function otherActivities()
@@ -434,6 +435,38 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     //////////////////////////////////////
 
     /**
+     * Get the caregivers for shifts withing +- 4 hours of this shift
+     *
+     * @return array
+     */
+    public function getNextAndPreviousShiftCaregiverInfo(): array
+    {
+        $start = Carbon::parse($this->schedule->starts_at);
+        $end = $start->copy()->addMinutes($this->schedule->duration);
+        $beforeWindow = [
+            $start->copy()->subHours(4),
+            $start->subMinute()
+        ];
+        $afterWindow = [
+            $end->copy()->addMinute(),
+            $end->copy()->addHours(4)
+        ];
+
+        return [
+            'before' => $this->client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $beforeWindow)
+                ->get()
+                ->unique('caregiver_id'),
+            'after' => $this->client->schedules()
+                ->with('caregiver.phoneNumber')
+                ->whereBetween('starts_at', $afterWindow)
+                ->get()
+                ->unique('caregiver_id')
+        ];
+    }
+
+    /**
      * Return the number of hours worked, calculate if not persisted
      *
      * @param bool $forceRecalculation
@@ -503,7 +536,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function isVerified()
     {
-        return (bool) $this->verified;
+        return (bool)$this->verified;
     }
 
     /**
@@ -524,8 +557,8 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function hasDuplicate()
     {
         $query = self::where('checked_in_time', $this->checked_in_time)
-                     ->where('client_id', $this->client_id)
-                     ->where('caregiver_id', $this->caregiver_id);
+            ->where('client_id', $this->client_id)
+            ->where('caregiver_id', $this->caregiver_id);
         if ($this->id) {
             $query->where('id', '!=', $this->id);
         }
@@ -541,11 +574,11 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function syncIssues($issues)
     {
-        $new = collect($issues)->filter(function($item) {
+        $new = collect($issues)->filter(function ($item) {
             return !isset($item['id']);
         });
 
-        $existing = collect($issues)->filter(function($item) {
+        $existing = collect($issues)->filter(function ($item) {
             return isset($item['id']);
         });
 
@@ -557,7 +590,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
                 ->delete();
 
             // update the existing issues in case they changed
-            foreach($existing as $item) {
+            foreach ($existing as $item) {
                 $issue = ShiftIssue::where('id', $item['id'])->first();
                 if ($issue) {
                     $issue->update($item);
@@ -569,7 +602,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         }
 
         // create new issues from the issues that have no id
-        foreach($new as $item) {
+        foreach ($new as $item) {
             ShiftIssue::create(array_merge($item, ['shift_id' => $this->id]));
         }
     }
@@ -582,7 +615,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function getAllyPercentage()
     {
         if ($this->costs()->hasPersistedCosts()) {
-            return (float) $this->costs()->getPersistedCosts()->ally_pct;
+            return (float)$this->costs()->getPersistedCosts()->ally_pct;
         }
 
         if ($this->client) {
@@ -590,7 +623,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         }
 
         // Default to CC fee
-        return (float) config('ally.credit_card_fee');
+        return (float)config('ally.credit_card_fee');
     }
 
     /**
@@ -619,7 +652,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         // first reformat array to work with sync
         // and drop any values with empty comments.
         $data = [];
-        foreach($goals as $goalId => $comments) {
+        foreach ($goals as $goalId => $comments) {
             if (empty($comments)) {
                 continue;
             }
@@ -642,7 +675,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function syncQuestions($questions, $answers)
     {
         $items = [];
-        foreach($questions as $q) {
+        foreach ($questions as $q) {
             $answer = isset($answers[$q->id]) ? $answers[$q->id] : '';
             $items[$q->id] = ['answer' => $answer];
         }
@@ -684,7 +717,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function removeFlag($flag)
     {
-        return (bool) $this->shiftFlags()->where('flag', $flag)->delete();
+        return (bool)$this->shiftFlags()->where('flag', $flag)->delete();
     }
 
     /**
@@ -696,10 +729,10 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         $removeFlags = array_diff($this->flags, $flags);
         $addFlags = array_diff($flags, $this->flags);
-        foreach($addFlags as $flag) {
+        foreach ($addFlags as $flag) {
             $this->addFlag($flag);
         }
-        foreach($removeFlags as $flag) {
+        foreach ($removeFlags as $flag) {
             $this->removeFlag($flag);
         }
     }
@@ -743,13 +776,13 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $query->whereIn('status', ShiftStatusManager::getUnconfirmedStatuses());
     }
 
-    public function scopeWhereTelephonyVerified($query) 
+    public function scopeWhereTelephonyVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_number');
     }
 
-    public function scopeWhereMobileVerified($query) 
+    public function scopeWhereMobileVerified($query)
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
@@ -815,7 +848,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
      */
     public function scopeWhereFlagsIn(Builder $query, array $flags)
     {
-        $query->whereHas('shiftFlags', function($q) use ($flags) {
+        $query->whereHas('shiftFlags', function ($q) use ($flags) {
             $q->whereIn('flag', $flags);
         });
     }
