@@ -162,7 +162,7 @@
 
         computed: {
             listUrl() {
-                const {business_id, active} = this.filters;
+                const {business_id, active, caseManager} = this.filters;
                 const activeValue = (active !== null) ? active : '';
 
                 return `/business/clients?json=1&address=1&active=${activeValue}&businesses[]=${business_id}`;
@@ -184,6 +184,10 @@
                     results = results.filter((client) => client.active == active);
                 } 
 
+                if(caseManager) {
+                    results = results.filter((client) => client.case_manager_id === caseManager);
+                }
+
                 return results;
             },
         },
@@ -197,7 +201,6 @@
                     client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
-                this.filterClients();
                 this.loading = false;
             },
             async loadOfficeUsers() {
@@ -221,13 +224,6 @@
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
             },
-            filterClients() {
-                if (! this.filters.caseManager) {
-                    this.filteredClients = this.clients;
-                } else {
-                    this.filteredClients = this.clients.filter(x => x.case_manager_id === this.filters.caseManager);
-                }
-            },
             filterCaseManagers() {
                 if (this.business_id == '') {
                     this.filteredCaseManagers = this.caseManagers;
@@ -241,12 +237,8 @@
             listUrl() {
                 this.loadClients();
             },
-            'filters.caseManager': function(value) {
-                this.filterClients();
-            },
             business_id(value) {
                 this.filterCaseManagers();
-                this.filterClients();
             }
         }
     }
