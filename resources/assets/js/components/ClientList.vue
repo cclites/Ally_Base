@@ -1,44 +1,41 @@
 <template>
     <b-card>
         <b-row class="mb-2">
-            <b-col lg="2">
+            <b-col lg="12">
                 <a href="/business/clients/create" class="btn btn-info">Add Client</a>
             </b-col>
-            <b-col lg="10">
-                <b-row>
-                    <b-col lg="3">
-                        <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
-                    </b-col>
-                    <b-col lg="3">
-                        <b-form-select v-model="filters.active">
-                            <option :value="null">All Clients</option>
-                            <option :value="1">Active Clients</option>
-                            <option :value="0">Inactive Clients</option>
-                        </b-form-select>
-                    </b-col>
-                    <b-col lg="3">
-                        <b-form-select v-model="filters.client_type">
-                            <option value="">--Select--</option>
-                            <option value="private_pay">Private Pay</option>
-                            <option value="medicaid">Medicaid</option>
-                            <option value="VA">VA</option>
-                            <option value="LTCI">LTC Insurance</option>
-                        </b-form-select>
-                    </b-col>
-                    <b-col lg="3" class="text-right">
-                        <b-form-input v-model.trim="filters.search" placeholder="Type to Search" />
-                    </b-col>
-                    <b-col lg="3">
-                        <b-form-group label="Payment Type" label-for="type">
-                            <b-form-select
-                                id="type"
-                                name="type"
-                                v-model="filters.payment_type"
-                                :options="paymentTypes"
-                            />
-                        </b-form-group>
-                    </b-col>
-                </b-row>
+        </b-row>
+        <b-row class="mb-2">
+            <b-col lg="3">
+                <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
+                    <template slot="first">
+                        <!-- this slot appears above the options from 'options' prop -->
+                        <option :value="null">-- Case Manager --</option>
+                    </template>
+                    <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.name }}</option>
+                </b-form-select>
+            </b-col>
+            <b-col lg="3">
+                <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
+            </b-col>
+            <b-col lg="3">
+                <b-form-select v-model="filters.active">
+                    <option :value="null">All Clients</option>
+                    <option :value="1">Active Clients</option>
+                    <option :value="0">Inactive Clients</option>
+                </b-form-select>
+            </b-col>
+            <b-col lg="3">
+                <b-form-select v-model="filters.client_type">
+                    <option value="">--Select--</option>
+                    <option value="private_pay">Private Pay</option>
+                    <option value="medicaid">Medicaid</option>
+                    <option value="VA">VA</option>
+                    <option value="LTCI">LTC Insurance</option>
+                </b-form-select>
+            </b-col>
+            <b-col lg="3" class="text-right">
+                <b-form-input v-model="filters.search" placeholder="Type to Search" />
             </b-col>
         </b-row>
 
@@ -47,7 +44,7 @@
             <div class="table-responsive">
                 <b-table 
                     bordered striped hover show-empty
-                    :items="items"
+                    :items="filteredClients"
                     :fields="fields"
                     :current-page="currentPage"
                     :per-page="perPage"
@@ -62,7 +59,7 @@
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" :href="'/business/clients/' + row.item.id">
-                            <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit" />
                         </b-btn>
                     </template>
                 </b-table>
@@ -77,7 +74,6 @@
                 </b-col>
             </b-row>
         </div>
-
     </b-card>
 </template>
 
@@ -91,52 +87,27 @@
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsListData],
 
-        props: {},
-
         data() {
             return {
                 filters: {
                     active: 1,
                     client_type: '',
                     business_id: '',
-                    payment_type: '',
                     search: null,
+                    caseManager: '',
                 },
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
                 sortBy: 'lastname',
                 sortDesc: false,
-                paymentTypes: [
-                    {
-                        value: '',
-                        text: '--- Select ---'
-                    },
-                    {
-                        value: 'CC',
-                        text: 'Credit Card'
-                    },
-                    {
-                        value: 'AMEX',
-                        text: 'American Express Credit Card'
-                    },
-                    {
-                        value: 'ACH',
-                        text: 'Bank Account'
-                    },
-                    {
-                        value: 'ACH-P',
-                        text: 'Provider Payment Account'
-                    },
-                    {
-                        value: 'NONE',
-                        text: 'None'
-                    },
-                ],
                 editModalVisible: false,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 clients: [],
+                caseManagers: [],
+                filteredCaseManagers: [],
+                filteredClients: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -165,8 +136,8 @@
                         formatter: this.formatUppercase,
                     },
                     {
-                        key: 'payment_type',
-                        label: 'Payment Method',
+                        key: 'case_manager_name',
+                        label: 'Case Manager',
                         sortable: true,
                     },
                     {
@@ -186,6 +157,7 @@
 
         mounted() {
             this.loadClients();
+            this.loadOfficeUsers();
         },
 
         computed: {
@@ -198,7 +170,7 @@
 
             items() {
                 const {search, active} = this.filters;
-                let simpleMatches = ['client_type', 'payment_type', 'business_id'];
+                let simpleMatches = ['client_type', 'business_id'];
                 let results = this.clients;
                 
                 simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
@@ -222,10 +194,16 @@
                 const response = await axios.get(this.listUrl);
                 this.clients = response.data.map(client => {
                     client.county = client.address ? client.address.county : '';
+                    client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
-
+                this.filterClients();
                 this.loading = false;
+            },
+            async loadOfficeUsers() {
+                const response = await axios.get(`/business/office-users`);
+                this.caseManagers = response.data;
+                this.filterCaseManagers();
             },
             details(item, index, button) {
                 this.selectedItem = item;
@@ -242,12 +220,33 @@
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
-            }
+            },
+            filterClients() {
+                if (! this.filters.caseManager) {
+                    this.filteredClients = this.clients;
+                } else {
+                    this.filteredClients = this.clients.filter(x => x.case_manager_id === this.filters.caseManager);
+                }
+            },
+            filterCaseManagers() {
+                if (this.business_id == '') {
+                    this.filteredCaseManagers = this.caseManagers;
+                } else {
+                    this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))
+                }
+            },
         },
 
         watch: {
             listUrl() {
                 this.loadClients();
+            },
+            'filters.caseManager': function(value) {
+                this.filterClients();
+            },
+            business_id(value) {
+                this.filterCaseManagers();
+                this.filterClients();
             }
         }
     }

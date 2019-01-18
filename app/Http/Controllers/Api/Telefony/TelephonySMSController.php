@@ -22,6 +22,15 @@ class TelephonySMSController extends BaseTelefonyController
             return $this->unauthorizedResponse();
         }
 
+        $validator = \Validator::make($request->all(), [
+            'MessageSid' => 'required|string',
+            'To' => 'required|string',
+            'From' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return $this->xmlResponse('<error>' . $validator->errors()->first() . '</error>');
+        }
+
         // ignore duplicate requests
         if (SmsThreadReply::where('twilio_message_id', $request->MessageSid)->exists()) {
             return $this->xmlResponse('<notice>Duplicate request ignored.</notice>');

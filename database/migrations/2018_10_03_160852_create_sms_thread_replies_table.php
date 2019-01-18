@@ -26,7 +26,7 @@ class CreateSmsThreadRepliesTable extends Migration
             $table->timestamps();
 
             $table->foreign('business_id')->references('id')->on('businesses')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('sms_thread_id')->references('id')->on('sms_threads');
+            $table->foreign('sms_thread_id')->references('id')->on('sms_threads')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

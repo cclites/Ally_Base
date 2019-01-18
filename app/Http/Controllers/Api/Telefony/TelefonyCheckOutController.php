@@ -8,7 +8,7 @@ use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
 
-class TelefonyCheckOutController extends BaseTelefonyController
+class TelefonyCheckOutController extends BaseVoiceController
 {
     /**
      * Return check out response.

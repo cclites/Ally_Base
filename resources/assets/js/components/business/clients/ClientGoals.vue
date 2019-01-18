@@ -16,6 +16,9 @@
                      :sort-desc.sync="sortDesc"
                      ref="table"
             >
+                <template slot="track_goal_progress" scope="row">
+                    {{ row.item.track_goal_progress ? 'Yes' : 'No'}}
+                </template>
                 <template slot="actions" scope="row">
                     <b-btn size="sm" @click="showModal(row.item)">Edit</b-btn>
                     <b-btn size="sm" @click="destroyGoal(row.item)" variant="danger">X</b-btn>
@@ -24,21 +27,26 @@
         </div>
 
         <b-modal id="clientGoalModal" :title="modalTitle" v-model="clientGoalModal" ref="clientGoalModal" size="lg">
-            <b-container fluid>
+            <b-container fluid> 
                 <form @keydown="form.clearError($event.target.name)">
                     <b-row>
                         <b-col lg="12">
-                            <b-form-group label="Question" label-for="question">
+                            <b-form-group label="Goal" label-for="question" label-class="required">
                                 <b-form-textarea
-                                        id="question"
-                                        name="question"
-                                        :rows="3"
-                                        v-model="form.question"
-                                >
-                                </b-form-textarea>
-                                <input-help :form="form" field="question" text="Enter the question to be asked upon Clock-out."></input-help>
+                                    id="question"
+                                    name="question"
+                                    :rows="3"
+                                    v-model="form.question"
+                                    required
+                                />
+                                <input-help :form="form" field="question" text="Enter the question to be asked upon Clock-out." />
                             </b-form-group>
                         </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-form-checkbox v-model="form.track_goal_progress" :value="true" :unchecked-value="false">
+                            Track goal progress on clock-out
+                        </b-form-checkbox>
                     </b-row>
                 </form>
             </b-container>
@@ -94,6 +102,11 @@
                         sortable: true,
                     },
                     {
+                        key: 'track_goal_progress',
+                        label: 'Tracked on clock-out',
+                        sortable: true,
+                    },
+                    {
                         key: 'actions',
                         class: 'hidden-print'
                     },
@@ -101,6 +114,7 @@
                 items: [],
                 form: new Form({
                     question: '',
+                    track_goal_progress: true,
                 }),
             }
         },
@@ -128,10 +142,12 @@
                 if (goal) {
                     this.selectedGoal = goal;
                     this.form.question = goal.question;
+                    this.form.track_goal_progress = goal.track_goal_progress;
                 } else {
                     this.selectedGoal = {};
                     this.form = new Form({
                         question: '',
+                        track_goal_progress: true,
                     });
                 }
 

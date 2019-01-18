@@ -135,10 +135,10 @@
                         </b-form-group>
                     </b-col>
                 </b-row>
-                <b-row v-if="shift.client.goals.length">
+                <b-row v-if="goals.length">
                     <b-col lg="12">
                         <h4>Goals:</h4>
-                        <b-form-group v-for="goal in shift.client.goals"
+                        <b-form-group v-for="goal in goals"
                             :key="goal.id"
                             :label="goal.question">
                             <!-- for some reason b-form-textarea had issues syncing with the dynamic goals object -->
@@ -189,11 +189,12 @@
         mixins: [FormatsDates],
 
         props: {
-            'shift': {},
+            'shift': Object,
             'activities': Array,
             'carePlanActivityIds': Array,
-            'business': {},
+            'business': Object,
             'questions': Array,
+            'goals': Array,
         },
 
         data() {
@@ -302,7 +303,7 @@
 
             setupGoalsForm() {
                 this.form.goals = {};
-                this.shift.client.goals.forEach(item => {
+                this.goals.forEach(item => {
                     this.form.goals[item.id] = '';
                 });
             },

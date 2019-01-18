@@ -66,6 +66,10 @@
                 <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
             </li>
         @endif
+
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -88,7 +92,6 @@
                 <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
             </div>
         </li>
-    </ul>
     </ul>
 
     <!-- Tab panes -->
@@ -175,6 +178,9 @@
         </div>
         <div class="tab-pane" id="ltci">
             <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
+        </div>
+        <div class="tab-pane" id="misc">
+            <client-misc-tab :client="{{ $client }}"></client-misc-tab>
         </div>
     </div>
 @endsection

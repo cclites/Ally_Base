@@ -68,7 +68,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load(['activities', 'issues', 'schedule', 'client', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
+        $shift->load(['activities', 'issues', 'schedule', 'client', 'client.goals', 'caregiver', 'signature', 'statusHistory', 'goals', 'questions']);
         $shift->append(['ally_pct', 'charged_at', 'confirmed_at']);
 
         // Load shift data into array before loading client info

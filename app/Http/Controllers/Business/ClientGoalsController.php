@@ -40,6 +40,7 @@ class ClientGoalsController extends BaseController
         $data = $request->validate(
             [
                 'question' => 'required|max:255',
+                'track_goal_progress' => 'required|boolean',
             ],
             [
                 'question.required' => 'A Goal must have a question.',
@@ -68,6 +69,7 @@ class ClientGoalsController extends BaseController
         $data = $request->validate(
             [
                 'question' => 'required|max:255',
+                'track_goal_progress' => 'required|boolean',
             ],
             [
                 'question.required' => 'A Goal must have a question.',
@@ -93,9 +95,9 @@ class ClientGoalsController extends BaseController
         $this->authorize('update', $client);
 
         if ($goal->delete()) {
-            return new SuccessResponse('The goal has been archived.', []);
+            return new SuccessResponse('The goal has been deleted.', []);
         }
 
-        return new ErrorResponse(500, 'The goal could not be archived.');
+        return new ErrorResponse(500, 'The goal could not be deleted.');
     }
 }
