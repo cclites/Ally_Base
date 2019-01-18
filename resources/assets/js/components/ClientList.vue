@@ -53,6 +53,7 @@
                     :per-page="perPage"
                     :sort-by.sync="sortBy"
                     :sort-desc.sync="sortDesc"
+                    :filter="filters.search"
                     @filtered="onFiltered"
                 >
                     <template slot="payment_type" scope="row">
@@ -85,7 +86,6 @@
     import BusinessLocationSelect from "./business/BusinessLocationSelect";
     import business from "../store/modules/business";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
-    import fuzzysearch from 'fuzzysearch';
 
     export default {
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
@@ -211,10 +211,6 @@
                 if(active === 1 || active === 0) {
                     results = results.filter((client) => client.active == active);
                 } 
-
-                if(search) {
-                    results = results.filter(({firstname, lastname}) => fuzzysearch(search, firstname) || fuzzysearch(search, lastname));
-                }
 
                 return results;
             },
