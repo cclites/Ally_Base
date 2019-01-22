@@ -178,7 +178,14 @@
             },
 
             print() {
-
+                this.filters.print = true;
+                let url = `/business/reports/projected-billing/print?dates[start]=${this.filters.dates.start}` +
+                    `&dates[end]=${this.filters.dates.end}` +
+                    `&caregiver=${this.filters.caregiver}` +
+                    `&client=${this.filters.client}` +
+                    `&clientType=${this.filters.clientType}`;
+                console.log(url);
+                window.location = url;
             },
 
             generatePdf() {

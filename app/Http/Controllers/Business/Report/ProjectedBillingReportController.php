@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+
 
 class ProjectedBillingReportController extends Controller
 {
@@ -29,16 +31,29 @@ class ProjectedBillingReportController extends Controller
         $clientTypeOptions = $clientOptions->pluck('client_type')
             ->unique()
             ->map(function ($item) {
-               return [
-                   'id' => $item,
-                   'name' => title_case(str_replace('_', ' ', $item)),
-               ];
+                return [
+                    'id' => $item,
+                    'name' => title_case(str_replace('_', ' ', $item)),
+                ];
             });
 
         return view('business.reports.projected_billing', compact('clientOptions', 'caregiverOptions', 'clientTypeOptions'));
     }
 
     public function reportData()
+    {
+        $data = $this->getData();
+        return response()->json($data);
+    }
+
+    public function print()
+    {
+        $data = $this->getData();
+        $pdf = PDF::loadView('business.reports.print.projected_billing', $data);
+        return $pdf->download('projected_billing.pdf');
+    }
+
+    protected function getData()
     {
         logger(request()->all());
         $dates = (object)request()->dates;
@@ -70,7 +85,7 @@ class ProjectedBillingReportController extends Controller
                 return $carry + ($item->duration / 60) * $item->getCaregiverRate();
             })
         ]);
-        return response()->json(compact('stats', 'clientStats', 'clientTypeStats'));
+        return compact('stats', 'clientStats', 'clientTypeStats', 'dates');
     }
 
     protected function getClientStats(Collection $schedules)
