@@ -52,6 +52,11 @@ class CronShiftSummaryEmails extends Command
 
         foreach ($unconfirmedShifts as $client_id => $shifts) {
             $client = $shifts->first()->client;
+            if (! $client->receive_summary_email) {
+                // skip clients that have their weekly summary emails turned off
+                continue;
+            }
+
             $businessName = $shifts->first()->business_name;
             $total = $shifts->sum('total');
 
