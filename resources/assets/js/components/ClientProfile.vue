@@ -103,7 +103,7 @@
                             <input-help :form="form" field="caregiver_1099" text=""></input-help>
                         </div>
                     </b-col>
-                    <b-col lg="12">
+                    <b-col lg="12" v-if="businessSendsSummaryEmails">
                         <div class="form-check">
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox"
@@ -142,6 +142,16 @@
 
         mixins: [FormatsDates, AuthUser],
 
+        computed: {
+            business() {
+                return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
+            },
+
+            businessSendsSummaryEmails() {
+                return !!this.business.shift_confirmation_email;
+            },
+        },
+        
         data() {
             return {
                 form: new Form({
