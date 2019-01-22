@@ -264,6 +264,8 @@ Route::group([
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+    Route::get('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@index')->name('reports.projected-billing');
+    Route::post('reports/projected-billing', 'Business\Report\ProjectedBillingReportController@reportData')->name('reports.projected-billing.data');
 
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');

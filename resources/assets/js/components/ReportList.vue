@@ -113,7 +113,7 @@
 
             items() {
                 const reports = [
-                    // For admin only 
+                    // For admin only
                     {
                         name: 'Unsettled Report',
                         url: 'reports/unsettled',
@@ -230,7 +230,7 @@
                         allowed: ['admin','office_user'],
                     },
 
-                    // For office users only 
+                    // For office users only
 
                     {
                         name: 'Client Directory',
@@ -386,8 +386,15 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Projected Billing',
+                        url: 'reports/projected-billing',
+                        description: 'See forecasting billing amounts based on scheduled and completed visits',
+                        category: 5,
+                        allowed: ['office_user'],
+                    },
 
-                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },                        
+                    // { name: 'Billing Forcast', url: 'reports/billing-forcast', description: 'See forecasting billing amounts based on scheduled and completed visits' },
                     // { name: 'Accounts Receivable', url: 'reports/', description: 'Shows each client with an outstanding balance' },
                     // { name: 'Generate Invoice', url: 'reports/', description: 'This will create an invoice in PDF that can be send to a client with an outstanding balance' },
                     // { name: 'Client Progression Report', url: 'reports/', description: 'See how a client is progressing over time' },
