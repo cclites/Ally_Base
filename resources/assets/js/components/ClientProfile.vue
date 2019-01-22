@@ -103,22 +103,6 @@
                             <input-help :form="form" field="caregiver_1099" text=""></input-help>
                         </div>
                     </b-col>
-                    <b-col lg="12" v-if="businessSendsSummaryEmails">
-                        <div class="form-check">
-                            <label class="custom-control custom-checkbox">
-                                <input type="checkbox"
-                                    class="custom-control-input"
-                                    name="receive_summary_email"
-                                    v-model="form.receive_summary_email"
-                                    :true-value="1"
-                                    :false-value="0"
-                                    :disabled="authInactive">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Receive the weekly shift summary email</span>
-                            </label>
-                            <input-help :form="form" field="receive_summary_email" text=""></input-help>
-                        </div>
-                    </b-col>
                 </b-row>
             </template>
             <b-row>
@@ -142,16 +126,6 @@
 
         mixins: [FormatsDates, AuthUser],
 
-        computed: {
-            business() {
-                return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
-            },
-
-            businessSendsSummaryEmails() {
-                return !!this.business.shift_confirmation_email;
-            },
-        },
-        
         data() {
             return {
                 form: new Form({
@@ -163,7 +137,6 @@
                     poa_last_name: this.client.poa_last_name,
                     poa_phone: this.client.poa_phone,
                     poa_relationship: this.client.poa_relationship,
-                    receive_summary_email: this.client.receive_summary_email,
                     caregiver_1099: this.client.caregiver_1099
                 })
             }
