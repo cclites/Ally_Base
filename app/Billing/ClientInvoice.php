@@ -4,11 +4,23 @@ namespace App\Billing;
 use App\AuditableModel;
 
 /**
- * App\Billing\ClientInvoice
+ * \App\Billing\ClientInvoice
  *
+ * @property int $id
+ * @property string $name
+ * @property int $client_id
+ * @property int $payer_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\InvoiceItem[] $items
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice wherePayerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class ClientInvoice extends AuditableModel
@@ -27,5 +39,19 @@ class ClientInvoice extends AuditableModel
     function items()
     {
         return $this->morphMany(InvoiceItem::class, 'invoice');
+    }
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
+    function getAmountDue(): float
+    {
+        return (float) $this->items()->sum('amount_due');
+    }
+
+    function addItem(InvoiceItem $item)
+    {
+        return $this->items()->save($item);
     }
 }

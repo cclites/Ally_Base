@@ -189,4 +189,23 @@ class ClientPayerTest extends TestCase
 
         $this->assertFalse($this->validate());
     }
+
+    /**
+     * @test
+     */
+    function an_allowance_payer_returns_valid_allowance_ranges_for_dates()
+    {
+        $weeklyPayer = $this->createPayer('weekly', ['effective_start' => '2019-01-01'], ['week_start' => 1]);
+        $monthlyPayer = $this->createPayer('monthly', ['effective_start' => '2019-01-01']);
+        $dailyPayer = $this->createPayer('daily', ['effective_start' => '2019-01-01']);
+        $balancePayer = $this->createPayer('balance', ['effective_start' => '2019-01-01']);
+
+        $this->assertEquals('2019-02-11 00:00:00', $weeklyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
+        $this->assertEquals('2019-02-17 23:59:59', $weeklyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
+        $this->assertEquals('2019-02-01 00:00:00', $monthlyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
+        $this->assertEquals('2019-02-28 23:59:59', $monthlyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
+        $this->assertEquals('2019-02-12 00:00:00', $dailyPayer->getAllowanceRange('2019-02-12')->start->toDateTimeString());
+        $this->assertEquals('2019-02-12 23:59:59', $dailyPayer->getAllowanceRange('2019-02-12')->end->toDateTimeString());
+        $this->assertNull($balancePayer->getAllowanceRange('2019-02-12'));
+    }
 }

@@ -5,10 +5,10 @@ use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Contracts\DepositableInterface;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\InvoiceItem;
 use Packages\MetaData\HasMetaData;
-use Packages\MetaData\HasMetaInterface;
 
-abstract class InvoiceableModel extends AuditableModel // implements HasMetaData, InvoiceableInterface
+abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface
 {
     use HasMetaData;
 
@@ -21,9 +21,26 @@ abstract class InvoiceableModel extends AuditableModel // implements HasMetaData
         return $this->morphMany(InvoiceableMeta::class, 'metable');
     }
 
+    public function invoiceItems()
+    {
+        return $this->morphMany(InvoiceItem::class, 'invoiceable');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    /**
+     * Get the amount due for payment, this should subtract the amount invoiced
+     *
+     * @return float
+     */
+    public function getAmountDue(): float
+    {
+        $amount = bcmul($this->getClientRate(), $this->getItemUnits(), 4);
+        $amount = bcsub($amount, $this->getAmountInvoiced(), 4);
+        return round($amount, 2);
+    }
 
     /**
      * Get the amount that has been invoiced
@@ -32,18 +49,7 @@ abstract class InvoiceableModel extends AuditableModel // implements HasMetaData
      */
     public function getAmountInvoiced(): float
     {
-        return (float) $this->getMetaValue("amount_invoiced");
-    }
-
-    /**
-     * Add an amount that has been invoiced for payment to a payer
-     *
-     * @param float $amount
-     */
-    public function addAmountInvoiced(float $amount): void
-    {
-        $invoiced = $this->getMetaValue("amount_invoiced") ?? "0.00";
-        $this->setMeta("amount_invoiced", bcadd($invoiced, $amount, 2));
+        return (float) $this->invoiceItems()->sum('amount_due');
     }
 
     /**

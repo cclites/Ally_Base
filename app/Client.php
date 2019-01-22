@@ -485,7 +485,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     {
         $date = Carbon::parse($date, $this->getTimezone());
 
-        return $query = $this->payers()
+        return $query = $this->payers()->ordered()
             ->where('effective_start', '<=', $date->toDateString())
             ->where('effective_end', '>=', $date->toDateString())
             ->get();

@@ -2,16 +2,73 @@
 
 namespace Tests\Feature;
 
+use App\Billing\ClientInvoice;
+use App\Billing\ClientPayer;
+use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Generators\ClientInvoiceGenerator;
+use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payer;
+use App\Billing\Validators\ClientPayerValidator;
+use App\Client;
+use App\Shift;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * Class ClientInvoiceTest
+ * Note:  This test uses ShiftService as the default invoiceable and makes use of ShiftAdjustment for a credit
+ *
+ * @package Tests\Feature
+ */
 class ClientInvoiceTest extends TestCase
 {
+    use RefreshDatabase;
+
+    /** @var \App\Client */
+    private $client;
+
+    /** @var ClientInvoiceGenerator */
+    private $invoicer;
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->client = factory(Client::class)->create();
+        $this->invoicer = new ClientInvoiceGenerator(app(ClientPayerValidator::class));
+    }
+
     /**
      * @test
      */
-    public function allowance_payer_before_a_split_payer_does_not_skew_the_amounts()
+    function services_on_previous_dates_should_not_be_billed_to_the_current_payer()
+    {
+        /*
+         * Payer A has an effective end of December 31st.  Payer B has an effective start on January 1st.
+         * A shift occurring on December 30th is invoiced on January 2nd,  the shift should be billed to Payer A, not Payer B.
+         * A shift occurring on January 1st should be invoiced to Payer B, not Payer A.
+         */
+
+        $payerA = $this->createBalancePayer('2018-01-01', '2018-12-31');
+        $payerB = $this->createBalancePayer('2019-01-01', '9999-12-31');
+        $serviceA = $this->createService(50.0, '2018-12-30');
+        $serviceB = $this->createService(60.0, '2019-01-01');
+
+        $invoices = collect($this->invoicer->generateAll($this->client));
+        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
+        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
+
+        $this->assertInstanceOf(ClientInvoice::class, $payerAInvoice);
+        $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
+        $this->assertInstanceOf(ClientInvoice::class, $payerBInvoice);
+        $this->assertEquals(60.0, $payerBInvoice->getAmountDue());
+    }
+
+    /**
+     * @test
+     */
+    function allowance_payer_before_a_split_payer_does_not_skew_the_amounts()
     {
         /*
          * Payer A has an allowance of $50.00.  Shift A is $100.00 of services.
@@ -20,13 +77,28 @@ class ClientInvoiceTest extends TestCase
          * Payer A needs to pay $50.00, Payer B & C both need to pay $25.00.
          */
 
-        $this->assertFalse(true);
+        $payerA = $this->createAllowancePayer(50.0);
+        $payerB = $this->createSplitPayer(0.4);
+        $payerC = $this->createSplitPayer(0.2);
+        $payerD = $this->createSplitPayer(0.4);
+        $this->createService(100.0);
+
+        $invoices = collect($this->invoicer->generateAll($this->client));
+        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
+        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
+        $payerCInvoice = $invoices->where('payer_id', $payerC->payer_id)->first();
+        $payerDInvoice = $invoices->where('payer_id', $payerD->payer_id)->first();
+
+        $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
+        $this->assertEquals(20.0, $payerBInvoice->getAmountDue());
+        $this->assertEquals(10.0, $payerCInvoice->getAmountDue());
+        $this->assertEquals(20.0, $payerDInvoice->getAmountDue());
     }
 
     /**
      * @test
      */
-    public function allowance_payer_accounts_for_credit_adjustments_before_throwing_exception()
+    function allowance_payer_accounts_for_credit_adjustments_before_throwing_exception()
     {
 
         /*
@@ -35,20 +107,107 @@ class ClientInvoiceTest extends TestCase
          * The invoice should be successfully generated for $100.00 due, taking the credit into account before issuing a PayerAllowanceExceeded exception
          */
 
+
         $this->assertFalse(true);
     }
 
     /**
      * @test
      */
-    public function services_on_previous_dates_should_not_be_billed_to_the_current_payer()
+    function services_assigned_to_a_payer_should_be_allocated_prior_to_auto()
     {
         /*
-         * Payer A has an effective end of December 31st.  Payer B has an effective start on January 1st.
-         * A shift occurring on December 30th is invoiced on January 2nd,  the shift should be billed to Payer A, not Payer B.
-         * A shift occurring on January 1st should be invoiced to Payer B, not Payer A.
+         * Payer A has a $100 allowance, shift A on 1st date is auto and $70, shift B on 2nd date is assigned to Payer A for $80.
+         * Shift B should be allocated in full to Payer A, then Shift A should allocated for $20 (remaining allowance)
+         * to Payer A and the balance to payer B.
          */
 
         $this->assertFalse(true);
     }
+
+    /**
+     * @test
+     */
+    function services_assigned_to_a_payer_that_exceeds_allowance_should_throw_exception()
+    {
+        /*
+         * Payer A has a $50 allowance,  Shift A and B are both $30 and assigned to Payer A,
+         * shift B should cause a PayerAllowanceExceeded exception
+         */
+
+        $this->assertFalse(true);
+    }
+
+    function shifts_should_be_waiting_for_charge_after_invoicing()
+    {
+
+    }
+
+    private function createAllowancePayer(float $allowance, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31',
+        string $allocation_type = ClientPayer::ALLOCATION_MONTHLY): ClientPayer
+    {
+        $payer = factory(Payer::class)->create();
+        $clientPayer = new ClientPayer([
+            'payer_id' => $payer->id,
+            'effective_start' => $effective_start,
+            'effective_end' => $effective_end,
+            'payment_allocation' => $allocation_type,
+            'payment_allowance' => $allowance
+        ]);
+
+        $this->client->payers()->save($clientPayer);
+        return $clientPayer;
+    }
+
+    private function createSplitPayer(float $splitPercentage, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        $payer = factory(Payer::class)->create();
+        $clientPayer = new ClientPayer([
+            'payer_id' => $payer->id,
+            'effective_start' => $effective_start,
+            'effective_end' => $effective_end,
+            'payment_allocation' => ClientPayer::ALLOCATION_SPLIT,
+            'split_percentage' => $splitPercentage
+        ]);
+
+        $this->client->payers()->save($clientPayer);
+        return $clientPayer;
+    }
+
+    private function createBalancePayer(string $effective_start = '2019-01-01', string $effective_end = '9999-12-31'): ClientPayer
+    {
+        $payer = factory(Payer::class)->create();
+        $clientPayer = new ClientPayer([
+            'payer_id' => $payer->id,
+            'effective_start' => $effective_start,
+            'effective_end' => $effective_end,
+            'payment_allocation' => ClientPayer::ALLOCATION_BALANCE,
+        ]);
+
+        $this->client->payers()->save($clientPayer);
+        return $clientPayer;
+    }
+
+    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
+    {
+        $shift = factory(Shift::class)->create([
+            'client_id' => $this->client->id,
+            'payer_id' => null,
+            'service_id' => null,
+            'checked_in_time' => $date . ' 12:00:00',
+            'status' => Shift::WAITING_FOR_INVOICE,
+        ]);
+
+        $shiftService = factory(ShiftService::class)->create([
+            'shift_id' => $shift->id,
+            'duration' => 1,
+            'client_rate' => $amount,
+            'caregiver_rate' => round($amount * .75, 2),
+            'ally_rate' => null,
+        ]);
+
+        return $shiftService;
+    }
+
+
 }
