@@ -163,7 +163,6 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         parent::boot();
         self::recalculateDurationOnChange();
-//        self::regenerateFlagsOnChange();
     }
 
     public static function recalculateDurationOnChange()
@@ -173,23 +172,6 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
                 ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
             ) {
                 $shift->hours = $shift->duration(true);
-            }
-        });
-    }
-
-    public static function regenerateFlagsOnChange()
-    {
-        $flagManager = app(ShiftFlagManager::class);
-
-        self::saved(function(Shift $shift) use ($flagManager) {
-            if ($flagManager->shouldGenerate($shift)) {
-                $flagManager->generateFlags($shift);
-            }
-        });
-
-        self::deleted(function(Shift $shift) use ($flagManager) {
-            foreach($shift->duplicates as $duplicate) {
-                $flagManager->generateFlags($duplicate);
             }
         });
     }
@@ -432,6 +414,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////
+
+    /**
+     * Get an instance of the shift's flag manager class.
+     *
+     * @return App\Shifts\ShiftFlagManager
+     */
+    public function flagManager() : ShiftFlagManager
+    {
+        return new ShiftFlagManager($this);
+    }
 
     /**
      * Return the number of hours worked, calculate if not persisted
