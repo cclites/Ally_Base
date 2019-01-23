@@ -57,7 +57,7 @@
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>
         </div>
-        <template v-else>
+        <div id="projected_billing_report" v-else>
             <b-row>
                 <b-col>
                     <div class="h4 my-3">Total hours scheduled: {{ numberFormat(stats.total_hours) }}</div>
@@ -78,7 +78,7 @@
                     <b-table :items="clientStats" :fields="fields"></b-table>
                 </b-col>
             </b-row>
-        </template>
+        </div>
 
     </b-card>
 </template>
@@ -177,7 +177,7 @@
                 return _.startCase(text)
             },
 
-            print() {
+            generatePdf() {
                 this.filters.print = true;
                 let url = `/business/reports/projected-billing/print?dates[start]=${this.filters.dates.start}` +
                     `&dates[end]=${this.filters.dates.end}` +
@@ -188,8 +188,8 @@
                 window.location = url;
             },
 
-            generatePdf() {
-
+            print() {
+                $('#projected_billing_report').print();
             }
         }
     }
