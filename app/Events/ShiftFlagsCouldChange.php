@@ -17,7 +17,7 @@ class ShiftFlagsCouldChange
     /**
      * @var \App\Shift
      */
-    protected $shift;
+    public $shift;
 
     /**
      * Create a new event instance.
