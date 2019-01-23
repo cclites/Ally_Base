@@ -7,6 +7,7 @@ use App\Businesses\Timezone;
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImporter
 {
@@ -43,7 +44,9 @@ class ShiftImporter
     public function importShiftFromRow(int $row)
     {
         $data = $this->getDataFromRow($row);
-        return Shift::create($data);
+        $shift = Shift::create($data);
+        event(new ShiftFlagsCouldChange($shift));
+        return $shift;
     }
 
     public function validateRow(int $row)

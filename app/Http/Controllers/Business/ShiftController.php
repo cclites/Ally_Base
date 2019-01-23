@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftController extends BaseController
 {
@@ -55,6 +56,9 @@ class ShiftController extends BaseController
             }
 
             \DB::commit();
+
+            event(new ShiftFlagsCouldChange($shift));
+            
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -144,6 +148,7 @@ class ShiftController extends BaseController
             $shift->syncGoals($request->getGoals());
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
 
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -264,6 +269,8 @@ class ShiftController extends BaseController
         $checked_out_distance = null;
         $activities = $shift->business->allActivities();
 
+        event(new ShiftFlagsCouldChange($shift));
+
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
     }
@@ -297,6 +304,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
+            event (new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('Shift was successfully clocked out.');
         }
 

@@ -15,6 +15,7 @@ use App\Shift;
 use App\ShiftIssue;
 use App\Signature;
 use Illuminate\Http\Request;
+use App\Events\ShiftFlagsCouldChange;
 
 
 class ShiftController extends BaseController
@@ -112,6 +113,7 @@ class ShiftController extends BaseController
             $clockIn->setGeocode($data['latitude'] ?? null ,$data['longitude'] ?? null);
             $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
             if ($shift) {
+                event(new ShiftFlagsCouldChange($shift));
                 return new SuccessResponse('You have successfully clocked in.');
             }
             return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
@@ -121,6 +123,7 @@ class ShiftController extends BaseController
             $clockIn->setManual(true);
             $shift = $this->completeClockIn($clockIn, $request->input('schedule_id'), $request->input('client_id'));
             if ($shift) {
+                event(new ShiftFlagsCouldChange($shift));
                 return new SuccessResponse('You have successfully clocked in.');
             }
             return new ErrorResponse(500, 'System error clocking in.  Please refresh and try again.');
@@ -274,6 +277,7 @@ class ShiftController extends BaseController
                 if ($narrativeNotes = $request->input('narrative_notes')) {
                     $shift->client->narrative()->create(['notes' => $narrativeNotes, 'creator_id' => auth()->id()]);
                 }
+                event(new ShiftFlagsCouldChange($shift));
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
@@ -284,6 +288,7 @@ class ShiftController extends BaseController
                 if ($data['narrative_notes']) {
                     $shift->client->narrative()->create(['notes' => $data['narrative_notes'], 'creator_id' => auth()->id()]);
                 }
+                event(new ShiftFlagsCouldChange($shift));
                 return new SuccessResponse('You have successfully clocked out.');
             }
             return new ErrorResponse(500, 'System error clocking out.  Please refresh and try again.');
