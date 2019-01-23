@@ -14,6 +14,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use App\Events\ShiftDeleted;
 
 /**
  * App\Shift
@@ -157,12 +158,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     protected $dispatchesEvents = [
         'created' => ShiftCreated::class,
         'updated' => ShiftModified::class,
+        // 'deleted' => ShiftDeleted::class,
     ];
 
     public static function boot()
     {
         parent::boot();
         self::recalculateDurationOnChange();
+        self::deleted(function(Shift $shift) {
+            event(new ShiftDeleted($shift));
+        });
     }
 
     public static function recalculateDurationOnChange()

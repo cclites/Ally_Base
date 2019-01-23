@@ -16,6 +16,7 @@ use App\Timesheet;
 use App\TimesheetEntry;
 use App\Shifts\ClockIn;
 use App\Activity;
+use App\Events\ShiftDeleted;
 
 class GenerateShiftFlagsTest extends TestCase
 {
@@ -327,14 +328,15 @@ class GenerateShiftFlagsTest extends TestCase
     }
 
     /** @test */
-    public function test_deleting_shifts()
+    public function duplicate_shift_flags_should_trigger_when_an_office_user_deletes_a_shift()
     {
         $this->actingAs($this->officeUser->user);
         
         $shift = $this->createShift('12:00:00', '18:00:00');
+        $shift->update(['status' => Shift::CLOCKED_OUT]);
 
-        // $this->expectsEvents(ShiftFlagsCouldChange::class);
-
+        $this->expectsEvents(ShiftDeleted::class);
+        
         $this->deleteJson(route('business.shifts.destroy', ['shift' => $shift]))
             ->assertStatus(200);
     }

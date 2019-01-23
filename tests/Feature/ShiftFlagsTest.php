@@ -107,8 +107,7 @@ class ShiftFlagsTest extends TestCase
     public function a_shift_touching_but_not_crossing_the_edge_does_not_cause_duplicate_flags()
     {
         $shift1 = $this->createDuplicateShift('10:00:00', '18:00:00');
-        $shift2 = $this->createDuplicateShift('18:00:00', '19:00:00');
-        $shift3 = $this->createDuplicateShift('06:00:00', '10:00:00');
+        $shift2 = $this->createDuplicateShift('08:00:00', '20:00:00'); // clock in is before, clock out is after, the reverse of inside
 
         $shift1->flagManager()->generate();
         $shift2->flagManager()->generate();
@@ -117,6 +116,36 @@ class ShiftFlagsTest extends TestCase
         $this->assertFalse($shift1->fresh()->hasFlag('duplicate'), 'The original shift incorrectly has a duplicate flag');
         $this->assertFalse($shift2->fresh()->hasFlag('duplicate'), 'The shift touching the clock out time incorrectly has a duplicate flag');
         $this->assertFalse($shift3->fresh()->hasFlag('duplicate'), 'The shift touching the clock in time incorrectly has a duplicate flag');
+    }
+
+    /**
+     * @test
+     */
+    public function if_a_duplicate_shift_is_deleted_it_should_update_the_flags_of_its_duplicates()
+    {
+        $shift1 = $this->createDuplicateShift('10:00:00', '18:00:00');
+        $shift2 = $this->createDuplicateShift('10:00:00', '18:00:00');
+
+        // make sure shift is not readonly
+        $shift1->update(['status' => Shift::WAITING_FOR_CONFIRMATION]);
+        $shift2->update(['status' => Shift::WAITING_FOR_CONFIRMATION]);
+
+        $shift1->flagManager()->generate();
+        $shift2->flagManager()->generate();
+        
+        $this->assertTrue($shift1->fresh()->hasFlag('duplicate'));
+        $this->assertTrue($shift2->fresh()->hasFlag('duplicate'));
+
+        $this->business = $this->client->business;
+        $this->officeUser = factory('App\OfficeUser')->create();
+        $this->officeUser->businesses()->attach($this->business->id);
+        $this->actingAs($this->officeUser->user);
+
+        $this->deleteJson(route('business.shifts.destroy', ['shift' => $shift1]))
+            ->assertStatus(200);
+
+        $this->assertEquals(null, $shift1->fresh());
+        $this->assertFalse($shift2->fresh()->hasFlag('duplicate'));
     }
 
     /**
