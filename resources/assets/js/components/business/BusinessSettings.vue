@@ -354,7 +354,7 @@
                             </b-form-group>
                             <!-- Summary email is disabled and set to no (by watcher) when allow_client_confirmation == 0 -->
                             <b-form-group
-                                    label="Send client visit summary and pending charge email Monday of each week"
+                                    label="Enable the 'Visit Summary with Pending Charges' email"
                                     label-for="shift_confirmation_email" label-class="required">
                                 <b-form-select id="shift_confirmation_email"
                                                :disabled="businessSettings.auto_confirm == 1 || businessSettings.allow_client_confirmations == 0"
@@ -363,6 +363,7 @@
                                     <option :value="0">No</option>
                                     <option :value="1">Yes</option>
                                 </b-form-select>
+                                <input-help :form="businessSettings" field="shift_confirmation_email" class="text-danger" text="Note: You will then need to enable this for each client on their profile."></input-help>
                             </b-form-group>
                             <div class="pl-5">
                                 <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
