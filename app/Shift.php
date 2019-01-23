@@ -785,6 +785,18 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     }
 
     /**
+     * Gets shifts that belong to the given client ids only.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param iterable $clients
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClients($query, $clients)
+    {
+        return $query->whereIn('client_id', $clients);
+    }
+
+    /**
      * Gets shifts that are checked in between given given start and end dates.
      * Automatically applies timezone transformation.
      *
