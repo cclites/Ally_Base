@@ -323,6 +323,9 @@ class GenerateShiftFlagsTest extends TestCase
             'checked_out_time' => $shift->checked_out_time->toDateTimeString()
         ];
 
+        // make sure business allows this method 
+        app('settings')->set($this->client->role->business_id, 'allow_client_confirmations', 1);
+
         $this->patchJson(route('client.unconfirmed-shifts.update', ['shift' => $shift->id]), $data)
             ->assertStatus(200);
     }
