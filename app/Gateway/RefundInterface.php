@@ -1,14 +1,14 @@
 <?php
 namespace App\Gateway;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 
 interface RefundInterface
 {
     /**
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param float $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount);
 }

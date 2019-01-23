@@ -1,8 +1,10 @@
 <?php
-namespace App;
+namespace App\Billing;
+
+use App\AuditableModel;
 
 /**
- * App\TransactionRefund
+ * App\Billing\TransactionRefund
  *
  * @property int $id
  * @property int $issued_transaction_id
@@ -13,10 +15,10 @@ namespace App;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\Payment $issuedPayment
- * @property-read \App\GatewayTransaction $issuedTransaction
- * @property-read \App\Payment $refundedPayment
- * @property-read \App\GatewayTransaction $refundedTransaction
+ * @property-read \App\Billing\Payment $issuedPayment
+ * @property-read \App\Billing\GatewayTransaction $issuedTransaction
+ * @property-read \App\Billing\Payment $refundedPayment
+ * @property-read \App\Billing\GatewayTransaction $refundedTransaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereCreatedAt($value)

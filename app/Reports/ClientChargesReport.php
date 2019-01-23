@@ -2,7 +2,7 @@
 namespace App\Reports;
 
 use App\Client;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Shift;
 use App\Traits\ShiftReportFilters;
 

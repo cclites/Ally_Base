@@ -27,4 +27,9 @@ class BusinessInvoice extends AuditableModel
     {
         return $this->hasMany(BusinessInvoiceItem::class, 'invoice');
     }
+
+    function deposits()
+    {
+        return $this->morphToMany(Deposit::class, 'invoice', 'invoice_deposits');
+    }
 }

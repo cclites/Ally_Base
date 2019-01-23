@@ -2,7 +2,7 @@
 
 namespace Tests\Bugs;
 
-use App\CreditCard;
+use App\Billing\PaymentMethods\CreditCard;
 use Tests\TestCase;
 
 class AllyMissingCCType extends TestCase

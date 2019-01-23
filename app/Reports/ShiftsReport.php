@@ -1,7 +1,7 @@
 <?php
 namespace App\Reports;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use App\Shifts\RateFactory;

@@ -16,10 +16,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
  * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar

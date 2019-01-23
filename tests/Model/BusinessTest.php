@@ -2,7 +2,7 @@
 
 namespace Tests\Model;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Client;

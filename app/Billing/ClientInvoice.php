@@ -41,6 +41,11 @@ class ClientInvoice extends AuditableModel
         return $this->hasMany(ClientInvoiceItem::class, 'invoice_id');
     }
 
+    function payments()
+    {
+        return $this->belongsToMany(Payment::class, 'invoice_payments', 'invoice_id', 'payment_id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

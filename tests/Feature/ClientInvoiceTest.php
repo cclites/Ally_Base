@@ -11,6 +11,7 @@ use App\Billing\Generators\ClientInvoiceGenerator;
 use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
+use App\Billing\Payment;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Shift;
@@ -40,6 +41,20 @@ class ClientInvoiceTest extends TestCase
 
         $this->client = factory(Client::class)->create();
         $this->invoicer = new ClientInvoiceGenerator(app(ClientPayerValidator::class));
+    }
+
+    /**
+     * @test
+     */
+    function an_invoice_can_have_multiple_payments()
+    {
+        /** @var ClientInvoice $invoice */
+        $invoice = factory(ClientInvoice::class)->create();
+        $payments = factory(Payment::class, 2)->create();
+        $invoice->payments()->saveMany($payments);
+
+        $this->assertCount(2, $invoice->payments,  'The invoice did not collect the payments.');
+        $this->assertCount(1, $payments[0]->invoices,  'The payment did not relate to the invoice.');
     }
 
     /**

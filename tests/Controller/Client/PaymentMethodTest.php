@@ -3,8 +3,8 @@
 namespace Tests\Controller\Client;
 
 use App\Client;
-use App\CreditCard;
-use App\BankAccount;
+use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\PaymentMethods\BankAccount;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;

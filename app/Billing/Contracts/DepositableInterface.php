@@ -8,14 +8,14 @@ interface DepositableInterface extends Arrayable
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function depositFunds($amount, $currency = 'USD');
 
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function withdrawFunds($amount, $currency = 'USD');
 

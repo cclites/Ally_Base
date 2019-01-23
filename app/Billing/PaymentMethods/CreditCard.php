@@ -1,15 +1,18 @@
 <?php
-namespace App;
+namespace App\Billing\PaymentMethods;
 
+use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\GatewayTransaction;
 use App\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
+use App\User;
 use Carbon\Carbon;
 use Crypt;
 
 /**
- * App\CreditCard
+ * App\Billing\PaymentMethods\CreditCard
  *
  * @property int $id
  * @property int $user_id
@@ -22,7 +25,7 @@ use Crypt;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransaction[] $chargedTransactions
  * @property-read object $charge_metrics
  * @property-read \Carbon $expiration_date
  * @property-read mixed $last_four
@@ -107,7 +110,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge($amount, $currency = 'USD')
     {
@@ -131,9 +134,9 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     /**
      * Refund a previously charged transaction
      *
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount)
     {

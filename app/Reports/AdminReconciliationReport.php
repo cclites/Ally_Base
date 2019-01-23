@@ -3,7 +3,7 @@
 namespace App\Reports;
 
 use App\Billing\Contracts\ReconcilableInterface;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 
 class AdminReconciliationReport extends BaseReport
 {

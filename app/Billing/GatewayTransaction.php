@@ -1,11 +1,13 @@
 <?php
-namespace App;
+namespace App\Billing;
 
+use App\AuditableModel;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
+use App\Billing\GatewayTransactionHistory;
 
 /**
- * App\GatewayTransaction
+ * App\Billing\GatewayTransaction
  *
  * @property int $id
  * @property string $gateway_id
@@ -23,13 +25,13 @@ use App\Events\FailedTransactionRecorded;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\Deposit $deposit
- * @property-read \App\FailedTransaction $failedTransaction
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransactionHistory[] $history
- * @property-read \App\GatewayTransactionHistory $lastHistory
+ * @property-read \App\Billing\Deposit $deposit
+ * @property-read \App\Billing\FailedTransaction $failedTransaction
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransactionHistory[] $history
+ * @property-read \App\Billing\GatewayTransactionHistory $lastHistory
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $method
- * @property-read \App\Payment $payment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\TransactionRefund[] $refunds
+ * @property-read \App\Billing\Payment $payment
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\TransactionRefund[] $refunds
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransaction whereAvsPass($value)

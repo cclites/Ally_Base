@@ -2,14 +2,14 @@
 namespace App\Billing\Contracts;
 
 use App\Contracts\HasAllyFeeInterface;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 
 interface ChargeableInterface extends HasAllyFeeInterface
 {
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge($amount, $currency = 'USD');
 
@@ -31,9 +31,9 @@ interface ChargeableInterface extends HasAllyFeeInterface
     /**
      * Refund a previously charged transaction
      *
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount);
 

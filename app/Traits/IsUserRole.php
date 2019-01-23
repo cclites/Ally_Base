@@ -2,8 +2,8 @@
 namespace App\Traits;
 
 use App\Address;
-use App\BankAccount;
-use App\CreditCard;
+use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\PaymentMethods\CreditCard;
 use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;

@@ -3,7 +3,7 @@ namespace App\Payments;
 
 use App\Business;
 use App\Contracts\DepositAggregatorInterface;
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Gateway\ECSPayment;
 use App\Shift;
 use Carbon\Carbon;
@@ -28,7 +28,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
     /**
      * Get the unsaved version of this aggregated deposit
      *
-     * @return \App\Deposit
+     * @return \App\Billing\Deposit
      */
     public function getDeposit()
     {
@@ -76,7 +76,7 @@ class BusinessDepositAggregator implements DepositAggregatorInterface
     /**
      * Process and persist the deposit
      *
-     * @return \App\GatewayTransaction|bool|false
+     * @return \App\Billing\GatewayTransaction|bool|false
      */
     public function deposit()
     {

@@ -2,11 +2,11 @@
 namespace App\Gateway;
 
 use App\Address;
-use App\BankAccount;
-use App\CreditCard;
+use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Exceptions\PaymentMethodDeclined;
 use App\Exceptions\PaymentMethodError;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\PhoneNumber;
 
 /**
@@ -177,7 +177,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     }
 
     /**
-     * @return \App\GatewayTransaction
+     * @return \App\Billing\GatewayTransaction
      * @throws \App\Exceptions\PaymentMethodDeclined
      * @throws \App\Exceptions\PaymentMethodError
      */
@@ -228,7 +228,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Validate, but do not authorize, the payment method
      *
-     * @param \App\BankAccount $account
+     * @param \App\Billing\PaymentMethods\BankAccount $account
      *
      * @return GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
@@ -243,7 +243,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Deposit (credit) the account with $amount
      *
-     * @param \App\BankAccount $account
+     * @param \App\Billing\PaymentMethods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
@@ -265,12 +265,12 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Authorize, but do not charge, the payment method
      *
-     * @param \App\CreditCard $card
+     * @param \App\Billing\PaymentMethods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
-     * @return GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function authorizeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
@@ -287,7 +287,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Charge the payment method
      *
-     * @param \App\BankAccount $account
+     * @param \App\Billing\PaymentMethods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
@@ -309,7 +309,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Validate, but do not authorize, the payment method
      *
-     * @param \App\CreditCard $card
+     * @param \App\Billing\PaymentMethods\CreditCard $card
      * @param mixed $cvv
      *
      * @return GatewayTransaction|false
@@ -325,12 +325,12 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Authorize, but do not charge, the payment method
      *
-     * @param \App\CreditCard $card
+     * @param \App\Billing\PaymentMethods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param mixed $cvv
      *
-     * @return GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function authorizeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null)
@@ -347,7 +347,7 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Charge the payment method
      *
-     * @param \App\CreditCard $card
+     * @param \App\Billing\PaymentMethods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param mixed $cvv
@@ -424,9 +424,9 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     }
 
     /**
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param float $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount)
     {

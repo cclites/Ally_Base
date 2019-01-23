@@ -2,6 +2,10 @@
 
 namespace App;
 
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
@@ -51,14 +55,14 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\CaregiverAvailability $availability
- * @property-read \App\BankAccount|null $bankAccount
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \App\Billing\PaymentMethods\BankAccount|null $bankAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar
@@ -77,7 +81,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverMeta[] $meta
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \App\PhoneNumber $phoneNumber
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
@@ -317,8 +321,8 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Set the caregiver's primary deposit account
      *
-     * @param \App\BankAccount $account
-     * @return \App\BankAccount|bool
+     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @return \App\Billing\PaymentMethods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount(BankAccount $account)
@@ -459,7 +463,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Get all gateway transactions that relate to this caregiver
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {

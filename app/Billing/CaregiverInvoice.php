@@ -27,4 +27,9 @@ class CaregiverInvoice extends AuditableModel
     {
         return $this->morphMany(CaregiverInvoiceItem::class, 'invoice');
     }
+
+    function deposits()
+    {
+        return $this->morphToMany(Deposit::class, 'invoice', 'invoice_deposits');
+    }
 }

@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Events\FailedTransactionFound;
 use App\Gateway\ECSQuery;
-use App\GatewayTransaction;
-use App\GatewayTransactionHistory;
+use App\Billing\GatewayTransaction;
+use App\Billing\GatewayTransactionHistory;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

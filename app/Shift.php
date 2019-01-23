@@ -1,7 +1,9 @@
 <?php
 namespace App;
 
+use App\Billing\Deposit;
 use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payment;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -68,7 +70,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read mixed $ally_pct
  * @property-read mixed $charged_at
@@ -79,7 +81,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftIssue[] $issues
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
- * @property-read \App\Payment|null $payment
+ * @property-read \App\Billing\Payment|null $payment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \App\Schedule|null $schedule
  * @property-read \App\Signature $signature

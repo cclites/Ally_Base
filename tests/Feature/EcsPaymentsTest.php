@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\BankAccount;
-use App\CreditCard;
+use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Exceptions\PaymentMethodDeclined;
 use App\Exceptions\PaymentMethodError;
 use App\Gateway\ECSPayment;

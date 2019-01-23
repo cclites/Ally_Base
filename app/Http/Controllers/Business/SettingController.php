@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Business;
 use App\Http\Requests\UpdateBusinessBankRequest;
 use App\Http\Requests\UpdateBusinessRequest;

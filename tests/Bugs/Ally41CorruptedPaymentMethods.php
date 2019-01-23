@@ -2,9 +2,9 @@
 
 namespace Tests\Bugs;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Client;
-use App\CreditCard;
+use App\Billing\PaymentMethods\CreditCard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +15,7 @@ class Ally41CorruptedPaymentMethods extends TestCase
     public function test_a_credit_card_can_be_reentered_without_corruption()
     {
         /**
-         * @var CreditCard $card
+         * @var \App\Billing\PaymentMethods\CreditCard $card
          */
         $card1 = factory(CreditCard::class)->create(['user_id' => 1]);
         $number = $card1->number;
@@ -30,7 +30,7 @@ class Ally41CorruptedPaymentMethods extends TestCase
     public function test_a_bank_account_can_be_reentered_without_corruption()
     {
         /**
-         * @var \App\BankAccount $card
+         * @var \App\Billing\PaymentMethods\BankAccount $card
          */
         $account1 = factory(BankAccount::class)->create(['user_id' => 1]);
         $number = $account1->account_number;

@@ -1,7 +1,7 @@
 <?php
 
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 use Illuminate\Database\Migrations\Migration;
 
 class LinkPreviousBusinessPaymentAccountTransactions extends Migration

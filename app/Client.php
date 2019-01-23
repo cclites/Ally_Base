@@ -4,6 +4,10 @@ namespace App;
 
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Businesses\Timezone;
 use App\Confirmations\Confirmation;
 use App\Contracts\CanBeConfirmedInterface;
@@ -87,12 +91,12 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $backupPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
  * @property-read \App\Business $business
  * @property-read \App\CareDetails $careDetails
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
  * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $defaultPayment
@@ -121,7 +125,7 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\OnboardStatusHistory[] $onboardStatusHistory
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\PhoneNumber[] $phoneNumbers
  * @property-read \App\ClientPreferences $preferences
  * @property-read \App\ClientReferralServiceAgreement $referralServiceAgreement
@@ -719,7 +723,7 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     /**
      * Get all gateway transactions that relate to this client
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {

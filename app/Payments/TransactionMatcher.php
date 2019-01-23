@@ -2,11 +2,11 @@
 
 namespace App\Payments;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Business;
-use App\CreditCard;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Gateway\ECSQuery;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\User;
 
 class TransactionMatcher {

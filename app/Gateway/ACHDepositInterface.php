@@ -2,16 +2,16 @@
 
 namespace App\Gateway;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 
 interface ACHDepositInterface
 {
     /**
      * Validate, but do not authorize, the payment method
      *
-     * @param \App\BankAccount $account
+     * @param \App\Billing\PaymentMethods\BankAccount $account
      *
-     * @return \App\GatewayTransaction
+     * @return \App\Billing\GatewayTransaction
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function validateAccount(BankAccount $account);
@@ -19,12 +19,12 @@ interface ACHDepositInterface
     /**
      * Deposit (credit) the account with $amount
      *
-     * @param \App\BankAccount $account
+     * @param \App\Billing\PaymentMethods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
-     * @return \App\GatewayTransaction
+     * @return \App\Billing\GatewayTransaction
      * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
      */
     public function depositFunds(BankAccount $account, $amount, $currency='USD', $secCode='PPD');

@@ -1,15 +1,15 @@
 <?php
 namespace App\Payments;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
-use App\CreditCard;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
 use App\Gateway\ECSPayment;
-use App\Payment;
+use App\Billing\Payment;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;
 use Carbon\Carbon;
@@ -54,7 +54,7 @@ class ClientPaymentAggregator implements PaymentAggregatorInterface
     /**
      * Get an unsaved version of the aggregated payment model
      *
-     * @return \App\Payment
+     * @return \App\Billing\Payment
      */
     public function getPayment()
     {
@@ -126,7 +126,7 @@ class ClientPaymentAggregator implements PaymentAggregatorInterface
     /**
      * Charge and persist the payment
      *
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge()
     {

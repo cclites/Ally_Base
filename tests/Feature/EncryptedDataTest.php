@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Caregiver;
 use App\Client;
-use App\CreditCard;
+use App\Billing\PaymentMethods\CreditCard;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

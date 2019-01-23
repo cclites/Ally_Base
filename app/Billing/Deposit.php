@@ -1,11 +1,15 @@
 <?php
-namespace App;
+namespace App\Billing;
 
+use App\AuditableModel;
+use App\Business;
+use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
 /**
- * App\Deposit
+ * App\Billing\Deposit
  *
  * @property int $id
  * @property string $deposit_type
@@ -24,7 +28,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read mixed $week
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @property-read \App\GatewayTransaction|null $transaction
+ * @property-read \App\Billing\GatewayTransaction|null $transaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -69,9 +73,20 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(GatewayTransaction::class, 'transaction_id');
     }
 
+    /** @deprecated */
     public function shifts()
     {
         return $this->belongsToMany(Shift::class, 'deposit_shifts');
+    }
+
+    public function businessInvoices()
+    {
+        return $this->morphedByMany(BusinessInvoice::class, 'invoice', 'invoice_deposits');
+    }
+
+    public function caregiverInvoices()
+    {
+        return $this->morphedByMany(CaregiverInvoice::class, 'invoice', 'invoice_deposits');
     }
 
     ///////////////////////////////////////////

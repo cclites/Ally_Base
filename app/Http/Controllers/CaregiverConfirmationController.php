@@ -3,7 +3,7 @@
 
 namespace App\Http\Controllers;
 
-use App\BankAccount;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Traits\Request\BankAccountRequest;
 use Carbon\Carbon;
 use App\Caregiver;

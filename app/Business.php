@@ -2,6 +2,10 @@
 
 namespace App;
 
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\PaymentMethods\BankAccount;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -86,22 +90,22 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\BankAccount|null $bankAccount
+ * @property-read \App\Billing\PaymentMethods\BankAccount|null $bankAccount
  * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
  * @property-read \App\BusinessChain|null $chain
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransaction[] $chargedTransactions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clientsUsingProviderPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\NoteTemplate[] $noteTemplates
- * @property-read \App\BankAccount|null $paymentAccount
+ * @property-read \App\Billing\PaymentMethods\BankAccount|null $paymentAccount
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
@@ -419,7 +423,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation  Ex: paymentAccount
-     * @return \App\BankAccount|null
+     * @return \App\Billing\PaymentMethods\BankAccount|null
      */
     public function getBankAccount($relation)
     {
@@ -428,8 +432,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation Ex: paymentAccount
-     * @param \App\BankAccount $account
-     * @return \App\BankAccount|bool
+     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @return \App\Billing\PaymentMethods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount($relation, BankAccount $account)
@@ -455,7 +459,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge($amount, $currency = 'USD')
     {
@@ -469,9 +473,9 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * Refund a previously charged transaction
      *
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount)
     {
@@ -534,7 +538,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * Get all gateway transactions that relate to this client
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {

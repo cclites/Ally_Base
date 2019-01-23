@@ -1,12 +1,17 @@
 <?php
-namespace App;
+namespace App\Billing;
 
+use App\AuditableModel;
+use App\Business;
 use App\Businesses\Timezone;
+use App\Caregiver;
+use App\Client;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
 /**
- * App\Payment
+ * App\Billing\Payment
  *
  * @property int $id
  * @property int|null $client_id
@@ -29,7 +34,7 @@ use App\Traits\BelongsToOneBusiness;
  * @property-read \App\Client|null $client
  * @property-read mixed $week
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
- * @property-read \App\GatewayTransaction|null $transaction
+ * @property-read \App\Billing\GatewayTransaction|null $transaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
@@ -63,9 +68,15 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     /// Relationship Methods
     ///////////////////////////////////////////
 
+    /** @deprecated  */
     public function shifts()
     {
         return $this->hasMany(Shift::class);
+    }
+
+    public function invoices()
+    {
+        return $this->belongsToMany(ClientInvoice::class, 'invoice_payments', 'payment_id', 'invoice_id');
     }
 
     public function client()

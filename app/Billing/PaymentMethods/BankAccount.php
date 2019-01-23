@@ -1,16 +1,20 @@
 <?php
 
-namespace App;
+namespace App\Billing\PaymentMethods;
 
+use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\GatewayTransaction;
+use App\Business;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
+use App\User;
 use Crypt;
 
 /**
- * App\BankAccount
+ * App\Billing\PaymentMethods\BankAccount
  *
  * @property int $id
  * @property int|null $user_id
@@ -26,7 +30,7 @@ use Crypt;
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Business|null $business
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransaction[] $chargedTransactions
  * @property-read object $charge_metrics
  * @property-read mixed $last_four
  * @property-read \App\User|null $user
@@ -114,7 +118,7 @@ class BankAccount extends AuditableModel implements ChargeableInterface
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge($amount, $currency = 'USD')
     {
@@ -138,9 +142,9 @@ class BankAccount extends AuditableModel implements ChargeableInterface
     /**
      * Refund a previously charged transaction
      *
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount)
     {

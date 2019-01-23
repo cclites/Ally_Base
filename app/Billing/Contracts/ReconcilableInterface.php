@@ -14,7 +14,7 @@ interface ReconcilableInterface
     /**
      * Get all gateway transactions that relate to this model
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions();
 }
