@@ -107,7 +107,8 @@ class ShiftFlagsTest extends TestCase
     public function a_shift_touching_but_not_crossing_the_edge_does_not_cause_duplicate_flags()
     {
         $shift1 = $this->createDuplicateShift('10:00:00', '18:00:00');
-        $shift2 = $this->createDuplicateShift('08:00:00', '20:00:00'); // clock in is before, clock out is after, the reverse of inside
+        $shift2 = $this->createDuplicateShift('18:00:00', '19:00:00');
+        $shift3 = $this->createDuplicateShift('06:00:00', '10:00:00');
 
         $shift1->flagManager()->generate();
         $shift2->flagManager()->generate();
