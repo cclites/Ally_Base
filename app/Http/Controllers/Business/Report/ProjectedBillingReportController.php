@@ -53,9 +53,8 @@ class ProjectedBillingReportController extends Controller
         return $pdf->download('projected_billing.pdf');
     }
 
-    protected function getData()
+    protected function getData(): array
     {
-        logger(request()->all());
         $dates = (object)request()->dates;
         $start = Carbon::parse($dates->start);
         $end = Carbon::parse($dates->end);
@@ -88,7 +87,7 @@ class ProjectedBillingReportController extends Controller
         return compact('stats', 'clientStats', 'clientTypeStats', 'dates');
     }
 
-    protected function getClientStats(Collection $schedules)
+    protected function getClientStats(Collection $schedules): \Illuminate\Support\Collection
     {
         $clients = $schedules->groupBy('client_id');
         $clientStats = collect([]);
@@ -104,7 +103,7 @@ class ProjectedBillingReportController extends Controller
         return $clientStats;
     }
 
-    protected function getClientTypeStats(Collection $schedules)
+    protected function getClientTypeStats(Collection $schedules): \Illuminate\Support\Collection
     {
         $clientTypes = $schedules->pluck('client.client_type')->unique()->toArray();
         $clientTypeStats = collect([]);
