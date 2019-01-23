@@ -141,7 +141,7 @@ class ShiftController extends BaseController
 
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
-            $shift->syncGoals($request->goals);
+            $shift->syncGoals($request->getGoals());
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
 
             return new SuccessResponse('You have successfully updated this shift.');
