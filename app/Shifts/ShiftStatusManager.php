@@ -312,6 +312,18 @@ class ShiftStatusManager
     }
 
 
+    /**
+     * Acknowledge that the shift has been fully invoiced to clients/payers
+     * @return bool
+     */
+    public function ackClientInvoice()
+    {
+        switch($this->status()) {
+            case Shift::WAITING_FOR_INVOICE:
+                return $this->update(Shift::WAITING_FOR_CHARGE);
+        }
+        return false;
+    }
 
     /**
      * Acknowledge a successful payment

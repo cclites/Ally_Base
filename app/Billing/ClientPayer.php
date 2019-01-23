@@ -287,7 +287,7 @@ class ClientPayer extends AuditableModel
         }
 
         // Calculate data from existing invoice items in database
-        $currentSum = InvoiceItem::whereHas('invoice', function ($invoice) {
+        $currentSum = ClientInvoiceItem::whereHas('invoice', function ($invoice) {
             $invoice->where('client_id', $this->client_id)->where('payer_id', $this->payer_id);
         })
             ->whereBetween('date', [$dateRange->start->toDateTimeString(), $dateRange->end->toDateTimeString()])

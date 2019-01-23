@@ -2,10 +2,11 @@
 namespace App\Billing\Generators;
 
 use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Exceptions\InvalidClientPayers;
 use App\Billing\Exceptions\PayerAllowanceExceeded;
-use App\Billing\InvoiceItem;
+use App\Billing\BaseInvoiceItem;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Billing\ClientPayer;
@@ -25,6 +26,13 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
      * @var ClientInvoice[]
      */
     protected $invoices = [];
+
+    /**
+     * A hash table of split payer amounts used by getAmountDue()
+     *
+     * @var array
+     */
+    protected $splitPayerAmounts = [];
 
     public function __construct(ClientPayerValidator $payerValidator)
     {
@@ -99,7 +107,11 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     public function sortInvoiceables(array $invoiceables): array
     {
         usort($invoiceables, function(InvoiceableInterface $invoiceableA, InvoiceableInterface $invoiceableB) {
-             // Sort by specific payer first, then by date
+             // Sort credit adjustments first, then specific payers, then by date
+            if (($invoiceableA->getClientRate() >= 0) !== ($invoiceableB->getClientRate() >= 0)) {
+                return $invoiceableA->getClientRate() >= 0 ? 1 : -1;
+            }
+
             if ($invoiceableA->getPayerId() === $invoiceableB->getPayerId()) {
                 return strtotime($invoiceableA->getItemDate()) - strtotime($invoiceableB->getItemDate());
             }
@@ -150,11 +162,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
     public function getItemData(InvoiceableInterface $invoiceable, $split = 1.0, $allowance = 999999.99): array
     {
         $total = round(bcmul($invoiceable->getItemUnits(), $invoiceable->getClientRate(), 4), 2);
-        $amountDue = round(bcmul($invoiceable->getAmountDue(), $split, 4), 2);
-
-        if ($amountDue > $allowance) {
-            $amountDue = $allowance;
-        }
+        $amountDue = $this->getAmountDue($invoiceable, $split, $allowance);
 
         return [
             'name' => $invoiceable->getItemName(),
@@ -219,11 +227,12 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             $split = $clientPayer->getSplitPercentage();
             $data = $this->getItemData($invoiceable, $split, $allowance);
             // Make item and associate invoiceable
-            $item = new InvoiceItem($data);
+            $item = new ClientInvoiceItem($data);
             $item->associateInvoiceable($invoiceable);
             // Add item to invoice
             $invoice = $this->getInvoice($client, $clientPayer);
             $invoice->addItem($item);
+            $invoiceable->addAmountInvoiced($item['amount_due']);
             // Reduce allowance by the amount due of the item
             $allowance -= $data['amount_due'];
 
@@ -238,5 +247,26 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         if ($invoiceable->getAmountDue() > 0.0) {
             throw new InvalidClientPayers('Unable to assign invoiceable due to an invalid client structure for client ' . $client->id . '.');
         }
+    }
+
+    protected function getAmountDue(InvoiceableInterface $invoiceable, $split = 1.0, $allowance = 999999.99)
+    {
+        $amountDue = $invoiceable->getAmountDue();
+
+        if ($split < 1.0) {
+            // Store amount owed by split payers (see allowance_payer_before_a_split_payer_does_not_skew_the_amounts)
+            if (!isset($this->splitPayerAmounts[$invoiceable->getItemHash()])) {
+                $this->splitPayerAmounts[$invoiceable->getItemHash()] = $amountDue;
+            }
+            $splitAmount = $this->splitPayerAmounts[$invoiceable->getItemHash()];
+
+            $amountDue = round(bcmul($splitAmount, $split, 4), 2);
+        }
+
+        if ($amountDue > $allowance) {
+            $amountDue = $allowance;
+        }
+
+        return $amountDue;
     }
 }

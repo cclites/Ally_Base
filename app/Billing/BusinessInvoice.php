@@ -7,7 +7,7 @@ use App\AuditableModel;
  * App\Billing\BusinessInvoice
  *
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\InvoiceItem[] $items
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\BusinessInvoiceItem[] $items
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
@@ -25,6 +25,6 @@ class BusinessInvoice extends AuditableModel
 
     function items()
     {
-        return $this->morphMany(InvoiceItem::class, 'invoice');
+        return $this->hasMany(BusinessInvoiceItem::class, 'invoice');
     }
 }

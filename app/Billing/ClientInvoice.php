@@ -13,7 +13,7 @@ use App\AuditableModel;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\InvoiceItem[] $items
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice whereCreatedAt($value)
@@ -38,7 +38,7 @@ class ClientInvoice extends AuditableModel
 
     function items()
     {
-        return $this->morphMany(InvoiceItem::class, 'invoice');
+        return $this->hasMany(ClientInvoiceItem::class, 'invoice_id');
     }
 
     ////////////////////////////////////
@@ -50,8 +50,11 @@ class ClientInvoice extends AuditableModel
         return (float) $this->items()->sum('amount_due');
     }
 
-    function addItem(InvoiceItem $item)
+    function addItem(ClientInvoiceItem $item): bool
     {
-        return $this->items()->save($item);
+        if ($this->items()->save($item)) {
+            return $this->update(['amount' => $this->items()->sum('amount_due')]);
+        }
+        return false;
     }
 }

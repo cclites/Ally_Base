@@ -25,7 +25,7 @@ use Illuminate\Support\Collection;
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\InvoiceItem[] $invoiceItems
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\BaseInvoiceItem[] $invoiceItems
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\InvoiceableMeta[] $meta
  * @property-read \App\Billing\Payer|null $payer
  * @property-read \App\Billing\Service $service
@@ -208,5 +208,23 @@ class ShiftService extends InvoiceableModel
     public function getPayerId(): ?int
     {
         return $this->payer_id;
+    }
+
+
+    /**
+     * Add an amount that has been invoiced to a payer
+     *
+     * @param float $amount
+     */
+    public function addAmountInvoiced(float $amount): void
+    {
+        // Check if all services have been invoiced
+        foreach ($this->shift->services as $service) {
+            if ($service->getAmountDue() > 0) {
+                return;
+            }
+        }
+
+        $this->shift->statusManager()->ackClientInvoice();
     }
 }

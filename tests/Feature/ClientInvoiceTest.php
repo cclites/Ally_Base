@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
 use App\Billing\Contracts\InvoiceableInterface;
+use App\Billing\Exceptions\PayerAllowanceExceeded;
 use App\Billing\Generators\ClientInvoiceGenerator;
+use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Validators\ClientPayerValidator;
@@ -100,15 +103,23 @@ class ClientInvoiceTest extends TestCase
      */
     function allowance_payer_accounts_for_credit_adjustments_before_throwing_exception()
     {
-
         /*
          * Allowance payer has a $100.00 allowance.
          * The shifts assigned to this payer total $150.00, but the Payer has $50.00 in credit adjustments.
          * The invoice should be successfully generated for $100.00 due, taking the credit into account before issuing a PayerAllowanceExceeded exception
          */
 
+        $payer = $this->createAllowancePayer(100.0);
+        $this->createBalancePayer();
 
-        $this->assertFalse(true);
+        $this->createService(150.00, '2019-01-15', $payer->payer_id);
+        $this->createCreditAdjustment(50.00, '2019-01-15', $payer->payer_id);
+
+        $invoices = collect($this->invoicer->generateAll($this->client));
+        $payerInvoice = $invoices->where('payer_id', $payer->payer_id)->first();
+
+        $this->assertEquals(100.0, $payerInvoice->getAmountDue());
+        $this->assertCount(1, $invoices, 'Only one invoice should have been generated since the service was assigned to a payer.');
     }
 
     /**
@@ -122,7 +133,18 @@ class ClientInvoiceTest extends TestCase
          * to Payer A and the balance to payer B.
          */
 
-        $this->assertFalse(true);
+        $payerA = $this->createAllowancePayer(100.00);
+        $payerB = $this->createBalancePayer();
+        $serviceA = $this->createService(70.00, '2019-01-15');
+        $serviceB = $this->createService(80.00, '2019-01-17', $payerA->payer_id);
+
+        $invoices = collect($this->invoicer->generateAll($this->client));
+        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
+        $itemB = $payerAInvoice->items->where('invoiceable_id', $serviceB->id)->first();
+        $itemA = $payerAInvoice->items->where('invoiceable_id', $serviceA->id)->first();
+
+        $this->assertEquals(80, $itemB->amount_due);
+        $this->assertEquals(20, $itemA->amount_due);
     }
 
     /**
@@ -134,14 +156,52 @@ class ClientInvoiceTest extends TestCase
          * Payer A has a $50 allowance,  Shift A and B are both $30 and assigned to Payer A,
          * shift B should cause a PayerAllowanceExceeded exception
          */
+        $this->expectException(PayerAllowanceExceeded::class);
 
-        $this->assertFalse(true);
+        $payerA = $this->createAllowancePayer(50.00);
+        $payerB = $this->createBalancePayer();
+
+        $serviceA = $this->createService(30.00, '2019-01-15', $payerA->payer_id);
+        $serviceB = $this->createService(30.00, '2019-01-17', $payerA->payer_id);
+
+        $this->invoicer->generateAll($this->client);
     }
 
+    /**
+     * @test
+     */
+    function the_invoice_amount_should_be_updated_when_adding_an_item()
+    {
+        $invoice = factory(ClientInvoice::class)->create();
+
+        $this->assertEquals(0, $invoice->amount);
+
+        $item = factory(ClientInvoiceItem::class)->make(['amount_due' => 20.00]);
+        $invoice->addItem($item);
+
+        $this->assertEquals(20, $invoice->amount);
+    }
+
+    /**
+     * @test
+     */
     function shifts_should_be_waiting_for_charge_after_invoicing()
     {
+        $payerA = $this->createAllowancePayer(20.00);
+        $payerB = $this->createBalancePayer();
+        $service = $this->createService(50.00);
+        $shift = $service->shift;
 
+        $this->assertEquals(Shift::WAITING_FOR_INVOICE, $shift->status);
+        $this->invoicer->generateAll($this->client);
+
+        $this->assertEquals(Shift::WAITING_FOR_CHARGE, $shift->fresh()->status);
     }
+
+
+    ////////////////////////////////////
+    //// Private Methods
+    ////////////////////////////////////
 
     private function createAllowancePayer(float $allowance, string $effective_start = '2019-01-01', string $effective_end = '9999-12-31',
         string $allocation_type = ClientPayer::ALLOCATION_MONTHLY): ClientPayer
@@ -200,6 +260,7 @@ class ClientInvoiceTest extends TestCase
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
+            'payer_id' => $payerId,
             'duration' => 1,
             'client_rate' => $amount,
             'caregiver_rate' => round($amount * .75, 2),
@@ -209,5 +270,18 @@ class ClientInvoiceTest extends TestCase
         return $shiftService;
     }
 
+    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $payerId = null)
+    {
+        $adjustment = factory(ShiftAdjustment::class)->create([
+            'client_id' => $this->client->id,
+            'client_rate' => -$amount,
+            'units' => 1,
+            'payer_id' => $payerId,
+            'status' => 'WAITING_FOR_INVOICE',
+            'created_at' => $date . ' 00:00:00',
+            'updated_at' => $date . ' 00:00:00',
+        ]);
 
+        return $adjustment;
+    }
 }

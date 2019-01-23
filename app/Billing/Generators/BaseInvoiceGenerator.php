@@ -1,6 +1,7 @@
 <?php
 namespace App\Billing\Generators;
 
+use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 
 abstract class BaseInvoiceGenerator
@@ -10,6 +11,7 @@ abstract class BaseInvoiceGenerator
      * @var array
      */
     public static $invoiceables = [
+        'shift_adjustment' => ShiftAdjustment::class,
         'shift_service' => ShiftService::class,
     ];
 

@@ -5,7 +5,7 @@ use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Contracts\DepositableInterface;
 use App\Billing\Contracts\InvoiceableInterface;
-use App\Billing\InvoiceItem;
+use App\Billing\ClientInvoiceItem;
 use Packages\MetaData\HasMetaData;
 
 abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface
@@ -21,14 +21,25 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         return $this->morphMany(InvoiceableMeta::class, 'metable');
     }
 
-    public function invoiceItems()
+    public function clientInvoiceItems()
     {
-        return $this->morphMany(InvoiceItem::class, 'invoiceable');
+        return $this->morphMany(ClientInvoiceItem::class, 'invoiceable');
     }
 
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+
+    /**
+     * Get a unique hash for this item
+     *
+     * @return string
+     */
+    public function getItemHash(): string
+    {
+        return $this->getTable() . '_' . $this->getKey();
+    }
 
     /**
      * Get the amount due for payment, this should subtract the amount invoiced
@@ -43,13 +54,13 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     }
 
     /**
-     * Get the amount that has been invoiced
+     * Get the amount that has been invoiced to the client
      *
      * @return float
      */
     public function getAmountInvoiced(): float
     {
-        return (float) $this->invoiceItems()->sum('amount_due');
+        return (float) $this->clientInvoiceItems()->sum('amount_due');
     }
 
     /**

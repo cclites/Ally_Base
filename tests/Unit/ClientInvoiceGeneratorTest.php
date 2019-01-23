@@ -61,7 +61,7 @@ class ClientInvoiceGeneratorTest extends TestCase
     public function invoiceables_are_collected_from_their_classes()
     {
         $invoiceable = \Mockery::mock(InvoiceableInterface::class);
-        $invoiceable->shouldReceive('getItemsForPayment')->with($this->client);
+        $invoiceable->shouldReceive('getItemsForPayment')->with($this->client)->andReturn(collect());
         BaseInvoiceGenerator::$invoiceables = ['mock' => $invoiceable];
 
         $this->invoicer()->getInvoiceables($this->client);
@@ -100,26 +100,20 @@ class ClientInvoiceGeneratorTest extends TestCase
     /**
      * @test
      */
-    public function get_payer_allowance_should_return_a_float()
-    {
-        $mockPayer = \Mockery::mock(ClientPayer::class);
-        $this->assertInternalType('float', $this->invoicer()->getPayerAllowance($mockPayer));
-    }
-
-    /**
-     * @test
-     */
     function invoiceables_should_be_sorted_by_payer_then_date()
     {
         $invoiceableFirst = \Mockery::mock(InvoiceableInterface::class);
+        $invoiceableFirst->shouldReceive('getClientRate')->andReturn(10.00);
         $invoiceableFirst->shouldReceive('getPayerId')->andReturn(1);
         $invoiceableFirst->shouldReceive('getItemDate')->andReturn('2019-01-31');
 
         $invoiceableSecond = \Mockery::mock(InvoiceableInterface::class);
+        $invoiceableSecond->shouldReceive('getClientRate')->andReturn(10.00);
         $invoiceableSecond->shouldReceive('getPayerId')->andReturn(null);
         $invoiceableSecond->shouldReceive('getItemDate')->andReturn('2019-01-18');
 
         $invoiceableThird = \Mockery::mock(InvoiceableInterface::class);
+        $invoiceableThird->shouldReceive('getClientRate')->andReturn(10.00);
         $invoiceableThird->shouldReceive('getPayerId')->andReturn(null);
         $invoiceableThird->shouldReceive('getItemDate')->andReturn('2019-01-19');
 
