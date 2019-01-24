@@ -18,6 +18,8 @@ use App\Console\Commands\CronVisitAccuracyReminder;
 use App\Notifications\Caregiver\VisitAccuracyCheck;
 use App\CaregiverLicense;
 use App\Console\Commands\CronDailyNotifications;
+use App\Shifts\ClockOut;
+use App\Events\UnverifiedShiftCreated;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -275,5 +277,184 @@ class TriggerNotificationsTest extends TestCase
                 return $license->id === $notification->license->id;
             }
         );
+    }
+
+    /** @test */
+    public function a_caregiver_should_be_notified_if_they_have_a_license_that_is_expired()
+    {
+        Notification::fake();
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->subDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            \App\Notifications\Caregiver\CertificationExpired::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function a_caregiver_should_be_notified_once_per_license()
+    {
+        Notification::fake();
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->subDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            \App\Notifications\Caregiver\CertificationExpired::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_only_be_notified_of_expired_licenses_once_per_caregiver()
+    {
+        Notification::fake();
+        
+        $otherBusiness = factory('App\Business')->create();
+        $this->officeUser->businesses()->attach($otherBusiness->id);
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->subDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+        
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\CertificationExpired::class,
+            1
+        );
+    }
+
+    /** @test */
+    public function office_users_should_only_be_notified_of_expiring_licenses_once_per_caregiver()
+    {
+        Notification::fake();
+        
+        $otherBusiness = factory('App\Business')->create();
+        $this->officeUser->businesses()->attach($otherBusiness->id);
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+        
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\CertificationExpiring::class,
+            1
+        );
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_when_a_caregivers_license_is_expired()
+    {
+        Notification::fake();
+
+        // create a second office user to another business on the same chain
+        $otherBusiness = factory('App\Business')->create();
+        $otherBusiness->chain->caregivers()->save($this->caregiver);
+        $otherOfficeUser = factory('App\OfficeUser')->create();
+        $otherOfficeUser->businesses()->attach($otherBusiness->id);
+
+        // create a third office user to a third business on another chain
+        $otherChain = factory('App\BusinessChain')->create();
+        $thirdBusiness = factory('App\Business')->create(['chain_id' => $otherChain->id]);
+        $otherChain->caregivers()->save($this->caregiver);
+        $thirdOfficeUser = factory('App\OfficeUser')->create();
+        $thirdOfficeUser->businesses()->attach($thirdBusiness->id);
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->subDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\CertificationExpired::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $otherOfficeUser->user,
+            \App\Notifications\Business\CertificationExpired::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $thirdOfficeUser->user,
+            \App\Notifications\Business\CertificationExpired::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+    }
+
+
+    /**
+     * @param array $attributes
+     * @return \App\Shift
+     */
+    protected function createShift($attributes = []) {
+        $attributes += [
+            'business_id' => $this->business->id,
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'checked_in_method' => Shift::METHOD_GEOLOCATION,
+            'checked_in_time' => Carbon::now()->subHour(),
+            'checked_in_number' => null,
+            'checked_in_latitude' => null,
+            'checked_in_longitude' => null,
+            'checked_out_time' => null,
+            'checked_out_number' => null,
+            'checked_out_latitude' => null,
+            'checked_out_longitude' => null,
+            'status' => Shift::CLOCKED_IN,
+        ];
+        return factory(Shift::class)->create($attributes);
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_when_unverified_shifts_are_created()
+    {
+        $shift = $this->createShift();
+        $this->expectsEvents(UnverifiedShiftCreated::class);
+        $clockOut = new ClockOut($this->caregiver);
+        $result = $clockOut->clockOut($shift);
     }
 }

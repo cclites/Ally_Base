@@ -118,9 +118,12 @@ class CronDailyNotifications extends Command
             \Notification::send($license->caregiver->user, new CertificationExpiring($license));
 
             // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            $sent = collect([]);
             foreach ($license->caregiver->businesses as $business) {
                 $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpiring::class);
+                $users = $users->diffAssoc($sent);
                 \Notification::send($users, new \App\Notifications\Business\CertificationExpiring($license));
+                $sent = $sent->merge($users);
             }
 
             TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $license->id);
@@ -149,9 +152,12 @@ class CronDailyNotifications extends Command
             \Notification::send($license->caregiver->user, new CertificationExpired($license));
 
             // notify all OfficeUsers that belong to the same businesses as the Caregiver
+            $sent = collect([]);
             foreach ($license->caregiver->businesses as $business) {
                 $users = $business->usersToNotify(\App\Notifications\Business\CertificationExpired::class);
+                $users = $users->diffAssoc($sent);
                 \Notification::send($users, new \App\Notifications\Business\CertificationExpired($license));
+                $sent = $sent->merge($users);
             }
 
             TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id);
