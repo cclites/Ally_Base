@@ -27,6 +27,7 @@ class Kernel extends ConsoleKernel
         CronScheduleConverter::class,
         CronShiftSummaryEmails::class,
         CronDailyNotifications::class,
+        CronReminders::class,
     ];
 
     /**
@@ -51,6 +52,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('cron:visit_accuracy')
             ->weeklyOn(1, '18:00'); // Mondays @ 1:00pm EST
+
+        $schedule->command('cron:reminders')
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**
