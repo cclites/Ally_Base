@@ -55,11 +55,11 @@
                         <hr/>
                         <b-row>
                             <b-col lg="6">
-                                <h1>Prospects Funnel</h1>
+                                <h1 class="text-center">Prospects Funnel</h1>
                                 <e-charts ref="funnel" :options="chartOptions" class="chart" auto-resize></e-charts>
                             </b-col>
                             <b-col lg="6">
-                                <h1>Prospects by Referral Source</h1>
+                                <h1 class="text-center">Prospects by Referral Source</h1>
                                 <e-charts ref="bar" :options="barOptions" class="chart" auto-resize></e-charts>
                             </b-col>
                         </b-row>
