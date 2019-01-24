@@ -55,9 +55,10 @@ class CronReminders extends Command
 
         foreach (Business::all() as $business) {
             $this->upcomingShifts($business);
+
+            $this->overdueClockins($business);
         }
 
-        $this->overdueClockins();
 
         $this->overdueClockOuts();
     }
@@ -65,14 +66,15 @@ class CronReminders extends Command
     /**
      * Find any upcoming shifts and notify the related Caregivers.
      *
+     * @param \App\Business $business
      * @return void
      */
     public function upcomingShifts(Business $business) : void
     {
-        $to = Carbon::now()->tz($business->timezone);
-        $from = Carbon::now()->addMinutes(20)->tz($business->timezone);
+        $from = Carbon::now()->tz($business->timezone);
+        $to = Carbon::now()->addMinutes(20)->tz($business->timezone);
 
-        $schedules = Schedule::whereBetween('starts_at', [$to, $from])
+        $schedules = Schedule::whereBetween('starts_at', [$from, $to])
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
@@ -91,12 +93,16 @@ class CronReminders extends Command
     /**
      * Find any shifts past start time and notify the related Caregivers.
      *
+     * @param \App\Business $business
      * @return void
      */
-    public function overdueClockins()
+    public function overdueClockins(Business $business) : void
     {
+        $from = Carbon::now()->subMinutes(60)->tz($business->timezone);
+        $to = Carbon::now()->subMinutes(20)->tz($business->timezone);
+
         $schedules = Schedule::with('shifts')
-            ->whereBetween('starts_at', [Carbon::now()->addMinutes(20), Carbon::now()->addMinutes(60)])
+            ->whereBetween('starts_at', [$from, $to])
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ClockInReminder::getKey(), $schedules->pluck('id'));

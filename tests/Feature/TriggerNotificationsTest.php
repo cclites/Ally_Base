@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Schedule;
 use Illuminate\Support\Carbon;
 use App\Notifications\Caregiver\ShiftReminder;
+use App\Notifications\Caregiver\ClockInReminder;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -51,8 +52,7 @@ class TriggerNotificationsTest extends TestCase
         
         Notification::assertNothingSent();
 
-        $cron = new CronReminders();
-        $cron->upcomingShifts($this->business);
+        (new CronReminders())->handle();
 
         Notification::assertSentTo(
             $this->caregiver->user,
@@ -75,8 +75,7 @@ class TriggerNotificationsTest extends TestCase
             'starts_at' => Carbon::now()->subMinutes(1),
         ]);
         
-        $cron = new CronReminders();
-        $cron->upcomingShifts($this->business);
+        (new CronReminders())->handle();
 
         Notification::assertNothingSent();
 
@@ -87,9 +86,33 @@ class TriggerNotificationsTest extends TestCase
             'starts_at' => Carbon::now()->addDays(1),
         ]);
         
-        $cron = new CronReminders();
-        $cron->upcomingShifts($this->business);
+        (new CronReminders())->handle();
 
         Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function a_caregiver_should_be_notified_if_they_are_late_to_clock_in()
+    {
+        Notification::fake();
+
+        $schedule = factory(Schedule::class)->create([
+            'client_id' => $this->client->id,
+            'business_id' => $this->business->id,
+            'caregiver_id' => $this->caregiver->id,
+            'starts_at' => Carbon::now()->subMinutes(25),
+        ]);
+        
+        Notification::assertNothingSent();
+        
+        (new CronReminders())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            ClockInReminder::class,
+            function ($notification, $channels) use ($schedule) {
+                return $schedule->id === $notification->schedule->id;
+            }
+        );
     }
 }

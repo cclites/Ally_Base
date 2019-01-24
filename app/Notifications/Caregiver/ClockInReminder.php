@@ -33,7 +33,7 @@ class ClockInReminder extends BaseNotification
      *
      * @var \App\Schedule
      */
-    protected $schedule;
+    public $schedule;
 
     /**
      * Create a new notification instance.
