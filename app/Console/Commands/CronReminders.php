@@ -10,6 +10,7 @@ use App\TriggeredReminder;
 use App\Notifications\Caregiver\ClockInReminder;
 use App\Notifications\Caregiver\ClockOutReminder;
 use App\Shift;
+use App\Business;
 
 class CronReminders extends Command
 {
@@ -52,7 +53,9 @@ class CronReminders extends Command
         // CAREGIVER REMINDERS
         // ======================================
 
-        $this->upcomingShifts();
+        foreach (Business::all() as $business) {
+            $this->upcomingShifts($business);
+        }
 
         $this->overdueClockins();
 
@@ -64,9 +67,12 @@ class CronReminders extends Command
      *
      * @return void
      */
-    public function upcomingShifts()
+    public function upcomingShifts(Business $business) : void
     {
-        $schedules = Schedule::whereBetween('starts_at', [Carbon::now(), Carbon::now()->addMinutes(20)])
+        $to = Carbon::now()->tz($business->timezone);
+        $from = Carbon::now()->addMinutes(20)->tz($business->timezone);
+
+        $schedules = Schedule::whereBetween('starts_at', [$to, $from])
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
