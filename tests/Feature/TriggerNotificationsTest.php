@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\CaregiverApplication;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,7 +44,7 @@ class TriggerNotificationsTest extends TestCase
         $number->update(['receives_sms' => 1]);
         $this->business->chain->caregivers()->save($this->caregiver);
         
-        $this->officeUser = factory('App\OfficeUser')->create();
+        $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
     }
 
@@ -535,5 +536,33 @@ class TriggerNotificationsTest extends TestCase
 
         $this->assertTrue($shift->checked_out_verified);
         Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_when_a_caregiver_submits_an_application()
+    {
+        Notification::fake();
+
+        $application = factory(CaregiverApplication::class)->raw([
+            'ssn' => '123-12-1234',
+            'address_2' => '',
+            'preferred_days' => [1],
+            'preferred_times' => [8],
+            'preferred_shift_length' => [1],
+            'heard_about' => [],
+        ]);
+
+        Notification::assertNothingSent();
+
+        $this->postJson(route('business_chain_routes.apply', ['slug' => $this->business->chain->slug]), $application)
+            ->assertStatus(201);
+        
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\ApplicationSubmitted::class,
+            function ($notification, $channels) use ($application) {
+                return $application['email'] === $notification->application->email;
+            }
+        );
     }
 }

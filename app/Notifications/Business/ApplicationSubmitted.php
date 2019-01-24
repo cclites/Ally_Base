@@ -28,7 +28,7 @@ class ApplicationSubmitted extends BaseNotification
      *
      * @var \App\CaregiverApplication
      */
-    protected $application;
+    public $application;
 
     /**
      * The action text.
