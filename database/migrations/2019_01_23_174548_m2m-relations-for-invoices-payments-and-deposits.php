@@ -17,6 +17,7 @@ class M2mRelationsForInvoicesPaymentsAndDeposits extends Migration
             $table->increments('id');
             $table->unsignedInteger('payment_id');
             $table->unsignedInteger('invoice_id');
+            $table->decimal('amount_applied', 9, 2);
 
             $table->foreign('payment_id')->references('id')->on('payments')->onDelete('restrict');
             $table->foreign('invoice_id')->references('id')->on('client_invoices')->onDelete('restrict');
@@ -27,6 +28,7 @@ class M2mRelationsForInvoicesPaymentsAndDeposits extends Migration
             $table->unsignedInteger('deposit_id');
             $table->string('invoice_type', 128);
             $table->unsignedInteger('invoice_id');
+            $table->decimal('amount_applied', 9, 2);
 
             $table->foreign('deposit_id')->references('id')->on('deposits')->onDelete('restrict');
             $table->index(['invoice_type', 'invoice_id']);

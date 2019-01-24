@@ -33,7 +33,12 @@ return [
         'caregiver_invoices' => \App\Billing\CaregiverInvoice::class,
         'client_invoices' => \App\Billing\ClientInvoice::class,
 
-        // Payment Methods and Shifts (for Signatures/Exceptions) haven't been converted yet
+        // Payment Methods
+        'businesses' => \App\Business::class,
+        'credit_cards' => \App\Billing\PaymentMethods\CreditCard::class,
+        'bank_accounts' => \App\Billing\PaymentMethods\BankAccount::class,
+
+        // Shifts (for Signatures/Exceptions) haven't been converted yet
     ],
 
     /*

@@ -67,6 +67,10 @@ class ShiftAdjustment extends InvoiceableModel
     //// Relationship Methods
     ////////////////////////////////////
 
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
+    }
 
     ////////////////////////////////////
     //// Instance Methods
@@ -121,9 +125,10 @@ class ShiftAdjustment extends InvoiceableModel
     /**
      * Get the name of this item to display on the invoice
      *
+     * @param string $invoiceModel
      * @return string
      */
-    public function getItemName(): string
+    public function getItemName(string $invoiceModel): string
     {
         return 'Shift Adjustment';
     }
@@ -131,9 +136,10 @@ class ShiftAdjustment extends InvoiceableModel
     /**
      * Get the group this item should be listed under on the invoice
      *
+     * @param string $invoiceModel
      * @return string|null
      */
-    public function getItemGroup(): ?string
+    public function getItemGroup(string $invoiceModel): ?string
     {
         return 'Adjustments';
     }
@@ -146,7 +152,15 @@ class ShiftAdjustment extends InvoiceableModel
      */
     public function getItemDate(): ?string
     {
-        return $this->created_at;
+        return $this->shift ? $this->shift->getItemDate() : $this->created_at;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getItemNotes(): ?string
+    {
+        return $this->notes;
     }
 
     /**

@@ -78,6 +78,6 @@ class ClientCaregiver implements Responsable
             );
         }
 
-        return $caregiver;
+        return response($caregiver);
     }
 }

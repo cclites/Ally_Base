@@ -9,6 +9,7 @@ use App\Billing\PaymentMethods\BankAccount;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Contracts\ContactableInterface;
 use App\Contracts\HasPaymentHold;
 use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
@@ -192,7 +193,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
  */
-class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface, BelongsToChainsInterface
+class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold,
+    BelongsToBusinessesInterface, BelongsToChainsInterface, ContactableInterface
 {
     use BelongsToBusinesses, BelongsToOneChain;
     use \App\Traits\HasPaymentHold;
@@ -705,6 +707,34 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this;
     }
 
+    function name(): string
+    {
+        return $this->name;
+    }
+
+    function getAddress(): ?Address
+    {
+        return new Address([
+            'address1' => $this->address1,
+            'address2' => $this->address2,
+            'city' => $this->city,
+            'state' => $this->state,
+            'zip' => $this->zip,
+            'country' => 'US',
+        ]);
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        try {
+            $phone = new PhoneNumber();
+            $phone->input($this->phone1);
+            return $phone;
+        }
+        catch (\Exception $e) {}
+        return null;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -720,5 +750,4 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         $builder->whereIn('id', $businessIds);
     }
-
 }

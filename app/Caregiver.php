@@ -7,6 +7,7 @@ use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\PaymentMethods\BankAccount;
 use App\Confirmations\Confirmation;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Contracts\HasPaymentHold as HasPaymentHoldInterface;
@@ -129,7 +130,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
+class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface,
+    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates;
@@ -281,8 +283,18 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     }
 
     ///////////////////////////////////////////
-    /// Other Methods
+    /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->phoneNumber;
+    }
 
     /**
      * Set the caregiver's availability data
@@ -426,7 +438,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return string
      */
-    public function name()
+    public function name(): string
     {
         return trim($this->user->name() . ' ' . $this->title);
     }
@@ -436,7 +448,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
      *
      * @return string
      */
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return trim($this->user->nameLastFirst() . ' ' . $this->title);
     }

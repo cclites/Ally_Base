@@ -1,8 +1,11 @@
 <?php
 namespace App\Billing;
 
+use App\Address;
 use App\AuditableModel;
 use App\Contracts\BelongsToChainsInterface;
+use App\Contracts\ContactableInterface;
+use App\PhoneNumber;
 use App\Traits\BelongsToOneChain;
 use Carbon\Carbon;
 
@@ -17,7 +20,7 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
  */
-class Payer extends AuditableModel implements BelongsToChainsInterface
+class Payer extends AuditableModel implements BelongsToChainsInterface, ContactableInterface
 {
     use BelongsToOneChain;
 
@@ -46,6 +49,11 @@ class Payer extends AuditableModel implements BelongsToChainsInterface
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    function isPrivatePay()
+    {
+        return $this->id === self::PRIVATE_PAY_ID;
+    }
 
     /**
      * Get the default PayerRate for this payer
@@ -110,5 +118,33 @@ class Payer extends AuditableModel implements BelongsToChainsInterface
             \Log::debug($ex->getMessage());
             return false;
         }
+    }
+
+    function name(): string
+    {
+        // TODO: Implement name() method.
+    }
+
+    function getAddress(): ?Address
+    {
+        return new Address([
+            'address1' => $this->address1,
+            'address2' => $this->address2,
+            'city' => $this->city,
+            'state' => $this->state,
+            'zip' => $this->zip,
+            'country' => 'US',
+        ]);
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        try {
+            $phone = new PhoneNumber();
+            $phone->input($this->phone_number);
+            return $phone;
+        }
+        catch (\Exception $e) {}
+        return null;
     }
 }

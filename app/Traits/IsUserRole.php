@@ -135,12 +135,12 @@ trait IsUserRole
     /// Name Concatenation Forwarders
     ///////////////////////////////////////////
 
-    public function name()
+    public function name(): string
     {
         return $this->user->name();
     }
 
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return $this->user->nameLastFirst();
     }

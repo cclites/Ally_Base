@@ -49,7 +49,7 @@ class AlterInvoiceStructures extends Migration
             $table->decimal('total', 9, 2); // client rate x units
             $table->decimal('amount_due', 9, 2); // total x payer allocation
             $table->dateTime('date')->nullable(); // used for ordering
-            $table->string('notes')->nullable();
+            $table->string('notes', 255)->nullable();
 
             $table->foreign('invoice_id')->references('id')->on('client_invoices')->onDelete('cascade');
             $table->index(['invoiceable_type', 'invoiceable_id']);
@@ -66,7 +66,7 @@ class AlterInvoiceStructures extends Migration
             $table->decimal('rate', 7, 2); // caregiver rate
             $table->decimal('total', 9, 2); // caregiver rate x units
             $table->dateTime('date')->nullable(); // used for ordering
-            $table->string('notes')->nullable();
+            $table->string('notes', 255)->nullable();
 
             $table->foreign('invoice_id')->references('id')->on('caregiver_invoices')->onDelete('cascade');
             $table->index(['invoiceable_type', 'invoiceable_id']);
@@ -86,7 +86,7 @@ class AlterInvoiceStructures extends Migration
             $table->decimal('rate', 7, 2); // provider rate
             $table->decimal('total', 9, 2); // provider rate x units
             $table->dateTime('date')->nullable(); // used for ordering
-            $table->string('notes')->nullable();
+            $table->string('notes', 255)->nullable();
 
             $table->foreign('invoice_id')->references('id')->on('business_invoices')->onDelete('cascade');
             $table->index(['invoiceable_type', 'invoiceable_id']);

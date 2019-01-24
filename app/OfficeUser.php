@@ -84,6 +84,17 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     //// Instance Methods
     ////////////////////////////////////
 
+
+    function getAddress(): ?Address
+    {
+        return $this->addresses()->first();
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->phoneNumbers()->first();
+    }
+
     /**
      * Return an array of business IDs the entity is attached to
      *

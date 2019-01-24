@@ -3,6 +3,7 @@ namespace App\Billing\Generators;
 
 use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
+use App\Shift;
 
 abstract class BaseInvoiceGenerator
 {
@@ -12,6 +13,7 @@ abstract class BaseInvoiceGenerator
      */
     public static $invoiceables = [
         'shift_adjustment' => ShiftAdjustment::class,
+        'shift' => Shift::class,
         'shift_service' => ShiftService::class,
     ];
 

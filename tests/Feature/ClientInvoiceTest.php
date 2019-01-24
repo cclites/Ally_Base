@@ -51,7 +51,7 @@ class ClientInvoiceTest extends TestCase
         /** @var ClientInvoice $invoice */
         $invoice = factory(ClientInvoice::class)->create();
         $payments = factory(Payment::class, 2)->create();
-        $invoice->payments()->saveMany($payments);
+        $invoice->payments()->saveMany($payments, [['amount_applied' => 0], ['amount_applied' => 0]]);
 
         $this->assertCount(2, $invoice->payments,  'The invoice did not collect the payments.');
         $this->assertCount(1, $payments[0]->invoices,  'The payment did not relate to the invoice.');
@@ -195,6 +195,22 @@ class ClientInvoiceTest extends TestCase
         $invoice->addItem($item);
 
         $this->assertEquals(20, $invoice->amount);
+    }
+
+
+    /**
+     * @test
+     */
+    function the_amount_paid_should_be_updated_when_adding_a_payment()
+    {
+        $invoice = factory(ClientInvoice::class)->create();
+
+        $this->assertEquals(0, $invoice->amount_paid);
+
+        $payment = factory(Payment::class)->make(['amount' => 20.00]);
+        $invoice->addPayment($payment, 20);
+
+        $this->assertEquals(20, $invoice->amount_paid);
     }
 
     /**

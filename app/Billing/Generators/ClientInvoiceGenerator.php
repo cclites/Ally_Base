@@ -165,8 +165,8 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         $amountDue = $this->getAmountDue($invoiceable, $split, $allowance);
 
         return [
-            'name' => $invoiceable->getItemName(),
-            'group' => $invoiceable->getItemGroup(),
+            'name' => $invoiceable->getItemName(ClientInvoice::class),
+            'group' => $invoiceable->getItemGroup(ClientInvoice::class),
             'units' => $invoiceable->getItemUnits(),
             'rate' => $invoiceable->getClientRate(),
             'date' => $invoiceable->getItemDate(),

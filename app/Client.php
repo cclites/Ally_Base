@@ -10,6 +10,7 @@ use App\Billing\PaymentMethods\BankAccount;
 use App\Billing\PaymentMethods\CreditCard;
 use App\Businesses\Timezone;
 use App\Confirmations\Confirmation;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\CanBeConfirmedInterface;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -210,7 +211,8 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientRate[] $rates
  * @property-read \App\PhoneNumber $smsNumber
  */
-class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
+class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold,
+    HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
     use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
@@ -468,6 +470,16 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
+
+    public function getAddress(): ?Address
+    {
+        return $this->evvAddress;
+    }
+
+    public function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->evvPhone;
+    }
 
     /**
      * Get the client timezone (currently retrieved from the business record)

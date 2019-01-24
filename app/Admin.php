@@ -77,4 +77,14 @@ class Admin extends AuditableModel implements UserRole
     {
         return;
     }
+
+    function getAddress(): ?Address
+    {
+        return null;
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        return null;
+    }
 }

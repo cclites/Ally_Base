@@ -1,7 +1,10 @@
 <?php
 namespace App;
 
+use App\Billing\CaregiverInvoice;
+use App\Billing\ClientInvoice;
 use App\Billing\Deposit;
+use App\Billing\Invoiceable\InvoiceableModel;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payment;
 use App\Businesses\Timezone;
@@ -9,9 +12,7 @@ use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
-use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\CostCalculator;
-use App\Shifts\ShiftFactory;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftFlagManager;
 use App\Shifts\ShiftStatusManager;
@@ -19,6 +20,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * App\Shift
@@ -153,7 +155,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  */
-class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
+class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
     use HasAllyFeeTrait;
@@ -389,7 +391,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
 
     public function getTimezoneAttribute()
     {
-        return Timezone::getTimezone($this->business_id);
+        return $this->getTimezone();
     }
 
     public function getDurationAttribute()
@@ -759,6 +761,173 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
             $this->removeFlag($flag);
         }
     }
+
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the client payment
+     *
+     * @param \App\Client $client
+     * @return \Illuminate\Support\Collection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForPayment(Client $client): Collection
+    {
+        return self::where('client_id', $client->id)
+            ->doesntHave('services')
+            ->where('status', Shift::WAITING_FOR_INVOICE)
+            ->get();
+    }
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the caregiver deposit
+     *
+     * @param \App\Caregiver $caregiver
+     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
+    {
+        // TODO: Implement getItemsForCaregiverDeposit() method.
+    }
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the provider deposit
+     *
+     * @param \App\Business $business
+     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForBusinessDeposit(Business $business): Collection
+    {
+        // TODO: Implement getItemsForBusinessDeposit() method.
+    }
+
+    /**
+     * Get the number of units to be invoiced
+     *
+     * @return float
+     */
+    public function getItemUnits(): float
+    {
+        return $this->duration();
+    }
+
+    /**
+     * Get the name of this item to display on the invoice
+     *
+     * @param string $invoiceModel
+     * @return string
+     */
+    public function getItemName(string $invoiceModel): string
+    {
+        $time = $this->checked_in_time->setTimezone($this->getTimezone())->format('g:iA');
+
+        switch($invoiceModel) {
+            case ClientInvoice::class:
+                return optional($this->caregiver)->name() . ' - ' . $time;
+            case CaregiverInvoice::class:
+                return optional($this->client)->name() . ' - ' . $time;
+        }
+
+        return optional($this->client)->name() . ' - ' . optional($this->caregiver)->name() . ' - ' . $time;
+    }
+
+    /**
+     * Get the group this item should be listed under on the invoice
+     *
+     * @param string $invoiceModel
+     * @return string|null
+     */
+    public function getItemGroup(string $invoiceModel): ?string
+    {
+        return $this->getItemName($invoiceModel);
+    }
+
+    /**
+     * Get the date & time that this item's "service" occurred.   SHOULD respect the client/business timezone.
+     * Note: This is used for sorting items on the invoice and determining payer allowances.
+     *
+     * @return string|null
+     */
+    public function getItemDate(): ?string
+    {
+        return $this->checked_in_time->setTimezone($this->getTimezone())->toDateTimeString();
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getItemNotes(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
+     *
+     * @return float
+     */
+    public function getClientRate(): float
+    {
+        return $this->client_rate;
+    }
+
+    /**
+     * TODO Implement caregiver deposit invoicing
+     * @return float
+     */
+    public function getCaregiverRate(): float
+    {
+        return $this->caregiver_rate;
+    }
+
+    /**
+     * Return the ally fee per unit for this invoiceable item.  If this returns null, abort invoicing this item.  Return 0.0 for no ally fee.
+     *
+     * @return float|null
+     */
+    public function getAllyRate(): ?float
+    {
+        // TODO: Implement getAllyRate() method.
+    }
+
+    /**
+     * TODO Implement business deposit invoicing
+     * Note: This is a calculated field from the other rates
+     * @return float
+     */
+    public function getProviderRate(): float
+    {
+        // TODO: Implement getProviderRate() method.
+    }
+
+    /**
+     * Get the assigned payer ID (payers.id, not client_payers.id)
+     *
+     * @return int|null
+     */
+    public function getPayerId(): ?int
+    {
+        return $this->payer_id;
+    }
+
+    /**
+     * Add an amount that has been invoiced to a payer
+     *
+     * @param float $amount
+     */
+    public function addAmountInvoiced(float $amount): void
+    {
+        if ($this->getAmountDue() === 0) {
+            $this->statusManager()->ackClientInvoice();
+        }
+    }
+
 
     ///////////////////////////////////////////
     /// Query Scopes

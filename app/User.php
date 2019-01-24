@@ -118,14 +118,14 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     /// Name Concatenation Methods
     ///////////////////////////////////////////
 
-    public function name()
+    public function name(): string
     {
-        return $this->firstname . ' ' . $this->lastname;
+        return trim($this->firstname . ' ' . $this->lastname);
     }
 
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
-        return $this->lastname . ', ' . $this->firstname;
+        return trim($this->lastname . ', ' . $this->firstname);
     }
 
     ////////////////////////////////////

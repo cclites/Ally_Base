@@ -50,16 +50,18 @@ interface InvoiceableInterface
     /**
      * Get the name of this item to display on the invoice
      *
+     * @param string $invoiceModel
      * @return string
      */
-    public function getItemName(): string;
+    public function getItemName(string $invoiceModel): string;
 
     /**
      * Get the group this item should be listed under on the invoice
      *
+     * @param string $invoiceModel
      * @return string|null
      */
-    public function getItemGroup(): ?string;
+    public function getItemGroup(string $invoiceModel): ?string;
 
     /**
      * Get the date & time that this item's "service" occurred.   SHOULD respect the client/business timezone.
@@ -68,6 +70,11 @@ interface InvoiceableInterface
      * @return string|null
      */
     public function getItemDate(): ?string;
+
+    /**
+     * @return string|null
+     */
+    public function getItemNotes(): ?string;
 
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.

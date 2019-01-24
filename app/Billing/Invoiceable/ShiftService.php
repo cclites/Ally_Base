@@ -131,9 +131,10 @@ class ShiftService extends InvoiceableModel
     /**
      * Get the name of this item to display on the invoice
      *
+     * @param string $invoiceModel
      * @return string
      */
-    public function getItemName(): string
+    public function getItemName(string $invoiceModel): string
     {
         return $this->service->code . ' ' . $this->service->name;
     }
@@ -141,13 +142,12 @@ class ShiftService extends InvoiceableModel
     /**
      * Get the group this item should be listed under on the invoice
      *
+     * @param string $invoiceModel
      * @return string|null
      */
-    public function getItemGroup(): ?string
+    public function getItemGroup(string $invoiceModel): ?string
     {
-        return '';
-        // TODO Delegate to the shift
-        return $this->shift->getItemGroup();
+        return $this->shift->getItemGroup($invoiceModel);
     }
 
     /**
@@ -158,8 +158,17 @@ class ShiftService extends InvoiceableModel
      */
     public function getItemDate(): ?string
     {
-        return $this->shift->checked_in_time;
+        return $this->shift->getItemDate();
     }
+
+    /**
+     * @return string|null
+     */
+    public function getItemNotes(): ?string
+    {
+        return null;
+    }
+
 
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
