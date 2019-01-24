@@ -28,6 +28,11 @@ class ShiftFlagManager
      */
     public function generate(array $flags = null) : void
     {
+        if ($this->shift->statusManager()->isClockedIn() || empty($this->shift->checked_out_time)) {
+            // do not process flags on shifts that have not been clocked out yet
+            return;
+        }
+
         if (empty($flags)) {
             $flags = ShiftFlag::FLAGS;
         }

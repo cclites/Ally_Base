@@ -8,6 +8,8 @@ use App\Shift;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\ShiftFlag;
+use App\ShiftStatusHistory;
 
 class ShiftFlagsTest extends TestCase
 {
@@ -150,6 +152,24 @@ class ShiftFlagsTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function flags_should_not_process_if_the_shift_is_currently_clocked_in()
+    {
+        $shift = $this->createDuplicateShift('10:00:00', '18:00:00');
+        $shift->update(['checked_in_method' => Shift::METHOD_OFFICE]);
+        $shift->flagManager()->generate();
+        $this->assertTrue($shift->hasFlag(ShiftFlag::ADDED));
+
+        $shift->syncFlags([]);
+        $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::ADDED));
+
+        $shift->statusManager()->update(Shift::CLOCKED_IN, ['checked_out_time' => null]);
+        $shift->fresh()->flagManager()->generate();
+        $this->assertFalse($shift->fresh()->hasFlag(ShiftFlag::ADDED));
+    }
+
+    /**
      * @param $in
      * @param $out
      * @return Shift
@@ -164,6 +184,7 @@ class ShiftFlagsTest extends TestCase
             'business_id' => $this->client->business_id,
             'checked_in_time' => $in,
             'checked_out_time' => $out,
+            'status' => Shift::CLOCKED_IN
         ]);
     }
 }
