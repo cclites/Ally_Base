@@ -32,6 +32,10 @@ use App\Policies\SmsThreadPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimesheetPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\CustomFieldPolicy;
+use App\Policies\CustomFieldOptionPolicy;
+use App\CustomField;
+use App\CustomFieldOption;
 use App\Prospect;
 use App\RateCode;
 use App\ReferralSource;
@@ -79,6 +83,8 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         Timesheet::class => TimesheetPolicy::class,
         User::class => UserPolicy::class,
+        CustomField::class => CustomFieldPolicy::class,
+        CustomFieldOption::class => CustomFieldOptionPolicy::class,
     ];
 
     /**

@@ -1,10 +1,34 @@
 export default {
+    props: {
+        customFields: {
+            type: Array,
+            required: true,
+        },
+    },
+
+    created() {
+        const obj = {};
+        const customKeys = [];
+        this.customFields.forEach(({key, label}) => {
+            customKeys.push(key);
+            obj[key] = {
+               sortable: true,
+               shouldShow: true,
+               key,
+               label,
+            };
+        });
+
+       this.customFieldKeys = customKeys;
+        this.columns = {
+            ...this.columns,
+            ...obj,
+        };
+    },
+
     data() {
         return {
-            totalRows: 0,
-            perPage: 15,
-            currentPage: 1,
-            columnsModal: false,
+            customFieldKeys: [],
             filters: {
                 start_date: '',
                 end_date: '',
@@ -65,14 +89,24 @@ export default {
             return moment(date).format('MM-DD-YYYY');
         },
 
-        onFiltered(filteredItems) {
-            // Trigger pagination to update the number of buttons/pages due to filtering
-            this.totalRows = filteredItems.length;
-            this.currentPage = 1;
-        },
-
         printTable() {
             $('#table').print();
         },
+
+        getFieldValue(meta, key) {
+            const metaField = meta.find(fieldValue => fieldValue.key == key);
+            const {options, default: fieldDefault} = this.customFields.find(definition => definition.key == key);
+            const isDropdown = options.length > 0;
+
+            if(!metaField) {
+                return fieldDefault;
+            }
+
+            return isDropdown ? this.getDropdownLabel(options, metaField.value) : metaField.value;
+        },
+
+        getDropdownLabel(options, key) {
+            return options.find(option => option.value == key).label;
+        }
     }
 }
