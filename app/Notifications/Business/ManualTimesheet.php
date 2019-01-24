@@ -34,7 +34,7 @@ class ManualTimesheet extends BaseNotification
      *
      * @var \App\Timesheet
      */
-    protected $timesheet;
+    public $timesheet;
 
     /**
      * Create a new notification instance.
@@ -73,8 +73,9 @@ class ManualTimesheet extends BaseNotification
     /**
      * Get the SystemNotification representation of the notification.
      *
-     * @param  mixed  $notifiable
-     * @return SystemNotification
+     * @param mixed $notifiable
+     * @param array $data
+     * @return \App\SystemNotification
      */
     public function toSystem($notifiable, $data = [])
     {

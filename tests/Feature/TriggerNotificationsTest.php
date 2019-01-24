@@ -566,3 +566,36 @@ class TriggerNotificationsTest extends TestCase
         );
     }
 }
+    /** @test */
+    public function office_users_should_be_notified_when_a_caregiver_submits_a_timesheet()
+    {
+        $this->business->update(['allows_manual_shifts' => true]);
+        Notification::fake();
+
+        $this->actingAs($this->caregiver->user);
+
+        Notification::assertNothingSent();
+
+        factory('App\Activity', 5)->create([
+            'business_id' => $this->business->id,
+        ]);
+        $this->activities = collect($this->business->allActivities())->pluck('id')->toArray();
+
+        $timesheet = [
+            'caregiver_id' => $this->caregiver->id,
+            'client_id' => $this->client->id,
+            'entries' => [factory('App\TimesheetEntry')->raw(['activities' => $this->activities])],
+        ];
+
+        $this->postJson(route('timesheets.store'), $timesheet)
+            ->assertStatus(200);
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\ManualTimesheet::class,
+            function ($notification) use ($timesheet) {
+                return $timesheet['caregiver_id'] === $notification->timesheet->caregiver_id;
+            }
+        );
+    }
+
