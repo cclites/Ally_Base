@@ -116,7 +116,6 @@ class TelefonyCheckInController extends BaseVoiceController
         if ($schedule = $this->telefony->scheduledShiftForClient($this->client, $caregiver->id)) {
             try {
                 if ($shift = $clockIn->clockIn($schedule)) {
-                    event(new ShiftFlagsCouldChange($shift));
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }
@@ -128,7 +127,6 @@ class TelefonyCheckInController extends BaseVoiceController
         else {
             try {
                 if ($shift = $clockIn->clockInWithoutSchedule($this->client->business, $this->client)) {
-                    event(new ShiftFlagsCouldChange($shift));
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }

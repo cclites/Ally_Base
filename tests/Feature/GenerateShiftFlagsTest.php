@@ -14,7 +14,6 @@ use Illuminate\Support\Carbon;
 use App\Shifts\ScheduleConverter;
 use App\Timesheet;
 use App\TimesheetEntry;
-use App\Shifts\ClockIn;
 use App\Activity;
 use App\Events\ShiftDeleted;
 
@@ -150,62 +149,12 @@ class GenerateShiftFlagsTest extends TestCase
         $timesheet->createShiftsFromEntries();
     }
 
-    /** @test */
-    public function it_triggers_when_a_caregiver_clocks_in_to_a_schedule()
-    {
-        $this->expectsEvents(ShiftFlagsCouldChange::class);
-
-        $this->actingAs($this->caregiver->user);
-
-        $schedule = $this->createSchedule(Carbon::now());
-
-        $this->postJson(route('clock_in'), ['schedule_id' => $schedule->id, 'client_id' => $this->client->id])
-            ->assertStatus(200);
-    }
-
-    /** @test */
-    public function it_triggers_when_a_caregiver_clocks_in_without_a_schedule()
-    {
-        $this->expectsEvents(ShiftFlagsCouldChange::class);
-
-        $this->actingAs($this->caregiver->user);
-
-        $this->postJson(route('clock_in'), ['schedule_id' => null, 'client_id' => $this->client->id])
-            ->assertStatus(200);
-    }
-
     protected function telefonyPost($url, $parameters = [], $headers = [])
     {
         $url = rtrim('/api/telefony/' . $url, '/');
         $parameters += ['From' => '1234567890'];
         $headers += ['Content-Type' => 'text/xml'];
         return $this->post($url, $parameters, $headers);
-    }
-
-    /** @test */
-    public function it_triggers_on_telefony_checkin_with_schedule()
-    {
-        $this->expectsEvents(ShiftFlagsCouldChange::class);
-
-        $phone = factory(\App\PhoneNumber::class)->make(['national_number' => '1234567890']);
-        $this->client->phoneNumbers()->save($phone);
-
-        $schedule = $this->createSchedule(Carbon::now());
-        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
-        $response->assertSee('You have successfully clocked in.');
-        $this->assertTrue(Shift::where('schedule_id', $schedule->id)->exists());
-    }
-
-    /** @test */
-    public function it_triggers_on_telefony_checkin_without_schedule()
-    {
-        $this->expectsEvents(ShiftFlagsCouldChange::class);
-
-        $phone = factory(\App\PhoneNumber::class)->make(['national_number' => '1234567890']);
-        $this->client->phoneNumbers()->save($phone);
-
-        $response = $this->telefonyPost('check-in/' . $this->caregiver->id, ['Digits' => 1]);
-        $response->assertSee('You have successfully clocked in.');
     }
 
     /** @test */
