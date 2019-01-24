@@ -61,4 +61,9 @@ class UpdateShiftRequest extends BusinessClientRequest
     {
         return $this->validated()['activities'] ?? [];
     }
+
+    public function getGoals()
+    {
+        return $this->validated()['goals'] ?? [];
+    }
 }

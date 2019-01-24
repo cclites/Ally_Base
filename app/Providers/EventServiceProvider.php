@@ -22,6 +22,10 @@ use App\Events\TimesheetCreated;
 use App\Listeners\CreateTimesheetException;
 use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
+use App\Events\ShiftFlagsCouldChange;
+use App\Listeners\GenerateShiftFlags;
+use App\Events\ShiftDeleted;
+use App\Listeners\RecalculateDuplicateShiftFlags;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -59,6 +63,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         TimesheetCreated::class => [
             CreateTimesheetException::class,
+        ],
+        ShiftFlagsCouldChange::class => [
+            GenerateShiftFlags::class,
+        ],
+        ShiftDeleted::class => [
+            RecalculateDuplicateShiftFlags::class,
         ],
     ];
 
