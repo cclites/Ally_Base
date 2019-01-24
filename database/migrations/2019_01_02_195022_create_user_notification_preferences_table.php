@@ -28,11 +28,13 @@ class CreateUserNotificationPreferencesTable extends Migration
             $table->timestamps();
         });
 
-        // ======================================================
-        // implement defaults for all user notifications preferences
-        // ======================================================
-        foreach(User::where('active', 1)->get() as $user) {
-            $user->ensureNotificationPreferences();
+        // ===========================================================
+        // Implement defaults for all user notifications preferences
+        // ===========================================================
+        foreach(\App\User::all() as $user) {
+            if ($user->role) {
+                $user->role->addNotificationPreferenceDefaults();
+            }
         }
     }
 
