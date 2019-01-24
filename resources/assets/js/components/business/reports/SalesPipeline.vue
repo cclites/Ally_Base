@@ -112,15 +112,14 @@ export default {
     },
     computed: {
         chartOptions() {
-            const calculatePercentage = (status) => (this.pipeline[status] / this.totalProspects * 100).toFixed(2);
             const data = [
-                {name: 'General', value: 70, count: this.pipeline.general, percentage: calculatePercentage('general') },
-                {name: 'Assessment Scheduled', value: 60, count: this.pipeline.had_assessment_scheduled, percentage: calculatePercentage('had_assessment_scheduled') },
-                {name: 'Assessment Performed', value: 50, count: this.pipeline.had_assessment_performed, percentage: calculatePercentage('had_assessment_performed') },
-                {name: 'Needs Contract', value: 40, count: this.pipeline.needs_contract, percentage: calculatePercentage('needs_contract') },
-                {name: 'Expecting Signature', value: 30, count: this.pipeline.expecting_client_signature, percentage: calculatePercentage('expecting_client_signature') },
-                {name: 'Collected Payment Info', value: 20, count: this.pipeline.needs_payment_info, percentage: calculatePercentage('needs_payment_info') },
-                {name: 'Ready to Schedule', value: 10, count: this.pipeline.ready_to_schedule, percentage: calculatePercentage('ready_to_schedule') },
+                {name: 'General', value: 70, count: this.pipeline.general, percentage: this.calculatePercentage('general') },
+                {name: 'Assessment Scheduled', value: 60, count: this.pipeline.had_assessment_scheduled, percentage: this.calculatePercentage('had_assessment_scheduled') },
+                {name: 'Assessment Performed', value: 50, count: this.pipeline.had_assessment_performed, percentage: this.calculatePercentage('had_assessment_performed') },
+                {name: 'Needs Contract', value: 40, count: this.pipeline.needs_contract, percentage: this.calculatePercentage('needs_contract') },
+                {name: 'Expecting Signature', value: 30, count: this.pipeline.expecting_client_signature, percentage: this.calculatePercentage('expecting_client_signature') },
+                {name: 'Collected Payment Info', value: 20, count: this.pipeline.needs_payment_info, percentage: this.calculatePercentage('needs_payment_info') },
+                {name: 'Ready to Schedule', value: 10, count: this.pipeline.ready_to_schedule, percentage: this.calculatePercentage('ready_to_schedule') },
             ];
 
             return {
@@ -263,6 +262,11 @@ export default {
                     console.error(err);
                     this.loading = false;
                 });
+        },
+        calculatePercentage(category) {
+            return this.totalProspects != 0 
+                ? (this.pipeline[category] / this.totalProspects * 100).toFixed(2)
+                : 0;
         },
         crunchDataForFunnel(data) {
             data.forEach(prospect => {
