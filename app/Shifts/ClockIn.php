@@ -8,6 +8,7 @@ use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
+use App\Events\UnverifiedClockIn;
 
 class ClockIn extends ClockBase
 {
@@ -41,6 +42,7 @@ class ClockIn extends ClockBase
             $shift->checked_in_verified = true;
         }
         catch (UnverifiedLocationException $e) {
+            event(new UnverifiedClockIn($shift));
             if ($shift->verified) throw $e;
         }
 

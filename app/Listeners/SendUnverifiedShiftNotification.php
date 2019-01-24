@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Events\UnverifiedShiftLocation;
 use App\Notifications\Business\UnverifiedShift;
+use App\Events\UnverifiedClockOut;
 
 class SendUnverifiedShiftNotification
 {
@@ -20,10 +20,10 @@ class SendUnverifiedShiftNotification
     /**
      * Handle the event.
      *
-     * @param  UnverifiedShiftLocation  $event
+     * @param  mixed  $event
      * @return void
      */
-    public function handle(UnverifiedShiftLocation $event)
+    public function handle($event)
     {
         $shift = $event->shift;
         $business = $shift->business;

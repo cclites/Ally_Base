@@ -7,7 +7,6 @@ use App\Events\FailedTransactionRecorded;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
-use App\Events\UnverifiedShiftCreated;
 use App\Events\UnverifiedShiftLocation;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
@@ -23,6 +22,8 @@ use App\Events\TaskAssigned;
 use App\Listeners\SendAssignedTaskEmail;
 use App\Listeners\SendManualTimesheetNotification;
 use App\Listeners\SendUnverifiedShiftNotification;
+use App\Events\UnverifiedClockOut;
+use App\Events\UnverifiedClockIn;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -36,10 +37,15 @@ class EventServiceProvider extends ServiceProvider
 //            SendAssignedTaskEmail::class,
         ],
         UnverifiedShiftLocation::class   => [
-            SendUnverifiedShiftNotification::class,
         ],
         UnverifiedShiftConfirmed::class => [
             UnverifiedShiftAcknowledgement::class,
+        ],
+        UnverifiedClockIn::class => [
+            SendUnverifiedShiftNotification::class,
+        ],
+        UnverifiedClockOut::class => [
+            SendUnverifiedShiftNotification::class,
         ],
         ShiftModified::class            => [
             ShiftStatusUpdate::class,

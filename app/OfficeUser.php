@@ -65,7 +65,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     public static $availableNotifications = [
         \App\Notifications\Business\DeclinedVisit::class, // TODO: implement trigger
         \App\Notifications\Business\CaregiverAvailable::class, // TODO: implement trigger
-        \App\Notifications\Business\UnverifiedShift::class, // TODO: implement trigger
+        \App\Notifications\Business\UnverifiedShift::class,
         \App\Notifications\Business\CertificationExpiring::class,
         \App\Notifications\Business\CertificationExpired::class,
         \App\Notifications\Business\ApplicationSubmitted::class,

@@ -4,7 +4,7 @@ namespace App\Shifts;
 
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftLocation;
-use App\Events\UnverifiedShiftCreated;
+use App\Events\UnverifiedClockOut;
 use App\Exceptions\UnverifiedLocationException;
 use App\Shift;
 use App\ShiftIssue;
@@ -104,7 +104,7 @@ class ClockOut extends ClockBase
         $shift->statusManager()->ackClockOut($verified);
 
         if (!$verified) {
-            event(new UnverifiedShiftCreated($shift));
+            event(new UnverifiedClockOut($shift));
             if (!$this->number) {
                 event(new UnverifiedShiftLocation($shift));
             }

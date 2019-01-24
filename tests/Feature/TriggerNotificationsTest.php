@@ -19,7 +19,7 @@ use App\Notifications\Caregiver\VisitAccuracyCheck;
 use App\CaregiverLicense;
 use App\Console\Commands\CronDailyNotifications;
 use App\Shifts\ClockOut;
-use App\Events\UnverifiedShiftCreated;
+use App\Events\UnverifiedClockOut;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -450,11 +450,90 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
-    public function office_users_should_be_notified_when_unverified_shifts_are_created()
+    public function office_users_should_be_notified_for_unverified_clock_ins()
     {
+        Notification::fake();
+        
+        $this->business->update(['location_exceptions' => true]);
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
+
+        Notification::assertNothingSent();
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->clockIn($schedule);
+        $this->assertFalse($shift->checked_in_verified);
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\UnverifiedShift::class,
+            function ($notification, $channels) use ($shift) {
+                return $shift->id === $notification->shift->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_not_be_notified_for_verified_clock_ins()
+    {
+        Notification::fake();
+
+        $this->business->update(['location_exceptions' => true]);
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
+
+        $phone = factory(\App\PhoneNumber::class)->make();
+        $this->client->phoneNumbers()->save($phone);
+
+        Notification::assertNothingSent();
+
+        $clockIn = new ClockIn($this->caregiver);
+        $shift = $clockIn->setNumber($phone->national_number)->clockIn($schedule);
+
+        $this->assertTrue($shift->checked_in_verified);
+        Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_for_unverified_clock_outs()
+    {
+        $this->business->update(['location_exceptions' => true]);
+
+        Notification::fake();
+
         $shift = $this->createShift();
-        $this->expectsEvents(UnverifiedShiftCreated::class);
+
+        Notification::assertNothingSent();
+
         $clockOut = new ClockOut($this->caregiver);
-        $result = $clockOut->clockOut($shift);
+        $clockOut->clockOut($shift);
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\UnverifiedShift::class,
+            function ($notification, $channels) use ($shift) {
+                return $shift->id === $notification->shift->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_not_be_notified_for_verified_clock_outs()
+    {
+        $this->business->update(['location_exceptions' => true]);
+
+        Notification::fake();
+
+        $shift = $this->createShift(['checked_in_verified' => true]);
+
+        $phone = factory(\App\PhoneNumber::class)->make();
+        $this->client->phoneNumbers()->save($phone);
+
+        Notification::assertNothingSent();
+
+        $clockIn = new ClockOut($this->caregiver);
+        $clockIn->setNumber($phone->national_number)
+            ->clockOut($shift);
+
+        $this->assertTrue($shift->checked_out_verified);
+        Notification::assertNothingSent();
     }
 }

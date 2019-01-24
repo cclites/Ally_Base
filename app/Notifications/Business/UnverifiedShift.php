@@ -34,7 +34,7 @@ class UnverifiedShift extends BaseNotification
      *
      * @var \App\Shift
      */
-    protected $shift;
+    public $shift;
 
     /**
      * The action text.
