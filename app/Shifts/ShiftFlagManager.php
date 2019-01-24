@@ -120,19 +120,15 @@ class ShiftFlagManager
                 $q->where('checked_in_time', $this->shift->checked_in_time)
                     ->where('checked_out_time', $this->shift->checked_out_time);
 
-                // only calculate inside and outside of hours when the shift has been clocked out
-                // because it throws an exception when trying to < >  a null timestamp
-                if (! empty($this->shift->checked_out_time)) {
-                    // Outside of Hours
-                    $q->orWhere('checked_in_time', '>', $this->shift->checked_in_time)
-                        ->where('checked_in_time', '<', $this->shift->checked_out_time);
-                    $q->orWhere('checked_out_time', '<', $this->shift->checked_out_time)
-                        ->where('checked_out_time', '>', $this->shift->checked_in_time);
+                // Outside of Hours
+                $q->orWhere('checked_in_time', '>', $this->shift->checked_in_time)
+                    ->where('checked_in_time', '<', $this->shift->checked_out_time);
+                $q->orWhere('checked_out_time', '<', $this->shift->checked_out_time)
+                    ->where('checked_out_time', '>', $this->shift->checked_in_time);
 
-                    // Inside of Hours
-                    $q->orWhereRaw("? > checked_in_time AND ? < checked_out_time", [$this->shift->checked_in_time, $this->shift->checked_in_time]);
-                    $q->orWhereRaw("? < checked_out_time AND ? > checked_in_time", [$this->shift->checked_out_time, $this->shift->checked_out_time]);
-                }
+                // Inside of Hours
+                $q->orWhereRaw("? > checked_in_time AND ? < checked_out_time", [$this->shift->checked_in_time, $this->shift->checked_in_time]);
+                $q->orWhereRaw("? < checked_out_time AND ? > checked_in_time", [$this->shift->checked_out_time, $this->shift->checked_out_time]);
             });
     }
 }
