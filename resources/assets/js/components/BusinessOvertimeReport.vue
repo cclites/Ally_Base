@@ -4,10 +4,11 @@
             <b-col>
                 <b-button-toolbar>
 
-                    <date-picker v-model="search.start" class="mr-2"></date-picker>
+                    <div class="d-flex">
+                        <date-picker v-model="search.start" class="mr-2"></date-picker>
 
-                    <date-picker v-model="search.end" class="mr-2"></date-picker>
-
+                        <date-picker v-model="search.end" class="mr-2"></date-picker>
+                    </div>
                     <b-input-group class="w-25 mr-2">
                         <b-form-select v-model="search.caregiver_id">
                             <option value="">All Caregivers</option>
@@ -26,7 +27,7 @@
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
-        
+
         <div v-show="! loading">
             <div class="table-responsive">
                 <b-table bordered striped hover show-empty
@@ -90,13 +91,13 @@
                         sortable: true,
                     },
                     {
-                        key: 'worked',
-                        label: 'Worked Hours',
+                        key: 'scheduled',
+                        label: 'Scheduled Hours',
                         sortable: true,
                     },
                     {
-                        key: 'scheduled',
-                        label: 'Scheduled Hours',
+                        key: 'worked',
+                        label: 'Worked Hours',
                         sortable: true,
                     },
                     {
