@@ -11,6 +11,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\CronShiftSummaryEmails;
 use App\Console\Commands\CronDailyNotifications;
+use App\Console\Commands\CronReminders;
 
 class Kernel extends ConsoleKernel
 {
