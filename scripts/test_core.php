@@ -28,6 +28,17 @@ if (!$recursiveLint->isSuccessful()) {
     exit(1);
 }
 
+$cmd = sprintf('php %s ide-helper:models -N -F .test_core_models.php',
+    escapeshellarg(base_path('artisan')));
+
+$ideHelper = new Process($cmd);
+$ideHelper->run();
+if (!$ideHelper->isSuccessful()) {
+    echo($ideHelper->getOutput() . "\n");
+    echo($ideHelper->getErrorOutput() . "\n");
+    exit(4);
+}
+
 $phpunitConfig = base_path('phpunit.xml');
 $phpunitBin = "$vendorDir/bin/phpunit";
 if (!file_exists($phpunitBin)) {
