@@ -16,6 +16,8 @@ use App\Shifts\ClockIn;
 use App\Shift;
 use App\Console\Commands\CronVisitAccuracyReminder;
 use App\Notifications\Caregiver\VisitAccuracyCheck;
+use App\CaregiverLicense;
+use App\Console\Commands\CronDailyNotifications;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -198,5 +200,80 @@ class TriggerNotificationsTest extends TestCase
         (new CronVisitAccuracyReminder())->handle();
 
         Notification::assertNothingSent();
+    }
+
+    /** @test */
+    public function a_caregiver_should_be_notified_if_they_have_a_license_expiring_soon()
+    {
+        Notification::fake();
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            \App\Notifications\Caregiver\CertificationExpiring::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_when_a_caregivers_license_is_expiring()
+    {
+        Notification::fake();
+
+        // create a second office user to another business on the same chain
+        $otherBusiness = factory('App\Business')->create();
+        $otherBusiness->chain->caregivers()->save($this->caregiver);
+        $otherOfficeUser = factory('App\OfficeUser')->create();
+        $otherOfficeUser->businesses()->attach($otherBusiness->id);
+
+        // create a third office user to a third business on another chain
+        $otherChain = factory('App\BusinessChain')->create();
+        $thirdBusiness = factory('App\Business')->create(['chain_id' => $otherChain->id]);
+        $otherChain->caregivers()->save($this->caregiver);
+        $thirdOfficeUser = factory('App\OfficeUser')->create();
+        $thirdOfficeUser->businesses()->attach($thirdBusiness->id);
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+        
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\CertificationExpiring::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $otherOfficeUser->user,
+            \App\Notifications\Business\CertificationExpiring::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
+
+        Notification::assertSentTo(
+            $thirdOfficeUser->user,
+            \App\Notifications\Business\CertificationExpiring::class,
+            function ($notification, $channels) use ($license) {
+                return $license->id === $notification->license->id;
+            }
+        );
     }
 }

@@ -35,7 +35,7 @@ class CertificationExpiring extends BaseNotification
      *
      * @var \App\CaregiverLicense
      */
-    protected $license;
+    public $license;
 
     /**
      * Create a new notification instance.
