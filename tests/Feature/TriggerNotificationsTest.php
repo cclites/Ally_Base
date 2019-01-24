@@ -14,6 +14,8 @@ use App\Notifications\Caregiver\ClockInReminder;
 use App\Notifications\Caregiver\ClockOutReminder;
 use App\Shifts\ClockIn;
 use App\Shift;
+use App\Console\Commands\CronVisitAccuracyReminder;
+use App\Notifications\Caregiver\VisitAccuracyCheck;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -154,5 +156,47 @@ class TriggerNotificationsTest extends TestCase
                 return $shift->id === $notification->shift->id;
             }
         );
+    }
+
+    /** @test */
+    public function caregivers_with_recently_unconfirmed_visits_should_receive_the_visit_accuracy_notification()
+    {
+        Notification::fake();
+
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
+        $shift = $this->clockInToShift($schedule);
+        
+        Notification::assertNothingSent();
+
+        (new CronVisitAccuracyReminder())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            VisitAccuracyCheck::class
+        );
+    }
+
+    /** @test */
+    public function caregivers_without_recent_unconfirmed_visits_should_not_receive_the_visit_accuracy_notification()
+    {
+        Notification::fake();
+
+        (new CronVisitAccuracyReminder())->handle();
+
+        Notification::assertNothingSent();
+
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
+        $shift = $this->clockInToShift($schedule);
+        $shift->update(['status' => Shift::WAITING_FOR_PAYOUT]);
+
+        (new CronVisitAccuracyReminder())->handle();
+
+        Notification::assertNothingSent();
+
+        $shift->update(['checked_in_time' => Carbon::now()->subDays(60)]);
+
+        (new CronVisitAccuracyReminder())->handle();
+
+        Notification::assertNothingSent();
     }
 }
