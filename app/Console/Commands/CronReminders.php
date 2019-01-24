@@ -57,10 +57,9 @@ class CronReminders extends Command
             $this->upcomingShifts($business);
 
             $this->overdueClockins($business);
+
+            $this->overdueClockOuts($business);
         }
-
-
-        $this->overdueClockOuts();
     }
 
     /**
@@ -74,7 +73,8 @@ class CronReminders extends Command
         $from = Carbon::now()->tz($business->timezone);
         $to = Carbon::now()->addMinutes(20)->tz($business->timezone);
 
-        $schedules = Schedule::whereBetween('starts_at', [$from, $to])
+        $schedules = Schedule::forBusinesses([$business->id])
+            ->whereBetween('starts_at', [$from, $to])
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ShiftReminder::getKey(), $schedules->pluck('id'));
@@ -101,7 +101,8 @@ class CronReminders extends Command
         $from = Carbon::now()->subMinutes(60)->tz($business->timezone);
         $to = Carbon::now()->subMinutes(20)->tz($business->timezone);
 
-        $schedules = Schedule::with('shifts')
+        $schedules = Schedule::forBusinesses([$business->id])
+            ->with('shifts')
             ->whereBetween('starts_at', [$from, $to])
             ->get();
 
@@ -126,12 +127,13 @@ class CronReminders extends Command
     /**
      * Find any shifts past end time and notify the related Caregivers.
      *
+     * @param \App\Business $business
      * @return void
      */
-    public function overdueClockOuts()
+    public function overdueClockOuts(Business $business) : void
     {
-        $shifts = Shift::where('status', Shift::CLOCKED_IN)
-            ->where('id', '99818')
+        $shifts = Shift::forBusinesses([$business->id])
+            ->where('status', Shift::CLOCKED_IN)
             ->get();
 
         $triggered = TriggeredReminder::getTriggered(ClockOutReminder::getKey(), $shifts->pluck('id'));
@@ -145,9 +147,9 @@ class CronReminders extends Command
                 continue;
             }
 
-            $start = Carbon::now()->subMinutes(60)->setTimezone('UTC');
-            $end = Carbon::now()->subMinutes(20)->setTimezone('UTC');
-            if ($shift->scheduledEndTime()->setTimezone('UTC')->between($start, $end)) {
+            $from = Carbon::now()->subMinutes(60)->tz($business->timezone);
+            $to = Carbon::now()->subMinutes(20)->tz($business->timezone);
+            if ($shift->scheduledEndTime()->between($from, $to)) {
                 \Notification::send($shift->caregiver->user, new ClockOutReminder($shift));
 
                 TriggeredReminder::markTriggered(ClockOutReminder::getKey(), $shift->id);

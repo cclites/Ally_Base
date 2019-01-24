@@ -11,6 +11,9 @@ use App\Schedule;
 use Illuminate\Support\Carbon;
 use App\Notifications\Caregiver\ShiftReminder;
 use App\Notifications\Caregiver\ClockInReminder;
+use App\Notifications\Caregiver\ClockOutReminder;
+use App\Shifts\ClockIn;
+use App\Shift;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -38,17 +41,47 @@ class TriggerNotificationsTest extends TestCase
         $this->officeUser->businesses()->attach($this->business->id);
     }
 
+    /**
+     * Helper function to create a schedule entry.
+     *
+     * @param Carbon $startsAt
+     * @param integer $duration
+     * @return Schedule
+     */
+    public function createSchedule(Carbon $startsAt = null, int $duration = 60) : Schedule
+    {
+        if ($startsAt == null) {
+            $startsAt = Carbon::now();
+        }
+
+        return factory(Schedule::class)->create([
+            'client_id' => $this->client->id,
+            'business_id' => $this->business->id,
+            'caregiver_id' => $this->caregiver->id,
+            'starts_at' => $startsAt,
+            'duration' => $duration,
+        ]);
+    }
+
+    /**
+     * Helper function to create clocked in shift from a Schedule.
+     *
+     * @param Schedule $schedule
+     * @return Shift
+     */
+    public function clockInToShift(Schedule $schedule) : Shift
+    {
+        $clockIn = new ClockIn($this->caregiver);
+        $clockIn->setManual(true);
+        return $clockIn->clockIn($schedule);
+    }
+
     /** @test */
     public function a_caregiver_should_be_notified_of_upcoming_shifts()
     {
         Notification::fake();
 
-        $schedule = factory(Schedule::class)->create([
-            'client_id' => $this->client->id,
-            'business_id' => $this->business->id,
-            'caregiver_id' => $this->caregiver->id,
-            'starts_at' => Carbon::now()->addMinutes(5),
-        ]);
+        $schedule = $this->createSchedule(Carbon::now()->addMinutes(5));
         
         Notification::assertNothingSent();
 
@@ -68,23 +101,13 @@ class TriggerNotificationsTest extends TestCase
     {
         Notification::fake();
 
-        $schedule = factory(Schedule::class)->create([
-            'client_id' => $this->client->id,
-            'business_id' => $this->business->id,
-            'caregiver_id' => $this->caregiver->id,
-            'starts_at' => Carbon::now()->subMinutes(1),
-        ]);
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(1));
         
         (new CronReminders())->handle();
 
         Notification::assertNothingSent();
 
-        $schedule = factory(Schedule::class)->create([
-            'client_id' => $this->client->id,
-            'business_id' => $this->business->id,
-            'caregiver_id' => $this->caregiver->id,
-            'starts_at' => Carbon::now()->addDays(1),
-        ]);
+        $schedule = $this->createSchedule(Carbon::now()->addDays(1));
         
         (new CronReminders())->handle();
 
@@ -96,15 +119,10 @@ class TriggerNotificationsTest extends TestCase
     {
         Notification::fake();
 
-        $schedule = factory(Schedule::class)->create([
-            'client_id' => $this->client->id,
-            'business_id' => $this->business->id,
-            'caregiver_id' => $this->caregiver->id,
-            'starts_at' => Carbon::now()->subMinutes(25),
-        ]);
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
         
         Notification::assertNothingSent();
-        
+
         (new CronReminders())->handle();
 
         Notification::assertSentTo(
@@ -112,6 +130,28 @@ class TriggerNotificationsTest extends TestCase
             ClockInReminder::class,
             function ($notification, $channels) use ($schedule) {
                 return $schedule->id === $notification->schedule->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function a_caregiver_should_be_notified_if_they_forget_to_clock_out()
+    {
+        Notification::fake();
+
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
+        
+        $shift = $this->clockInToShift($schedule);
+            
+        Notification::assertNothingSent();
+
+        (new CronReminders())->handle();
+
+        Notification::assertSentTo(
+            $this->caregiver->user,
+            ClockOutReminder::class,
+            function ($notification, $channels) use ($shift) {
+                return $shift->id === $notification->shift->id;
             }
         );
     }

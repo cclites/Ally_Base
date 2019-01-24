@@ -165,7 +165,7 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     public static $availableNotifications = [
         \App\Notifications\Caregiver\ShiftReminder::class,
         \App\Notifications\Caregiver\ClockInReminder::class,
-        \App\Notifications\Caregiver\ClockOutReminder::class, // TODO: implement trigger
+        \App\Notifications\Caregiver\ClockOutReminder::class,
         \App\Notifications\Caregiver\VisitAccuracyCheck::class, // TODO: implement trigger
         \App\Notifications\Caregiver\CertificationExpiring::class, // TODO: implement trigger
         \App\Notifications\Caregiver\CertificationExpired::class, // TODO: implement trigger

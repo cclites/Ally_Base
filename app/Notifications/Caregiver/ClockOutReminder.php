@@ -33,7 +33,7 @@ class ClockOutReminder extends BaseNotification
      *
      * @var \App\Shift
      */
-    protected $shift;
+    public $shift;
 
     /**
      * Create a new notification instance.
