@@ -6,7 +6,7 @@ use App\Notifications\BaseNotification;
 use App\Jobs\SendTextMessage;
 use App\SmsThreadReply;
 
-class SmsReply extends BaseNotification
+class NewSmsReply extends BaseNotification
 {
     /**
      * The label of the notification (used for preferences).
@@ -34,7 +34,7 @@ class SmsReply extends BaseNotification
      *
      * @var \App\SmsThreadReply
      */
-    protected $reply;
+    public $reply;
 
     /**
      * Create a new notification instance.
@@ -71,7 +71,8 @@ class SmsReply extends BaseNotification
      * Get the SystemNotification representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return SystemNotification
+     * @param  array  $data
+     * @return \App\SystemNotification
      */
     public function toSystem($notifiable, $data = [])
     {

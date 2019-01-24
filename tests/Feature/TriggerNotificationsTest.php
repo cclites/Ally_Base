@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\CaregiverApplication;
+use App\Exceptions\UnverifiedLocationException;
+use App\PhoneNumber;
+use App\SmsThread;
+use Tests\FakesTwilioWebhooks;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Console\Commands\CronReminders;
 use Illuminate\Support\Facades\Notification;
@@ -20,17 +23,17 @@ use App\Notifications\Caregiver\VisitAccuracyCheck;
 use App\CaregiverLicense;
 use App\Console\Commands\CronDailyNotifications;
 use App\Shifts\ClockOut;
-use App\Events\UnverifiedClockOut;
+use App\SmsThreadReply;
 
 class TriggerNotificationsTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, FakesTwilioWebhooks;
 
     public $client;
     public $caregiver;
     public $business;
     public $officeUser;
-    
+
     public function setUp()
     {
         parent::setUp();
@@ -40,10 +43,11 @@ class TriggerNotificationsTest extends TestCase
         $this->business->update(['outgoing_sms_number' => '8001112222']);
 
         $this->caregiver = factory('App\Caregiver')->create();
+        $this->caregiver->clients()->save($this->client);
         $number = $this->caregiver->user->addPhoneNumber('primary', '1 (234) 567-8900');
         $number->update(['receives_sms' => 1]);
         $this->business->chain->caregivers()->save($this->caregiver);
-        
+
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->officeUser->businesses()->attach($this->business->id);
     }
@@ -74,13 +78,17 @@ class TriggerNotificationsTest extends TestCase
      * Helper function to create clocked in shift from a Schedule.
      *
      * @param Schedule $schedule
-     * @return Shift
+     * @return Shift|null
      */
-    public function clockInToShift(Schedule $schedule) : Shift
+    public function clockInToShift(Schedule $schedule) : ?Shift
     {
         $clockIn = new ClockIn($this->caregiver);
         $clockIn->setManual(true);
-        return $clockIn->clockIn($schedule);
+        try {
+            return $clockIn->clockIn($schedule);
+        } catch (\Exception $ex) {
+            return null;
+        }
     }
 
     /** @test */
@@ -89,7 +97,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::fake();
 
         $schedule = $this->createSchedule(Carbon::now()->addMinutes(5));
-        
+
         Notification::assertNothingSent();
 
         (new CronReminders())->handle();
@@ -109,13 +117,13 @@ class TriggerNotificationsTest extends TestCase
         Notification::fake();
 
         $schedule = $this->createSchedule(Carbon::now()->subMinutes(1));
-        
+
         (new CronReminders())->handle();
 
         Notification::assertNothingSent();
 
         $schedule = $this->createSchedule(Carbon::now()->addDays(1));
-        
+
         (new CronReminders())->handle();
 
         Notification::assertNothingSent();
@@ -127,7 +135,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::fake();
 
         $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
-        
+
         Notification::assertNothingSent();
 
         (new CronReminders())->handle();
@@ -147,9 +155,9 @@ class TriggerNotificationsTest extends TestCase
         Notification::fake();
 
         $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
-        
+
         $shift = $this->clockInToShift($schedule);
-            
+
         Notification::assertNothingSent();
 
         (new CronReminders())->handle();
@@ -170,7 +178,7 @@ class TriggerNotificationsTest extends TestCase
 
         $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
         $shift = $this->clockInToShift($schedule);
-        
+
         Notification::assertNothingSent();
 
         (new CronVisitAccuracyReminder())->handle();
@@ -214,7 +222,7 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->addDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
@@ -250,7 +258,7 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->addDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
@@ -289,7 +297,7 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->subDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
@@ -312,7 +320,7 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->subDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
@@ -330,7 +338,7 @@ class TriggerNotificationsTest extends TestCase
     public function office_users_should_only_be_notified_of_expired_licenses_once_per_caregiver()
     {
         Notification::fake();
-        
+
         $otherBusiness = factory('App\Business')->create();
         $this->officeUser->businesses()->attach($otherBusiness->id);
 
@@ -338,11 +346,11 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->subDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
-        
+
         Notification::assertSentToTimes(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpired::class,
@@ -354,7 +362,7 @@ class TriggerNotificationsTest extends TestCase
     public function office_users_should_only_be_notified_of_expiring_licenses_once_per_caregiver()
     {
         Notification::fake();
-        
+
         $otherBusiness = factory('App\Business')->create();
         $this->officeUser->businesses()->attach($otherBusiness->id);
 
@@ -362,11 +370,11 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->addDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
-        
+
         Notification::assertSentToTimes(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpiring::class,
@@ -396,7 +404,7 @@ class TriggerNotificationsTest extends TestCase
             'expires_at' => Carbon::now()->subDays(3),
             'caregiver_id' => $this->caregiver->id,
         ]);
-        
+
         Notification::assertNothingSent();
 
         (new CronDailyNotifications())->handle();
@@ -426,12 +434,12 @@ class TriggerNotificationsTest extends TestCase
         );
     }
 
-
     /**
      * @param array $attributes
      * @return \App\Shift
      */
-    protected function createShift($attributes = []) {
+    protected function createShift($attributes = [])
+    {
         $attributes += [
             'business_id' => $this->business->id,
             'client_id' => $this->client->id,
@@ -454,7 +462,7 @@ class TriggerNotificationsTest extends TestCase
     public function office_users_should_be_notified_for_unverified_clock_ins()
     {
         Notification::fake();
-        
+
         $this->business->update(['location_exceptions' => true]);
         $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
 
@@ -556,7 +564,7 @@ class TriggerNotificationsTest extends TestCase
 
         $this->postJson(route('business_chain_routes.apply', ['slug' => $this->business->chain->slug]), $application)
             ->assertStatus(201);
-        
+
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\ApplicationSubmitted::class,
@@ -565,7 +573,7 @@ class TriggerNotificationsTest extends TestCase
             }
         );
     }
-}
+
     /** @test */
     public function office_users_should_be_notified_when_a_caregiver_submits_a_timesheet()
     {
@@ -599,3 +607,33 @@ class TriggerNotificationsTest extends TestCase
         );
     }
 
+    /** @test */
+    public function office_users_should_receive_notifications_when_caregivers_reply_via_sms()
+    {
+        Notification::fake();
+
+        $thread = SmsThread::create(array_merge([
+            'business_id' => $this->business->id,
+            'from_number' => PhoneNumber::formatNational($this->business->outgoing_sms_number),
+            'message' => str_random(10),
+            'can_reply' => true,
+            'sent_at' => Carbon::now(),
+        ]));
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
+        $reply = SmsThreadReply::first();
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\NewSmsReply::class,
+            function ($notification) use ($reply) {
+                return $reply->id === $notification->reply->id;
+            }
+        );
+    }
+}

@@ -24,6 +24,8 @@ use App\Listeners\SendManualTimesheetNotification;
 use App\Listeners\SendUnverifiedShiftNotification;
 use App\Events\UnverifiedClockOut;
 use App\Events\UnverifiedClockIn;
+use App\Events\SmsThreadReplyCreated;
+use App\Listeners\SendNewSmsReplyNotification;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -66,6 +68,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         TimesheetCreated::class => [
             SendManualTimesheetNotification::class,
+        ],
+        SmsThreadReplyCreated::class => [
+            SendNewSmsReplyNotification::class,
         ],
     ];
 

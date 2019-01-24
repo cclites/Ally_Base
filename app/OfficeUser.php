@@ -69,8 +69,8 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         \App\Notifications\Business\CertificationExpiring::class,
         \App\Notifications\Business\CertificationExpired::class,
         \App\Notifications\Business\ApplicationSubmitted::class,
-        \App\Notifications\Business\SmsReply::class, // TODO: implement trigger
         \App\Notifications\Business\ManualTimesheet::class,
+        \App\Notifications\Business\NewSmsReply::class,
         \App\Notifications\Business\FailedCharge::class, // TODO: implement trigger
         \App\Notifications\Business\ClientBirthday::class,
         \App\Notifications\Business\BiAnualVisitDue::class, // TODO: implement trigger
