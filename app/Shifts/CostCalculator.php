@@ -22,7 +22,7 @@ class CostCalculator
     const ROUNDING_METHOD = PHP_ROUND_HALF_UP;
 
     /**
-     * @var \App\Billing\PaymentMethods\BankAccount|\App\Billing\PaymentMethods\CreditCard
+     * @var \App\Billing\Payments\Methods\BankAccount|\App\Billing\Payments\Methods\CreditCard
      */
     protected $paymentType;
 

@@ -1,22 +1,29 @@
 <?php
 namespace App\Billing\Contracts;
 
+use App\Address;
+use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Contracts\HasAllyFeeInterface;
 use App\Billing\GatewayTransaction;
+use App\PhoneNumber;
 
 interface ChargeableInterface extends HasAllyFeeInterface
 {
     /**
-     * @param float $amount
-     * @param string $currency
-     * @return \App\Billing\GatewayTransaction|false
+     * @return \App\Address|null
      */
-    public function charge($amount, $currency = 'USD');
+    public function getBillingAddress(): ?Address;
+
+    /**
+     * @return \App\PhoneNumber|null
+     */
+    public function getBillingPhone(): ?PhoneNumber;
 
     /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
      *
+     * @param \App\Billing\Contracts\ChargeableInterface $newPaymentMethod
      * @return bool
      */
     public function canBeMergedWith(ChargeableInterface $newPaymentMethod);
@@ -24,6 +31,7 @@ interface ChargeableInterface extends HasAllyFeeInterface
     /**
      * Merge the existing record with the new values
      *
+     * @param \App\Billing\Contracts\ChargeableInterface $newPaymentMethod
      * @return bool
      */
     public function mergeWith(ChargeableInterface $newPaymentMethod);

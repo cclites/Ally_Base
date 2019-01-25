@@ -35,8 +35,8 @@ return [
 
         // Payment Methods
         'businesses' => \App\Business::class,
-        'credit_cards' => \App\Billing\PaymentMethods\CreditCard::class,
-        'bank_accounts' => \App\Billing\PaymentMethods\BankAccount::class,
+        'credit_cards' => \App\Billing\Payments\Methods\CreditCard::class,
+        'bank_accounts' => \App\Billing\Payments\Methods\BankAccount::class,
 
         // Shifts (for Signatures/Exceptions) haven't been converted yet
     ],

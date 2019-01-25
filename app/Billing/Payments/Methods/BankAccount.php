@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Billing\PaymentMethods;
+namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
@@ -14,7 +14,7 @@ use App\User;
 use Crypt;
 
 /**
- * App\Billing\PaymentMethods\BankAccount
+ * App\Billing\Payments\Methods\BankAccount
  *
  * @property int $id
  * @property int|null $user_id
@@ -63,6 +63,12 @@ class BankAccount extends AuditableModel implements ChargeableInterface
         'savings'
     ];
 
+
+    public static function getAccountTypes()
+    {
+        return self::$accountTypes;
+    }
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -110,9 +116,31 @@ class BankAccount extends AuditableModel implements ChargeableInterface
     /// Instance Methods
     ///////////////////////////////////////////
 
-    public static function getAccountTypes()
+
+    function getBillingAddress(): ?\App\Address
     {
-        return self::$accountTypes;
+        if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
+            return $address;
+        } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
+            return $address;
+        } elseif ($this->business) {
+            return $this->business->getAddress();
+        }
+
+        return null;
+    }
+
+    function getBillingPhone(): ?\App\PhoneNumber
+    {
+        if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
+            return $phone;
+        } elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'primary')->first()) {
+            return $phone;
+        } elseif ($this->business) {
+            return $this->business->getPhoneNumber();
+        }
+
+        return null;
     }
 
     /**

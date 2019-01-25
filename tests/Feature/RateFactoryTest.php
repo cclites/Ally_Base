@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Businesses\SettingsRepository;
 use App\Caregiver;

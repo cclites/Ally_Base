@@ -2,7 +2,7 @@
 
 namespace Tests\Bugs;
 
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use Tests\TestCase;
 
 class AllyMissingCCType extends TestCase
@@ -11,7 +11,7 @@ class AllyMissingCCType extends TestCase
     public function test_a_credit_card_type_is_set_when_a_cc_number_is_entered()
     {
         /**
-         * @var CreditCard $card
+         * @var \App\Billing\Payments\Methods\CreditCard $card
          */
         $card = factory(CreditCard::class)->make();
         $card->type = null;

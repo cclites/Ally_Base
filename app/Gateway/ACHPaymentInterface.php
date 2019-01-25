@@ -3,44 +3,35 @@
 namespace App\Gateway;
 
 use App\Address;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\PhoneNumber;
 
-interface ACHPaymentInterface
+interface ACHPaymentInterface extends ACHDepositInterface
 {
-    /**
-     * Validate, but do not authorize, the payment method
-     *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
-     *
-     * @return \App\Billing\GatewayTransaction
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
-     */
-    public function validateAccount(BankAccount $account);
 
     /**
      * Authorize, but do not charge, the payment method
      *
-     * @param \App\Billing\PaymentMethods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
      * @return \App\Billing\GatewayTransaction
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function authorizeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD');
 
     /**
      * Charge the payment method
      *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @param \App\Billing\Payments\Methods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
      * @return \App\Billing\GatewayTransaction
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function chargeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD');
 

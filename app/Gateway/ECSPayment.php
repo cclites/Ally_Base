@@ -2,10 +2,10 @@
 namespace App\Gateway;
 
 use App\Address;
-use App\Billing\PaymentMethods\BankAccount;
-use App\Billing\PaymentMethods\CreditCard;
-use App\Exceptions\PaymentMethodDeclined;
-use App\Exceptions\PaymentMethodError;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Exceptions\PaymentMethodDeclined;
+use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\PhoneNumber;
 
@@ -15,7 +15,7 @@ use App\PhoneNumber;
  *
  * @package App\Gateway
  */
-class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCardPaymentInterface, RefundInterface {
+class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
 
     const APPROVED = 1;
     const DECLINED = 2;
@@ -178,8 +178,8 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
 
     /**
      * @return \App\Billing\GatewayTransaction
-     * @throws \App\Exceptions\PaymentMethodDeclined
-     * @throws \App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined
+     * @throws \App\Billing\Exceptions\PaymentMethodError
      */
     public function post($method)
     {
@@ -228,10 +228,10 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Validate, but do not authorize, the payment method
      *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @param \App\Billing\Payments\Methods\BankAccount $account
      *
      * @return GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function validateAccount(BankAccount $account)
     {
@@ -243,13 +243,13 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Deposit (credit) the account with $amount
      *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @param \App\Billing\Payments\Methods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
      * @return GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function depositFunds(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
@@ -265,13 +265,13 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Authorize, but do not charge, the payment method
      *
-     * @param \App\Billing\PaymentMethods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
      * @return \App\Billing\GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function authorizeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
@@ -287,13 +287,13 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Charge the payment method
      *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
+     * @param \App\Billing\Payments\Methods\BankAccount $account
      * @param float $amount
      * @param string $currency
      * @param string $secCode
      *
      * @return GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function chargeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD')
     {
@@ -309,11 +309,11 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Validate, but do not authorize, the payment method
      *
-     * @param \App\Billing\PaymentMethods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param mixed $cvv
      *
      * @return GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function validateCard(CreditCard $card, $cvv = null)
     {
@@ -325,13 +325,13 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Authorize, but do not charge, the payment method
      *
-     * @param \App\Billing\PaymentMethods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param mixed $cvv
      *
      * @return \App\Billing\GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function authorizeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null)
     {
@@ -347,13 +347,13 @@ class ECSPayment implements ACHDepositInterface, ACHPaymentInterface, CreditCard
     /**
      * Charge the payment method
      *
-     * @param \App\Billing\PaymentMethods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param float $amount
      * @param string $currency
      * @param mixed $cvv
      *
      * @return GatewayTransaction|false
-     * @throws \App\Exceptions\PaymentMethodDeclined|\App\Exceptions\PaymentMethodError
+     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
     public function chargeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null)
     {

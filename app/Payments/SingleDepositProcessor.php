@@ -1,6 +1,6 @@
 <?php
 namespace App\Payments;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Billing\Deposit;

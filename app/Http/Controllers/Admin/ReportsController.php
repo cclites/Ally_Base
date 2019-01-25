@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use Auth;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Client;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\GatewayTransaction;
 use App\Http\Controllers\Controller;
 use App\Reports\CaregiverPaymentsReport;

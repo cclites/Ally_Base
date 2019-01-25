@@ -2,9 +2,9 @@
 
 namespace App\Payments;
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Gateway\ECSQuery;
 use App\Billing\GatewayTransaction;
 use App\User;

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Billing\PaymentMethods\BankAccount;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
 use Illuminate\Console\Command;
 
 class OnceCorrectCorruption extends Command

@@ -4,7 +4,7 @@
 namespace App\Traits\Request;
 
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Responses\ValidationErrorResponse;
 use App\Services\Microbilt;
 use Illuminate\Http\Request;

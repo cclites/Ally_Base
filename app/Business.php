@@ -5,7 +5,7 @@ namespace App;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -91,7 +91,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\Billing\PaymentMethods\BankAccount|null $bankAccount
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
  * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
@@ -104,7 +104,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\NoteTemplate[] $noteTemplates
- * @property-read \App\Billing\PaymentMethods\BankAccount|null $paymentAccount
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $paymentAccount
  * @property-read \App\PaymentHold $paymentHold
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
@@ -425,7 +425,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation  Ex: paymentAccount
-     * @return \App\Billing\PaymentMethods\BankAccount|null
+     * @return \App\Billing\Payments\Methods\BankAccount|null
      */
     public function getBankAccount($relation)
     {
@@ -434,8 +434,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation Ex: paymentAccount
-     * @param \App\Billing\PaymentMethods\BankAccount $account
-     * @return \App\Billing\PaymentMethods\BankAccount|bool
+     * @param \App\Billing\Payments\Methods\BankAccount $account
+     * @return \App\Billing\Payments\Methods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount($relation, BankAccount $account)
@@ -714,6 +714,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     function getAddress(): ?Address
     {
+        if (!$this->address1) {
+            return null;
+        }
+
         return new Address([
             'address1' => $this->address1,
             'address2' => $this->address2,
@@ -733,6 +737,16 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         }
         catch (\Exception $e) {}
         return null;
+    }
+
+    function getBillingAddress(): ?Address
+    {
+        return $this->getAddress();
+    }
+
+    function getBillingPhone(): ?PhoneNumber
+    {
+        return $this->getPhoneNumber();
     }
 
     ////////////////////////////////////

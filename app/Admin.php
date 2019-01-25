@@ -16,8 +16,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar

@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Billing\PaymentMethods\BankAccount;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasPaymentHold;
 use App\Traits\BelongsToBusinesses;
@@ -40,10 +40,10 @@ use Packages\MetaData\HasMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \App\Admin $admin
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\Caregiver $caregiver
  * @property-read \App\Client $client
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Task[] $dueTasks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\EmergencyContact[] $emergencyContacts

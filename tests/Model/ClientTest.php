@@ -3,10 +3,10 @@
 namespace Tests\Model;
 
 use App\Address;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Client;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payment;
 use App\PhoneNumber;
 use Tests\TestCase;

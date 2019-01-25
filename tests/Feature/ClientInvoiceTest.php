@@ -12,7 +12,7 @@ use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Payment;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Shift;

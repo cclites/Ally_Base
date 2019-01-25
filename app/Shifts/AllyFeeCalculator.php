@@ -3,7 +3,7 @@ namespace App\Shifts;
 
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 
 /**
  * Class AllyFeeCalculator

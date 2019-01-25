@@ -5,7 +5,7 @@ namespace App;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Confirmations\Confirmation;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
@@ -56,11 +56,11 @@ use Packages\MetaData\HasOwnMetaData;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\CaregiverAvailability $availability
- * @property-read \App\Billing\PaymentMethods\BankAccount|null $bankAccount
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\BankAccount[] $bankAccounts
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\BusinessChain[] $businessChains
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentMethods\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \App\RateCode|null $defaultFixedRate
  * @property-read \App\RateCode|null $defaultHourlyRate
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
@@ -333,8 +333,8 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     /**
      * Set the caregiver's primary deposit account
      *
-     * @param \App\Billing\PaymentMethods\BankAccount $account
-     * @return \App\Billing\PaymentMethods\BankAccount|bool
+     * @param \App\Billing\Payments\Methods\BankAccount $account
+     * @return \App\Billing\Payments\Methods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount(BankAccount $account)

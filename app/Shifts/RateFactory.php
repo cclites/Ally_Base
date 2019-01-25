@@ -6,7 +6,7 @@ use App\Businesses\SettingsRepository;
 use App\Caregiver;
 use App\Client;
 use App\Contracts\HasAllyFeeInterface;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\RateCode;
 use App\Schedule;
 use App\Shift;

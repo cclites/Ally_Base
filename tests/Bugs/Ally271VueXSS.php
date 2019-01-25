@@ -2,9 +2,9 @@
 
 namespace Tests\Bugs;
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Client;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\View\Compilers\BladeCompiler;
 use Tests\TestCase;

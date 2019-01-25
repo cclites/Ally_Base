@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Client;
 
 $factory->define(CreditCard::class, function (Faker $faker) {

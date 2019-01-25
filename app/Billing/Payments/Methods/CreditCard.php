@@ -1,5 +1,5 @@
 <?php
-namespace App\Billing\PaymentMethods;
+namespace App\Billing\Payments\Methods;
 
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Crypt;
 
 /**
- * App\Billing\PaymentMethods\CreditCard
+ * App\Billing\Payments\Methods\CreditCard
  *
  * @property int $id
  * @property int $user_id
@@ -107,6 +107,27 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     /// Other Methods
     ///////////////////////////////////////////
 
+
+    function getBillingAddress(): ?\App\Address
+    {
+        if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
+            return $address;
+        } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
+            return $address;
+        }
+        return null;
+    }
+
+    function getBillingPhone(): ?\App\PhoneNumber
+    {
+        if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
+            return $phone;
+        } elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'primary')->first()) {
+            return $phone;
+        }
+        return null;
+    }
+
     /**
      * @param float $amount
      * @param string $currency
@@ -116,15 +137,11 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         $gateway = app()->make(CreditCardPaymentInterface::class);
 
-        if ($this->user && $address = $this->user->addresses->where('type', 'billing')->first()) {
-            $gateway->setBillingAddress($address);
-        } elseif ($this->user && $address = $this->user->addresses->where('type', 'primary')->first()) {
+        if ($address = $this->getBillingAddress()) {
             $gateway->setBillingAddress($address);
         }
 
-        if ($this->user && $phone = $this->user->phoneNumbers->where('type', 'billing')->first()) {
-            $gateway->setBillingPhone($phone);
-        } elseif ($this->user && $phone = $this->user->phoneNumbers->where('type', 'primary')->first()) {
+        if ($phone = $this->getBillingPhone()) {
             $gateway->setBillingPhone($phone);
         }
 

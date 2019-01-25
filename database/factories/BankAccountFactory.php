@@ -3,7 +3,7 @@
 use Faker\Generator as Faker;
 use App\OfficeUser;
 use App\Business;
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 
 $factory->define(BankAccount::class, function (Faker $faker) {
     return [

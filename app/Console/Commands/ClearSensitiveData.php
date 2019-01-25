@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\Client;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\EmergencyContact;
 use App\Note;
 use App\PhoneNumber;

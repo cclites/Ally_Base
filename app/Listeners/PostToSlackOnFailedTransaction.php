@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Contracts\ChatServiceInterface;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Events\FailedTransactionFound;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;

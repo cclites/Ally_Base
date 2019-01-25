@@ -1,11 +1,11 @@
 <?php
 namespace App\Payments;
 
-use App\Billing\PaymentMethods\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
-use App\Billing\PaymentMethods\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
 use App\Gateway\ECSPayment;

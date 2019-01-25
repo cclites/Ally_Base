@@ -9,7 +9,7 @@ class ScheduleCostCalculator
     const DEFAULT_SCALE = 2;
 
     /**
-     * @var \App\Billing\PaymentMethods\BankAccount|\App\Billing\PaymentMethods\CreditCard
+     * @var \App\Billing\Payments\Methods\BankAccount|\App\Billing\Payments\Methods\CreditCard
      */
     protected $paymentType;
 
