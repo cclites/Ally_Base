@@ -133,7 +133,7 @@ class CronDailyNotifications extends Command
                 $sent = $sent->merge($users);
             }
 
-            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $license->id);
+            TriggeredReminder::markTriggered(CertificationExpiring::getKey(), $license->id, $license->expires_at->addDays(1));
         }
     }
 
@@ -167,7 +167,7 @@ class CronDailyNotifications extends Command
                 $sent = $sent->merge($users);
             }
 
-            TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id);
+            TriggeredReminder::markTriggered(CertificationExpired::getKey(), $license->id, Carbon::now()->addDays(30));
         }
     }
 }
