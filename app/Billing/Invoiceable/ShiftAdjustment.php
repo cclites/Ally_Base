@@ -1,6 +1,7 @@
 <?php
 namespace App\Billing\Invoiceable;
 
+use App\Billing\ClientInvoiceItem;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -164,6 +165,16 @@ class ShiftAdjustment extends InvoiceableModel
     }
 
     /**
+     * Check if the client rate includes the ally fee (ex. true for shifts, false for expenses)
+     *
+     * @return bool
+     */
+    public function hasFeeIncluded(): bool
+    {
+        return true;
+    }
+
+    /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
      *
      * @return float
@@ -215,9 +226,11 @@ class ShiftAdjustment extends InvoiceableModel
     /**
      * Add an amount that has been invoiced to a payer
      *
+     * @param \App\Billing\ClientInvoiceItem $invoiceItem
      * @param float $amount
+     * @param float $allyFee  The value of $amount that represents the Ally Fee
      */
-    public function addAmountInvoiced(float $amount): void
+    public function addAmountInvoiced(ClientInvoiceItem $invoiceItem, float $amount, float $allyFee): void
     {
         // TODO: Implement addAmountInvoiced() method.
     }

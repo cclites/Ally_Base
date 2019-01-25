@@ -77,14 +77,15 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      * Add an amount that has been actually paid by a payer
      * Note: Can be used to calculate the actual ally fee
      *
-     * @param float $amount
      * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
+     * @param float $amount
+     * @param float $allyFee  The value of $amount that represents the Ally Fee
      */
-    public function addAmountCharged(float $amount, ChargeableInterface $paymentMethod): void
+    public function addAmountCharged(ChargeableInterface $paymentMethod, float $amount, float $allyFee): void
     {
         $charged = $this->getMetaValue("amount_charged") ?? "0.00";
         $this->setMeta("amount_charged", bcadd($charged, $amount, 2));
-        $this->addMeta("charges", json_encode(["amount" => $amount, "method_type" => get_class($paymentMethod)] + $paymentMethod->toArray()));
+        $this->addMeta("charges", json_encode(["amount" => $amount, "ally_fee" => $allyFee, "method_type" => get_class($paymentMethod)] + $paymentMethod->toArray()));
     }
 
     /**
@@ -99,12 +100,11 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
 
     /**
      * Add an amount that has been deposited
-     * Note: Can be used to calculate the actual ally fee
      *
-     * @param float $amount
      * @param \App\Billing\Contracts\DepositableInterface $account
+     * @param float $amount
      */
-    public function addAmountDeposited(float $amount, DepositableInterface $account): void
+    public function addAmountDeposited(DepositableInterface $account, float $amount): void
     {
         $deposited = $this->getMetaValue("amount_deposited") ?? "0.00";
         $this->setMeta("amount_deposited", bcadd($deposited, $amount, 2));

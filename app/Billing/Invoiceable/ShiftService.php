@@ -2,6 +2,7 @@
 namespace App\Billing\Invoiceable;
 
 use App\AuditableModel;
+use App\Billing\ClientInvoiceItem;
 use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
@@ -91,9 +92,7 @@ class ShiftService extends InvoiceableModel
      */
     public function getItemsForPayment(Client $client): Collection
     {
-        return self::whereHas('shift', function($query) {
-            $query->where('status', Shift::WAITING_FOR_INVOICE);
-        })->get();
+        return new Collection([]); // Handled by App\Shift
     }
 
     /**
@@ -169,6 +168,16 @@ class ShiftService extends InvoiceableModel
         return null;
     }
 
+    /**
+     * Check if the client rate includes the ally fee (ex. true for shifts, false for expenses)
+     *
+     * @return bool
+     */
+    public function hasFeeIncluded(): bool
+    {
+        return true;
+    }
+
 
     /**
      * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
@@ -223,9 +232,11 @@ class ShiftService extends InvoiceableModel
     /**
      * Add an amount that has been invoiced to a payer
      *
+     * @param \App\Billing\ClientInvoiceItem $invoiceItem
      * @param float $amount
+     * @param float $allyFee  The value of $amount that represents the Ally Fee
      */
-    public function addAmountInvoiced(float $amount): void
+    public function addAmountInvoiced(ClientInvoiceItem $invoiceItem, float $amount, float $allyFee): void
     {
         // Check if all services have been invoiced
         foreach ($this->shift->services as $service) {

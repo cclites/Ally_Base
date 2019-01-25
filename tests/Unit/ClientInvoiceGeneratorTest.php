@@ -86,8 +86,9 @@ class ClientInvoiceGeneratorTest extends TestCase
         $invoiceable->shouldReceive('getItemDate')->andReturn($date);
         $invoiceable->shouldReceive('getClientRate')->andReturn($rate);
         $invoiceable->shouldReceive('getAmountDue')->andReturn($total);
+        $invoiceable->shouldReceive('hasFeeIncluded')->andReturn(true);
 
-        $data = $this->invoicer()->getItemData($invoiceable);
+        $data = $this->invoicer()->getItemData($invoiceable, $rate, $total);
         $this->assertSame($name, $data['name']);
         $this->assertSame($group, $data['group']);
         $this->assertSame($units, $data['units']);

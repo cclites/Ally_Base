@@ -155,22 +155,19 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
 
     /**
      * @param \App\Billing\Contracts\InvoiceableInterface $invoiceable
-     * @param float $split
+     * @param \App\Billing\ClientPayer $clientPayer
      * @param float $allowance
      * @return array
      */
-    public function getItemData(InvoiceableInterface $invoiceable, $split = 1.0, $allowance = 999999.99): array
+    public function getItemData(InvoiceableInterface $invoiceable, float $clientRate, float $amountDue): array
     {
-        $total = round(bcmul($invoiceable->getItemUnits(), $invoiceable->getClientRate(), 4), 2);
-        $amountDue = $this->getAmountDue($invoiceable, $split, $allowance);
-
         return [
             'name' => $invoiceable->getItemName(ClientInvoice::class),
             'group' => $invoiceable->getItemGroup(ClientInvoice::class),
             'units' => $invoiceable->getItemUnits(),
-            'rate' => $invoiceable->getClientRate(),
+            'rate' => $clientRate,
             'date' => $invoiceable->getItemDate(),
-            'total' => $total,
+            'total' => round(bcmul($invoiceable->getItemUnits(), $clientRate, 4), 2),
             'amount_due' => $amountDue,
         ];
     }
@@ -224,15 +221,16 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
             }
             // Get invoiceable item data
             $allowance = $this->getPayerAllowance($clientPayer, $invoiceable->getItemDate());
-            $split = $clientPayer->getSplitPercentage();
-            $data = $this->getItemData($invoiceable, $split, $allowance);
+            $clientRate = $this->getClientRate($clientPayer, $invoiceable);
+            [$amountDue, $allyFee] = $this->getAmountDueAndFee($clientPayer, $invoiceable, $allowance);
+            $data = $this->getItemData($invoiceable, $clientRate, $amountDue);
             // Make item and associate invoiceable
             $item = new ClientInvoiceItem($data);
             $item->associateInvoiceable($invoiceable);
             // Add item to invoice
             $invoice = $this->getInvoice($client, $clientPayer);
             $invoice->addItem($item);
-            $invoiceable->addAmountInvoiced($item['amount_due']);
+            $invoiceable->addAmountInvoiced($item, $amountDue, $allyFee);
             // Reduce allowance by the amount due of the item
             $allowance -= $data['amount_due'];
 
@@ -249,9 +247,17 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
         }
     }
 
-    protected function getAmountDue(InvoiceableInterface $invoiceable, $split = 1.0, $allowance = 999999.99)
+    protected function getClientRate(ClientPayer $clientPayer, InvoiceableInterface $invoiceable): float
+    {
+        $clientRate = $invoiceable->getClientRate();
+        return add($clientRate, $this->getAllyFee($clientRate, $invoiceable, $clientPayer));
+    }
+
+    /** @return float[] */
+    protected function getAmountDueAndFee(ClientPayer $clientPayer, InvoiceableInterface $invoiceable, $allowance = 999999.99): array
     {
         $amountDue = $invoiceable->getAmountDue();
+        $split = $clientPayer->getSplitPercentage();
 
         if ($split < 1.0) {
             // Store amount owed by split payers (see allowance_payer_before_a_split_payer_does_not_skew_the_amounts)
@@ -259,14 +265,32 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
                 $this->splitPayerAmounts[$invoiceable->getItemHash()] = $amountDue;
             }
             $splitAmount = $this->splitPayerAmounts[$invoiceable->getItemHash()];
-
-            $amountDue = round(bcmul($splitAmount, $split, 4), 2);
+            $amountDue = multiply($splitAmount, $split);
         }
 
-        if ($amountDue > $allowance) {
-            $amountDue = $allowance;
+        $allyFee = $this->getAllyFee($amountDue, $invoiceable, $clientPayer);
+
+        if (($amountDue + $allyFee) > $allowance) {
+            $amountDue = divide(
+                $allowance, divide(
+                    add($amountDue, $allyFee),
+                    $amountDue
+                )
+            );
+            $allyFee = subtract($allowance, $amountDue);
         }
 
-        return $amountDue;
+        return [
+            add($amountDue, $allyFee),
+            $allyFee
+        ];
+    }
+
+    protected function getAllyFee(float $amount, InvoiceableInterface $invoiceable, ClientPayer $clientPayer): float
+    {
+        if ($invoiceable->hasFeeIncluded()) {
+            return 0.0;
+        }
+        return $clientPayer->getAllyFee($amount);
     }
 }

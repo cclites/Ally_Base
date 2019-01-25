@@ -4,7 +4,10 @@ namespace App\Billing;
 use App\AuditableModel;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Contracts\HasAllyFeeInterface;
 use App\Data\DateRange;
+use App\Traits\HasAddressesAndNumbers;
+use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 
 /**
@@ -41,8 +44,10 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class ClientPayer extends AuditableModel
+class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 {
+    use HasAllyFeeTrait;
+
     protected $orderedColumn = 'priority';
     protected $guarded = ['id', 'payer_name', 'payer'];
     protected $with = ['payer'];
@@ -295,5 +300,20 @@ class ClientPayer extends AuditableModel
 
         $allowance = bcsub($this->payment_allowance, $currentSum, 4);
         return round($allowance, 2);
+    }
+
+    /**
+     * Get the ally fee percentage for this entity
+     *
+     * @return float
+     */
+    public function getAllyPercentage()
+    {
+        if ($this->payer->isPrivatePay()) {
+            return $this->client->getAllyPercentage();
+        }
+        else {
+            return (float) config('ally.bank_account_fee');
+        }
     }
 }

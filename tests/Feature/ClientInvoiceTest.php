@@ -12,6 +12,7 @@ use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
 use App\Billing\Payment;
+use App\Billing\PaymentMethods\CreditCard;
 use App\Billing\Validators\ClientPayerValidator;
 use App\Client;
 use App\Shift;
@@ -185,6 +186,62 @@ class ClientInvoiceTest extends TestCase
     /**
      * @test
      */
+    function expenses_assigned_to_split_payers_should_calculate_fees_independently()
+    {
+        /**
+         * Payer A/B has a 80/20 split.  A shift expense of $100 is assigned.
+         * Payer A default payment method is ACH (3% fee), Payer B's default payment method is CC (5% fee)
+         * Payer A should pay $82.40, Payer B should pay $21.00
+         */
+
+        $payerA = $this->createSplitPayer(0.8);
+        $payerB = $this->createSplitPayer(0.2);
+        $payerB->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $shift = $this->createShiftWithExpense(100);
+
+        $invoices = $this->invoicer->generateAll($this->client);
+        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
+        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $shiftExpense = $payerAInvoice->items[0]->invoiceable;
+
+        $this->assertEquals(82.40, $payerAInvoice->getAmount());
+        $this->assertEquals(21.00, $payerBInvoice->getAmount());
+        $this->assertEquals(3.40, $shiftExpense->ally_fee, 'The ally fee was not correctly updated on the invoiceable.');
+    }
+
+    /**
+     * @test
+     */
+    function expenses_assigned_to_allowance_payers_should_calculate_fees_independently()
+    {
+        /**
+         * Payer A is an allowance payer of $80, Payer B is a balance payer.  A shift expense of $100 is assigned.
+         * Payer A default payment method is ACH (3% fee), Payer B's default payment method is CC (5% fee)
+         * Payer A should pay $80.00 ($77.67 towards expense), Payer B should pay $23.45 ($22.33 towards expense)
+         */
+
+        $payerA = $this->createAllowancePayer(80.00);
+        $payerB = $this->createBalancePayer();
+        $payerB->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $shift = $this->createShiftWithExpense(100);
+
+        $invoices = $this->invoicer->generateAll($this->client);
+        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
+        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $shiftExpense = $payerAInvoice->items[0]->invoiceable;
+
+        $this->assertEquals(80.00, $payerAInvoice->getAmount());
+        $this->assertEquals(23.45, $payerBInvoice->getAmount());
+        $this->assertEquals(3.45, $shiftExpense->ally_fee, 'The ally fee was not correctly updated on the invoiceable.');
+    }
+
+
+
+    /**
+     * @test
+     */
     function the_invoice_amount_should_be_updated_when_adding_an_item()
     {
         $invoice = factory(ClientInvoice::class)->create();
@@ -299,6 +356,22 @@ class ClientInvoiceTest extends TestCase
         ]);
 
         return $shiftService;
+    }
+
+    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
+    {
+        $shift = factory(Shift::class)->create([
+            'client_id' => $this->client->id,
+            'payer_id' => $payerId,
+            'service_id' => null,
+            'caregiver_rate' => 0,
+            'client_rate' => 0,
+            'other_expenses' => $amount,
+            'checked_in_time' => $date . ' 12:00:00',
+            'status' => Shift::WAITING_FOR_INVOICE,
+        ]);
+
+        return $shift;
     }
 
     private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $payerId = null)

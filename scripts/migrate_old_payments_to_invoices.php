@@ -40,7 +40,7 @@ Payment::whereNotNull('client_id')->chunk(100, function($payments) {
 
         if ($invoice->getAmount() < $payment->amount) {
             // Add a manual adjustment
-            $diff = bcsub($invoice->getAmount(), $payment->amount, 2);
+            $diff = bcsub($payment->amount, $invoice->getAmount(), 2);
             $item = new \App\Billing\ClientInvoiceItem([
                 'rate' => $diff,
                 'units' => 1,
