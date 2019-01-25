@@ -26,6 +26,8 @@ use App\Shifts\ClockOut;
 use App\SmsThreadReply;
 use App\TriggeredReminder;
 use App\Console\Commands\CronFlushTriggeredReminders;
+use App\Channels\SystemChannel;
+use App\Channels\SmsChannel;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -819,5 +821,178 @@ class TriggerNotificationsTest extends TestCase
             \App\Notifications\Business\ClientBirthday::class,
             2
         );
+    }
+
+    /** @test */
+    public function by_default_office_users_only_receive_system_notifications()
+    {
+        Notification::fake();
+
+        // using ClientBirthday here, but functionality is in the BaseNotification
+        // class that is used by all notifications.
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+
+        $this->assertEquals([SystemChannel::class], $notification->via($this->officeUser->user));
+    }
+
+    /** @test */
+    public function by_default_caregivers_receive_no_notifications()
+    {
+        Notification::fake();
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+
+        // using CertificationExpiring here, but functionality is in the BaseNotification
+        // class that is used by all notifications.
+        $notification = new \App\Notifications\Caregiver\CertificationExpiring($this->client);
+
+        $this->assertEquals([], $notification->via($this->caregiver->user));
+    }
+
+    /** @test */
+    public function office_users_should_only_be_notified_via_the_methods_they_are_subscribed_to()
+    {
+        Notification::fake();
+
+        $this->officeUser->user->update([
+            'notification_email' => 'test@test.com',
+            'notification_phone' => '1234567890',
+            'allow_sms_notifications' => 1,
+            'allow_email_notifications' => 1,
+            'allow_system_notifications' => 1,
+        ]);
+
+        $this->officeUser->notificationPreferences()->delete();
+        $this->officeUser->notificationPreferences()->create([
+            'key' => \App\Notifications\Business\ClientBirthday::getKey(),
+            'sms' => false,
+            'email' => false,
+            'system' => false,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
+
+        $this->officeUser->notificationPreferences()
+            ->where('key', \App\Notifications\Business\ClientBirthday::getKey())
+            ->update([
+                'sms' => true,
+                'email' => true,
+                'system' => true,
+            ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([
+            SystemChannel::class,
+            'mail',
+            SmsChannel::class,
+        ], $notification->via($this->officeUser->user));
+    }
+
+    /** @test */
+    public function users_should_not_receive_email_notifications_if_they_are_turned_off()
+    {
+        Notification::fake();
+
+        $this->officeUser->user->update([
+            'notification_email' => 'test@test.com',
+            'allow_email_notifications' => 1,
+        ]);
+
+        $this->officeUser->notificationPreferences()->delete();
+        $this->officeUser->notificationPreferences()->create([
+            'key' => \App\Notifications\Business\ClientBirthday::getKey(),
+            'sms' => false,
+            'email' => true,
+            'system' => false,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals(['mail'], $notification->via($this->officeUser->user));
+
+        $this->officeUser->user->update([
+            'notification_email' => null,
+            'allow_email_notifications' => 1,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
+
+        $this->officeUser->user->update([
+            'notification_email' => 'test@test.com',
+            'allow_email_notifications' => 0,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
+    }
+
+    /** @test */
+    public function users_should_not_receive_sms_notifications_if_they_are_turned_off()
+    {
+        Notification::fake();
+
+        $this->officeUser->user->update([
+            'notification_phone' => '1234567890',
+            'allow_sms_notifications' => 1,
+        ]);
+
+        $this->officeUser->notificationPreferences()->delete();
+        $this->officeUser->notificationPreferences()->create([
+            'key' => \App\Notifications\Business\ClientBirthday::getKey(),
+            'sms' => true,
+            'email' => false,
+            'system' => false,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([SmsChannel::class], $notification->via($this->officeUser->user));
+
+        $this->officeUser->user->update([
+            'notification_phone' => null,
+            'allow_sms_notifications' => 1,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
+
+        $this->officeUser->user->update([
+            'notification_phone' => '1234567890',
+            'allow_sms_notifications' => 0,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
+    }
+
+    /** @test */
+    public function users_should_not_receive_system_notifications_if_they_are_turned_off()
+    {
+        Notification::fake();
+
+        $this->officeUser->user->update([
+            'allow_system_notifications' => 1,
+        ]);
+
+        $this->officeUser->notificationPreferences()->delete();
+        $this->officeUser->notificationPreferences()->create([
+            'key' => \App\Notifications\Business\ClientBirthday::getKey(),
+            'sms' => false,
+            'email' => false,
+            'system' => true,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([SystemChannel::class], $notification->via($this->officeUser->user));
+
+        $this->officeUser->user->update([
+            'allow_system_notifications' => 0,
+        ]);
+
+        $notification = new \App\Notifications\Business\ClientBirthday($this->client);
+        $this->assertEquals([], $notification->via($this->officeUser->user));
     }
 }
