@@ -29,7 +29,7 @@ class ClientBirthday extends BaseNotification
      *
      * @var \App\Client
      */
-    protected $client;
+    public $client;
 
     /**
      * The action text.

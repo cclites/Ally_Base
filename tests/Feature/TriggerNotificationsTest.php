@@ -105,7 +105,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             ShiftReminder::class,
-            function ($notification, $channels) use ($schedule) {
+            function ($notification) use ($schedule) {
                 return $schedule->id === $notification->schedule->id;
             }
         );
@@ -143,7 +143,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             ClockInReminder::class,
-            function ($notification, $channels) use ($schedule) {
+            function ($notification) use ($schedule) {
                 return $schedule->id === $notification->schedule->id;
             }
         );
@@ -165,7 +165,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             ClockOutReminder::class,
-            function ($notification, $channels) use ($shift) {
+            function ($notification) use ($shift) {
                 return $shift->id === $notification->shift->id;
             }
         );
@@ -230,7 +230,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             \App\Notifications\Caregiver\CertificationExpiring::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -266,7 +266,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpiring::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -274,7 +274,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $otherOfficeUser->user,
             \App\Notifications\Business\CertificationExpiring::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -282,9 +282,33 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $thirdOfficeUser->user,
             \App\Notifications\Business\CertificationExpiring::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_only_be_notified_of_expiring_licenses_once_per_caregiver()
+    {
+        Notification::fake();
+
+        $otherBusiness = factory('App\Business')->create();
+        $this->officeUser->businesses()->attach($otherBusiness->id);
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\CertificationExpiring::class,
+            1
         );
     }
 
@@ -305,7 +329,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             \App\Notifications\Caregiver\CertificationExpired::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -328,7 +352,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->caregiver->user,
             \App\Notifications\Caregiver\CertificationExpired::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -354,30 +378,6 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentToTimes(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpired::class,
-            1
-        );
-    }
-
-    /** @test */
-    public function office_users_should_only_be_notified_of_expiring_licenses_once_per_caregiver()
-    {
-        Notification::fake();
-
-        $otherBusiness = factory('App\Business')->create();
-        $this->officeUser->businesses()->attach($otherBusiness->id);
-
-        $license = factory(CaregiverLicense::class)->create([
-            'expires_at' => Carbon::now()->addDays(3),
-            'caregiver_id' => $this->caregiver->id,
-        ]);
-
-        Notification::assertNothingSent();
-
-        (new CronDailyNotifications())->handle();
-
-        Notification::assertSentToTimes(
-            $this->officeUser->user,
-            \App\Notifications\Business\CertificationExpiring::class,
             1
         );
     }
@@ -412,7 +412,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpired::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -420,7 +420,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $otherOfficeUser->user,
             \App\Notifications\Business\CertificationExpired::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -428,7 +428,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $thirdOfficeUser->user,
             \App\Notifications\Business\CertificationExpired::class,
-            function ($notification, $channels) use ($license) {
+            function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
         );
@@ -475,7 +475,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\UnverifiedShift::class,
-            function ($notification, $channels) use ($shift) {
+            function ($notification) use ($shift) {
                 return $shift->id === $notification->shift->id;
             }
         );
@@ -518,7 +518,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\UnverifiedShift::class,
-            function ($notification, $channels) use ($shift) {
+            function ($notification) use ($shift) {
                 return $shift->id === $notification->shift->id;
             }
         );
@@ -568,7 +568,7 @@ class TriggerNotificationsTest extends TestCase
         Notification::assertSentTo(
             $this->officeUser->user,
             \App\Notifications\Business\ApplicationSubmitted::class,
-            function ($notification, $channels) use ($application) {
+            function ($notification) use ($application) {
                 return $application['email'] === $notification->application->email;
             }
         );
@@ -633,6 +633,26 @@ class TriggerNotificationsTest extends TestCase
             \App\Notifications\Business\NewSmsReply::class,
             function ($notification) use ($reply) {
                 return $reply->id === $notification->reply->id;
+            }
+        );
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_the_day_of_a_clients_birthday()
+    {
+        Notification::fake();
+
+        $this->client->user->update(['date_of_birth' => Carbon::now()->subYears(20)->format('Y-m-d')]);
+
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentTo(
+            $this->officeUser->user,
+            \App\Notifications\Business\ClientBirthday::class,
+            function ($notification) {
+                return $this->client->id === $notification->client->id;
             }
         );
     }
