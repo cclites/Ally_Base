@@ -37,6 +37,7 @@ use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
 use App\CustomField;
+use App\OfficeUser;
 
 class ReportsController extends BaseController
 {
@@ -766,6 +767,14 @@ class ReportsController extends BaseController
 
         $reports = collect($reports);
         return view('business.reports.referral_sources', compact('reports'));
+    }
+
+    public function caseManager()
+    {
+        $clients = Client::forRequestedBusinesses()->whereNotNull('case_manager_id')->with('caseManager')->get();
+        $ids = $clients->pluck('case_manager_id');
+        $caseManagers = OfficeUser::whereIn('id', $ids)->get();
+        return view('business.reports.case_manager', compact('caseManagers', 'clients'));
     }
 
     /**
