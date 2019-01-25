@@ -53,7 +53,10 @@
                             <span class="display-6">Closed Lost: {{pipeline.closed_loss}}</span>
                         </b-row>
                         <hr/>
-                        <b-row>
+                        <b-col lg="2">
+                            <b-button variant="primary" class="mb-3" @click="showGraph = !showGraph">Show/Hide graphs</b-button>
+                        </b-col>
+                        <b-row v-show="showGraph">
                             <b-col lg="6">
                                 <h1 class="text-center">Prospects Funnel</h1>
                                 <e-charts ref="funnel" :options="chartOptions" class="chart" auto-resize></e-charts>
@@ -118,6 +121,7 @@ export default {
         return {
             loading: false,
             dataIsReady: false,
+            showGraph: true,
             form: new Form({
                 start_date: '09/01/2018',
                 end_date: '12/01/2018',
