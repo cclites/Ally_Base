@@ -60,6 +60,9 @@
                                 <template slot="days_since_contact" scope="row">
                                     -
                                 </template>
+                                <template slot="status" scope="row">
+                                    {{ row.item.user.active ? 'Active' : 'Inactive' }}
+                                </template>
                                 <template slot="actions" scope="row">
                                     <b-btn size="sm" :href="`/business/clients/${row.item.id}`" target="_blank">
                                         View client profile
@@ -121,6 +124,11 @@
                     {
                         key: 'nameLastFirst',
                         label: 'Client',
+                        sortable: true,
+                    },
+                    {
+                        key: 'status',
+                        label: 'Client Status',
                         sortable: true,
                     },
                     {
