@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 class TriggeredReminder extends Model
 {
@@ -82,11 +83,16 @@ class TriggeredReminder extends Model
      * @param int $reference_id
      * @return mixed
      */
-    public static function markTriggered($key, $reference_id)
+    public static function markTriggered($key, $reference_id, $expireDate = null)
     {
+        if (empty($expireDate)) {
+            $expireDate = Carbon::now()->addDays(2);
+        }
+
         return TriggeredReminder::create([
             'reference_id' => $reference_id,
             'key' => $key,
+            'expires_at' => $expireDate,
         ]);
     }
 }

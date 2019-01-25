@@ -18,6 +18,7 @@ class CreateTriggeredRemindersTable extends Migration
 
             $table->string('key')->index();
             $table->unsignedInteger('reference_id')->index();
+            $table->timestamp('expires_at');
 
             $table->timestamps();
         });

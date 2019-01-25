@@ -12,6 +12,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\CronShiftSummaryEmails;
 use App\Console\Commands\CronDailyNotifications;
 use App\Console\Commands\CronReminders;
+use App\Console\Commands\CronFlushTriggeredReminders;
 
 class Kernel extends ConsoleKernel
 {
@@ -29,6 +30,7 @@ class Kernel extends ConsoleKernel
         CronShiftSummaryEmails::class,
         CronDailyNotifications::class,
         CronReminders::class,
+        CronFlushTriggeredReminders::class,
     ];
 
     /**
@@ -56,6 +58,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('cron:reminders')
             ->everyMinute()
+            ->withoutOverlapping();
+            
+        $schedule->command('cron:flush_reminders')
+            ->twiceDaily(8, 20)
             ->withoutOverlapping();
     }
 
