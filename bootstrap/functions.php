@@ -35,6 +35,47 @@ function json_phone(\App\User $user, $type) {
     return '{}';
 }
 
+
+////////////////////////////////////
+//// Float Safe Math Functions
+////////////////////////////////////
+
+function add($operand1, $operand2, $decimals=2): float
+{
+    return round(
+        bcadd($operand1, $operand2, ceil($decimals*2)),
+        $decimals
+    );
+}
+
+function subtract($operand1, $operand2, $decimals=2): float
+{
+    return round(
+        bcsub($operand1, $operand2, ceil($decimals*2)),
+        $decimals
+    );
+}
+
+function divide($operand1, $operand2, $decimals=2): float
+{
+    return round(
+        bcdiv($operand1, $operand2, ceil($decimals*2)),
+        $decimals
+    );
+}
+
+function multiply($operand1, $operand2, $decimals=2): float
+{
+    return round(
+        bcmul($operand1, $operand2, ceil($decimals*2)),
+        $decimals
+    );
+}
+
+////////////////////////////////////
+//// Date Functions
+////////////////////////////////////
+
 function filter_date($input, $to_format='Y-m-d') {
     if (!$input) return null;
     $carbon = new \Carbon\Carbon($input);
