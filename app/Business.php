@@ -682,14 +682,14 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     }
 
     /**
-     * Get a list of users that should be notified for the given notification.
+     * Get a list of OfficeUser's notifiable User objects
+     * that should be sent notifications.
      *
-     * @param string $notification
      * @return array|Collection
      */
-    public function usersToNotify($notification)
+    public function notifiableUsers()
     {
-        return $this->users()->with(['user', 'notificationPreferences'])
+        return $this->users()->with(['user', 'user.notificationPreferences'])
             ->whereHas('user', function ($q) {
                 $q->where('active', true);
             })

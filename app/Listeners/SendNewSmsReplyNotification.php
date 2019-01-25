@@ -29,7 +29,7 @@ class SendNewSmsReplyNotification implements ShouldQueue
     {
         if (! empty($event->reply->business)) {
             \Notification::send(
-                $event->reply->business->usersToNotify(NewSmsReply::class),
+                $event->reply->business->notifiableUsers(),
                 new NewSmsReply($event->reply)
             );
         }

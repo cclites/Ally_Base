@@ -28,9 +28,10 @@ class SendManualTimesheetNotification
         // Only send notifications when the Caregiver is the
         // one who submitted the Timesheet.
         if ($event->timesheet->creator_id == $event->timesheet->caregiver_id) {
-            $users = $event->timesheet->business->usersToNotify(ManualTimesheet::class);
-
-            \Notification::send($users, new ManualTimesheet($event->timesheet));
+            \Notification::send(
+                $event->timesheet->business->notifiableUsers(),
+                new ManualTimesheet($event->timesheet)
+            );
         }
     }
 }

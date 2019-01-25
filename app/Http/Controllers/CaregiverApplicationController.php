@@ -91,8 +91,7 @@ class CaregiverApplicationController extends BusinessBaseController
         $application = $businessChain->caregiverApplications()->create($data);
 
         if ($application) {
-            $users = $businessChain->usersToNotify(ApplicationSubmitted::class);
-            \Notification::send($users, new ApplicationSubmitted($application));
+            \Notification::send($businessChain->notifiableUsers(), new ApplicationSubmitted($application));
 
             return new CreatedResponse('Application submitted successfully.', [], route('business_chain_routes.applications.done', ['slug' => $slug, 'application' => $application]));
         }

@@ -33,7 +33,6 @@ class SendUnverifiedShiftNotification
             return;
         }
 
-        $users = $business->usersToNotify(UnverifiedShift::class);
-        \Notification::send($users, new UnverifiedShift($shift));
+        \Notification::send($business->notifiableUsers(), new UnverifiedShift($shift));
     }
 }

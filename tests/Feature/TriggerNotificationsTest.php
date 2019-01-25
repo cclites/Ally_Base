@@ -791,7 +791,7 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
-    public function office_users_should_be_notified_the_day_of_a_clients_birthday_once_per_year()
+    public function office_users_should_only_be_notified_the_day_of_a_clients_birthday_once_per_year()
     {
         Notification::fake();
 
