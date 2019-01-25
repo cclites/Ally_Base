@@ -23,6 +23,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
+use App\Http\Requests\UpdateNotificationOptionsRequest;
+use App\Http\Requests\UpdateNotificationPreferencesRequest;
 
 class CaregiverController extends BaseController
 {
@@ -130,7 +132,8 @@ class CaregiverController extends BaseController
             'notes.creator',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
-            }
+            },
+            'user.notificationPreferences',
         ]);
         $schedules = $caregiver->schedules()->get();
         $business = $this->business();
@@ -142,7 +145,16 @@ class CaregiverController extends BaseController
 
         $caregiver->future_schedules = $caregiver->futureSchedules()->count();
 
-        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
+        $notifications = $caregiver->user->getAvailableNotifications()->map(function ($cls) {
+            return [
+                'class' => $cls,
+                'key' => $cls::getKey(),
+                'title' => $cls::getTitle(),
+                'disabled' => $cls::$disabled,
+            ];
+        });
+
+        return view('business.caregivers.show', compact('caregiver', 'schedules', 'business', 'notifications'));
     }
 
     /**
@@ -336,5 +348,43 @@ class CaregiverController extends BaseController
 
         $caregiver->update($data);
         return new SuccessResponse('The default rates have been saved.');
+    }
+
+    /**
+     * Update caregiver's user notification settings.
+     *
+     * @param UpdateNotificationOptionsRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationOptions(UpdateNotificationOptionsRequest $request, Caregiver $caregiver)
+    {
+        $this->authorize('update', $caregiver);
+
+        $data = $request->validated();
+
+        if ($caregiver->user()->update($data)) {
+            return new SuccessResponse('Caregiver\'s notification options have been updated.');
+        }
+
+        return new ErrorResponse(500, 'Unexpected error updating the Caregiver\'s notification options.  Please try again.');
+    }
+
+    /**
+     * Update caregiver's user notification preferences.
+     *
+     * @param UpdateNotificationPreferencesRequest $request
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request, Caregiver $caregiver)
+    {
+        $this->authorize('update', $caregiver);
+
+        $caregiver->user->syncNotificationPreferences($request->validated());
+
+        return new SuccessResponse('Caregiver\'s notification preferences have been saved.');
     }
 }

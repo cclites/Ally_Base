@@ -26,12 +26,24 @@ class UpdateNotificationPreferencesRequest extends FormRequest
     {
         $rules = [];
     
-        foreach (auth()->user()->getAvailableNotifications() as $cls) {
+        // set user to current logged in user (for use with user's profile)
+        $user = auth()->user();
+
+        // update the user object if the request is for 
+        // the office user side updating a client or caregiver 
+        if ($this->route('client')) {
+            $user = $this->route('client')->user;
+        }
+        if ($this->route('caregiver')) {
+            $user = $this->route('caregiver')->user;
+        }
+
+        foreach ($user->getAvailableNotifications() as $cls) {
             $rules[$cls::getKey()] = 'required|array';
             $rules[$cls::getKey().'.sms'] = 'boolean';
             $rules[$cls::getKey().'.email'] = 'boolean';
 
-            if (auth()->user()->role_type == 'office_user') {
+            if ($user->role_type == 'office_user') {
                 $rules[$cls::getKey().'.system'] = 'boolean';
             }
         }

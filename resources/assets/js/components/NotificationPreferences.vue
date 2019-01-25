@@ -152,6 +152,7 @@
         props: {
             'user': {},
             'notifications': {},
+            'admin': false,
         },
 
         mixins: [FormatsDates, AuthUser],
@@ -171,10 +172,24 @@
             }
         },
 
+        computed: {
+            urlPrefix() {
+                if (this.admin) {
+                    switch (this.user.role_type) {
+                        case 'client':
+                            return `/business/clients/${this.user.id}`;
+                        case 'caregiver':
+                            return `/business/caregivers/${this.user.id}`;
+                    }
+                }
+                return '/profile';
+            }
+        },
+
         methods: {
             saveOptions() {
                 this.busy = true;
-                this.form.patch('/profile/notification-options')
+                this.form.patch(`${this.urlPrefix}/notification-options`)
                     .then(response => {
                     })
                     .catch(e => {
@@ -187,7 +202,7 @@
             savePreferences() {
                 this.busy = true;
                 let form = new Form(this.preferences);
-                form.post(`/profile/notification-preferences`)
+                form.post(`${this.urlPrefix}/notification-preferences`)
                     .then(response => {
                     })
                     .catch(e => {

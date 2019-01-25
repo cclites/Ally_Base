@@ -428,4 +428,27 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
                 return collect([]);
         }
     }
+
+    /**
+     * Sync notification data from request and create new preferences  
+     * or update existing.
+     *
+     * @param array $data
+     * @return void
+     */
+    public function syncNotificationPreferences(array $preferences) : void
+    {
+        foreach ($preferences as $key => $data) {
+            $pref = $this->notificationPreferences()
+                ->where('key', $key)
+                ->first();
+
+            if ($pref) {
+                $pref->update($data);
+            } else {
+                $data['key'] = $key;
+                $this->notificationPreferences()->create($data);
+            }
+        }
+    }
 }

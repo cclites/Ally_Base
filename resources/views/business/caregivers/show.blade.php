@@ -59,6 +59,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#misc" role="tab">Misc.</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -165,6 +168,9 @@
         </div>
         <div class="tab-pane" id="misc" role="tabpanel">
             <business-caregiver-misc-tab misc="{{ $caregiver->misc }}" :caregiver="{{ $caregiver }}"></business-caregiver-misc-tab>
+        </div>
+        <div class="tab-pane" id="notifications" role="tabpanel">
+            <notification-preferences :admin="true" :user="{{ $caregiver->user }}" :notifications="{{ $notifications }}"></notification-preferences>
         </div>
     </div>
 @endsection

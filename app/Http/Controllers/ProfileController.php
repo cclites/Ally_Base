@@ -242,24 +242,7 @@ class ProfileController extends Controller
      */
     public function updateNotificationPreferences(UpdateNotificationPreferencesRequest $request)
     {
-        $notifications = $request->validated();
-
-        \DB::beginTransaction();
-
-        foreach ($notifications as $key => $data) {
-            $pref = auth()->user()->notificationPreferences()
-                ->where('key', $key)
-                ->first();
-
-            if ($pref) {
-                $pref->update($data);
-            } else {
-                $data['key'] = $key;
-                auth()->user()->notificationPreferences()->create($data);
-            }
-        }
-
-        \DB::commit();
+        auth()->user()->syncNotificationPreferences($request->validated());
 
         return new SuccessResponse('Notification preferences have been saved.');
     }

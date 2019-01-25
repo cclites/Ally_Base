@@ -165,6 +165,8 @@ Route::group([
     Route::resource('caregivers/{caregiver}/licenses', 'Business\CaregiverLicenseController');
     Route::put('caregivers/{caregiver}/default-rates', 'Business\CaregiverController@defaultRates')->name('caregivers.default-rates');
     Route::get('caregivers/{caregiver}/clients', 'Business\CaregiverClientController@index')->name('caregivers.clients');
+    Route::patch('caregivers/{caregiver}/notification-options', 'Business\CaregiverController@updateNotificationOptions');
+    Route::post('caregivers/{caregiver}/notification-preferences', 'Business\CaregiverController@updateNotificationPreferences');
 
     Route::get('clients/{client}/onboarding', 'Business\ClientOnboardingController@create')->name('clients.onboarding.create');
     Route::post('clients/{client}/onboarding', 'Business\ClientOnboardingController@store')->name('clients.onboarding.store');
