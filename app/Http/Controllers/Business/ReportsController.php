@@ -1189,6 +1189,8 @@ class ReportsController extends BaseController
         $prospects = Prospect::select([
                 'id',
                 'business_id', 
+                'firstname',
+                'lastname',
                 'closed_loss', 
                 'closed_win', 
                 'referred_by',
