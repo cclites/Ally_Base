@@ -112,6 +112,26 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
+    public function a_caregiver_should_only_be_notified_once_of_upcoming_shifts()
+    {
+        Notification::fake();
+
+        $schedule = $this->createSchedule(Carbon::now()->addMinutes(5));
+
+        Notification::assertNothingSent();
+
+        (new CronReminders())->handle();
+
+        (new CronReminders())->handle();
+
+        Notification::assertSentToTimes(
+            $this->caregiver->user,
+            ShiftReminder::class,
+            1
+        );
+    }
+
+    /** @test */
     public function a_caregiver_should_not_be_notified_of_shifts_not_in_the_upcoming_window()
     {
         Notification::fake();
@@ -150,6 +170,26 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
+    public function a_caregiver_should_only_be_notified_once_if_they_are_late_to_clock_in()
+    {
+        Notification::fake();
+
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(25));
+
+        Notification::assertNothingSent();
+
+        (new CronReminders())->handle();
+
+        (new CronReminders())->handle();
+
+        Notification::assertSentToTimes(
+            $this->caregiver->user,
+            ClockInReminder::class,
+            1
+        );
+    }
+
+    /** @test */
     public function a_caregiver_should_be_notified_if_they_forget_to_clock_out()
     {
         Notification::fake();
@@ -168,6 +208,28 @@ class TriggerNotificationsTest extends TestCase
             function ($notification) use ($shift) {
                 return $shift->id === $notification->shift->id;
             }
+        );
+    }
+
+    /** @test */
+    public function a_caregiver_should_only_be_notified_once_if_they_forget_to_clock_out()
+    {
+        Notification::fake();
+
+        $schedule = $this->createSchedule(Carbon::now()->subMinutes(80), 60);
+
+        $shift = $this->clockInToShift($schedule);
+
+        Notification::assertNothingSent();
+
+        (new CronReminders())->handle();
+
+        (new CronReminders())->handle();
+
+        Notification::assertSentToTimes(
+            $this->caregiver->user,
+            ClockOutReminder::class,
+            1
         );
     }
 
@@ -233,6 +295,29 @@ class TriggerNotificationsTest extends TestCase
             function ($notification) use ($license) {
                 return $license->id === $notification->license->id;
             }
+        );
+    }
+
+    /** @test */
+    public function a_caregiver_should_only_be_notified_once_if_they_have_a_license_expiring_soon()
+    {
+        Notification::fake();
+
+        $license = factory(CaregiverLicense::class)->create([
+            'expires_at' => Carbon::now()->addDays(3),
+            'caregiver_id' => $this->caregiver->id,
+        ]);
+
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
+            $this->caregiver->user,
+            \App\Notifications\Caregiver\CertificationExpiring::class,
+            1
         );
     }
 
@@ -305,6 +390,8 @@ class TriggerNotificationsTest extends TestCase
 
         (new CronDailyNotifications())->handle();
 
+        (new CronDailyNotifications())->handle();
+
         Notification::assertSentToTimes(
             $this->officeUser->user,
             \App\Notifications\Business\CertificationExpiring::class,
@@ -336,7 +423,7 @@ class TriggerNotificationsTest extends TestCase
     }
 
     /** @test */
-    public function a_caregiver_should_be_notified_once_per_license()
+    public function a_caregiver_should_be_notified_once_per_expired_license()
     {
         Notification::fake();
 
@@ -349,12 +436,12 @@ class TriggerNotificationsTest extends TestCase
 
         (new CronDailyNotifications())->handle();
 
-        Notification::assertSentTo(
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
             $this->caregiver->user,
             \App\Notifications\Caregiver\CertificationExpired::class,
-            function ($notification) use ($license) {
-                return $license->id === $notification->license->id;
-            }
+            1
         );
     }
 
@@ -372,6 +459,8 @@ class TriggerNotificationsTest extends TestCase
         ]);
 
         Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
 
         (new CronDailyNotifications())->handle();
 
@@ -656,4 +745,5 @@ class TriggerNotificationsTest extends TestCase
             }
         );
     }
+
 }
