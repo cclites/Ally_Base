@@ -21,21 +21,6 @@ class AlterUsersTableAddNotificationSettings extends Migration
             $table->string('notification_email')->nullable();
             $table->string('notification_phone')->nullable();
         });
-
-        // ===========================================================
-        // Set default values for user's noficiation email and phone
-        // to their current email and (mobile) phone.
-        // ===========================================================
-        foreach (User::all() as $user) {
-            if ($user->email && strpos($user->email, '@noemail.allyms.com') === false) {
-                $user->notification_email = $user->email;
-            }
-            if ($phone = $user->phoneNumbers->where('type', 'mobile')->first()) {
-                $user->notification_phone = $phone->national_number;
-                $user->allow_sms_notifications = true;
-            }
-            $user->save();
-        }
     }
 
     /**

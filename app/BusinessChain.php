@@ -109,9 +109,6 @@ class BusinessChain extends AuditableModel
             ->whereHas('user', function ($q) {
                 $q->where('active', true);
             })
-            ->whereHas('notificationPreferences', function ($q) use ($notification) {
-                $q->where('key', $notification::getKey());
-            })
             ->get()
             ->pluck('user');
     }

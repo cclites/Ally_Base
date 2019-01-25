@@ -39,10 +39,6 @@ trait IsUserRole
         static::restoring(function(self $obj) {
             return $obj->restoreOriginalEmail();
         });
-
-        static::created(function(self $obj) {
-            $obj->addNotificationPreferenceDefaults();
-        });
     }
 
     protected function alwaysIncludeUserRelationship()
@@ -400,26 +396,5 @@ trait IsUserRole
         $builder->join('users', 'users.id', '=', $this->table . '.id')
             ->orderBy('users.lastname', $direction)
             ->orderBy('users.firstname', $direction);
-    }
-
-    /**
-     * Automatically create notification preference defaults.
-     *
-     * @return void
-     */
-    public function addNotificationPreferenceDefaults()
-    {
-        if (empty(static::$availableNotifications)) {
-            return;
-        }
-
-        foreach (static::$availableNotifications as $cls) {
-            $this->user->notificationPreferences()->create([
-                'key' => $cls::getKey(),
-                'sms' => false,
-                'email' => false,
-                'system' => true,
-            ]);
-        }
     }
 }

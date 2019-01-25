@@ -339,6 +339,32 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     }
 
     /**
+     * Get the default notification preferences for the given notification.
+     *
+     * @param string $key
+     * @return UserNotificationPreferences
+     */
+    public function getDefaultNotificationPreferences(string $key) : UserNotificationPreferences
+    {
+        $prefs = new UserNotificationPreferences();
+        $prefs->mail = false;
+        $prefs->sms = false;
+        $prefs->system = false;
+
+        switch ($this->role_type) {
+            case 'office_user':
+                $prefs->system = true;
+                break;
+            case 'caregiver':
+            case 'client':
+            default:
+                break;
+        }
+
+        return $prefs;
+    }
+
+    /**
      * Determine if the system shound notify the user for the given notification class and
      * notification method.
      *
@@ -349,11 +375,10 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function shouldNotify($notification, $via)
     {
         $preference = $this->notificationPreferences()->where('key', $notification)->first();
-
         if (! $preference) {
-            return false;
+            $preference = $this->getDefaultNotificationPreferences($notification);
         }
-        
+
         switch ($via) {
             case 'mail': 
                 if (! $this->allow_email_notifications || empty($this->notification_email)) {

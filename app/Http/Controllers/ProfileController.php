@@ -247,9 +247,16 @@ class ProfileController extends Controller
         \DB::beginTransaction();
 
         foreach ($notifications as $key => $data) {
-            auth()->user()->notificationPreferences()
+            $pref = auth()->user()->notificationPreferences()
                 ->where('key', $key)
-                ->update($data);
+                ->first();
+
+            if ($pref) {
+                $pref->update($data);
+            } else {
+                $data['key'] = $key;
+                auth()->user()->notificationPreferences()->create($data);
+            }
         }
 
         \DB::commit();

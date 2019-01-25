@@ -82,8 +82,8 @@
             header-bg-variant="info"
             header-text-variant="white"
         >
-            <form @submit.prevent="savePreferences()">
-                <b-row v-for="item in notifications" :key="item.key" v-if="! loading">
+            <form v-if="! loading" @submit.prevent="savePreferences()">
+                <b-row v-for="item in notifications" :key="item.key">
                     <b-col lg="6">
                         <div class="mb-2" :class="{ 'text-muted': item.disabled }">
                             {{ item.title }}
@@ -134,10 +134,10 @@
             </form>
         </b-card>
 
-        <b-card header="Custom Reminders & Notifications"
+        <b-card v-if="user.role_type == 'office_user'"
+            header="Custom Reminders & Notifications"
             header-bg-variant="info"
             header-text-variant="white"
-            v-if="user.role_type == 'office_user'"
         >
             <center><b>Feature Coming Soon</b></center>
         </b-card>
@@ -176,31 +176,39 @@
                 this.busy = true;
                 this.form.patch('/profile/notification-options')
                     .then(response => {
-                        this.busy = false;
                     })
                     .catch(e => {
+                    })
+                    .finally(() => {
                         this.busy = false;
                     })
             },
 
             savePreferences() {
+                this.busy = true;
                 let form = new Form(this.preferences);
-
                 form.post(`/profile/notification-preferences`)
                     .then(response => {
                     })
                     .catch(e => {
                     })
+                    .finally(() => {
+                        this.busy=  false;
+                    })
             },
         },
 
         mounted() {
-            this.user.notification_preferences.forEach(n => {
-                this.preferences[n.key] = {
-                    sms: n.sms,
-                    email: n.email,
-                    system: n.system,
-                };
+            this.notifications.forEach(n => {
+                let pref = this.user.notification_preferences.find(x => x.key == n.key);
+                if (! pref) {
+                    pref = {
+                        sms: 0,
+                        email: 0,
+                        system: 1,
+                    };
+                }
+                this.preferences[n.key] = pref;
             });
             this.loading = false;
         }
