@@ -24,6 +24,8 @@ use App\CaregiverLicense;
 use App\Console\Commands\CronDailyNotifications;
 use App\Shifts\ClockOut;
 use App\SmsThreadReply;
+use App\TriggeredReminder;
+use App\Console\Commands\CronFlushTriggeredReminders;
 
 class TriggerNotificationsTest extends TestCase
 {
@@ -746,4 +748,76 @@ class TriggerNotificationsTest extends TestCase
         );
     }
 
+    /** @test */
+    public function trigger_reminders_can_expire()
+    {
+        $tr = TriggeredReminder::markTriggered(
+            \App\Notifications\Business\ClientBirthday::getKey(),
+            $this->client->id,
+            Carbon::now()->subMinutes(1)
+        );
+
+        $this->assertCount(1, TriggeredReminder::all());
+
+        (new CronFlushTriggeredReminders())->handle();
+
+        $this->assertCount(0, TriggeredReminder::all());
+
+        $tr = TriggeredReminder::markTriggered(
+            \App\Notifications\Business\ClientBirthday::getKey(),
+            $this->client->id,
+            Carbon::now()->subDays(1)
+        );
+
+        $this->assertCount(1, TriggeredReminder::all());
+
+        (new CronFlushTriggeredReminders())->handle();
+
+        $this->assertCount(0, TriggeredReminder::all());
+
+        $tr = TriggeredReminder::markTriggered(
+            \App\Notifications\Business\ClientBirthday::getKey(),
+            $this->client->id,
+            Carbon::now()->addDays(1)
+        );
+
+        $this->assertCount(1, TriggeredReminder::all());
+
+        (new CronFlushTriggeredReminders())->handle();
+
+        $this->assertCount(1, TriggeredReminder::all());
+    }
+
+    /** @test */
+    public function office_users_should_be_notified_the_day_of_a_clients_birthday_once_per_year()
+    {
+        Notification::fake();
+
+        $this->client->user->update(['date_of_birth' => Carbon::now()->subYears(20)->format('Y-m-d')]);
+
+        Notification::assertNothingSent();
+
+        (new CronDailyNotifications())->handle();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\ClientBirthday::class,
+            1
+        );
+
+        // change the current time to the next year
+        Carbon::setTestNow(Carbon::now()->addYears(1));
+
+        (new CronFlushTriggeredReminders())->handle();
+
+        (new CronDailyNotifications())->handle();
+
+        Notification::assertSentToTimes(
+            $this->officeUser->user,
+            \App\Notifications\Business\ClientBirthday::class,
+            2
+        );
+    }
 }

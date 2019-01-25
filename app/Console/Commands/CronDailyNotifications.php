@@ -79,9 +79,17 @@ class CronDailyNotifications extends Command
                 ->where('active', 1);
         })->get();
 
+        $triggered = TriggeredReminder::getTriggered(ClientBirthday::getKey(), $clients->pluck('id'));
+
         foreach ($clients as $client) {
+            if ($triggered->contains($client->id)) {
+                continue;
+            }
+ 
             $users = $client->business->usersToNotify(ClientBirthday::class);
             \Notification::send($users, new ClientBirthday($client));
+
+            TriggeredReminder::markTriggered(ClientBirthday::getKey(), $client->id);
         }
     }
 
