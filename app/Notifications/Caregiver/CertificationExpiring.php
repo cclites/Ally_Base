@@ -7,8 +7,6 @@ use App\Jobs\SendTextMessage;
 
 class CertificationExpiring extends BaseNotification
 {
-    public static $disabled = true;
-    
     /**
      * The label of the notification (used for preferences).
      *
@@ -29,6 +27,14 @@ class CertificationExpiring extends BaseNotification
      * @var string
      */
     protected $action = 'Login';
+
+    /**
+     * The number of days in which the Caregiver should start to
+     * receive 'expiring' reminders.
+     *
+     * @var integer
+     */
+    public static $threshold = 30;
 
     /**
      * The related license.

@@ -9,8 +9,6 @@ use App\CaregiverLicense;
 
 class CertificationExpired extends BaseNotification
 {
-    public static $disabled = true;
-    
     /**
      * The label of the notification (used for preferences).
      *
