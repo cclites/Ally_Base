@@ -44,7 +44,7 @@
 
         <hr />
 
-        <h2>Care Details: </h2>
+        <h2>Medication: </h2>
         <b-form-group label="Is consumer able to provide direction to the caregiver to assist consumer in taking medication?">
             <b-form-radio-group id="can_provide_direction" v-model="form.can_provide_direction">
                 <b-form-radio value="1">Yes</b-form-radio>
@@ -63,6 +63,22 @@
             <b-form-textarea id="medication_overseer" v-model="form.medication_overseer" :rows="3" />
         </b-form-group>
 
+        <b-form-group label="Allergies?">
+            <b-form-textarea id="allergies" v-model="form.allergies" :rows="3" />
+        </b-form-group>
+
+        <b-form-group label="Pharmacy name">
+            <b-form-input v-model="form.pharmacy_name" />
+        </b-form-group>
+
+        <b-form-group label="Pharmacy phone number">
+            <mask-input v-model="form.pharmacy_number" name="pharmacy_number" />
+        </b-form-group>
+
+        <hr />
+
+        <h2>Care Details: </h2>
+        
         <checkbox-group label="Safety Measures" v-model="form.safety_measures" :items="options.safety_measures" />
 
         <b-form-group label="Special instructions:" class="ml-4">
@@ -182,7 +198,10 @@
 <script>
     export default {
         props: {
-            'client': {},
+            client: {
+                type: Object,
+                required: true,
+            },
         },
 
         data() {
@@ -369,47 +388,50 @@
             }
 
             this.fillForm({
-                'lives_alone': '',
-                'pets': [],
-                'smoker': '',
-                'alcohol': '',
-                'incompetent': '',
-                'competency_level': '',
-                'can_provide_direction': '',
-                'assist_medications': '',
-                'medication_overseer': '',
-                'safety_measures': [],
-                'safety_instructions': '',
-                'mobility': [],
-                'mobility_instructions': '',
-                'toileting': [],
-                'toileting_instructions': '',
-                'bathing': [],
-                'bathing_frequency': '',
-                'bathing_instructions': '',
-                'vision': '',
-                'hearing': '',
-                'hearing_instructions': '',
-                'diet': [],
-                'diet_likes': '',
-                'feeding_instructions': '',
-                'skin': [],
-                'skin_conditions': '',
-                'hair': '',
-                'hair_frequency': '',
-                'oral': [],
-                'shaving': '',
-                'shaving_instructions': '',
-                'nails': [],
-                'dressing': [],
-                'dressing_instructions': '',
-                'housekeeping': [],
-                'housekeeping_instructions': '',
-                'errands': [],
-                'supplies': [],
-                'supplies_instructions': '',
-                'comments': '',
-                'instructions': '',
+                lives_alone: '',
+                pets: [],
+                smoker: '',
+                alcohol: '',
+                incompetent: '',
+                competency_level: '',
+                can_provide_direction: '',
+                assist_medications: '',
+                medication_overseer: '',
+                allergies: '',
+                pharmacy_name: '',
+                pharmacy_number: '',
+                safety_measures: [],
+                safety_instructions: '',
+                mobility: [],
+                mobility_instructions: '',
+                toileting: [],
+                toileting_instructions: '',
+                bathing: [],
+                bathing_frequency: '',
+                bathing_instructions: '',
+                vision: '',
+                hearing: '',
+                hearing_instructions: '',
+                diet: [],
+                diet_likes: '',
+                feeding_instructions: '',
+                skin: [],
+                skin_conditions: '',
+                hair: '',
+                hair_frequency: '',
+                oral: [],
+                shaving: '',
+                shaving_instructions: '',
+                nails: [],
+                dressing: [],
+                dressing_instructions: '',
+                housekeeping: [],
+                housekeeping_instructions: '',
+                errands: [],
+                supplies: [],
+                supplies_instructions: '',
+                comments: '',
+                instructions: '',
             });
         },
     }
