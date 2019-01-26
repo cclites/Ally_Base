@@ -774,7 +774,9 @@ class ReportsController extends BaseController
         $clients = Client::forRequestedBusinesses()
             ->whereNotNull('case_manager_id')
             ->with('caseManager')
-            ->with('notes')
+            ->with(['notes' => function($query) {
+                return $query->where('type', 'phone');
+            }])
             ->get();
         $ids = $clients->pluck('case_manager_id');
         $caseManagers = OfficeUser::whereIn('id', $ids)->get();
