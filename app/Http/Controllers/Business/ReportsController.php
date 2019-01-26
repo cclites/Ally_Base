@@ -771,7 +771,11 @@ class ReportsController extends BaseController
 
     public function caseManager()
     {
-        $clients = Client::forRequestedBusinesses()->whereNotNull('case_manager_id')->with('caseManager')->get();
+        $clients = Client::forRequestedBusinesses()
+            ->whereNotNull('case_manager_id')
+            ->with('caseManager')
+            ->with('notes')
+            ->get();
         $ids = $clients->pluck('case_manager_id');
         $caseManagers = OfficeUser::whereIn('id', $ids)->get();
         return view('business.reports.case_manager', compact('caseManagers', 'clients'));

@@ -57,9 +57,6 @@
                                 <template slot="case_manager" scope="row">
                                     {{ row.item.case_manager.user.nameLastFirst }}
                                 </template>
-                                <template slot="days_since_contact" scope="row">
-                                    -
-                                </template>
                                 <template slot="status" scope="row">
                                     {{ row.item.user.active ? 'Active' : 'Inactive' }}
                                 </template>
@@ -147,7 +144,16 @@
 
         computed: {
             items() {
-                let result = [ ...this.clients ];
+                let result = this.clients.map((client) => {
+                    const days_since_contact = client.notes.length > 0
+                        ? moment().diff(client.notes[client.notes.length-1].created_at, 'days')
+                        : '-';
+
+                    return {
+                        ...client,
+                        days_since_contact,
+                    };
+                });
 
                 if(this.filters.case_manager_id) {
                     result = result.filter(client => client.case_manager_id == this.filters.case_manager_id);
@@ -161,7 +167,9 @@
                     result = result.filter(client => client.id == this.filters.client_id);
                 }
 
-                // TODO: filter for days since contact
+                if(this.filters.days_since_contact && this.filters.days_since_contact > 0) {
+                    result = result.filter(client => client.days_since_contact >= this.filters.days_since_contact);
+                }
 
                 return result;
             },
@@ -194,9 +202,6 @@
                     .catch(e => {
                         this.loading = false;
                     });
-            },
-            calculateDaysSince(date) {
-                return moment(date);
             },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
