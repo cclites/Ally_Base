@@ -769,6 +769,26 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Display a listing of the users and their birthdays.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userBirthday(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
+        $users;
+
+        if($type == 'clients') {
+            $users = Client::forRequestedBusinesses()->get();
+        }else {
+            $users = Caregiver::forRequestedBusinesses()->get();
+        }
+
+        return view('business.reports.user_birthday', compact('users', 'type'));
+    }
+
+    /**
      * Shows the list of prospective clients
      *
      * @return Response
