@@ -20,6 +20,11 @@ interface ChargeableInterface extends HasAllyFeeInterface
     public function getBillingPhone(): ?PhoneNumber;
 
     /**
+     * @return \App\Billing\Payments\Contracts\PaymentMethodStrategy
+     */
+    public function getDefaultStrategy(): PaymentMethodStrategy;
+
+    /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
      *

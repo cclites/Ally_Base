@@ -1,12 +1,14 @@
 <?php
 namespace App\Billing\Payments;
 
+use App\Billing\Exceptions\PayerAssignmentError;
+use App\Billing\Exceptions\PaymentAmountError;
+use App\Billing\Exceptions\PaymentMethodDeclined;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\TransactionRefund;
-use App\Client;
-use App\Billing\Exceptions\PaymentMethodDeclined;
-use App\Billing\Exceptions\PaymentMethodError;
 
 class PaymentProcessor
 {
@@ -21,7 +23,7 @@ class PaymentProcessor
     protected $achGateway;
 
     /**
-     * @param \App\Client $client
+     * @param \App\Billing\Payer $payer
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float $amount
      * @param string $currency
@@ -29,16 +31,31 @@ class PaymentProcessor
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
      */
-    function charge(Client $client, PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
+    function charge(Payer $payer, ?PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
     {
+        if ($amount <= 0)  {
+            throw new PaymentAmountError("The payment amount cannot be less than $0");
+        }
+
+        if ($payer->isPrivatePay()) {
+            $client = $payer->getPrivatePayer();
+            if (!$client) {
+                throw new PayerAssignmentError("The private payer does not have a client record attached.");
+            }
+        }
+
+        if (!$strategy) {
+            $strategy = $payer->getPaymentMethod()->getDefaultStrategy();
+        }
+
         if ($transaction = $strategy->charge($amount, $currency)) {
             if (!$transaction->success) {
                 throw new PaymentMethodDeclined();
             }
 
             return Payment::create([
-                'client_id' => $client->id,
-                'business_id' => $client->business_id,
+                'payer_id' => $payer,
+                'client_id' => $client->id ?? null,
                 'amount' => $transaction->amount,
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
@@ -60,6 +77,10 @@ class PaymentProcessor
      */
     public function refund(Payment $payment, PaymentMethodStrategy $strategy, float $amount, string $notes = null): ?TransactionRefund
     {
+        if ($amount <= 0)  {
+            throw new PaymentAmountError("The refund amount cannot be less than $0");
+        }
+
         if (!$payment->transaction) {
             throw new PaymentMethodError('Unable to locate transaction for Payment ID ' . $payment->id);
         }
@@ -74,8 +95,6 @@ class PaymentProcessor
             }
 
             $refundPayment = Payment::create([
-                'client_id' => $payment->client_id,
-                'business_id' => $payment->business_id,
                 'payment_type' => $payment->payment_type,
                 'amount' => $amount * -1,
                 'transaction_id' => $transaction->id,

@@ -20,16 +20,19 @@ use Carbon\Carbon;
  * @property string $effective_start
  * @property string $effective_end
  * @property string|null $payment_allocation
- * @property float $payment_allowance
- * @property float $split_percentage
+ * @property float|null $payment_allowance
+ * @property float|null $split_percentage
  * @property int $priority
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Client $client
  * @property-read string $payer_name
  * @property-read \App\Billing\Payer $payer
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereEffectiveEnd($value)
@@ -215,19 +218,15 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     }
 
     /**
-     * Get the payment method for this payer
-     *
-     * @return \App\Billing\Contracts\ChargeableInterface
+     * @return \App\Billing\Payer
      */
-    function getPaymentMethod(): ChargeableInterface
+    function getPayer(): Payer
     {
-        if ($this->payer_id === null) {
-            // Private pay
-            return $this->client->getPaymentMethod();
+        $payer = $this->payer;
+        if ($payer->isPrivatePay()) {
+            $payer->setPrivatePayer($this->client);
         }
-
-        // Fall back to provider pay for all other payments.
-        return $this->client->business;
+        return $payer;
     }
 
     /**

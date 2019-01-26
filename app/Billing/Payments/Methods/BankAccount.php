@@ -5,6 +5,8 @@ namespace App\Billing\Payments\Methods;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
+use App\Billing\Payments\BankAccountPayment;
+use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Business;
 use App\Gateway\ACHDepositInterface;
 use App\Gateway\ACHPaymentInterface;
@@ -141,6 +143,11 @@ class BankAccount extends AuditableModel implements ChargeableInterface
         }
 
         return null;
+    }
+
+    function getDefaultStrategy(): PaymentMethodStrategy
+    {
+        return new BankAccountPayment($this);
     }
 
     /**

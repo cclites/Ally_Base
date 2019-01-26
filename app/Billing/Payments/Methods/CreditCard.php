@@ -4,6 +4,8 @@ namespace App\Billing\Payments\Methods;
 use App\AuditableModel;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
+use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Payments\CreditCardPayment;
 use App\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
@@ -126,6 +128,11 @@ class CreditCard extends AuditableModel implements ChargeableInterface
             return $phone;
         }
         return null;
+    }
+
+    function getDefaultStrategy(): PaymentMethodStrategy
+    {
+        return new CreditCardPayment($this);
     }
 
     /**

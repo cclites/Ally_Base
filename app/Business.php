@@ -3,8 +3,10 @@
 namespace App;
 
 use App\Billing\Deposit;
+use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
+use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
@@ -747,6 +749,12 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     function getBillingPhone(): ?PhoneNumber
     {
         return $this->getPhoneNumber();
+    }
+
+    function getDefaultStrategy(): PaymentMethodStrategy
+    {
+        if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
+        return $this->paymentAccount->getDefaultStrategy();
     }
 
     ////////////////////////////////////
