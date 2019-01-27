@@ -14,8 +14,8 @@ class AddPaymentMethodToPayer extends Migration
     public function up()
     {
         Schema::table('payers', function (Blueprint $table) {
-            $table->string('payment_method_type')->nullable();
-            $table->unsignedInteger('payment_method_id')->nullable();
+            $table->unsignedInteger('payment_method_id')->after('fax_number')->nullable();
+            $table->string('payment_method_type')->after('fax_number')->nullable();
         });
     }
 
