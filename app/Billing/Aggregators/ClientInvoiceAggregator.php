@@ -2,6 +2,7 @@
 namespace App\Billing\Aggregators;
 
 use App\Billing\ClientInvoice;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Business;
 use App\BusinessChain;
 use App\Client;
@@ -10,12 +11,22 @@ use Illuminate\Support\Collection;
 class ClientInvoiceAggregator
 {
     /**
+     * @var \App\Billing\Queries\ClientInvoiceQuery
+     */
+    protected $query;
+
+    public function __construct(ClientInvoiceQuery $query)
+    {
+        $this->query = $query;
+    }
+
+    /**
      * @param \App\BusinessChain $chain
      * @return \Illuminate\Support\Collection|ClientInvoice[]
      */
     function getInvoicesByChain(BusinessChain $chain): Collection
     {
-        $invoices = ClientInvoice::forBusinessChain($chain)
+        $invoices = $this->query->forBusinessChain($chain)
             ->notPaidInFull()
             ->get();
 
@@ -28,7 +39,7 @@ class ClientInvoiceAggregator
      */
     function getInvoicesByBusiness(Business $business): Collection
     {
-        $invoices = ClientInvoice::forBusiness($business->id)
+        $invoices = $this->query->forBusiness($business->id)
             ->notPaidInFull()
             ->get();
 
@@ -41,7 +52,7 @@ class ClientInvoiceAggregator
      */
     function getInvoicesByClient(Client $client): Collection
     {
-        $invoices = ClientInvoice::where('client_id', $client->id)
+        $invoices = $this->query->where('client_id', $client->id)
             ->notPaidInFull()
             ->get();
 
