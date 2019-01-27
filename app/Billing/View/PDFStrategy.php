@@ -23,9 +23,14 @@ class PDFStrategy implements InvoiceViewStrategy
         $this->filename = $filename;
     }
 
+    /**
+     * @param \App\Billing\Contracts\InvoiceInterface $invoice
+     * @param \Illuminate\Contracts\View\View $view
+     * @return \Illuminate\Http\Response
+     */
     public function generate(InvoiceInterface $invoice, View $view)
     {
         $this->pdfWrapper->loadHTML($view->render());
-        $this->pdfWrapper->download($this->filename);
+        return $this->pdfWrapper->download($this->filename);
     }
 }

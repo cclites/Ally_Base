@@ -45,7 +45,8 @@ class CaregiverInvoice extends AuditableModel
 
     function deposits()
     {
-        return $this->morphToMany(Deposit::class, 'invoice', 'invoice_deposits');
+        return $this->morphToMany(Deposit::class, 'invoice', 'invoice_deposits')
+            ->withPivot(['amount_applied']);
     }
 
     ////////////////////////////////////

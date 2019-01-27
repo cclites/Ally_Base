@@ -68,6 +68,16 @@
         .logo img {
             max-height: 80px;
         }
+
+        .items-table td, .items-table th {
+            padding-top: 6px !important;
+            padding-bottom: 6px !important;
+        }
+
+        .items-table td.item-group {
+            padding-top: 4px !important;
+            padding-bottom: 4px !important;
+        }
     </style>
 @endpush
 
@@ -123,15 +133,15 @@
                 <table class="table">
                     <tbody>
                     <tr>
-                        <th>Total Amount:</th>
+                        <th>Invoiced Amount:</th>
                         <td>
-                            &dollar;{{ number_format($invoice->getAmount()) }}
+                            &dollar;{{ number_format($invoice->getAmount(), 2) }}
                         </td>
                     </tr>
                     <tr>
                         <th>Amount Due:</th>
                         <td>
-                            &dollar;{{ number_format($invoice->getAmountDue()) }}
+                            &dollar;{{ number_format($invoice->getAmountDue(), 2) }}
                         </td>
                     </tr>
                     </tbody>

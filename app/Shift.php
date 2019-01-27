@@ -893,7 +893,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemGroup(string $invoiceModel): ?string
     {
-        return $this->getItemName($invoiceModel);
+        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j') . ': ' . $this->getItemName($invoiceModel);
     }
 
     /**
