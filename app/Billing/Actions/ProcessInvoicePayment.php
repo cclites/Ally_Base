@@ -1,24 +1,25 @@
 <?php
-namespace App\Billing\Payments;
+namespace App\Billing\Actions;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Client;
 
-class InvoicePaymentProcessor
+class ProcessInvoicePayment
 {
     /**
-     * @var \App\Billing\Payments\PaymentProcessor
+     * @var \App\Billing\Actions\ProcessPayment
      */
     protected $paymentProcessor;
 
-    function __construct(PaymentProcessor $paymentProcessor = null)
+
+    public function __construct(ProcessPayment $paymentProcessor)
     {
-        $this->paymentProcessor = $paymentProcessor ?? new PaymentProcessor();
+        $this->paymentProcessor = $paymentProcessor;
     }
+
 
     /**
      * @param \App\Billing\ClientInvoice $invoice

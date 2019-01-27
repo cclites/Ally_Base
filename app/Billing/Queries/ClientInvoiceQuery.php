@@ -4,7 +4,6 @@ namespace App\Billing\Queries;
 use App\Billing\ClientInvoice;
 use App\BusinessChain;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
