@@ -17,7 +17,7 @@ class AlterUsersTableAddDeactivationReasonId extends Migration
             $table->unsignedInteger('deactivation_reason_id')->nullable();
             $table->date('reactivation_date')->nullable();
 
-            $table->foreign('deactivation_reason_id')->reference('id')->on('deactivation_reasons')->onUpdate('CASCADE')->onDelete('RESTRICT');
+            $table->foreign('deactivation_reason_id')->references('id')->on('deactivation_reasons')->onUpdate('CASCADE')->onDelete('RESTRICT');
         });
     }
 
@@ -29,6 +29,7 @@ class AlterUsersTableAddDeactivationReasonId extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['deactivation_reason_id']);
             $table->dropColumn('deactivation_reason_id');
             $table->dropColumn('reactivation_date');
         });
