@@ -201,7 +201,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         'unpaired_pay_rates' => 'json',
     ];
 
-    protected $appends = ['clientDeactivationReasons', 'caregiverDeactivationReasons'];
+    protected $appends = [];
     
     /**
      * The "booting" method of the model.

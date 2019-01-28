@@ -257,7 +257,7 @@ class ClientController extends BaseController
         if (request()->filled('reactivation_date')) {
             $data['reactivation_date'] = Carbon::parse(request('reactivation_date'));
         }
-        logger($data);
+        
         if ($client->update($data)) {
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
