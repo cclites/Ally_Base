@@ -56,6 +56,13 @@
                     @endforeach
                 @endforeach
                 </tbody>
+                <tfoot>
+                <tr>
+                    <th colspan="4">Total</th>
+                    <th>{{ $invoice->items->sum('total') }}</th>
+                    <th>{{ $invoice->amount }}</th>
+                </tr>
+                </tfoot>
             </table>
         </div>
     </div>
