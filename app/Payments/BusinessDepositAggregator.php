@@ -4,7 +4,7 @@ namespace App\Payments;
 use App\Business;
 use App\Contracts\DepositAggregatorInterface;
 use App\Billing\Deposit;
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ECSPayment;
 use App\Shift;
 use Carbon\Carbon;
 use DB;

@@ -6,7 +6,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Billing\Payments\CreditCardPayment;
-use App\Gateway\CreditCardPaymentInterface;
+use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
 use App\User;

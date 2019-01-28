@@ -4,8 +4,8 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Billing\Deposit;
-use App\Gateway\ACHDepositInterface;
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ACHDepositInterface;
+use App\Billing\Gateway\ECSPayment;
 
 /**
  * Class SingleDepositProcessor

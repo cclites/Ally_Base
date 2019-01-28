@@ -2,7 +2,7 @@
 
 namespace App\Payments;
 
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ECSPayment;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 
@@ -13,7 +13,7 @@ class RefundProcessor
      */
     private $transaction;
     /**
-     * @var \App\Gateway\ECSPayment
+     * @var \App\Billing\Gateway\ECSPayment
      */
     private $ECSPayment;
 

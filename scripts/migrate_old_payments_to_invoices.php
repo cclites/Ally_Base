@@ -58,10 +58,10 @@ Payment::whereNotNull('client_id')->update(['payer_id' => \App\Billing\Payer::PR
 });
 
 ////////////////////////////////////
-//// Payments to Invoices
+//// Client Payments to Invoices
 ////////////////////////////////////
 
-Payment::with(['client', 'client.payers'])->whereNotNull('client_id')->chunk(200, function($payments) {
+Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($payments) {
     $payments->each(function(Payment $payment) {
         $payer = $payment->payer;
 
@@ -73,33 +73,7 @@ Payment::with(['client', 'client.payers'])->whereNotNull('client_id')->chunk(200
         ]);
 
         foreach($payment->shifts as $shift) {
-
-            $total = $shift->costs()->getTotalCost();
-
-            if ($shift->costs()->getMileageCost() > 0) {
-                $total = subtract($total, $shift->costs()->getMileageCost());
-                $expense = _createMileageExpense($shift);
-                _assignExpense($invoice, $shift, $expense);
-            }
-
-            if ($shift->costs()->getOtherExpenses() > 0) {
-                $total = subtract($total, $shift->costs()->getOtherExpenses());
-                $expense = _createOtherExpense($shift);
-                _assignExpense($invoice, $shift, $expense);
-            }
-
-
-            $item = new \App\Billing\ClientInvoiceItem([
-                'rate' => $shift->costs()->getTotalHourlyCost(),
-                'units' => $shift->duration(),
-                'group' => $shift->getItemGroup(ClientInvoice::class),
-                'name' => $shift->getItemName(ClientInvoice::class),
-                'total' => $total,
-                'amount_due' => $total,
-                'date' => $shift->getItemDate(),
-            ]);
-            $item->associateInvoiceable($shift);
-            $invoice->addItem($item);
+            $item = _assignShift($invoice, $shift);
         }
 
         if ($invoice->getAmount() != $payment->amount) {
@@ -120,6 +94,67 @@ Payment::with(['client', 'client.payers'])->whereNotNull('client_id')->chunk(200
         $invoice->addPayment($payment, $payment->amount);
     });
 });
+
+////////////////////////////////////
+//// Provider Pay Payments to Invoices (One per client)
+////////////////////////////////////
+
+$missedAmounts = [];
+
+Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments) {
+    $payments->each(function(Payment $payment) {
+        $payer = $payment->payer;
+        $groupedShifts = $payment->shifts->groupBy('client_id');
+
+        $totalInvoiced = 0;
+        foreach($groupedShifts as $clientId => $shifts) {
+            $invoice = ClientInvoice::create([
+                'client_id' => $payment->client_id,
+                'payer_id' => $payer->id,
+                'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+                'created_at' => $payment->created_at,
+            ]);
+
+            foreach($shifts as $shift) {
+                $item = _assignShift($invoice, $shift);
+            }
+
+            $invoice->addPayment($payment, $invoice->getAmountDue());
+            $totalInvoiced = add($totalInvoiced, $invoice->getAmount());
+        }
+
+        if ($totalInvoiced != $payment->amount) {
+            $diff = subtract($payment->amount, $totalInvoiced);
+            $missedAmounts[] = [
+                'payment_id' => $payment->id,
+                'diff' => $diff,
+                'shift_count' => $payment->shifts->count(),
+            ];
+
+//            // Add a manual adjustment invoice
+//            $invoice = ClientInvoice::create([
+//                'client_id' => null, // THIS CAN'T BE CREATED
+//                'payer_id' => $payer->id,
+//                'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+//                'created_at' => $payment->created_at,
+//            ]);
+//
+//            $item = new \App\Billing\ClientInvoiceItem([
+//                'rate' => $diff,
+//                'units' => 1,
+//                'group' => 'Adjustments',
+//                'name' => 'Manual Adjustment',
+//                'total' => $diff,
+//                'amount_due' => $diff,
+//                'notes' => str_limit($payment->notes, 253, '..'),
+//            ]);
+//            $invoice->addItem($item);
+        }
+
+    });
+});
+
+file_put_contents(base_path('missed_amounts.serialized'), serialize($missedAmounts));
 
 DB::commit();
 
@@ -164,4 +199,35 @@ function _assignExpense(ClientInvoice $invoice, \App\Shift $shift, \App\Billing\
     ]);
     $item->associateInvoiceable($expense);
     $invoice->addItem($item);
+}
+
+function _assignShift(ClientInvoice $invoice, \App\Shift $shift): \App\Billing\ClientInvoiceItem
+{
+    $total = $shift->costs()->getTotalCost();
+
+    if ($shift->costs()->getMileageCost() > 0) {
+        $total = subtract($total, $shift->costs()->getMileageCost());
+        $expense = _createMileageExpense($shift);
+        _assignExpense($invoice, $shift, $expense);
+    }
+
+    if ($shift->costs()->getOtherExpenses() > 0) {
+        $total = subtract($total, $shift->costs()->getOtherExpenses());
+        $expense = _createOtherExpense($shift);
+        _assignExpense($invoice, $shift, $expense);
+    }
+
+
+    $item = new \App\Billing\ClientInvoiceItem([
+        'rate' => $shift->costs()->getTotalHourlyCost(),
+        'units' => $shift->duration(),
+        'group' => $shift->getItemGroup(ClientInvoice::class),
+        'name' => $shift->getItemName(ClientInvoice::class),
+        'total' => $total,
+        'amount_due' => $total,
+        'date' => $shift->getItemDate(),
+    ]);
+    $item->associateInvoiceable($shift);
+    $invoice->addItem($item);
+    return $item;
 }

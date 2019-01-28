@@ -6,7 +6,7 @@ use App\Business;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Gateway\CreditCardPaymentInterface;
+use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\GatewayTransaction;
 use App\Payments\ClientPaymentAggregator;
 use App\Payments\PaymentProcessor;

@@ -16,13 +16,13 @@ use App\AuditableModel;
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Billing\GatewayTransaction $transaction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAction($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereInternalTransactionId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\GatewayTransactionHistory whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereInternalTransactionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class GatewayTransactionHistory extends AuditableModel

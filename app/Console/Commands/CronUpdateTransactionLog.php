@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\FailedTransactionFound;
-use App\Gateway\ECSQuery;
+use App\Billing\Gateway\ECSQuery;
 use App\Billing\GatewayTransaction;
 use App\Billing\GatewayTransactionHistory;
 use Carbon\Carbon;
@@ -34,7 +34,7 @@ class CronUpdateTransactionLog extends Command
     /**
      * The gateway query object
      *
-     * @var \App\Gateway\ECSQuery
+     * @var \App\Billing\Gateway\ECSQuery
      */
     protected $query;
 

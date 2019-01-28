@@ -5,7 +5,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Gateway\ACHPaymentInterface;
+use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Payments\Methods\BankAccount;
 
 class BankAccountPayment implements PaymentMethodStrategy
@@ -16,7 +16,7 @@ class BankAccountPayment implements PaymentMethodStrategy
     protected $account;
 
     /**
-     * @var \App\Gateway\ACHPaymentInterface
+     * @var \App\Billing\Gateway\ACHPaymentInterface
      */
     protected $gateway;
 

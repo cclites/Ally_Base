@@ -5,13 +5,13 @@ namespace App\Payments;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Billing\Payments\Methods\CreditCard;
-use App\Gateway\ECSQuery;
+use App\Billing\Gateway\ECSQuery;
 use App\Billing\GatewayTransaction;
 use App\User;
 
 class TransactionMatcher {
     /**
-     * @var \App\Gateway\ECSQuery
+     * @var \App\Billing\Gateway\ECSQuery
      */
     private $query;
 

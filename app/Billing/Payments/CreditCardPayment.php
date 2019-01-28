@@ -5,7 +5,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
-use App\Gateway\CreditCardPaymentInterface;
+use App\Billing\Gateway\CreditCardPaymentInterface;
 use App\Billing\Payments\Methods\CreditCard;
 
 class CreditCardPayment implements PaymentMethodStrategy
@@ -16,7 +16,7 @@ class CreditCardPayment implements PaymentMethodStrategy
     protected $card;
 
     /**
-     * @var \App\Gateway\CreditCardPaymentInterface
+     * @var \App\Billing\Gateway\CreditCardPaymentInterface
      */
     protected $gateway;
 

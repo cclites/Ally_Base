@@ -1,5 +1,5 @@
 <?php
-namespace App\Gateway;
+namespace App\Billing\Gateway;
 
 class ECSQuery
 {

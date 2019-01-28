@@ -1,23 +1,13 @@
 <?php
 
-namespace App\Gateway;
+namespace App\Billing\Gateway;
 
 use App\Address;
-use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
 use App\PhoneNumber;
 
-interface CreditCardPaymentInterface extends RefundInterface
+interface ACHPaymentInterface extends ACHDepositInterface
 {
-    /**
-     * Validate, but do not authorize, the payment method
-     *
-     * @param \App\Billing\Payments\Methods\CreditCard $card
-     * @param mixed $cvv
-     *
-     * @return \App\Billing\GatewayTransaction
-     * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
-     */
-    public function validateCard(CreditCard $card, $cvv = null);
 
     /**
      * Authorize, but do not charge, the payment method
@@ -25,25 +15,25 @@ interface CreditCardPaymentInterface extends RefundInterface
      * @param \App\Billing\Payments\Methods\CreditCard $card
      * @param float $amount
      * @param string $currency
-     * @param mixed $cvv
+     * @param string $secCode
      *
      * @return \App\Billing\GatewayTransaction
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
-    public function authorizeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null);
+    public function authorizeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD');
 
     /**
      * Charge the payment method
      *
-     * @param \App\Billing\Payments\Methods\CreditCard $card
+     * @param \App\Billing\Payments\Methods\BankAccount $account
      * @param float $amount
      * @param string $currency
-     * @param mixed $cvv
+     * @param string $secCode
      *
      * @return \App\Billing\GatewayTransaction
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined|\App\Billing\Exceptions\PaymentMethodError
      */
-    public function chargeCard(CreditCard $card, $amount, $currency = 'USD', $cvv = null);
+    public function chargeAccount(BankAccount $account, $amount, $currency = 'USD', $secCode = 'PPD');
 
     /**
      * @param \App\Address $address

@@ -1,5 +1,5 @@
 <?php
-namespace App\Gateway;
+namespace App\Billing\Gateway;
 
 use App\Address;
 use App\Billing\Payments\Methods\BankAccount;
@@ -13,7 +13,7 @@ use App\PhoneNumber;
  * Class ECSPayment
  * Documented at https://ecspayments.transactiongateway.com/merchants/resources/integration/integration_portal.php
  *
- * @package App\Gateway
+ * @package App\Billing\Gateway
  */
 class ECSPayment implements ACHPaymentInterface, CreditCardPaymentInterface {
 

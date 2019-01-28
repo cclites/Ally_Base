@@ -8,7 +8,7 @@ use App\Contracts\PaymentAggregatorInterface;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Events\FailedTransactionFound;
 use App\Events\FailedTransactionRecorded;
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ECSPayment;
 use App\Billing\Payment;
 use App\Shifts\AllyFeeCalculator;
 use App\Shift;

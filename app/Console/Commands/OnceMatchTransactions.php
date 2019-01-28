@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Gateway\ECSQuery;
+use App\Billing\Gateway\ECSQuery;
 use App\Billing\GatewayTransaction;
 use App\Payments\TransactionMatcher;
 use Illuminate\Console\Command;

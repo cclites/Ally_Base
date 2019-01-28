@@ -6,7 +6,7 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Exceptions\PaymentMethodDeclined;
 use App\Billing\Exceptions\PaymentMethodError;
-use App\Gateway\ECSPayment;
+use App\Billing\Gateway\ECSPayment;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Gateway;
+namespace App\Billing\Gateway;
 
 use App\Billing\Payments\Methods\BankAccount;
 
