@@ -4,6 +4,7 @@ namespace App\Billing\Queries;
 use App\Billing\Exceptions\PayerAssignmentError;
 use App\Billing\Payer;
 use App\Billing\Payment;
+use App\Client;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentQuery extends BaseQuery
@@ -17,6 +18,13 @@ class PaymentQuery extends BaseQuery
     function getModelInstance(): Model
     {
         return new Payment();
+    }
+
+    function forClient(Client $client)
+    {
+        $this->where('client_id', $client->id);
+
+        return $this;
     }
 
     function forPayer(Payer $payer): self

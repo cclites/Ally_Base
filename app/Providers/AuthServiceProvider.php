@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Activity;
+use App\Billing\ClientInvoice;
 use App\Billing\Payer;
 use App\Billing\Service;
 use App\Business;
@@ -18,6 +19,7 @@ use App\Policies\ActivityPolicy;
 use App\Policies\BusinessPolicy;
 use App\Policies\CaregiverApplicationPolicy;
 use App\Policies\CaregiverPolicy;
+use App\Policies\ClientInvoicePolicy;
 use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
 use App\Policies\EmergencyContactPolicy;
@@ -66,6 +68,7 @@ class AuthServiceProvider extends ServiceProvider
         Caregiver::class => CaregiverPolicy::class,
         CaregiverApplication::class => CaregiverApplicationPolicy::class,
         Client::class => ClientPolicy::class,
+        ClientInvoice::class => ClientInvoicePolicy::class,
         ClientNarrative::class => ClientNarrativePolicy::class,
         Deposit::class => DepositPolicy::class,
         EmergencyContact::class => EmergencyContactPolicy::class,

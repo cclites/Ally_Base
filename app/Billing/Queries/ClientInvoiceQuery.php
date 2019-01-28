@@ -2,6 +2,7 @@
 namespace App\Billing\Queries;
 
 use App\Billing\ClientInvoice;
+use App\Billing\Payer;
 use App\BusinessChain;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,16 @@ class ClientInvoiceQuery extends BaseQuery
     function getModelInstance(): Model
     {
         return new ClientInvoice();
+    }
+
+    function forClient(int $clientId, bool $privatePayOnly = true): self
+    {
+        $this->where('client_id', $clientId);
+        if ($privatePayOnly) {
+            $this->where('payer_id', Payer::PRIVATE_PAY_ID);
+        }
+
+        return $this;
     }
 
     function forBusiness(int $businessId): self

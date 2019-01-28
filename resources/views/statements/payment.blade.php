@@ -118,7 +118,7 @@
                             @if (!$payment->success)
                                 <span style="color: darkred">Failed</span>
                             @else
-                                <span style="color: green">Success</span>
+                                <span style="color: green">Complete</span>
                             @endif
                         </td>
                     </tr>

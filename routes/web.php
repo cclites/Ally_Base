@@ -74,6 +74,11 @@ Route::group([
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
+
+    Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
+    Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
+    Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
+    Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
 });
 
 Route::group([

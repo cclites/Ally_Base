@@ -68,6 +68,7 @@ Vue.component('checkbox-group', require('./components/CheckboxGroup'));
 
 // Client
 Vue.component('ltc-shift-approval', require('./components/clients/LtcShiftApproval'));
+Vue.component('client-invoice-history', require('./components/clients/ClientInvoiceHistory'));
 Vue.component('client-payment-history', require('./components/clients/ClientPaymentHistory'));
 Vue.component('client-payment-details', require('./components/clients/ClientPaymentDetails'));
 Vue.component('client-payment-details-print', require('./components/clients/ClientPaymentDetailsPrint'));
