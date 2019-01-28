@@ -2,7 +2,6 @@ import * as Vue from "vue";
 
 const state = {
     businesses: [],
-    currentBusiness: {}
 }
 
 // getters
@@ -22,10 +21,6 @@ const actions = {}
 const mutations = {
     setBusinesses (state, businesses) {
         state.businesses = businesses
-    },
-
-    setCurrentBusiness(state, business) {
-        state.currentBusiness = business;
     },
 
     updateBusiness(state, business) {
