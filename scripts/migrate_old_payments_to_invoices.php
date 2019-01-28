@@ -102,9 +102,9 @@ Payment::with(['client', 'client.payers'])->whereNotNull('client_id')->chunk(200
             $invoice->addItem($item);
         }
 
-        if ($invoice->getAmount() < $payment->amount) {
+        if ($invoice->getAmount() != $payment->amount) {
             // Add a manual adjustment
-            $diff = bcsub($payment->amount, $invoice->getAmount(), 2);
+            $diff = subtract($payment->amount, $invoice->getAmount());
             $item = new \App\Billing\ClientInvoiceItem([
                 'rate' => $diff,
                 'units' => 1,

@@ -42,7 +42,12 @@
                         <?php /** @var \App\Billing\ClientInvoiceItem $item */ ?>
                         <tr>
                             <td>{{ local_date($item->date) }}</td>
-                            <td>{{ $item->name }}</td>
+                            <td>
+                                {{ $item->name }}
+                                @if(trim($item->notes))
+                                    <br /><small>{{ $item->notes }}</small>
+                                @endif
+                            </td>
                             <td>{{ number_format($item->rate, 2) }}</td>
                             <td>{{ $item->units }}</td>
                             <td>{{ number_format($item->total, 2) }}</td>
@@ -81,6 +86,13 @@
                         <td>{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>
                     </tr>
+                    @if($payment->notes)
+                        <tr>
+                            <td colspan="5" style="padding-left: 15px;">
+                                <strong>Note: </strong> {{ $payment->notes }}
+                            </td>
+                        </tr>
+                    @endif
                 @endforeach
                 </tbody>
             </table>
