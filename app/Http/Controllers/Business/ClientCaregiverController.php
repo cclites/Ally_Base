@@ -12,6 +12,17 @@ use Illuminate\Http\Request;
 
 class ClientCaregiverController extends BaseController
 {
+    public function index(Client $client)
+    {
+        $this->authorize('read', $client);
+
+        $caregivers = $client->caregivers()->ordered()->get()->map(function ($caregiver) use ($client) {
+            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+        });
+
+        return $caregivers->sortBy('name')->values()->all();
+    }
+
     public function store(Request $request, Client $client)
     {
         $this->authorize('update', $client);
@@ -50,17 +61,6 @@ class ClientCaregiverController extends BaseController
         }
 
         return new ErrorResponse(500, 'Unable to save caregiver assignment.');
-    }
-
-    public function index(Client $client)
-    {
-        $this->authorize('read', $client);
-
-        $caregivers = $client->caregivers->map(function ($caregiver) use ($client) {
-            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
-        });
-
-        return $caregivers->sortBy('name')->values()->all();
     }
 
     public function show(Client $client, Caregiver $caregiver)

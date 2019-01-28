@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Reports\ShiftsReport;
 use App\Shift;
 use App\Shifts\AllyFeeCalculator;

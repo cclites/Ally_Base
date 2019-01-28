@@ -1,0 +1,257 @@
+<?php
+namespace App\Billing;
+
+use App\Address;
+use App\AuditableModel;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Exceptions\PayerAssignmentError;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Client;
+use App\Contracts\BelongsToChainsInterface;
+use App\Contracts\ContactableInterface;
+use App\PhoneNumber;
+use App\Traits\BelongsToOneChain;
+use Carbon\Carbon;
+
+/**
+ * \App\Billing\Payer
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $npi_number
+ * @property int $week_start
+ * @property string|null $address1
+ * @property string|null $address2
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $zip
+ * @property string|null $phone_number
+ * @property string|null $fax_number
+ * @property int|null $chain_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $payment_method_type
+ * @property int|null $payment_method_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\BusinessChain|null $businessChain
+ * @property-read \Illuminate\Database\Eloquent\Model|ChargeableInterface $paymentMethod
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PayerRate[] $rates
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereAddress1($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereAddress2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereChainId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereFaxNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereNpiNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer wherePaymentMethodId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer wherePaymentMethodType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer wherePhoneNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereWeekStart($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereZip($value)
+ * @mixin \Eloquent
+ */
+class Payer extends AuditableModel implements BelongsToChainsInterface, ContactableInterface
+{
+    use BelongsToOneChain;
+
+    const PRIVATE_PAY_ID = 0;
+
+    protected $orderedColumn = 'name';
+
+    protected $guarded = ['id', 'rates'];
+
+    protected $casts = [
+        'chain_id' => 'int',
+        'week_start' => 'int',
+    ];
+
+    protected $with = ['rates'];
+
+    /**
+     * @var \App\Client|null
+     */
+    protected $client;
+
+    ////////////////////////////////////
+    //// Relationship Methods
+    ////////////////////////////////////
+
+    function rates()
+    {
+        return $this->hasMany(PayerRate::class);
+    }
+
+    function paymentMethod()
+    {
+        return $this->morphTo('payment_method');
+    }
+
+    ////////////////////////////////////
+    //// Instance Methods
+    ////////////////////////////////////
+
+    function isPrivatePay()
+    {
+        return $this->id === self::PRIVATE_PAY_ID;
+    }
+
+    function setPrivatePayer(Client $client)
+    {
+        $this->client = $client;
+    }
+
+    function getPrivatePayer(): ?Client
+    {
+        return $this->isPrivatePay() ? $this->client : null;
+    }
+
+    function getUniqueKey(): string
+    {
+        if ($this->isPrivatePay()) {
+            if (!$this->getPrivatePayer()) {
+                throw new PayerAssignmentError("The private payer does not have a client record attached.");
+            }
+
+            return (string) $this->id . ':' . $this->getPrivatePayer()->id;
+        }
+
+        return (string) $this->id;
+    }
+
+    /**
+     * @param \App\Billing\Contracts\ChargeableInterface|\Illuminate\Database\Eloquent\Model $paymentMethod
+     * @return bool
+     */
+    function setPaymentMethod(ChargeableInterface $paymentMethod)
+    {
+        return $this->paymentMethod()->associate($paymentMethod)->save();
+    }
+
+    function getPaymentMethod(): ChargeableInterface
+    {
+        if ($this->isPrivatePay()) {
+            if (!$this->getPrivatePayer()) {
+                throw new PayerAssignmentError("The private payer does not have a client record attached.");
+            }
+
+            $method = $this->getPrivatePayer()->getPaymentMethod();
+        } else {
+            $method = $this->paymentMethod;
+        }
+
+        if (!$method) {
+            throw new PaymentMethodError("This payer has no payment method assigned.");
+        }
+
+        return $method;
+    }
+
+
+    function name(): string
+    {
+        if ($this->isPrivatePay()) {
+            return ($client = $this->getPrivatePayer()) ? $client->name() : 'Client';
+        }
+
+        return $this->name;
+    }
+
+    function getAddress(): ?Address
+    {
+        return new Address([
+            'address1' => $this->address1,
+            'address2' => $this->address2,
+            'city' => $this->city,
+            'state' => $this->state,
+            'zip' => $this->zip,
+            'country' => 'US',
+        ]);
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        try {
+            $phone = new PhoneNumber();
+            $phone->input($this->phone_number);
+            return $phone;
+        }
+        catch (\Exception $e) {}
+        return null;
+    }
+
+    /**
+     * Get the default PayerRate for this payer
+     *
+     * @param string $date
+     * @return \App\Billing\PayerRate|null
+     */
+    function getDefaultRate(string $date = 'now'): ?PayerRate
+    {
+        $date = Carbon::parse($date, 'UTC')->setTime(0, 0, 0);
+
+        return $this->rates()
+            ->whereNull('service_id')
+            ->where('effective_start', '<=', $date)
+            ->where('effective_end', '>=', $date)
+            ->first();
+    }
+
+    /**
+     * Remove existing PayerRates and update with the given
+     * request values.
+     *
+     * @param array|null $rates
+     * @return bool
+     */
+    public function syncRates(iterable $rates) : bool
+    {
+        try {
+            $new = collect($rates)->filter(function($item) {
+                return ! isset($item['id']);
+            });
+
+            $existing = collect($rates)->filter(function($item) {
+                return isset($item['id']);
+            });
+
+            $ids = $existing->pluck('id');
+            if (count($ids)) {
+                // remove all issues with ids that aren't in the current array
+                PayerRate::where('payer_id', $this->id)
+                    ->whereNotIn('id', $ids)
+                    ->delete();
+
+                // update the existing issues in case they changed
+                foreach($existing as $item) {
+                    if ($rate = PayerRate::where('id', $item['id'])->first()) {
+                        $rate->update($item);
+                    }
+                }
+            } else {
+                // clear
+                PayerRate::where('payer_id', $this->id)->delete();
+            }
+
+            // create new issues from the issues that have no id
+            foreach($new as $item) {
+                PayerRate::create(array_merge($item, ['payer_id' => $this->id]));
+            }
+            
+            return true;
+        } catch (\Exception $ex) {
+            \Log::debug($ex->getMessage());
+            return false;
+        }
+    }
+
+}

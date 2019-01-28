@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverApplication;
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateCaregiverRequest;

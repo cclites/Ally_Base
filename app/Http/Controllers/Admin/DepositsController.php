@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Business;
 use App\Caregiver;
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Http\Controllers\Controller;
 use App\Payments\DepositProcessor;
 use App\Payments\SingleDepositProcessor;

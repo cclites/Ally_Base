@@ -208,6 +208,12 @@ Route::group([
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
     Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
     Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
+    Route::get('clients/{client}/payers', 'Business\ClientPayerController@index')->name('clients.payers.index');
+    Route::get('clients/{client}/payers/unique', 'Business\ClientPayerController@uniquePayers')->name('clients.payers.unique');
+    Route::patch('clients/{client}/payers', 'Business\ClientPayerController@update')->name('clients.payers.update');
+    Route::patch('clients/{client}/payers/{payer}/priority', 'Business\ClientPayerController@updatePriority')->name('clients.payers.priority');
+    Route::get('clients/{client}/rates', 'Business\ClientRatesController@index')->name('clients.rates.index');
+    Route::patch('clients/{client}/rates', 'Business\ClientRatesController@update')->name('clients.rates.update');
 
     Route::get('clients/{client}/narrative', 'Business\ClientNarrativeController@index')->name('clients.narrative');
     Route::patch('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@update')->name('clients.narrative.update');
@@ -265,6 +271,15 @@ Route::group([
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
 
+    Route::get('services', 'Business\ServiceController@index')->name('services.index');
+    Route::post('services', 'Business\ServiceController@store');
+    Route::patch('services/{service}', 'Business\ServiceController@update');
+    Route::delete('services/{service}', 'Business\ServiceController@destroy');
+
+    Route::post('authorization', 'Business\ClientAuthController@store');
+    Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
+    Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
+
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
@@ -273,7 +288,6 @@ Route::group([
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');
 
-    Route::post('shifts/convert/{schedule}', 'Business\ShiftController@convertSchedule')->name('shifts.convert');
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');
     Route::get('shifts/{shift}/print', 'Business\ShiftController@printPage')->name('shifts.print');
@@ -328,6 +342,8 @@ Route::group([
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
     Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
+
+    Route::resource('payers', 'Business\PayerController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {

@@ -33,13 +33,13 @@
             <a class="nav-link" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+            <a data-toggle="tab" role="tab" href="#payers" class="nav-link">Payers</a>
+        </li>
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#rates" class="nav-link">Caregivers &amp; Rates</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
         </li>
         @if($business->scheduling)
             <li class="nav-item">
@@ -59,11 +59,12 @@
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
+            <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Insurance & Service Auths</a>
         </li>
+
         @if($client->client_type === 'medicaid')
             <li class="nav-item">
-                <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Medicaid Data</a>
+                <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
             </li>
         @endif
 
@@ -81,15 +82,15 @@
                 <a class="dropdown-item" data-toggle="tab" href="#addresses" role="tab">Addresses</a>
                 <a class="dropdown-item" data-toggle="tab" href="#phones" role="tab">Phone Numbers</a>
                 <a class="dropdown-item" data-toggle="tab" href="#payment" role="tab">Payment Methods</a>
-                <a class="dropdown-item" data-toggle="tab" href="#caregivers" role="tab">Caregivers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#payers" role="tab">Payers</a>
+                <a class="dropdown-item" data-toggle="tab" href="#rates" role="tab">Caregivers &amp; Rates</a>
                 <a class="dropdown-item" data-toggle="tab" href="#care_plans" role="tab">Service Needs &amp; Goals</a>
-                <a class="dropdown-item" data-toggle="tab" href="#service_orders" role="tab">Service Orders</a>
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
-                <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
+                <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
         </li>
     </ul>
@@ -133,12 +134,23 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane" id="caregivers" role="tabpanel">
-            <business-client-caregivers :client="{{ $client }}"
-                                        :ally-rate-original="{{ floatval($client->allyFee) }}"
-                                        payment-type-message="{{ $defaultPaymentTypeMessage }}"
-            ></business-client-caregivers>
+        <div class="tab-pane" id="payers" role="tabpanel">
+            <client-payers-tab :client="{{ $client }}" :payers="{{ $client->payers }}" :payer-options="{{ $payers }}" />
         </div>
+        <div class="tab-pane" id="rates" role="tabpanel">
+            <!-- Includes caregivers -->
+            <client-rates-tab :client="{{ $client }}"
+                              :rates="{{ $client->rates }}"
+                              :ally-rate-original="{{ floatval($client->allyFee) }}"
+                              payment-type-message="{{ $defaultPaymentTypeMessage }}"
+            />
+        </div>
+        {{--<div class="tab-pane" id="caregivers" role="tabpanel">--}}
+            {{--<business-client-caregivers :client="{{ $client }}"--}}
+                                        {{--:ally-rate-original="{{ floatval($client->allyFee) }}"--}}
+                                        {{--payment-type-message="{{ $defaultPaymentTypeMessage }}"--}}
+            {{--></business-client-caregivers>--}}
+        {{--</div>--}}
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
@@ -151,9 +163,6 @@
             </b-card>
             <business-client-care-details
                 :client="{{ $client }}" />
-        </div>
-        <div class="tab-pane" id="service_orders" role="tabpanel">
-            <business-client-service-orders :client="{{ $client }}"></business-client-service-orders>
         </div>
         @if($business->scheduling)
             <div class="tab-pane" id="schedule" role="tabpanel">
@@ -176,8 +185,8 @@
             <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"
                                     :user-id="{{ $client->id }}"></emergency-contacts-tab>
         </div>
-        <div class="tab-pane" id="ltci">
-            <client-ltc-insurance :client="{{ $client }}"></client-ltc-insurance>
+        <div class="tab-pane" id="insurance_service_auth">
+            <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>
         </div>
         <div class="tab-pane" id="misc">
             <client-misc-tab :client="{{ $client }}"></client-misc-tab>

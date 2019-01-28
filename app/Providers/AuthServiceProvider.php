@@ -3,14 +3,16 @@
 namespace App\Providers;
 
 use App\Activity;
+use App\Billing\Payer;
+use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverApplication;
 use App\Client;
-use App\Deposit;
+use App\Billing\Deposit;
 use App\EmergencyContact;
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 use App\PhoneNumber;
 use App\Policies\ActivityPolicy;
 use App\Policies\BusinessPolicy;
@@ -20,6 +22,7 @@ use App\Policies\ClientPolicy;
 use App\Policies\DepositPolicy;
 use App\Policies\EmergencyContactPolicy;
 use App\Policies\GatewayTransactionPolicy;
+use App\Policies\PayerPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\PhoneNumberPolicy;
 use App\Policies\ProspectPolicy;
@@ -27,6 +30,7 @@ use App\Policies\OtherContactPolicy;
 use App\Policies\RateCodePolicy;
 use App\Policies\ReferralSourcePolicy;
 use App\Policies\SchedulePolicy;
+use App\Policies\ServicePolicy;
 use App\Policies\ShiftPolicy;
 use App\Policies\SmsThreadPolicy;
 use App\Policies\SystemExceptionPolicy;
@@ -71,12 +75,14 @@ class AuthServiceProvider extends ServiceProvider
         EmergencyContact::class => EmergencyContactPolicy::class,
         GatewayTransaction::class => GatewayTransactionPolicy::class,
         OtherContact::class => OtherContactPolicy::class,
+        Payer::class => PayerPolicy::class,
         Payment::class => PaymentPolicy::class,
         PhoneNumber::class => PhoneNumberPolicy::class,
         Prospect::class => ProspectPolicy::class,
         RateCode::class => RateCodePolicy::class,
         ReferralSource::class => ReferralSourcePolicy::class,
         Schedule::class => SchedulePolicy::class,
+        Service::class => ServicePolicy::class,
         Shift::class => ShiftPolicy::class,
         SmsThread::class => SmsThreadPolicy::class,
         SystemException::class => SystemExceptionPolicy::class,

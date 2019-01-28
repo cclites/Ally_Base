@@ -800,7 +800,6 @@
             },
 
             onShiftCreate() {
-                debugger;
                 this.editShiftModal = false;
                 this.addShiftModal = false;
                 this.reloadData();

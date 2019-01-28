@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Business;
 use App\Client;
-use App\Payment;
+use App\Billing\Payment;
 use App\Payments\ClientPaymentAggregator;
 use App\Payments\PaymentProcessor;
 use App\Payments\PendingPayments;

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Business;
 use App\Caregiver;
 use App\Client;
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Import;
 use App\Imports\ImportManager;
 use App\Responses\CreatedResponse;

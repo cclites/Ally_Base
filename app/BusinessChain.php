@@ -1,6 +1,10 @@
 <?php
 namespace App;
 
+use App\Billing\Payer;
+use App\Billing\Service;
+
+
 /**
  * App\BusinessChain
  *
@@ -83,9 +87,24 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(OfficeUser::class, 'chain_id');
     }
 
-    public function fields()
+    /**
+     * Get the Payers relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function payers()
     {
-        return $this->hasMany(CustomField::class, 'chain_id');
+        return $this->hasMany(Payer::class, 'chain_id');
+    }
+
+    /**
+     * Get the Services relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'chain_id');
     }
 
     ////////////////////////////////////
