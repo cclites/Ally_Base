@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\Service;
 use App\Http\Requests\TimesheetReportRequest;
 use App\ReferralSource;
 use App\Reports\PayrollReport;
@@ -551,7 +552,15 @@ class ReportsController extends BaseController
         }
 
         if ($request->filled('client_type')) {
-            $report->where('client_type', $request->client_type);
+            $report->query()->whereHas('client', function($query) use ($request) {
+                $query->where('client_type', $request->client_type);
+            });
+        }
+
+        if ($request->filled('service_code')) {
+            $report->query()->whereHas('services', function ($query) use ($request) {
+                $query->where('id', $request->service_code);
+            });
         }
 
         if ($status = $request->input('status')) {
@@ -580,7 +589,6 @@ class ReportsController extends BaseController
                 $report->query()->whereFlagsIn($flags);
             }
         }
-
     }
 
     public function exportTimesheets()
@@ -1144,7 +1152,8 @@ class ReportsController extends BaseController
                     'id' => $item
                 ];
             });
-        return view('business.reports.revenue', compact('clients', 'caregivers', 'clientTypes'));
+        $serviceCodes = $this->businessChain()->services()->get();
+        return view('business.reports.revenue', compact('clients', 'caregivers', 'clientTypes', 'serviceCodes'));
     }
 
     /**
@@ -1244,7 +1253,8 @@ class ReportsController extends BaseController
         $groupedByDate = [];
 
         foreach ($data as $i => $shiftReport) {
-            $date = (new Carbon($shiftReport['checked_in_time']))->format('m/d/Y');
+            // grouped by week
+            $date = (new Carbon($shiftReport['checked_in_time']))->startOfWeek()->format('m/d/Y');
 
             if(isset($groupedByDate[$date])) {
                 $groupedByDate[$date][] = $shiftReport;
@@ -1285,7 +1295,6 @@ class ReportsController extends BaseController
 
             $groupedByDate[$date] = $total;
         }
-
         return $groupedByDate;
     }
 }
