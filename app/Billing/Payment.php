@@ -84,9 +84,9 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(Client::class);
     }
 
-    public function caregiver()
+    public function payer()
     {
-        return $this->belongsTo(Caregiver::class);
+        return $this->belongsTo(Payer::class);
     }
 
     public function business()

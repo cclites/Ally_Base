@@ -76,7 +76,7 @@
                 @foreach($payments as $payment)
                     <tr>
                         <td>{{ local_date($payment->created_at) }}</td>
-                        <td>{{ $payment->payer->name ?? '' }}</td>
+                        <td>{{ $payment->payer->name() ?? '' }}</td>
                         <td>{{ $payment->payment_type }}</td>
                         <td>{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>

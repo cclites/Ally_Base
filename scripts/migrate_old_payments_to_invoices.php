@@ -10,20 +10,66 @@ DB::beginTransaction();
 //// Create Client Payers
 ////////////////////////////////////
 
-// TODO: How to create Provider Pay Payers for business chains?  Create a payer for each business location?
-// TODO: Create balance payers for all private pay, assign provider pay payer for all "Provider Pay"
-// TODO: Add payer_id field to payments, migrate existing business payments to their respective payer ID
+// Create a new provider pay payer for each business location
+$providerPayers = [];
+foreach(\App\Business::all() as $business) {
+    $payer = new \App\Billing\Payer([
+        'name' => $business->name(),
+        'week_start' => 1,
+        'address1' => $business->address1,
+        'address2' => $business->address2,
+        'city' => $business->city,
+        'state' => $business->state,
+        'zip' => $business->zip,
+        'phone_number' => $business->phone1,
+        'chain_id' => $business->chain_id,
+    ]);
+    $payer->paymentMethod()->associate($business);
+    $payer->save();
+    $providerPayers[$business->id] = $payer;
+
+    // Mark all previous provider pay payments as the new payer id
+    Payment::whereNull('client_id')->where('business_id', $business->id)->update(['payer_id' => $payer->id]);
+}
+
+// Mark all non-provider pay payments as private payer
+Payment::whereNotNull('client_id')->update(['payer_id' => \App\Billing\Payer::PRIVATE_PAY_ID]);
+
+
+// Assign a balance payer for all existing clients
+\App\Client::with('defaultPayment')->chunk(200, function($clients) {
+    $clients->each(function(\App\Client $client) {
+        global $providerPayers;
+        if ($client->getPaymentMethod() instanceof \App\Business) {
+            $payer = $providerPayers[$client->business_id];
+        } else {
+            $payer = null;
+        }
+
+        \App\Billing\ClientPayer::create([
+            'client_id' => $client->id,
+            'payer_id' => $payer->id ?? \App\Billing\Payer::PRIVATE_PAY_ID,
+            'effective_start' => '2018-01-01',
+            'effective_end' => '9999-12-31',
+            'payment_allocation' => \App\Billing\ClientPayer::ALLOCATION_BALANCE,
+            'priority' => 1,
+        ]);
+    });
+});
 
 ////////////////////////////////////
-//// Client Payments to Invoices
+//// Payments to Invoices
 ////////////////////////////////////
 
-Payment::whereNotNull('client_id')->chunk(100, function($payments) {
+Payment::with(['client', 'client.payers'])->whereNotNull('client_id')->chunk(200, function($payments) {
     $payments->each(function(Payment $payment) {
+        $payer = $payment->payer;
+
         $invoice = ClientInvoice::create([
             'client_id' => $payment->client_id,
-            'payer_id' => \App\Billing\Payer::PRIVATE_PAY_ID,
-            'name' => ClientInvoice::getNextName($payment->client_id, \App\Billing\Payer::PRIVATE_PAY_ID),
+            'payer_id' => $payer->id,
+            'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+            'created_at' => $payment->created_at,
         ]);
 
         foreach($payment->shifts as $shift) {
@@ -75,14 +121,12 @@ Payment::whereNotNull('client_id')->chunk(100, function($payments) {
     });
 });
 
-/////////////////////////////////////
-//// Provider Pay Payments to Invoices
-////////////////////////////////////
-
-
-
 DB::commit();
 
+
+////////////////////////////////////
+//// DONE:  Functions below
+////////////////////////////////////
 
 function _createMileageExpense(\App\Shift $shift)
 {

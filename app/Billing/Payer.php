@@ -159,6 +159,10 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
 
     function name(): string
     {
+        if ($this->isPrivatePay()) {
+            return ($client = $this->getPrivatePayer()) ? $client->name() : 'Client';
+        }
+
         return $this->name;
     }
 
