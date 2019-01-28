@@ -522,7 +522,7 @@ class ReportsController extends BaseController
         if ($request->input('transaction_id')) {
             $transaction = GatewayTransaction::findOrFail($request->input('transaction_id'));
             $report->forTransaction($transaction);
-            
+
             if ($request->input('reconciliation_report')) {
                 $report->forReconciliationReport($transaction);
             }
@@ -548,6 +548,10 @@ class ReportsController extends BaseController
         }
         if ($client_id = $request->input('client_id')) {
             $report->where('client_id', $client_id);
+        }
+
+        if ($request->filled('client_type')) {
+            $report->where('client_type', $request->client_type);
         }
 
         if ($status = $request->input('status')) {
@@ -727,7 +731,7 @@ class ReportsController extends BaseController
             })
             ->groupBy('client_id');
     }
-    
+
     /**
      * List of referral sources and how many clients have been referred by each
      *
@@ -805,7 +809,7 @@ class ReportsController extends BaseController
             ->where('user_type', 'client')
             ->with('options')
             ->get();
-        
+
         return view('business.reports.client_directory', compact('clients', 'fields'));
     }
 
@@ -820,7 +824,7 @@ class ReportsController extends BaseController
             ->with('address')
             ->with('meta')
             ->get();
-            
+
         $fields = CustomField::forAuthorizedChain()
             ->where('user_type', 'caregiver')
             ->with('options')
@@ -831,7 +835,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the prospect directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -861,7 +865,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the caregiver directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -897,7 +901,7 @@ class ReportsController extends BaseController
 
     /**
      * Handle the request to generate the client directory
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return Response
      */
@@ -952,7 +956,7 @@ class ReportsController extends BaseController
                         'user_id' => $item->caregiver->id,
                     ]);
                 });
-            
+
             return response()->json($report);
         }
 
@@ -983,11 +987,11 @@ class ReportsController extends BaseController
                         'user_id' => $item->client->id,
                     ]);
                 });
-            
+
             return response()->json($report);
         }
 
-        
+
         $type = 'client';
         $users = Client::forRequestedBusinesses()->active()->ordered()->get();
 
@@ -1124,7 +1128,23 @@ class ReportsController extends BaseController
      */
     public function revenuePage()
     {
-        return view('business.reports.revenue');
+        $clients = Client::forRequestedBusinesses()->select('id')->get()
+            ->sortBy('name')->values()->all();
+        $clients = collect($clients);
+        $caregivers = Caregiver::forRequestedBusinesses()->select('id')->get()
+            ->sortBy('name')->values()->all();
+        $caregivers = collect($caregivers);
+        $clientTypes = Client::forRequestedBusinesses()
+            ->select('client_type')
+            ->distinct()
+            ->pluck('client_type')
+            ->map(function($item) {
+                return [
+                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'id' => $item
+                ];
+            });
+        return view('business.reports.revenue', compact('clients', 'caregivers', 'clientTypes'));
     }
 
     /**
@@ -1155,7 +1175,7 @@ class ReportsController extends BaseController
 
     /**
      * Show the page to generate a sales pipeline report
-     * 
+     *
      * @return Response
      */
     public function showSalesPipeline(Request $request)
@@ -1170,7 +1190,7 @@ class ReportsController extends BaseController
     /**
      * Handle the request to generate a report for the sales pipeline
      * @param Request $request
-     * 
+     *
      * @return array
      */
     protected function salesPipelineReport(Request $request) {
@@ -1179,7 +1199,7 @@ class ReportsController extends BaseController
             'start_date' => 'required|string|date',
             'end_date' => 'required|string|date',
         ]);
-        
+
         $startDate = new Carbon($request->start_date);
         $endDate = new Carbon($request->end_date);
         if($startDate->diffInMonths($endDate) > 6) {
@@ -1188,9 +1208,9 @@ class ReportsController extends BaseController
 
         $prospects = Prospect::select([
                 'id',
-                'business_id', 
-                'closed_loss', 
-                'closed_win', 
+                'business_id',
+                'closed_loss',
+                'closed_win',
                 'referred_by',
                 'referral_source_id',
                 'had_assessment_scheduled',

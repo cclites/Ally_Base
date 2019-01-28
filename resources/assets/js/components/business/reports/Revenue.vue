@@ -57,6 +57,35 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
+                    <b-row>
+                        <b-col lg="3">
+                            <b-form-group label="Client">
+                                <b-form-select v-model="form.client_id">
+                                    <option value="">All</option>
+                                    <option v-for="client in clientOptions" :value="client.id">{{ client.name }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Caregiver">
+                                <b-form-select v-model="form.caregiver_id">
+                                    <option value="">All</option>
+                                    <option v-for="caregiver in caregiverOptions" :value="caregiver.id">{{ caregiver.name }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            <b-form-group label="Client Type">
+                                <b-form-select v-model="form.client_type">
+                                    <option value="">All</option>
+                                    <option v-for="type in clientTypes" :value="type.id">{{ type.name }}</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="3">
+                            Service Code
+                        </b-col>
+                    </b-row>
 
                     <loading-card v-show="loading"></loading-card>
                     <div v-if="dataIsReady && ! loading">
@@ -171,10 +200,26 @@ import LineChart from './analytics/LineChart';
 import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
 export default {
+    props: {
+        clientOptions: {
+            type: Array,
+            required: true
+        },
+        caregiverOptions: {
+            type: Array,
+            required: true
+        },
+        clientTypes: {
+            type: Array,
+            required: true
+        }
+    },
+
     components: {
         BusinessLocationFormGroup,
         LineChart,
     },
+
     data() {
         return {
             loading: false,
@@ -184,7 +229,11 @@ export default {
                 end_date: '11/01/2018',
                 compare_to_prior: 0,
                 wages_as_cogs: 1,
-                business_id: "",
+                business_id: '',
+                client_id: '',
+                caregiver_id: '',
+                client_type: '',
+                service_code: ''
             }),
             data: {
                 current: {},
@@ -222,6 +271,7 @@ export default {
             wagesColor: '#f07730',
         };
     },
+
     computed: {
         chartData() {
             let date = Object.keys(this.data.current);
@@ -355,7 +405,7 @@ export default {
 .text-section {
     padding: 30px 60px;
 }
-.text-container p {    
+.text-container p {
     margin-bottom: 1rem;
     font-size: 1.3rem;
 }
