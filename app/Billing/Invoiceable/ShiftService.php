@@ -205,7 +205,7 @@ class ShiftService extends InvoiceableModel
      */
     public function getAllyRate(): ?float
     {
-        // TODO: Implement getAllyRate() method.
+        return divide($this->getMetaValue("ally_fee_charged", 0), $this->getItemUnits());
     }
 
     /**

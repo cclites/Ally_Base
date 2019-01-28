@@ -2,6 +2,8 @@
 namespace App\Billing\Contracts;
 
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Deposit;
+use App\Billing\Payment;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -152,11 +154,11 @@ interface InvoiceableInterface
      * Add an amount that has been actually paid by a payer
      * Note: Can be used to calculate the actual ally fee
      *
-     * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
+     * @param \App\Billing\Payment $payment
      * @param float $amount
-     * @param float $allyFee  The value of $amount that represents the Ally Fee
+     * @param float $allyFee The value of $amount that represents the Ally Fee
      */
-    public function addAmountCharged(ChargeableInterface $paymentMethod, float $amount, float $allyFee): void;
+    public function addAmountCharged(Payment $payment, float $amount, float $allyFee): void;
 
     /**
      * Get the amount that has been deposited
@@ -168,9 +170,9 @@ interface InvoiceableInterface
     /**
      * Add an amount that has been deposited
      *
-     * @param \App\Billing\Contracts\DepositableInterface $account
+     * @param \App\Billing\Deposit $deposit
      * @param float $amount
      */
-    public function addAmountDeposited(DepositableInterface $account, float $amount): void;
+    public function addAmountDeposited(Deposit $deposit, float $amount): void;
 
 }

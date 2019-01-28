@@ -1,6 +1,7 @@
 <?php
 namespace App\Billing\Payments;
 
+use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
@@ -42,5 +43,10 @@ class BankAccountPayment implements PaymentMethodStrategy
     public function refund(?GatewayTransaction $transaction, float $amount, string $currency = "USD"): ?GatewayTransaction
     {
         return $this->gateway->depositFunds($this->account, $amount, $currency);
+    }
+
+    public function getPaymentMethod(): ChargeableInterface
+    {
+        return $this->account;
     }
 }

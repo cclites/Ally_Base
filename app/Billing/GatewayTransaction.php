@@ -54,6 +54,13 @@ class GatewayTransaction extends AuditableModel
 {
     protected $table = 'gateway_transactions';
     protected $guarded = ['id'];
+    protected $casts = [
+        'amount' => 'float',
+        'success' => 'bool',
+        'declined' => 'bool',
+        'cvs_pass' => 'bool',
+        'avs_pass' => 'bool',
+    ];
 
     ///////////////////////////////////////////
     /// Relationship Methods

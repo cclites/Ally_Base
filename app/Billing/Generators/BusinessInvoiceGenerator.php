@@ -20,7 +20,7 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
     {
         $invoiceables = [];
         foreach($this->getInvoiceableClasses() as $class) {
-            $invoiceables[] = $class->getItemsForBusinessDeposit($business);
+            $invoiceables = array_merge($invoiceables, $class->getItemsForBusinessDeposit($business)->all());
         }
         return $invoiceables;
     }

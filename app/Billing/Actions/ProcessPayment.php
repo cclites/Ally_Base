@@ -13,6 +13,11 @@ use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 class ProcessPayment
 {
     /**
+     * @var null|float
+     */
+    protected $allyFee = null;
+
+    /**
      * @param \App\Billing\Payer $payer
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float $amount
@@ -47,11 +52,38 @@ class ProcessPayment
                 'payer_id' => $payer,
                 'client_id' => $client->id ?? null,
                 'amount' => $transaction->amount,
+                'system_allotment' => $this->getAllyFee($strategy, $amount),
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
             ]);
         }
 
         throw new PaymentMethodError();
+    }
+
+    /**
+     * Set a predetermined Ally Fee instead of calculating it from the payment amount and payment method
+     *
+     * @param float|null $fixedFee
+     */
+    function setAllyFee(?float $fixedFee)
+    {
+        $this->allyFee = $fixedFee;
+    }
+
+    /**
+     * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
+     * @param float $amount
+     * @return float|null
+     */
+    function getAllyFee(PaymentMethodStrategy $strategy, float $amount)
+    {
+        if ($this->allyFee !== null) {
+            return $this->allyFee;
+        }
+
+        $percentage = $strategy->getPaymentMethod()->getAllyPercentage();
+        $allyFee = subtract($amount, divide($amount, add(1, $percentage)));
+        return $allyFee;
     }
 }

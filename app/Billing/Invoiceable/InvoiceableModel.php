@@ -6,6 +6,8 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Contracts\DepositableInterface;
 use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\Deposit;
+use App\Billing\Payment;
 use Packages\MetaData\HasMetaData;
 
 abstract class InvoiceableModel extends AuditableModel implements InvoiceableInterface
@@ -77,15 +79,17 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
      * Add an amount that has been actually paid by a payer
      * Note: Can be used to calculate the actual ally fee
      *
-     * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
+     * @param \App\Billing\Payment $payment
      * @param float $amount
-     * @param float $allyFee  The value of $amount that represents the Ally Fee
+     * @param float $allyFee The value of $amount that represents the Ally Fee
      */
-    public function addAmountCharged(ChargeableInterface $paymentMethod, float $amount, float $allyFee): void
+    public function addAmountCharged(Payment $payment, float $amount, float $allyFee): void
     {
-        $charged = $this->getMetaValue("amount_charged") ?? "0.00";
-        $this->setMeta("amount_charged", bcadd($charged, $amount, 2));
-        $this->addMeta("charges", json_encode(["amount" => $amount, "ally_fee" => $allyFee, "method_type" => get_class($paymentMethod)] + $paymentMethod->toArray()));
+        $charged = $this->getMetaValue("amount_charged") ?? 0.0;
+        $allyFeeCharged = $this->getMetaValue("ally_fee_charged") ?? 0.0;
+        $this->setMeta("amount_charged", add($charged, $amount));
+        $this->setMeta("ally_fee_charged", add($allyFeeCharged, $allyFee));
+        $this->addMeta("charges", json_encode(["amount" => $amount, "ally_fee" => $allyFee, "payment_id" => $payment->id]));
     }
 
     /**
@@ -101,13 +105,13 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     /**
      * Add an amount that has been deposited
      *
-     * @param \App\Billing\Contracts\DepositableInterface $account
+     * @param \App\Billing\Deposit $deposit
      * @param float $amount
      */
-    public function addAmountDeposited(DepositableInterface $account, float $amount): void
+    public function addAmountDeposited(Deposit $deposit, float $amount): void
     {
         $deposited = $this->getMetaValue("amount_deposited") ?? "0.00";
         $this->setMeta("amount_deposited", bcadd($deposited, $amount, 2));
-        $this->addMeta("deposits", json_encode(["amount" => $amount, "account_type" => get_class($account)] + $account->toArray()));
+        $this->addMeta("deposits", json_encode(["amount" => $amount, "deposit_id" => $deposit->id]));
     }
 }

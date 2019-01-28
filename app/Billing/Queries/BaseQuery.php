@@ -66,15 +66,20 @@ abstract class BaseQuery extends Builder
     }
 
     /**
-     * Call the QB method to retrieve query SQL and reset query builder instance for the next independent query
+     * Reset the query instance on any execution methods passed through to the QueryBuilder class
      *
-     * @return string
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
      */
-    function toSql()
+    public function __call($method, $parameters)
     {
-        $results = $this->query->toSql();
-        $this->newQuery();
-        return $results;
+        $resetOnMethods = array_except($this->passthru, ['exists', 'doesntExist', 'getConnection']);
+        $result = parent::__call($method, $parameters);
+        if (in_array($method, $resetOnMethods)) {
+            $this->newQuery();
+        }
+        return $result;
     }
 
     /**

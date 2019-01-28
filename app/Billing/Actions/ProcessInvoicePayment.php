@@ -6,6 +6,7 @@ use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Queries\PaymentQuery;
 
 class ProcessInvoicePayment
 {
@@ -13,11 +14,21 @@ class ProcessInvoicePayment
      * @var \App\Billing\Actions\ProcessPayment
      */
     protected $paymentProcessor;
+    /**
+     * @var \App\Billing\Actions\ApplyPayment
+     */
+    protected $paymentApplicator;
+    /**
+     * @var \App\Billing\Queries\PaymentQuery
+     */
+    protected $paymentQuery;
 
 
-    public function __construct(ProcessPayment $paymentProcessor)
+    public function __construct(ProcessPayment $paymentProcessor, ApplyPayment $paymentApplicator, PaymentQuery $paymentQuery)
     {
         $this->paymentProcessor = $paymentProcessor;
+        $this->paymentApplicator = $paymentApplicator;
+        $this->paymentQuery = $paymentQuery;
     }
 
 
@@ -41,7 +52,7 @@ class ProcessInvoicePayment
             throw new PaymentMethodError("Unable to receive payment for invoice.");
         }
 
-        $invoice->addPayment($payment, $payment->amount);
+        $this->paymentApplicator->apply($invoice, $payment, $amount);
         return $payment;
     }
 
@@ -55,9 +66,13 @@ class ProcessInvoicePayment
      */
     function payInvoices(iterable $invoices, Payer $payer, PaymentMethodStrategy $strategy): Payment
     {
-        $amount = 0;
-        foreach($invoices as $invoice) {
-            $amount = add($amount, $invoice->getAmountDue());
+        $amount = $this->sumInvoiceAmounts($invoices);
+        $existingPayments = $this->paymentQuery->forPayer($payer)->hasAmountAvailable()->get();
+        if ($existingPayments->count()) {
+            foreach($existingPayments as $payment) {
+                $this->applyPayment($invoices, $payment);
+                $amount = $this->sumInvoiceAmounts($invoices); // recalculate after allocating existing payments
+            }
         }
 
         $payment = $this->paymentProcessor->charge($payer, $strategy, $amount);
@@ -65,10 +80,42 @@ class ProcessInvoicePayment
             throw new PaymentMethodError("Unable to receive payment for invoices.");
         }
 
-        foreach($invoices as $invoice) {
-            $invoice->addPayment($payment, $invoice->getAmountDue());
-        }
+        $this->applyPayment($invoices, $payment);
 
         return $payment;
+    }
+
+    /**
+     * @param ClientInvoice[] $invoices
+     * @return float
+     */
+    protected function sumInvoiceAmounts(iterable $invoices): float
+    {
+        $amount = 0.0;
+        foreach($invoices as $invoice) {
+            $amount = add($amount, $invoice->getAmountDue());
+        }
+        return $amount;
+    }
+
+    /**
+     * @param ClientInvoice[] $invoices
+     * @param \App\Billing\Payment $payment
+     * @return void
+     */
+    protected function applyPayment(iterable $invoices, Payment $payment): void
+    {
+        foreach($invoices as $invoice) {
+            if ($amount = $payment->getAmountAvailable()) {
+                if ($amount > $invoice->getAmountDue()) {
+                    $amount = $invoice->getAmountDue();
+                }
+                if ($amount > 0) {
+                    $this->paymentApplicator->apply($invoice, $payment, $amount);
+                }
+            } else {
+                break;
+            }
+        }
     }
 }

@@ -66,10 +66,10 @@ trait HasMetaData
      * @param string $key
      * @return string|null
      */
-    public function getMetaValue(string $key): ?string
+    public function getMetaValue(string $key, $default = null): ?string
     {
         $meta = $this->getMeta($key, 1)->first();
-        return $meta ? (string) $meta->value : null;
+        return $meta ? (string) $meta->value : $default;
     }
 
     /**

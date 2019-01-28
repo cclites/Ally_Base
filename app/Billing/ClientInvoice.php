@@ -116,6 +116,7 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
         if ($this->payments()->save($payment, ['amount_applied' => $amountApplied])) {
             return (bool) $this->increment('amount_paid', $amountApplied);
         }
+
         return false;
     }
 

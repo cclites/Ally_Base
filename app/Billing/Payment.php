@@ -62,6 +62,13 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     protected $table = 'payments';
     protected $guarded = ['id'];
     protected $appends = ['week'];
+    protected $casts = [
+        'amount' => 'float',
+        'transaction_id' => 'int',
+        'adjustment' => 'bool',
+        'success' => 'bool',
+        'system_allotment' => 'float',
+    ];
     protected $week;
 
     ///////////////////////////////////////////
@@ -123,5 +130,25 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     /// Instance Methods
     ///////////////////////////////////////////
 
+    /**
+     * Return the amount of the payment allocated to the Ally Fee
+     *
+     * @return float
+     */
+    function getAllyFee(): float
+    {
+        return $this->system_allotment;
+    }
+
+    /**
+     * Return the amount of the payment that has yet to be applied
+     *
+     * @return float
+     */
+    function getAmountAvailable(): float
+    {
+        $sumApplied = \DB::table('invoice_payments')->where('payment_id', $this->id)->sum('amount_applied');
+        return subtract($this->amount, $sumApplied);
+    }
 
 }

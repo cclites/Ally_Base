@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \App\Billing\ClientInvoice $invoice
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $invoiceable
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|InvoiceableInterface $invoiceable
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem whereAmountDue($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem whereDate($value)

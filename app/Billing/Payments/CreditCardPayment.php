@@ -1,6 +1,7 @@
 <?php
 namespace App\Billing\Payments;
 
+use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
@@ -45,5 +46,10 @@ class CreditCardPayment implements PaymentMethodStrategy
             return $this->gateway->refund($transaction, $amount);
         }
         throw new PaymentMethodError("The provided credit card does not match the transaction.");
+    }
+
+    public function getPaymentMethod(): ChargeableInterface
+    {
+        return $this->card;
     }
 }
