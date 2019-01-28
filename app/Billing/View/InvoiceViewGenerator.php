@@ -21,7 +21,7 @@ class InvoiceViewGenerator
 
     function generate(string $viewName, ContactableInterface $sender, ContactableInterface $recipient, InvoiceInterface $invoice, Collection $items, Collection $payments)
     {
-        $itemGroups = $items->sortBy('date')->groupBy('group');
+        $itemGroups = $this->getItemGroups($items);
         $view = view($viewName, compact('sender', 'recipient', 'invoice', 'itemGroups', 'payments'));
         return $this->strategy->generate($view);
     }
@@ -42,5 +42,10 @@ class InvoiceViewGenerator
             $items,
             $payments
         );
+    }
+
+    function getItemGroups(Collection $items)
+    {
+        return $items->sortBy('date')->groupBy('group');
     }
 }

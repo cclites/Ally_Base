@@ -146,10 +146,29 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @return float
      */
+    function getAmount(): float
+    {
+        return $this->amount;
+    }
+
+    /**
+     * Return the amount of the payment that has been applied to invoices
+     *
+     * @return float
+     */
+    function getAmountApplied(): float
+    {
+        return (float) \DB::table('invoice_payments')->where('payment_id', $this->id)->sum('amount_applied');
+    }
+
+    /**
+     * Return the amount of the payment that has yet to be applied
+     *
+     * @return float
+     */
     function getAmountAvailable(): float
     {
-        $sumApplied = \DB::table('invoice_payments')->where('payment_id', $this->id)->sum('amount_applied');
-        return subtract($this->amount, $sumApplied);
+        return subtract($this->amount, $this->getAmountApplied());
     }
 
 }
