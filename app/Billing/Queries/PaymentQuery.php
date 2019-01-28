@@ -36,6 +36,7 @@ class PaymentQuery extends BaseQuery
     function hasAmountAvailable(): self
     {
         $this->where('success', true)
+            ->where('created_at', '>=', '2019-01-01 00:00:00') // Prevent pre-migration missing applications from showing as available payments
             ->whereRaw('(SELECT COALESCE(SUM(amount_applied), 0) FROM invoice_payments WHERE payment_id = payments.id) < payments.amount');
 
         return $this;

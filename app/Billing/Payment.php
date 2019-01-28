@@ -83,7 +83,8 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
 
     public function invoices()
     {
-        return $this->belongsToMany(ClientInvoice::class, 'invoice_payments', 'payment_id', 'invoice_id');
+        return $this->belongsToMany(ClientInvoice::class, 'invoice_payments', 'payment_id', 'invoice_id')
+            ->withPivot(['amount_applied']);
     }
 
     public function client()

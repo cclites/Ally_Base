@@ -109,9 +109,9 @@ Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments)
         $totalInvoiced = 0;
         foreach($groupedShifts as $clientId => $shifts) {
             $invoice = ClientInvoice::create([
-                'client_id' => $payment->client_id,
+                'client_id' => $clientId,
                 'payer_id' => $payer->id,
-                'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+                'name' => ClientInvoice::getNextName($clientId, $payer->id),
                 'created_at' => $payment->created_at,
             ]);
 
