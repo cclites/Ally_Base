@@ -109,6 +109,14 @@ function is_office_user() {
     return Auth::check() && Auth::user()->role_type === 'office_user';
 }
 
+/**
+ * Check if the logged in user is a client
+ *
+ * @return bool
+ */
+function is_client() {
+    return Auth::check() && Auth::user()->role_type === 'client';
+}
 
 if (! function_exists('activeBusiness')) {
     /**
