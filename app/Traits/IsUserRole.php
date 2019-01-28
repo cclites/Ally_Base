@@ -47,7 +47,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at', 'deactivation_reason_id', 'reactivation_date']);
     }
 
     ///////////////////////////////////////////
@@ -242,6 +242,16 @@ trait IsUserRole
         if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
             $this->attributes['avatar'] = $filename;
         }
+    }
+
+    public function getReactivationDateAttribute()
+    {
+        return optional($this->user->reactivation_date)->toDateTimeString();
+    }
+
+    public function getDeactivationReasonIdAttribute()
+    {
+        return $this->user->deactivation_reason_id;
     }
 
     ///////////////////////////////////////////
