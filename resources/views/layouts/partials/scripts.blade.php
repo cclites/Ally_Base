@@ -11,6 +11,12 @@
         window.Store.commit('setBusinesses', @json(Auth::user()->officeUser->businesses));
     @elseif(is_admin())
         window.Store.commit('setBusinesses', @json(\App\Business::all()));
+    @elseif(is_client())
+        window.Store.commit('setBusinesses', @json(
+            [(new \App\Http\Resources\BusinessSettingsResource(
+                auth()->user()->role->business
+            ))->toArray(request())]
+        ));
     @endif
 </script>
 

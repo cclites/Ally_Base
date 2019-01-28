@@ -47,7 +47,7 @@
 
         watch: {
             businessId(val) {
-                window.location.href = '/business/settings/bank-accounts/' + val;
+                if (val) window.location.href = '/business/settings/bank-accounts/' + val;
             }
         }
     }

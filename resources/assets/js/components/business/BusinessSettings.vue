@@ -363,7 +363,7 @@
                                 </b-form-select>
                             </b-form-group>
                             <b-form-group
-                                label="Send client summary visits confirmation and pending charge email Monday of each week"
+                                    label="Enable the 'Visit Summary with Pending Charges' email"
                                     label-for="shift_confirmation_email" label-class="required">
                                 <b-form-select id="shift_confirmation_email"
                                                v-model="businessSettings.shift_confirmation_email"
@@ -371,6 +371,7 @@
                                     <option :value="0">No</option>
                                     <option :value="1">Yes</option>
                                 </b-form-select>
+                                <input-help :form="businessSettings" field="shift_confirmation_email" class="text-danger" text="Note: You will then need to enable this for each client on their profile."></input-help>
                             </b-form-group>
                             <div class="pl-5">
                                 <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
