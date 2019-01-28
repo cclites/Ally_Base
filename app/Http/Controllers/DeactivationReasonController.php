@@ -13,6 +13,21 @@ use App\Business;
 class DeactivationReasonController extends Controller
 {
     /**
+     * Get a list of the current business's deactivation reasons.
+     *
+     * @return \Illuminate\Htt\Response
+     */
+    public function index()
+    {
+        $business = activeBusiness();
+
+        return response()->json([
+            'client' => $business->clientDeactivationReasons,
+            'caregiver' => $business->caregiverDeactivationReasons,
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request

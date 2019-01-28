@@ -10,6 +10,7 @@ use App\User;
 use App\Document;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\DeactivationReason;
 
 trait IsUserRole
 {
@@ -328,6 +329,11 @@ trait IsUserRole
     public function documents()
     {
         return $this->hasMany(Document::class, 'user_id', 'id');
+    }
+
+    public function deactivationReason()
+    {
+        return $this->hasOne(DeactivationReason::class, 'id', 'deactivation_reason_id');
     }
 
     ////////////////////////////////////

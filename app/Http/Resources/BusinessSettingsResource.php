@@ -15,9 +15,6 @@ class BusinessSettingsResource extends Resource
      */
     public function toArray($request)
     {
-        $this->resource->clientDeactivationReasons = $this->resource->clientDeactivationReasons;
-        $this->resource->caregiverDeactivationReasons = $this->resource->caregiverDeactivationReasons;
-        
         if (is_office_user() || is_admin()) {
             return $this->resource->toArray();
         } 
@@ -71,8 +68,6 @@ class BusinessSettingsResource extends Resource
             // 'include_ally_fee',
             'use_rate_codes',
             'chain_id',
-            'clientDeactivationReasons',
-            'caregiverDeactivationReasons',
         ];
 
         return Arr::only($this->resource->toArray(), $settings);

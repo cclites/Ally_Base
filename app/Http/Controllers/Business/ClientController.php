@@ -163,6 +163,7 @@ class ClientController extends BaseController
             'careDetails',
             'carePlans',
             'caseManager',
+            'deactivationReason',
             'notes' => function ($query) {
                 return $query->orderBy('created_at', 'desc');
             },

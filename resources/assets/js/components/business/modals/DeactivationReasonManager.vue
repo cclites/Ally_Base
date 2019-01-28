@@ -59,23 +59,20 @@
 
             reasons() {
                 if (this.type === 'caregiver') {
-                    return this.business.caregiverDeactivationReasons;
+                    return this.deactivationReasons.caregiver;
                 }
 
-                return this.business.clientDeactivationReasons;
+                return this.deactivationReasons.client;
             }
         },
 
         methods: {
-            ...mapMutations(['updateBusiness']),
-
             async addReason() {
                 this.form.post('/business/settings/deactivation-reasons')
                     .then( ({ data }) => {
                         this.updateReasons(data.data);
                     })
                     .catch(e => {
-
                     })
             },
 
@@ -92,36 +89,30 @@
             },
 
             updateReasons(item) {
-                let business = JSON.parse(JSON.stringify(this.business));
                 switch (item.type) {
                     case 'caregiver':
-                        business.caregiverDeactivationReasons.push(item);
-                        this.updateBusiness(business);
+                        this.deactivationReasons.caregiver.push(item);
                         break;
                     case 'client':
-                        business.clientDeactivationReasons.push(item);
-                        this.updateBusiness(business);
+                        this.deactivationReasons.client.push(item);
                         break;
                 }
             },
 
-            removeReasonFormBusiness(reason) {
-                let business = JSON.parse(JSON.stringify(this.business));
+            removeReason(reason) {
                 let index = -1;
 
                 switch (reason.type) {
                     case 'caregiver':
-                        index = business.caregiverDeactivationReasons.findIndex(x => x.id == reason.id);
+                        index = this.deactivationReasons.caregiver.findIndex(x => x.id == reason.id);
                         if (index >= 0) {
-                            business.caregiverDeactivationReasons.splice(index, 1);
-                            this.updateBusiness(business);
+                            this.deactivationReasons.caregiver.splice(index, 1);
                         }
                         break;
                     case 'client':
-                        index = business.clientDeactivationReasons.findIndex(x => x.id == reason.id);
+                        index = this.deactivationReasons.client.findIndex(x => x.id == reason.id);
                         if (index >= 0) {
-                            business.clientDeactivationReasons.splice(index, 1);
-                            this.updateBusiness(business);
+                            this.deactivationReasons.client.splice(index, 1);
                         }
                         break;
                 }
@@ -136,7 +127,7 @@
                 form.submit('DELETE', `/business/settings/deactivation-reasons/${reason.id}`)
                     .then(() => {
                         // delete item
-                        this.removeReasonFormBusiness(reason);
+                        this.removeReason(reason);
                     })
                     .catch(e => {
                     })
@@ -144,10 +135,10 @@
         },
 
         mounted() {
-            this.deactivationReasons = {
-                client: this.business ? this.business.clientDeactivationReasons : [],
-                caregiver: this.business ? this.business.caregiverDeactivationReasons : []
-            };
+            axios.get('/business/settings/deactivation-reasons')
+                .then( ({ data }) => {
+                    this.deactivationReasons = data;        
+                });
         },
     }
 </script>

@@ -64,6 +64,9 @@
                     <b-col>Discharge Date: {{ formatDate(client.inactive_at)}}</b-col>
                 </b-row>
                 <b-row class="mb-2">
+                    <b-col>Deactivation Reason: {{ client.deactivation_reason ? client.deactivation_reason.name : 'N/A' }}</b-col>
+                </b-row>
+                <b-row class="mb-2">
                     <b-col>Re-activation Date: {{ client.reactivation_date ? formatDate(client.reactivation_date) : 'N/A' }}</b-col>
                 </b-row>
                 <b-row class="mb-2">

@@ -22,7 +22,7 @@
 
                     <b-form-group label="Reason for Deactivation">
                         <b-form-select v-model="deactivation_reason_id">
-                            <option v-for="reason in defaultBusiness.caregiverDeactivationReasons" :key="reason.id" :value="reason.id">
+                            <option v-for="reason in this.deactivationReasons.caregiver" :key="reason.id" :value="reason.id">
                                 {{ reason.name }}
                             </option>
                         </b-form-select>
@@ -66,14 +66,12 @@
                 deactivateModal: false,
                 deactivation_reason_id: '',
                 inactive_at: '',
-                deactivation_note: ''
+                deactivation_note: '',
+                deactivationReasons: {
+                    client: [],
+                    caregiver: []
+                },
             }
-        },
-
-        created () {
-        },
-
-        mounted () {
         },
 
         computed: {
@@ -95,6 +93,13 @@
                 let url = `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}&deactivation_reason_id=${this.deactivation_reason_id}&note=${this.deactivation_note}`;
                 form.submit ('delete', url);
             }
-        }
+        },
+
+        mounted() {
+            axios.get('/business/settings/deactivation-reasons')
+                .then( ({ data }) => {
+                    this.deactivationReasons = data;        
+                });
+        },
     }
 </script>
