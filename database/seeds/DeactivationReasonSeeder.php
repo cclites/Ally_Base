@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Business;
 
 class DeactivationReasonSeeder extends Seeder
 {
@@ -23,20 +24,22 @@ class DeactivationReasonSeeder extends Seeder
             'Contractor is not available'
         ]);
 
-        $clientReasons->each(function ($item) {
-            \App\DeactivationReason::create([
-                'name' => $item,
-                'type' => 'client'
-            ]);
-        });
-
-        $caregiverReasons->each(function ($item) {
-            \App\DeactivationReason::create([
-                'name' => $item,
-                'type' => 'caregiver'
-            ]);
-        });
-
-
+        foreach(Business::all() as $business) {
+            $clientReasons->each(function ($item) use ($business) {
+                \App\DeactivationReason::create([
+                    'name' => $item,
+                    'type' => 'client',
+                    'business_id' => $business->id,
+                ]);
+            });
+    
+            $caregiverReasons->each(function ($item) use ($business) {
+                \App\DeactivationReason::create([
+                    'name' => $item,
+                    'type' => 'caregiver',
+                    'business_id' => $business->id,
+                ]);
+            });
+        }
     }
 }

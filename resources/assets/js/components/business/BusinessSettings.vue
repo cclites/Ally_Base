@@ -527,20 +527,15 @@
                 deactivationReasons: {
                     client: [],
                     caregiver: []
-                }
+                },
                 tabIndex: 0,
                 tabs: ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields'],
             }
         },
 
         computed: {
-            ...mapState(['currentBusiness']),
-
             business() {
-                let idx = _.findIndex(this.$store.state.business.businesses, ['id', this.businessId]);
-
-                return this.$store.state.business.businesses[idx];
-                //return !_.isEmpty(this.businessId) ? this.getBusiness(this.businessId) : this.defaultBusiness;
+                return this.$store.getters.getBusiness(this.businessId) || ""
             }
         },
 
@@ -662,8 +657,8 @@
                 }
 
                 if (business.id !== oldBusiness.id) {
-                    this.businessSettings = this.makeForm (business);
-                    this.signatureOption = this.getSignatureOption (business);
+                    this.businessSettings = this.makeForm(business);
+                    this.signatureOption = this.getSignatureOption(business);
                 }
             },
             'businessSettings.allow_client_confirmations': function(value) {

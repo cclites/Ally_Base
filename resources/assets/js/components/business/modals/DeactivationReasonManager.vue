@@ -27,10 +27,6 @@
             }
         },
 
-        created() {
-            this.form.business_id = this.business.id
-        },
-
         computed: {
             business() {
                 return this.$parent.business;
@@ -45,6 +41,7 @@
             ...mapGetters(['defaultBusiness']),
 
             async addReason() {
+                this.form.business_id = this.business.id;
                 let response = await this.form.post('/business/settings/deactivation-reasons');
                 this.$emit('reasonAdded', response.data);
             },
