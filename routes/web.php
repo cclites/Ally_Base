@@ -134,6 +134,7 @@ Route::group([
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
     Route::post('settings/deactivation-reasons', 'DeactivationReasonController@store')->name('deactivation_reasons.store');
+    Route::delete('settings/deactivation-reasons/{reason}', 'DeactivationReasonController@destroy')->name('deactivation_reasons.destroy');
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 

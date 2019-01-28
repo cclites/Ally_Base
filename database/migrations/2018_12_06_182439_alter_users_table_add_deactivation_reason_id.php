@@ -16,6 +16,8 @@ class AlterUsersTableAddDeactivationReasonId extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedInteger('deactivation_reason_id')->nullable();
             $table->date('reactivation_date')->nullable();
+
+            $table->foreign('deactivation_reason_id')->reference('id')->on('deactivation_reasons')->onUpdate('CASCADE')->onDelete('RESTRICT');
         });
     }
 

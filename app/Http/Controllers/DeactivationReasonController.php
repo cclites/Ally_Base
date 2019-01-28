@@ -3,36 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\DeactivationReason;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use App\User;
+use App\Business;
 
 class DeactivationReasonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
     public function store(Request $request)
     {
@@ -42,52 +27,37 @@ class DeactivationReasonController extends Controller
             'name' => 'string|required'
         ]);
 
-        $reason = DeactivationReason::create($data);
-        return new SuccessResponse(ucfirst($data['type']) . ' Deactivation Reason created.', $reason);
-    }
+        $business = Business::findOrFail($data['business_id']);
+        $this->authorize('update', $business);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\DeactivationReason  $deactivationReason
-     * @return \Illuminate\Http\Response
-     */
-    public function show(DeactivationReason $deactivationReason)
-    {
-        //
-    }
+        if ($reason = DeactivationReason::create($data)) {
+            return new SuccessResponse(ucfirst($data['type']) . ' Deactivation reason created.', $reason);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\DeactivationReason  $deactivationReason
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DeactivationReason $deactivationReason)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\DeactivationReason  $deactivationReason
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, DeactivationReason $deactivationReason)
-    {
-        //
+        return new ErrorResponse(500, 'An unexpected error occurred.');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\DeactivationReason  $deactivationReason
+     * @param  \App\DeactivationReason  $reason
      * @return \Illuminate\Http\Response
+     * @throws AuthorizationException
      */
-    public function destroy(DeactivationReason $deactivationReason)
+    public function destroy(DeactivationReason $reason)
     {
-        //
+        $this->authorize('update', $reason->business);
+
+        if (User::where('deactivation_reason_id', $reason->id)->exists()) {
+            return new ErrorResponse(401, "Could not remove the deactivation reason \"{$reason->name}\" because it is currently in use in the system.");
+        }
+
+        try {
+            $reason->delete();
+        } catch (\Exception $ex) {
+            return new ErrorResponse(500, 'An unexpected error occurred.');
+        }
+
+        return new SuccessResponse("Deactivation reason \"{$reason->name}\" successfully removed.", $reason);
     }
 }

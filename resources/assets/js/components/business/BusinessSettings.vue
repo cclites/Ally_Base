@@ -130,25 +130,11 @@
                     <b-row>
                         <b-col lg="6">
                             <div class="mb-2">Reason codes when deactivating clients</div>
-                            <b-list-group>
-                                <b-list-group-item v-for="reason in business.clientDeactivationReasons" :key="reason.id">
-                                    {{ reason.name }}
-                                </b-list-group-item>
-                                <b-list-group-item button @click="addDeactivationReason('client')">
-                                    <i class="fa fa-plus mr-2"></i>Add Reason
-                                </b-list-group-item>
-                            </b-list-group>
+                            <deactivation-reason-manager v-if="business" :business="business" type="client"></deactivation-reason-manager>
                         </b-col>
                         <b-col lg="6">
                             <div class="mb-2">Reason codes when deactivating caregivers</div>
-                            <b-list-group>
-                                <b-list-group-item v-for="reason in business.caregiverDeactivationReasons"
-                                                   :key="reason.id">{{ reason.name }}
-                                </b-list-group-item>
-                                <b-list-group-item button @click="addDeactivationReason('caregiver')">
-                                    <i class="fa fa-plus mr-2"></i>Add Reason
-                                </b-list-group-item>
-                            </b-list-group>
+                            <deactivation-reason-manager v-if="business" :business="business" type="caregiver"></deactivation-reason-manager>
                         </b-col>
                     </b-row>
                     <b-row>
@@ -484,8 +470,6 @@
                 </b-tab>
             </b-tabs>
         </b-card>
-
-        <deactivation-reason-manager v-if="business" ref="deactivationReasonManager" @reasonAdded="updateReasons($event)"></deactivation-reason-manager>
     </div>
 </template>
 
@@ -524,10 +508,6 @@
                     }
                 },
                 signatureOption: null,
-                deactivationReasons: {
-                    client: [],
-                    caregiver: []
-                },
                 tabIndex: 0,
                 tabs: ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields'],
             }
@@ -544,11 +524,6 @@
             if (index >= 0) {
                 this.tabIndex = index;
             }
-            
-            this.deactivationReasons = {
-                client: this.business ? this.business.clientDeactivationReasons : [],
-                caregiver: this.business ? this.business.caregiverDeactivationReasons : []
-            };
         },
 
         methods: {
@@ -623,24 +598,6 @@
                 Object.assign(this.businessSettings, this.signatureMapping[this.signatureOption]);
             },
 
-            addDeactivationReason(type) {
-                this.$refs.deactivationReasonManager.show(type);
-            },
-
-            updateReasons(event) {
-                let item = event.data;
-                let business = JSON.parse(JSON.stringify(this.business));
-                switch (item.type) {
-                    case 'caregiver':
-                        business.caregiverDeactivationReasons.push(item)
-                        this.updateBusiness(business)
-                        break;
-                    case 'client':
-                        business.clientDeactivationReasons.push(item)
-                        this.updateBusiness(business)
-                        break;
-                }
-            },
         },
 
         watch: {

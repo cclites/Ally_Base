@@ -43,7 +43,7 @@
                 <b-col lg="6">
                     <b-form-group label="Reason for Deactivation">
                         <b-form-select v-model="form.deactivation_reason_id">
-                            <option v-for="reason in defaultBusiness.clientDeactivationReasons" :value="reason.id">
+                            <option v-for="reason in defaultBusiness.clientDeactivationReasons" :key="reason.id" :value="reason.id">
                                 {{ reason.name }}
                             </option>
                         </b-form-select>
