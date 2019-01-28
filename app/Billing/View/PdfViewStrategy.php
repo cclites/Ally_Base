@@ -1,12 +1,11 @@
 <?php
 namespace App\Billing\View;
 
-use App\Billing\Contracts\InvoiceInterface;
-use App\Billing\Contracts\InvoiceViewStrategy;
+use App\Contracts\ViewStrategy;
 use Barryvdh\Snappy\PdfWrapper;
 use Illuminate\Contracts\View\View;
 
-class PDFStrategy implements InvoiceViewStrategy
+class PdfViewStrategy implements ViewStrategy
 {
     /**
      * @var string
@@ -24,11 +23,10 @@ class PDFStrategy implements InvoiceViewStrategy
     }
 
     /**
-     * @param \App\Billing\Contracts\InvoiceInterface $invoice
      * @param \Illuminate\Contracts\View\View $view
      * @return \Illuminate\Http\Response
      */
-    public function generate(InvoiceInterface $invoice, View $view)
+    public function generate(View $view)
     {
         $this->pdfWrapper->loadHTML($view->render());
         return $this->pdfWrapper->download($this->filename);

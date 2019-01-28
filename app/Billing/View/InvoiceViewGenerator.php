@@ -3,18 +3,18 @@ namespace App\Billing\View;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
-use App\Billing\Contracts\InvoiceViewStrategy;
+use App\Contracts\ViewStrategy;
 use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
 
 class InvoiceViewGenerator
 {
     /**
-     * @var \App\Billing\Contracts\InvoiceViewStrategy
+     * @var \App\Contracts\ViewStrategy
      */
     protected $strategy;
 
-    function __construct(InvoiceViewStrategy $strategy)
+    function __construct(ViewStrategy $strategy)
     {
         $this->strategy = $strategy;
     }
@@ -23,7 +23,7 @@ class InvoiceViewGenerator
     {
         $itemGroups = $items->sortBy('date')->groupBy('group');
         $view = view($viewName, compact('sender', 'recipient', 'invoice', 'itemGroups', 'payments'));
-        return $this->strategy->generate($invoice, $view);
+        return $this->strategy->generate($view);
     }
 
     function generateClientInvoice(ClientInvoice $clientInvoice, ?string $viewName = null)
@@ -36,7 +36,7 @@ class InvoiceViewGenerator
 
         return $this->generate(
             $viewName ?? 'invoices.client_invoice',
-            $business,
+            $payer->isPrivatePay() ? $business : $client,
             $payer->isPrivatePay() ? $client : $payer,
             $clientInvoice,
             $items,
