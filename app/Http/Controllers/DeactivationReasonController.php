@@ -46,10 +46,14 @@ class DeactivationReasonController extends Controller
      */
     public function destroy(DeactivationReason $reason)
     {
+        if (empty($reason->business_id)) {
+            return new ErrorResponse(403, "You cannot remove factory deactivation reason codes.");
+        }
+
         $this->authorize('update', $reason->business);
 
         if (User::where('deactivation_reason_id', $reason->id)->exists()) {
-            return new ErrorResponse(401, "Could not remove the deactivation reason \"{$reason->name}\" because it is currently in use in the system.");
+            return new ErrorResponse(403, "Could not remove the deactivation reason \"{$reason->name}\" because it is currently in use in the system.");
         }
 
         try {

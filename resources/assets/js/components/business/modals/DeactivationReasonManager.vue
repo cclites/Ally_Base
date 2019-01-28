@@ -5,7 +5,7 @@
                 <div class="f-1">{{ reason.name }}</div>
                 <div class="ml-auto">
                     <!-- <i class="fa fa-trash-alt"></i> -->
-                    <a href="#" @click.prevent="remove(reason)"><i class="fa fa-trash"></i></a>
+                    <a v-if="reason.business_id" href="#" @click.prevent="remove(reason)"><i class="fa fa-trash"></i></a>
                 </div>
             </b-list-group-item>
             <b-list-group-item button @click="show()">
