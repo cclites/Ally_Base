@@ -7,9 +7,9 @@
                 </b-col>
             </b-row>
         </b-card>
-        <b-card no-body v-if="business">
-            <b-tabs pills card>
-                <b-tab title="System" active>
+        <b-card no-body v-if="business.id">
+            <b-tabs pills card v-model="tabIndex">
+                <b-tab title="System" href="#system">
                     <b-row>
                         <b-col lg="6">
                             <!--<div v-if="business.logo" class="mb-3">-->
@@ -160,7 +160,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Phone &amp; Address">
+                <b-tab title="Phone &amp; Address" href="#phone">
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="Phone 1">
@@ -231,7 +231,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Medicaid">
+                <b-tab title="Medicaid" href="#medicaid">
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="EIN">
@@ -263,7 +263,7 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Clock Out Questions">
+                <b-tab title="Clock Out Questions" href="#questions">
                     <b-row>
                         <b-col lg="12">
                             <h4>Options</h4>
@@ -351,10 +351,10 @@
                         </b-col>
                     </b-row>
                 </b-tab>
-                <b-tab title="Payroll Policy" v-if="business.type == 'Agency'">
+                <b-tab title="Payroll Policy" href="#payroll" v-if="business.type == 'Agency'">
                     <payroll-policy :business="business"></payroll-policy>
                 </b-tab>
-                <b-tab title="Shift Confirmations">
+                <b-tab title="Shift Confirmations" href="#shift-confirmations">
                     <b-row>
                         <b-col lg="6">
                             <b-form-group label="Allow clients to confirm and modify visits" label-for="allow_client_confirmations">
@@ -479,6 +479,9 @@
                         </b-col>
                     </b-row>
                 </b-tab>
+                <b-tab title="Custom fields" href="#custom-fields">
+                    <custom-field-list />
+                </b-tab>
             </b-tabs>
         </b-card>
 
@@ -525,6 +528,8 @@
                     client: [],
                     caregiver: []
                 }
+                tabIndex: 0,
+                tabs: ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields'],
             }
         },
 
@@ -539,11 +544,12 @@
             }
         },
 
-        created() {
-
-        },
-
         mounted() {
+            let index = this.tabs.findIndex(tab => tab === window.location.hash);
+            if (index >= 0) {
+                this.tabIndex = index;
+            }
+            
             this.deactivationReasons = {
                 client: this.business ? this.business.clientDeactivationReasons : [],
                 caregiver: this.business ? this.business.caregiverDeactivationReasons : []

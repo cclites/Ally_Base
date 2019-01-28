@@ -125,6 +125,10 @@ Route::group([
 ], function() {
     Route::resource('activities', 'Business\ActivityController')->only(['index', 'store', 'update', 'destroy']);
 
+    Route::post('custom-fields/options/{field}', 'Business\CustomFieldController@storeOptions')->name('custom_fields.options.create');
+    Route::put('custom-fields/options/{field}', 'Business\CustomFieldController@updateOptions')->name('custom_fields.options.update');
+    Route::post('custom-fields/{account}/{id}', 'Business\CustomFieldController@storeValue')->name('custom_fields.value.update');
+    Route::resource('custom-fields', 'Business\CustomFieldController');
     Route::get('settings/bank-accounts/{business?}', 'Business\SettingController@bankAccounts')->name('settings.bank_accounts.index');
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
@@ -325,11 +329,14 @@ Route::group([
     Route::get('quickbooks', 'Business\QuickbookController@index')->name('quickbooks.index');
 
     Route::resource('referral-sources', 'Business\ReferralSourceController');
+    Route::get('{business}/office-users', 'Business\OfficeUserController@listForBusiness');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['office_user']], function () {
     Route::post('/notes/search', 'NoteController@search');
     Route::resource('notes', 'NoteController');
+    Route::resource('note-templates', 'NoteTemplateController');
+    Route::get('/business/office-users', 'Business\OfficeUserController@index');
 });
 
 Route::group([

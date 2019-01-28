@@ -28,6 +28,15 @@
                     @include('layouts.partials.active_business')
                 @endif
                 <!-- ============================================================== -->
+                <!-- Exceptions -->
+                <!-- ============================================================== -->
+                @if(is_office_user())
+                    <system-notifications></system-notifications>
+                @endif
+                @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']))
+                    <tasks-icon role="{{ Auth::user()->role_type }}"></tasks-icon>
+                @endif
+                <!-- ============================================================== -->
                 <!-- Profile -->
                 <!-- ============================================================== -->
                 <li class="nav-item dropdown">
@@ -41,8 +50,10 @@
                                         <p class="text-muted">{{ Auth::check() ? Auth::user()->email : 'Not logged in' }}</p></div>
                                 </div>
                             </li>
+                            @if(! is_admin_now())
                             <li role="separator" class="divider"></li>
                             <li><a href="{{ route('profile') }}"><i class="fa fa-user"></i> My Profile</a></li>
+                            @endif
                             <li role="separator" class="divider"></li>
                             <li><a href="{{ url('/logout') }}"
                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

@@ -9,7 +9,7 @@ namespace App\Http\Controllers\Api\Telefony;
  * NOTE: Sessions are not supported by Twilio (stateless), use request parameters or cache
  *
  */
-class TelefonyGreetingController extends BaseTelefonyController
+class TelefonyGreetingController extends BaseVoiceController
 {
 
     /**
