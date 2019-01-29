@@ -10,6 +10,11 @@ use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Carbon;
 
+/**
+ * Class PaymentHistoryController
+ * @package App\Http\Controllers\Clients
+ * @deprecated
+ */
 class PaymentHistoryController extends Controller
 {
     public function index()

@@ -3,5 +3,7 @@
 @section('title', 'Invoice History')
 
 @section('content')
-    <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices }}"></client-invoice-history>
+    <b-card title="Invoice History">
+        <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices }}"></client-invoice-history>
+    </b-card>
 @endsection

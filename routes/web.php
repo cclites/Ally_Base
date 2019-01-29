@@ -207,8 +207,6 @@ Route::group([
     Route::patch('clients/{client}/password', 'Business\ClientController@changePassword')->name('clients.reset_password');
     Route::post('clients/{client}/detach-caregiver', 'Business\ClientCaregiverController@detachCaregiver')->name('clients.detach-caregiver');
     Route::put('clients/{client}/default-rates', 'Business\ClientController@defaultRates')->name('clients.default-rates');
-    Route::get('clients/payments/{payment}', 'Clients\PaymentHistoryController@show');
-    Route::get('clients/payments/{payment}/print', 'Clients\PaymentHistoryController@printDetails');
     Route::get('clients/{client}/payers', 'Business\ClientPayerController@index')->name('clients.payers.index');
     Route::get('clients/{client}/payers/unique', 'Business\ClientPayerController@uniquePayers')->name('clients.payers.unique');
     Route::patch('clients/{client}/payers', 'Business\ClientPayerController@update')->name('clients.payers.update');
@@ -271,6 +269,9 @@ Route::group([
     Route::get('reports/data/shifts', 'Business\ReportsController@shifts')->name('reports.data.shifts');
     Route::get('reports/data/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/data/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
+
+    Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('payments.show');
+    Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('invoices.show');
 
     Route::get('services', 'Business\ServiceController@index')->name('services.index');
     Route::post('services', 'Business\ServiceController@store');

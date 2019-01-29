@@ -53,7 +53,10 @@
             <a class="nav-link" data-toggle="tab" href="#documents" role="tab">Documents</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Client Statements</a>
+            <a class="nav-link" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
         </li>
         <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
@@ -84,7 +87,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#schedule" role="tab">Schedule</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_notes" role="tab">Notes</a>
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
-                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_invoice_history" role="tab">Invoices</a>
+                <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payments</a>
                 <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
             </div>
@@ -174,8 +178,33 @@
                 :user-id="{{ $client->user->id }}"
             ></document-list>
         </div>
+        <div class="tab-pane" id="client_invoice_history" role="tabpanel">
+            <b-card title="Invoice History">
+                <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices OR "[]" }}">
+                    <template slot="actions" scope="data">
+                        <a :href="'/business/client/invoices/' + data.item.id" class="btn btn-secondary" target="_blank">
+                            <i class="fa fa-external-link"></i> View
+                        </a>
+                        <a :href="'/business/client/invoices/' + data.item.id + '/pdf'" class="btn btn-secondary">
+                            <i class="fa fa-file-pdf-o"></i> Download
+                        </a>
+                    </template>
+                </client-invoice-history>
+            </b-card>
+        </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
-            <client-statements-tab :payments="{{ $client->payments }}"></client-statements-tab>
+            <b-card title="Payment History">
+                <client-payment-history :client="{{ $client }}" :payments="{{ $client->payments OR "[]" }}">
+                    <template slot="actions" scope="data">
+                        <a :href="'/business/client/payments/' + data.item.id" class="btn btn-secondary" target="_blank">
+                            <i class="fa fa-external-link"></i> View
+                        </a>
+                        <a :href="'/business/client/payments/' + data.item.id + '/pdf'" class="btn btn-secondary">
+                            <i class="fa fa-file-pdf-o"></i> Download
+                        </a>
+                    </template>
+                </client-payment-history>
+            </b-card>
         </div>
         <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :emergency-contacts="{{ $client->user->emergencyContacts }}"

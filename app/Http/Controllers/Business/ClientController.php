@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Client;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Business\ClientAuthController;
@@ -143,10 +144,12 @@ class ClientController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  \App\Client  $client
+     * @param  \App\Client $client
+     * @param \App\Billing\Queries\ClientInvoiceQuery $invoiceQuery
      * @return ErrorResponse|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show(Client $client)
+    public function show(Client $client, ClientInvoiceQuery $invoiceQuery)
     {
         $this->authorize('read', $client);
 
@@ -198,8 +201,9 @@ class ClientController extends BaseController
         $services = Service::forAuthorizedChain()->ordered()->get();
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
+        $invoices = $invoiceQuery->forClient($client->id)->get();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths'));
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'payers', 'services', 'auths', 'invoices'));
     }
 
     public function edit(Client $client)
