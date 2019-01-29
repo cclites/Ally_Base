@@ -138,10 +138,15 @@
             },
 
             destroy(item) {
-                axios.delete(`/business/status-aliases/${item.id}`)
+                if (! confirm('Are you sure you want to remove this alias?')) {
+                    return;
+                }
+
+                let f = new Form({});
+                f.submit('DELETE', `/business/status-aliases/${item.id}`)
                     .then(response => {
-                        let index = this.statuses[this.form.type].findIndex(x => x.id == item.id);
-                        this.statuses[this.form.type].splice(index, 1);
+                        let index = this.statuses[item.type].findIndex(x => x.id == item.id);
+                        this.statuses[item.type].splice(index, 1);
                     })
                     .catch(e => {
                     })
