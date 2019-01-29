@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentQuery extends BaseQuery
 {
+    use BelongsToBusinessesQueries;
 
     /**
      * Return an empty instance of the Model this class queries
