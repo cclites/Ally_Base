@@ -50,6 +50,7 @@ class UpdateClientRequest extends BusinessRequest
             'disaster_planning' => 'nullable|string|max:65535',
             'caregiver_1099' => 'nullable|boolean',
             'receive_summary_email' => 'boolean',
+            'sales_person_id' => 'nullable|int'
         ];
     }
 

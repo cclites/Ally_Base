@@ -14,6 +14,7 @@ use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use App\SalesPerson;
 use App\Shifts\AllyFeeCalculator;
 use App\Traits\Request\PaymentMethodRequest;
 use Carbon\Carbon;
@@ -192,7 +193,9 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business'));
+        $salesPeople = SalesPerson::forRequestedBusinesses()->get();
+
+        return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople'));
     }
 
     public function edit(Client $client)
@@ -218,6 +221,7 @@ class ClientController extends BaseController
             $addOnboardRecord = true;
         }
 
+        logger($data);
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $history = new OnboardStatusHistory([
