@@ -27,7 +27,7 @@
                 </b-table>
             </b-col>
         </b-row>
-        <b-modal v-model="statusAliasModal" :title="modalTitle" @ok="save()" @cancel="hideModal()" ok-variant="info">
+        <b-modal v-model="statusAliasModal" :title="modalTitle" @ok.prevent="save()" @cancel="hideModal()" ok-variant="info">
             <b-form-group label="Status Name">
                 <b-form-input v-model="form.name"></b-form-input>
             </b-form-group>

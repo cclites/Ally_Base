@@ -203,4 +203,24 @@ class ManageStatusAliasesTest extends TestCase
             ->assertJsonCount(5, 'caregiver')
             ->assertJsonCount(3, 'client');
     }
+
+    /** @test */
+    public function changing_a_statuses_active_attribute_will_fail_if_it_is_in_use()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $status = factory(StatusAlias::class)->create(['active' => 1]);
+        $this->caregiver->update(['status_alias_id' => $status->id]);
+
+        $this->assertEquals($status->id, $this->caregiver->fresh()->status_alias_id);
+
+        $data = $status->toArray();
+        $data['active'] = 0;
+        $this->assertEquals(1, $status->fresh()->active);
+
+        $this->patchJson(route('business.status-aliases.update', ['status_alias' => $status]), $data)
+            ->assertStatus(403);
+
+        $this->assertEquals(1, $status->fresh()->active);
+    }
 }

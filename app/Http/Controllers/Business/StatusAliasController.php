@@ -66,6 +66,12 @@ class StatusAliasController extends BaseController
             'type' => 'required|in:client,caregiver',
         ]);
 
+        // cannot allow chaging of the 'active' type once a status alias is in use
+        // because it will cause issues with how users are filtered.
+        if ($data['active'] != $statusAlias->active && User::where('status_alias_id', $statusAlias->id)->exists()) {
+            return new ErrorResponse(403, 'Cannot change active value for this status alias because it is currently in use.');
+        }
+
         if ($statusAlias->update($data)) {
             return new SuccessResponse('Status alias updated.', $statusAlias);
         }
