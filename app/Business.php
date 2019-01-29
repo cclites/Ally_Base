@@ -724,4 +724,5 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         $builder->whereIn('id', $businessIds);
     }
+
 }
