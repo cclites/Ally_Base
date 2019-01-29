@@ -14,13 +14,16 @@ use App\User;
 class StatusAliasController extends BaseController
 {
     /**
-     * Display a listing of the resource.
+     * Get a list of the status aliases available for 
+     * the current Business.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
+        return response()->json(
+            $this->business()->statusAliases->groupBy('type')
+        );
     }
 
     /**

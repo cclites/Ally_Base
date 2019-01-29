@@ -137,7 +137,7 @@ class ManageStatusAliasesTest extends TestCase
         $status = factory(StatusAlias::class)->create(['name' => 'Test', 'active' => '0']);
 
         $this->assertEquals('Test', $status->name);
-        $this->assertEquals(false, $status->active);
+        $this->assertEquals(0, $status->active);
 
         $data = array_merge($status->toArray(), [
             'name' => 'Updated',
@@ -147,7 +147,7 @@ class ManageStatusAliasesTest extends TestCase
         $this->patchJson(route('business.status-aliases.update', ['status_alias' => $status]), $data)
             ->assertStatus(200);
 
-        $this->assertEquals(true, $status->fresh()->active);
+        $this->assertEquals(1, $status->fresh()->active);
         $this->assertEquals('Updated', $status->fresh()->name);
     }
 
@@ -182,5 +182,22 @@ class ManageStatusAliasesTest extends TestCase
             ->assertStatus(403);
 
         $this->assertCount(1, $this->business->fresh()->statusAliases);
+    }
+
+    /** @test */
+    public function an_office_user_can_get_a_list_of_the_available_status_aliases()
+    {
+        $this->disableExceptionHandling();
+        
+        factory(StatusAlias::class, 5)->create(['type' => 'caregiver']);
+        factory(StatusAlias::class, 3)->create(['type' => 'client']);
+        
+        $this->actingAs($this->officeUser->user);
+
+        $this->getJson(route('business.status-aliases.index'))
+            ->assertStatus(200)
+            ->assertJsonStructure(['caregiver', 'client'])
+            ->assertJsonCount(5, 'caregiver')
+            ->assertJsonCount(3, 'client');
     }
 }

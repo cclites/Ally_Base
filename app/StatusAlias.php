@@ -27,13 +27,6 @@ class StatusAlias extends Model
      */
     protected $appends = [];
     
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = ['active' => 'bool'];
-
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************

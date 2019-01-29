@@ -462,6 +462,9 @@
                 <b-tab title="Custom fields" href="#custom-fields">
                     <custom-field-list />
                 </b-tab>
+                <b-tab title="Status Aliases" href="#status-aliases">
+                    <business-status-alias-manager :business="this.business"></business-status-alias-manager>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -501,14 +504,21 @@
                 },
                 signatureOption: null,
                 tabIndex: 0,
-                tabs: ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields'],
             }
         },
 
         computed: {
             business() {
                 return this.$store.getters.getBusiness(this.businessId) || ""
-            }
+            },
+            
+            tabs() {
+                if (this.business.type == 'agency') {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#status-aliases'];
+                } else {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#status-aliases'];
+                }
+            },
         },
 
         mounted() {
