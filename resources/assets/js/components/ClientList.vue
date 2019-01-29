@@ -19,10 +19,13 @@
                 <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
             </b-col>
             <b-col lg="3">
-                <b-form-select v-model="active">
-                    <option :value="null">All Clients</option>
-                    <option :value="1">Active Clients</option>
-                    <option :value="0">Inactive Clients</option>
+                <b-form-select v-model="statusFilter">
+                    <option value="">All Clients</option>
+                    <option value="active">Active Clients</option>
+                    <option value="inactive">Inactive Clients</option>
+                    <option v-for="status in statuses.client" :key="status.id" :value="status.id">
+                        {{ status.name }}
+                    </option>
                 </b-form-select>
             </b-col>
             <b-col lg="3" class="text-right">
@@ -139,18 +142,37 @@
                     }
                 ],
                 loading: false,
+                statuses: {caregiver: [], client: []},
+                statusFilter: '',
             }
         },
 
-        mounted() {
+        async mounted() {
+            await this.fetchStatusAliases();
             this.loadClients();
             this.loadOfficeUsers();
         },
 
         computed: {
             listUrl() {
-                let active = (this.active !== null) ? this.active : '';
-                return '/business/clients?json=1&address=1&active=' + active + '&businesses[]=' + this.business_id;
+                let active = '';
+                let aliasId = '';
+                if (this.statusFilter === '') {
+                    active = '';
+                } else if (this.statusFilter === 'active') {
+                    active = 1;
+                } else if (this.statusFilter === 'inactive') {
+                    active = 0;    
+                } else {
+                    aliasId = this.statusFilter;
+                    let alias = this.statuses.client.find(x => x.id == this.statusFilter);
+                    if (alias) {
+                        aliasId = alias.id;
+                        active = alias.active;
+                    }
+                }
+
+                return `/business/clients?json=1&address=1&businesses[]=${this.business_id}&active=${active}&status=${aliasId}`;
             }
         },
 
@@ -200,6 +222,22 @@
                 } else {
                     this.filteredCaseManagers = this.caseManagers.filter(x => x.business_ids.includes(this.business_id))
                 }
+            },
+            async fetchStatusAliases() {
+                this.loading = true;
+                axios.get(`/business/status-aliases`)
+                    .then( ({ data }) => {
+                        if (data && data.client) {
+                            this.statuses = data;
+                        } else {
+                            this.statuses = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    })
             },
         },
 
