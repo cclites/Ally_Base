@@ -221,7 +221,6 @@ class ClientController extends BaseController
             $addOnboardRecord = true;
         }
 
-        logger($data);
         if ($client->update($data)) {
             if ($addOnboardRecord) {
                 $history = new OnboardStatusHistory([
