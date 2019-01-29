@@ -21,17 +21,6 @@ class StatusAliasTest extends TestCase
     }
 
     /** @test */
-    public function its_name_must_be_unique()
-    {
-        $status = factory(StatusAlias::class)->create(['name' => 'Test']);
-        $this->assertCount(1, StatusAlias::all());
-
-        $this->expectException(QueryException::class);
-        $status2 = factory(StatusAlias::class)->create(['name' => 'Test']);
-        $this->assertCount(1, StatusAlias::all());
-    }
-
-    /** @test */
     public function it_can_be_classified_as_an_active_status()
     {
         $status = factory(StatusAlias::class)->create(['active' => true]);
