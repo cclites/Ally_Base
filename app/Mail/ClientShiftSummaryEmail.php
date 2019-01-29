@@ -82,7 +82,7 @@ class ClientShiftSummaryEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject("Corrected - Visit Confirmation Email For {$this->businessName}")
+        return $this->subject("Please Confirm Your Visit Details For {$this->businessName}")
             ->markdown('emails.client.shift-summary');
     }
 }
