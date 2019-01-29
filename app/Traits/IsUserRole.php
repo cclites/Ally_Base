@@ -47,7 +47,7 @@ trait IsUserRole
 
     protected function appendAttributesToRoleModel()
     {
-        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at']);
+        $this->append(['firstname', 'lastname', 'email', 'username', 'date_of_birth', 'name', 'nameLastFirst', 'masked_name', 'gender', 'active', 'avatar', 'inactive_at', 'created_at', 'updated_at', 'status_alias_id']);
     }
 
     ///////////////////////////////////////////
@@ -244,6 +244,11 @@ trait IsUserRole
         }
     }
 
+    public function getStatusAliasIdAttribute()
+    {
+        return $this->user->status_alias_id;
+    }
+    
     ///////////////////////////////////////////
     /// Attribute Input Handling
     ///////////////////////////////////////////

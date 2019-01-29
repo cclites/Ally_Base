@@ -5,9 +5,12 @@ use App\Rules\Avatar;
 use App\Rules\ValidSSN;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Traits\ActiveBusiness;
 
 class UpdateCaregiverRequest extends FormRequest
 {
+    use ActiveBusiness;
+
     public function authorize()
     {
         return true;
@@ -15,6 +18,8 @@ class UpdateCaregiverRequest extends FormRequest
 
     public function rules()
     {
+        $aliases = $this->business()->statusAliases()->forCaregivers()->get()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
@@ -36,6 +41,7 @@ class UpdateCaregiverRequest extends FormRequest
                 'nullable',
                 new Avatar()
             ],
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
         ];
     }
 

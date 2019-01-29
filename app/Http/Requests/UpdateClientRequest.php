@@ -6,9 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\Avatar;
+use App\Traits\ActiveBusiness;
 
 class UpdateClientRequest extends BusinessRequest
 {
+    use ActiveBusiness;
+    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -16,6 +19,8 @@ class UpdateClientRequest extends BusinessRequest
      */
     public function rules()
     {
+        $aliases = $this->business()->statusAliases()->forClients()->get()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
@@ -50,6 +55,7 @@ class UpdateClientRequest extends BusinessRequest
             'disaster_planning' => 'nullable|string|max:65535',
             'caregiver_1099' => 'nullable|boolean',
             'receive_summary_email' => 'boolean',
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
         ];
     }
 
