@@ -95,7 +95,7 @@ class BusinessChain extends AuditableModel
     */
     public function statusAliases()
     {
-        return $this->hasMany(StatusAlias::class, 'chain_id');
+        return $this->hasMany(StatusAlias::class, 'chain_id')->orderBy('name');
     }
 
     ////////////////////////////////////
