@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-card header="Select a Office Location" header-variant="info">
+        <b-card header="Select an Office Location" header-variant="info">
             <b-row>
                 <b-col lg="4" md="6">
                     <business-location-select v-model="businessId"></business-location-select>
@@ -458,6 +458,9 @@
                             </b-btn>
                         </b-col>
                     </b-row>
+                </b-tab>
+                <b-tab title="Sales People" href="#sales-people">
+                    <business-salesperson-list :business-id="businessId"></business-salesperson-list>
                 </b-tab>
                 <b-tab title="Custom fields" href="#custom-fields">
                     <custom-field-list />
