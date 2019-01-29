@@ -73,6 +73,17 @@
                                 <input-help :form="businessSettings" field="shift_rounding_method"
                                             text="Select the methodology used to round the number of hours worked on each shift."></input-help>
                             </b-form-group>
+
+                            <b-form-group label="Enable Client Onboarding" label-for="enable_client_onboarding">
+                                <b-form-select id="enable_client_onboarding"
+                                               v-model="businessSettings.enable_client_onboarding"
+                                >
+                                    <option :value="0">No</option>
+                                    <option :value="1">Yes</option>
+                                </b-form-select>
+                                <input-help :form="businessSettings" field="enable_client_onboarding"
+                                            text="Enable the client onboarding button on the client details page."></input-help>
+                            </b-form-group>
                         </b-col>
                         <b-col lg="6">
                             <b-form-group label="Scheduling" label-for="scheduling" label-class="required">
@@ -563,6 +574,7 @@
                     auto_append_hours: business.auto_append_hours,
                     auto_confirm_unmodified_shifts: business.auto_confirm_unmodified_shifts,
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
+                    enable_client_onboarding: business.enable_client_onboarding
                 });
             },
             async update() {

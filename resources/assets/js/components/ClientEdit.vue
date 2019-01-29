@@ -399,7 +399,7 @@
                             <b-form-group v-if="client.onboarding_step < 6">
                                 <label class="hidden-sm-down"><span>Start Client Onboarding</span></label>
                                 <br>
-                                <b-button :href="`/business/clients/${client.id}/onboarding`" variant="info" size="sm">Start Client Onboarding</b-button>
+                                <b-button @click="startOnboarding" variant="info" size="sm">Start Client Onboarding</b-button>
                             </b-form-group>
                             <b-form-group v-if="client.onboard_status == 'emailed_reconfirmation'">
                                 <label class="hidden-sm-down"><span>Client Agreement Email</span></label>
@@ -466,6 +466,10 @@
             @ok="reactivateClient"
             v-model="activateModal">
                 Are you sure you wish to re-activate {{ this.client.name }}?
+        </b-modal>
+
+        <b-modal v-model="onboardingWarning" title="Not Available">
+            Contact Ally support to configure this feature.
         </b-modal>
 
         <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
@@ -552,6 +556,7 @@
                 inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
+                onboardingWarning: false
             }
         },
 
@@ -619,6 +624,14 @@
                     .then(function(response) {
                         component.lastStatusDate = moment.utc().format();
                     });
+            },
+
+            startOnboarding() {
+                if (this.business.enable_client_onboarding) {
+                    window.location = `/business/clients/${this.client.id}/onboarding`
+                } else {
+                    this.onboardingWarning = true;
+                }
             }
 
         },
