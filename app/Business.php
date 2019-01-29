@@ -414,16 +414,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->hasMany(SmsThread::class);
     }
     
-    /**
-     * Get the Businesses StatusAliases relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-    */
-    public function statusAliases()
-    {
-        return $this->hasMany(StatusAlias::class);
-    }
-
     ///////////////////////////////////////////
     /// Other Methods
     ///////////////////////////////////////////

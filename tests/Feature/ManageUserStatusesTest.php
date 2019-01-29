@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\StatusAlias;
 use App\Business;
+use App\BusinessChain;
 
 class ManageUserStatusTest extends TestCase
 {
@@ -15,7 +16,7 @@ class ManageUserStatusTest extends TestCase
     public $client;
     public $business;
     public $officeUser;
-    public $contact;
+    public $chain;
     
     public function setUp()
     {
@@ -23,6 +24,7 @@ class ManageUserStatusTest extends TestCase
     
         $this->client = factory('App\Client')->create();
         $this->business = $this->client->business;
+        $this->chain = $this->business->businessChain;
         $this->officeUser = factory('App\OfficeUser')->create(['chain_id' => $this->business->chain->id]);
         $this->business->users()->attach($this->officeUser->id);
     
@@ -43,6 +45,8 @@ class ManageUserStatusTest extends TestCase
     /** @test */
     public function an_office_user_can_change_a_caregivers_status_alias()
     {
+        $this->disableExceptionHandling();
+
         $this->actingAs($this->officeUser->user);
 
         $status = factory(StatusAlias::class)->create(['type' => 'caregiver']);
@@ -60,9 +64,9 @@ class ManageUserStatusTest extends TestCase
     public function an_office_user_can_only_change_a_caregivers_status_to_the_owning_businesses_statuses()
     {
         $this->actingAs($this->officeUser->user);
-        $otherBusiness = factory(Business::class)->create();
+        $otherChain = factory(BusinessChain::class)->create();
 
-        $status = factory(StatusAlias::class)->create(['type' => 'caregiver', 'business_id' => $otherBusiness->id]);
+        $status = factory(StatusAlias::class)->create(['type' => 'caregiver', 'chain_id' => $otherChain->id]);
 
         $data = $this->caregiver->toArray();
         $data['status_alias_id'] = $status->id;
@@ -101,6 +105,8 @@ class ManageUserStatusTest extends TestCase
         $data = $this->client->toArray();
         $data['ssn'] = '123-23-1234';
         $data['status_alias_id'] = $status->id;
+        // onboard status must be set for update to succeed
+        $data['onboard_status'] = 'needs_agreement';
 
         $this->patchJson(route('business.clients.update', ['client' => $this->client]), $data)
             ->assertStatus(200);
@@ -112,9 +118,9 @@ class ManageUserStatusTest extends TestCase
     public function an_office_user_can_only_change_a_clients_status_to_the_owning_businesses_statuses()
     {
         $this->actingAs($this->officeUser->user);
-        $otherBusiness = factory(Business::class)->create();
+        $otherChain = factory(BusinessChain::class)->create();
 
-        $status = factory(StatusAlias::class)->create(['type' => 'client', 'business_id' => $otherBusiness->id]);
+        $status = factory(StatusAlias::class)->create(['type' => 'client', 'chain_id' => $otherChain->id]);
 
         $data = $this->client->toArray();
         $data['status_alias_id'] = $status->id;

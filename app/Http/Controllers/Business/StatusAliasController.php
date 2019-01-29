@@ -15,14 +15,14 @@ class StatusAliasController extends BaseController
 {
     /**
      * Get a list of the status aliases available for 
-     * the current Business.
+     * the current BusinessChain.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         return response()->json(
-            $this->business()->statusAliases->groupBy('type')
+            $this->businessChain()->statusAliases->groupby('type')
         );
     }
 
@@ -36,16 +36,14 @@ class StatusAliasController extends BaseController
     public function store(Request $request)
     {
         $data = $request->validate([
-            'business_id' => 'required',
             'name' => 'required|max:255|unique:status_aliases,name',
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
         ]);
 
-        $business = Business::findOrFail($request->business_id);
-        $this->authorize('update', $business);
+        $this->authorize('update', $this->business());
 
-        $status = StatusAlias::create($data);
+        $status = $this->businessChain()->statusAliases()->create($data);
 
         return new SuccessResponse('Status alias saved.', $status);
     }
@@ -60,10 +58,9 @@ class StatusAliasController extends BaseController
      */
     public function update(Request $request, StatusAlias $statusAlias)
     {
-        $this->authorize('update', $statusAlias->business);
+        $this->authorize('update', $this->business());
 
         $data = $request->validate([
-            'business_id' => 'required',
             'name' => ['required', 'max:255', Rule::unique('status_aliases')->ignore($statusAlias->id)],
             'active' => 'required|boolean',
             'type' => 'required|in:client,caregiver',
@@ -84,7 +81,7 @@ class StatusAliasController extends BaseController
      */
     public function destroy(StatusAlias $statusAlias)
     {
-        $this->authorize('update', $statusAlias->business);
+        $this->authorize('update', $this->business());
 
         if (User::where('status_alias_id', $statusAlias->id)->exists()) {
             return new ErrorResponse(403, 'Unable to remove status alias because it is already in use.');

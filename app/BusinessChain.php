@@ -88,6 +88,16 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(CustomField::class, 'chain_id');
     }
 
+    /**
+     * Get the Businesses StatusAliases relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function statusAliases()
+    {
+        return $this->hasMany(StatusAlias::class, 'chain_id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

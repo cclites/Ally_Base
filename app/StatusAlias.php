@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\BelongsToOneChain;
 use Illuminate\Database\Eloquent\Model;
 
 class StatusAlias extends Model
 {
+    use BelongsToOneChain;
+    
     /**
      * The attributes that aren't mass assignable.
      *
@@ -30,16 +33,6 @@ class StatusAlias extends Model
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
-
-    /**
-     * Get the owning business.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function business()
-    {
-        return $this->belongsTo(Business::class);
-    }
 
     // **********************************************************
     // MUTATORS

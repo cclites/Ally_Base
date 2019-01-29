@@ -15,14 +15,14 @@ class CreateStatusAliasesTable extends Migration
     {
         Schema::create('status_aliases', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('business_id');
+            $table->unsignedInteger('chain_id');
             $table->string('type')->index();
             $table->string('name');
             $table->boolean('active')->default(false);
 
             $table->timestamps();
 
-            $table->foreign('business_id')->references('id')->on('businesses');
+            $table->foreign('chain_id')->references('id')->on('business_chains');
         });
     }
 
@@ -34,7 +34,7 @@ class CreateStatusAliasesTable extends Migration
     public function down()
     {
         Schema::table('status_aliases', function (Blueprint $table) {
-            $table->dropForeign(['business_id']);
+            $table->dropForeign(['chain_id']);
         });
 
         Schema::dropIfExists('status_aliases');

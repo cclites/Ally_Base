@@ -10,7 +10,7 @@ $factory->define(App\StatusAlias::class, function (Faker $faker) {
     }
 
     return [
-        'business_id' => Business::inRandomOrder()->value('id'),
+        'chain_id' => Business::inRandomOrder()->first()->chain_id,
         'name' => $faker->colorName(),
         'active' => $faker->randomElement([1, 0]),
         'type' => $faker->randomElement(['client', 'caregiver']),

@@ -1,5 +1,6 @@
 <template>
     <div>
+        <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
         <loading-card v-show="loading"></loading-card>
 
         <b-row v-if="! loading">
@@ -46,10 +47,6 @@
         mixins: [FormatsStrings],
 
         props: {
-            business: {
-                type: Object,
-                default: () => { return {} },
-            },
         },
 
         data() {
@@ -67,7 +64,6 @@
                     type: '',
                     name: '',
                     active: '1',
-                    business_id: '',
                 }),
             }
         },
@@ -85,7 +81,7 @@
         methods: {
             fetch() {
                 this.loading = true;
-                axios.get('/business/status-aliases')
+                axios.get(`/business/status-aliases`)
                     .then( ({ data }) => {
                         if (data && data.caregiver) {
                             this.statuses = data;
@@ -101,8 +97,6 @@
             },
 
             save() {
-                this.form.business_id = this.business.id;
-
                 let url = '/business/status-aliases';
                 if (this.form.id) {
                     url += `/${this.form.id}`;
@@ -156,12 +150,6 @@
         
         mounted() {
             this.fetch();
-        },
-
-        watch: {
-            business(newValue, oldValue) {
-                this.fetch();
-            },
         },
     }
 </script>

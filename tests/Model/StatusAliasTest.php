@@ -7,7 +7,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\StatusAlias;
-use App\Business;
+use App\BusinessChain;
 
 class StatusAliasTest extends TestCase
 {
@@ -35,10 +35,10 @@ class StatusAliasTest extends TestCase
     }
 
     /** @test */
-    public function it_belongs_to_a_business()
+    public function it_belongs_to_a_business_chain()
     {
         $status = factory(StatusAlias::class)->create();
-        $this->assertInstanceOf(Business::class, $status->business);
+        $this->assertInstanceOf(BusinessChain::class, $status->businessChain);
     }
 
     /** @test */
