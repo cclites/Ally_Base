@@ -113,6 +113,12 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
+                    <b-form-group label="Client Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                     <b-form-group label="HIC" label-for="hic">
                         <b-form-input
                             id="hic"
@@ -539,6 +545,7 @@
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updated_at,
                     receive_summary_email: this.client.receive_summary_email,
+                    status_alias_id: this.client.status_alias_id || '',
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
@@ -552,12 +559,14 @@
                 inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
+                statusAliases: [],
             }
         },
 
         mounted() {
             this.checkForNoEmailDomain();
             this.loadOfficeUsers();
+            this.fetchStatusAliases();
         },
 
         methods: {
@@ -619,8 +628,20 @@
                     .then(function(response) {
                         component.lastStatusDate = moment.utc().format();
                     });
-            }
+            },
 
+            fetchStatusAliases() {
+                axios.get(`/business/status-aliases?business_id=${this.client.business_id}`)
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data;
+                        } else {
+                            this.statusAliases = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         },
 
         computed: {
@@ -649,9 +670,23 @@
                     return 'The status was last updated ' + this.lastStatusUpdated;
                 }
                 return 'Select the Ally Agreement status of the client.';
-            }
-        }
+            },
+            
+            statusAliasOptions() {
+                if (! this.statusAliases || !this.statusAliases.client) {
+                    return [];
+                }
 
+                return this.statusAliases.client.filter(item => {
+                    return item.active == this.active;
+                }).map(item => {
+                    return {
+                        value: item.id,
+                        text: item.name,
+                    };
+                });
+            },
+        },
     }
 </script>
 

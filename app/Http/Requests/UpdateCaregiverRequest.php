@@ -18,7 +18,7 @@ class UpdateCaregiverRequest extends FormRequest
 
     public function rules()
     {
-        $aliases = $this->business()->statusAliases()->forCaregivers()->get()->pluck('id')->toArray();
+        $aliases = $this->business()->chain->statusAliases()->forCaregivers()->get()->pluck('id')->toArray();
 
         return [
             'firstname' => 'required|string|max:45',

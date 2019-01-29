@@ -14,7 +14,7 @@
                     :fields="columns"
                 >
                     <template slot="active" scope="data">
-                        {{ data.value ? 'Active' : 'Inactive' }}
+                        {{ data.value == 1 ? 'Active' : 'Inactive' }}
                     </template>
                     <template slot="actions" scope="data">
                         <b-btn variant="secondary" size="sm" @click="edit(data.item)">
