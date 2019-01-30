@@ -109,7 +109,7 @@ class InvoicePaymentTest extends TestCase
         $payment = factory(Payment::class)->create(['client_id' => null, 'payer_id' => $this->clientPayer->payer_id, 'amount' => 50]);
         $this->createService(80.00);
         $invoice = $this->invoicer->generateAll($this->client)[0];
-        $payment = $this->processor->payInvoices([$invoice], $invoice->getPayer(), new DummyCreditCard());
+        $payment = $this->processor->payInvoices([$invoice], new DummyCreditCard());
 
         $this->assertCount(2, $invoice->payments);
         $this->assertEquals(30.0, $payment->amount);
@@ -159,6 +159,11 @@ class DummyCreditCard implements PaymentMethodStrategy
     {
         return new CreditCard();
     }
+
+    public function getPaymentType(): string
+    {
+        return 'CC';
+    }
 }
 
 
@@ -167,5 +172,10 @@ class DummyBankAccount extends DummyCreditCard
     public function getPaymentMethod(): ChargeableInterface
     {
         return new BankAccount();
+    }
+
+    public function getPaymentType(): string
+    {
+        return 'ACH';
     }
 }

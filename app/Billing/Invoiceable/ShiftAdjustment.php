@@ -2,6 +2,7 @@
 namespace App\Billing\Invoiceable;
 
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -15,35 +16,27 @@ use Illuminate\Support\Collection;
  * @property int $business_id
  * @property int $client_id
  * @property int $caregiver_id
- * @property int $payer_id
- * @property int $service_id
- * @property int $shift_id
+ * @property int|null $payer_id
+ * @property int|null $service_id
+ * @property int|null $shift_id
  * @property float $units
  * @property float $client_rate
  * @property float $caregiver_rate
- * @property float $ally_rate
+ * @property float|null $ally_rate
  * @property string $status
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\BaseInvoiceItem[] $invoiceItems
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $clientInvoiceItems
+ * @property-read \App\Billing\ClientPayer $clientPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\InvoiceableMeta[] $meta
+ * @property-read \App\Shift|null $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereAllyRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereCaregiverId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereCaregiverRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereClientId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereClientRate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel whereMeta($key, $delimiter = null, $value = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment wherePayerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereServiceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereShiftId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereUnits($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
  * @mixin \Eloquent
  */
@@ -67,6 +60,11 @@ class ShiftAdjustment extends InvoiceableModel
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
+
+    public function clientPayer()
+    {
+        return $this->belongsTo(ClientPayer::class);
+    }
 
     public function shift()
     {
@@ -214,13 +212,23 @@ class ShiftAdjustment extends InvoiceableModel
     }
 
     /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer
+    {
+        return $this->clientPayer;
+    }
+
+    /**
      * Get the assigned payer ID (payers.id, not client_payers.id)
      *
      * @return int|null
      */
     public function getPayerId(): ?int
     {
-        return $this->payer_id;
+        return $this->getClientPayer()->id ?? null;
     }
 
     /**

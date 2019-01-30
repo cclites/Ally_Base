@@ -1,7 +1,6 @@
 <?php
 /**
  * @var \App\Billing\View\PaymentInvoiceObject[] $invoiceObjects
- * @var \App\Billing\Payer $payer
  * @var \App\Billing\Payment $payment
  */
 ?>
@@ -85,18 +84,18 @@
             <div class="header-left">
                 <div class="logo"><img src="{{ asset('/images/AllyLogo.png') }}" /></div>
                 <br>
-                <table>
-                    <tr>
-                        <td colspan="2">
-                            <strong>{{ $payer->name() }}</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            @include('invoices.partials.address', ['address' => $payer->getAddress(), 'phone' => $payer->getPhoneNumber()])
-                        </td>
-                    </tr>
-                </table>
+                {{--<table>--}}
+                    {{--<tr>--}}
+                        {{--<td colspan="2">--}}
+                            {{--<strong>{{ $payer->name() }}</strong>--}}
+                        {{--</td>--}}
+                    {{--</tr>--}}
+                    {{--<tr>--}}
+                        {{--<td colspan="2">--}}
+                            {{--@include('invoices.partials.address', ['address' => $payer->getAddress(), 'phone' => $payer->getPhoneNumber()])--}}
+                        {{--</td>--}}
+                    {{--</tr>--}}
+                {{--</table>--}}
             </div>
             <div class="text-right header-right">
                 <div class="h3">Payment #{{ $payment->id }}</div>
@@ -160,7 +159,7 @@
                                     <td>{{ $invoiceObject->invoice->getDate() }}</td>
                                     <td>{{ $invoiceObject->invoice->getName() }}</td>
                                     <td>{{ $invoiceObject->invoice->client->name() }}</td>
-                                    <td>{{ $invoiceObject->invoice->payer->name() }}</td>
+                                    <td>{{ $invoiceObject->invoice->getClientPayer()->name() }}</td>
                                     <td>{{ number_format($invoiceObject->invoice->getAmount(), 2) }}</td>
                                     <td>{{ number_format($invoiceObject->amountApplied, 2) }}</td>
                                 </tr>

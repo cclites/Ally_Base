@@ -4,11 +4,13 @@ namespace App;
 use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Billing\Deposit;
 use App\Billing\Invoiceable\InvoiceableModel;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payment;
+use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -385,6 +387,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function services()
     {
         return $this->hasMany(ShiftService::class);
+    }
+
+    public function clientPayer()
+    {
+        return $this->belongsTo(ClientPayer::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
     }
 
 
@@ -873,16 +885,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemName(string $invoiceModel): string
     {
-        $time = $this->checked_in_time->setTimezone($this->getTimezone())->format('g:iA');
-
-        switch($invoiceModel) {
-            case ClientInvoice::class:
-                return optional($this->caregiver)->name() . ' - ' . $time;
-            case CaregiverInvoice::class:
-                return optional($this->client)->name() . ' - ' . $time;
+        if ($service = $this->service) {
+            /** @var Service $service */
+            return $service->name;
         }
 
-        return optional($this->client)->name() . ' - ' . optional($this->caregiver)->name() . ' - ' . $time;
+        // Fallback
+        return $this->getItemGroup($invoiceModel);
     }
 
     /**
@@ -893,7 +902,19 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemGroup(string $invoiceModel): ?string
     {
-        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j') . ': ' . $this->getItemName($invoiceModel);
+        $name = optional($this->client)->name() . ' - ' . optional($this->caregiver)->name();
+
+        switch($invoiceModel) {
+            case ClientInvoice::class:
+                $name = optional($this->caregiver)->name();
+                break;
+            case CaregiverInvoice::class:
+                $name = optional($this->client)->name();
+                break;
+        }
+
+
+        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j g:iA') . ': ' . $name;
     }
 
     /**
@@ -965,13 +986,22 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer
+    {
+        return $this->clientPayer;
+    }
+    /**
      * Get the assigned payer ID (payers.id, not client_payers.id)
      *
      * @return int|null
      */
     public function getPayerId(): ?int
     {
-        return $this->payer_id;
+        return $this->getClientPayer()->id ?? null;
     }
 
     /**

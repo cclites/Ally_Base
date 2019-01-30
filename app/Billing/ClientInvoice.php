@@ -45,9 +45,26 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
      * @param int $payerId
      * @return string
      */
-    public static function getNextName(int $clientId, int $payerId)
+    public static function getNextName(int $clientId)
     {
-        return ''; // TODO
+        $lastName = self::where('client_id', $clientId)
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->value('name');
+
+
+        $minId = 1000;
+        if (!$lastName) {
+            $nextId = $minId;
+        } else {
+            $nextId = (int) substr($lastName, strpos($lastName, '-') + 1) + 1;
+        }
+
+        if ($nextId < $minId) {
+            $nextId = $minId;
+        }
+
+        return "${clientId}-${nextId}";
     }
 
     ////////////////////////////////////
@@ -65,27 +82,23 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             ->withPivot(['amount_applied']);
     }
 
-    function payer()
-    {
-        return $this->belongsTo(Payer::class);
-    }
-
     function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    function clientPayer()
+    {
+        return $this->belongsTo(ClientPayer::class);
     }
 
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
 
-    function getPayer(): Payer
+    function getClientPayer(): ClientPayer
     {
-        $payer = $this->payer;
-        if ($payer->isPrivatePay()) {
-            $payer->setPrivatePayer($this->client);
-        }
-        return $payer;
+        return $this->clientPayer;
     }
 
     function getAmount(): float

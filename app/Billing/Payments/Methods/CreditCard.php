@@ -233,4 +233,12 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         return $this->user;
     }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'credit_cards:' . $this->id;
+    }
 }

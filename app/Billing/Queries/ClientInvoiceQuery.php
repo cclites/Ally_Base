@@ -2,6 +2,7 @@
 namespace App\Billing\Queries;
 
 use App\Billing\ClientInvoice;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Payer;
 use App\BusinessChain;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,7 +26,9 @@ class ClientInvoiceQuery extends BaseQuery
     {
         $this->where('client_id', $clientId);
         if ($privatePayOnly) {
-            $this->where('payer_id', Payer::PRIVATE_PAY_ID);
+            $this->whereHas('clientPayer', function($q) {
+                $q->where('payer_id', Payer::PRIVATE_PAY_ID);
+            });
         }
 
         return $this;

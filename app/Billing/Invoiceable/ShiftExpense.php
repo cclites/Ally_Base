@@ -2,6 +2,7 @@
 namespace App\Billing\Invoiceable;
 
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -167,6 +168,16 @@ class ShiftExpense extends InvoiceableModel
     public function getProviderRate(): float
     {
         return 0;
+    }
+
+    /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer
+    {
+        return $this->shift->getClientPayer();
     }
 
     /**

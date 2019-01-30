@@ -23,7 +23,6 @@
                 <thead>
                 <tr class="bg-info">
                     <th>Payment Date</th>
-                    <th>Payer</th>
                     <th>Payment Method</th>
                     <th>Total Amount</th>
                     <th>Amount Applied to Invoice</th>
@@ -33,7 +32,6 @@
                 @foreach($payments as $payment)
                     <tr>
                         <td>{{ local_date($payment->created_at) }}</td>
-                        <td>{{ $payment->payer->name() ?? '' }}</td>
                         <td>{{ $payment->payment_type }}</td>
                         <td>{{ number_format($payment->amount, 2) }}</td>
                         <td>{{ number_format($payment->pivot->amount_applied ?? '-1', 2) }}</td>

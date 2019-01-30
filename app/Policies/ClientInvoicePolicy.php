@@ -19,7 +19,7 @@ class ClientInvoicePolicy extends BasePolicy
 
     public function read(User $user, ClientInvoice $invoice)
     {
-        return ($invoice->client_id == $user->id && $invoice->payer->isPrivatePay())
+        return ($invoice->client_id == $user->id && $invoice->getClientPayer()->isPrivatePay())
             || $this->businessCheck($user, $invoice->client);
     }
 

@@ -257,4 +257,12 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     {
         return $this->user ?? $this->business;
     }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'bank_accounts:' . $this->id;
+    }
 }

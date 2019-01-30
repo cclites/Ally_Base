@@ -29,15 +29,15 @@ class InvoiceViewGenerator
     function generateClientInvoice(ClientInvoice $clientInvoice, ?string $viewName = null)
     {
         $client = $clientInvoice->client;
-        $payer = $clientInvoice->payer;
+        $clientPayer = $clientInvoice->getClientPayer();
         $business = $client->business;
         $items = $clientInvoice->items;
         $payments = $clientInvoice->payments;
 
         return $this->generate(
             $viewName ?? 'invoices.client_invoice',
-            $payer->isPrivatePay() ? $business : $client,
-            $payer->isPrivatePay() ? $client : $payer,
+            $clientPayer->isPrivatePay() ? $business : $client,
+            $clientPayer->isPrivatePay() ? $client : $clientPayer,
             $clientInvoice,
             $items,
             $payments

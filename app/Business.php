@@ -757,6 +757,14 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->paymentAccount->getPaymentStrategy();
     }
 
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'businesses:' . $this->id;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

@@ -3,6 +3,7 @@ namespace App\Billing\Invoiceable;
 
 use App\AuditableModel;
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
@@ -65,9 +66,9 @@ class ShiftService extends InvoiceableModel
     //// Relationship Methods
     ////////////////////////////////////
 
-    function payer()
+    function clientPayer()
     {
-        return $this->belongsTo(Payer::class);
+        return $this->belongsTo(ClientPayer::class);
     }
 
     function shift()
@@ -219,13 +220,23 @@ class ShiftService extends InvoiceableModel
     }
 
     /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer
+    {
+        return $this->clientPayer;
+    }
+
+    /**
      * Get the assigned payer ID (payers.id, not client_payers.id)
      *
      * @return int|null
      */
     public function getPayerId(): ?int
     {
-        return $this->payer_id;
+        return $this->getClientPayer()->id ?? null;
     }
 
 

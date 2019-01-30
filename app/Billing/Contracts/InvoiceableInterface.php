@@ -2,6 +2,7 @@
 namespace App\Billing\Contracts;
 
 use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
 use App\Billing\Deposit;
 use App\Billing\Payment;
 use App\Business;
@@ -112,6 +113,13 @@ interface InvoiceableInterface
      * @return float
      */
     public function getProviderRate(): float;
+
+    /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer;
 
     /**
      * Get the assigned payer ID (payers.id, not client_payers.id)

@@ -1,6 +1,7 @@
 <?php
 namespace App\Shifts;
 
+use App\Billing\ClientPayer;
 use App\Billing\Payer;
 use App\Billing\ScheduleService;
 use App\Billing\Service;
@@ -40,7 +41,7 @@ class ShiftFactory implements Arrayable
         ?Carbon $clockOutTime = null,
         ?string $currentStatus = null,
         ?Service $service = null,
-        ?Payer $payer = null
+        ?ClientPayer $clientPayer = null
     ): self
     {
         return new self([
@@ -48,7 +49,7 @@ class ShiftFactory implements Arrayable
             'caregiver_id'      => $caregiver->id,
             'client_id'         => $client->id,
             'service_id'        => $service ? $service->id : self::getDefaultServiceId($client),
-            'payer_id'          => $payer->id ?? null,
+            'client_payer_id'   => $clientPayer->id ?? null,
             'checked_in_method' => $clockInMethod,
             'checked_in_time'   => $clockInTime->setTimezone('UTC'),
             'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
@@ -70,13 +71,23 @@ class ShiftFactory implements Arrayable
         ?string $currentStatus = null
     ): self
     {
+        if ($schedule->payer_id) {
+            $client = $schedule->client;
+            $date = $clockInTime->setTimezone($client->getTimezone())->toDateString();
+            $clientPayer = $client->getPayers($date)
+                ->where('payer_id', $schedule->payer_id)
+                ->first();
+
+            // TODO: Send notification / system exception if matching client payer isn't found
+        }
+
         $self = new self([
             'schedule_id'       => $schedule->id,
             'business_id'       => $schedule->business_id,
             'caregiver_id'      => $schedule->caregiver_id,
             'client_id'         => $schedule->client_id,
             'service_id'        => $schedule->service_id,
-            'payer_id'          => $schedule->payer_id,
+            'client_payer_id'   => $clientPayer->id ?? null,
             'checked_in_method' => $clockInMethod,
             'checked_in_time'   => $clockInTime->setTimezone('UTC'),
             'checked_out_method'=> $clockOutMethod ?? $clockOutTime ? $clockInMethod : Shift::METHOD_UNKNOWN,
@@ -136,7 +147,7 @@ class ShiftFactory implements Arrayable
         return $shift;
     }
 
-        /**
+    /**
      * Get the instance as an array.
      *
      * @return array

@@ -2,6 +2,8 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Business;
 use App\Client;
 use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\HasAllyFeeInterface;
@@ -29,22 +31,11 @@ use Carbon\Carbon;
  * @property-read \App\Client $client
  * @property-read string $payer_name
  * @property-read \App\Billing\Payer $payer
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $paymentMethod
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereClientId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereEffectiveEnd($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereEffectiveStart($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePayerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePaymentAllocation($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePaymentAllowance($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePolicyNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer wherePriority($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereSplitPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 class ClientPayer extends AuditableModel implements HasAllyFeeInterface
@@ -175,6 +166,11 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
         return $this->belongsTo(Payer::class);
     }
 
+    public function paymentMethod()
+    {
+        return $this->morphTo('payment_method');
+    }
+
     ////////////////////////////////////
     //// Mutators
     ////////////////////////////////////
@@ -192,6 +188,54 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    function name(): string
+    {
+        return $this->isPrivatePay() ? $this->client->name() : $this->getPayer()->name();
+    }
+
+    /**
+     * @return \App\Billing\Payer
+     */
+    function getPayer(): Payer
+    {
+        return $this->payer;
+    }
+
+    function isPrivatePay(): bool
+    {
+        return $this->getPayer()->isPrivatePay();
+    }
+
+    function getUniqueKey(): string
+    {
+        if ($this->isPrivatePay()) {
+            return (string) $this->payer_id . ':' . $this->getPrivatePayer()->id;
+        }
+
+        return (string) $this->id;
+    }
+
+    function getPaymentMethod(): ChargeableInterface
+    {
+        if ($method = $this->getPayer()->getPaymentMethod()) {
+            if ($method instanceof Business) {
+                $method = $this->client->business;
+            }
+            return $method;
+        }
+
+        if ($method = $this->paymentMethod) {
+            return $method;
+        }
+
+        if ($this->getPayer()->isPrivatePay()) {
+            return $this->client->getPaymentMethod();
+        }
+
+        throw new PaymentMethodError("No payment method is available.");
+    }
+
 
     /**
      * @return bool
@@ -215,18 +259,6 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
     function isSplitType(): bool
     {
         return $this->payment_allocation === self::ALLOCATION_SPLIT;
-    }
-
-    /**
-     * @return \App\Billing\Payer
-     */
-    function getPayer(): Payer
-    {
-        $payer = $this->payer;
-        if ($payer->isPrivatePay()) {
-            $payer->setPrivatePayer($this->client);
-        }
-        return $payer;
     }
 
     /**

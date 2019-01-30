@@ -25,6 +25,11 @@ interface ChargeableInterface extends HasAllyFeeInterface
     public function getPaymentStrategy(): PaymentMethodStrategy;
 
     /**
+     * @return string
+     */
+    public function getHash(): string;
+
+    /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
      *

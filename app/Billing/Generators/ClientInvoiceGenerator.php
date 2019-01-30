@@ -187,7 +187,7 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
      */
     public function getInvoiceName(Client $client)
     {
-        return ClientInvoice::where('client_id', $client->id)->max("name") ?? "1";
+        return ClientInvoice::getNextName($client->id);
     }
 
     /**

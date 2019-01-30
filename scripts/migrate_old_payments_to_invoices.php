@@ -7,68 +7,121 @@ use App\Billing\Payment;
 DB::beginTransaction();
 
 ////////////////////////////////////
-//// Create Client Payers
+//// Run preparation for each business chain
 ////////////////////////////////////
 
-// Create a new provider pay payer for each business location
 $providerPayers = [];
-foreach(\App\Business::all() as $business) {
-    $payer = new \App\Billing\Payer([
-        'name' => $business->name(),
-        'week_start' => 1,
-        'address1' => $business->address1,
-        'address2' => $business->address2,
-        'city' => $business->city,
-        'state' => $business->state,
-        'zip' => $business->zip,
-        'phone_number' => $business->phone1,
-        'chain_id' => $business->chain_id,
-    ]);
-    $payer->paymentMethod()->associate($business);
-    $payer->save();
-    $providerPayers[$business->id] = $payer;
 
-    // Mark all previous provider pay payments as the new payer id
-    Payment::whereNull('client_id')->where('business_id', $business->id)->update(['payer_id' => $payer->id]);
+/** @var \App\BusinessChain $chain */
+foreach(\App\BusinessChain::all() as $chain) {
+
+    $businessIds = $chain->businesses()->pluck('id')->toArray();
+
+    ////////////////////////////////////
+    //// Create a default service
+    ////////////////////////////////////
+
+    $service = \App\Billing\Service::create([
+        'name' => 'Caregiver Service',
+        'code' => '',
+        'default' => true,
+        'chain_id' => $chain->id,
+    ]);
+
+    ////////////////////////////////////
+    //// Update shifts to use that service
+    ////////////////////////////////////
+
+    \App\Shift::whereIn('business_id', $businessIds)->update(['service_id' => $service->id]);
+    echo("Line 36\n");
+
+    ////////////////////////////////////
+    //// Update schedules to use that service
+    ////////////////////////////////////
+
+    \App\Schedule::whereIn('business_id', $businessIds)->update(['service_id' => $service->id]);
+    echo("Line 43\n");
+
+    /////////////////////////////////////
+    //// Create a new provider payer
+    ////////////////////////////////////
+
+    $payer = \App\Billing\Payer::create([
+        'name' => $chain->name,
+        'week_start' => 1,
+        'address1' => $chain->address1,
+        'address2' => $chain->address2,
+        'city' => $chain->city,
+        'state' => $chain->state,
+        'zip' => $chain->zip,
+        'phone_number' => $chain->phone1,
+        'chain_id' => $chain->id,
+        'payment_method_type' => 'businesses', // Important
+    ]);
+
+    // Update all previous provider payer payments with the payment method
+    foreach($businessIds as $businessId) {
+        $providerPayers[$businessId] = $payer;
+        Payment::whereNull('client_id')->where('business_id', $businessId)->update([
+            'payment_method_type' => 'businesses',
+            'payment_method_id' => $businessId,
+        ]);
+    }
+    echo("Line 70\n");
+
 }
 
-// Mark all non-provider pay payments as private payer
-Payment::whereNotNull('client_id')->update(['payer_id' => \App\Billing\Payer::PRIVATE_PAY_ID]);
+////////////////////////////////////
+//// Update all previous private pay payments with their payment method
+////////////////////////////////////
 
+DB::statement("
+UPDATE payments p
+INNER JOIN gateway_transactions t ON p.transaction_id = t.id
+SET p.payment_method_type = t.method_type, p.payment_method_id = t.method_id
+WHERE p.client_id IS NOT NULL
+");
+echo("Line 84\n");
 
-// Assign a balance payer for all existing clients
-\App\Client::with('defaultPayment')->chunk(200, function($clients) {
-    $clients->each(function(\App\Client $client) {
-        global $providerPayers;
-        if ($client->getPaymentMethod() instanceof \App\Business) {
-            $payer = $providerPayers[$client->business_id];
-        } else {
-            $payer = null;
-        }
+////////////////////////////////////
+//// Assign Balance Payers to Clients
+////////////////////////////////////
 
-        \App\Billing\ClientPayer::create([
-            'client_id' => $client->id,
-            'payer_id' => $payer->id ?? \App\Billing\Payer::PRIVATE_PAY_ID,
-            'effective_start' => '2018-01-01',
-            'effective_end' => '9999-12-31',
-            'payment_allocation' => \App\Billing\ClientPayer::ALLOCATION_BALANCE,
-            'priority' => 1,
-        ]);
-    });
-});
+$rows = DB::affectingStatement("
+INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
+SELECT DISTINCT c.id, p.id, '2018-01-01', '9999-12-31', 'balance' FROM clients c
+INNER JOIN businesses b ON b.id = c.business_id
+INNER JOIN payers p ON p.chain_id = b.chain_id
+WHERE c.default_payment_type = 'businesses'
+");
+echo "$rows affected by provider pay setting\n";
+
+var_dump(DB::select('SELECT count(*) FROM client_payers'));
+
+$rows = DB::affectingStatement("
+INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
+SELECT id, '0', '2018-01-01', '9999-12-31', 'balance' FROM clients WHERE default_payment_type != 'businesses' OR default_payment_type IS NULL
+");
+echo "$rows affected by private pay setting\n";
+echo("Line 104\n");
+
+var_dump(DB::select('SELECT count(*) FROM client_payers'));
 
 ////////////////////////////////////
 //// Client Payments to Invoices
 ////////////////////////////////////
 
-Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($payments) {
+Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('client_id')->chunk(200, function($payments) {
     $payments->each(function(Payment $payment) {
-        $payer = $payment->payer;
+
+        if (!$payment->client->payers->first()) {
+            dd($payment->client->toArray());
+        }
 
         $invoice = ClientInvoice::create([
             'client_id' => $payment->client_id,
-            'payer_id' => $payer->id,
-            'name' => ClientInvoice::getNextName($payment->client_id, $payer->id),
+            'client_payer_id' => $payment->client->payers->first()->id,
+            'name' => ClientInvoice::getNextName($payment->client_id),
             'created_at' => $payment->created_at,
         ]);
 
@@ -94,6 +147,7 @@ Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($paymen
         $invoice->addPayment($payment, $payment->amount);
     });
 });
+echo("Line 139\n");
 
 ////////////////////////////////////
 //// Provider Pay Payments to Invoices (One per client)
@@ -101,17 +155,17 @@ Payment::with(['payer'])->whereNotNull('client_id')->chunk(200, function($paymen
 
 $missedAmounts = [];
 
-Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments) {
+Payment::with(['shifts', 'shifts.client', 'shifts.client.payers'])->whereNull('client_id')->chunk(200, function($payments) {
     $payments->each(function(Payment $payment) {
-        $payer = $payment->payer;
         $groupedShifts = $payment->shifts->groupBy('client_id');
 
         $totalInvoiced = 0;
         foreach($groupedShifts as $clientId => $shifts) {
+            $payer = $shifts->first()->client->payers->first();
             $invoice = ClientInvoice::create([
                 'client_id' => $clientId,
-                'payer_id' => $payer->id,
-                'name' => ClientInvoice::getNextName($clientId, $payer->id),
+                'client_payer_id' => $payer->id,
+                'name' => ClientInvoice::getNextName($clientId),
                 'created_at' => $payment->created_at,
             ]);
 
@@ -153,8 +207,35 @@ Payment::with(['payer'])->whereNull('client_id')->chunk(200, function($payments)
 
     });
 });
+echo("Line 199\n");
 
 file_put_contents(base_path('missed_amounts.serialized'), serialize($missedAmounts));
+echo("Line 202\n");
+
+
+////////////////////////////////////
+//// Migrate client caregiver rates
+////////////////////////////////////
+
+\App\Client::has('caregivers')->with(['caregivers', 'defaultPayment'])->chunk(200, function($clients) {
+    $clients->each(function(\App\Client $client) {
+        foreach($client->caregivers as $caregiver) {
+            $paymentMethod = $client->getPaymentMethod() ?? new \App\Billing\Payments\Methods\CreditCard();
+            \App\Billing\ClientRate::create([
+                'client_id' => $client->id,
+                'caregiver_id' => $caregiver->id,
+                'client_hourly_rate' => multiply(add($caregiver->pivot->caregiver_hourly_rate, $caregiver->pivot->provider_hourly_fee), add(1, $paymentMethod->getAllyPercentage())),
+                'caregiver_hourly_rate' => $caregiver->pivot->caregiver_hourly_rate ?? 0,
+                'client_fixed_rate' => multiply(add($caregiver->pivot->caregiver_fixed_rate, $caregiver->pivot->provider_fixed_fee), add(1, $paymentMethod->getAllyPercentage())),
+                'caregiver_fixed_rate' => $caregiver->pivot->caregiver_fixed_rate ?? 0,
+                'effective_start' => '2018-01-01',
+                'effective_end' => '9999-12-31',
+            ]);
+        }
+    });
+});
+echo("Line 226\n");
+
 
 DB::commit();
 
@@ -170,7 +251,7 @@ function _createMileageExpense(\App\Shift $shift)
         'name' => 'Mileage',
         'units' => $shift->mileage,
         'rate' => divide($shift->costs()->getMileageCost(), $shift->mileage),
-        'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false))
+        'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false)),
     ]);
 }
 
@@ -182,7 +263,7 @@ function _createOtherExpense(\App\Shift $shift)
         'notes' => str_limit($shift->other_expenses_desc, 253, '..'),
         'units' => 1,
         'rate' => $shift->costs()->getOtherExpenses(),
-        'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false))
+        'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false)),
     ]);
 }
 
