@@ -1,23 +1,17 @@
 <?php
 namespace App\Billing\Contracts;
 
+use App\Billing\Payments\Contracts\DepositMethodStrategy;
 use Illuminate\Contracts\Support\Arrayable;
 
 interface DepositableInterface extends Arrayable
 {
     /**
-     * @param float $amount
-     * @param string $currency
-     * @return \App\Billing\GatewayTransaction|false
+     * Return the default deposit strategy
+     *
+     * @return \App\Billing\Payments\Contracts\DepositMethodStrategy
      */
-    public function depositFunds($amount, $currency = 'USD');
-
-    /**
-     * @param float $amount
-     * @param string $currency
-     * @return \App\Billing\GatewayTransaction|false
-     */
-    public function withdrawFunds($amount, $currency = 'USD');
+    public function getDepositStrategy(): DepositMethodStrategy;
 
     /**
      * Return the owner of the payment method or account

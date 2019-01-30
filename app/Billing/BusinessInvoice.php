@@ -2,6 +2,9 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Contracts\DepositInvoiceInterface;
+use App\Business;
+use Illuminate\Support\Collection;
 
 /**
  * \App\Billing\BusinessInvoice
@@ -9,24 +12,21 @@ use App\AuditableModel;
  * @property int $id
  * @property string $name
  * @property int $business_id
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Business $business
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\BusinessInvoiceItem[] $items
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereAmountPaid($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereBusinessId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice query()
  * @mixin \Eloquent
  */
-class BusinessInvoice extends AuditableModel
+class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
 {
     protected $guarded = ['id'];
 
@@ -37,6 +37,11 @@ class BusinessInvoice extends AuditableModel
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
+
+    function business()
+    {
+        return $this->belongsTo(Business::class);
+    }
 
     function items()
     {
@@ -67,5 +72,20 @@ class BusinessInvoice extends AuditableModel
             return (bool) $this->increment('amount_paid', $amountApplied);
         }
         return false;
+    }
+
+    public function getAmount(): float
+    {
+        return $this->amount;
+    }
+
+    public function getAmountDue(): float
+    {
+        return subtract($this->amount, $this->amount_paid);
+    }
+
+    public function getItems(): Collection
+    {
+        return $this->items;
     }
 }

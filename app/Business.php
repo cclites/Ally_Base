@@ -751,10 +751,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return $this->getPhoneNumber();
     }
 
-    function getDefaultStrategy(): PaymentMethodStrategy
+    function getPaymentStrategy(): PaymentMethodStrategy
     {
         if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
-        return $this->paymentAccount->getDefaultStrategy();
+        return $this->paymentAccount->getPaymentStrategy();
     }
 
     ////////////////////////////////////

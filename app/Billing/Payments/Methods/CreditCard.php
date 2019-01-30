@@ -130,7 +130,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
         return null;
     }
 
-    function getDefaultStrategy(): PaymentMethodStrategy
+    function getPaymentStrategy(): PaymentMethodStrategy
     {
         return new CreditCardPayment($this);
     }

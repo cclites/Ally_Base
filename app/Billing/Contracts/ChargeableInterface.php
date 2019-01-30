@@ -22,7 +22,7 @@ interface ChargeableInterface extends HasAllyFeeInterface
     /**
      * @return \App\Billing\Payments\Contracts\PaymentMethodStrategy
      */
-    public function getDefaultStrategy(): PaymentMethodStrategy;
+    public function getPaymentStrategy(): PaymentMethodStrategy;
 
     /**
      * Determine if the existing record can be updated

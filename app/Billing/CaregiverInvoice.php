@@ -2,6 +2,8 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Contracts\DepositInvoiceInterface;
+use Illuminate\Support\Collection;
 
 /**
  * \App\Billing\CaregiverInvoice
@@ -9,24 +11,21 @@ use App\AuditableModel;
  * @property int $id
  * @property string $name
  * @property int $caregiver_id
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property float $amount
  * @property float $amount_paid
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read \App\Caregiver $caregiver
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\CaregiverInvoiceItem[] $items
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereAmountPaid($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereCaregiverId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoice query()
  * @mixin \Eloquent
  */
-class CaregiverInvoice extends AuditableModel
+class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
 {
     protected $guarded = ['id'];
 
@@ -37,6 +36,11 @@ class CaregiverInvoice extends AuditableModel
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////
+
+    function caregiver()
+    {
+        return $this->belongsTo(\App\Caregiver::class);
+    }
 
     function items()
     {
@@ -67,5 +71,20 @@ class CaregiverInvoice extends AuditableModel
             return (bool) $this->increment('amount_paid', $amountApplied);
         }
         return false;
+    }
+
+    public function getAmount(): float
+    {
+        return $this->amount;
+    }
+
+    public function getAmountDue(): float
+    {
+        return subtract($this->amount, $this->amount_paid);
+    }
+
+    public function getItems(): Collection
+    {
+        return $this->items;
     }
 }

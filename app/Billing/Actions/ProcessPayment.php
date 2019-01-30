@@ -40,7 +40,7 @@ class ProcessPayment
         }
 
         if (!$strategy) {
-            $strategy = $payer->getPaymentMethod()->getDefaultStrategy();
+            $strategy = $payer->getPaymentMethod()->getPaymentStrategy();
         }
 
         if ($transaction = $strategy->charge($amount, $currency)) {
