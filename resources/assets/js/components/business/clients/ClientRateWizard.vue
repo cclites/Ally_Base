@@ -118,10 +118,10 @@
             <b-btn variant="info" @click="step++" :disabled="!isNullOrInt(rateObject.payer_id)" v-if="step === 3">
                 Continue
             </b-btn>
-            <b-btn variant="info" @click="step++" :disabled="caregiver_hourly.length == 0 || caregiver_hourly != 0 && caregiver_hourly >= client_hourly" v-if="step === 4">
+            <b-btn variant="info" @click="step++" :disabled="!ratesAreValid(caregiver_hourly, client_hourly)" v-if="step === 4">
                 Continue
             </b-btn>
-            <b-btn variant="info" @click="step++" :disabled="caregiver_fixed.length == 0 || caregiver_fixed != 0 && caregiver_fixed >= client_fixed" v-if="step === 5">
+            <b-btn variant="info" @click="step++" :disabled="!ratesAreValid(caregiver_fixed, client_fixed)" v-if="step === 5">
                 Continue
             </b-btn>
             <b-btn variant="info" @click="finish()" :disabled="!datesAreValid()" v-if="step === 6">
@@ -187,6 +187,12 @@
             datesAreValid() {
                 return moment(this.rateObject.effective_start, 'MM/DD/YYYY', true).isValid()
                     && moment(this.rateObject.effective_end, 'MM/DD/YYYY', true).isValid()
+            },
+            ratesAreValid(caregiverRate, clientRate)
+            {
+                return caregiverRate.length != 0
+                    && (caregiverRate == 0 || parseFloat(clientRate) > parseFloat(caregiverRate))
+                    && parseFloat(clientRate) >= 0 && parseFloat(caregiverRate) >= 0;
             },
             resetState() {
                 Object.assign(this.$data, initialState());
