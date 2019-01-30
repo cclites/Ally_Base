@@ -20,6 +20,7 @@ use App\Traits\IsUserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
 
 /**
  * App\Caregiver
@@ -124,7 +125,7 @@ use Packages\MetaData\HasOwnMetaData;
 class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHoldInterface, BelongsToChainsInterface
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains;
-    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates;
+    use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
 
     protected $table = 'caregivers';
     public $timestamps = false;
@@ -286,28 +287,6 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         $availability = $this->availability()->firstOrNew([]);
         $availability->fill($data);
         return $availability->save() ? $availability : false;
-    }
-
-    /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a caregiver that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
     }
 
     /**

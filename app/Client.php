@@ -20,6 +20,7 @@ use App\Traits\IsUserRole;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Packages\MetaData\HasOwnMetaData;
+use App\Traits\CanHaveEmptyEmail;
 
 /**
  * App\Client
@@ -200,7 +201,7 @@ use Packages\MetaData\HasOwnMetaData;
 class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface, ReconcilableInterface, HasPaymentHold, HasAllyFeeInterface
 {
     use IsUserRole, BelongsToOneBusiness, Notifiable;
-    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates;
+    use HasSSNAttribute, HasPaymentHoldTrait, HasAllyFeeTrait, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail;
 
     protected $table = 'clients';
     public $timestamps = false;
@@ -493,28 +494,6 @@ class Client extends AuditableModel implements UserRole, CanBeConfirmedInterface
     {
         $method = ($backup) ? $this->backupPayment : $this->defaultPayment;
         return $method;
-    }
-
-    /**
-     * Retrieve the fake email address for a caregiver that does not have an email address.
-     * This should always be a domain in our control that drops the emails to prevent leaking of sensitive information and bounces.
-     *
-     * @return string
-     */
-    public function getAutoEmail()
-    {
-        return $this->id . '@noemail.allyms.com';
-    }
-
-    /**
-     * Set the generated fake email address for a client that does not have an email address.
-     *
-     * @return $this
-     */
-    public function setAutoEmail()
-    {
-        $this->email = $this->getAutoEmail();
-        return $this;
     }
 
     /**
