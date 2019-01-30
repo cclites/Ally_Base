@@ -8,18 +8,36 @@
                 header-text-variant="white"
                 header-bg-variant="info"
         >
-            <div class="d-flex mb-3">
-                <b-btn variant="success" href="/business/communication/sms-other-replies" class="ml-auto">View Other Replies</b-btn>
+            <div class="d-flex mb-2">
+                <div class="f-1 d-flex align-items-baseline flex-col">
+                    <b-form-group class="form-inline mr-3">
+                        <date-picker ref="startDate"
+                                        v-model="start_date"
+                                        placeholder="Start Date">
+                        </date-picker> &nbsp;to&nbsp;
+                        <date-picker ref="endDate"
+                                        v-model="end_date"
+                                        placeholder="End Date">
+                        </date-picker>
+                    </b-form-group>
+                    <div>
+                        <b-btn variant="info" @click="fetch()" :disabled="busy">Generate</b-btn>
+                    </div>
+                </div>
+                <div class="ml-auto">
+                    <b-btn variant="success" href="/business/communication/sms-other-replies" class="ml-auto">View Other Replies</b-btn>
+                </div>
             </div>
 
             <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     :busy="busy"
+                :items="items"
+                :fields="fields"
+                :current-page="currentPage"
+                :per-page="perPage"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                :busy="busy"
+                empty-text="Select dates and press Generate"
             >
                 <template slot="message" scope="row">
                     {{ messagePreview(row.item.message) }}
@@ -47,15 +65,8 @@ export default {
 
     mixins: [FormatsDates, FormatsListData],
 
-    props: {
-        threads: {
-            type: Array,
-            default: [],
-        }
-    },
-
     data: () => ({
-        busy: true,
+        busy: false,
         items: [],
         perPage: 25,
         currentPage: 1,
@@ -92,6 +103,8 @@ export default {
                 class: 'hidden-print'
             },
         ],
+        start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
+        end_date: moment().format('MM/DD/YYYY'),
     }),
 
     computed: {
@@ -101,6 +114,19 @@ export default {
     },
 
     methods: {
+        fetch() {
+            this.busy = true;
+            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}`)
+                .then( ({ data }) => {
+                    this.items = data;
+                })
+                .catch(e => {
+                })
+                .finally(() => {
+                    this.busy = false;
+                })
+        },
+
         messagePreview(message) {
             if (message.length <= 70) {
                 return message;
@@ -112,11 +138,6 @@ export default {
         openThread(thread) {
             window.location = `/business/communication/sms-threads/${thread.id}`;
         }
-    },
-
-    mounted() {
-        this.items = this.threads;
-        this.busy = false;
     },
 }
 </script>

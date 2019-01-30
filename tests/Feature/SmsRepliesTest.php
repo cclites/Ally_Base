@@ -299,4 +299,52 @@ class SmsRepliesTest extends TestCase
         $this->assertCount(0, $thread->fresh()->replies);
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
     }
+
+    /** @test */
+    public function office_users_can_search_sms_threads_by_date()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread1 = $this->generateThread(['sent_at' => Carbon::now()->subDays(10)]);
+        $thread2 = $this->generateThread(['sent_at' => Carbon::now()->subDays(5)]);
+        $thread3 = $this->generateThread(['sent_at' => Carbon::now()->subDays(5)]);
+        $thread4 = $this->generateThread(['sent_at' => Carbon::now()->subDays(1)]);
+        $thread5 = $this->generateThread(['sent_at' => Carbon::now()->subDays(1)]);
+
+        $this->assertCount(5, SmsThread::all());
+
+        $start = Carbon::now()->subDays(7)->format('Y-m-d');
+        $end = Carbon::now()->format('Y-m-d');
+        $query = "?start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(4);
+
+        $start = Carbon::now()->subDays(2)->format('Y-m-d');
+        $end = Carbon::now()->format('Y-m-d');
+        $query = "?start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(2);
+
+        $start = Carbon::now()->subDays(11)->format('Y-m-d');
+        $end = Carbon::now()->subDays(8)->format('Y-m-d');
+        $query = "?start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(1);
+
+        $start = Carbon::now()->subDays(30)->format('Y-m-d');
+        $end = Carbon::now()->subDays(15)->format('Y-m-d');
+        $query = "?start_date=$start&end_date=$end";
+
+        $this->getJson(route('business.communication.sms-threads').$query)
+            ->assertStatus(200)
+            ->assertJsonCount(0);
+    }
 }

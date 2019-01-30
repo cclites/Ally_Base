@@ -58,6 +58,10 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      */
     protected $appends = ['unique_recipient_count'];
 
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+    
     /**
      * Get the business relation.
      *
@@ -100,6 +104,38 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     {
         return $this->hasMany(SmsThreadReply::class);
     }
+    
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+    
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+    
+    /**
+     * Gets shifts that are checked in between given given start and end dates.
+     * Automatically applies timezone transformation.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $start
+     * @param string $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeBetweenDates($query, $start, $end)
+    {
+        if (empty($start) || empty($end)) {
+            return $query;
+        }
+
+        $startDate = (new Carbon($start . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
+        return $query->whereBetween('sent_at', [$startDate, $endDate]);
+    }
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
 
     /**
      * Determine if the thread was flagged to accept replies
