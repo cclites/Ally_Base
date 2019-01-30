@@ -50,6 +50,17 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     protected $hidden = ['number'];
     protected $appends = ['last_four', 'expiration_date'];
 
+    /**
+     * Determine the credit card type based on the provider number
+     *
+     * @param string $number
+     * @return string|null
+     */
+    public static function getType($number)
+    {
+        return \Inacho\CreditCard::validCreditCard($number)['type'] ?: null;
+    }
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -66,6 +77,7 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     public function setNumberAttribute($value)
     {
         $this->attributes['number'] = Crypt::encrypt($value);
+        $this->attributes['type'] = self::getType($value);
     }
 
     public function getNumberAttribute()

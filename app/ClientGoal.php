@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * App\ClientGoal
  *
@@ -51,4 +53,14 @@ class ClientGoal extends AuditableModel
     {
         return $this->belongsToMany(Shift::class);
     }
+
+    ////////////////////////////////////
+    //// Query Scopes
+    ////////////////////////////////////
+
+    public function scopeTracked(Builder $builder, bool $areTracked = true)
+    {
+        $builder->where('track_goal_progress', $areTracked);
+    }
+
 }

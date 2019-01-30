@@ -17,7 +17,7 @@ $i = 0;
     DB::beginTransaction();
     $shifts->each(function(Shift $shift) {
 //        $time1 = microtime(true);
-        app(\App\Shifts\ShiftFlagManager::class)->generateFlags($shift);
+        $shift->flagManager()->generate();
 //        $time2 = microtime(true);
 //        printf("Shift ID: %d Time: %sms\n", $shift->id, round($time2 - $time1, 6) * 1000);
     });

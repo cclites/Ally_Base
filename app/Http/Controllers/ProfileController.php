@@ -65,7 +65,7 @@ class ProfileController extends Controller
                 'poa_phone' => 'nullable|string',
                 'poa_email' => 'nullable|string',
                 'poa_relationship' => 'nullable|string',
-                'receive_summary_email' => 'boolean',
+                'caregiver_1099' => 'boolean',
             ]);
             auth()->user()->role->update($client_data);
         }

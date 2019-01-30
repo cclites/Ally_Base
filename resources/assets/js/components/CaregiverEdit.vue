@@ -28,7 +28,7 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Title" label-for="title">
+                    <b-form-group label="Title" label-for="title" label-class="required">
                         <b-form-input
                                 id="title"
                                 name="title"
@@ -82,7 +82,7 @@
                         </b-row>
                         <input-help :form="form" field="email" text="Enter their email address or check the box if caregiver does not have an email."></input-help>
                     </b-form-group>
-                    <b-form-group label="Username" label-for="username">
+                    <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                             id="username"
                             name="username"

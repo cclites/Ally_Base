@@ -98,15 +98,14 @@
                             <label class="custom-control custom-checkbox">
                                 <input type="checkbox"
                                     class="custom-control-input"
-                                    name="receive_summary_email"
-                                    v-model="form.receive_summary_email"
+                                    name="caregiver_1099"
+                                    v-model="form.caregiver_1099"
                                     :true-value="1"
-                                    :false-value="0"
-                                    :disabled="authInactive">
+                                    :false-value="0">
                                 <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">Receive the weekly shift summary email</span>
+                                <span class="custom-control-description">Send 1099 to caregivers on the client’s behalf</span>
                             </label>
-                            <input-help :form="form" field="receive_summary_email" text=""></input-help>
+                            <input-help :form="form" field="caregiver_1099" text=""></input-help>
                         </div>
                     </b-col>
                 </b-row>
@@ -144,7 +143,7 @@
                     poa_phone: this.client.poa_phone,
                     poa_email: this.client.poa_email,
                     poa_relationship: this.client.poa_relationship,
-                    receive_summary_email: this.client.receive_summary_email,
+                    caregiver_1099: this.client.caregiver_1099
                 })
             }
         },

@@ -14,7 +14,7 @@ class OfficeUserController extends Controller
 {
     public function index(Business $business)
     {
-        return $business->users;
+        return $business->users->sortBy('name');
     }
 
     public function store(Request $request, Business $business)
