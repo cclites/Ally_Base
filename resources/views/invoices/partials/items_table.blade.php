@@ -48,8 +48,8 @@
             <tfoot>
             <tr>
                 <th colspan="4">Total</th>
-                <th>{{ $invoice->items->sum('total') }}</th>
-                <th>{{ $invoice->amount }}</th>
+                <th>{{ number_format($invoice->items->sum('total'), 2) }}</th>
+                <th>{{ number_format($invoice->amount, 2) }}</th>
             </tr>
             </tfoot>
         </table>

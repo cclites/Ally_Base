@@ -40,6 +40,7 @@
                 items: this.invoices,
                 fields: [
                     { key: 'created_at', label: 'Invoice Date', sortable: true },
+                    { key: 'name', label: 'Invoice #', sortable: true },
                     {
                         key: 'amount',
                         label: 'Amount',
