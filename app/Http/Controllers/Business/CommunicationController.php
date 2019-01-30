@@ -180,6 +180,8 @@ class CommunicationController extends Controller
         $this->authorize('read', $thread);
         $thread->load(['recipients', 'replies']);
 
+        $thread->unreadReplies()->update(['read_at' => Carbon::now()]);
+
         if (request()->wantsJson()) {
             return response()->json($thread);
         }

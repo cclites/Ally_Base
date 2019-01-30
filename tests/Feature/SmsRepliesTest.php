@@ -347,6 +347,7 @@ class SmsRepliesTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(0);
     }
+
     /** @test */
     public function office_users_can_filter_sms_threads_by_those_with_replies()
     {
@@ -369,6 +370,38 @@ class SmsRepliesTest extends TestCase
         $this->getJson(route('business.communication.sms-threads').'?json=1&reply_only=1')
             ->assertStatus(200)
             ->assertJsonCount(1);
+    }
 
+    /** @test */
+    public function when_an_office_user_views_a_thread_it_should_mark_all_replies_as_read()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread = $this->generateThread();
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        factory(SmsThreadReply::class, 3)->create(['sms_thread_id' => $thread->id]);
+        $this->assertEquals(3, $thread->fresh()->unread_replies_count);
+
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
+            ->assertStatus(200)
+            ->assertJsonCount(3, 'replies');
+
+        $this->assertEquals(0, $thread->fresh()->unread_replies_count);
+
+        factory(SmsThreadReply::class)->create(['sms_thread_id' => $thread->id]);
+        $this->assertEquals(1, $thread->fresh()->unread_replies_count);
+
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
+            ->assertStatus(200)
+            ->assertJsonCount(4, 'replies');
+
+        $this->assertEquals(0, $thread->fresh()->unread_replies_count);
     }
 }

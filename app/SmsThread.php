@@ -56,7 +56,7 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      *
      * @var array
      */
-    protected $appends = ['unique_recipient_count'];
+    protected $appends = ['unique_recipient_count', 'unread_replies_count'];
 
     // **********************************************************
     // RELATIONSHIPS
@@ -83,6 +83,31 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * Get the thread replies relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function replies()
+    {
+        return $this->hasMany(SmsThreadReply::class);
+    }
+
+    /**
+     * Get the unread thread replies relation.
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function unreadReplies()
+    {
+        return $this->hasMany(SmsThreadReply::class)
+            ->whereNull('read_at');
+    }
+    
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+    
+    /**
      * Get the thread recipients.
      *
      * @return Illuminate\Database\Eloquent\Relations\HasMany
@@ -96,19 +121,15 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
     }
 
     /**
-     * Get the thread replies relation.
+     * Get the number of unread replies.
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @return int
      */
-    public function replies()
+    public function getUnreadRepliesCountAttribute()
     {
-        return $this->hasMany(SmsThreadReply::class);
+        return $this->unreadReplies()->count();
     }
-    
-    // **********************************************************
-    // MUTATORS
-    // **********************************************************
-    
+
     // **********************************************************
     // QUERY SCOPES
     // **********************************************************

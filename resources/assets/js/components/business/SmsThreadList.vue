@@ -48,6 +48,10 @@
                 <template slot="recipients_count" scope="row">
                     {{ row.item.unique_recipient_count }} Users
                 </template>
+                <template slot="replies_count" scope="data">
+                    <span>{{ data.value }}</span>
+                    <span v-if="data.item.unread_replies_count > 0" class="ml-2 text-danger">New</span>
+                </template>
                 <template slot="sent_at" scope="row">
                     {{ formatDateTimeFromUTC(row.item.sent_at) }}
                 </template>
