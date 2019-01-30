@@ -11,11 +11,56 @@ function interpol_escape($value)
     return preg_replace('/({|}|&#123;|&#125;|&#x7b;|&#x7d;)(?=\S)/', '$1 ', $value);
 }
 
+/**
+ * Check to see if the user agent matches the Ally Mobile App
+ *
+ * @param null $agent
+ * @return bool
+ */
 function is_mobile_app($agent = null)
 {
     if (!$agent) $agent = request()->userAgent();
     $match = ' AllyMS Mobile ';
     return strpos($agent, $match) !== false;
+}
+
+/**
+ * Map a polymorphic type in the database to a class name
+ *
+ * @param string $dbType
+ * @return string|null  Class name
+ */
+function maps_to_class(string $dbType): ?string
+{
+    return strval(config("database.polymorphism.${dbType}")) ?: null;
+}
+
+/**
+ * Map a class name to a polymorphic type in the database
+ *
+ * @param string $className
+ * @return string|null  Polymorphic type mapping
+ */
+function maps_from_class(string $className): ?string
+{
+    $array = config("database.polymorphism");
+    return strval(array_search($className, $array)) ?: null;
+}
+
+/**
+ * Map a polymorphic relation in the database to a Model instance
+ *
+ * @param string $dbType
+ * @param $dbId
+ * @return \Illuminate\Database\Eloquent\Model|null
+ */
+function maps_to_model(string $dbType, $dbId): ?\Illuminate\Database\Eloquent\Model
+{
+    if ($class = maps_to_class($dbType)) {
+        return (new $class)->find($dbId);
+    }
+
+    return null;
 }
 
 function collection_only_values($collection, $values = []) {
