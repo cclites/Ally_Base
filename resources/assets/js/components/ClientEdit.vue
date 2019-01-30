@@ -469,6 +469,17 @@
         </b-modal>
 
         <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
+
+        <!-- Send client agreement confirmation modal -->
+        <confirm-modal ref="confirmSendAgreement"
+            title="Send Client Agreement"
+            yesButton="Send Agreement"
+        >
+            <div class="mb-3">
+                <strong>Send Client Agreement Email to {{ client.email }}?</strong>
+            </div>
+            <p>When you send this email, the user will be instructed to click on a private link to confirm their information and reset their password.</p>
+        </confirm-modal>
     </b-card>
 </template>
 
@@ -480,6 +491,7 @@
     import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     window.croppie = require('croppie');
+    import ConfirmationModal from "./modals/ConfirmationModal";
 
     export default {
         props: {
@@ -496,6 +508,7 @@
             ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
+            ConfirmationModal,
         },
 
         data() {
@@ -552,6 +565,7 @@
                 inactive_at: '',
                 showReferralModal: false,
                 caseManagers: [],
+                sendEmailModal: false,
             }
         },
 
@@ -613,14 +627,14 @@
             },
 
             sendConfirmation() {
-                let component = this;
-                let form = new Form();
-                form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
-                    .then(function(response) {
-                        component.lastStatusDate = moment.utc().format();
-                    });
+                this.$refs.confirmSendAgreement.confirm(() => {
+                    let form = new Form();
+                    form.post('/business/clients/' + this.client.id + '/send_confirmation_email')
+                        .then(function(response) {
+                            this.lastStatusDate = moment.utc().format();
+                        });
+                })
             }
-
         },
 
         computed: {
