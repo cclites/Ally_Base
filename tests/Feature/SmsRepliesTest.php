@@ -10,10 +10,11 @@ use App\SmsThread;
 use App\SmsThreadReply;
 use App\PhoneNumber;
 use Carbon\Carbon;
+use Tests\FakesTwilioWebhooks;
 
 class SmsRepliesTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, FakesTwilioWebhooks;
 
     public $client;
     public $caregiver;
@@ -48,45 +49,13 @@ class SmsRepliesTest extends TestCase
         ], $overrides));
     }
 
-    public function generateWebhook($to, $from, $message)
-    {
-        return [
-            'MessageSid' => str_random(34),
-            'AccountSid' => config('services.twilio.sid'),
-            'MessagingServiceSid' => str_random(34),
-            'From' => PhoneNumber::formatE164($from),
-            'To' => PhoneNumber::formatE164($to),
-            'Body' => $message,
-            'NumMedia' => 0,
-        ];
-    }
-
-    public function fakeWebook($to = null, $from = null, $message = null)
-    {
-        if (empty($to)) {
-            $to = config('services.twilio.default_number');
-        }
-
-        if (empty($from)) {
-            $from = $this->caregiver->phoneNumbers()->first()->number(false);
-        }
-
-        if (empty($message)) {
-            $message = str_random(100);
-        }
-
-        $data = $this->generateWebhook($to, $from, $message);
-        $this->post(route('twilio.incoming'), $data)
-            ->assertStatus(200);
-    }
-
     /** @test */
     public function twilio_webhook_must_contain_matching_account_sid()
     {
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '12017043960', 'test');
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '12019999999', 'test');
         $data['AccountSid'] = 'INVALID_SID';
 
-        $this->post(route('twilio.incoming'), $data)
+        $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(401);
     }
 
@@ -95,9 +64,9 @@ class SmsRepliesTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
-        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12017043960', 'test');
+        $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', 'test');
 
-        $this->post(route('twilio.incoming'), $data)
+        $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);
     }
 
@@ -130,7 +99,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $this->assertCount(1, SmsThreadReply::all());
     }
@@ -153,7 +122,7 @@ class SmsRepliesTest extends TestCase
             'number' => $caregiver2->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number, $this->caregiver->phoneNumbers()->first()->number(false));
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $reply = SmsThreadReply::first();
         $this->assertEquals($this->caregiver->id, $reply->user_id);
@@ -172,7 +141,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook('999999999');
+        $this->fakeWebhook('999999999', $this->caregiver);
 
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertNull(SmsThreadReply::first()->business_id);
@@ -188,8 +157,9 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
+        $this->assertCount(1, $thread->fresh()->replies);
         $this->assertEquals($thread->id, SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
     }
@@ -206,8 +176,9 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
+        $this->assertCount(0, $thread->fresh()->replies);
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
     }
@@ -224,7 +195,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
 
         $this->assertNull(SmsThreadReply::first()->sms_thread_id);
         $this->assertEquals($this->business->id, SmsThreadReply::first()->business_id);
@@ -260,7 +231,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
         $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
             ->assertStatus(200)
@@ -291,7 +262,7 @@ class SmsRepliesTest extends TestCase
     {
         $this->actingAs($this->officeUser->user);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
         $thread = $this->generateThread();
         $thread->recipients()->create([
@@ -299,7 +270,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->fakeWebook($this->business->outgoing_sms_number);
+        $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
         $this->assertCount(2, SmsThreadReply::all());
 
