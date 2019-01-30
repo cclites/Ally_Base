@@ -133,9 +133,9 @@ Route::group([
     Route::post('settings/bank-account/{type}', 'Business\SettingController@storeBankAccount')->name('settings.bank_accounts.update');
     Route::get('settings', 'Business\SettingController@index')->name('settings.index');
     Route::put('settings/{id}', 'Business\SettingController@update')->name('settings.update');
-    Route::get('settings/deactivation-reasons', 'DeactivationReasonController@index')->name('deactivation_reasons');
-    Route::post('settings/deactivation-reasons', 'DeactivationReasonController@store')->name('deactivation_reasons.store');
-    Route::delete('settings/deactivation-reasons/{reason}', 'DeactivationReasonController@destroy')->name('deactivation_reasons.destroy');
+    Route::get('settings/deactivation-reasons', 'Business\DeactivationReasonController@index')->name('deactivation_reasons');
+    Route::post('settings/deactivation-reasons', 'Business\DeactivationReasonController@store')->name('deactivation_reasons.store');
+    Route::delete('settings/deactivation-reasons/{reason}', 'Business\DeactivationReasonController@destroy')->name('deactivation_reasons.destroy');
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 

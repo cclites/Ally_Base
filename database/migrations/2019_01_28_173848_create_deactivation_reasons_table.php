@@ -16,9 +16,11 @@ class CreateDeactivationReasonsTable extends Migration
         Schema::create('deactivation_reasons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->unsignedInteger('business_id')->nullable();
+            $table->unsignedInteger('chain_id')->nullable();
             $table->string('type', 10)->index();
             $table->timestamps();
+
+            $table->foreign('chain_id')->references('id')->on('business_chains');
         });
 
         $this->seedFactoryReasonCodes();
@@ -31,6 +33,9 @@ class CreateDeactivationReasonsTable extends Migration
      */
     public function down()
     {
+        Schema::table('deactivation_reasons', function (Blueprint $table) {
+            $table->dropForeign(['chain_id']);
+        });
         Schema::dropIfExists('deactivation_reasons');
     }
 

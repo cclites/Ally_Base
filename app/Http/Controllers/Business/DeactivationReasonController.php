@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
 
 use App\DeactivationReason;
 use App\Responses\ErrorResponse;
@@ -8,22 +8,22 @@ use App\Responses\SuccessResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use App\User;
-use App\Business;
 
-class DeactivationReasonController extends Controller
+class DeactivationReasonController extends BaseController
 {
     /**
-     * Get a list of the current business's deactivation reasons.
+     * Get a list of the current business chain's deactivation reasons.
      *
      * @return \Illuminate\Htt\Response
+     * @throws \Exception
      */
     public function index()
     {
-        $business = activeBusiness();
+        $chain = $this->businessChain();
 
         return response()->json([
-            'client' => $business->clientDeactivationReasons,
-            'caregiver' => $business->caregiverDeactivationReasons,
+            'client' => $chain->clientDeactivationReasons,
+            'caregiver' => $chain->caregiverDeactivationReasons,
         ]);
     }
 
@@ -32,20 +32,18 @@ class DeactivationReasonController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
-     * @throws AuthorizationException
+     * @throws \Exception
      */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'business_id' => 'int|required',
             'type' => 'string|required',
             'name' => 'string|required'
         ]);
 
-        $business = Business::findOrFail($data['business_id']);
-        $this->authorize('update', $business);
+        $this->authorize('create', [DeactivationReason::class, $data]);
 
-        if ($reason = DeactivationReason::create($data)) {
+        if ($reason = $this->businessChain()->deactivationReasons()->create($data)) {
             return new SuccessResponse(ucfirst($data['type']) . ' Deactivation reason created.', $reason);
         }
 
@@ -61,11 +59,11 @@ class DeactivationReasonController extends Controller
      */
     public function destroy(DeactivationReason $reason)
     {
-        if (empty($reason->business_id)) {
+        if (empty($reason->chain_id)) {
             return new ErrorResponse(403, "You cannot remove factory deactivation reason codes.");
         }
 
-        $this->authorize('update', $reason->business);
+        $this->authorize('delete', $reason);
 
         if (User::where('deactivation_reason_id', $reason->id)->exists()) {
             return new ErrorResponse(403, "Could not remove the deactivation reason \"{$reason->name}\" because it is currently in use in the system.");

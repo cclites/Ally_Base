@@ -75,7 +75,6 @@
         },
 
         computed: {
-            ...mapGetters (['defaultBusiness'])
         },
 
         methods: {

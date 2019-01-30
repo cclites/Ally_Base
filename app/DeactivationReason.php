@@ -2,12 +2,12 @@
 
 namespace App;
 
-use App\Traits\BelongsToOneBusiness;
-use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToChainsInterface;
+use App\Traits\BelongsToOneChain;
 
-class DeactivationReason extends Model
+class DeactivationReason extends AuditableModel implements BelongsToChainsInterface
 {
-    use BelongsToOneBusiness;
+    use BelongsToOneChain;
 
     protected $guarded = ['id'];
 
@@ -25,19 +25,16 @@ class DeactivationReason extends Model
      */
     protected $appends = [];
 
+    /**
+     * The column to sort by default when using ordered().
+     *
+     * @var string
+     */
+    protected $orderedColumn = 'name';
+
     // **********************************************************
     // RELATIONSHIPS
     // **********************************************************
-
-    /**
-     * Get the owning business relation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-    */
-    public function business()
-    {
-        return $this->belongsTo(Business::class);
-    }
 
     // **********************************************************
     // MUTATORS
