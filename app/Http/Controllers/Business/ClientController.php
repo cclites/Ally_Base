@@ -359,6 +359,10 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
 
+        if ($client->hasNoEmail()) {
+            return new ErrorResponse(400, 'Client does not have an email address on file.');
+        }
+
         $client->sendConfirmationEmail();
         return new SuccessResponse('Email Sent to Client');
     }
