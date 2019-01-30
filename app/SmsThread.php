@@ -121,4 +121,19 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 
         return true;
     }
+    
+    /**
+     * Check if the thread was created with the given user as a recipient.
+     *
+     * @param string|null $user_id
+     * @return boolean
+     */
+    public function hasRecipient(?string $user_id = null) : bool 
+    {
+        if (empty($user_id)) {
+            return false;
+        }
+
+        return $this->recipients()->where('user_id', $user_id)->exists();
+    }
 }

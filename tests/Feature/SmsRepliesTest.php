@@ -279,4 +279,24 @@ class SmsRepliesTest extends TestCase
             ->assertJsonCount(1);
     }
 
+    /** @test */
+    public function caregivers_should_only_be_attached_to_threads_they_are_a_part_of()
+    {
+        $otherCaregiver = factory('App\Caregiver')->create();
+        $number = $otherCaregiver->user->addPhoneNumber('primary', '1 (999) 999-8888');
+        $number->update(['receives_sms' => 1]);
+        $this->business->chain->caregivers()->save($otherCaregiver);
+        
+        $thread = $this->generateThread(['sent_at' => Carbon::now()->subMinutes(30)]);
+
+        $thread->recipients()->create([
+            'user_id' => $this->caregiver->id,
+            'number' => $this->caregiver->phoneNumbers()->first()->national_number,
+        ]);
+
+        $this->fakeWebhook($this->business->outgoing_sms_number, $otherCaregiver);
+
+        $this->assertCount(0, $thread->fresh()->replies);
+        $this->assertNull(SmsThreadReply::first()->sms_thread_id);
+    }
 }
