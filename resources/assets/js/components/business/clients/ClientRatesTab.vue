@@ -74,7 +74,7 @@
         <div class="ml-auto mb-3">
             <h5>
                 <strong>Client Rates </strong>
-                <b-btn variant="info" @click="addRate()" class="ml-2">Add Rate</b-btn>
+                <b-btn variant="info" @click="rateWizardModal = true" class="ml-2">Add Rate</b-btn>
             </h5>
         </div>
 
@@ -247,14 +247,18 @@
                 <b-btn variant="info" @click="saveCaregiver()" :disabled="!caregiverForm.caregiver_id">Add Caregiver</b-btn>
             </div>
         </b-modal>
+
+        <client-rate-wizard v-model="rateWizardModal" :client="client" :caregivers="caregivers" :services="services" :payers="payers" @new-rate="addRate"></client-rate-wizard>
     </b-card>
 </template>
 
 <script>
-    import FormatsDates from "../../mixins/FormatsDates";
-    import RateFactory from "../../classes/RateFactory";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import RateFactory from "../../../classes/RateFactory";
+    import ClientRateWizard from "./ClientRateWizard";
 
     export default {
+        components: {ClientRateWizard},
         props: {
             'client': {},
             'rates': Array,
@@ -280,6 +284,7 @@
 
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
+                rateWizardModal: false,
 
                 excludeForm: new Form({
                     caregiver_id: "",
@@ -403,17 +408,17 @@
 
         methods: {
 
-            addRate() {
+            addRate(rateObject) {
                 this.items.push({
-                    service_id: null,
-                    payer_id: null,
-                    caregiver_id: null,
-                    effective_start: moment().format('MM/DD/YYYY'),
-                    effective_end: moment('9999-12-31').format('MM/DD/YYYY'),
-                    caregiver_hourly_rate: '0.00',
-                    caregiver_fixed_rate: '0.00',
-                    client_hourly_rate: '0.00',
-                    client_fixed_rate: '0.00',
+                    service_id: rateObject.service_id || null,
+                    payer_id: rateObject.payer_id || null,
+                    caregiver_id: rateObject.caregiver_id ||null,
+                    effective_start: rateObject.effective_start || moment().format('MM/DD/YYYY'),
+                    effective_end: rateObject.effective_end || moment('9999-12-31').format('MM/DD/YYYY'),
+                    caregiver_hourly_rate: rateObject.caregiver_hourly_rate || '0.00',
+                    caregiver_fixed_rate: rateObject.caregiver_fixed_rate || '0.00',
+                    client_hourly_rate: rateObject.client_hourly_rate || '0.00',
+                    client_fixed_rate: rateObject.client_fixed_rate || '0.00',
                 });
 
                 // Scroll to bottom of table

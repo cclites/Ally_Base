@@ -90,8 +90,8 @@
 </template>
 
 <script>
-    import FormatsDates from "../../mixins/FormatsDates";
-    import FormatsStrings from "../../mixins/FormatsStrings";
+    import FormatsDates from "../../../mixins/FormatsDates";
+    import FormatsStrings from "../../../mixins/FormatsStrings";
 
     export default {
         props: {
