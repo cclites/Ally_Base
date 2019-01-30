@@ -214,7 +214,7 @@ class SmsRepliesTest extends TestCase
 
         $this->assertCount(6, SmsThread::all());
 
-        $this->getJson(route('business.communication.sms-threads'))
+        $this->getJson(route('business.communication.sms-threads')."?json=1")
             ->assertStatus(200)
             ->assertJsonCount(5);
     }
@@ -233,7 +233,7 @@ class SmsRepliesTest extends TestCase
 
         $this->fakeWebhook($this->business->outgoing_sms_number, $this->caregiver);
     
-        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
             ->assertStatus(200)
             ->assertJsonFragment([
                 'id' => $thread->id,
@@ -253,7 +253,7 @@ class SmsRepliesTest extends TestCase
             'number' => $this->caregiver->phoneNumbers()->first()->national_number,
         ]);
 
-        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id]))
+        $this->getJson(route('business.communication.sms-threads.show', ['thread' => $thread->id])."?json=1")
             ->assertStatus(403);
     }
 
@@ -317,7 +317,7 @@ class SmsRepliesTest extends TestCase
 
         $start = Carbon::now()->subDays(7)->format('Y-m-d');
         $end = Carbon::now()->format('Y-m-d');
-        $query = "?start_date=$start&end_date=$end";
+        $query = "?json=1&start_date=$start&end_date=$end";
 
         $this->getJson(route('business.communication.sms-threads').$query)
             ->assertStatus(200)
@@ -325,7 +325,7 @@ class SmsRepliesTest extends TestCase
 
         $start = Carbon::now()->subDays(2)->format('Y-m-d');
         $end = Carbon::now()->format('Y-m-d');
-        $query = "?start_date=$start&end_date=$end";
+        $query = "?json=1&start_date=$start&end_date=$end";
 
         $this->getJson(route('business.communication.sms-threads').$query)
             ->assertStatus(200)
@@ -333,7 +333,7 @@ class SmsRepliesTest extends TestCase
 
         $start = Carbon::now()->subDays(11)->format('Y-m-d');
         $end = Carbon::now()->subDays(8)->format('Y-m-d');
-        $query = "?start_date=$start&end_date=$end";
+        $query = "?json=1&start_date=$start&end_date=$end";
 
         $this->getJson(route('business.communication.sms-threads').$query)
             ->assertStatus(200)
@@ -341,7 +341,7 @@ class SmsRepliesTest extends TestCase
 
         $start = Carbon::now()->subDays(30)->format('Y-m-d');
         $end = Carbon::now()->subDays(15)->format('Y-m-d');
-        $query = "?start_date=$start&end_date=$end";
+        $query = "?json=1&start_date=$start&end_date=$end";
 
         $this->getJson(route('business.communication.sms-threads').$query)
             ->assertStatus(200)
