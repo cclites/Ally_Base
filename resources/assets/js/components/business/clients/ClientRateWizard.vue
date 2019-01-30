@@ -1,5 +1,5 @@
 <template>
-    <b-modal title="New Client Rate Wizard"
+    <b-modal :title="defaultRate ? 'New Default Rate' : 'New Client Rate Wizard'"
              v-model="localValue"
              ref="rateWizardModal">
         <b-container fluid>
@@ -153,7 +153,7 @@
 
     export default {
         name: "ClientRateWizard",
-        props: ["value", "client", "caregivers", "services", "payers"],
+        props: ["value", "client", "caregivers", "services", "payers", "defaultRate"],
         data() {
             return initialState();
         },
@@ -188,13 +188,24 @@
                 return moment(this.rateObject.effective_start, 'MM/DD/YYYY', true).isValid()
                     && moment(this.rateObject.effective_end, 'MM/DD/YYYY', true).isValid()
             },
+            resetState() {
+                Object.assign(this.$data, initialState());
+            },
             closeModal() {
                 this.localValue = false;
-                Object.assign(this.$data, initialState());
+                this.resetState();
             },
             finish() {
                 this.$emit('new-rate', this.rateObject);
                 this.closeModal();
+            },
+        },
+        watch: {
+            defaultRate(val, old) {
+                if (val !== old) {
+                    this.resetState();
+                    this.step = val ? 4 : 1;
+                }
             }
         }
     }

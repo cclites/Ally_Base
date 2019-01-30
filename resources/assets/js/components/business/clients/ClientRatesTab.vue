@@ -74,7 +74,8 @@
         <div class="ml-auto mb-3">
             <h5>
                 <strong>Client Rates </strong>
-                <b-btn variant="info" @click="rateWizardModal = true" class="ml-2">Add Rate</b-btn>
+                <b-btn variant="info" @click="addRateWizard()" class="ml-2">Add Rate Wizard</b-btn>
+                <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn>
             </h5>
         </div>
 
@@ -248,7 +249,14 @@
             </div>
         </b-modal>
 
-        <client-rate-wizard v-model="rateWizardModal" :client="client" :caregivers="caregivers" :services="services" :payers="payers" @new-rate="addRate"></client-rate-wizard>
+        <client-rate-wizard v-model="rateWizardModal"
+                            :client="client"
+                            :caregivers="caregivers"
+                            :services="services"
+                            :payers="payers"
+                            :default-rate="defaultRateOnWizard"
+                            @new-rate="addRate">
+        </client-rate-wizard>
     </b-card>
 </template>
 
@@ -285,6 +293,7 @@
                 clientCaregiverModal: false,
                 clientExcludeCaregiverModal: false,
                 rateWizardModal: false,
+                defaultRateOnWizard: false,
 
                 excludeForm: new Form({
                     caregiver_id: "",
@@ -407,6 +416,11 @@
         },
 
         methods: {
+
+            addRateWizard(defaultRate=false) {
+                this.defaultRateOnWizard = defaultRate;
+                this.rateWizardModal = true;
+            },
 
             addRate(rateObject) {
                 this.items.push({
