@@ -450,11 +450,7 @@
             },
 
             caregivers() {
-                if (! this.form.client_id) {
-                    return [];
-                }
-
-                if (this.cgMode === 'all') {
+                if (! this.form.client_id || this.cgMode === 'all') {
                     return this.allCaregivers;
                 }
                 return this.clientCaregivers;
