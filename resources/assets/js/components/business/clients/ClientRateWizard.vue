@@ -103,7 +103,7 @@
                             <small>Enter the end of the date range.  If you are unsure, leave it at 12/31/9999 to remain in effect forever.</small>
                         </b-form-group>
 
-                        <small>Note: Once you press "Finish", you'll still have to save your changes in the Client Rates Table.  This makes sure you don't have any overlapping rates defined.</small>
+                        <!--<small>Note: Once you press "Finish", you'll still have to save your changes in the Client Rates Table.  This makes sure you don't have any overlapping rates defined.</small>-->
                     </template>
                 </b-col>
             </b-row>

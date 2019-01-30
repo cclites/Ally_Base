@@ -422,7 +422,7 @@
                 this.rateWizardModal = true;
             },
 
-            addRate(rateObject) {
+            addRate(rateObject={}) {
                 this.items.push({
                     service_id: rateObject.service_id || null,
                     payer_id: rateObject.payer_id || null,
@@ -434,6 +434,13 @@
                     client_hourly_rate: rateObject.client_hourly_rate || '0.00',
                     client_fixed_rate: rateObject.client_fixed_rate || '0.00',
                 });
+
+                console.log(rateObject);
+                if (rateObject.service_id !== undefined) {
+                    // If a rate object is passed, attempt to save the rate structure
+                    this.saveRates();
+                    this.defaultRateOnWizard = false;
+                }
 
                 // Scroll to bottom of table
                 $('html, body').animate({
