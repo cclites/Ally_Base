@@ -33,12 +33,12 @@ class ClientCaregiver implements Responsable
     }
 
     /**
-     * Create an HTTP response that represents the object.
+     * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
      */
-    public function toResponse($request)
+    public function toArray($request)
     {
         $caregiver = $this->caregiver;
         $client = $this->client;
@@ -78,6 +78,17 @@ class ClientCaregiver implements Responsable
             );
         }
 
-        return response($caregiver);
+        return $caregiver->toArray();
+    }
+
+    /**
+     * Create an HTTP response that represents the object.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function toResponse($request)
+    {
+        return response($this->toArray($request));
     }
 }

@@ -17,7 +17,7 @@ class ClientCaregiverController extends BaseController
         $this->authorize('read', $client);
 
         $caregivers = $client->caregivers()->ordered()->get()->map(function ($caregiver) use ($client) {
-            return (new ClientCaregiver($client, $caregiver))->toResponse(null);
+            return (new ClientCaregiver($client, $caregiver))->toArray(null);
         });
 
         return $caregivers->sortBy('name')->values()->all();
