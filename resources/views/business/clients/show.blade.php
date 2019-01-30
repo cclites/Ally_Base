@@ -59,9 +59,6 @@
             <a data-toggle="tab" role="tab" href="#contact_list" class="nav-link">Contacts</a>
         </li>
         <li class="nav-item">
-            <a data-toggle="tab" role="tab" href="#emergency_contacts" class="nav-link">Emergency Contacts</a>
-        </li>
-        <li class="nav-item">
             <a data-toggle="tab" role="tab" href="#ltci" class="nav-link">Insurance Data</a>
         </li>
         @if($client->client_type === 'medicaid')
@@ -92,7 +89,6 @@
                 <a class="dropdown-item" data-toggle="tab" href="#documents" role="tab">Documents</a>
                 <a class="dropdown-item" data-toggle="tab" href="#client_payment_history" role="tab">Payment History</a>
                 <a class="dropdown-item" data-toggle="tab" href="#contact_list" role="tab">Contacts</a>
-                <a class="dropdown-item" data-toggle="tab" href="#emergency_contacts" role="tab">Emergency Contacts</a>
                 <a class="dropdown-item" data-toggle="tab" href="#ltci" role="tab">Insurance Data</a>
             </div>
         </li>
@@ -178,8 +174,6 @@
         </div>
         <div class="tab-pane" id="contact_list" role="tabpanel">
             <contact-list-tab :emergency-contacts="{{ $client->user->emergencyContacts }}" :user-id="{{ $client->id }}"></contact-list-tab>
-        </div>
-        <div class="tab-pane" id="emergency_contacts" role="tabpanel">
             <emergency-contacts-tab :client="{{ $client }}"></emergency-contacts-tab>
         </div>
         <div class="tab-pane" id="ltci">

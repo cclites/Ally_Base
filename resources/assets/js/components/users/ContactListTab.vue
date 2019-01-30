@@ -3,7 +3,7 @@
             header-text-variant="white">
         <div slot="header">
             <b-row align-h="between">
-                <b-col>Contacts</b-col>
+                <b-col>Emergency Contacts</b-col>
                 <b-col>
                     <b-btn @click="addingNew = true" class="pull-right" :disabled="addingNew || authInactive">New Contact</b-btn>
                 </b-col>

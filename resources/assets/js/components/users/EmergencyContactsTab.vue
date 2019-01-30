@@ -1,10 +1,9 @@
 <template>
-    <b-card header="Emergency Contacts"
+    <b-card header="Other Contacts"
         header-bg-variant="info"
         header-text-variant="white"
         >
-        <form @submit.prevent="saveProfile()" @keydown="form.clearError($event.target.name)">
-
+        <form @submit.prevent="save()" @keydown="form.clearError($event.target.name)">
             <b-row>
                 <b-col>
                     <p class="h6 text-primary">Power of Attorney</p>
@@ -69,7 +68,7 @@
 
             <b-row>
                 <b-col lg="12">
-                    <b-button variant="success" type="submit">Save Emergency Contact</b-button>
+                    <b-button variant="success" type="submit">Save Contacts</b-button>
                 </b-col>
             </b-row>
         </form>
@@ -102,20 +101,11 @@
             }
         },
 
-        mounted() {
-            
-        },
-
         methods: {
-            async saveProfile() {
-                let response = await this.form.patch(`/business/clients/${this.client.id}/emergency-contact`)
+            async save() {
+                let response = await this.form.patch(`/business/clients/${this.client.id}/other-contacts`)
             },
         },
-
-        computed: {
-
-        }
-
     }
 </script>
 

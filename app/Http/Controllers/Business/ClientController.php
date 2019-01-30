@@ -411,13 +411,13 @@ class ClientController extends BaseController
         }
     }
 
-    public function emergencyContact(UpdateClientPOAContactRequest $request, Client $client)
+    public function updateContacts(UpdateClientPOAContactRequest $request, Client $client)
     {
         $this->authorize('update', $client);
 
         $client->update($request->validated());
 
-        return new SuccessResponse('Client emergency contact updated.');
+        return new SuccessResponse('Client contacts updated.');
     }
 
     public function preferences(UpdateClientPreferencesRequest $request, Client $client)
