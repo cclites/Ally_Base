@@ -102,11 +102,11 @@ export default {
 
     methods: {
         messagePreview(message) {
-            if (message.length <= 20) {
+            if (message.length <= 70) {
                 return message;
             }
 
-            return message.substr(0, 20) + '...';
+            return message.substr(0, 70) + '...';
         },
 
         openThread(thread) {
