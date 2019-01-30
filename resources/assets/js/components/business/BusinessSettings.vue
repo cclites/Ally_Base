@@ -128,16 +128,6 @@
                         </b-col>
                     </b-row>
                     <b-row>
-                        <b-col lg="6">
-                            <div class="mb-2">Reason codes when deactivating clients</div>
-                            <deactivation-reason-manager v-if="business" :business="business" type="client"></deactivation-reason-manager>
-                        </b-col>
-                        <b-col lg="6">
-                            <div class="mb-2">Reason codes when deactivating caregivers</div>
-                            <deactivation-reason-manager v-if="business" :business="business" type="caregiver"></deactivation-reason-manager>
-                        </b-col>
-                    </b-row>
-                    <b-row>
                         <b-col>
                             <hr />
                             <b-btn @click="update" variant="info" size="lg">
@@ -469,6 +459,19 @@
                 <b-tab title="Custom fields" href="#custom-fields">
                     <custom-field-list />
                 </b-tab>
+                <b-tab title="Deactivation Reasons" href="#deactivation-reasons">
+                    <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
+                    <b-row>
+                        <b-col lg="6">
+                            <h3>Client Reason Codes</h3>
+                            <deactivation-reason-manager type="client"></deactivation-reason-manager>
+                        </b-col>
+                        <b-col lg="6">
+                            <h3>Caregiver Reason Codes</h3>
+                            <deactivation-reason-manager type="caregiver"></deactivation-reason-manager>
+                        </b-col>
+                    </b-row>
+                </b-tab>
             </b-tabs>
         </b-card>
     </div>
@@ -510,14 +513,21 @@
                 },
                 signatureOption: null,
                 tabIndex: 0,
-                tabs: ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields'],
             }
         },
 
         computed: {
             business() {
                 return this.$store.getters.getBusiness(this.businessId) || ""
-            }
+            },
+            
+            tabs() {
+                if (this.business.type == 'agency') {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#payroll', '#shift-confirmations', '#custom-fields', '#deactivation-reasons'];
+                } else {
+                    return ['#system', '#phone', '#medicaid', '#questions', '#shift-confirmations', '#custom-fields', '#deactivation-reasons'];
+                }
+            },
         },
 
         mounted() {
