@@ -20,6 +20,9 @@
                                         placeholder="End Date">
                         </date-picker>
                     </b-form-group>
+                    <div class="form-check mb-3">
+                        <b-form-checkbox v-model="repliesOnly" value="1" unchecked-value="0">Show only threads with replies</b-form-checkbox>
+                    </div>
                     <div>
                         <b-btn variant="info" @click="fetch()" :disabled="busy">Generate</b-btn>
                     </div>
@@ -105,6 +108,7 @@ export default {
         ],
         start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
         end_date: moment().format('MM/DD/YYYY'),
+        repliesOnly: 0,
     }),
 
     computed: {
@@ -116,7 +120,7 @@ export default {
     methods: {
         fetch() {
             this.busy = true;
-            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}`)
+            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}`)
                 .then( ({ data }) => {
                     this.items = data;
                 })

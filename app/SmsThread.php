@@ -133,6 +133,22 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
         return $query->whereBetween('sent_at', [$startDate, $endDate]);
     }
 
+    /**
+     * Get the threads that have replies.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWithReplies($query, bool $onOff = false)
+    {
+        if ($onOff) {
+            return $query->whereHas('replies', function ($q) {
+                $q->whereNotNull('id');
+            });
+        }
+
+        return $query;
+    }
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************

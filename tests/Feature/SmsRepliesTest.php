@@ -347,4 +347,28 @@ class SmsRepliesTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(0);
     }
+    /** @test */
+    public function office_users_can_filter_sms_threads_by_those_with_replies()
+    {
+        $this->withoutExceptionHandling();
+
+        $this->actingAs($this->officeUser->user);
+
+        $thread1 = $this->generateThread();
+        $thread2 = $this->generateThread();
+        $thread3 = $this->generateThread();
+
+        $this->assertCount(3, SmsThread::all());
+
+        factory(SmsThreadReply::class)->create(['sms_thread_id' => $thread1->id]);
+
+        $this->getJson(route('business.communication.sms-threads').'?json=1&reply_only=0')
+            ->assertStatus(200)
+            ->assertJsonCount(3);
+
+        $this->getJson(route('business.communication.sms-threads').'?json=1&reply_only=1')
+            ->assertStatus(200)
+            ->assertJsonCount(1);
+
+    }
 }
