@@ -2,6 +2,8 @@
 namespace App\Billing;
 
 use App\AuditableModel;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Exceptions\PaymentMethodError;
 use App\Business;
 use App\Businesses\Timezone;
 use App\Caregiver;
@@ -9,6 +11,7 @@ use App\Client;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Billing\Payment
@@ -107,6 +110,11 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(GatewayTransaction::class, 'transaction_id');
     }
 
+    public function paymentMethod()
+    {
+        return $this->morphTo('payment_method');
+    }
+
     ////////////////////////////////////
     //// Mutators
     ////////////////////////////////////
@@ -169,6 +177,21 @@ class Payment extends AuditableModel implements BelongsToBusinessesInterface
     function getAmountAvailable(): float
     {
         return subtract($this->amount, $this->getAmountApplied());
+    }
+
+    /**
+     * Associate the corresponding payment method with this payment (Note: this does not save the payment method)
+     *
+     * @param \App\Billing\Contracts\ChargeableInterface $paymentMethod
+     * @throws \App\Billing\Exceptions\PaymentMethodError
+     */
+    function setPaymentMethod(ChargeableInterface $paymentMethod)
+    {
+        if ($paymentMethod instanceof Model) {
+            $this->paymentMethod()->associate($paymentMethod);
+        } else {
+            throw new PaymentMethodError("Unable to assign a non-model chargeable. Consult Payment::associateMethod");
+        }
     }
 
 }

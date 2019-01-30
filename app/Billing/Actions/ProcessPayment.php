@@ -18,7 +18,6 @@ class ProcessPayment
     protected $allyFee = null;
 
     /**
-     * @param \App\Billing\Payer $payer
      * @param \App\Billing\Payments\Contracts\PaymentMethodStrategy $strategy
      * @param float $amount
      * @param string $currency
@@ -26,21 +25,10 @@ class ProcessPayment
      * @throws \App\Billing\Exceptions\PaymentMethodDeclined
      * @throws \App\Billing\Exceptions\PaymentMethodError
      */
-    function charge(Payer $payer, ?PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
+    function charge(PaymentMethodStrategy $strategy, float $amount, string $currency = 'USD'): Payment
     {
         if ($amount <= 0)  {
             throw new PaymentAmountError("The payment amount cannot be less than $0");
-        }
-
-        if ($payer->isPrivatePay()) {
-            $client = $payer->getPrivatePayer();
-            if (!$client) {
-                throw new PayerAssignmentError("The private payer does not have a client record attached.");
-            }
-        }
-
-        if (!$strategy) {
-            $strategy = $payer->getPaymentMethod()->getPaymentStrategy();
         }
 
         if ($transaction = $strategy->charge($amount, $currency)) {
@@ -48,14 +36,19 @@ class ProcessPayment
                 throw new PaymentMethodDeclined();
             }
 
-            return Payment::create([
-                'payer_id' => $payer,
+            $payment = new Payment([
                 'client_id' => $client->id ?? null,
                 'amount' => $transaction->amount,
+                'payment_type' => $strategy->getPaymentType(),
                 'system_allotment' => $this->getAllyFee($strategy, $amount),
                 'transaction_id' => $transaction->id,
                 'success' => $transaction->success,
             ]);
+
+            $payment->setPaymentMethod($strategy->getPaymentMethod());
+            $payment->save();
+
+            return $payment;
         }
 
         throw new PaymentMethodError();

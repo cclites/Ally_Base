@@ -49,4 +49,9 @@ class BankAccountPayment implements PaymentMethodStrategy
     {
         return $this->account;
     }
+
+    public function getPaymentType(): string
+    {
+        return 'ACH';
+    }
 }

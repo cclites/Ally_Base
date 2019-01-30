@@ -52,4 +52,9 @@ class CreditCardPayment implements PaymentMethodStrategy
     {
         return $this->card;
     }
+
+    public function getPaymentType(): string
+    {
+        return $this->card->type === 'amex' ? 'AMEX' : 'CC';
+    }
 }
