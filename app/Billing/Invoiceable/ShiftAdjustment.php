@@ -230,16 +230,6 @@ class ShiftAdjustment extends InvoiceableModel
     }
 
     /**
-     * Get the assigned payer ID (payers.id, not client_payers.id)
-     *
-     * @return int|null
-     */
-    public function getPayerId(): ?int
-    {
-        return $this->getClientPayer()->id ?? null;
-    }
-
-    /**
      * Add an amount that has been invoiced to a payer
      *
      * @param \App\Billing\ClientInvoiceItem $invoiceItem

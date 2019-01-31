@@ -324,7 +324,7 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 
         // Calculate data from existing invoice items in database
         $currentSum = ClientInvoiceItem::whereHas('invoice', function ($invoice) {
-            $invoice->where('client_id', $this->client_id)->where('payer_id', $this->payer_id);
+            $invoice->where('client_id', $this->client_id)->where('client_payer_id', $this->id);
         })
             ->whereBetween('date', [$dateRange->start->toDateTimeString(), $dateRange->end->toDateTimeString()])
             ->sum('amount_due') ?? 0;

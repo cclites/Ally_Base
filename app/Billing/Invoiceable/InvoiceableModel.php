@@ -81,6 +81,16 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     }
 
     /**
+     * Get the assigned payer ID (payers.id, not client_payers.id)
+     *
+     * @return int|null
+     */
+    public function getPayerId(): ?int
+    {
+        return $this->getClientPayer()->payer_id ?? null;
+    }
+
+    /**
      * Return the ally fee per unit for this invoiceable item.
      * If this returns null, abort deposit invoices.  Return 0.0 for no ally fee.
      *

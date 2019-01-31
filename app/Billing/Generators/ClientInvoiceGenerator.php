@@ -73,17 +73,17 @@ class ClientInvoiceGenerator extends BaseInvoiceGenerator
      */
     public function getInvoice(Client $client, ClientPayer $clientPayer): ClientInvoice
     {
-        $payerId = $clientPayer->payer_id;
+        $clientPayerId = $clientPayer->id;
 
-        if (!isset($this->invoices[$payerId])) {
-            $this->invoices[$payerId] = ClientInvoice::create([
+        if (!isset($this->invoices[$clientPayerId])) {
+            $this->invoices[$clientPayerId] = ClientInvoice::create([
                 'name' => $this->getInvoiceName($client),
                 'client_id' => $clientPayer->client_id,
-                'payer_id' => $payerId,
+                'client_payer_id' => $clientPayerId,
             ]);
         }
 
-        return $this->invoices[$payerId];
+        return $this->invoices[$clientPayerId];
     }
 
     /**

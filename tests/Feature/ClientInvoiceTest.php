@@ -77,8 +77,8 @@ class ClientInvoiceTest extends TestCase
         $serviceB = $this->createService(60.0, '2019-01-01');
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = $invoices->where('client_payer_id', $payerB->id)->first();
 
         $this->assertInstanceOf(ClientInvoice::class, $payerAInvoice);
         $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
@@ -105,10 +105,10 @@ class ClientInvoiceTest extends TestCase
         $this->createService(100.0);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = $invoices->where('payer_id', $payerB->payer_id)->first();
-        $payerCInvoice = $invoices->where('payer_id', $payerC->payer_id)->first();
-        $payerDInvoice = $invoices->where('payer_id', $payerD->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = $invoices->where('client_payer_id', $payerB->id)->first();
+        $payerCInvoice = $invoices->where('client_payer_id', $payerC->id)->first();
+        $payerDInvoice = $invoices->where('client_payer_id', $payerD->id)->first();
 
         $this->assertEquals(50.0, $payerAInvoice->getAmountDue());
         $this->assertEquals(20.0, $payerBInvoice->getAmountDue());
@@ -130,11 +130,11 @@ class ClientInvoiceTest extends TestCase
         $payer = $this->createAllowancePayer(100.0);
         $this->createBalancePayer();
 
-        $this->createService(150.00, '2019-01-15', $payer->payer_id);
-        $this->createCreditAdjustment(50.00, '2019-01-15', $payer->payer_id);
+        $this->createService(150.00, '2019-01-15', $payer->id);
+        $this->createCreditAdjustment(50.00, '2019-01-15', $payer->id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerInvoice = $invoices->where('payer_id', $payer->payer_id)->first();
+        $payerInvoice = $invoices->where('client_payer_id', $payer->id)->first();
 
         $this->assertEquals(100.0, $payerInvoice->getAmountDue());
         $this->assertCount(1, $invoices, 'Only one invoice should have been generated since the service was assigned to a payer.');
@@ -154,10 +154,10 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(100.00);
         $payerB = $this->createBalancePayer();
         $serviceA = $this->createService(70.00, '2019-01-15');
-        $serviceB = $this->createService(80.00, '2019-01-17', $payerA->payer_id);
+        $serviceB = $this->createService(80.00, '2019-01-17', $payerA->id);
 
         $invoices = collect($this->invoicer->generateAll($this->client));
-        $payerAInvoice = $invoices->where('payer_id', $payerA->payer_id)->first();
+        $payerAInvoice = $invoices->where('client_payer_id', $payerA->id)->first();
         $itemB = $payerAInvoice->items->where('invoiceable_id', $serviceB->id)->first();
         $itemA = $payerAInvoice->items->where('invoiceable_id', $serviceA->id)->first();
 
@@ -179,10 +179,11 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(50.00);
         $payerB = $this->createBalancePayer();
 
-        $serviceA = $this->createService(30.00, '2019-01-15', $payerA->payer_id);
-        $serviceB = $this->createService(30.00, '2019-01-17', $payerA->payer_id);
+        $serviceA = $this->createService(30.00, '2019-01-15', $payerA->id);
+        $serviceB = $this->createService(30.00, '2019-01-17', $payerA->id);
 
-        $this->invoicer->generateAll($this->client);
+        $invoices = $this->invoicer->generateAll($this->client);
+        dump(null);
     }
 
     /**
@@ -203,8 +204,8 @@ class ClientInvoiceTest extends TestCase
         $shift = $this->createShiftWithExpense(100);
 
         $invoices = $this->invoicer->generateAll($this->client);
-        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = collect($invoices)->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = collect($invoices)->where('client_payer_id', $payerB->id)->first();
         $shiftExpense = $payerAInvoice->items[0]->invoiceable;
 
         $this->assertEquals(82.40, $payerAInvoice->getAmount());
@@ -230,8 +231,8 @@ class ClientInvoiceTest extends TestCase
         $shift = $this->createShiftWithExpense(100);
 
         $invoices = $this->invoicer->generateAll($this->client);
-        $payerAInvoice = collect($invoices)->where('payer_id', $payerA->payer_id)->first();
-        $payerBInvoice = collect($invoices)->where('payer_id', $payerB->payer_id)->first();
+        $payerAInvoice = collect($invoices)->where('client_payer_id', $payerA->id)->first();
+        $payerBInvoice = collect($invoices)->where('client_payer_id', $payerB->id)->first();
         $shiftExpense = $payerAInvoice->items[0]->invoiceable;
 
         $this->assertEquals(80.00, $payerAInvoice->getAmount());

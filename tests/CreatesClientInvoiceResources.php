@@ -68,11 +68,11 @@ trait CreatesClientInvoiceResources
         return $clientPayer;
     }
 
-    private function createService(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
+    private function createService(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'payer_id' => null,
+            'client_payer_id' => null,
             'service_id' => null,
             'checked_in_time' => $date . ' 12:00:00',
             'status' => Shift::WAITING_FOR_INVOICE,
@@ -80,7 +80,7 @@ trait CreatesClientInvoiceResources
 
         $shiftService = factory(ShiftService::class)->create([
             'shift_id' => $shift->id,
-            'payer_id' => $payerId,
+            'client_payer_id' => $clientPayerId,
             'duration' => 1,
             'client_rate' => $amount,
             'caregiver_rate' => round($amount * .75, 2),
@@ -90,11 +90,11 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
-    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $payerId = null): InvoiceableInterface
+    private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
             'client_id' => $this->client->id,
-            'payer_id' => $payerId,
+            'client_payer_id' => $clientPayerId,
             'service_id' => null,
             'caregiver_rate' => 0,
             'client_rate' => 0,
@@ -106,13 +106,13 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
-    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $payerId = null)
+    private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null)
     {
         $adjustment = factory(ShiftAdjustment::class)->create([
             'client_id' => $this->client->id,
+            'client_payer_id' => $clientPayerId,
             'client_rate' => -$amount,
             'units' => 1,
-            'payer_id' => $payerId,
             'status' => 'WAITING_FOR_INVOICE',
             'created_at' => $date . ' 00:00:00',
             'updated_at' => $date . ' 00:00:00',
