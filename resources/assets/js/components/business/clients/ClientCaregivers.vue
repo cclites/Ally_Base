@@ -53,7 +53,7 @@
                 </thead>
                 <tbody>
                 <template v-for="(item,index) in items">
-                    <tr>
+                    <tr :key="index">
                         <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
                         <td :class="getTdClass(index)">Hourly</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.caregiver_rate) }}</td>
@@ -61,18 +61,11 @@
                         <td :class="getTdClass(index)" v-else>{{ moneyFormat(item.rates.hourly.provider_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.total_rate) }}</td>
-                        <!-- <td class="daily">{{ item.pivot.caregiver_fixed_rate }}</td> -->
-                        <!-- <td class="daily">{{ item.pivot.provider_fixed_fee }}</td> -->
-                        <!--<td :class=getTdClass(index)>{{ item.pivot.ally_daily_fee }}</td>-->
-                        <!--<td class="daily">{{ item.pivot.total_daily_fee }}</td>-->
                         <td rowspan="2">
                             <b-btn size="sm" @click="editCaregiver(item)">Edit</b-btn>
-                            <!--<b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(item.id)">-->
-                                <!--<i class="fa fa-times"></i>-->
-                            <!--</b-btn>-->
                         </td>
                     </tr>
-                    <tr v-if="item.rates.fixed.total_rate > 0">
+                    <tr v-if="item.rates.fixed.total_rate > 0" :key="index">
                         <td :class="getTdClass(index)">Daily</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.caregiver_rate) }}</td>
                         <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.fixed.client_rate) }}</td>
@@ -80,7 +73,7 @@
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.ally_fee) }}</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.fixed.total_rate) }}</td>
                     </tr>
-                    <tr v-else>
+                    <tr v-else :key="index">
                         <td :class="getTdClass(index)">Daily</td>
                         <td colspan="4" :class="getTdClass(index)"></td>
                     </tr>
@@ -90,7 +83,7 @@
             <hr>
             <div class="h6">Excluded Caregivers</div>
             <table class="table table-bordered excluded-caregivers" v-if="excludedCaregivers.length">
-                <tr v-for="exGiver in excludedCaregivers">
+                <tr v-for="exGiver in excludedCaregivers" :key="exGiver.id">
                     <td class="sized">
                         {{ exGiver.caregiver.name }}
                     </td>
@@ -511,7 +504,6 @@
                     .then(response => {
                         this.excludedCaregivers = response.data;
                     }).catch(error => {
-                        console.error(error.response);
                     });
             },
 
@@ -539,12 +531,10 @@
                         this.fetchCaregivers();
                     }).catch(error => {
                     this.loading = '';
-                        console.error(error.response);
                     });
             },
 
             removeAssignedCaregiver(caregiver_id) {
-                console.log('Removing caregiver from client.');
                 let form = new Form({caregiver_id: caregiver_id});
                 form.post('/business/clients/'+this.client_id+'/detach-caregiver')
                     .then(() => {
@@ -586,7 +576,6 @@
                 if (isNaN(cgRate) || isNaN(totalRate)) {
                     return;
                 }
-                console.log(totalRate, 1+parseFloat(this.allyRate), cgRate);
                 let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
                 this.form.provider_hourly_fee = computed.toFixed(2);
                 this.highlightInput('#provider_hourly_fee');
@@ -623,7 +612,6 @@
                 if (isNaN(cgRate) || isNaN(totalRate)) {
                     return;
                 }
-                console.log(totalRate, 1+parseFloat(this.allyRate), cgRate);
                 let computed = totalRate / (1+parseFloat(this.allyRate)) - cgRate;
                 this.form.provider_fixed_fee = computed.toFixed(2);
                 this.highlightInput('#provider_fixed_fee');
