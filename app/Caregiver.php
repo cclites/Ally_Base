@@ -504,6 +504,49 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     ////////////////////////////////////
 
     /**
+     * Get the date of the last shift between the Caregiver and
+     * the given Client.
+     *
+     * @param Client $client
+     * @return null|string
+     */
+    public function getLastServiceDate(Client $client) : ?string
+    {
+        $lastShift = Shift::forCaregiver($this->id)
+            ->forClient($client->id)
+            ->latest()
+            ->first();
+        
+        if (empty($lastShift)) {
+            return null;
+        }
+
+        return optional($lastShift->checked_in_time)->format('Y-m-d');
+    }
+
+    /**
+     * Get the total number of hours the Caregiver has worked for
+     * the given Client.
+     *
+     * @param Client $client
+     * @return integer
+     */
+    public function getTotalClockedHours(Client $client) : int
+    {
+        $sum = Shift::forCaregiver($this->id)
+            ->forClient($client->id)
+            ->whereNotNull('checked_out_time')
+            ->selectRaw('SUM(hours) as hours')
+            ->first();
+        
+        if (empty($sum)) {
+            return 0;
+        }
+
+        return $sum->hours ? $sum->hours : 0;
+    }
+
+    /**
      * A query scope for filtering results by related business IDs
      * Note: Use forAuthorizedBusinesses in controllers
      *

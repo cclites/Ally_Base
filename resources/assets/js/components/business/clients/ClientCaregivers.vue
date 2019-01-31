@@ -42,6 +42,9 @@
                 <thead>
                 <tr>
                     <th>Referred Caregiver</th>
+                    <th>Last Service</th>
+                    <th>Hours Worked</th>
+                    <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Rate Type</th>
                     <th :class="getTdClass(1)">Caregiver Rate</th>
                     <th :class="getTdClass(1)" v-if="hasClientRateStructure(business)">Client Rate</th>
@@ -55,6 +58,8 @@
                 <template v-for="(item,index) in items">
                     <tr :key="index">
                         <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
+                        <td rowspan="2">{{ item.last_service_date ? formatDateFromUTC(item.last_service_date) : 'N/A' }}</td>
+                        <td rowspan="2">0</td>
                         <td :class="getTdClass(index)">Hourly</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.caregiver_rate) }}</td>
                         <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.hourly.client_rate) }}</td>
@@ -324,6 +329,7 @@
 
 <script>
     import FormatsNumbers from '../../../mixins/FormatsNumbers'
+    import FormatsDates from '../../../mixins/FormatsDates'
     import RateCodes from "../../../mixins/RateCodes";
     import RateCodeModal from "../rate_codes/RateCodeModal";
     import ClientCaregiverRateCodeModal from "./ClientCaregiverRateCodeModal";
@@ -341,7 +347,7 @@
 
         components: {ClientCaregiverRateCodeModal, RateCodeModal},
 
-        mixins: [FormatsNumbers, RateCodes],
+        mixins: [FormatsNumbers, RateCodes, FormatsDates],
 
         data() {
             return {
