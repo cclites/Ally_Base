@@ -33,6 +33,35 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
         'caregiver_id' => 'int',
     ];
 
+    /**
+     * Get the next invoice name for a client
+     *
+     * @param int $caregiverId
+     * @return string
+     */
+    public static function getNextName(int $caregiverId)
+    {
+        $lastName = self::where('caregiver_id', $caregiverId)
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->value('name');
+
+
+        $minId = 1000;
+        if (!$lastName) {
+            $nextId = $minId;
+        } else {
+            $nextId = (int) substr($lastName, strpos($lastName, '-') + 1) + 1;
+        }
+
+        if ($nextId < $minId) {
+            $nextId = $minId;
+        }
+
+        return "C${caregiverId}-${nextId}";
+    }
+
+
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////

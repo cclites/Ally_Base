@@ -3,6 +3,7 @@ namespace App\Billing\Invoiceable;
 
 use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
+use App\Billing\Invoiceable\Traits\BelongsToThroughShift;
 use App\Business;
 use App\Caregiver;
 use App\Client;
@@ -15,6 +16,8 @@ use Illuminate\Support\Collection;
  */
 class ShiftExpense extends InvoiceableModel
 {
+    use BelongsToThroughShift;
+
     protected $guarded = ['id'];
     protected $casts = [
         'shift_id' => 'int',
@@ -48,17 +51,6 @@ class ShiftExpense extends InvoiceableModel
     }
 
     /**
-     * Collect all applicable invoiceables of this type eligible for the caregiver deposit
-     *
-     * @param \App\Caregiver $caregiver
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
-     */
-    public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
-    {
-        // TODO: Implement getItemsForCaregiverDeposit() method.
-    }
-
-    /**
      * Collect all applicable invoiceables of this type eligible for the provider deposit
      *
      * @param \App\Business $business
@@ -66,7 +58,7 @@ class ShiftExpense extends InvoiceableModel
      */
     public function getItemsForBusinessDeposit(Business $business): Collection
     {
-        // TODO: Implement getItemsForBusinessDeposit() method.
+        return new Collection([]); // Shift Expenses are only paid out to caregivers
     }
 
     /**

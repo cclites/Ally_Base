@@ -34,6 +34,34 @@ class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
         'business_id' => 'int',
     ];
 
+    /**
+     * Get the next invoice name for a client
+     *
+     * @param int $businessId
+     * @return string
+     */
+    public static function getNextName(int $businessId)
+    {
+        $lastName = self::where('business_id', $businessId)
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->value('name');
+
+
+        $minId = 1000;
+        if (!$lastName) {
+            $nextId = $minId;
+        } else {
+            $nextId = (int) substr($lastName, strpos($lastName, '-') + 1) + 1;
+        }
+
+        if ($nextId < $minId) {
+            $nextId = $minId;
+        }
+
+        return "B${businessId}-${nextId}";
+    }
+
     ////////////////////////////////////
     //// Relationship Methods
     ////////////////////////////////////

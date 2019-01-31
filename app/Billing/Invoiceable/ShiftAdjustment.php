@@ -7,6 +7,8 @@ use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Shift;
+use App\Traits\BelongsToOneBusiness;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -42,6 +44,8 @@ use Illuminate\Support\Collection;
  */
 class ShiftAdjustment extends InvoiceableModel
 {
+    use BelongsToOneBusiness;
+
     protected $table = 'shift_adjustments';
     protected $guarded = ['id'];
     protected $casts = [
@@ -84,6 +88,8 @@ class ShiftAdjustment extends InvoiceableModel
      */
     public function getItemsForPayment(Client $client): Collection
     {
+        // TODO: Implement getItemsForPayment() method.
+        // This should probably use the InvoiceableQuery class, like Shift does
         return self::where('client_id', $client->id)
             ->where('status', Shift::WAITING_FOR_INVOICE)
             ->get();
@@ -98,6 +104,7 @@ class ShiftAdjustment extends InvoiceableModel
     public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
     {
         // TODO: Implement getItemsForCaregiverDeposit() method.
+        return new Collection();
     }
 
     /**
@@ -109,6 +116,7 @@ class ShiftAdjustment extends InvoiceableModel
     public function getItemsForBusinessDeposit(Business $business): Collection
     {
         // TODO: Implement getItemsForBusinessDeposit() method.
+        return new Collection();
     }
 
     /**
@@ -241,5 +249,17 @@ class ShiftAdjustment extends InvoiceableModel
     public function addAmountInvoiced(ClientInvoiceItem $invoiceItem, float $amount, float $allyFee): void
     {
         // TODO: Implement addAmountInvoiced() method.
+    }
+
+    /**
+     * A query scope for filtering invoicables by related caregiver IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $caregiverIds
+     * @return void
+     */
+    public function scopeForCaregivers(Builder $builder, array $caregiverIds)
+    {
+        $builder->whereIn('caregiver_id', $caregiverIds);
     }
 }

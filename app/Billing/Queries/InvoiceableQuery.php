@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceableQuery extends BaseQuery
 {
+    use BelongsToBusinessesQueries;
+
     /**
      * @var \App\Billing\Invoiceable\InvoiceableModel
      */
@@ -23,6 +25,13 @@ class InvoiceableQuery extends BaseQuery
     function getModelInstance(): Model
     {
         return clone $this->invoiceableModel;
+    }
+
+    function forCaregivers(array $caregiverIds): self
+    {
+        parent::forCaregivers($caregiverIds);
+
+        return $this;
     }
 
     function doesntHaveClientInvoice(): self

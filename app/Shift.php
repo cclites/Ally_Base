@@ -10,6 +10,7 @@ use App\Billing\Invoiceable\InvoiceableModel;
 use App\Billing\Invoiceable\ShiftExpense;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payment;
+use App\Billing\Queries\InvoiceableQuery;
 use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
@@ -742,7 +743,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     public function addFlag($flag)
     {
         if ($this->hasFlag($flag)) {
-            return false;
+            return;
         }
 
         $this->shiftFlags()->create(['flag' => $flag]);
@@ -823,7 +824,9 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getItemsForPayment(Client $client): Collection
     {
-        $shifts = self::where('client_id', $client->id)
+        $query = new InvoiceableQuery($this);
+        $shifts = $query->doesntHaveClientInvoice()
+            ->where('client_id', $client->id)
             ->where('status', Shift::WAITING_FOR_INVOICE)
             ->get();
 
@@ -843,28 +846,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
 
         return $collection;
-    }
-
-    /**
-     * Collect all applicable invoiceables of this type eligible for the caregiver deposit
-     *
-     * @param \App\Caregiver $caregiver
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
-     */
-    public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
-    {
-        // TODO: Implement getItemsForCaregiverDeposit() method.
-    }
-
-    /**
-     * Collect all applicable invoiceables of this type eligible for the provider deposit
-     *
-     * @param \App\Business $business
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
-     */
-    public function getItemsForBusinessDeposit(Business $business): Collection
-    {
-        // TODO: Implement getItemsForBusinessDeposit() method.
     }
 
     /**
@@ -966,26 +947,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     }
 
     /**
-     * Return the ally fee per unit for this invoiceable item.  If this returns null, abort invoicing this item.  Return 0.0 for no ally fee.
-     *
-     * @return float|null
-     */
-    public function getAllyRate(): ?float
-    {
-        // TODO: Implement getAllyRate() method.
-    }
-
-    /**
-     * TODO Implement business deposit invoicing
-     * Note: This is a calculated field from the other rates
-     * @return float
-     */
-    public function getProviderRate(): float
-    {
-        // TODO: Implement getProviderRate() method.
-    }
-
-    /**
      * Get the client payer record
      *
      * @return \App\Billing\ClientPayer|null
@@ -1068,6 +1029,18 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
+    }
+
+    /**
+     * A query scope for filtering invoicables by related caregiver IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $caregiverIds
+     * @return void
+     */
+    public function scopeForCaregivers(Builder $builder, array $caregiverIds)
+    {
+        $builder->whereIn('caregiver_id', $caregiverIds);
     }
 
     /**

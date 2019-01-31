@@ -8,6 +8,7 @@ use App\Billing\Payment;
 use App\Business;
 use App\Caregiver;
 use App\Client;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 interface InvoiceableInterface
@@ -108,7 +109,6 @@ interface InvoiceableInterface
     public function getAllyRate(): ?float;
 
     /**
-     * TODO Implement business deposit invoicing
      * Note: This is a calculated field from the other rates
      * @return float
      */
@@ -182,5 +182,14 @@ interface InvoiceableInterface
      * @param float $amount
      */
     public function addAmountDeposited(Deposit $deposit, float $amount): void;
+
+    /**
+     * A query scope for filtering invoicables by related caregiver IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $caregiverIds
+     * @return void
+     */
+    public function scopeForCaregivers(Builder $builder, array $caregiverIds);
 
 }

@@ -4,12 +4,16 @@ namespace App\Billing\Invoiceable;
 use App\AuditableModel;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
+use App\Billing\Invoiceable\Traits\BelongsToThroughShift;
 use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
 use App\Billing\Payer;
 use App\Client;
+use App\Contracts\BelongsToBusinessesInterface;
 use App\Shift;
+use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -50,6 +54,8 @@ use Illuminate\Support\Collection;
  */
 class ShiftService extends InvoiceableModel
 {
+    use BelongsToThroughShift;
+
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -94,28 +100,6 @@ class ShiftService extends InvoiceableModel
     public function getItemsForPayment(Client $client): Collection
     {
         return new Collection([]); // Handled by App\Shift
-    }
-
-    /**
-     * Collect all applicable invoiceables of this type eligible for the caregiver deposit
-     *
-     * @param \App\Caregiver $caregiver
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
-     */
-    public function getItemsForCaregiverDeposit(Caregiver $caregiver): Collection
-    {
-        // TODO: Implement getItemsForCaregiverDeposit() method.
-    }
-
-    /**
-     * Collect all applicable invoiceables of this type eligible for the provider deposit
-     *
-     * @param \App\Business $business
-     * @return \Illuminate\Support\Collection|\App\Billing\Contracts\InvoiceableInterface[]
-     */
-    public function getItemsForBusinessDeposit(Business $business): Collection
-    {
-        // TODO: Implement getItemsForBusinessDeposit() method.
     }
 
     /**
@@ -200,26 +184,6 @@ class ShiftService extends InvoiceableModel
     }
 
     /**
-     * Return the ally fee per unit for this invoiceable item.  If this returns null, abort invoicing this item.  Return 0.0 for no ally fee.
-     *
-     * @return float|null
-     */
-    public function getAllyRate(): ?float
-    {
-        return divide($this->getMetaValue("ally_fee_charged", 0), $this->getItemUnits());
-    }
-
-    /**
-     * TODO Implement business deposit invoicing
-     * Note: This is a calculated field from the other rates
-     * @return float
-     */
-    public function getProviderRate(): float
-    {
-        // TODO: Implement getProviderRate() method.
-    }
-
-    /**
      * Get the client payer record
      *
      * @return \App\Billing\ClientPayer|null
@@ -258,4 +222,6 @@ class ShiftService extends InvoiceableModel
 
         $this->shift->statusManager()->ackClientInvoice();
     }
+
+
 }

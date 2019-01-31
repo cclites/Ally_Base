@@ -19,6 +19,7 @@ class ShiftStatusManager
         Shift::CLOCKED_OUT,
         Shift::WAITING_FOR_CONFIRMATION,
         Shift::WAITING_FOR_AUTHORIZATION,
+        Shift::WAITING_FOR_INVOICE,
         Shift::WAITING_FOR_CHARGE,
         Shift::WAITING_FOR_PAYOUT,
         Shift::PAID_NOT_CHARGED,
@@ -89,6 +90,7 @@ class ShiftStatusManager
         return [
             Shift::WAITING_FOR_CONFIRMATION,
             Shift::WAITING_FOR_AUTHORIZATION,
+            Shift::WAITING_FOR_INVOICE,
             Shift::WAITING_FOR_CHARGE,
             Shift::WAITING_FOR_PAYOUT,
             Shift::PAID_NOT_CHARGED,
@@ -294,7 +296,7 @@ class ShiftStatusManager
     public function ackAuthorization()
     {
         if (in_array($this->status(), [Shift::WAITING_FOR_AUTHORIZATION])) {
-            return $this->update(Shift::WAITING_FOR_CHARGE);
+            return $this->update(Shift::WAITING_FOR_INVOICE);
         }
         return false;
     }
@@ -305,7 +307,7 @@ class ShiftStatusManager
      */
     public function unauthorize()
     {
-        if ($this->status() === Shift::WAITING_FOR_CHARGE) {
+        if ($this->status() === Shift::WAITING_FOR_INVOICE) {
             return $this->update(Shift::WAITING_FOR_AUTHORIZATION);
         }
         return false;
