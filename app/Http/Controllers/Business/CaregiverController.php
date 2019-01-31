@@ -141,6 +141,9 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->future_schedules = $caregiver->futureSchedules()->count();
+        $caregiver->hours_total = $caregiver->totalServiceHours();
+        $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }

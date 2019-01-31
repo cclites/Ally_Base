@@ -80,7 +80,7 @@ class ClientCaregiver implements Responsable
         }
 
         $caregiver->last_service_date = $caregiver->getLastServiceDate($client);
-        $caregiver->total_hours = number_format($caregiver->getTotalClockedHours($client));
+        $caregiver->total_hours = $caregiver->totalServiceHours($client->id);
         
         return $caregiver;
     }

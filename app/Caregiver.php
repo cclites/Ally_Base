@@ -526,24 +526,28 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
 
     /**
      * Get the total number of hours the Caregiver has worked for
-     * the given Client.
+     * the given Client and between the given date range.
      *
-     * @param Client $client
+     * @param null|integer $client
+     * @param null|string $startDate
+     * @param null|string $endDate
      * @return integer
      */
-    public function getTotalClockedHours(Client $client) : int
+    public function totalServiceHours(?int $clientId = null, ?string $startDate = null, ?string $endDate = null) : int
     {
-        $sum = Shift::forCaregiver($this->id)
-            ->forClient($client->id)
+        $result = Shift::selectRaw('SUM(hours) as total_hours')
+            ->forCaregiver($this->id)
+            ->forClient($clientId)
+            ->betweenDates($startDate, $endDate)
             ->whereNotNull('checked_out_time')
-            ->selectRaw('SUM(hours) as total_hours')
+            ->whereConfirmed()
             ->first();
-        
-        if (empty($sum)) {
+
+        if (empty($result)) {
             return 0;
         }
 
-        return empty($sum->total_hours) ? 0 : $sum->total_hours;
+        return empty($result->total_hours) ? 0 : $result->total_hours;
     }
 
     /**
