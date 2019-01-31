@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Business;
 
 use App\Business;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\SalesPerson;
 use Illuminate\Http\Request;
+use App\Client;
 
 class SalesPersonController extends BaseController
 {
@@ -74,6 +76,10 @@ class SalesPersonController extends BaseController
     public function destroy(SalesPerson $salesPerson)
     {
         $this->authorize('delete', $salesPerson);
+
+        if (Client::where('sales_person_id', $salesPerson->id)->exists()) {
+            return new ErrorResponse(400, 'Unable to delete sales person because they are assigned to a client.');
+        }
 
         $salesPerson->delete();
         return new SuccessResponse('Salesperson deleted.');
