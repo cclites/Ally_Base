@@ -82,10 +82,24 @@ class InvoiceableQueryTest extends TestCase
         $with = $this->createInvoiceable();
         $this->createClientInvoice($with, true);
 
-        $results = $this->query->hasPaidClientInvoice()->get();
+        $results = $this->query->hasClientInvoicesPaid()->get();
 
         $this->assertCount(1, $results);
         $this->assertEquals($with->getKey(), $results[0]->getKey());
+    }
+
+    /**
+     * @test
+     */
+    public function query_excludes_invoiceables_when_one_of_the_invoices_is_still_unpaid()
+    {
+        $without = $this->createInvoiceable();
+        $this->createClientInvoice($without);
+        $this->createClientInvoice($without, true);
+
+        $results = $this->query->hasClientInvoicesPaid()->get();
+
+        $this->assertCount(0, $results);
     }
 
     /**
@@ -128,7 +142,7 @@ class InvoiceableQueryTest extends TestCase
         $with = $this->createInvoiceable();
         $this->createCaregiverInvoice($with, true);
 
-        $results = $this->query->hasPaidCaregiverInvoice()->get();
+        $results = $this->query->hasCaregiverInvoicesPaid()->get();
 
         $this->assertCount(1, $results);
         $this->assertEquals($with->getKey(), $results[0]->getKey());
@@ -174,7 +188,7 @@ class InvoiceableQueryTest extends TestCase
         $with = $this->createInvoiceable();
         $this->createBusinessInvoice($with, true);
 
-        $results = $this->query->hasPaidBusinessInvoice()->get();
+        $results = $this->query->hasBusinessInvoicesPaid()->get();
 
         $this->assertCount(1, $results);
         $this->assertEquals($with->getKey(), $results[0]->getKey());
@@ -199,7 +213,7 @@ class InvoiceableQueryTest extends TestCase
         $with = $this->createInvoiceable();
         $this->createClientInvoice($with, true);
 
-        $results = $this->query->hasPaidClientInvoice()
+        $results = $this->query->hasClientInvoicesPaid()
             ->doesntHaveBusinessInvoice()
             ->doesntHaveCaregiverInvoice()
             ->get();

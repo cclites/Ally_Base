@@ -43,11 +43,12 @@ class InvoiceableQuery extends BaseQuery
         return $this;
     }
 
-    function hasPaidClientInvoice(): self
+    function hasClientInvoicesPaid(): self
     {
-        $this->whereExists(function($query) {
+        $this->hasClientInvoice();
+        $this->whereNotExists(function($query) {
             $this->clientInvoiceSubquery($query);
-            $query->whereColumn('client_invoices.amount_paid', '=', 'client_invoices.amount');
+            $query->whereColumn('client_invoices.amount_paid', '!=', 'client_invoices.amount');
         });
 
         return $this;
@@ -71,11 +72,12 @@ class InvoiceableQuery extends BaseQuery
         return $this;
     }
 
-    function hasPaidCaregiverInvoice(): self
+    function hasCaregiverInvoicesPaid(): self
     {
-        $this->whereExists(function($query) {
+        $this->hasCaregiverInvoice();
+        $this->whereNotExists(function($query) {
             $this->caregiverInvoiceSubquery($query);
-            $query->whereColumn('caregiver_invoices.amount_paid', '=', 'caregiver_invoices.amount');
+            $query->whereColumn('caregiver_invoices.amount_paid', '!=', 'caregiver_invoices.amount');
         });
 
         return $this;
@@ -99,11 +101,12 @@ class InvoiceableQuery extends BaseQuery
         return $this;
     }
 
-    function hasPaidBusinessInvoice(): self
+    function hasBusinessInvoicesPaid(): self
     {
-        $this->whereExists(function($query) {
+        $this->hasBusinessInvoice();
+        $this->whereNotExists(function($query) {
             $this->businessInvoiceSubquery($query);
-            $query->whereColumn('business_invoices.amount_paid', '=', 'business_invoices.amount');
+            $query->whereColumn('business_invoices.amount_paid', '!=', 'business_invoices.amount');
         });
 
         return $this;
