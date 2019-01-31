@@ -59,7 +59,7 @@
                     <tr :key="index">
                         <td rowspan="2">{{ item.firstname }} {{ item.lastname }}</td>
                         <td rowspan="2">{{ item.last_service_date ? formatDateFromUTC(item.last_service_date) : 'N/A' }}</td>
-                        <td rowspan="2">0</td>
+                        <td rowspan="2">{{ item.total_hours }}</td>
                         <td :class="getTdClass(index)">Hourly</td>
                         <td :class="getTdClass(index)">{{ moneyFormat(item.rates.hourly.caregiver_rate) }}</td>
                         <td :class="getTdClass(index)" v-if="hasClientRateStructure(business)">{{ moneyFormat(item.rates.hourly.client_rate) }}</td>

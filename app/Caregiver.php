@@ -536,14 +536,14 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         $sum = Shift::forCaregiver($this->id)
             ->forClient($client->id)
             ->whereNotNull('checked_out_time')
-            ->selectRaw('SUM(hours) as hours')
+            ->selectRaw('SUM(hours) as total_hours')
             ->first();
         
         if (empty($sum)) {
             return 0;
         }
 
-        return $sum->hours ? $sum->hours : 0;
+        return empty($sum->total_hours) ? 0 : $sum->total_hours;
     }
 
     /**
