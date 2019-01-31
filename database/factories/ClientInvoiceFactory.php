@@ -8,8 +8,8 @@ $factory->define(\App\Billing\ClientInvoice::class, function (Faker $faker) {
             $client = \App\Client::inRandomOrder()->first() ?? factory(\App\Client::class)->create();
             return $client->id;
         },
-        'payer_id' => function() {
-            $payer = \App\Billing\Payer::inRandomOrder()->first() ?? factory(\App\Billing\Payer::class)->create();
+        'client_payer_id' => function() {
+            $payer = \App\Billing\ClientPayer::inRandomOrder()->first() ?? factory(\App\Billing\ClientPayer::class)->create();
             return $payer->id;
         },
         'name' => mt_rand(),

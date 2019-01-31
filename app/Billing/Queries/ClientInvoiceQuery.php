@@ -55,7 +55,7 @@ class ClientInvoiceQuery extends BaseQuery
 
     function paidInFull(): self
     {
-        $this->whereColumn('amount_paid', '==', 'amount');
+        $this->whereColumn('amount_paid', '=', 'amount');
 
         return $this;
     }

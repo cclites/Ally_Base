@@ -12,7 +12,7 @@ $factory->define(\App\Billing\Invoiceable\ShiftService::class, function (Faker $
             $service = \App\Billing\Service::inRandomOrder()->first() ?? factory(\App\Billing\Service::class)->create();
             return $service->id;
         },
-        'payer_id' => null,
+        'client_payer_id' => null,
         'hours_type' => 'default',
         'duration' => mt_rand(1,5),
         'client_rate' => $faker->randomFloat(2, 20, 25),
