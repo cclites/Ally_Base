@@ -28,7 +28,7 @@
                         </b-form-input>
                         <input-help :form="form" field="lastname" text="Enter their last name."></input-help>
                     </b-form-group>
-                    <b-form-group label="Client Type" label-for="client_type">
+                    <b-form-group label="Client Type" label-for="client_type" label-class="required">
                         <b-form-select
                                 id="client_type"
                                 name="client_type"
@@ -96,7 +96,7 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Username" label-for="username">
+                    <b-form-group label="Username" label-for="username" label-class="required">
                         <b-form-input
                                 id="username"
                                 name="username"
@@ -141,8 +141,10 @@
                         <date-picker id="inquiry_date" v-model="form.inquiry_date"></date-picker>
                     </b-form-group>
 
-                    <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
-                    <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+                    <b-form-group>
+                        <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                        <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
+                    </b-form-group>
 
                     <b-form-group>
                         <b-form-checkbox id="ambulatory"
@@ -152,6 +154,7 @@
                             Ambulatory
                         </b-form-checkbox>
                     </b-form-group>
+
                     <b-form-group>
                         <b-form-checkbox id="caregiver_1099"
                                          v-model="form.caregiver_1099"
@@ -159,6 +162,23 @@
                                          :unchecked-value="false">
                             Send 1099 to caregivers on the client’s behalf
                         </b-form-checkbox>
+                    </b-form-group>
+
+                    <b-form-group v-if="businessSendsSummaryEmails">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox"
+                                    class="custom-control-input"
+                                    name="receive_summary_email"
+                                    v-model="form.receive_summary_email"
+                                    :true-value="1"
+                                    :false-value="0"
+                                    :disabled="authInactive">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Receive the weekly Visit Summary with Pending Charges email</span>
+                            </label>
+                            <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
+                        </div>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
@@ -518,6 +538,7 @@
                     created_at: this.client.created_at,
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updated_at,
+                    receive_summary_email: this.client.receive_summary_email,
                 }),
                 preferences: new Form({
                     gender: this.client.preferences ? this.client.preferences.gender : null,
@@ -603,6 +624,14 @@
         },
 
         computed: {
+            business() {
+                return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
+            },
+
+            businessSendsSummaryEmails() {
+                return !! this.business.shift_confirmation_email;
+            },
+
             lastStatusUpdated() {
                 return moment.utc(this.lastStatusDate).local().format('L') + ' at ' + moment.utc(this.lastStatusDate).local().format('LT');
             },

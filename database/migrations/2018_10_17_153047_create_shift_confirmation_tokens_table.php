@@ -21,7 +21,7 @@ class CreateShiftConfirmationTokensTable extends Migration
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamps();
 
-            $table->foreign('client_id')->references('id')->on('clients');
+            $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade')->onUpdate('cascade');
         });
 
         Schema::create('shift_confirmation_shifts', function (Blueprint $table) {
@@ -30,7 +30,7 @@ class CreateShiftConfirmationTokensTable extends Migration
 
             $table->primary(['shift_confirmation_id', 'shift_id']);
             $table->foreign('shift_confirmation_id')->references('id')->on('shift_confirmations')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('shift_id')->references('id')->on('shifts');
+            $table->foreign('shift_id')->references('id')->on('shifts')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

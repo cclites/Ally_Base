@@ -70,7 +70,7 @@
                         </b-form-group>
                     </b-col>
                     <b-col class="ml-auto">
-                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" />
+                        <business-location-form-group v-model="filterBusinessId" :allow-all="true" :label="null" />
                     </b-col>
                 </b-row>
             </b-col>
@@ -613,7 +613,7 @@
                         .catch(function(error) {
                             this.hoverShift = {};
                         });
-                }.bind(this, event, target), 1000);
+                }.bind(this, event, target), 500);
 
             },
 
@@ -857,7 +857,7 @@
     <a class="dropdown-item"><span class="color-sample" style="background-color: #27c11e"></span> Clocked In</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #1c81d9"></span> Future Shift</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #849290"></span> Past Shift</a>
-    <a class="dropdown-item"><span class="color-sample" style="background-color: #D0C3D3"></span> Unconfirmed Shift</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #ad92b0"></span> Unconfirmed Shift</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #d9c01c"></span> Client Canceled</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Canceled</a>
   </div>
@@ -915,12 +915,16 @@
                     title: resource.title,
                     trigger: 'manual',
                 }).on('mouseenter', function () {
-                    let $this = $(this);
-                    $this.popover('show');
-                    $('.popover').on('mouseleave', function () {
-                        $this.popover('hide');
-                    });
+                    this.previewTimer = setTimeout((event, target) => {
+                        let $this = $(this);
+                        $this.popover('show');
+                        $('.popover').on('mouseleave', function () {
+                            $this.popover('hide');
+                        });
+                    }, 750);
                 }).on('mouseleave', function () {
+                    clearTimeout(this.previewTimer);
+                    this.previewTimer = null;
                     let $this = $(this);
                     setTimeout(function () {
                         if (!$('.popover:hover').length) {
@@ -1071,7 +1075,7 @@
     .badge.scheduled { background-color: #1c81d9; }
     .badge.clocked_in { background-color: #27c11e; }
     .badge.confirmed { background-color: #849290; }
-    .badge.unconfirmed { background-color: #D0C3D3; }
+    .badge.unconfirmed { background-color: #ad92b0; }
     .badge.client_canceled { background-color: #730073; }
     .badge.cg_canceled { background-color: #ff8c00; }
     .badge.open { background-color: #d9c01c; }

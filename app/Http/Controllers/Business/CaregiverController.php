@@ -125,6 +125,7 @@ class CaregiverController extends BaseController
             'user.documents',
             'bankAccount',
             'availability',
+            'meta',
             'skills',
             'notes.creator',
             'notes' => function ($query) {

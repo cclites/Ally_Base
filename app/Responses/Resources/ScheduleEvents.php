@@ -148,7 +148,7 @@ class ScheduleEvents implements Responsable
         }
 
         if ($shift === Schedule::UNCONFIRMED) {
-            return '#D0C3D3';
+            return '#ad92b0';
         }
 
         if ($status === Schedule::CAREGIVER_CANCELED) {

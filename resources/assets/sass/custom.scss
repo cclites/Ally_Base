@@ -338,3 +338,13 @@ label.required::after, legend.required::after {
   content: " *";
   color: red;
 }
+
+.notification-icon {
+  padding-top: 9px;
+  font-size: 28px;
+  padding-left: 3px;
+}
+
+.datepicker-dropdown {
+  z-index: 10000 !important; /* ALLY-761 - Header hides datepicker under certain circumstances */
+}
