@@ -167,11 +167,14 @@
 </template>
 
 <script>
+    import FormatsDates from '../mixins/FormatsDates';
     export default {
         props: {
             'caregiver': {},
         },
 
+        mixins: [FormatsDates],
+        
         data() {
             return {
                 form: new Form({
@@ -186,6 +189,8 @@
                     gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
+                    orientation_date: this.caregiver.orientation_date ? this.formatDate(this.caregiver.orientation_date) : '',
+                    application_date: this.caregiver.application_date ? this.formatDate(this.caregiver.application_date) : '',
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

@@ -151,11 +151,13 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'application_date',
+        'orientation_date',
     ];
     protected $appends = ['masked_ssn'];
 
-    public $dates = ['onboarded', 'hire_date', 'deleted_at'];
+    public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
     ///////////////////////////////////////////
     /// Relationship Methods

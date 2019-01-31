@@ -36,6 +36,8 @@ class UpdateCaregiverRequest extends FormRequest
                 'nullable',
                 new Avatar()
             ],
+            'application_date' => 'nullable|date',
+            'orientation_date' => 'nullable|date',
         ];
     }
 
@@ -51,6 +53,8 @@ class UpdateCaregiverRequest extends FormRequest
     {
         $data = $this->validated();
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
+        if ($data['application_date']) $data['application_date'] = filter_date($data['application_date']);
+        if ($data['orientation_date']) $data['orientation_date'] = filter_date($data['orientation_date']);
 
         return $data;
     }
