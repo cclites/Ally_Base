@@ -16,4 +16,15 @@ class SalesPerson extends Model implements BelongsToBusinessesInterface
     {
         return $this->belongsTo(Business::class);
     }
+
+    /**
+     * Get only the active sales people.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWhereActive($query)
+    {
+        return $query->where('active', 1);
+    }
 }

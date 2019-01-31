@@ -193,7 +193,10 @@ class ClientController extends BaseController
         $lastStatusDate = $client->onboardStatusHistory()->orderBy('created_at', 'DESC')->value('created_at');
         $business = $this->business();
 
-        $salesPeople = SalesPerson::forRequestedBusinesses()->get();
+        $salesPeople = SalesPerson::forRequestedBusinesses()
+            ->whereActive()
+            ->orWhere('id', $client->sales_person_id)
+            ->get();
 
         return view('business.clients.show', compact('client', 'caregivers', 'lastStatusDate', 'business', 'salesPeople'));
     }

@@ -371,8 +371,8 @@
                     <b-form-group label="Salesperson">
                         <b-form-select v-model="form.sales_person_id">
                             <option :value="null">None</option>
-                            <option v-for="item in salesPeople" :value="item.id">
-                                {{ item.firstname }} {{ item.lastname }}
+                            <option v-for="item in salesPeople" :value="item.id" :key="item.id">
+                                {{ item.firstname }} {{ item.lastname }}{{ item.active == 1 ? '' : ' (Inactive)'}}
                             </option>
                         </b-form-select>
                     </b-form-group>
