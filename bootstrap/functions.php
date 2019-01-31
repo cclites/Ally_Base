@@ -63,6 +63,19 @@ function maps_to_model(string $dbType, $dbId): ?\Illuminate\Database\Eloquent\Mo
     return null;
 }
 
+/**
+ * Map a Model instance to a polymorphic type in the database
+ *
+ * @param \Illuminate\Database\Eloquent\Model $model
+ * @return string|null  Polymorphic type mapping
+ */
+function maps_from_model(\Illuminate\Database\Eloquent\Model $model): ?string
+{
+    $className = get_class($model);
+    $array = config("database.polymorphism");
+    return strval(array_search($className, $array)) ?: null;
+}
+
 function collection_only_values($collection, $values = []) {
     return $collection->map(function($item) use ($values)
     {
