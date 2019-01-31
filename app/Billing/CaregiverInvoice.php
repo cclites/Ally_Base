@@ -31,6 +31,8 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
 
     protected $casts = [
         'caregiver_id' => 'int',
+        'amount' => 'float',
+        'amount_paid' => 'float',
     ];
 
     /**
@@ -104,7 +106,7 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
 
     public function getAmount(): float
     {
-        return $this->amount;
+        return (float) $this->amount;
     }
 
     public function getAmountDue(): float
@@ -115,5 +117,20 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
     public function getItems(): Collection
     {
         return $this->items;
+    }
+
+    function getName(): string
+    {
+        return $this->name;
+    }
+
+    function getDate(): string
+    {
+        return $this->created_at->format('m/d/Y');
+    }
+
+    function getAmountPaid(): float
+    {
+        return (float) $this->amount_paid;
     }
 }

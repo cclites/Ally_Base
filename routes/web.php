@@ -13,6 +13,20 @@
 
 //Auth::loginUsingId(2);
 
+
+Route::get('/test/business/{id}', function($id) {
+    $invoice = \App\Billing\BusinessInvoice::find($id);
+    $view = new \App\Billing\View\InvoiceViewGenerator(new \App\Billing\View\HtmlViewStrategy());
+    return $view->generateBusinessInvoice($invoice);
+});
+
+Route::get('/test/caregiver/{id}', function($id) {
+    $invoice = \App\Billing\CaregiverInvoice::find($id);
+    $view = new \App\Billing\View\InvoiceViewGenerator(new \App\Billing\View\HtmlViewStrategy());
+    return $view->generateCaregiverInvoice($invoice);
+});
+
+
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('home') : redirect()->route('login');
 });

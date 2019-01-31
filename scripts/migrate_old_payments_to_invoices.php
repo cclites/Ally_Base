@@ -2,6 +2,7 @@
 require __DIR__ . "/bootstrap.php";
 
 use App\Billing\ClientInvoice;
+use App\Billing\Deposit;
 use App\Billing\Payment;
 
 DB::beginTransaction();
@@ -214,6 +215,107 @@ echo("Line 202\n");
 
 
 ////////////////////////////////////
+//// Caregiver deposits to invoices
+////////////////////////////////////
+
+Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiver_id')->chunk(200, function($deposits) {
+    $deposits->each(function(Deposit $deposit) {
+        $invoice = \App\Billing\CaregiverInvoice::create([
+            'name' => \App\Billing\CaregiverInvoice::getNextName($deposit->caregiver_id),
+            'caregiver_id' => $deposit->caregiver_id,
+        ]);
+
+        foreach($deposit->shifts as $shift) {
+            /** @var \App\Billing\Invoiceable\ShiftExpense $expense */
+            foreach($shift->expenses as $expense) {
+                $item = new \App\Billing\CaregiverInvoiceItem([
+                    'group' => $expense->getItemGroup(\App\Billing\CaregiverInvoice::class),
+                    'name' => $expense->getItemName(\App\Billing\CaregiverInvoice::class),
+                    'units' => $units = $expense->getItemUnits(),
+                    'rate' => $rate = $expense->getCaregiverRate(),
+                    'total' => multiply($rate, $units),
+                ]);
+                $item->associateInvoiceable($shift);
+                $invoice->addItem($item);
+            }
+
+            $item = new \App\Billing\CaregiverInvoiceItem([
+                'group' => $shift->getItemGroup(\App\Billing\CaregiverInvoice::class),
+                'name' => $shift->getItemName(\App\Billing\CaregiverInvoice::class),
+                'units' => $shift->duration(),
+                'rate' => $shift->caregiver_rate,
+                'total' => $shift->costs()->getCaregiverCost(false),
+            ]);
+            $item->associateInvoiceable($shift);
+            $invoice->addItem($item);
+        }
+
+        if ($invoice->getAmount() != $deposit->amount) {
+            // Add a manual adjustment
+            $diff = subtract($deposit->amount, $invoice->getAmount());
+            $item = new \App\Billing\CaregiverInvoiceItem([
+                'rate' => $diff,
+                'units' => 1,
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'total' => $diff,
+                'notes' => str_limit($deposit->notes, 253, '..'),
+            ]);
+            $invoice->addItem($item);
+        }
+
+        $invoice->addDeposit($deposit, $deposit->amount);
+    });
+});
+
+////////////////////////////////////
+//// Business deposits to invoices
+////////////////////////////////////
+
+Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(200, function($deposits) {
+    $deposits->each(function(Deposit $deposit) {
+        $invoice = \App\Billing\BusinessInvoice::create([
+            'name' => \App\Billing\BusinessInvoice::getNextName($deposit->business_id),
+            'business_id' => $deposit->business_id,
+        ]);
+
+        foreach($deposit->shifts as $shift) {
+            $item = new \App\Billing\BusinessInvoiceItem([
+                'group' => $shift->getItemGroup(\App\Billing\BusinessInvoice::class),
+                'name' => $shift->getItemName(\App\Billing\BusinessInvoice::class),
+                'units' => $shift->duration(),
+                'client_rate' => $clientRate = $shift->costs()->getTotalHourlyCost(),
+                'caregiver_rate' => $shift->caregiver_rate,
+                'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
+                'rate' => $shift->provider_fee,
+                'total' => $shift->costs()->getProviderFee(),
+            ]);
+            $item->associateInvoiceable($shift);
+            $invoice->addItem($item);
+        }
+
+        if ($invoice->getAmount() != $deposit->amount) {
+            // Add a manual adjustment
+            $diff = subtract($deposit->amount, $invoice->getAmount());
+            $item = new \App\Billing\BusinessInvoiceItem([
+                'rate' => $diff,
+                'client_rate' => 0,
+                'caregiver_rate' => 0,
+                'ally_rate' => 0,
+                'units' => 1,
+                'group' => 'Adjustments',
+                'name' => 'Manual Adjustment',
+                'total' => $diff,
+                'notes' => str_limit($deposit->notes, 253, '..'),
+            ]);
+            $invoice->addItem($item);
+        }
+
+        $invoice->addDeposit($deposit, $deposit->amount);
+    });
+});
+
+////////////////////////////////////
 //// Migrate client caregiver rates
 ////////////////////////////////////
 
@@ -250,7 +352,7 @@ function _createMileageExpense(\App\Shift $shift)
         'shift_id' => $shift->id,
         'name' => 'Mileage',
         'units' => $shift->mileage,
-        'rate' => divide($shift->costs()->getMileageCost(), $shift->mileage),
+        'rate' => divide($shift->costs()->getMileageCost(false), $shift->mileage),
         'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false)),
     ]);
 }
@@ -262,7 +364,7 @@ function _createOtherExpense(\App\Shift $shift)
         'name' => 'Other Expenses',
         'notes' => str_limit($shift->other_expenses_desc, 253, '..'),
         'units' => 1,
-        'rate' => $shift->costs()->getOtherExpenses(),
+        'rate' => $shift->costs()->getOtherExpenses(false),
         'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false)),
     ]);
 }
@@ -270,7 +372,7 @@ function _createOtherExpense(\App\Shift $shift)
 function _assignExpense(ClientInvoice $invoice, \App\Shift $shift, \App\Billing\Invoiceable\ShiftExpense $expense)
 {
     $item = new \App\Billing\ClientInvoiceItem([
-        'rate' => $expense->getClientRate(),
+        'rate' => add($expense->getClientRate(), $expense->getAllyRate()),
         'units' => $expense->getItemUnits(),
         'group' => $shift->getItemGroup(ClientInvoice::class),
         'name' => $expense->getItemName(ClientInvoice::class),

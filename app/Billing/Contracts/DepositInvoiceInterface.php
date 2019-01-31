@@ -9,10 +9,8 @@ use App\Billing\Deposit;
 use App\Billing\Payments\Contracts\DepositMethodStrategy;
 use Illuminate\Support\Collection;
 
-interface DepositInvoiceInterface
+interface DepositInvoiceInterface extends InvoiceInterface
 {
     public function addDeposit(Deposit $deposit, float $amountApplied): bool;
-    public function getAmount(): float;
-    public function getAmountDue(): float;
     public function getItems(): Collection;
 }

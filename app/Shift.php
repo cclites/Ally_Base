@@ -390,6 +390,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftService::class);
     }
 
+    public function expenses()
+    {
+        return $this->hasMany(ShiftExpense::class);
+    }
+
     public function clientPayer()
     {
         return $this->belongsTo(ClientPayer::class);

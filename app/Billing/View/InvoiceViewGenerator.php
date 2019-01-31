@@ -1,6 +1,8 @@
 <?php
 namespace App\Billing\View;
 
+use App\Billing\BusinessInvoice;
+use App\Billing\CaregiverInvoice;
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\InvoiceInterface;
 use App\Contracts\ViewStrategy;
@@ -39,6 +41,38 @@ class InvoiceViewGenerator
             $clientPayer->isPrivatePay() ? $business : $client,
             $clientPayer->isPrivatePay() ? $client : $clientPayer,
             $clientInvoice,
+            $items,
+            $payments
+        );
+    }
+
+    function generateCaregiverInvoice(CaregiverInvoice $caregiverInvoice, ?string $viewName = null)
+    {
+        $caregiver = $caregiverInvoice->caregiver;
+        $items = $caregiverInvoice->items;
+        $payments = $caregiverInvoice->deposits;
+
+        return $this->generate(
+            $viewName ?? 'invoices.caregiver_invoice',
+            $caregiver,
+            $caregiver,
+            $caregiverInvoice,
+            $items,
+            $payments
+        );
+    }
+
+    function generateBusinessInvoice(BusinessInvoice $businessInvoice, ?string $viewName = null)
+    {
+        $business = $businessInvoice->business;
+        $items = $businessInvoice->items;
+        $payments = $businessInvoice->deposits;
+
+        return $this->generate(
+            $viewName ?? 'invoices.business_invoice',
+            $business,
+            $business,
+            $businessInvoice,
             $items,
             $payments
         );

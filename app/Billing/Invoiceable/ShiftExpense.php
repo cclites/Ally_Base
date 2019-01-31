@@ -133,7 +133,6 @@ class ShiftExpense extends InvoiceableModel
     }
 
     /**
-     * TODO Implement caregiver deposit invoicing
      * @return float
      */
     public function getCaregiverRate(): float
