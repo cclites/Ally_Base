@@ -52,6 +52,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\ClientNarrative;
 use App\Policies\ClientNarrativePolicy;
+use App\SalesPerson;
+use App\Policies\SalesPersonPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -85,6 +87,7 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         CustomField::class => CustomFieldPolicy::class,
         CustomFieldOption::class => CustomFieldOptionPolicy::class,
+        SalesPerson::class => SalesPersonPolicy::class,
     ];
 
     /**

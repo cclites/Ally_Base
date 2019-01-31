@@ -36,6 +36,8 @@ class SalesPersonController extends BaseController
             'active' => 'required|bool',
         ]);
 
+        $this->authorize('create', [SalesPerson::class, $data]);
+        
         $salesPerson = SalesPerson::create($data);
         return new SuccessResponse('Sales person created', $salesPerson);
     }
@@ -49,6 +51,8 @@ class SalesPersonController extends BaseController
      */
     public function update(Request $request, SalesPerson $salesPerson)
     {
+        $this->authorize('update', $salesPerson);
+
         $data = $request->validate([
             'business_id' => 'required|int',
             'firstname' => 'required|string',
@@ -69,6 +73,8 @@ class SalesPersonController extends BaseController
      */
     public function destroy(SalesPerson $salesPerson)
     {
+        $this->authorize('delete', $salesPerson);
+
         $salesPerson->delete();
         return new SuccessResponse('Salesperson deleted.');
     }

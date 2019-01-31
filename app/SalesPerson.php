@@ -4,8 +4,9 @@ namespace App;
 
 use App\Traits\BelongsToOneBusiness;
 use Illuminate\Database\Eloquent\Model;
+use App\Contracts\BelongsToBusinessesInterface;
 
-class SalesPerson extends Model
+class SalesPerson extends Model implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
 
