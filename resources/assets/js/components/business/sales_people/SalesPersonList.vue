@@ -8,7 +8,7 @@
                 </b-btn>
             </div>
         </div>
-        <b-table :items="salesPeople" :fields="fields">
+        <b-table :items="salesPeople" :fields="fields" show-empty>
             <template slot="actions" scope="data">
                 <b-btn title="Edit" @click="editSalesperson(data.item)">
                     <i class="fa fa-edit"></i>
@@ -37,7 +37,7 @@
             </b-form-group>
             <div slot="modal-footer" class="d-flex justify-content-end">
                  <b-btn @click="salesPersonModal.show = false" class="mr-2">Cancel</b-btn>
-                 <b-btn variant="info" @click="submit">Ok</b-btn>
+                 <b-btn variant="info" @click="submit">{{ this.salesPerson.id ? 'Save' : 'Add' }}</b-btn>
             </div>
         </b-modal>
     </div>
@@ -58,7 +58,6 @@
                 salesPersonModal: {
                     show: false,
                     title: '',
-                    type: ''
                 },
                 salesPeople: [],
                 fields: [
@@ -85,42 +84,42 @@
                     },
                     'actions'
                 ],
-                salesPersonForm: new Form({
-                    business_id: this.businessId,
-                    firstname: '',
-                    lastname: '',
-                    email: '',
-                    active: 1
-                })
+                salesPersonForm: new Form()
             }
         },
 
         created () {
-            this.fetchData ()
+            this.fetchData()
         },
 
         methods: {
-            async fetchData () {
+            async fetchData() {
                 let response = await axios.get (`/business/sales-people/${this.businessId}`);
                 this.salesPeople = response.data;
             },
 
             editSalesperson(item) {
-                this.salesPersonModal.title = 'Edit Salesperson'
-                this.salesPersonModal.type = 'edit'
-                this.salesPersonForm = new Form(item)
                 this.salesPerson = item
+                this.salesPersonModal.title = 'Edit Salesperson'
+                this.salesPersonForm = new Form(item)
                 this.salesPersonModal.show = true
             },
 
             addSalesperson() {
+                this.salesPerson = {};
+                this.salesPersonForm = new Form({
+                    business_id: this.businessId,
+                    firstname: '',
+                    lastname: '',
+                    email: '',
+                    active: 1
+                });
                 this.salesPersonModal.title = 'Add Salesperson'
-                this.salesPersonModal.type = 'add'
                 this.salesPersonModal.show = true
             },
 
             async submit() {
-                if (this.salesPersonModal.type === 'add') {
+                if (! this.salesPerson.id) {
                     let response = await this.salesPersonForm.post('/business/sales-people')
                     this.salesPeople.push(response.data.data)
                     this.salesPersonModal.show = false
@@ -139,13 +138,15 @@
             },
 
             async deleteSalesperson(id) {
-                console.log('deleting ' + id)
-                let response = await axios.delete(`/business/sales-people/${id}`)
-                let idx = _.findIndex(this.salesPeople, ['id', id])
-                this.salesPeople.splice(idx, 1)
+                let form = new Form({});
+                form.submit('DELETE', `/business/sales-people/${id}`)
+                    .then(response => {
+                        let idx = _.findIndex(this.salesPeople, ['id', id])
+                        this.salesPeople.splice(idx, 1)        
+                    })
+                    .catch(e => {
+                    })
             }
-
-
         }
     }
 </script>
