@@ -32,6 +32,9 @@
                             <input type="checkbox" v-model="statusFilters" value="CAREGIVER_CANCELED"> <span class="badge badge-primary cg_canceled" v-b-popover.hover="`Filter scheduled shifts that are marked Caregiver Canceled. ${statusHelp}`">CG Canceled</span>
                         </label>
                         <label>
+                            <input type="checkbox" v-model="statusFilters" value="CAREGIVER_NOSHOW"> <span class="badge badge-primary no_show" v-b-popover.hover="`Filter scheduled shifts that are marked Caregiver No Show. ${statusHelp}`">CG No Show</span>
+                        </label>
+                        <label>
                             <input type="checkbox" v-model="statusFilters" value="ATTENTION_REQUIRED"> <span class="badge badge-primary attention" v-b-popover.hover="`Filter scheduled shifts that are marked Attention Required. ${statusHelp}`">Attention Required</span>
                         </label>
                     </b-col>
@@ -870,6 +873,7 @@
     <a class="dropdown-item"><span class="color-sample" style="background-color: #ad92b0"></span> Unconfirmed Shift</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #d9c01c"></span> Client Canceled</a>
     <a class="dropdown-item"><span class="color-sample" style="background-color: #d91c4e"></span> CG Canceled</a>
+    <a class="dropdown-item"><span class="color-sample" style="background-color: #63cbc7"></span> CG No Show</a>
   </div>
 `);
             },
@@ -1091,6 +1095,7 @@
     .badge.open { background-color: #d9c01c; }
     .badge.attention { background-color: #C30000; }
     .badge.missed_clock_in { background-color: #E468B2; }
+    .badge.no_show { background-color: #63cbc7; }
 
     .fc-resource-area .fc-scroller {
         /* disables horizontal scroll bar in resource area */
