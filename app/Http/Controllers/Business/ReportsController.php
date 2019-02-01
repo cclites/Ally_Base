@@ -777,16 +777,22 @@ class ReportsController extends BaseController
     public function userBirthday(Request $request)
     {
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
-        $users;
+        $type = ucfirst($type);
+        return view('business.reports.user_birthday', compact('type'));
+    }
+
+    public function userBirthdayData(Request $request)
+    {
+        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
 
         if($type == 'clients') {
-            $users = Client::forRequestedBusinesses()->get();
-        }else {
-            $users = Caregiver::forRequestedBusinesses()->get();
+            return Client::forRequestedBusinesses()->get();
         }
 
-        return view('business.reports.user_birthday', compact('users', 'type'));
+        return Caregiver::forRequestedBusinesses()->get();
     }
+
+
 
     /**
      * Shows the list of prospective clients
