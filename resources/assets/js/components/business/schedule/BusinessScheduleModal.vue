@@ -802,6 +802,14 @@
 
             'form.caregiver_id': function(val, old_val) {
                 this.prefillRates();
+
+                // Automatically reset the schedule status when it is a
+                // no show or open shift and a new caregiver is set otherwise
+                // saving the schedule will clear the caregiver_id because of 
+                // its status.
+                if (! old_val && val && (this.form.status == 'CAREGIVER_NOSHOW' || this.form.status == 'OPEN_SHIFT')) {
+                    this.form.status = 'OK';
+                }
             },
 
             'form.hours_type': function(val, old_val) {
