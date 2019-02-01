@@ -769,6 +769,17 @@ class ReportsController extends BaseController
     }
 
     /**
+     * Display a listing of the caregiver's working anniversaries
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function caregiverAnniversary()
+    {
+        $users = Caregiver::forRequestedBusinesses()->get();
+        return view('business.reports.caregiver_anniversary', compact('users'));
+    }
+
+    /**
      * Display a listing of the users and their birthdays.
      *
      * @param Request $request
@@ -791,8 +802,6 @@ class ReportsController extends BaseController
 
         return Caregiver::forRequestedBusinesses()->get();
     }
-
-
 
     /**
      * Shows the list of prospective clients
