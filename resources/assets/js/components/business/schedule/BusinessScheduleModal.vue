@@ -222,6 +222,24 @@
                                 </b-form-group>
                             </b-col>
                         </b-row>
+                        <b-row>
+                            <b-col sm="6">
+                                <b-form-group label="Shift Status" label-for="status" v-if="schedule.id">
+                                    <b-form-select
+                                            id="status"
+                                            name="status"
+                                            v-model="form.status"
+                                    >
+                                        <option value="OK">No Status</option>
+                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
+                                        <option value="CLIENT_CANCELED">Client Canceled</option>
+                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
+                                        <option value="OPEN_SHIFT">Open Shift</option>
+                                    </b-form-select>
+                                </b-form-group>
+                            </b-col>
+                        </b-row>
                     </b-tab>
                     <b-tab title="Recurrence" id="schedule-recurrence" v-if="!schedule.id">
                         <b-row>
@@ -262,20 +280,6 @@
                     <b-tab title="Notes" id="schedule-notes">
                         <b-row>
                             <b-col lg="12">
-                                <b-form-group label="Schedule Status" label-for="status" v-if="schedule.id">
-                                    <b-form-select
-                                            id="status"
-                                            name="status"
-                                            v-model="form.status"
-                                    >
-                                        <option value="OK">No Status</option>
-                                        <option value="ATTENTION_REQUIRED">Attention Required</option>
-                                        <option value="CLIENT_CANCELED">Client Canceled</option>
-                                        <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
-                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
-                                        <option value="OPEN_SHIFT">Open Shift</option>
-                                    </b-form-select>
-                                </b-form-group>
                                 <b-form-group label="Schedule Notes" label-for="notes">
                                     <b-form-textarea
                                             id="notes"
