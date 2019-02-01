@@ -6,6 +6,18 @@
         class="client-care-needs"
     >
         <h2>General</h2>
+        <b-row>
+            <b-col lg="6">
+            <b-form-group label="Height">
+                <b-form-input v-model="form.height" placeholder="i.e.: 5 ft 10" />
+            </b-form-group>
+            </b-col>
+            <b-col lg="6">
+            <b-form-group label="Weight">
+                <b-form-input v-model="form.weight" placeholder="i.e.: 160 lbs" />
+            </b-form-group>
+            </b-col>
+        </b-row>
         <b-form-group label="Living Arrangements">
             <b-form-radio-group id="lives_alone" v-model="form.lives_alone">
                 <b-form-radio value="1">Lives alone</b-form-radio>
@@ -388,6 +400,8 @@
             }
 
             this.fillForm({
+                height: '',
+                weight: '',
                 lives_alone: '',
                 pets: [],
                 smoker: '',

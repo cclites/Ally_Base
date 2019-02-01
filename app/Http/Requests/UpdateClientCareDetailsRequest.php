@@ -26,6 +26,8 @@ class UpdateClientCareDetailsRequest extends FormRequest
     public function rules()
     {
         return [
+            'height' => 'nullable|string',
+            'weight' => 'nullable|string',
             'lives_alone' => 'nullable|boolean',
             'pets' => ['present', 'array', Rule::in(CareDetails::PETS)],
             'smoker' => 'nullable|boolean',
