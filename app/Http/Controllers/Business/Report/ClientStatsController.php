@@ -38,6 +38,15 @@ class ClientStatsController extends Controller
                     ->whereConfirmed();
             },
                 'shifts.activities'])
+            ->when($request->filled('client_status'), function ($query) use ($request) {
+                $active = $request->client_status == 'active' ? true : false;
+                $query->whereHas('user', function ($query) use ($active) {
+                    $query->where('active', $active);
+                });
+            })
+            ->when($request->filled('client_type'), function ($query) use ($request) {
+                $query->where('client_type', $request->client_type);
+            })
             ->get();
         $activities = $clients->pluck('shifts')
             ->flatten()

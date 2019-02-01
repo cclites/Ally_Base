@@ -33,6 +33,14 @@
                     </b-form-select>
                 </b-form-group>
 
+                <b-form-group label="Client Status" class="mb-2 mr-2">
+                    <b-form-select v-model="form.client_status">
+                        <option value="">All</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </b-form-select>
+                </b-form-group>
+
                 <b-form-group label="&nbsp;" class="mb-2 mr-2">
                     <b-button variant="info" type="submit" :disabled="state === 'loading'">Generate</b-button>
                 </b-form-group>
@@ -47,7 +55,7 @@
                     <div class="h5">Total Unassigned Gender Serviced: {{ genders['unassigned'] }}</div>
                     <div class="h5">Average Client Age: {{ averageAge }}</div>
                 </b-col>
-                <b-col md="6">
+                <b-col md="6" class="mt-4 mt-md-0">
                     <div class="h4">ADL Statistics</div>
                     <div class="h5">Top Activities Performed for Clients: </div>
                     <b-table :items="activities" :fields="activityFields"></b-table>
@@ -75,6 +83,7 @@
                 state: 'notLoaded',
                 form: new Form({
                     client_type: '',
+                    client_status: '',
                     start_date: this.formatDate(moment().subtract(1, 'month')),
                     end_date: this.formatDate(moment())
                 }),
