@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Support\Facades\Crypt;
+use App\Client;
 
 /**
  * App\ClientMedication
@@ -57,4 +58,57 @@ class ClientMedication extends BaseModel
         return empty($this->attributes['frequency']) ? null : Crypt::decrypt($this->attributes['frequency']);
     }
 
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = Crypt::encrypt($value);
+    }
+
+    public function getNameAttribute()
+    {
+        return empty($this->attributes['name']) ? null : Crypt::decrypt($this->attributes['name']);
+    }
+    public function setDescriptionAttribute($value)
+    {
+        $this->attributes['description'] = Crypt::encrypt($value);
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return empty($this->attributes['description']) ? null : Crypt::decrypt($this->attributes['description']);
+    }
+
+    public function setSideEffectsAttribute($value)
+    {
+        $this->attributes['side_effects'] = Crypt::encrypt($value);
+    }
+
+    public function getSideEffectsAttribute()
+    {
+        return empty($this->attributes['side_effects']) ? null : Crypt::decrypt($this->attributes['side_effects']);
+    }
+
+    public function setNotesAttribute($value)
+    {
+        $this->attributes['notes'] = Crypt::encrypt($value);
+    }
+
+    public function getNotesAttribute()
+    {
+        return empty($this->attributes['notes']) ? null : Crypt::decrypt($this->attributes['notes']);
+    }
+
+    public function setTrackingAttribute($value)
+    {
+        $this->attributes['tracking'] = Crypt::encrypt($value);
+    }
+
+    public function getTrackingAttribute()
+    {
+        return empty($this->attributes['tracking']) ? null : Crypt::decrypt($this->attributes['tracking']);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class); 
+    }
 }
