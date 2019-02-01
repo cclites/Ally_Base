@@ -4,6 +4,7 @@ namespace App\Billing\Queries;
 use App\Billing\Exceptions\PayerAssignmentError;
 use App\Billing\Payer;
 use App\Billing\Payment;
+use App\Business;
 use App\Client;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,23 +22,17 @@ class PaymentQuery extends BaseQuery
         return new Payment();
     }
 
-    function forClient(Client $client)
+    function forClient(Client $client): self
     {
         $this->where('client_id', $client->id);
 
         return $this;
     }
 
-    function forPayer(Payer $payer): self
+    function usingProviderPay(?Business $business): self
     {
-        if ($payer->isPrivatePay()) {
-            if (!$client = $payer->getPrivatePayer()) {
-                throw new PayerAssignmentError("Using PaymentQuery::forPayer with an unattached private payer.");
-            }
-            $this->where('client_id', $client->id);
-        }
-
-        $this->where('payer_id', $payer->id);
+        $this->where('payment_method_type', maps_from_class(Business::class));
+        if ($business) $this->where('payment_method_id', $business->id);
 
         return $this;
     }

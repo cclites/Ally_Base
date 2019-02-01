@@ -78,6 +78,7 @@ Vue.component('client-modify-shift-modal', require('./components/clients/ModifyS
 
 
 // Caregiver
+Vue.component('caregiver-deposit-history', require('./components/caregivers/CaregiverDepositHistory'));
 Vue.component('caregiver-phone-numbers-tab', require('./components/caregivers/profile/CaregiverPhoneNumbersTab'));
 Vue.component('caregiver-task-list', require('./components/caregivers/TaskList'));
 

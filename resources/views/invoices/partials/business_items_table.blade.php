@@ -5,8 +5,11 @@
             <tr class="bg-info">
                 <th>Service Date</th>
                 <th>Service Name</th>
-                <th>Rate</th>
                 <th>Units</th>
+                <th>Client Rate</th>
+                <th>Caregiver Rate</th>
+                <th>Ally Rate</th>
+                <th>Provider Rate</th>
                 <th>Total</th>
             </tr>
             </thead>
@@ -36,8 +39,11 @@
                                 <small>{{ $item->notes }}</small>
                             @endif
                         </td>
-                        <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ $item->units }}</td>
+                        <td>{{ number_format($item->client_rate, 2) }}</td>
+                        <td>{{ number_format($item->caregiver_rate, 2) }}</td>
+                        <td>{{ number_format($item->ally_rate, 2) }}</td>
+                        <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
                     </tr>
                 @endforeach
@@ -45,7 +51,7 @@
             </tbody>
             <tfoot>
             <tr>
-                <th colspan="4">Total</th>
+                <th colspan="7">Total</th>
                 <th>{{ number_format($invoice->amount, 2) }}</th>
             </tr>
             </tfoot>

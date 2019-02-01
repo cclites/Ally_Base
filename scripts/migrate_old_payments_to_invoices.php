@@ -234,6 +234,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
                     'units' => $units = $expense->getItemUnits(),
                     'rate' => $rate = $expense->getCaregiverRate(),
                     'total' => multiply($rate, $units),
+                    'date' => $shift->getItemDate(),
                 ]);
                 $item->associateInvoiceable($shift);
                 $invoice->addItem($item);
@@ -245,6 +246,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
                 'units' => $shift->duration(),
                 'rate' => $shift->caregiver_rate,
                 'total' => $shift->costs()->getCaregiverCost(false),
+                'date' => $shift->getItemDate(),
             ]);
             $item->associateInvoiceable($shift);
             $invoice->addItem($item);
@@ -260,6 +262,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
                 'name' => 'Manual Adjustment',
                 'total' => $diff,
                 'notes' => str_limit($deposit->notes, 253, '..'),
+                'date' => $deposit->created_at,
             ]);
             $invoice->addItem($item);
         }
@@ -289,6 +292,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(200, f
                 'ally_rate' => subtract($clientRate, add($shift->caregiver_rate, $shift->provider_fee)),
                 'rate' => $shift->provider_fee,
                 'total' => $shift->costs()->getProviderFee(),
+                'date' => $shift->getItemDate(),
             ]);
             $item->associateInvoiceable($shift);
             $invoice->addItem($item);
@@ -307,6 +311,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(200, f
                 'name' => 'Manual Adjustment',
                 'total' => $diff,
                 'notes' => str_limit($deposit->notes, 253, '..'),
+                'date' => $deposit->created_at,
             ]);
             $invoice->addItem($item);
         }

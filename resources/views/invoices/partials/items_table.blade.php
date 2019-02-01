@@ -5,8 +5,8 @@
             <tr class="bg-info">
                 <th>Service Date</th>
                 <th>Service Name</th>
-                <th>Rate</th>
                 <th>Units</th>
+                <th>Rate</th>
                 <th>Total</th>
                 <th>Amount Due by Payer</th>
             </tr>
@@ -37,8 +37,8 @@
                                 <small>{{ $item->notes }}</small>
                             @endif
                         </td>
-                        <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ $item->units }}</td>
+                        <td>{{ number_format($item->rate, 2) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
                         <td>{{ number_format($item->amount_due, 2) }}</td>
                     </tr>

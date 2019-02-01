@@ -105,4 +105,9 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
             'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
         ];
     }
+
+    public function getAmount(): float
+    {
+        return (float) $this->amount;
+    }
 }
