@@ -492,6 +492,10 @@
                     client_id: this.form.client_id,
                 }
             },
+
+            isPast() {
+                return moment(this.schedule.starts_at).isBefore(moment());
+            },
         },
 
         methods: {
@@ -545,6 +549,12 @@
             },
 
             submitForm() {
+                if (this.isPast) {
+                    if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
+                        return;
+                    }
+                }
+
                 this.submitting = true;
 
                 if (this.form.hours_type !== 'default') {
@@ -595,8 +605,8 @@
 
             deleteSchedule() {
                 let confirmMessage = 'Are you sure you wish to delete this scheduled shift?';
-                if (moment(this.schedule.starts_at).isBefore(moment())) {
-                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: This will not affect any shift already in the Shift History.";
+                if (this.isPast) {
+                    confirmMessage = "Are you sure you wish to delete this past entry?\nNote: Modifying past schedules will NOT change the shift history or billing.";
                 }
                 if (this.schedule.id && confirm(confirmMessage)) {
                     let form = new Form();

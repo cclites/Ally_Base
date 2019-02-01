@@ -531,26 +531,34 @@
                 return kpis;
             },
 
-            updateStatus(val) {
-                if (this.hoverShift.id) {
-                    let url = `/business/schedule/${this.hoverShift.id}/status`;
-                    // this.busy = true;
-                    let form = new Form({
-                        id: this.hoverShift.id,
-                        status: val,
-                    });
-
-                    form.patch(url)
-                        .then(response => {
-                            // this.$emit('updateEvent', this.form.id, response.data.data);
-                            // this.showModal = false;
-                            this.fetchEvents(true);
-                            // this.busy = false;
-                        })
-                        .catch(e => {
-                            // this.busy = false;
-                        });
+            updateStatus(val, e) {
+                if (! this.hoverShift.id) {
+                    return;
                 }
+            
+                if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at.date).isBefore(moment())) {
+                    if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
+                        return;
+                    }
+                }
+
+                let url = `/business/schedule/${this.hoverShift.id}/status`;
+                // this.busy = true;
+                let form = new Form({
+                    id: this.hoverShift.id,
+                    status: val,
+                });
+
+                form.patch(url)
+                    .then(response => {
+                        // this.$emit('updateEvent', this.form.id, response.data.data);
+                        // this.showModal = false;
+                        this.fetchEvents(true);
+                        // this.busy = false;
+                    })
+                    .catch(e => {
+                        // this.busy = false;
+                    });
             },
 
             editFromPreview() {
