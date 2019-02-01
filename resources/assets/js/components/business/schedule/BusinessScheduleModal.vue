@@ -272,6 +272,8 @@
                                         <option value="ATTENTION_REQUIRED">Attention Required</option>
                                         <option value="CLIENT_CANCELED">Client Canceled</option>
                                         <option value="CAREGIVER_CANCELED">Caregiver Canceled</option>
+                                        <option value="CAREGIVER_NOSHOW">Caregiver No Show</option>
+                                        <option value="OPEN_SHIFT">Open Shift</option>
                                     </b-form-select>
                                 </b-form-group>
                                 <b-form-group label="Schedule Notes" label-for="notes">

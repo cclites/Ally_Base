@@ -178,6 +178,10 @@ class ScheduleController extends BaseController
         $data = $request->validated();
         $data['starts_at'] = Carbon::createFromTimestamp($request->starts_at, $business->timezone);
         unset($data['notes']);
+
+        if (in_array($data['status'], [Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT])) {
+            $data['caregiver_id'] = null;
+        }
         $schedule->update($data);
         return new SuccessResponse('The schedule has been updated.');
     }
@@ -238,6 +242,11 @@ class ScheduleController extends BaseController
 
         // set status
         $schedule->update(['status' => request()->status]);
+
+        // clear caregiver if open shift
+        if (in_array(request()->status, [Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT])) {
+            $schedule->update(['caregiver_id' => null]);
+        }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });

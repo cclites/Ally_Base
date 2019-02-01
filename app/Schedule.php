@@ -126,6 +126,8 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     const ATTENTION_REQUIRED = 'ATTENTION_REQUIRED';
     const CAREGIVER_CANCELED = 'CAREGIVER_CANCELED';
     const CLIENT_CANCELED = 'CLIENT_CANCELED';
+    const CAREGIVER_NOSHOW = 'CAREGIVER_NOSHOW';
+    const OPEN_SHIFT = 'OPEN_SHIFT';
 
     ///////////////////////////////////////////
     /// Related Shift Statuses
