@@ -5,6 +5,7 @@ namespace App\Responses\Resources;
 use App\Shifts\AllyFeeCalculator;
 use App\Shifts\RateFactory;
 use Illuminate\Contracts\Support\Responsable;
+use App\Shift;
 
 class ClientCaregiver implements Responsable
 {
@@ -78,6 +79,9 @@ class ClientCaregiver implements Responsable
             );
         }
 
+        $caregiver->last_service_date = $caregiver->getLastServiceDate($client);
+        $caregiver->total_hours = $caregiver->totalServiceHours($client->id);
+        
         return $caregiver;
     }
 }

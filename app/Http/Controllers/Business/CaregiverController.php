@@ -38,7 +38,9 @@ class CaregiverController extends BaseController
     public function index(Request $request)
     {
         if ($request->expectsJson()) {
-            $query = Caregiver::forRequestedBusinesses()->ordered();
+            $query = Caregiver::with('clients.business')
+                ->forRequestedBusinesses()
+                ->ordered();
 
             // Default to active only, unless active is provided in the query string
             if ($request->input('active', 1) !== null) {
@@ -52,7 +54,17 @@ class CaregiverController extends BaseController
                 $query->with('phoneNumber');
             }
 
-            return $query->get();
+            if ($request->filled('location')) {
+                $query->whereHas('clients', function($q1) use ($request) {
+                    $q1->whereHas('business', function ($q2) use ($request) {
+                        $q2->where('id', $request->location);
+                    });
+                });
+            }
+
+            $results = $query->get();
+            // dd($results->toArray());
+            return response()->json($results);
         }
 
         return view('business.caregivers.index');
@@ -141,6 +153,9 @@ class CaregiverController extends BaseController
         }
 
         $caregiver->future_schedules = $caregiver->futureSchedules()->count();
+        $caregiver->hours_total = $caregiver->totalServiceHours();
+        $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
+        $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
 
         return view('business.caregivers.show', compact('caregiver', 'schedules', 'business'));
     }

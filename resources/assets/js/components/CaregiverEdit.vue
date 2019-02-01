@@ -56,6 +56,12 @@
                         </b-form-input>
                         <input-help :form="form" field="medicaid_id" text="The caregiver ID, or license number, for Medicaid"></input-help>
                     </b-form-group>
+                    <b-form-group label="Orientation Date">
+                        <date-picker id="orientation_date" v-model="form.orientation_date"></date-picker>
+                    </b-form-group>
+                    <b-form-group label="Application Date">
+                        <date-picker id="application_date" v-model="form.application_date"></date-picker>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -98,6 +104,11 @@
                     </b-form-group>
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
+                    </b-form-group>
+                    <b-form-group label="Confirmed Service Hours">
+                        <div class="mb-2"><strong>Lifetime: </strong>{{ caregiver.hours_total.toLocaleString() }}</div>
+                        <div class="mb-2"><strong>Last 90 Days: </strong>{{ caregiver.hours_last_90.toLocaleString() }}</div>
+                        <div class="mb-2"><strong>Last 30 Days: </strong>{{ caregiver.hours_last_30.toLocaleString() }}</div>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -156,11 +167,14 @@
 </template>
 
 <script>
+    import FormatsDates from '../mixins/FormatsDates';
     export default {
         props: {
             'caregiver': {},
         },
 
+        mixins: [FormatsDates],
+        
         data() {
             return {
                 form: new Form({
@@ -175,6 +189,8 @@
                     gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
+                    orientation_date: this.caregiver.orientation_date ? this.formatDate(this.caregiver.orientation_date) : '',
+                    application_date: this.caregiver.application_date ? this.formatDate(this.caregiver.application_date) : '',
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,

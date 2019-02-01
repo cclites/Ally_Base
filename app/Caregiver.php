@@ -151,11 +151,13 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
         'w9_employer_id_number',
         'medicaid_id',
         'hourly_rate_id',
-        'fixed_rate_id'
+        'fixed_rate_id',
+        'application_date',
+        'orientation_date',
     ];
     protected $appends = ['masked_ssn'];
 
-    public $dates = ['onboarded', 'hire_date', 'deleted_at'];
+    public $dates = ['onboarded', 'hire_date', 'deleted_at', 'application_date', 'orientation_date'];
 
     ///////////////////////////////////////////
     /// Relationship Methods
@@ -502,6 +504,53 @@ class Caregiver extends AuditableModel implements UserRole, CanBeConfirmedInterf
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
+
+    /**
+     * Get the date of the last shift between the Caregiver and
+     * the given Client.
+     *
+     * @param Client $client
+     * @return null|string
+     */
+    public function getLastServiceDate(Client $client) : ?string
+    {
+        $lastShift = Shift::forCaregiver($this->id)
+            ->forClient($client->id)
+            ->latest()
+            ->first();
+        
+        if (empty($lastShift)) {
+            return null;
+        }
+
+        return optional($lastShift->checked_in_time)->format('Y-m-d');
+    }
+
+    /**
+     * Get the total number of hours the Caregiver has worked for
+     * the given Client and between the given date range.
+     *
+     * @param null|integer $client
+     * @param null|string $startDate
+     * @param null|string $endDate
+     * @return integer
+     */
+    public function totalServiceHours(?int $clientId = null, ?string $startDate = null, ?string $endDate = null) : int
+    {
+        $result = Shift::selectRaw('SUM(hours) as total_hours')
+            ->forCaregiver($this->id)
+            ->forClient($clientId)
+            ->betweenDates($startDate, $endDate)
+            ->whereNotNull('checked_out_time')
+            ->whereConfirmed()
+            ->first();
+
+        if (empty($result)) {
+            return 0;
+        }
+
+        return empty($result->total_hours) ? 0 : $result->total_hours;
+    }
 
     /**
      * A query scope for filtering results by related business IDs
