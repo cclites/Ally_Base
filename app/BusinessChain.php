@@ -88,6 +88,11 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(CustomField::class, 'chain_id');
     }
 
+    public function referralSources()
+    {
+        return $this->hasMany(ReferralSource::class, 'chain_id');
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////

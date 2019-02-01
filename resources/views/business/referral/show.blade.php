@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="tab-pane" id="client_notes" role="tabpanel">
-            <notes-tab :notes="{{ $referralSource->notes }}" :business="{{ $business }}" :source="{{ $referralSource }}"></notes-tab>
+            <notes-tab :notes="{{ $referralSource->notes }}" :source="{{ $referralSource }}"></notes-tab>
         </div>
     </div>
 @endsection

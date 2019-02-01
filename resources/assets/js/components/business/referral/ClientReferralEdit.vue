@@ -19,11 +19,6 @@
                                 <b-form-input v-model="form.phone" type="text" />
                                 <input-help :form="form" field="phone"></input-help>
                             </b-form-group>
-                            <business-location-form-group v-model="form.business_id"
-                                                        :form="form"
-                                                        field="business_id"
-                                                        help-text="">
-                            </business-location-form-group>
                         </b-col>
                     </b-row>
             </b-container>
@@ -40,11 +35,7 @@
 </template>
 
 <script>
-    import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
-
     export default {
-        components: {BusinessLocationFormGroup},
-
         props: {
             source: Object,
         },
@@ -71,7 +62,6 @@
                     organization: defaults.organization,
                     contact_name: defaults.contact_name,
                     phone: defaults.phone,
-                    business_id: defaults.business_id || ""
                 });
             },
 

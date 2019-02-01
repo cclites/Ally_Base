@@ -11,9 +11,9 @@ class ReferralSourceController extends BaseController
 {
     public function index($edit = 0, $create = 0)
     {
-        $referralsources = ReferralSource::forRequestedBusinesses()->ordered()->get();
+        $referralsources = $this->businessChain()->referralSources()->ordered()->get();
         if (request()->expectsJson()) {
-            return $referralsources;
+            return response()->json($referralsources);
         }
 
         return view('business.referral.list', compact('referralsources', 'edit', 'create'));
@@ -42,18 +42,15 @@ class ReferralSourceController extends BaseController
             },
         ]);
 
-        $business = $this->business();
-
-        return view('business.referral.show', compact('referralSource', 'business'));
+        return view('business.referral.show', compact('referralSource'));
     }
 
     public function store(UpdateReferralSourceRequest $request)
     {
-        $data = $request->filtered();
+        $data = $request->validated();
         $this->authorize('create', [ReferralSource::class, $data]);
 
-        $referralSource = ReferralSource::create($data);
-        if ($referralSource) {
+        if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
             return new CreatedResponse('The referral source has been created!', $referralSource);
         }
 
@@ -63,7 +60,7 @@ class ReferralSourceController extends BaseController
     public function update(ReferralSource $referralSource, UpdateReferralSourceRequest $request)
     {
         $this->authorize('update', $referralSource);
-        $data = $request->filtered();
+        $data = $request->validated();
 
         if ($referralSource->update($data)) {
             return new SuccessResponse('The referral source has been saved!', $referralSource);

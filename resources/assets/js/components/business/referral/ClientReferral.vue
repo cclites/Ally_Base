@@ -76,12 +76,6 @@
                         sortable: true
                     },
                     {
-                        key: 'business_id',
-                        label: 'Location',
-                        sortable: true,
-                        formatter: this.showBusinessName,
-                    },
-                    {
                         key: 'created_at',
                         label: 'Created At',
                         sortable: true,

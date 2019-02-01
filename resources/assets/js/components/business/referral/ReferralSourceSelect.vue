@@ -24,7 +24,7 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'businessId'],
+        props: ['value'],
 
         data() {
             return {
@@ -43,8 +43,7 @@
                 }
             },
             filteredSources() {
-                return (this.businessId === undefined) ? this.referralSources
-                    : this.referralSources.filter(source => source.business_id === this.businessId);
+                return this.referralSources;
             }
         },
 
