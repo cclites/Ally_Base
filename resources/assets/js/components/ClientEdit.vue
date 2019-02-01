@@ -142,7 +142,7 @@
                     </b-form-group>
 
                     <b-form-group>
-                        <referral-source-select v-model="form.referral_source_id"></referral-source-select>
+                        <business-referral-source-select v-model="form.referral_source_id"></business-referral-source-select>
                         <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                     </b-form-group>
 
@@ -468,7 +468,12 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal>
+        <business-referral-source-modal 
+            @saved="savedReferralSource"
+            v-model="showReferralModal"
+            :source="{}"
+            source-type="client"
+        ></business-referral-source-modal>
     </b-card>
 </template>
 
@@ -477,7 +482,6 @@
     import DatePicker from './DatePicker';
     import FormatsDates from '../mixins/FormatsDates';
     import BusinessLocationSelect from './business/BusinessLocationSelect'
-    import ReferralSourceSelect from "./business/referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "./business/BusinessLocationFormGroup";
     window.croppie = require('croppie');
 
@@ -493,7 +497,6 @@
 
         components: {
             BusinessLocationFormGroup,
-            ReferralSourceSelect,
             DatePicker,
             BusinessLocationSelect,
         },
@@ -561,9 +564,9 @@
         },
 
         methods: {
-            newrefsourcedata(data) {
+            savedReferralSource(data) {
                 if(data) {
-                    this.show = false;
+                    this.showReferralModal = false;
                     this.referralsources.push(data);
                     this.form.referral_source_id = data.id;
                 }
@@ -572,10 +575,6 @@
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/${this.client.business_id}/office-users`);
                 this.caseManagers = response.data;
-            },
-
-            closemodal(status) {
-                this.show = status;
             },
 
             checkForNoEmailDomain() {

@@ -2,6 +2,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\ReferralSource;
 
 class UpdateReferralSourceRequest extends FormRequest
 {
@@ -21,6 +22,7 @@ class UpdateReferralSourceRequest extends FormRequest
             'organization' => 'required',
             'contact_name' => 'required',
             'phone' => 'nullable|max:32',
+            'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
         ];
     }
 }

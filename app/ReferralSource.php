@@ -30,25 +30,118 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;
 
-    protected $orderedColumn = 'organization';
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'chain_id',
         'organization',
         'contact_name',
-        'phone'
+        'phone',
+        'type',
     ];
+    
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    public $with = [];
+    
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [];
+    
+    /**
+     * The default sorting column.
+     *
+     * @var string
+     */
+    protected $orderedColumn = 'organization';
 
-    public function client() {
+    // **********************************************************
+    // REFERRAL SOURCE TYPES
+    // **********************************************************
+    const TYPE_CLIENT = 'client';
+    const TYPE_CAREGIVER = 'caregiver';
+
+    // **********************************************************
+    // RELATIONSHIPS
+    // **********************************************************
+    
+    /**
+     * A ReferralSource can have many Caregivers.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function caregiers() {
         return $this->hasMany(Client::class);
     }
 
-    public function prospect() {
+    /**
+     * A ReferralSource can have many Clients.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clients() {
+        return $this->hasMany(Client::class);
+    }
+
+    /**
+     * A ReferralSource can have many Prospects.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function prospects() {
         return $this->hasMany(Prospect::class);
     }
 
+    /**
+     * Get the referral source notes relation.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function notes()
     {
         return $this->hasMany(Note::class);
+    }
+
+    // **********************************************************
+    // MUTATORS
+    // **********************************************************
+    
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+    
+    /**
+     * Get only sources for the given type.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $type
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    // **********************************************************
+    // OTHER FUNCTIONS
+    // **********************************************************
+
+    /**
+     * Get a list of the valid ReferralSource types.
+     *
+     * @return array
+     */
+    public static function validTypes() : array
+    {
+        return [static::TYPE_CLIENT, static::TYPE_CAREGIVER];
     }
 }

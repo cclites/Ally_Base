@@ -11,12 +11,19 @@ class ReferralSourceController extends BaseController
 {
     public function index($edit = 0, $create = 0)
     {
-        $referralsources = $this->businessChain()->referralSources()->ordered()->get();
+        $type = request()->type === ReferralSource::TYPE_CAREGIVER ? ReferralSource::TYPE_CAREGIVER : ReferralSource::TYPE_CLIENT;
+
+        $referralsources = $this->businessChain()
+            ->referralSources()
+            ->forType($type)
+            ->ordered()
+            ->get();
+
         if (request()->expectsJson()) {
             return response()->json($referralsources);
         }
 
-        return view('business.referral.list', compact('referralsources', 'edit', 'create'));
+        return view('business.referral.list', compact('referralsources', 'edit', 'create', 'type'));
     }
 
     public function create()
@@ -51,7 +58,7 @@ class ReferralSourceController extends BaseController
         $this->authorize('create', [ReferralSource::class, $data]);
 
         if ($referralSource = $this->businessChain()->referralSources()->create($data)) {
-            return new CreatedResponse('The referral source has been created!', $referralSource);
+        return new CreatedResponse('The referral source has been created!', $referralSource);
         }
 
         return new ErrorResponse(500, 'Unable to create referral source.');

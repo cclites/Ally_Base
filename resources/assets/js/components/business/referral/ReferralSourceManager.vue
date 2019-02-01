@@ -2,7 +2,7 @@
     <b-card>
         <b-row class="mb-2">
             <b-col lg="3">
-                <b-btn variant="info" @click="showModal=true">Add Referral Sources</b-btn>
+                <b-btn variant="info" @click="showModal=true">Add Referral Source</b-btn>
             </b-col>
         </b-row>
         <div class="table-responsive">
@@ -16,7 +16,6 @@
                      :sort-desc.sync="sortDesc"
             >
                 <template slot="actions" scope="row">
-                    <!--<b-btn size="sm" @click="edit(row.item.id)">-->
                     <b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
                         <i class="fa fa-edit"></i>
                     </b-btn>
@@ -33,7 +32,12 @@
             </b-col>
         </b-row>
 
-        <client-referral-modal v-model="showModal" :source="editSource" @saved="updateList"></client-referral-modal>
+        <business-referral-source-modal
+            v-model="showModal"
+            :source="editSource" 
+            @saved="updateList"
+            :source-type="sourceType"
+        ></business-referral-source-modal>
     </b-card>
 </template>
 
@@ -44,7 +48,7 @@
     export default {
         mixins: [FormatsDates, FormatsListData],
 
-        props: ['referralSources', 'editSourceId', 'createSource'],
+        props: ['referralSources', 'editSourceId', 'createSource', 'sourceType'],
 
         data() {
             return {
