@@ -18,7 +18,7 @@
                 </b-col>
                 <b-col lg="4">
                     <b-form-group label="Middle Initial">
-                        <b-form-input v-model="form.middle_initial"></b-form-input>
+                        <b-form-input v-model="form.middle_initial" />
                     </b-form-group>
                 </b-col>
                 <b-col lg="4">
@@ -53,7 +53,7 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Phone Number">
-                        <b-form-input id="phone_number" v-model="form.phone_number"></b-form-input>
+                        <b-form-input id="phone_number" v-model="form.phone_number" />
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -79,7 +79,7 @@
             <b-row>
                 <b-col>
                     <b-form-group label="Address">
-                        <b-form-input v-model="form.address"></b-form-input>
+                        <b-form-input v-model="form.address" />
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -136,12 +136,12 @@
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Client Height">
-                        <b-form-input v-model="form.height"></b-form-input>
+                        <b-form-input v-model="form.height" />
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Client Weight">
-                        <b-form-input v-model="form.weight"></b-form-input>
+                        <b-form-input v-model="form.weight" />
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -178,26 +178,26 @@
             <b-col lg="6">
                 <b-card border-variant="secondary" header="Primary Care Physician">
                     <b-form-group label="Name" class="mt-2">
-                        <b-form-input v-model="form.physician_name"></b-form-input>
+                        <b-form-input v-model="form.physician_name" />
                     </b-form-group>
                     <b-form-group label="Phone">
-                        <b-form-input v-model="form.physician_phone"></b-form-input>
+                        <b-form-input v-model="form.physician_phone" />
                     </b-form-group>
                     <b-form-group label="Address">
-                        <b-form-input v-model="form.physician_address"></b-form-input>
+                        <b-form-input v-model="form.physician_address" />
                     </b-form-group>
                 </b-card>
             </b-col>
             <b-col lg="6">
                 <b-card border-variant="secondary" header="Pharmacy">
                     <b-form-group label="Name" class="mt-2">
-                        <b-form-input v-model="form.pharmacy_name"></b-form-input>
+                        <b-form-input v-model="form.pharmacy_name" />
                     </b-form-group>
                     <b-form-group label="Phone">
-                        <b-form-input v-model="form.pharmacy_phone"></b-form-input>
+                        <b-form-input v-model="form.pharmacy_phone" />
                     </b-form-group>
                     <b-form-group label="Address">
-                        <b-form-input v-model="form.pharmacy_address"></b-form-input>
+                        <b-form-input v-model="form.pharmacy_address" />
                     </b-form-group>
                 </b-card>
             </b-col>
@@ -213,47 +213,44 @@
                     </b-btn>
                 </div>
             </div>
-            <b-row v-show="showAddMeds">
-                <b-col md="4">
-                    <b-form-group label="Name">
-                        <b-form-input v-model="med.type"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col md="4">
-                    <b-form-group label="Dose">
-                        <b-form-input v-model="med.dose"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col md="4">
-                    <b-form-group label="Frequency">
-                        <b-form-input v-model="med.frequency"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col md="4">
-                    <b-btn @click="addMedication" variant="info" size="sm">Add Medication</b-btn>
-                </b-col>
-            </b-row>
+            <form v-show="showAddMeds" @keydown="med.clearError($event.target.name)" @submit.prevent="addMedication">
+                <b-row>
+                    <b-col md="6">
+                        <b-form-group label="Name" label-class="required">
+                            <b-form-input v-model="med.type" required />
+                        </b-form-group>
+                    </b-col>
+                    <b-col md="6">
+                        <b-form-group label="Description" label-class="required">
+                            <b-form-textarea v-model="med.description" :rows="3" required />
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-col md="4">
+                        <b-form-group label="Dose" label-class="required">
+                            <b-form-input v-model="med.dose" required />
+                        </b-form-group>
+                    </b-col>
+                    <b-col md="4">
+                        <b-form-group label="Frequency" label-class="required">
+                            <b-form-input v-model="med.frequency" required />
+                        </b-form-group>
+                    </b-col>
+                    <b-col md="4">
+                        <b-btn type="submit" variant="info" size="sm">Add Medication</b-btn>
+                    </b-col>
+                </b-row>
+            </form>
             <b-row class="my-2">
-                <b-col md="4">
-                    Name
-                </b-col>
-                <b-col md="4">
-                    Dose
-                </b-col>
-                <b-col md="4">
-                    Frequency
-                </b-col>
+                <b-col md="4">Name</b-col>
+                <b-col md="4">Dose</b-col>
+                <b-col md="4">Frequency</b-col>
             </b-row>
             <b-row v-for="(item, index) in form.medications" :key="index">
-                <b-col md="4">
-                    {{ item.type }}
-                </b-col>
-                <b-col md="4">
-                    {{ item.dose }}
-                </b-col>
-                <b-col md="4">
-                    {{ item.frequency }}
-                </b-col>
+                <b-col md="4">{{ item.type }}</b-col>
+                <b-col md="4">{{ item.dose }}</b-col>
+                <b-col md="4">{{ item.frequency }}</b-col>
             </b-row>
         </b-card>
 
@@ -267,13 +264,13 @@
             </b-form-group>
             <template v-if="form.hospice_care">
                 <b-form-group label="Office Location (city)">
-                    <b-form-input v-model="form.hospice_office_location"></b-form-input>
+                    <b-form-input v-model="form.hospice_office_location" />
                 </b-form-group>
                 <b-form-group label="Case Manager Name">
-                    <b-form-input v-model="form.hospice_case_manager"></b-form-input>
+                    <b-form-input v-model="form.hospice_case_manager" />
                 </b-form-group>
                 <b-form-group label="Phone">
-                    <b-form-input v-model="form.hospice_phone"></b-form-input>
+                    <b-form-input v-model="form.hospice_phone" />
                 </b-form-group>
             </template>
         </b-card>
@@ -287,7 +284,7 @@
                 </b-form-radio-group>
             </b-form-group>
             <b-form-group v-if="form.dnr" label="Where is the DNR posted?">
-                <b-form-input v-model="form.dnr_location"></b-form-input>
+                <b-form-input v-model="form.dnr_location" />
             </b-form-group>
         </b-card>
 
@@ -296,19 +293,19 @@
             <b-col lg="6">
                 <b-card border-variant="secondary" header="Primary Emergency Contacts">
                     <b-form-group label="Name">
-                        <b-form-input v-model="form.ec_name"></b-form-input>
+                        <b-form-input v-model="form.ec_name" />
                     </b-form-group>
                     <b-form-group label="Address">
-                        <b-form-input v-model="form.ec_address"></b-form-input>
+                        <b-form-input v-model="form.ec_address" />
                     </b-form-group>
                     <b-form-group label="Phone Number">
-                        <b-form-input v-model="form.ec_phone_number"></b-form-input>
+                        <b-form-input v-model="form.ec_phone_number" />
                     </b-form-group>
                     <b-form-group label="Email">
-                        <b-form-input v-model="form.ec_email"></b-form-input>
+                        <b-form-input v-model="form.ec_email" />
                     </b-form-group>
                     <b-form-group label="Relationship">
-                        <b-form-input v-model="form.ec_relationship"></b-form-input>
+                        <b-form-input v-model="form.ec_relationship" />
                     </b-form-group>
                     <b-form-group label="POA" horizontal>
                         <b-form-radio-group v-model="form.ec_poa">
@@ -321,19 +318,19 @@
             <b-col lg="6">
                 <b-card border-variant="secondary" header="Secondary Emergency Contacts">
                     <b-form-group label="Name">
-                        <b-form-input v-model="form.secondary_ec_name"></b-form-input>
+                        <b-form-input v-model="form.secondary_ec_name" />
                     </b-form-group>
                     <b-form-group label="Address">
-                        <b-form-input v-model="form.secondary_ec_address"></b-form-input>
+                        <b-form-input v-model="form.secondary_ec_address" />
                     </b-form-group>
                     <b-form-group label="Phone Number">
-                        <b-form-input v-model="form.secondary_ec_phone_number"></b-form-input>
+                        <b-form-input v-model="form.secondary_ec_phone_number" />
                     </b-form-group>
                     <b-form-group label="Email">
-                        <b-form-input v-model="form.secondary_ec_email"></b-form-input>
+                        <b-form-input v-model="form.secondary_ec_email" />
                     </b-form-group>
                     <b-form-group label="Relationship">
-                        <b-form-input v-model="form.secondary_ec_relationship"></b-form-input>
+                        <b-form-input v-model="form.secondary_ec_relationship" />
                     </b-form-group>
                     <b-form-group label="POA" horizontal>
                         <b-form-radio-group v-model="form.secondary_ec_poa">
@@ -388,7 +385,7 @@
                 </b-form-radio-group>
             </b-form-group>
             <b-form-group label="Who will be responsible for the client during an evacuation?">
-                <b-form-input v-model="form.emp_evacuation_responsible_party"></b-form-input>
+                <b-form-input v-model="form.emp_evacuation_responsible_party" />
             </b-form-group>
             <b-form-group label="Will the client need a caregiver during this period?" horizontal :label-cols="8"
                           breakpoint="md">
