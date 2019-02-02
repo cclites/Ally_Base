@@ -130,6 +130,7 @@ Vue.component('business-caregiver-skills-tab', require('./components/business/ca
 Vue.component('business-caregiver-phone-numbers-tab', require('./components/business/caregivers/BusinessCaregiverPhoneNumbersTab'));
 Vue.component('business-client-phone-numbers-tab', require('./components/business/clients/BusinessClientPhoneNumbersTab'));
 Vue.component('business-client-care-plans-tab', require('./components/business/clients/ClientCarePlansTab'));
+Vue.component('client-medication', require('./components/business/clients/Medication'));
 Vue.component('business-client-goals', require('./components/business/clients/ClientGoals'));
 Vue.component('business-client-care-details', require('./components/business/clients/ClientCareDetails'));
 Vue.component('business-client-addresses-tab', require('./components/business/clients/ClientAddressesTab'));

@@ -142,6 +142,7 @@
         <div class="tab-pane" id="care_plans" role="tabpanel">
             <business-client-care-plans-tab :client="{{ $client }}" :activities="{{ $business->allActivities() }}"></business-client-care-plans-tab>
             <business-client-goals :client="{{ $client }}" :goals="[]"></business-client-goals>
+            <client-medication :client="{{ $client }}" :medications="[]"></client-medication>
             <b-card
                 header="Client Narrative"
                 header-text-variant="white"
