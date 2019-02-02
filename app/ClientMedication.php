@@ -57,16 +57,7 @@ class ClientMedication extends BaseModel
     {
         return empty($this->attributes['frequency']) ? null : Crypt::decrypt($this->attributes['frequency']);
     }
-
-    public function setNameAttribute($value)
-    {
-        $this->attributes['name'] = Crypt::encrypt($value);
-    }
-
-    public function getNameAttribute()
-    {
-        return empty($this->attributes['name']) ? null : Crypt::decrypt($this->attributes['name']);
-    }
+    
     public function setDescriptionAttribute($value)
     {
         $this->attributes['description'] = Crypt::encrypt($value);

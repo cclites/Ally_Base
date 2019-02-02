@@ -14,7 +14,6 @@ class AlterClientMedicationsAddColumns extends Migration
     public function up()
     {
         Schema::table('client_medications', function (Blueprint $table) {
-            $table->binary('name', 65535);
             $table->binary('description', 65535);
             $table->binary('side_effects', 65535)->nullable();
             $table->binary('notes', 65535)->nullable();
@@ -30,7 +29,6 @@ class AlterClientMedicationsAddColumns extends Migration
     public function down()
     {
         Schema::table('client_medications', function (Blueprint $table) {
-            $table->dropColumn('name');
             $table->dropColumn('description');
             $table->dropColumn('side_effects');
             $table->dropColumn('notes');
