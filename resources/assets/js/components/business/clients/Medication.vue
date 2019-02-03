@@ -7,7 +7,6 @@
         <b-btn variant="info" class="mb-2" @click="showModal()">Add Medication</b-btn>
         <ally-table id="client-medication" :columns="fields" :items="items" sort-by="">
             <template slot="actions" scope="row">
-                <b-btn size="sm" @click="showModal(row.item)">Edit</b-btn>
                 <b-btn size="sm" @click="destroyMedication(row.item)" variant="danger">X</b-btn>
             </template>
         </ally-table>
@@ -43,9 +42,8 @@
                             </b-form-group>
                         </b-col>
                     </b-row>
-                    <b-form-group label="Description" label-for="description" label-class="required">
+                    <b-form-group label="Description" label-class="required">
                         <b-form-textarea
-                            id="description"
                             name="description"
                             v-model="form.description"
                             :rows="3"
@@ -55,16 +53,14 @@
                     </b-form-group>
                     <b-form-group label="Side effects" label-for="side_effects">
                         <b-form-textarea
-                            id="side_effects"
                             name="side_effects"
                             v-model="form.side_effects"
                             :rows="3"
                         />
                         <input-help :form="form" field="side_effects" text="Enter information about the side effects of this medicine." />
                     </b-form-group>
-                    <b-form-group label="Notes" label-for="notes">
+                    <b-form-group label="Notes">
                         <b-form-textarea
-                            id="notes"
                             name="notes"
                             v-model="form.notes"
                             :rows="3"
@@ -89,7 +85,7 @@
 
         <b-modal id="confirmDeleteModal" title="Delete Medication" v-model="confirmDeleteModal">
             <b-container fluid>
-                <h4>Are you sure you want to do delete the medication "{{ selected.name }}"?</h4>
+                <h4>Are you sure you want to delete the medication "{{ selected.type }}"?</h4>
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="confirmDeleteModal = false">Cancel</b-btn>
@@ -118,6 +114,10 @@
         },
 
         mixins: [FormatsDates],
+
+        mounted() {
+            this.form = this.resetForm();
+        },
 
         data() {
             return {
@@ -164,7 +164,7 @@
                         shouldShow: true,
                     },
                 ],
-                items: [],
+                items: this.medications,
                 form: new Form({
                     type: '',
                     description: '',
@@ -184,26 +184,37 @@
             },
         },
 
-        mounted() {
-            axios.get(this.url).then( ({ data }) => {
-                this.items = data;
-            });
-        },
-
         methods: {
-            showModal(goal = null) {
+            resetForm() {
+                return new Form({
+                    type: '',
+                    description: '',
+                    side_effects: '',
+                    dose: '',
+                    frequency: '',
+                    notes: '',
+                    tracking: '',
+                });
+            },
+
+            showModal(medication = null) {
                 this.form.reset();
 
-                if (goal) {
-                    this.selected = goal;
-                    this.form.question = goal.question;
-                    this.form.track_goal_progress = goal.track_goal_progress;
+                if (medication) {
+                    this.selected = medication;
+                    [
+                        'type',
+                        'description',
+                        'side_effects',
+                        'dose',
+                        'amount',
+                        'frequency',
+                        'notes',
+                        'tracking',
+                    ].forEach(field => this.form[field] = medication[field]);
                 } else {
                     this.selected = {};
-                    this.form = new Form({
-                        question: '',
-                        track_goal_progress: true,
-                    });
+                    this.form = this.resetForm();
                 }
 
                 this.editModal = true;
@@ -216,8 +227,8 @@
                     return;
                 }
 
-                let form = new Form;
-                form.submit('delete', this.goalUrl(goal))
+                const form = new Form;
+                form.submit('delete', `/business/clients/${this.client.id}/medications/${this.selected.id}`)
                     .then( ({ data }) => {
                         let index = this.items.findIndex(item => item.id == this.selected.id);
                         if (index != -1) {
@@ -246,7 +257,7 @@
                 if (index != -1) {
                     this.items.splice(index, 1, medication);
                 } else {
-                    this.items[index] = medication;
+                    this.items.push(medication);
                 }
             },
         }
