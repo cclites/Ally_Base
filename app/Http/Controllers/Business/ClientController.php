@@ -158,6 +158,7 @@ class ClientController extends BaseController
             'creditCards',
             'payments',
             'user.documents',
+            'medications',
             'meta',
             'notes.creator',
             'careDetails',
