@@ -20,6 +20,7 @@
             @saved="newReferralSource"
             v-model="showReferralModal" 
             :source="{}"
+            :source-type="sourceType"
         ></business-referral-source-modal>
     </b-row>
 </template>

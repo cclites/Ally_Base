@@ -132,7 +132,7 @@
             <hr />
             <b-row>
                 <b-col lg="6">
-                    <referral-source-select v-model="form.referral_source_id" :business-id="form.business_id"></referral-source-select>
+                    <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                     <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                 </b-col>
                 <b-col lg="6">
@@ -184,11 +184,10 @@
 <script>
     import Countries from "../../../classes/Countries";
     import States from "../../../classes/States";
-    import ReferralSourceSelect from "../referral/ReferralSourceSelect";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
 
     export default {
-        components: {BusinessLocationFormGroup, ReferralSourceSelect},
+        components: {BusinessLocationFormGroup},
 
         props: ['prospect', 'referralsources'],
 
