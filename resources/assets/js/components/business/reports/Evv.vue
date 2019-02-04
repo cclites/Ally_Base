@@ -99,11 +99,13 @@
 
 <script>
     import FormatsDistance from "../../../mixins/FormatsDistance";
+    import FormatsDates from "../../../mixins/FormatsDates";
 
     export default {
         props: {},
 
         mixins: [FormatsDistance],
+        mixins: [FormatsDistance, FormatsDates],
 
         data() {
             return {
