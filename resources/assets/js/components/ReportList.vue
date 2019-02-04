@@ -234,14 +234,14 @@
 
                     {
                         name: 'Client Directory',
-                        url: 'clients',
+                        url: 'reports/client-directory',
                         description: 'Shows the full list of clients',
                         category: 2,
                         allowed: ['office_user'],
                     },
                     {
                         name: 'Caregiver Directory',
-                        url: 'caregivers',
+                        url: 'reports/caregiver-directory',
                         description: 'Shows the full list of caregivers',
                         category: 3,
                         allowed: ['office_user'],
