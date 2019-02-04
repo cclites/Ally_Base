@@ -729,22 +729,23 @@ class ReportsController extends BaseController
     }
     
     /**
-     * List of referral sources and how many clients have been referred by each
+     * List of referral sources and how many Clients have been referred by each.
      *
      * @return Response
      */
-    public function referralSources()
+    public function clientReferralSources()
     {
         $reports = [];
-
         $shiftstatuses = ShiftStatusManager::getPendingStatuses();
 
-        $referralsources = ReferralSource::forRequestedBusinesses()
-            ->withCount('client', 'prospect')->with(['client.shifts' => function($query) use($shiftstatuses){
+        $referralsources = $this->businessChain()->referralSources()
+            ->forType('client')
+            ->withCount('clients', 'prospects')
+            ->with(['clients.shifts' => function ($query) use ($shiftstatuses) {
                 $query->whereNotIn('status', $shiftstatuses)->get();
             }])->get();
 
-        if($referralsources) {
+        if ($referralsources) {
             foreach($referralsources as $referralsource) {
                 $reports[] = [
                     "id" => $referralsource->id,
@@ -753,9 +754,9 @@ class ReportsController extends BaseController
                     "contact_name" => $referralsource->contact_name,
                     "phone" => $referralsource->phone,
                     "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
-                    "client_count" => $referralsource->client_count,
-                    "prospect_count" => $referralsource->prospect_count,
-                    "shift_total" => ($referralsource->client->map(function($item) {
+                    "clients_count" => $referralsource->clients_count,
+                    "prospects_count" => $referralsource->prospects_count,
+                    "shift_total" => ($referralsource->clients->map(function($item) {
                            return $item->shifts->map(function($shift) {
                                return number_format($shift->costs()->getTotalCost(), 2);
                            })->sum();
@@ -765,7 +766,49 @@ class ReportsController extends BaseController
         }
 
         $reports = collect($reports);
-        return view('business.reports.referral_sources', compact('reports'));
+        $type = "client";
+        return view('business.reports.referral_sources', compact('reports', 'type'));
+    }
+
+    /**
+     * List of referral sources and how many Caregivers have been referred by each.
+     *
+     * @return Response
+     */
+    public function caregiverReferralSources()
+    {
+        $reports = [];
+        $shiftstatuses = ShiftStatusManager::getPendingStatuses();
+
+        $referralsources = $this->businessChain()->referralSources()
+            ->forType('caregiver')
+            ->withCount('caregivers')
+            ->with(['caregivers.shifts' => function ($query) use ($shiftstatuses) {
+                $query->whereNotIn('status', $shiftstatuses)->get();
+            }])->get();
+
+        if ($referralsources) {
+            foreach($referralsources as $referralsource) {
+                $reports[] = [
+                    "id" => $referralsource->id,
+                    "business_id" => $referralsource->business_id,
+                    "organization" => $referralsource->organization,
+                    "contact_name" => $referralsource->contact_name,
+                    "phone" => $referralsource->phone,
+                    "created_at" => Carbon::parse($referralsource->created_at)->format('d/m/Y'),
+                    "caregivers_count" => $referralsource->caregivers_count,
+                    "shift_total" => ($referralsource->caregivers->map(function($item) {
+                           return $item->shifts->map(function($shift) {
+                               return number_format($shift->costs()->getTotalCost(), 2);
+                           })->sum();
+                    }))->sum()
+                ];
+            }
+        }
+
+        $reports = collect($reports);
+        $type = "caregiver";
+        return view('business.reports.referral_sources', compact('reports', 'type'));
     }
 
     /**

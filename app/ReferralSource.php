@@ -79,8 +79,8 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function caregiers() {
-        return $this->hasMany(Client::class);
+    public function caregivers() {
+        return $this->hasMany(Caregiver::class);
     }
 
     /**
