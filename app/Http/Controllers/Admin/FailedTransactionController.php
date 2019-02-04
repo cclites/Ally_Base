@@ -22,11 +22,13 @@ class FailedTransactionController extends Controller
                 'deposit',
                 'payment',
                 'deposit.caregiver',
-                'deposit.caregiver.businesses',
+                'deposit.caregiver.chains',
                 'deposit.business',
+                'deposit.business.chain',
                 'payment.client',
-                'payment.client.business',
+                'payment.client.business.chain',
                 'payment.business',
+                'payment.business.chain',
                 'lastHistory'
             ]);
             return $query->has('failedTransaction')

@@ -56,7 +56,7 @@
                     },
                     {
                         key: 'business_name',
-                        label: 'Registry',
+                        label: 'Chain',
                         sortable: true,
                     },
                     {
@@ -131,17 +131,22 @@
                             item.business_name = '';
                             if (item.related.client) {
                                 item.name = item.related.client.name;
-                                item.business_name = (item.related.client.business) ? item.related.client.business.name : '';
+                                if (item.related.client.business && item.related.client.business.chain) {
+                                    item.business_name = item.related.client.business.chain.name;
+                                }
                             }
                             else if (item.related.caregiver) {
                                 item.name = item.related.caregiver.name;
-                                if (item.related.caregiver.businesses) {
-                                    item.business_name = item.related.caregiver.businesses[0].name;
+                                if (item.related.caregiver.chains) {
+                                    item.business_name = item.related.caregiver.chains[0].name;
                                 }
                             }
                             else if (item.related.business) {
                                 item.name = item.related.business.name;
                                 item.business_name = item.related.business.name;
+                                if (item.related.business.chain) {
+                                    item.business_name = item.related.business.chain.name;
+                                }
                             }
 
                             item.last_history_date = (item.last_history) ? item.last_history.created_at : '';
