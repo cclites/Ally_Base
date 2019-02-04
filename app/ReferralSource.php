@@ -123,11 +123,15 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
      * Get only sources for the given type.
      *
      * @param \Illuminate\Database\Query\Builder $query
-     * @param string $type
+     * @param null|string $type
      * @return \Illuminate\Database\Query\Builder
      */
-    public function scopeForType($query, string $type)
+    public function scopeForType($query, ?string $type = null)
     {
+        if (empty($type)) {
+            return $query;
+        }
+
         return $query->where('type', $type);
     }
 

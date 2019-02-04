@@ -6,16 +6,15 @@ use App\ReferralSource;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
+use Illuminate\Http\Request;
 
 class ReferralSourceController extends BaseController
 {
-    public function index($edit = 0, $create = 0)
+    public function index(Request $request)
     {
-        $type = request()->type === ReferralSource::TYPE_CAREGIVER ? ReferralSource::TYPE_CAREGIVER : ReferralSource::TYPE_CLIENT;
-
         $referralsources = $this->businessChain()
             ->referralSources()
-            ->forType($type)
+            ->forType($request->type)
             ->ordered()
             ->get();
 
