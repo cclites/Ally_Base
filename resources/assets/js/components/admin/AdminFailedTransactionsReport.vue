@@ -137,8 +137,8 @@
                             }
                             else if (item.related.caregiver) {
                                 item.name = item.related.caregiver.name;
-                                if (item.related.caregiver.chains) {
-                                    item.business_name = item.related.caregiver.chains[0].name;
+                                if (item.related.caregiver.business_chains) {
+                                    item.business_name = item.related.caregiver.business_chains[0].name;
                                 }
                             }
                             else if (item.related.business) {

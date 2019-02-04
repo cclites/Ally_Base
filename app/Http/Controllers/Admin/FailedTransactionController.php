@@ -22,7 +22,7 @@ class FailedTransactionController extends Controller
                 'deposit',
                 'payment',
                 'deposit.caregiver',
-                'deposit.caregiver.chains',
+                'deposit.caregiver.businessChains',
                 'deposit.business',
                 'deposit.business.chain',
                 'payment.client',
