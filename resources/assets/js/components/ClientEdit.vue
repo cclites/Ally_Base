@@ -142,7 +142,7 @@
                     </b-form-group>
 
                     <b-form-group>
-                        <business-referral-source-select v-model="form.referral_source_id" :source-type="client"></business-referral-source-select>
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
                         <input-help :form="form" field="referred_by" text="Enter how the prospect was referred." />
                     </b-form-group>
 
