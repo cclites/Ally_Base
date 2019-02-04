@@ -12,9 +12,11 @@ class ReferralSourceController extends BaseController
 {
     public function index(Request $request)
     {
+        $type = $request->type;
+
         $referralsources = $this->businessChain()
             ->referralSources()
-            ->forType($request->type)
+            ->forType($type)
             ->ordered()
             ->get();
 
@@ -73,5 +75,20 @@ class ReferralSourceController extends BaseController
         }
 
         return new ErrorResponse(500, 'Unable to save referral source.');
+    }
+
+    public function destroy(ReferralSource $referralSource) 
+    {
+        $this->authorize('delete', $referralSource);
+
+        try {
+            if ($referralSource->delete()) {
+                return new SuccessResponse('The referral source was successfully removed.', $referralSource);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            return new ErrorResponse(400, 'Cannot delete that referral source because it is currently in use.');
+        }
+
+        return new ErrorResponse(500, 'An unexpected error occurred.');
     }
 }

@@ -19,6 +19,9 @@
                     <b-btn size="sm" :href="'/business/referral-sources/' + row.item.id">
                         <i class="fa fa-edit"></i>
                     </b-btn>
+                    <b-btn size="sm" @click="destroy(row.item)" variant="danger">
+                        <i class="fa fa-trash"></i>
+                    </b-btn>
                 </template>
             </b-table>
         </div>
@@ -115,7 +118,23 @@
                 else {
                     Vue.set(this.items, index, source);
                 }
-            }
+            },
+            destroy(item) {
+                if (! confirm('Are you sure you want to delete this referral source?')) {
+                    return;
+                }
+                
+                let form = new Form({});
+                form.submit('DELETE', `/business/referral-sources/${item.id}`)
+                    .then(response => {
+                        let index = this.items.findIndex(x => x.id == item.id);
+                        if (index >= 0) {
+                            this.items.splice(index, 1);
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         }
     }
 </script>
