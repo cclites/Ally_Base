@@ -18,6 +18,17 @@ function is_mobile_app($agent = null)
     return strpos($agent, $match) !== false;
 }
 
+function is_ios() {
+    $userAgent = request()->userAgent();
+    $parser = UAParser\Parser::create();
+    $parsed = $parser->parse($userAgent);
+    if (optional($parsed->os)->family == 'iOS') {
+        return true;
+    }
+
+    return false;
+}
+
 function collection_only_values($collection, $values = []) {
     return $collection->map(function($item) use ($values)
     {
