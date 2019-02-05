@@ -101,7 +101,20 @@
             <div v-if="! loading">
                 <b-row>
                     <b-col sm="12">
-                        <b>There are {{ totalItems }} transactions listed for a total amount of {{ numberFormat(totalAmount) }}.</b>
+                        <table class="table table-bordered">
+                            <thead>
+                            <th>Total Transactions</th>
+                            <th>Total Amount</th>
+                            <th>CC Amount</th>
+                            <th>ACH Amount</th>
+                            </thead>
+                            <tbody>
+                            <td>{{ totalItems }}</td>
+                            <td>{{ numberFormat(totalAmount) }}</td>
+                            <td>{{ numberFormat(totalCC) }}</td>
+                            <td>{{ numberFormat(totalACH) }}</td>
+                            </tbody>
+                        </table>
                     </b-col>
                 </b-row>
                 <div class="table-responsive">
@@ -215,6 +228,18 @@
                 return this.charges.reduce((previous, current) => {
                     return previous + parseFloat(current.amount);
                 }, 0);
+            },
+            totalCC() {
+                return this.charges.filter(item => ['CC', 'AMEX'].includes(item.payment_type))
+                    .reduce((previous, current) => {
+                        return previous + parseFloat(current.amount);
+                    }, 0);
+            },
+            totalACH() {
+                return this.charges.filter(item => ['ACH', 'ACH-P'].includes(item.payment_type))
+                    .reduce((previous, current) => {
+                        return previous + parseFloat(current.amount);
+                    }, 0);
             }
         },
 

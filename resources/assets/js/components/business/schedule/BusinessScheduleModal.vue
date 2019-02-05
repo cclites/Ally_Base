@@ -374,11 +374,13 @@
                 },
                 specialHoursChange: false,
                 maxHoursWarning: false,
+                allCaregivers: this.passCaregivers,
             }
         },
 
         mounted() {
             this.loadClientData();
+            this.loadAllCaregivers();
             this.fetchRateCodes();
         },
 
@@ -448,8 +450,8 @@
             },
 
             caregivers() {
-                if (this.cgMode === 'all') {
-                    return this.passCaregivers;
+                if (! this.form.client_id || this.cgMode === 'all') {
+                    return this.allCaregivers;
                 }
                 return this.clientCaregivers;
             },
@@ -633,6 +635,13 @@
                     // Load caregivers and ally pct immediately
                     this.loadCaregivers();
                     this.loadAllyPctFromClient(this.client_id);
+                }
+            },
+
+            async loadAllCaregivers() {
+                if (!this.allCaregivers || !this.allCaregivers.length) {
+                    const response = await axios.get('/business/caregivers?json=1');
+                    this.allCaregivers = response.data;
                 }
             },
 

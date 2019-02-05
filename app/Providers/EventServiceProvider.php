@@ -26,6 +26,10 @@ use App\Events\UnverifiedClockOut;
 use App\Events\UnverifiedClockIn;
 use App\Events\SmsThreadReplyCreated;
 use App\Listeners\SendNewSmsReplyNotification;
+use App\Events\ShiftFlagsCouldChange;
+use App\Listeners\GenerateShiftFlags;
+use App\Events\ShiftDeleted;
+use App\Listeners\RecalculateDuplicateShiftFlags;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -71,6 +75,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         SmsThreadReplyCreated::class => [
             SendNewSmsReplyNotification::class,
+        ],
+        ShiftFlagsCouldChange::class => [
+            GenerateShiftFlags::class,
+        ],
+        ShiftDeleted::class => [
+            RecalculateDuplicateShiftFlags::class,
         ],
     ];
 

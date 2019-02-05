@@ -49,6 +49,7 @@ class UpdateClientRequest extends BusinessRequest
             'disaster_code_plan' => 'nullable|string|max:50',
             'disaster_planning' => 'nullable|string|max:65535',
             'caregiver_1099' => 'nullable|boolean',
+            'receive_summary_email' => 'boolean',
         ];
     }
 

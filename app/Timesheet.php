@@ -6,6 +6,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 /**
  * App\Timesheet
@@ -309,6 +310,8 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 
             if ($shift = Shift::create($data)) {
                 $shift->activities()->sync($entry->activities);
+
+                event(new ShiftFlagsCouldChange($shift));
             } else {
                 return false;
             }

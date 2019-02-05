@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Telefony;
 use App\Caregiver;
 use App\Exceptions\TelefonyMessageException;
 use App\Shifts\ClockIn;
+use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckInController extends BaseVoiceController
 {
@@ -114,7 +115,7 @@ class TelefonyCheckInController extends BaseVoiceController
         // Try to find schedule with caregiver
         if ($schedule = $this->telefony->scheduledShiftForClient($this->client, $caregiver->id)) {
             try {
-                if ($clockIn->clockIn($schedule)) {
+                if ($shift = $clockIn->clockIn($schedule)) {
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }
@@ -125,7 +126,7 @@ class TelefonyCheckInController extends BaseVoiceController
         }
         else {
             try {
-                if ($clockIn->clockInWithoutSchedule($this->client->business, $this->client)) {
+                if ($shift = $clockIn->clockInWithoutSchedule($this->client->business, $this->client)) {
                     $this->telefony->say('You have successfully clocked in.  Please remember to call back and clock out at the end of your shift. Good bye.');
                     return $this->telefony->response();
                 }

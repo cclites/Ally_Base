@@ -344,3 +344,7 @@ label.required::after, legend.required::after {
   font-size: 28px;
   padding-left: 3px;
 }
+
+.datepicker-dropdown {
+  z-index: 10000 !important; /* ALLY-761 - Header hides datepicker under certain circumstances */
+}
