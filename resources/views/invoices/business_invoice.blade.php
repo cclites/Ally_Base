@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-md-12">
 
-            <h4>Related Deposits</h4>
+            <div class="h3">Related Deposits</div>
 
             <table class="table table-bordered payments-table">
                 <thead>

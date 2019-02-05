@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-md-12">
 
-            <h4>Applied Payments</h4>
+            <div class="h3">Applied Payments</div>
 
             <table class="table table-bordered payments-table">
                 <thead>
