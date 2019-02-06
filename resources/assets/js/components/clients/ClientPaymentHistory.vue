@@ -44,13 +44,13 @@
                 fields: [
                     { key: 'created_at', label: 'Date Paid', sortable: true },
                     { key: 'week', label: 'Week' },
-                    { key: 'success', label: 'Payment Status' },
                     {
                         key: 'amount',
                         label: 'Amount',
                         formatter: (value) => { return this.moneyFormat(value) },
                         sortable: true,
                     },
+                    { key: 'success', label: 'Payment Status' },
                     {
                         key: 'actions',
                         class: 'hidden-print'                        
