@@ -1,9 +1,6 @@
 <?php
-
 namespace App\Responses\Resources;
 
-use App\Billing\ClientInvoiceItem;
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\Resource;
 use Illuminate\Support\Collection;
 
@@ -34,8 +31,14 @@ class ClientInvoice extends Resource
     public function toArray($request)
     {
         return $this->resource->attributesToArray() + [
-            'items' => $this->groupItems($this->resource->items)->toArray(),
-            'payments' => $this->resource->payments->toArray(),
+            'client' => $this->whenLoaded('client'),
+            'payer' => $this->whenLoaded('clientPayer', function() {
+                return $this->clientPayer->payer;
+            }),
+            'items' => $this->whenLoaded('items', function() {
+                return $this->groupItems($this->resource->items)->toArray();
+            }),
+            'payments' => $this->whenLoaded('payments'),
         ];
     }
 }

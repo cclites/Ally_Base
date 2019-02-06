@@ -765,6 +765,16 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return 'businesses:' . $this->id;
     }
 
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return 'ACH-P *' . $this->paymentAccount->last_four;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////

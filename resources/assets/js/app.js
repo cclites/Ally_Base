@@ -103,7 +103,8 @@ Vue.component('admin-pending-transactions-report', require('./components/admin/A
 Vue.component('admin-on-hold-report', require('./components/admin/AdminOnHoldReport'));
 Vue.component('admin-shared-shifts-report', require('./components/admin/AdminSharedShiftsReport'));
 Vue.component('admin-unpaid-shifts-report', require('./components/admin/AdminUnpaidShiftsReport'));
-Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
+// Vue.component('admin-pending-charges', require('./components/admin/AdminPendingCharges.vue'));
+Vue.component('admin-payments', require('./components/admin/AdminPayments'));
 Vue.component('admin-pending-deposits', require('./components/admin/AdminPendingDeposits.vue'));
 Vue.component('admin-pending-shifts', require('./components/admin/AdminPendingShifts.vue'));
 Vue.component('admin-reconciliation-report', require('./components/admin/AdminReconciliationReport'));

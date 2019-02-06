@@ -16,7 +16,7 @@ use App\Business;
 use App\BusinessChain;
 use Illuminate\Support\Collection;
 
-class ProcessChainPayments
+class ProcessChainDeposits
 {
     /**
      * @var \App\Billing\Gateway\ACHDepositInterface

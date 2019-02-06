@@ -121,5 +121,6 @@ class ProcessInvoicePayment
                 break;
             }
         }
+        $payment->load('invoices');
     }
 }

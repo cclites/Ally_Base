@@ -30,6 +30,13 @@ interface ChargeableInterface extends HasAllyFeeInterface
     public function getHash(): string;
 
     /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string;
+
+    /**
      * Determine if the existing record can be updated
      * This is used for the preservation of payment method on transaction history records
      *

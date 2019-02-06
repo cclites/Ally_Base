@@ -241,4 +241,14 @@ class CreditCard extends AuditableModel implements ChargeableInterface
     {
         return 'credit_cards:' . $this->id;
     }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return strtoupper($this->type) .  ' *' . $this->last_four;
+    }
 }

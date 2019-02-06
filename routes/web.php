@@ -401,13 +401,12 @@ Route::group([
     Route::post('charges/successful/{payment}', 'Admin\ChargesController@markSuccessful')->name('charges.mark_successful');
     Route::post('charges/failed/{payment}', 'Admin\ChargesController@markFailed')->name('charges.mark_failed');
     Route::get('charges/pending', 'Admin\ChargesController@pending')->name('charges.pending');
-    Route::get('charges/pending/{business}', 'Admin\ChargesController@pendingData')->name('charges.pending.data');
-    Route::get('charges/pending/{business}/per-client', 'Admin\ChargesController@pendingDataPerClient')->name('charges.pending.data_per_client');
-    Route::post('charges/pending/{business}', 'Admin\ChargesController@processCharges')->name('charges.process_charges');
+    Route::post('charges/charge/{chain}', 'Admin\ChargesController@processCharges')->name('charges.processCharges');
     Route::get('charges/pending_shifts', 'Admin\PendingShiftsController@index')->name('charges.pending_shifts');
     Route::post('charges/pending_shifts/{shift?}', 'Admin\PendingShiftsController@update')->name('charges.update_shift_status');
     Route::view('charges/manual', 'admin.charges.manual')->name('charges.manual');
     Route::post('charges/manual', 'Admin\ChargesController@manualCharge');
+    Route::get('charges/{payment}/{view?}', 'Admin\ChargesController@show')->name('charges.show');
     Route::get('deposits', 'Admin\DepositsController@index')->name('deposits');
     Route::get('deposits/failed', 'Admin\DepositsController@failed')->name('deposits.failed');
     Route::post('deposits/successful/{deposit}', 'Admin\DepositsController@markSuccessful')->name('deposits.mark_successful');
@@ -484,6 +483,11 @@ Route::group([
     Route::delete('knowledge-manager/{knowledge}', 'Admin\KnowledgeManagerController@destroy');
     Route::post('knowledge-manager/attachments', 'Admin\KnowledgeAttachmentController@store');
     Route::post('knowledge-manager/video', 'Admin\KnowledgeAttachmentController@storeVideo');
+
+    /* Invoices */
+    Route::get('invoices/clients', 'Admin\ClientInvoiceController@index');
+    Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');

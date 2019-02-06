@@ -100,7 +100,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
     {
         $allyFeeCharged = $this->getMetaValue("ally_fee_charged");
         if ($allyFeeCharged !== null) {
-            return divide($allyFeeCharged, $this->getItemUnits());
+            return divide($allyFeeCharged, $this->getItemUnits(), 4);
         }
         return null;
     }

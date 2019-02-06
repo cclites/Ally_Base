@@ -40,10 +40,10 @@
                             @endif
                         </td>
                         <td>{{ $item->units }}</td>
-                        <td>{{ number_format($item->client_rate, 2) }}</td>
-                        <td>{{ number_format($item->caregiver_rate, 2) }}</td>
-                        <td>{{ number_format($item->ally_rate, 2) }}</td>
-                        <td>{{ number_format($item->rate, 2) }}</td>
+                        <td>{{ rate_format($item->client_rate) }}</td>
+                        <td>{{ rate_format($item->caregiver_rate) }}</td>
+                        <td>{{ rate_format($item->ally_rate) }}</td>
+                        <td>{{ rate_format($item->rate) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
                     </tr>
                 @endforeach

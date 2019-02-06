@@ -38,7 +38,7 @@
                             @endif
                         </td>
                         <td>{{ $item->units }}</td>
-                        <td>{{ number_format($item->rate, 2) }}</td>
+                        <td>{{ rate_format($item->rate) }}</td>
                         <td>{{ number_format($item->total, 2) }}</td>
                         <td>{{ number_format($item->amount_due, 2) }}</td>
                     </tr>

@@ -240,6 +240,29 @@ class ClientInvoiceTest extends TestCase
         $this->assertEquals(3.45, $shiftExpense->ally_fee, 'The ally fee was not correctly updated on the invoiceable.');
     }
 
+    /**
+     * @test
+     */
+    function expenses_with_small_incremental_rates_dont_create_differences_between_due_and_total()
+    {
+        /**
+         * A mileage rate of $0.535 when multiplied by units and rounded to two decimal places does not
+         * end up with differing amounts for the total and the amount due
+         */
+
+        $payerA = $this->createBalancePayer();
+        $payerA->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $shift = $this->createShiftWithMileage(0.535, 36);
+
+        $invoice = $this->invoicer->generateAll($this->client)[0];
+        $item = $invoice->items->first();
+
+        $this->assertEquals(0.5618, $item->rate);
+        $this->assertEquals(20.22, $item->amount_due);
+        $this->assertEquals(20.22, $item->total);
+    }
+
 
 
     /**

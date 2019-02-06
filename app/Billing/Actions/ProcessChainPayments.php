@@ -6,6 +6,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Gateway\ACHPaymentInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
+use App\Billing\PaymentLog;
 use App\Billing\Payments\BankAccountPayment;
 use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Payments\Methods\BankAccount;
@@ -53,21 +54,41 @@ class ProcessChainPayments
      * Process the payments for the chain, grouping by payment method
      *
      * @param \App\BusinessChain $chain
-     * @throws \App\Billing\Exceptions\PaymentMethodDeclined
-     * @throws \App\Billing\Exceptions\PaymentMethodError
+     * @return Collection|\App\Billing\PaymentLog[]
      */
     function processPayments(BusinessChain $chain)
     {
+        PaymentLog::acquireLock();
+        $batchId = PaymentLog::getNextBatch($chain->id);
+
         $groupedInvoices = $this->groupByPaymentMethod(
             $this->getInvoices($chain)
         );
 
+        $results = [];
         foreach($groupedInvoices as $hash => $invoices) {
+            $log = new PaymentLog();
+            $log->batch_id = $batchId;
             /** @var \App\Billing\ClientInvoice[] $invoices */
-            $paymentMethod = $this->getPaymentMethod($invoices[0]);
-            $strategy = $this->buildStrategy($paymentMethod);
-            $this->paymentProcessor->payInvoices($invoices, $strategy);
+            try {
+                if ($hash === 'missing') {
+                    throw new PaymentMethodError("Missing payment method for " . $invoices[0]->clientPayer->name());
+                }
+                $paymentMethod = $this->getPaymentMethod($invoices[0]);
+                $log->setPaymentMethod($paymentMethod);
+                $strategy = $this->buildStrategy($paymentMethod);
+                $log->setPayment($this->paymentProcessor->payInvoices($invoices, $strategy));
+            }
+            catch (\Exception $e) {
+                $log->setException($e);
+            }
+            $log->save();
+            $results[] = $log;
         }
+
+        PaymentLog::releaseLock();
+
+        return collect($results);
     }
 
     /**
@@ -91,8 +112,13 @@ class ProcessChainPayments
     {
         $hashTable = [];
         foreach($invoices as $invoice) {
-            $method = $this->getPaymentMethod($invoice);
-            $hash = $method->getHash();
+            try {
+                $method = $this->getPaymentMethod($invoice);
+                $hash = $method->getHash();
+            }
+            catch (\Exception $e) {
+                $hash = 'missing';
+            }
             $hashTable[$hash][] = $invoice;
         }
 
@@ -126,13 +152,13 @@ class ProcessChainPayments
     function buildStrategy(ChargeableInterface $chargeable)
     {
         if ($chargeable instanceof CreditCard) {
-            return new CreditCardPayment($chargeable, $this->ccGateway);
+            return new CreditCardPayment($chargeable, clone $this->ccGateway);
         }
         if ($chargeable instanceof BankAccount) {
-            return new BankAccountPayment($chargeable, $this->achGateway);
+            return new BankAccountPayment($chargeable, clone $this->achGateway);
         }
         if ($chargeable instanceof Business) {
-            return new ProviderPayment($chargeable, $this->achGateway);
+            return new ProviderPayment($chargeable, clone $this->achGateway);
         }
         throw new PaymentMethodError("Unable to build payment strategy.");
     }

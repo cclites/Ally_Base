@@ -148,7 +148,7 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
     function getPaymentMethod(): ?ChargeableInterface
     {
         if (maps_to_class($this->payment_method_type) === Business::class) {
-
+            return new Business();
         }
 
         return null;

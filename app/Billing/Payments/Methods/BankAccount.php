@@ -265,4 +265,14 @@ class BankAccount extends AuditableModel implements ChargeableInterface, Deposit
     {
         return 'bank_accounts:' . $this->id;
     }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return 'ACH *' . $this->last_four;
+    }
 }

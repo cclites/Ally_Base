@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Billing\Actions\ProcessChainPayments;
+use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\PaymentViewGenerator;
+use App\Billing\View\PdfViewStrategy;
 use App\Business;
+use App\BusinessChain;
 use App\Client;
 use App\Billing\Payment;
-use App\Payments\ClientPaymentAggregator;
-use App\Payments\PaymentProcessor;
-use App\Payments\PendingPayments;
 use App\Payments\SinglePaymentProcessor;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\PaymentLog;
 use App\Responses\SuccessResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,38 +44,29 @@ class ChargesController extends Controller
         return view('admin.charges.index');
     }
 
+    public function show(Payment $payment, string $view = "html")
+    {
+        $strategy = new HtmlViewStrategy();
+        if (strtolower($view) === 'pdf') {
+            $strategy = new PdfViewStrategy('payment-' . $payment->id . '.pdf');
+        }
+
+        $viewGenerator = new PaymentViewGenerator($strategy);
+        return $viewGenerator->generate($payment);
+    }
+
     public function pending()
     {
-        return view('admin.charges.pending');
+        $chains = BusinessChain::ordered()->get();
+        return view('admin.charges.pending', compact('chains'));
     }
 
-    public function pendingData(Request $request, Business $business)
+    public function processCharges(BusinessChain $chain, ProcessChainPayments $action)
     {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+        $results = $action->processPayments($chain);
+        $collection = PaymentLog::collection($results)->toArray(null);
 
-        $processor = new PaymentProcessor($business, $startDate, $endDate);
-        return array_values($processor->getPaymentModels());
-    }
-
-    public function pendingDataPerClient(Request $request, Business $business)
-    {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-
-        $processor = new PaymentProcessor($business, $startDate, $endDate);
-        return $processor->getPaymentDataPerClient();
-    }
-
-    public function processCharges(Request $request, Business $business)
-    {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-
-        $processor = new PaymentProcessor($business, $startDate, $endDate);
-        $data = $processor->process();
-        $count = count($data['charges']);
-        return new SuccessResponse('There were ' . $count . ' successful transactions.', $data);
+        return new CreatedResponse('The payments have been processed.', $collection);
     }
 
     public function manualCharge(Request $request)

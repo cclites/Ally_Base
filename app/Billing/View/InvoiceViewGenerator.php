@@ -39,7 +39,7 @@ class InvoiceViewGenerator
         return $this->generate(
             $viewName ?? 'invoices.client_invoice',
             $clientPayer->isPrivatePay() ? $business : $client,
-            $clientPayer->isPrivatePay() ? $client : $clientPayer,
+            $clientPayer->isPrivatePay() ? $client : $clientPayer->payer,
             $clientInvoice,
             $items,
             $payments

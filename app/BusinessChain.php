@@ -49,7 +49,7 @@ class BusinessChain extends AuditableModel
 
     protected $table = 'business_chains';
     protected $guarded = ['id'];
-    protected $orderedColumn = 'id';
+    protected $orderedColumn = 'name';
 
     ////////////////////////////////////
     //// Static Methods

@@ -30,7 +30,7 @@ function is_mobile_app($agent = null)
  * @param string $dbType
  * @return string|null  Class name
  */
-function maps_to_class(string $dbType): ?string
+function maps_to_class(?string $dbType): ?string
 {
     return strval(config("database.polymorphism.${dbType}")) ?: null;
 }
@@ -54,7 +54,7 @@ function maps_from_class(string $className): ?string
  * @param $dbId
  * @return \Illuminate\Database\Eloquent\Model|null
  */
-function maps_to_model(string $dbType, $dbId): ?\Illuminate\Database\Eloquent\Model
+function maps_to_model(?string $dbType, $dbId): ?\Illuminate\Database\Eloquent\Model
 {
     if ($class = maps_to_class($dbType)) {
         return (new $class)->find($dbId);
@@ -128,6 +128,22 @@ function multiply($operand1, $operand2, $decimals=2): float
         bcmul($operand1, $operand2, ceil($decimals*2)),
         $decimals
     );
+}
+
+/**
+ * Displays up to 4 decimal places, with a minimum of 2 decimal places, trimming unnecessary zeroes
+ *
+ * @param mixed $number
+ * @param int $minimumDecimals
+ * @param int $maximumDecimals
+ * @return string
+ */
+function rate_format($number, int $minimumDecimals = 2, int $maximumDecimals = 4): string
+{
+    $formatted = number_format($number, $maximumDecimals, '.', ',');
+    $minimumLength = strpos($formatted, '.') + $minimumDecimals + 1;
+    $extra = rtrim(substr($formatted, $minimumLength), "0");
+    return substr($formatted, 0, $minimumLength) . $extra;
 }
 
 ////////////////////////////////////

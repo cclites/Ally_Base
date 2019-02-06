@@ -106,6 +106,23 @@ trait CreatesClientInvoiceResources
         return $shift;
     }
 
+    private function createShiftWithMileage(float $rate, float $miles, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    {
+        $shift = factory(Shift::class)->create([
+            'client_id' => $this->client->id,
+            'client_payer_id' => $clientPayerId,
+            'service_id' => null,
+            'caregiver_rate' => 0,
+            'client_rate' => 0,
+            'mileage' => $miles,
+            'checked_in_time' => $date . ' 12:00:00',
+            'status' => Shift::WAITING_FOR_INVOICE,
+        ]);
+        $shift->business->update(['mileage_rate' => $rate]);
+
+        return $shift;
+    }
+
     private function createCreditAdjustment(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null)
     {
         $adjustment = factory(ShiftAdjustment::class)->create([

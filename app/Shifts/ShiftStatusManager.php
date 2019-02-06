@@ -75,6 +75,7 @@ class ShiftStatusManager
     public static function getReadOnlyStatuses()
     {
         return [
+            Shift::WAITING_FOR_CHARGE,
             Shift::WAITING_FOR_PAYOUT,
             Shift::PAID_NOT_CHARGED,
             Shift::PAID_BUSINESS_ONLY,

@@ -7,112 +7,34 @@ use App\Billing\Payment;
 
 DB::beginTransaction();
 
+////////////////////////////////////2
+//// Migrate client caregiver rates
 ////////////////////////////////////
-//// Run preparation for each business chain
-////////////////////////////////////
 
-$providerPayers = [];
-
-/** @var \App\BusinessChain $chain */
-foreach(\App\BusinessChain::all() as $chain) {
-
-    $businessIds = $chain->businesses()->pluck('id')->toArray();
-
-    ////////////////////////////////////
-    //// Create a default service
-    ////////////////////////////////////
-
-    $service = \App\Billing\Service::create([
-        'name' => 'Caregiver Service',
-        'code' => '',
-        'default' => true,
-        'chain_id' => $chain->id,
-    ]);
-
-    ////////////////////////////////////
-    //// Update shifts to use that service
-    ////////////////////////////////////
-
-    \App\Shift::whereIn('business_id', $businessIds)->update(['service_id' => $service->id]);
-    echo("Line 36\n");
-
-    ////////////////////////////////////
-    //// Update schedules to use that service
-    ////////////////////////////////////
-
-    \App\Schedule::whereIn('business_id', $businessIds)->update(['service_id' => $service->id]);
-    echo("Line 43\n");
-
-    /////////////////////////////////////
-    //// Create a new provider payer
-    ////////////////////////////////////
-
-    $payer = \App\Billing\Payer::create([
-        'name' => $chain->name,
-        'week_start' => 1,
-        'address1' => $chain->address1,
-        'address2' => $chain->address2,
-        'city' => $chain->city,
-        'state' => $chain->state,
-        'zip' => $chain->zip,
-        'phone_number' => $chain->phone1,
-        'chain_id' => $chain->id,
-        'payment_method_type' => 'businesses', // Important
-    ]);
-
-    // Update all previous provider payer payments with the payment method
-    foreach($businessIds as $businessId) {
-        $providerPayers[$businessId] = $payer;
-        Payment::whereNull('client_id')->where('business_id', $businessId)->update([
-            'payment_method_type' => 'businesses',
-            'payment_method_id' => $businessId,
+$clients = \App\Client::has('caregivers')->with(['caregivers', 'defaultPayment'])->get();
+$clients->each(function(\App\Client $client) {
+    foreach($client->caregivers as $caregiver) {
+        $paymentMethod = $client->getPaymentMethod() ?? new \App\Billing\Payments\Methods\CreditCard();
+        \App\Billing\ClientRate::create([
+            'client_id' => $client->id,
+            'caregiver_id' => $caregiver->id,
+            'client_hourly_rate' => multiply(add($caregiver->pivot->caregiver_hourly_rate, $caregiver->pivot->provider_hourly_fee), add(1, $paymentMethod->getAllyPercentage())),
+            'caregiver_hourly_rate' => $caregiver->pivot->caregiver_hourly_rate ?? 0,
+            'client_fixed_rate' => multiply(add($caregiver->pivot->caregiver_fixed_rate, $caregiver->pivot->provider_fixed_fee), add(1, $paymentMethod->getAllyPercentage())),
+            'caregiver_fixed_rate' => $caregiver->pivot->caregiver_fixed_rate ?? 0,
+            'effective_start' => '2018-01-01',
+            'effective_end' => '9999-12-31',
         ]);
     }
-    echo("Line 70\n");
+});
 
-}
-
-////////////////////////////////////
-//// Update all previous private pay payments with their payment method
-////////////////////////////////////
-
-DB::statement("
-UPDATE payments p
-INNER JOIN gateway_transactions t ON p.transaction_id = t.id
-SET p.payment_method_type = t.method_type, p.payment_method_id = t.method_id
-WHERE p.client_id IS NOT NULL
-");
-echo("Line 84\n");
-
-////////////////////////////////////
-//// Assign Balance Payers to Clients
-////////////////////////////////////
-
-$rows = DB::affectingStatement("
-INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
-SELECT DISTINCT c.id, p.id, '2018-01-01', '9999-12-31', 'balance' FROM clients c
-INNER JOIN businesses b ON b.id = c.business_id
-INNER JOIN payers p ON p.chain_id = b.chain_id
-WHERE c.default_payment_type = 'businesses'
-");
-echo "$rows affected by provider pay setting\n";
-
-var_dump(DB::select('SELECT count(*) FROM client_payers'));
-
-$rows = DB::affectingStatement("
-INSERT INTO client_payers (client_id, payer_id, effective_start, effective_end, payment_allocation)
-SELECT id, '0', '2018-01-01', '9999-12-31', 'balance' FROM clients WHERE default_payment_type != 'businesses' OR default_payment_type IS NULL
-");
-echo "$rows affected by private pay setting\n";
-echo("Line 104\n");
-
-var_dump(DB::select('SELECT count(*) FROM client_payers'));
+echo("Line 31\n");
 
 ////////////////////////////////////
 //// Client Payments to Invoices
 ////////////////////////////////////
 
-Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('client_id')->chunk(200, function($payments) {
+Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('client_id')->chunk(500, function($payments) {
     $payments->each(function(Payment $payment) {
 
         if (!$payment->client->payers->first()) {
@@ -156,7 +78,7 @@ echo("Line 139\n");
 
 $missedAmounts = [];
 
-Payment::with(['shifts', 'shifts.client', 'shifts.client.payers'])->whereNull('client_id')->chunk(200, function($payments) {
+Payment::with(['shifts', 'shifts.client', 'shifts.client.payers'])->whereNull('client_id')->chunk(500, function($payments) {
     $payments->each(function(Payment $payment) {
         $groupedShifts = $payment->shifts->groupBy('client_id');
 
@@ -218,7 +140,7 @@ echo("Line 202\n");
 //// Caregiver deposits to invoices
 ////////////////////////////////////
 
-Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiver_id')->chunk(200, function($deposits) {
+Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiver_id')->chunk(500, function($deposits) {
     $deposits->each(function(Deposit $deposit) {
         $invoice = \App\Billing\CaregiverInvoice::create([
             'name' => \App\Billing\CaregiverInvoice::getNextName($deposit->caregiver_id),
@@ -270,12 +192,14 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
         $invoice->addDeposit($deposit, $deposit->amount);
     });
 });
+echo("Line 203\n");
+
 
 ////////////////////////////////////
 //// Business deposits to invoices
 ////////////////////////////////////
 
-Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(200, function($deposits) {
+Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, function($deposits) {
     $deposits->each(function(Deposit $deposit) {
         $invoice = \App\Billing\BusinessInvoice::create([
             'name' => \App\Billing\BusinessInvoice::getNextName($deposit->business_id),
@@ -319,29 +243,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(200, f
         $invoice->addDeposit($deposit, $deposit->amount);
     });
 });
-
-////////////////////////////////////
-//// Migrate client caregiver rates
-////////////////////////////////////
-
-\App\Client::has('caregivers')->with(['caregivers', 'defaultPayment'])->chunk(200, function($clients) {
-    $clients->each(function(\App\Client $client) {
-        foreach($client->caregivers as $caregiver) {
-            $paymentMethod = $client->getPaymentMethod() ?? new \App\Billing\Payments\Methods\CreditCard();
-            \App\Billing\ClientRate::create([
-                'client_id' => $client->id,
-                'caregiver_id' => $caregiver->id,
-                'client_hourly_rate' => multiply(add($caregiver->pivot->caregiver_hourly_rate, $caregiver->pivot->provider_hourly_fee), add(1, $paymentMethod->getAllyPercentage())),
-                'caregiver_hourly_rate' => $caregiver->pivot->caregiver_hourly_rate ?? 0,
-                'client_fixed_rate' => multiply(add($caregiver->pivot->caregiver_fixed_rate, $caregiver->pivot->provider_fixed_fee), add(1, $paymentMethod->getAllyPercentage())),
-                'caregiver_fixed_rate' => $caregiver->pivot->caregiver_fixed_rate ?? 0,
-                'effective_start' => '2018-01-01',
-                'effective_end' => '9999-12-31',
-            ]);
-        }
-    });
-});
-echo("Line 226\n");
+echo("Line 204\n");
 
 
 DB::commit();
@@ -357,7 +259,7 @@ function _createMileageExpense(\App\Shift $shift)
         'shift_id' => $shift->id,
         'name' => 'Mileage',
         'units' => $shift->mileage,
-        'rate' => divide($shift->costs()->getMileageCost(false), $shift->mileage),
+        'rate' => divide($shift->costs()->getMileageCost(false), $shift->mileage, 4),
         'ally_fee' => subtract($shift->costs()->getMileageCost(), $shift->costs()->getMileageCost(false)),
     ]);
 }

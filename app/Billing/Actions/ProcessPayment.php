@@ -8,6 +8,8 @@ use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Business;
+use App\User;
 
 
 class ProcessPayment
@@ -36,8 +38,19 @@ class ProcessPayment
                 throw new PaymentMethodDeclined();
             }
 
+            // Get payment method owner
+            if ($owner = $strategy->getPaymentMethod()->getOwnerModel()) {
+                if ($owner instanceof User) {
+                    $client = $owner->client;
+                }
+                if ($owner instanceof Business) {
+                    $business = $owner;
+                }
+            }
+
             $payment = new Payment([
                 'client_id' => $client->id ?? null,
+                'business_id' => $business->id ?? $client->business_id ?? null,
                 'amount' => $transaction->amount,
                 'payment_type' => $strategy->getPaymentType(),
                 'system_allotment' => $this->getAllyFee($strategy, $amount),
