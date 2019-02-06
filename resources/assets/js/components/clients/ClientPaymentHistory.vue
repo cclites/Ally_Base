@@ -25,6 +25,11 @@
                     </a>
                 </slot>
             </template>
+            <template slot="invoices" scope="data">
+                <div v-for="invoice in data.item.invoices" :key="invoice.id">
+                    <a :href="`/business/client/invoices/${invoice.id}`">#{{ invoice.name }}</a>
+                </div>
+            </template>
         </b-table>
     </div>
 </template>
@@ -51,6 +56,7 @@
                         sortable: true,
                     },
                     { key: 'success', label: 'Payment Status' },
+                    { key: 'invoices', label: 'Related Invoices' },
                     {
                         key: 'actions',
                         class: 'hidden-print'                        
