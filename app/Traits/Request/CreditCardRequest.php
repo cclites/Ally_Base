@@ -1,7 +1,7 @@
 <?php
 namespace App\Traits\Request;
 
-use App\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Rules\CreditCardValid;
 use Illuminate\Http\Request;
 

@@ -13,7 +13,12 @@
     </li>
 @endif
 <li>
-    <a href="/payment-history" aria-expanded="false">
+    <a href="/client/invoices" aria-expanded="false">
+        <i class="fa fa-file-text" style="margin-right: -2px; margin-left: 2px"></i><span class="hide-menu">Invoice History</span>
+    </a>
+</li>
+<li>
+    <a href="/client/payments" aria-expanded="false">
         <i class="mdi mdi-credit-card"></i><span class="hide-menu">Payment History</span>
     </a>
 </li>
