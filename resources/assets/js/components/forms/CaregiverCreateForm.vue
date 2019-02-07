@@ -35,7 +35,7 @@
             </b-form-group>
         </b-col>
         <b-col lg="6">
-            <b-form-group label="Title" label-for="title">
+            <b-form-group label="Title" label-for="title" label-class="required">
                 <b-form-input
                         id="title"
                         name="title"
@@ -73,7 +73,7 @@
                 <input-help :form="form" field="email"
                             text="Enter their email address or check the box if caregiver does not have an email."></input-help>
             </b-form-group>
-            <b-form-group label="Username" label-for="username">
+            <b-form-group label="Username" label-for="username" label-class="required">
                 <b-form-input
                         id="username"
                         name="username"

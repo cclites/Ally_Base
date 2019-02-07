@@ -8,6 +8,7 @@ use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use Carbon\Carbon;
 use DateTimeZone;
+use App\Events\ShiftFlagsCouldChange;
 
 /**
  * Class ScheduleConverter
@@ -163,6 +164,8 @@ class ScheduleConverter
 
         if ($shift) {
             $schedule->update(['converted_at' => Carbon::now()]);
+
+            event(new ShiftFlagsCouldChange($shift));
         }
 
         return $shift;

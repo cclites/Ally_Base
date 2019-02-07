@@ -70,6 +70,10 @@
                 <a data-toggle="tab" role="tab" href="#insurance_service_auth" class="nav-link">Medicaid Data</a>
             </li>
         @endif
+
+        <li class="nav-item">
+            <a data-toggle="tab" role="tab" href="#misc" class="nav-link">Misc</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -212,6 +216,9 @@
         </div>
         <div class="tab-pane" id="insurance_service_auth">
             <client-insurance-service-auth :client="{{ $client }}" :payers="{{ $payers }}" :services="{{ $services }}" :auths="{{ $auths }}"></client-insurance-service-auth>
+        </div>
+        <div class="tab-pane" id="misc">
+            <client-misc-tab :client="{{ $client }}"></client-misc-tab>
         </div>
     </div>
 @endsection

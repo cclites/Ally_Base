@@ -84,6 +84,8 @@ class DepositInvoiceController extends Controller
 
         \DB::commit();
 
+        $invoices = array_filter($invoices); // remove null entries when no invoice was generated
+
         return new CreatedResponse(count($invoices) . ' invoices were created.', [
             'invoices' => $invoices,
             'errors' => $errors,

@@ -33,7 +33,7 @@
                     </b-select>
                 </template>
                 <template slot="policy_number" scope="row">
-                    <b-form-input v-model="row.item.policy_number" type="text" class="date-input form-control-sm" />
+                    <b-form-input v-model="row.item.policy_number" type="text" class="date-input form-control-sm" :disabled="row.item.payer_id == 0" />
                 </template>
                 <template slot="effective_start" scope="row">
                     <mask-input v-model="row.item.effective_start" type="date" class="date-input form-control-sm"></mask-input>

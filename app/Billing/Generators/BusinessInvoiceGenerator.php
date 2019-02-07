@@ -23,6 +23,7 @@ class BusinessInvoiceGenerator extends BaseInvoiceGenerator
         foreach($invoiceables as $invoiceable) {
             $itemData = $this->getItemData($invoiceable);
             $item = new BusinessInvoiceItem($itemData);
+            $item->associateInvoiceable($invoiceable);
             $invoice->addItem($item);
         }
 

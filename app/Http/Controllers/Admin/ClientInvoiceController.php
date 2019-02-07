@@ -52,8 +52,9 @@ class ClientInvoiceController extends Controller
         $invoices = [];
         $chain = BusinessChain::findOrFail($request->input('chain_id'));
         $businessIds = $chain->businesses()->pluck('id')->toArray();
-        $timezone = Timezone::getTimezone($businessIds[0]) ?? 'America/New_York';
-        $endDateUtc = Carbon::now($timezone)->startOfWeek()->subSecond()->setTimezone('UTC');
+//        $timezone = Timezone::getTimezone($businessIds[0]) ?? 'America/New_York';
+//        $endDateUtc = Carbon::now($timezone)->startOfWeek()->subSecond()->setTimezone('UTC');
+        $endDateUtc = Carbon::now('UTC');
 
         $errors = [];
         $clients = Client::active()->whereIn('business_id', $businessIds)->get();

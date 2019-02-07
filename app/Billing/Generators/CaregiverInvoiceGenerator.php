@@ -23,6 +23,7 @@ class CaregiverInvoiceGenerator extends BaseInvoiceGenerator
         foreach($invoiceables as $invoiceable) {
             $itemData = $this->getItemData($invoiceable);
             $item = new CaregiverInvoiceItem($itemData);
+            $item->associateInvoiceable($invoiceable);
             $invoice->addItem($item);
         }
 

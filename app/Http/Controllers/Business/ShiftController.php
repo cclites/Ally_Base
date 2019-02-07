@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftController extends BaseController
 {
@@ -52,6 +53,9 @@ class ShiftController extends BaseController
             }
 
             \DB::commit();
+
+            event(new ShiftFlagsCouldChange($shift));
+            
             $redirect = $request->input('modal') == 1 ? null : route('business.shifts.show', [$shift->id]);
             return new SuccessResponse('You have successfully created this shift.', ['shift' => $shift->id], $redirect);
         }
@@ -138,10 +142,11 @@ class ShiftController extends BaseController
 
             $shift->activities()->sync($request->getActivities());
             $shift->syncIssues($request->getIssues());
-            $shift->syncGoals($request->goals);
+            $shift->syncGoals($request->getGoals());
             $shift->syncQuestions($allQuestions, $questionData['questions'] ?? []);
             $shift->syncServices($request->getServices());
 
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
         return new ErrorResponse(500, 'The shift could not be updated.');
@@ -215,6 +220,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Duplicate an existing shift and advance one day
+        /** @var Shift $shift */
         $shift = $shift->replicate();
         $shift->checked_in_time = (new Carbon($shift->checked_in_time))->addDay();
         $shift->checked_out_time = (new Carbon($shift->checked_out_time))->addDay();
@@ -223,6 +229,8 @@ class ShiftController extends BaseController
         $checked_in_distance = null;
         $checked_out_distance = null;
         $activities = $shift->business->allActivities();
+
+        event(new ShiftFlagsCouldChange($shift));
 
         return view('business.shifts.show', compact('shift', 'checked_in_distance', 'checked_out_distance', 'activities'));
 
@@ -257,6 +265,7 @@ class ShiftController extends BaseController
         }
 
         if ($shift->update($data)) {
+            event (new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('Shift was successfully clocked out.');
         }
 

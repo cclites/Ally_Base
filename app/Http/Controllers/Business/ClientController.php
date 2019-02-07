@@ -163,7 +163,9 @@ class ClientController extends BaseController
             'bankAccounts',
             'creditCards',
             'payments',
+            'payments.invoices',
             'user.documents',
+            'meta',
             'notes.creator',
             'careDetails',
             'carePlans',
@@ -208,7 +210,7 @@ class ClientController extends BaseController
 
     public function edit(Client $client)
     {
-        return $this->show($client);
+        return $this->show($client, app(ClientInvoiceQuery::class));
     }
 
     /**
@@ -266,7 +268,7 @@ class ClientController extends BaseController
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been archived.', [], route('business.clients.index'));
         }
-        return new ErrorResponse('Could not archive the selected client.');
+        return new ErrorResponse(500, 'Could not archive the selected client.');
     }
 
     /**
@@ -283,7 +285,7 @@ class ClientController extends BaseController
             $client->clearFutureSchedules();
             return new SuccessResponse('The client has been re-activated.');
         }
-        return new ErrorResponse('Could not re-activate the selected client.');
+        return new ErrorResponse(500, 'Could not re-activate the selected client.');
     }
 
     public function address(Request $request, Client $client, $type)

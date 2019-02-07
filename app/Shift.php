@@ -26,6 +26,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
 
 /**
@@ -179,13 +180,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     protected $dispatchesEvents = [
         'created' => ShiftCreated::class,
         'updated' => ShiftModified::class,
+        // 'deleted' => ShiftDeleted::class,
     ];
 
     public static function boot()
     {
         parent::boot();
         self::recalculateDurationOnChange();
-        self::regenerateFlagsOnChange();
+        self::deleted(function(Shift $shift) {
+            event(new ShiftDeleted($shift));
+        });
     }
 
     public static function recalculateDurationOnChange()
@@ -195,23 +199,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 ( $shift->isDirty('checked_out_time') || $shift->isDirty('checked_in_time') )
             ) {
                 $shift->hours = $shift->duration(true);
-            }
-        });
-    }
-
-    public static function regenerateFlagsOnChange()
-    {
-        $flagManager = app(ShiftFlagManager::class);
-
-        self::saved(function(Shift $shift) use ($flagManager) {
-            if ($flagManager->shouldGenerate($shift)) {
-                $flagManager->generateFlags($shift);
-            }
-        });
-
-        self::deleted(function(Shift $shift) use ($flagManager) {
-            foreach($shift->duplicates as $duplicate) {
-                $flagManager->generateFlags($duplicate);
             }
         });
     }
@@ -485,6 +472,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     //////////////////////////////////////
     /// Other Methods
     //////////////////////////////////////
+
+    /**
+     * Get an instance of the shift's flag manager class.
+     *
+     * @return App\Shifts\ShiftFlagManager
+     */
+    public function flagManager() : ShiftFlagManager
+    {
+        return new ShiftFlagManager($this);
+    }
 
     /**
      * @param iterable $services
@@ -1071,6 +1068,18 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         }
 
         return $query->where('client_id', $client);
+    }
+
+    /**
+     * Gets shifts that belong to the given client ids only.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param iterable $clients
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeForClients($query, $clients)
+    {
+        return $query->whereIn('client_id', $clients);
     }
 
     /**

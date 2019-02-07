@@ -227,7 +227,7 @@ class ClientInvoiceTest extends TestCase
         $payerA = $this->createAllowancePayer(80.00);
         $payerB = $this->createBalancePayer();
         $payerB->update(['payer_id' => Payer::PRIVATE_PAY_ID]);
-        $this->client->setPaymentMethod(factory(CreditCard::class)->create());
+        $this->client->setPaymentMethod(factory(CreditCard::class)->create(['type' => 'visa']));
         $shift = $this->createShiftWithExpense(100);
 
         $invoices = $this->invoicer->generateAll($this->client);

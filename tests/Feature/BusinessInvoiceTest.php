@@ -24,7 +24,7 @@ class BusinessInvoiceTest extends TestCase
      */
     function an_invoice_can_be_generated_from_shifts()
     {
-        $business = factory(Business::class)->create();
+        $business = factory(Business::class)->create(['timezone' => 'UTC']);
         $excludedShift = factory(Shift::class)->create();
         /** @var Shift $includedShift */
         $includedShift = factory(Shift::class)->create([
@@ -33,6 +33,7 @@ class BusinessInvoiceTest extends TestCase
             'caregiver_rate' => 10,
             'checked_in_time' => '2019-01-01 12:00:00',
             'checked_out_time' => '2019-01-01 14:00:00',
+            'status' => 'WAITING_FOR_PAYOUT', // anything but PAID
         ]);
 
         /** @var ClientInvoice $clientInvoice */

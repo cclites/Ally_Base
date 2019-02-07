@@ -11,6 +11,7 @@ use App\Shifts\Data\ClockOutData;
 use App\Shifts\ShiftFactory;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImporter
 {
@@ -47,7 +48,9 @@ class ShiftImporter
     public function importShiftFromRow(int $row): Shift
     {
         $factory = $this->getShiftFactory($row);
-        return $factory->create();
+        $shift = $factory->create();
+        event(new ShiftFlagsCouldChange($shift));
+        return $shift;
     }
 
     public function validateRow(int $row): void

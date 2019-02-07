@@ -33,6 +33,7 @@ class CaregiverInvoiceTest extends TestCase
             'caregiver_rate' => 10,
             'checked_in_time' => '2019-01-01 12:00:00',
             'checked_out_time' => '2019-01-01 14:00:00',
+            'status' => 'WAITING_FOR_PAYOUT', // anything but PAID
         ]);
 
         /** @var ClientInvoice $clientInvoice */

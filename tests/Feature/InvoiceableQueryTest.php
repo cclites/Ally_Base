@@ -252,7 +252,13 @@ class InvoiceableQueryTest extends TestCase
                 'amount' => 100,
                 'amount_paid' => 100
             ]);
+        } else {
+            $invoice->update([
+                'amount' => 100,
+                'amount_paid' => 0
+            ]);
         }
+
 
         return $invoice;
     }

@@ -209,6 +209,24 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         'unpaired_pay_rates' => 'json',
     ];
 
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            // populate settings defaults here because the change() method
+            // on migration columns is not supported due to the business
+            // table having an enum column. 
+            $model->shift_confirmation_email = false;
+            $model->allow_client_confirmations = false;
+        });
+    }
+
     ///////////////////////////////////////////
     /// Business type constants
     ///////////////////////////////////////////

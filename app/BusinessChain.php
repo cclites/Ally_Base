@@ -87,6 +87,11 @@ class BusinessChain extends AuditableModel
         return $this->hasMany(OfficeUser::class, 'chain_id');
     }
 
+    public function fields()
+    {
+        return $this->hasMany(CustomField::class, 'chain_id');
+    }
+
     /**
      * Get the Payers relationship.
      *

@@ -23,10 +23,10 @@ class ApplyPayment
         $invoice->addPayment($payment, $amount);
 
         // Send amount charged with allocated ally fees back to invoiceables
-        $allyFee = multiply(divide($payment->amount, $amount), $payment->getAllyFee());
+        $allyFee = multiply(divide($amount, $payment->amount, 6), $payment->getAllyFee());
         foreach($invoice->items as $item) {
             if ($item->invoiceable) {
-                $allocatedPct = divide($item->amount_due, $invoice->amount);
+                $allocatedPct = divide($item->amount_due, $invoice->amount, 6);
                 $allocatedAmount = multiply($allocatedPct, $amount);
                 $allocatedFee = multiply($allocatedPct, $allyFee);
                 $item->invoiceable->addAmountCharged($payment, $allocatedAmount, $allocatedFee);

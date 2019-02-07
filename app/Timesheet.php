@@ -9,6 +9,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 /**
  * App\Timesheet
@@ -121,7 +122,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * A Timesheet can have many SystemExceptions.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function exceptions()
     {
@@ -135,7 +136,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been confirmed.
      *
-     * @return void
+     * @return bool
      */
     public function getIsApprovedAttribute()
     {
@@ -145,7 +146,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been denied.
      *
-     * @return void
+     * @return bool
      */
     public function getIsDeniedAttribute()
     {
@@ -222,7 +223,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @param array $data
      * @param \App\User $creator
-     * @return \App\Timesheet
+     * @return \App\Timesheet|false
      */
     public static function createWithEntries($data, $creator)
     {
@@ -317,6 +318,8 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 
             if ($shift = $shiftFactory->create($timesheetData, $clockOutData)) {
                 $shift->activities()->sync($entry->activities);
+
+                event(new ShiftFlagsCouldChange($shift));
             } else {
                 return false;
             }

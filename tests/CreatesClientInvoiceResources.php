@@ -90,6 +90,28 @@ trait CreatesClientInvoiceResources
         return $shiftService;
     }
 
+    private function createServiceHours(float $rate, float $duration, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
+    {
+        $shift = factory(Shift::class)->create([
+            'client_id' => $this->client->id,
+            'client_payer_id' => null,
+            'service_id' => null,
+            'checked_in_time' => $date . ' 12:00:00',
+            'status' => Shift::WAITING_FOR_INVOICE,
+        ]);
+
+        $shiftService = factory(ShiftService::class)->create([
+            'shift_id' => $shift->id,
+            'client_payer_id' => $clientPayerId,
+            'duration' => $duration,
+            'client_rate' => $rate,
+            'caregiver_rate' => round($rate * .75, 2),
+            'ally_rate' => null,
+        ]);
+
+        return $shiftService;
+    }
+
     private function createShiftWithExpense(float $amount, string $date = '2019-01-15', ?int $clientPayerId = null): InvoiceableInterface
     {
         $shift = factory(Shift::class)->create([
