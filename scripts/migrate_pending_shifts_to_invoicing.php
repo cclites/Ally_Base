@@ -7,15 +7,16 @@ DB::beginTransaction();
 //// Migrate existing pending shifts
 ////////////////////////////////////
 
-$statuses = \App\Shifts\ShiftStatusManager::getPendingStatuses();
+$statuses = \App\Shifts\ShiftStatusManager::getPendingStatuses() + [\App\Shift::WAITING_FOR_CHARGE];
 $shifts = \App\Shift::with(['client', 'client.defaultPayment'])->whereIn('status', $statuses)->get();
 $count = 0;
 $shifts->each(function (\App\Shift $shift) use (&$count) {
-    if ($shift->status === \App\Shift::WAITING_FOR_CHARGE) {
-        $shift->status = \App\Shift::WAITING_FOR_INVOICE;
-    }
-    $shift->client_rate = $shift->costs()->getTotalHourlyCost();
-    $count += (int) $shift->save();
+    $status = $shift->status === \App\Shift::WAITING_FOR_CHARGE ? \App\Shift::WAITING_FOR_INVOICE : $shift->status;
+    $rate = $shift->costs()->getTotalHourlyCost();
+    $count += \DB::table('shifts')->where('id', $shift->id)->update([
+        'client_rate' => $rate,
+        'status' => $status,
+    ]);
 });
 
 DB::commit();
