@@ -56,7 +56,7 @@ class ProcessChainPayments
      * @param \App\BusinessChain $chain
      * @return Collection|\App\Billing\PaymentLog[]
      */
-    function processPayments(BusinessChain $chain)
+    function processPayments(BusinessChain $chain): Collection
     {
         PaymentLog::acquireLock();
         $batchId = PaymentLog::getNextBatch($chain->id);
@@ -66,10 +66,10 @@ class ProcessChainPayments
         );
 
         $results = [];
+        /** @var \App\Billing\ClientInvoice[] $invoices */
         foreach($groupedInvoices as $hash => $invoices) {
             $log = new PaymentLog();
             $log->batch_id = $batchId;
-            /** @var \App\Billing\ClientInvoice[] $invoices */
             try {
                 if ($hash === 'missing') {
                     throw new PaymentMethodError("Missing payment method for " . $invoices[0]->clientPayer->name());

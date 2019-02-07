@@ -1,15 +1,20 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\Billing\Actions\ProcessChainDeposits;
+use App\Billing\View\DepositViewGenerator;
+use App\Billing\View\HtmlViewStrategy;
+use App\Billing\View\PdfViewStrategy;
 use App\Business;
+use App\BusinessChain;
 use App\Caregiver;
 use App\Billing\Deposit;
 use App\Http\Controllers\Controller;
-use App\Payments\DepositProcessor;
 use App\Payments\SingleDepositProcessor;
+use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\DepositLog;
 use App\Responses\SuccessResponse;
-use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -52,33 +57,34 @@ class DepositsController extends Controller
         return view('admin.deposits.index');
     }
 
-    public function pendingIndex()
+    public function show(Deposit $deposit, string $view = "html")
     {
-        return view('admin.deposits.pending');
+        $strategy = new HtmlViewStrategy();
+        if (strtolower($view) === 'pdf') {
+            $strategy = new PdfViewStrategy('deposit-' . $deposit->id . '.pdf');
+        }
+
+        $viewGenerator = new DepositViewGenerator($strategy);
+        return $viewGenerator->generate($deposit);
     }
 
-    public function pendingDeposits(Request $request, Business $business)
+    public function pendingIndex()
     {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
+        $chains = BusinessChain::ordered()->get();
+        return view('admin.deposits.pending', compact('chains'));
+    }
 
-        $processor = new DepositProcessor($business, $startDate, $endDate);
-        return $processor->getDepositData();
+    public function processDeposits(BusinessChain $chain, ProcessChainDeposits $action)
+    {
+        $results = $action->processDeposits($chain);
+        $collection = DepositLog::collection($results)->toArray(null);
+
+        return new CreatedResponse('The deposits have been processed.', $collection);
     }
 
     public function missingBankAccount(Request $request, Business $business)
     {
         return $business->caregivers()->doesntHave('bankAccount')->get();
-    }
-
-    public function deposit(Request $request, Business $business)
-    {
-        $startDate = new Carbon($request->input('start_date') . ' 00:00:00', 'America/New_York');
-        $endDate = new Carbon($request->input('end_date') . ' 23:59:59', 'America/New_York');
-
-        $processor = new DepositProcessor($business, $startDate, $endDate);
-        $count = $processor->process();
-        return new SuccessResponse('There were ' . $count . ' successful transactions.');
     }
 
     public function depositAdjustment()

@@ -5,6 +5,7 @@ use App\AuditableModel;
 use App\Business;
 use App\Caregiver;
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Contracts\ContactableInterface;
 use App\Shift;
 use App\Traits\BelongsToOneBusiness;
 
@@ -110,4 +111,10 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
     {
         return (float) $this->amount;
     }
+
+    public function getRecipient(): ContactableInterface
+    {
+        return $this->caregiver ?? $this->business ?? new Business();
+    }
+
 }

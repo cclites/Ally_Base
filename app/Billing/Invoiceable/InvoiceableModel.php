@@ -61,7 +61,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         $query = new InvoiceableQuery($this);
         return $query->forBusinesses([$business->id])
             ->hasClientInvoicesPaid()
-            ->doesntHaveCaregiverInvoice()
+            ->doesntHaveBusinessInvoice()
             ->get();
     }
 

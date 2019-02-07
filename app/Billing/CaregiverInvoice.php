@@ -3,6 +3,7 @@ namespace App\Billing;
 
 use App\AuditableModel;
 use App\Billing\Contracts\DepositInvoiceInterface;
+use App\Contracts\ContactableInterface;
 use Illuminate\Support\Collection;
 
 /**
@@ -132,5 +133,10 @@ class CaregiverInvoice extends AuditableModel implements DepositInvoiceInterface
     function getAmountPaid(): float
     {
         return (float) $this->amount_paid;
+    }
+
+    function getRecipient(): ContactableInterface
+    {
+        return $this->caregiver;
     }
 }

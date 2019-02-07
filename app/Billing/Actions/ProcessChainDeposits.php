@@ -3,6 +3,8 @@ namespace App\Billing\Actions;
 
 use App\Billing\ClientInvoice;
 use App\Billing\Contracts\ChargeableInterface;
+use App\Billing\Contracts\DepositInvoiceInterface;
+use App\Billing\DepositLog;
 use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\CreditCardPaymentInterface;
@@ -11,6 +13,8 @@ use App\Billing\Payments\CreditCardPayment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\Methods\ProviderPayment;
+use App\Billing\Queries\BusinessInvoiceQuery;
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use App\Billing\Queries\ClientInvoiceQuery;
 use App\Business;
 use App\BusinessChain;
@@ -29,102 +33,71 @@ class ProcessChainDeposits
     protected $depositProcessor;
 
     /**
-     * @var \App\Billing\Queries\ClientInvoiceQuery
+     * @var \App\Billing\Queries\CaregiverInvoiceQuery
      */
-    protected $invoiceQuery;
+    protected $caregiverInvoiceQuery;
 
-    function __construct(ACHDepositInterface $achGateway = null, ProcessInvoiceDeposit $depositProcessor = null, ClientInvoiceQuery $invoiceQuery = null)
+    /**
+     * @var \App\Billing\Queries\BusinessInvoiceQuery
+     */
+    protected $businessInvoiceQuery;
+
+
+    function __construct(ACHDepositInterface $achGateway = null, ProcessInvoiceDeposit $depositProcessor = null,
+        CaregiverInvoiceQuery $caregiverInvoiceQuery = null, BusinessInvoiceQuery $businessInvoiceQuery = null)
     {
         $this->achGateway = $achGateway ?: app(ACHDepositInterface::class);
         $this->depositProcessor = $depositProcessor ?: app(ProcessInvoiceDeposit::class);
-        $this->invoiceQuery = $invoiceQuery ?: app(ClientInvoiceQuery::class);
+        $this->caregiverInvoiceQuery = $caregiverInvoiceQuery ?: app(CaregiverInvoiceQuery::class);
+        $this->businessInvoiceQuery = $businessInvoiceQuery ?: app(BusinessInvoiceQuery::class);
     }
 
     /**
-     * Process the payments for the chain, grouping by payment method
+     * Process the deposits for the chain
      *
      * @param \App\BusinessChain $chain
-     * @throws \App\Billing\Exceptions\PaymentMethodDeclined
-     * @throws \App\Billing\Exceptions\PaymentMethodError
+     * @return \Illuminate\Support\Collection
+     * @throws \Exception
      */
-    function processPayments(BusinessChain $chain)
+    function processDeposits(BusinessChain $chain): Collection
     {
-        $groupedInvoices = $this->groupByPaymentMethod(
-            $this->getInvoices($chain)
-        );
+        DepositLog::acquireLock();
+        $batchId = DepositLog::getNextBatch($chain->id);
 
-        foreach($groupedInvoices as $hash => $invoices) {
-            /** @var \App\Billing\ClientInvoice[] $invoices */
-            $paymentMethod = $this->getPaymentMethod($invoices[0]);
-            $strategy = $this->buildStrategy($paymentMethod);
-            $this->depositProcessor->payInvoices($invoices, $strategy);
+        $invoices = $this->getInvoices($chain);
+        $results = [];
+        foreach($invoices as $invoice) {
+            $log = new DepositLog();
+            $log->batch_id = $batchId;
+            try {
+                $deposit = $this->depositProcessor->payInvoice($invoice);
+                $log->setDeposit($deposit);
+                if ($deposit->transaction && $deposit->transaction->method) {
+                    $log->setPaymentMethod($deposit->transaction->method);
+                }
+            }
+            catch (\Exception $e) {
+                $log->setException($e);
+            }
+
+            $results[] = $log;
         }
+
+        DepositLog::releaseLock();
+
+        return collect($results);
     }
 
     /**
      * Get all unpaid invoices for a chain
      *
      * @param \App\BusinessChain $chain
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|DepositInvoiceInterface[]
      */
     function getInvoices(BusinessChain $chain): Collection
     {
-        return $this->invoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
-    }
-
-    /**
-     * Group a collection of invoices by payment method
-     *
-     * @param \App\Billing\ClientInvoice[] $invoices
-     * @return array
-     */
-    function groupByPaymentMethod(iterable $invoices): array
-    {
-        $hashTable = [];
-        foreach($invoices as $invoice) {
-            $method = $this->getPaymentMethod($invoice);
-            $hash = $method->getHash();
-            $hashTable[$hash][] = $invoice;
-        }
-
-        return $hashTable;
-    }
-
-    /**
-     * Get the assigned payment method for an invoice (derived from the client payer)
-     *
-     * @param \App\Billing\ClientInvoice $invoice
-     * @return \App\Billing\Contracts\ChargeableInterface
-     * @throws \App\Billing\Exceptions\PaymentMethodError
-     */
-    function getPaymentMethod(ClientInvoice $invoice): ChargeableInterface
-    {
-        $paymentMethod = $invoice->getClientPayer()->getPaymentMethod();
-        if (!$paymentMethod) {
-            throw new PaymentMethodError("Unable to get payment method from invoice.");
-        }
-
-        return $paymentMethod;
-    }
-
-    /**
-     * Build a payment method strategy for the given payment method using the injected gateways
-     *
-     * @param \App\Billing\Contracts\ChargeableInterface $chargeable
-     * @return \App\Billing\Payments\BankAccountPayment|\App\Billing\Payments\CreditCardPayment|\App\Billing\Payments\Methods\ProviderPayment
-     * @throws \App\Billing\Exceptions\PaymentMethodError
-     */
-    function buildStrategy(ChargeableInterface $chargeable)
-    {
-        if ($chargeable instanceof CreditCard) {
-            return new CreditCardPayment($chargeable, $this->ccGateway);
-        }
-        if ($chargeable instanceof BankAccount) {
-            return new BankAccountPayment($chargeable, $this->achGateway);
-        }
-        if ($chargeable instanceof Business) {
-            return new ProviderPayment($chargeable, $this->achGateway);
-        }
-        throw new PaymentMethodError("Unable to build payment strategy.");
+        $caregiverInvoices = $this->caregiverInvoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
+        $businessInvoices = $this->businessInvoiceQuery->forBusinessChain($chain)->notPaidInFull()->get();
+        return $caregiverInvoices->merge($businessInvoices);
     }
 }

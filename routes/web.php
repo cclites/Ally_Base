@@ -414,9 +414,9 @@ Route::group([
     Route::get('deposits/pending', 'Admin\DepositsController@pendingIndex')->name('deposits.pending');
     Route::get('deposits/adjustment', 'Admin\DepositsController@depositAdjustment')->name('deposits.adjustment');
     Route::post('deposits/adjustment', 'Admin\DepositsController@manualDeposit');
-    Route::get('deposits/pending/{business}', 'Admin\DepositsController@pendingDeposits')->name('deposits.pending.business');
-    Route::post('deposits/pending/{business}', 'Admin\DepositsController@deposit')->name('deposits.submit.business');
+    Route::post('deposits/deposit/{chain}', 'Admin\DepositsController@processDeposits')->name('deposits.deposit');
     Route::get('deposits/missing_accounts/{business}', 'Admin\DepositsController@missingBankAccount')->name('deposits.missing_accounts');
+    Route::get('deposits/{deposit}/{view?}', 'Admin\DepositsController@show')->name('deposits.show');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
     Route::get('shifts/data', 'Admin\ShiftsController@data')->name('shifts.data');
     Route::get('transactions', 'Admin\TransactionsController@index')->name('transactions');
@@ -486,8 +486,12 @@ Route::group([
 
     /* Invoices */
     Route::get('invoices/clients', 'Admin\ClientInvoiceController@index');
-    Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
     Route::post('invoices/clients', 'Admin\ClientInvoiceController@generate');
+    Route::get('invoices/clients/{invoice}', 'Admin\ClientInvoiceController@show');
+    Route::get('invoices/deposits', 'Admin\DepositInvoiceController@index');
+    Route::post('invoices/deposits', 'Admin\DepositInvoiceController@generate');
+    Route::get('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@showCaregiverInvoice');
+    Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
 });
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
