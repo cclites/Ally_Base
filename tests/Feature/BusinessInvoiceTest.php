@@ -24,7 +24,7 @@ class BusinessInvoiceTest extends TestCase
      */
     function an_invoice_can_be_generated_from_shifts()
     {
-        $business = factory(Business::class)->create();
+        $business = factory(Business::class)->create(['timezone' => 'UTC']);
         $excludedShift = factory(Shift::class)->create();
         /** @var Shift $includedShift */
         $includedShift = factory(Shift::class)->create([
