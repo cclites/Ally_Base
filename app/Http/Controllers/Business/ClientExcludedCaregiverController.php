@@ -35,12 +35,17 @@ class ClientExcludedCaregiverController extends BaseController
     {
         $this->authorize('update', $client);
 
-        $data = $request->validate(['caregiver_id' => 'required|int']);
+        $data = $request->validate([
+            'caregiver_id' => 'required|int',
+            'effective_at' => 'nullable|date',
+        ]);
 
         $caregiver = ClientExcludedCaregiver::create([
             'client_id' => $client->id,
             'caregiver_id' => $data['caregiver_id'],
-            'note' => $request->input('note', null)
+            'note' => $request->input('note', null),
+            'reason' => $request->input('reason', null),
+            'effective_at' => filter_date($request->effective_at),
         ]);
 
         if ($caregiver) {

@@ -175,10 +175,19 @@
                                 <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
                         </b-form-group>
+                        <b-form-group label="Reason" label-for="exclude_reason">
+                            <b-form-select name="exclude_reason" v-model="excludeForm.reason">
+                                <option value="">--Reason for excluding--</option>
+                                <option v-for="(item, index) in exclusionReasons" :value="index" :key="index">{{ item }}</option>
+                            </b-form-select>
+                        </b-form-group>
                         <b-form-group label="Note" label-for="note">
                             <b-form-textarea v-model="excludeForm.note"
                                              :rows="3">
                             </b-form-textarea>
+                        </b-form-group>
+                        <b-form-group label="Effective Date" label-for="exclude_effective_at">
+                            <mask-input v-model="excludeForm.effective_at" id="exclude_effective_at" type="date"></mask-input>
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -267,6 +276,8 @@
                 excludeForm: new Form({
                     caregiver_id: "",
                     note: "",
+                    reason: '',
+                    effective_at: moment().format('MM/DD/YYYY'),
                 }),
                 caregiverForm: new Form({caregiver_id: ""}),
 
@@ -344,6 +355,13 @@
                         class: 'hidden-print'
                     },
                 ],
+                exclusionReasons: {
+                    'unhappy_client': 'Client not happy and refuses service from this caregiver',
+                    'retired': 'Retired',
+                    'no_shows': 'Continual no shows',
+                    'quit': 'Caregiver quit',
+                    'service_not_needed': 'Client no longer needs service',
+                },
             }
         },
 
@@ -475,6 +493,8 @@
                 this.excludeForm = new Form({
                     caregiver_id: "",
                     note: "",
+                    reason: '',
+                    effective_at: moment().format('MM/DD/YYYY'),
                 });
                 this.clientExcludeCaregiverModal = false;
             },
