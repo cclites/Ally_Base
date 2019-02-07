@@ -163,6 +163,7 @@ class ClientController extends BaseController
             'bankAccounts',
             'creditCards',
             'payments',
+            'payments.invoices',
             'user.documents',
             'meta',
             'notes.creator',

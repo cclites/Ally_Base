@@ -25,6 +25,11 @@
                     </a>
                 </slot>
             </template>
+            <template slot="invoices" scope="data">
+                <div v-for="invoice in data.item.invoices" :key="invoice.id">
+                    <a :href="`/business/client/invoices/${invoice.id}`">#{{ invoice.name }}</a>
+                </div>
+            </template>
         </b-table>
     </div>
 </template>
@@ -44,13 +49,14 @@
                 fields: [
                     { key: 'created_at', label: 'Date Paid', sortable: true },
                     { key: 'week', label: 'Week' },
-                    { key: 'success', label: 'Payment Status' },
                     {
                         key: 'amount',
                         label: 'Amount',
                         formatter: (value) => { return this.moneyFormat(value) },
                         sortable: true,
                     },
+                    { key: 'success', label: 'Payment Status' },
+                    { key: 'invoices', label: 'Related Invoices' },
                     {
                         key: 'actions',
                         class: 'hidden-print'                        
