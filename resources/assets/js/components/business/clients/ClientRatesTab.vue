@@ -144,33 +144,30 @@
             </h5>
         </div>
         <div class="table-responsive">
-            <table class="table table-bordered caregiver-list-table">
-                <tbody>
-                    <tr v-for="exGiver in excludedCaregivers">
-                        <td class="sized">
-                            {{ exGiver.caregiver.name }}
-                        </td>
-                        <td class="sized">{{ exGiver.note }}</td>
-                        <td class="sized" style="white-space: nowrap">
-                            <b-btn @click="removeExcludedCaregiver(exGiver.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
-                        </td>
-                    </tr>
-                    <tr v-if="!excludedCaregivers.length">
-                        <td colspan="3">There are no excluded caregivers for this client.</td>
-                    </tr>
-                </tbody>
-            </table>
+            <b-table bordered striped hover show-empty
+                :items="excludedCaregivers"
+                :fields="excludedFields"
+                empty-text="There are no excluded caregivers for this client."
+            >
+                <template slot="actions" scope="data">
+                    <b-btn @click="editExcludedCaregiver(data.item)" size="sm" variant="info"><i class="fa fa-edit"></i></b-btn>
+                    <b-btn @click="removeExcludedCaregiver(data.item.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
+                </template>
+            </b-table>
         </div>
 
         <!-- MODALS -->
         <b-modal id="clientExcludeCargiver"
-                 title="Exclude Caregiver"
+                 :title="excludeForm.id ? 'Update Excluded Caregiver' : 'Exclude Caregiver'"
                  v-model="clientExcludeCaregiverModal">
             <b-container fluid>
                 <b-row>
                     <b-col lg="12">
                         <b-form-group label="Caregiver *" label-for="exclude_caregiver_id">
-                            <b-form-select name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
+                            <div v-if="excludeForm.id">
+                                {{ excludeForm.caregiver_name }}
+                            </div>
+                            <b-form-select v-else name="exclude_caregiver_id" v-model="excludeForm.caregiver_id">
                                 <option value="">--Select a Caregiver--</option>
                                 <option v-for="item in otherCaregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                             </b-form-select>
@@ -194,7 +191,9 @@
             </b-container>
             <div slot="modal-footer">
                 <b-btn variant="default" @click="clientExcludeCaregiverModal=false">Close</b-btn>
-                <b-btn variant="info" @click="excludeCaregiver()" :disabled="!excludeForm.caregiver_id">Exclude Caregiver</b-btn>
+                <b-btn variant="info" @click="excludeCaregiver()" :disabled="!excludeForm.caregiver_id">
+                    {{ excludeForm.id ? 'Save' : 'Exclude Caregiver' }}
+                </b-btn>
             </div>
         </b-modal>
 
@@ -274,6 +273,8 @@
                 addNewCaregiver: false,
 
                 excludeForm: new Form({
+                    id: "",
+                    caregiver_name: "",
                     caregiver_id: "",
                     note: "",
                     reason: '',
@@ -354,6 +355,13 @@
                         label: '',
                         class: 'hidden-print'
                     },
+                ],
+                excludedFields: [
+                    { key: 'caregiver_name', label: 'Name', sortable: true },
+                    { key: 'effective_at', label: 'Date Excluded', sortable: true, formatter: x => this.formatDateFromUTC(x) },
+                    { key: 'reason', label: 'Reason Code', sortable: true, formatter: x => { return x ? this.exclusionReasons[x] : 'None' } },
+                    { key: 'note', sortable: true },
+                    { key: 'actions', label: '', class: 'hidden-print' },
                 ],
                 exclusionReasons: {
                     'unhappy_client': 'Client not happy and refuses service from this caregiver',
@@ -487,10 +495,16 @@
             },
 
             async excludeCaregiver() {
-                const response = await this.excludeForm.post('/business/clients/'+this.client.id+'/exclude-caregiver');
+                if (this.excludeForm.id) {
+                    const response = await this.excludeForm.patch('/business/clients/'+this.client.id+'/exclude-caregiver/'+this.excludeForm.id);
+                } else {
+                    const response = await this.excludeForm.post('/business/clients/'+this.client.id+'/exclude-caregiver');
+                }
                 this.fetchExcludedCaregivers();
                 this.fetchOtherCaregivers();
                 this.excludeForm = new Form({
+                    id: "",
+                    caregiver_name: "",
                     caregiver_id: "",
                     note: "",
                     reason: '',
@@ -509,6 +523,18 @@
                         console.error(error.response);
                     });
                 }
+            },
+
+            editExcludedCaregiver(item) {
+                this.excludeForm = new Form({
+                    id: item.id,
+                    caregiver_name: item.caregiver.name,
+                    caregiver_id: item.caregiver_id,
+                    note: item.note,
+                    reason: item.reason,
+                    effective_at: moment(item.effective_at).format('MM/DD/YYYY'),
+                });
+                this.clientExcludeCaregiverModal = true
             },
 
             setItems(data) {
