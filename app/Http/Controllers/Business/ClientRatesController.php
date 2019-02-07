@@ -44,6 +44,15 @@ class ClientRatesController extends Controller
         
         \DB::beginTransaction();
         try {
+            // Ensure all caregivers are attached to the client
+            $caregivers = collect($data['rates'])
+                ->where('caregiver_id', '<>', null)
+                ->pluck('caregiver_id');
+    
+            if (! empty($caregivers)) {
+                $client->caregivers()->syncWithoutDetaching($caregivers);
+            }
+    
             if ($client->syncRates($data['rates'])) {
                 $validator = new ClientRateValidator();
                 if (! $validator->validate($client->fresh())) {

@@ -44,9 +44,10 @@ class UpdateClientRatesRequest extends FormRequest
             'rates.*.caregiver_id' => [
                 'nullable',
                 'numeric',
-                Rule::exists('client_caregivers', 'caregiver_id')->where(function ($query) {
-                    $query->where('client_id', $this->route('client')->id);
-                })
+                'exists:caregivers,id'
+                // Rule::exists('client_caregivers', 'caregiver_id')->where(function ($query) {
+                //     $query->where('client_id', $this->route('client')->id);
+                // })
             ],
             'rates.*.effective_start' => 'required|date',
             'rates.*.effective_end' => 'required|date', 

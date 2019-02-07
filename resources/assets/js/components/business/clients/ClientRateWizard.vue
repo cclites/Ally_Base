@@ -1,5 +1,5 @@
 <template>
-    <b-modal :title="defaultRate ? 'New Default Rate' : 'New Client Rate Wizard'"
+    <b-modal :title="defaultRate ? 'New Default Rate' : 'Add Caregiver Wizard'"
              v-model="localValue"
              ref="rateWizardModal">
         <b-container fluid>
@@ -8,38 +8,42 @@
                     <template v-if="step === 1">
                         <h4>Caregiver Assignment</h4>
                         <p>
-                            <strong>Which caregiver(s) do you want this rate applied to?</strong>
+                            <strong v-if="addMode">Which caregiver(s) do you want to assign to the client?</strong>
+                            <strong v-else>Which caregiver(s) do you want this rate applied to?</strong>
                         </p>
 
-                        <b-form-radio-group v-model="caregiver_type">
+                        <!-- <b-form-radio-group v-model="caregiver_type">
                             <b-radio value="all">All Caregivers</b-radio><br />
                             <b-radio value="specific">A specific caregiver:</b-radio><br />
-                        </b-form-radio-group>
-                        <b-form-select v-if="caregiver_type === 'specific'" v-model="caregiver_select">
-                            <option value="">--Select a specific caregiver--</option>
-                            <option v-for="caregiver in caregivers" :value="caregiver.id">{{ caregiver.name }}</option>
+                        </b-form-radio-group> -->
+                        <b-form-select v-if="addMode" v-model="caregiver_select">
+                            <option value="">--Select a Caregiver--</option>
+                            <option v-for="caregiver in potentialCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
+                        </b-form-select>
+                        <b-form-select v-else v-model="caregiver_select">
+                            <option value="">--Select a Caregiver--</option>
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
                         <p>
                             <small v-if="caregiver_type === 'all'">Note: "All Caregivers" rates will only be used if there isn't a specific caregiver rate available.</small>
                         </p>
                     </template>
                     <template v-if="step === 2">
-                        <h4>Service Assignment</h4>
+                        <h4>Service Type</h4>
                         <p>
-                            <strong>Which service(s) do you want this rate applied to?</strong>
+                            <strong>Would you like to set the rate for ALL service types or a specific service type?</strong>
                         </p>
-
                         <b-form-radio-group v-model="service_type">
-                            <b-radio value="all">All Services</b-radio><br />
-                            <b-radio value="specific">A specific service:</b-radio><br />
+                            <b-radio value="all">All Service Types</b-radio><br />
+                            <b-radio value="specific">A specific service type:</b-radio><br />
                         </b-form-radio-group>
                         <b-form-select v-if="service_type === 'specific'" v-model="service_select">
-                            <option value="">--Select a specific service--</option>
-                            <option v-for="service in services" :value="service.id">{{ service.name }}</option>
+                            <option value="">--Select a specific service type--</option>
+                            <option v-for="service in services" :value="service.id" :key="service.id">{{ service.name }}</option>
                         </b-form-select>
-                        <p>
+                        <p class="mt-2">
                             <small v-if="service_type === 'specific'">Note: You must assign this service on the schedule for it to use this rate.</small>
-                            <small v-else>Note: "All Services" rates will only be used if there isn't a specific service rate available.</small>
+                            <small v-else>Note: Selecting ALL will be the default rate used if a caregiver clocks in/out of an unscheduled visit.</small>
                         </p>
                     </template>
                     <template v-if="step === 3">
@@ -55,7 +59,7 @@
                         <b-form-select v-if="payer_type === 'specific'" v-model="payer_select">
                             <option value="">--Select a specific payer--</option>
                             <option :value="0">({{ client.name }})</option>
-                            <option v-for="payer in payers" :value="payer.id">{{ payer.name }}</option>
+                            <option v-for="payer in payers" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                         </b-form-select>
                         <p>
                             <small v-if="payer_type === 'specific'">Note: You must assign this payer on the schedule for it to use this rate.</small>
@@ -136,7 +140,7 @@
 <script>
     const initialState = () => ({
         step: 1,
-        caregiver_type: "all",
+        caregiver_type: "specific",
         caregiver_select: "",
         service_type: "all",
         service_select: "",
@@ -153,7 +157,7 @@
 
     export default {
         name: "ClientRateWizard",
-        props: ["value", "client", "caregivers", "services", "payers", "defaultRate"],
+        props: ["value", "client", "caregivers", "services", "payers", "defaultRate", 'addMode', 'potentialCaregivers'],
         data() {
             return initialState();
         },

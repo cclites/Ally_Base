@@ -4,25 +4,19 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-
-        <b-row class="mb-2">
-            <b-col sm="7">
-                <b-btn variant="info" @click="addCaregiver()">Add Caregiver to Client</b-btn>
-                <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver from Client</b-btn>
-            </b-col>
-            <b-col sm="5" class="text-right">
+        <div class="d-flex">
+            <div class="mb-3">
+                <h5><strong>Referred Caregivers and Rates</strong></h5>
+            </div>
+            <div class="ml-auto">
                 {{ paymentText }}
-            </b-col>
-        </b-row>
-
-        <hr />
-
-        <div class="ml-auto mb-3">
-            <h5>
-                <strong>Client Rates </strong>
-                <b-btn variant="info" @click="addRateWizard()" class="ml-2">Add Rate Wizard</b-btn>
-                <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn>
-            </h5>
+            </div>
+        </div>
+        <div class="mb-3">
+            <b-btn variant="info" @click="addCaregiver()">Add Caregiver</b-btn>
+            <b-btn variant="info" @click="clientExcludeCaregiverModal = true">Exclude Caregiver</b-btn>
+            <b-btn variant="info" @click="addRateWizard()">Add Rate to Existing Caregiver</b-btn>
+            <!-- <b-btn variant="primary" @click="addRateWizard(true)" class="ml-2">Add a Default Client Rate</b-btn> -->
         </div>
 
         <div v-if="filterByCaregiverId">
@@ -36,7 +30,7 @@
             </b-badge>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive mb-2">
             <b-table bordered striped hover show-empty
                      :items="filteredItems"
                      :fields="fields"
@@ -195,7 +189,7 @@
             </div>
         </b-modal>
 
-        <b-modal title="Add Caregiver Assignment"
+        <!-- <b-modal title="Add Caregiver Assignment"
                  v-model="clientCaregiverModal"
                  ref="clientCaregiverModal">
             <b-container fluid>
@@ -218,7 +212,7 @@
                 <b-btn variant="default" @click="clientCaregiverModal=false">Close</b-btn>
                 <b-btn variant="info" @click="saveCaregiver()" :disabled="!caregiverForm.caregiver_id">Add Caregiver</b-btn>
             </div>
-        </b-modal>
+        </b-modal> -->
 
         <client-rate-wizard v-model="rateWizardModal"
                             :client="client"
@@ -226,6 +220,8 @@
                             :services="services"
                             :payers="payers"
                             :default-rate="defaultRateOnWizard"
+                            :potential-caregivers="otherCaregivers"
+                            :add-mode="addNewCaregiver"
                             @new-rate="addRate">
         </client-rate-wizard>
     </b-card>
@@ -265,6 +261,7 @@
                 clientExcludeCaregiverModal: false,
                 rateWizardModal: false,
                 defaultRateOnWizard: false,
+                addNewCaregiver: false,
 
                 excludeForm: new Form({
                     caregiver_id: "",
@@ -394,6 +391,7 @@
             },
 
             addRate(rateObject={}) {
+                this.addNewCaregiver = false;
                 this.items.push({
                     service_id: rateObject.service_id || null,
                     payer_id: rateObject.payer_id || null,
@@ -437,21 +435,27 @@
                     })
                     .catch(e => {
                     })
+                    .finally(() => {
+                        this.fetchAssignedCaregivers();
+                        this.fetchOtherCaregivers();
+                    })
             },
 
             addCaregiver() {
-                this.caregiverForm = new Form({
-                    caregiver_id: null,
-                });
-                this.clientCaregiverModal = true;
+                this.addNewCaregiver = true;
+                this.rateWizardModal = true;
+                // this.caregiverForm = new Form({
+                //     caregiver_id: null,
+                // });
+                // this.clientCaregiverModal = true;
             },
 
-            async saveCaregiver() {
-                await this.caregiverForm.post('/business/clients/' + this.client.id + '/caregivers');
-                this.fetchAssignedCaregivers();
-                this.fetchOtherCaregivers();
-                this.clientCaregiverModal = false;
-            },
+            // async saveCaregiver() {
+            //     await this.caregiverForm.post('/business/clients/' + this.client.id + '/caregivers');
+            //     this.fetchAssignedCaregivers();
+            //     this.fetchOtherCaregivers();
+            //     this.clientCaregiverModal = false;
+            // },
 
             async removeAssignedCaregiver(caregiver_id) {
                 if (confirm('Are you sure you wish to remove this caregiver from this client?')) {
@@ -607,7 +611,11 @@
 
             getCaregiverName(id) {
                 let cg = this.caregivers.find(x => x.id === id);
-                return cg.name;
+                if (cg) {
+                    return cg.name;
+                }
+
+                return 'All';
             },
         },
 
