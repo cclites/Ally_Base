@@ -221,13 +221,13 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
     public function getMaskedNameAttribute()
     {
         $first = $this->firstname;
-        if (strlen($first) > 1) {
-            $first = substr($first, 0, 2) . str_repeat('*', strlen($first) - 2);
+        if (mb_strlen($first) > 1) {
+            $first = mb_substr($first, 0, 2) . str_repeat('*', mb_strlen($first) - 2);
         }
 
         $last = $this->lastname;
-        if (strlen($last) > 1) {
-            $last = substr($last, 0, 2) . str_repeat('*', strlen($last) - 2);
+        if (mb_strlen($last) > 1) {
+            $last = mb_substr($last, 0, 2) . str_repeat('*', mb_strlen($last) - 2);
         }
         return "$first $last";
     }
@@ -249,7 +249,7 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
             $phone = $this->phoneNumbers->first();
         }
 
-        return empty($phone) ? '' : $phone->number;
+        return empty($phone) ? '' : (string) $phone->number;
     }
 
     ///////////////////////////////////////////

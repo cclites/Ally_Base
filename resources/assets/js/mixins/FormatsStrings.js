@@ -17,6 +17,9 @@ export default {
             str = str + br + address.city + `, ` + address.state + ' ' + address.zip;
             return str;
         },
+        toSnakeCase(str) {
+            return _.snakeCase(str);
+        },
         stringLimit(str, limit=100)
         {
             if (typeof(str) !== "string") return "";

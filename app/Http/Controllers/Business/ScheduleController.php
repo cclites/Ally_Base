@@ -428,8 +428,9 @@ class ScheduleController extends BaseController
      */
     public function print(PrintableScheduleRequest $request)
     {
-        $start = Carbon::parse($request->input('start', 'First day of this month'));
-        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $start = Carbon::parse($request->input('start_date', 'First day of this month'));
+        $end = Carbon::parse($request->input('end_date', 'First day of next month'));
+        $group_by = $request->input('group_by');
         $business = $request->getBusiness();
         $schedules = $business->schedules()->whereBetween('starts_at', [$start, $end])->get();
 
@@ -438,7 +439,7 @@ class ScheduleController extends BaseController
             $schedule->ends_at = $schedule->starts_at->copy()->addMinutes($schedule->duration);
             return $schedule;
         });
-        return view('business.schedule_print', compact('schedules'));
+        return view('business.schedule_print', compact('schedules', 'group_by'));
     }
 
     protected function businessScheduleTitle(Schedule $schedule)

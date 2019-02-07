@@ -283,7 +283,7 @@ abstract class BaseImport extends Command
      *
      * @param int $row
      * @param $cellValue
-     * @return int|null
+     * @return bool
      */
     protected function resolveActive(int $row, $cellValue)
     {
@@ -484,6 +484,8 @@ abstract class BaseImport extends Command
      */
     protected function transformDateValue($value)
     {
+        if (!$value) return null;
+
         try {
             if (Carbon::createFromFormat('Y-m-d', $value) !== false) {
                 return $value;

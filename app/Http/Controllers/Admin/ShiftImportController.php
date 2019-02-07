@@ -14,6 +14,7 @@ use App\Responses\SuccessResponse;
 use App\Shift;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImportController extends Controller
 {
@@ -135,6 +136,7 @@ class ShiftImportController extends Controller
             'user_id' => \Auth::id()
         ]);
         foreach($shifts as $shift) {
+            event(new ShiftFlagsCouldChange($shift));
             $import->shifts()->save($shift);
         }
         \DB::commit();

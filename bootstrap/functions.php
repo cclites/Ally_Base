@@ -24,6 +24,17 @@ function is_mobile_app($agent = null)
     return strpos($agent, $match) !== false;
 }
 
+function is_ios() {
+    $userAgent = request()->userAgent();
+    $parser = UAParser\Parser::create();
+    $parsed = $parser->parse($userAgent);
+    if (optional($parsed->os)->family == 'iOS') {
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * Map a polymorphic type in the database to a class name
  *
@@ -224,6 +235,14 @@ function is_office_user() {
     return Auth::check() && Auth::user()->role_type === 'office_user';
 }
 
+/**
+ * Check if the logged in user is a client
+ *
+ * @return bool
+ */
+function is_client() {
+    return Auth::check() && Auth::user()->role_type === 'client';
+}
 
 if (! function_exists('activeBusiness')) {
     /**

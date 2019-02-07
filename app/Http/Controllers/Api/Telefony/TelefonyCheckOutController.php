@@ -7,6 +7,7 @@ use App\Exceptions\TelefonyMessageException;
 use App\Shifts\ClockOut;
 use App\Shift;
 use App\ShiftIssue;
+use App\Events\ShiftFlagsCouldChange;
 
 class TelefonyCheckOutController extends BaseVoiceController
 {
@@ -279,6 +280,7 @@ class TelefonyCheckOutController extends BaseVoiceController
             }
 
             if ($clockOut->clockOut($shift)) {
+                event(new ShiftFlagsCouldChange($shift));
                 $this->telefony->say('You have successfully clocked out.<PAUSE>Thank you. Good bye.');
                 return $this->telefony->response();
             }

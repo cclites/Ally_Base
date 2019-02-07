@@ -125,6 +125,7 @@ class CaregiverController extends BaseController
             'user.documents',
             'bankAccount',
             'availability',
+            'meta',
             'skills',
             'notes.creator',
             'notes' => function ($query) {
@@ -219,7 +220,7 @@ class CaregiverController extends BaseController
         if ($caregiver->update(['active' => true, 'inactive_at' => null])) {
             return new SuccessResponse('The caregiver has been re-activated.');
         }
-        return new ErrorResponse('Could not re-activate the selected caregiver.');
+        return new ErrorResponse(500, 'Could not re-activate the selected caregiver.');
     }
 
     public function address(Request $request, $caregiver_id, $type)
