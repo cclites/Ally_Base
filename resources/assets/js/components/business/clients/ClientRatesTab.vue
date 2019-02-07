@@ -101,6 +101,13 @@
                      ref="table"
                      class="table-fit-more"
             >
+                <template slot="caregiver_id" scope="row">
+                    {{ getCaregiverName(row.item.caregiver_id) }}
+                    <!-- <b-select v-model="row.item.caregiver_id" size="sm">
+                        <option :value="null">(All)</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
+                    </b-select> -->
+                </template>
                 <template slot="service_id" scope="row">
                     <b-select v-model="row.item.service_id" size="sm" @change="(e) => onChangeService(e, row.item)">
                         <option :value="null">(All)</option>
@@ -111,12 +118,6 @@
                     <b-select v-model="row.item.payer_id" size="sm" @change="(e) => onChangePayer(e, row.item)">
                         <option :value="null">(All)</option>
                         <option v-for="item in payers" :value="item.id" :key="item.id">{{ item.name }}</option>
-                    </b-select>
-                </template>
-                <template slot="caregiver_id" scope="row">
-                    <b-select v-model="row.item.caregiver_id" size="sm">
-                        <option :value="null">(All)</option>
-                        <option v-for="item in caregivers" :value="item.id" :key="item.id" v-if="!filterByCaregiverId || filterByCaregiverId === item.id">{{ item.name }}</option>
                     </b-select>
                 </template>
                 <template slot="effective_start" scope="row">
@@ -309,6 +310,11 @@
                 sortDesc: false,
                 fields: [
                     {
+                        key: 'caregiver_id',
+                        label: 'Caregiver',
+                        sortable: true
+                    },
+                    {
                         key: 'service_id',
                         label: 'Service',
                         sortable: true
@@ -316,11 +322,6 @@
                     {
                         key: 'payer_id',
                         label: 'Payer',
-                        sortable: true
-                    },
-                    {
-                        key: 'caregiver_id',
-                        label: 'Caregiver',
                         sortable: true
                     },
                     {
@@ -632,6 +633,11 @@
                 }
 
                 console.log('no default rate for payer '+payer_id);
+            },
+
+            getCaregiverName(id) {
+                let cg = this.caregivers.find(x => x.id === id);
+                return cg.name;
             },
         },
 
