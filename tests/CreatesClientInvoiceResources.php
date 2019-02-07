@@ -6,6 +6,7 @@ use App\Billing\Contracts\InvoiceableInterface;
 use App\Billing\Invoiceable\ShiftAdjustment;
 use App\Billing\Invoiceable\ShiftService;
 use App\Billing\Payer;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Shift;
 
 /**
@@ -158,5 +159,10 @@ trait CreatesClientInvoiceResources
         ]);
 
         return $adjustment;
+    }
+
+    private function createCreditCard($type = 'visa')
+    {
+        return factory(CreditCard::class)->create(['type' => $type]);
     }
 }
