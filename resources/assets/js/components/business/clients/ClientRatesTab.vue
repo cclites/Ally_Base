@@ -15,60 +15,6 @@
             </b-col>
         </b-row>
 
-        <b-row>
-            <b-col lg="7">
-                <div class="table-responsive">
-                    <table class="table table-bordered caregiver-list-table">
-                        <thead>
-                        <tr>
-                            <th>Referred Caregiver</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="caregiver in caregivers" :key="caregiver.id">
-                            <td>{{ caregiver.firstname }} {{ caregiver.lastname }}</td>
-                            <td>
-                                <b-btn size="sm" variant="danger" @click="removeAssignedCaregiver(caregiver.id)">
-                                    <i class="fa fa-times"></i>
-                                </b-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!caregivers.length">
-                            <td colspan="3">There are no referred, or assigned, caregivers for this client.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </b-col>
-            <b-col lg="5">
-                <div class="table-responsive">
-                    <table class="table table-bordered caregiver-list-table">
-                        <thead>
-                        <tr>
-                            <th>Excluded Caregiver</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="exGiver in excludedCaregivers">
-                            <td class="sized">
-                                {{ exGiver.caregiver.name }}
-                            </td>
-                            <td class="sized">{{ exGiver.note }}</td>
-                            <td class="sized" style="white-space: nowrap">
-                                <b-btn @click="removeExcludedCaregiver(exGiver.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="!excludedCaregivers.length">
-                            <td colspan="3">There are no excluded caregivers for this client.</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </b-col>
-        </b-row>
-
         <hr />
 
         <div class="ml-auto mb-3">
@@ -197,6 +143,30 @@
 
         <div class="mt-4"><small>* Provider fees and Ally fees are estimated based on the primary payment method.</small></div>
 
+        <hr />
+        <div class="mt-4">
+            <h5>
+                <strong>Excluded Caregivers </strong>
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered caregiver-list-table">
+                <tbody>
+                    <tr v-for="exGiver in excludedCaregivers">
+                        <td class="sized">
+                            {{ exGiver.caregiver.name }}
+                        </td>
+                        <td class="sized">{{ exGiver.note }}</td>
+                        <td class="sized" style="white-space: nowrap">
+                            <b-btn @click="removeExcludedCaregiver(exGiver.id)" size="sm" variant="danger"><i class="fa fa-times"></i></b-btn>
+                        </td>
+                    </tr>
+                    <tr v-if="!excludedCaregivers.length">
+                        <td colspan="3">There are no excluded caregivers for this client.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <!-- MODALS -->
         <b-modal id="clientExcludeCargiver"
