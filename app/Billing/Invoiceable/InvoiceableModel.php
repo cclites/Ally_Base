@@ -47,6 +47,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         return $query->forCaregivers([$caregiver->id])
             ->hasClientInvoicesPaid()
             ->doesntHaveCaregiverInvoice()
+            ->notBelongingToAnOldFinalizedShift()
             ->get();
     }
 
@@ -62,6 +63,7 @@ abstract class InvoiceableModel extends AuditableModel implements InvoiceableInt
         return $query->forBusinesses([$business->id])
             ->hasClientInvoicesPaid()
             ->doesntHaveBusinessInvoice()
+            ->notBelongingToAnOldFinalizedShift()
             ->get();
     }
 

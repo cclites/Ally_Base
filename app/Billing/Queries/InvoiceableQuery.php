@@ -5,6 +5,8 @@ namespace App\Billing\Queries;
 
 
 use App\Billing\Invoiceable\InvoiceableModel;
+use App\Billing\Invoiceable\ShiftExpense;
+use App\Shift;
 use Illuminate\Database\Eloquent\Model;
 
 class InvoiceableQuery extends BaseQuery
@@ -117,6 +119,25 @@ class InvoiceableQuery extends BaseQuery
             $this->businessInvoiceSubquery($query);
             $query->whereColumn('business_invoices.amount_paid', '!=', 'business_invoices.amount');
         });
+
+        return $this;
+    }
+
+    /**
+     * This is a method used to exclude shifts (and related expenses) marked as PAID prior to the billing revamp in February 2019
+     *
+     * @return \App\Billing\Queries\InvoiceableQuery
+     */
+    function notBelongingToAnOldFinalizedShift(): self
+    {
+        if ($this->invoiceableModel instanceof Shift) {
+            $this->where('status', '!=', 'PAID');
+        }
+        else if ($this->invoiceableModel instanceof ShiftExpense) {
+            $this->whereDoesntHave('shift', function($q) {
+                $q->where('status', 'PAID');
+            });
+        }
 
         return $this;
     }

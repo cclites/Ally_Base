@@ -49,7 +49,7 @@ class ProcessDeposit
             'business_id'  => $business->id,
         ];
 
-        $this->deposit($strategy, $attributes, $amount, $currency);
+        return $this->deposit($strategy, $attributes, $amount, $currency);
     }
 
     public function depositToCaregiver(Caregiver $caregiver, ?DepositMethodStrategy $strategy, float $amount, string $currency = 'USD'): Deposit
@@ -68,6 +68,6 @@ class ProcessDeposit
             'caregiver_id'  => $caregiver->id,
         ];
 
-        $this->deposit($strategy, $attributes, $amount, $currency);
+        return $this->deposit($strategy, $attributes, $amount, $currency);
     }
 }
