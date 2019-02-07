@@ -76,6 +76,7 @@ class ClientExcludedCaregiverController extends BaseController
 
         return response()->json($clientExcludedCaregiver);
     }
+    
     /**
      * Remove the specified resource from storage.
      *
