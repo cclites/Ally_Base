@@ -6,7 +6,7 @@ Your home care service week is finished. Please review and confirm your home car
 @component('mail::table')
 | Date            | Caregiver            | Hours            | Rate             | Total             |
 |-----------------|----------------------|------------------|------------------|-------------------|
-@foreach ($shifts as $s)  | {{$s->date->format('m/d/Y')}}  | {{ str_replace('*', '\*', $s->caregiver) }}  | {{$s->hours}}  | ${{number_format($s->rate, 2)}}  | ${{number_format($s->total, 2)}}  |
+@foreach ($shifts as $s)  | {{$s->date->setTimezone($timezone)->format('m/d/Y')}}  | {{ str_replace('*', '\*', $s->caregiver) }}  | {{$s->hours}}  | ${{number_format($s->rate, 2)}}  | ${{number_format($s->total, 2)}}  |
 @endforeach
 @endcomponent
 

@@ -107,6 +107,11 @@
                         <th>{{ sum('ally_total') }}</th>
                         <th colspan="2"></th>
                     </template>
+                    <template slot="actions" scope="data">
+                        <b-btn variant="info" :href="`/business/shifts/${data.item.id}`" size="sm">
+                            <i class="fa fa-edit"></i>
+                        </b-btn>
+                    </template>
                 </b-table>
             </div>
             <b-row>
@@ -219,6 +224,11 @@
                         label: 'Confirmed',
                         sortable: true,
                         formatter: ts => ts ? this.formatDateTimeFromUTC(ts) : '-'
+                    },
+                    {
+                        key: 'actions',
+                        label: '',
+                        sortable: false,
                     },
                     // {
                     //     key: 'ally_pct',
