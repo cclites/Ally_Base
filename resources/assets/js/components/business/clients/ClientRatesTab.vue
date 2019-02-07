@@ -222,6 +222,7 @@
                             :default-rate="defaultRateOnWizard"
                             :potential-caregivers="otherCaregivers"
                             :add-mode="addNewCaregiver"
+                            :ally-rate-original="allyRateOriginal"
                             @new-rate="addRate">
         </client-rate-wizard>
     </b-card>
