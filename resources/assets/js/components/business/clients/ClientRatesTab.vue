@@ -386,6 +386,7 @@
         methods: {
 
             addRateWizard(defaultRate=false) {
+                this.addNewCaregiver = false;
                 this.defaultRateOnWizard = defaultRate;
                 this.rateWizardModal = true;
             },

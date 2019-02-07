@@ -16,7 +16,7 @@
                             <b-radio value="all">All Caregivers</b-radio><br />
                             <b-radio value="specific">A specific caregiver:</b-radio><br />
                         </b-form-radio-group> -->
-                        <b-form-select v-if="addMode" v-model="caregiver_select">
+                        <b-form-select v-if="addMode === true" v-model="caregiver_select">
                             <option value="">--Select a Caregiver--</option>
                             <option v-for="caregiver in potentialCaregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
                         </b-form-select>
@@ -216,7 +216,11 @@
                     this.resetState();
                     this.step = val ? 4 : 1;
                 }
-            }
+            },
+            value() {
+                this.resetState();
+                this.step = 1;
+            },
         }
     }
 </script>
