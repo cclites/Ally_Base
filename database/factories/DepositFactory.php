@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use App\Deposit;
+use App\Billing\Deposit;
 
 $factory->define(Deposit::class, function(Faker $faker) {
     return [

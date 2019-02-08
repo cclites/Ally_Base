@@ -16,7 +16,7 @@ trait HasAllyFeeTrait
      */
     public function getAllyFee($paymentAmount)
     {
-        $amount = bcmul($paymentAmount, $this->getAllyPercentage(), CostCalculator::DEFAULT_SCALE);
+        $amount = multiply($paymentAmount, $this->getAllyPercentage(), CostCalculator::DEFAULT_SCALE);
         return (float) round($amount, CostCalculator::DECIMAL_PLACES, CostCalculator::ROUNDING_METHOD);
     }
 
@@ -29,7 +29,7 @@ trait HasAllyFeeTrait
      */
     public function getAllyHourlyRate($caregiverRate = null, $providerFee = null)
     {
-        $amount = bcadd($caregiverRate, $providerFee, 2);
+        $amount = add($caregiverRate, $providerFee, CostCalculator::DECIMAL_PLACES);
         return $this->getAllyFee($amount);
     }
 }

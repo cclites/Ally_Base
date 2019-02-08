@@ -70,7 +70,7 @@ class DepositProcessor
     /**
      * Return all the deposit models that would be created (does not persist anything)
      *
-     * @return \App\Deposit[]
+     * @return \App\Billing\Deposit[]
      */
     public function getDepositData()
     {

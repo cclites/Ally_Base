@@ -2,10 +2,10 @@
 namespace App\Payments;
 
 use App\Business;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
 use App\Contracts\PaymentAggregatorInterface;
 use App\Events\FailedTransactionFound;
-use App\Payment;
+use App\Billing\Payment;
 use App\Shift;
 use Carbon\Carbon;
 use DB;
@@ -18,7 +18,7 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
     protected $business;
 
     /**
-     * @var \App\Contracts\ChargeableInterface
+     * @var \App\Billing\Contracts\ChargeableInterface
      */
     protected $method;
 
@@ -94,7 +94,7 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
     /**
      * Get an unsaved version of the aggregated payment model
      *
-     * @return \App\Payment
+     * @return \App\Billing\Payment
      */
     public function getPayment()
     {
@@ -151,7 +151,7 @@ class BusinessPaymentAggregator implements PaymentAggregatorInterface
     /**
      * Charge and persist the payment
      *
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge()
     {

@@ -6,8 +6,12 @@ use Illuminate\Support\Facades\Cache;
 
 class Timezone
 {
-    public static function getTimezone($business_id)
+    /**
+     * @param $business_id
+     * @return string
+     */
+    public static function getTimezone($business_id): string
     {
-        return app('settings')->get($business_id, 'timezone');
+        return (string) app('settings')->get($business_id, 'timezone') ?: 'America/New_York';
     }
 }

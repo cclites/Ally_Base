@@ -6,6 +6,7 @@ namespace App\Traits;
 
 use App\Address;
 use App\PhoneNumber;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait HasAddressesAndNumbers
 {
@@ -13,12 +14,12 @@ trait HasAddressesAndNumbers
     //// Relationships
     ////////////////////////////////////
 
-    public function addresses()
+    public function addresses(): HasMany
     {
         return $this->hasMany(Address::class, 'user_id', 'id');
     }
 
-    public function phoneNumbers()
+    public function phoneNumbers(): HasMany
     {
         return $this->hasMany(PhoneNumber::class, 'user_id', 'id');
     }

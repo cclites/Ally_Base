@@ -46,7 +46,7 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = Shift::with(['client', 'caregiver', 'business', 'client.defaultPayment', 'client.backupPayment', 'costHistory'])
+        $this->query = Shift::with(['client', 'caregiver', 'business', 'business.chain', 'client.defaultPayment', 'client.backupPayment', 'costHistory'])
             ->orderBy('checked_in_time', 'asc');
     }
 
@@ -205,7 +205,7 @@ class UnconfirmedShiftsReport extends BaseReport
                     'date' => $s->checked_in_time,
                     'client_id' => $s->client_id,
                     'client' => $s->client,
-                    'business_name' => $s->business->name,
+                    'business_name' => $s->business->chain->name ?? $s->business->name ?? 'Caregiver Service',
                     'caregiver' => $this->mask_names ? $s->caregiver->user->maskedName : $s->caregiver->user->name,
                     'hours' => $s->hours,
                     'confirmed' => $s->statusManager()->isConfirmed(),
