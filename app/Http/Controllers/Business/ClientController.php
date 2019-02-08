@@ -46,6 +46,9 @@ class ClientController extends BaseController
             if ($request->input('active', 1) !== null) {
                 $query->where('active', $request->input('active', 1));
             }
+            if ($request->input('status', 1) !== null) {
+                $query->where('status_alias_id', $request->input('status', null));
+            }
             // Use query string ?address=1&phone_number=1&care_plans=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');

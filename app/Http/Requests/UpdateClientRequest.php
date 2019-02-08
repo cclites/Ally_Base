@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
@@ -16,11 +17,14 @@ class UpdateClientRequest extends BusinessRequest
      */
     public function rules()
     {
+        $client = $this->route('client');
+        $aliases = StatusAlias::forAuthorizedChain()->pluck('id')->toArray();
+
         return [
             'firstname' => 'required|string|max:45',
             'lastname' => 'required|string|max:45',
             'email' => 'required_unless:no_email,1|nullable|email',
-            'username' => ['required', Rule::unique('users')->ignore($this->route('client')->id)],
+            'username' => ['required', Rule::unique('users')->ignore($client->id)],
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
@@ -42,6 +46,7 @@ class UpdateClientRequest extends BusinessRequest
             'disaster_planning' => 'nullable|string|max:65535',
             'caregiver_1099' => 'nullable|boolean',
             'receive_summary_email' => 'boolean',
+            'status_alias_id' => 'nullable|in:' . join(',', $aliases),
         ];
     }
 

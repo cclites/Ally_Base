@@ -103,6 +103,12 @@
                     <b-form-group label="Photo">
                         <edit-avatar v-model="form.avatar" :size="150" :cropperPadding="100" />
                     </b-form-group>
+                    <b-form-group label="Caregiver Status">
+                        <b-form-select :options="statusAliasOptions" name="status_alias_id" v-model="form.status_alias_id">
+                            <option value="">{{ active ? 'Active' : 'Inactive' }}</option>
+                        </b-form-select>
+                        <input-help :form="form" field="status_alias_id"></input-help>
+                    </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
@@ -132,6 +138,7 @@
 
 <script>
     import DeactivateCaregiverModal from './modals/DeactivateCaregiverModal';
+    import { mapGetters } from 'vuex'
 
     export default {
         props: {
@@ -157,20 +164,40 @@
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
                     referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
+                    status_alias_id: this.caregiver.status_alias_id || '',
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,
                 active: this.caregiver.active,
                 activateModal: false,
+                inactive_at: '',
+                statusAliases: [],
             }
         },
 
         mounted() {
             this.checkForNoEmailDomain();
+            this.fetchStatusAliases();
+        },
+
+        computed: {
+            statusAliasOptions() {
+                if (! this.statusAliases || !this.statusAliases.caregiver) {
+                    return [];
+                }
+
+                return this.statusAliases.caregiver.filter(item => {
+                    return item.active == this.active;
+                }).map(item => {
+                    return {
+                        value: item.id,
+                        text: item.name,
+                    };
+                });
+            },
         },
 
         methods: {
-
             checkForNoEmailDomain() {
                 let domain = 'noemail.allyms.com';
                 if (this.form.email) {
@@ -192,7 +219,20 @@
                     .then(({ data }) => {
                         this.form.avatar = data.data.avatar;
                     })
-            }
+            },
+
+            fetchStatusAliases() {
+                axios.get('/business/status-aliases')
+                    .then( ({ data }) => {
+                        if (data && data.caregiver) {
+                            this.statusAliases = data;
+                        } else {
+                            this.statusAliases = {caregiver: [], client: []};
+                        }
+                    })
+                    .catch(e => {
+                    })
+            },
         }
     }
 </script>

@@ -159,6 +159,7 @@ Route::group([
     Route::post('settings/deactivation-reasons', 'Business\DeactivationReasonController@store')->name('deactivation_reasons.store');
     Route::delete('settings/deactivation-reasons/{reason}', 'Business\DeactivationReasonController@destroy')->name('deactivation_reasons.destroy');
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
+    Route::resource('status-aliases', 'Business\StatusAliasController');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
 
     Route::get('care-match', 'Business\CareMatchController@index')->name('care-match');
