@@ -45,7 +45,7 @@ class CaregiverController extends BaseController
                 $query->where('active', $request->input('active', 1));
             }
 
-            if ($request->input('status', 1) !== null) {
+            if ($request->input('status') !== null) {
                 $query->where('status_alias_id', $request->input('status', null));
             }
 
