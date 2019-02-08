@@ -2,11 +2,18 @@
 
 namespace App;
 
+use App\Billing\Deposit;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
+use App\Billing\Payments\Contracts\PaymentMethodStrategy;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
-use App\Contracts\ChargeableInterface;
+use App\Billing\Contracts\ChargeableInterface;
+use App\Contracts\ContactableInterface;
 use App\Contracts\HasPaymentHold;
-use App\Contracts\ReconcilableInterface;
+use App\Billing\Contracts\ReconcilableInterface;
 use App\Exceptions\ExistingBankAccountException;
 use App\Traits\BelongsToBusinesses;
 use App\Traits\BelongsToOneChain;
@@ -86,22 +93,22 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Activity[] $activities
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\BankAccount|null $bankAccount
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $bankAccount
  * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CarePlan[] $carePlans
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
  * @property-read \App\BusinessChain|null $chain
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\GatewayTransaction[] $chargedTransactions
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransaction[] $chargedTransactions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clientsUsingProviderPayment
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\NoteTemplate[] $noteTemplates
- * @property-read \App\BankAccount|null $paymentAccount
+ * @property-read \App\Billing\Payments\Methods\BankAccount|null $paymentAccount
  * @property-read \App\PaymentHold $paymentHold
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Payment[] $payments
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payment[] $payments
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
@@ -188,7 +195,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
  */
-class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold, BelongsToBusinessesInterface, BelongsToChainsInterface
+class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold,
+    BelongsToBusinessesInterface, BelongsToChainsInterface, ContactableInterface
 {
     use BelongsToBusinesses, BelongsToOneChain;
     use \App\Traits\HasPaymentHold;
@@ -200,6 +208,24 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     protected $casts = [
         'unpaired_pay_rates' => 'json',
     ];
+
+    /**
+     * The "booting" method of the model.
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            // populate settings defaults here because the change() method
+            // on migration columns is not supported due to the business
+            // table having an enum column. 
+            $model->shift_confirmation_email = false;
+            $model->allow_client_confirmations = false;
+        });
+    }
 
     ///////////////////////////////////////////
     /// Business type constants
@@ -419,7 +445,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation  Ex: paymentAccount
-     * @return \App\BankAccount|null
+     * @return \App\Billing\Payments\Methods\BankAccount|null
      */
     public function getBankAccount($relation)
     {
@@ -428,8 +454,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
 
     /**
      * @param string $relation Ex: paymentAccount
-     * @param \App\BankAccount $account
-     * @return \App\BankAccount|bool
+     * @param \App\Billing\Payments\Methods\BankAccount $account
+     * @return \App\Billing\Payments\Methods\BankAccount|bool
      * @throws \App\Exceptions\ExistingBankAccountException
      */
     public function setBankAccount($relation, BankAccount $account)
@@ -455,7 +481,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * @param float $amount
      * @param string $currency
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function charge($amount, $currency = 'USD')
     {
@@ -469,9 +495,9 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * Refund a previously charged transaction
      *
-     * @param \App\GatewayTransaction $transaction
+     * @param \App\Billing\GatewayTransaction $transaction
      * @param $amount
-     * @return \App\GatewayTransaction|false
+     * @return \App\Billing\GatewayTransaction|false
      */
     public function refund(GatewayTransaction $transaction, $amount)
     {
@@ -534,7 +560,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     /**
      * Get all gateway transactions that relate to this client
      *
-     * @return \App\GatewayTransaction[]|\Illuminate\Support\Collection
+     * @return \App\Billing\GatewayTransaction[]|\Illuminate\Support\Collection
      */
     public function getAllTransactions()
     {
@@ -691,6 +717,82 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return [$this->id];
     }
 
+    /**
+     * Return the owner of the payment method or account
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function getOwnerModel()
+    {
+        return $this;
+    }
+
+    function name(): string
+    {
+        return $this->name;
+    }
+
+    function getAddress(): ?Address
+    {
+        if (!$this->address1) {
+            return null;
+        }
+
+        return new Address([
+            'address1' => $this->address1,
+            'address2' => $this->address2,
+            'city' => $this->city,
+            'state' => $this->state,
+            'zip' => $this->zip,
+            'country' => 'US',
+        ]);
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        try {
+            $phone = new PhoneNumber();
+            $phone->input($this->phone1);
+            return $phone;
+        }
+        catch (\Exception $e) {}
+        return null;
+    }
+
+    function getBillingAddress(): ?Address
+    {
+        return $this->getAddress();
+    }
+
+    function getBillingPhone(): ?PhoneNumber
+    {
+        return $this->getPhoneNumber();
+    }
+
+    function getPaymentStrategy(): PaymentMethodStrategy
+    {
+        if (!$this->paymentAccount) throw new PaymentMethodError("No payment account assigned to business.");
+        return $this->paymentAccount->getPaymentStrategy();
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return 'businesses:' . $this->id;
+    }
+
+    /**
+     * Return a display value of the payment method.  Ex.  VISA *0925
+     *
+     * @return string
+     */
+    public function getDisplayValue(): string
+    {
+        return 'ACH-P *' . $this->paymentAccount->last_four;
+    }
+
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -706,5 +808,4 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     {
         $builder->whereIn('id', $businessIds);
     }
-
 }

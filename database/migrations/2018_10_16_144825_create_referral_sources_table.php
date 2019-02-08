@@ -18,7 +18,7 @@ class CreateReferralSourcesTable extends Migration
             $table->unsignedInteger('business_id');
             $table->string('organization');
             $table->string('contact_name');
-            $table->string('phone');
+            $table->string('phone')->nullable(); // nullable added 1/4/19 and added manually to production db
             $table->timestamps();
 
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');

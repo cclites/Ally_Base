@@ -2,10 +2,14 @@
 namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
+use App\Shifts\Data\ClockOutData;
+use App\Shifts\ShiftFactory;
+use App\Shifts\Data\TimesheetData;
 use App\Traits\BelongsToOneBusiness;
 use App\Events\TimesheetCreated;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use App\Events\ShiftFlagsCouldChange;
 
 /**
  * App\Timesheet
@@ -118,7 +122,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * A Timesheet can have many SystemExceptions.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function exceptions()
     {
@@ -132,7 +136,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been confirmed.
      *
-     * @return void
+     * @return bool
      */
     public function getIsApprovedAttribute()
     {
@@ -142,7 +146,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * Checks if Timesheet has been denied.
      *
-     * @return void
+     * @return bool
      */
     public function getIsDeniedAttribute()
     {
@@ -219,7 +223,7 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
      *
      * @param array $data
      * @param \App\User $creator
-     * @return \App\Timesheet
+     * @return \App\Timesheet|false
      */
     public static function createWithEntries($data, $creator)
     {
@@ -289,26 +293,33 @@ class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
     public function createShiftsFromEntries()
     {
         foreach($this->entries as $entry) {
-            $data['checked_in_time'] = $entry['checked_in_time'];
-            $data['checked_out_time'] = $entry['checked_out_time'];
-            $data['mileage'] = $entry['mileage'];
-            $data['other_expenses'] = $entry['other_expenses'];
-            $data['caregiver_comments'] = $entry['caregiver_comments'];
-            $data['caregiver_rate'] = $entry['caregiver_rate'];
-            $data['provider_fee'] = $entry['provider_fee'];
+            $shiftFactory = ShiftFactory::withoutSchedule(
+                Client::findOrFail($this->client_id),
+                Caregiver::findOrFail($this->caregiver_id),
+                Shift::HOURS_DEFAULT,
+                false,
+                $entry['caregiver_rate'],
+                $entry['client_rate'], // TODO: This needs to be converted from provider_fee structure
+                Shift::METHOD_TIMESHEET,
+                Carbon::parse($entry['checked_in_time']),
+                Shift::METHOD_TIMESHEET,
+                Carbon::parse($entry['checked_out_time']),
+                Shift::WAITING_FOR_AUTHORIZATION
+            );
 
-            $data['timesheet_id'] = $this->id;
-            $data['caregiver_id'] = $this->caregiver_id;
-            $data['client_id'] = $this->client_id;
-            $data['business_id'] = $this->business_id;
-            $data['checked_in_method'] = Shift::METHOD_TIMESHEET;
-            $data['checked_out_method'] = Shift::METHOD_TIMESHEET;
-            $data['hours_type'] = 'default';
-            $data['status'] = Shift::WAITING_FOR_AUTHORIZATION;
-            $data['verified'] = false;
+            $timesheetData = new TimesheetData($this);
 
-            if ($shift = Shift::create($data)) {
+            $clockOutData = new ClockOutData(
+                $entry['mileage'] ?? 0.0,
+                $entry['other_expenses'] ?? 0.0,
+                null,
+                $entry['caregiver_comments']
+            );
+
+            if ($shift = $shiftFactory->create($timesheetData, $clockOutData)) {
                 $shift->activities()->sync($entry->activities);
+
+                event(new ShiftFlagsCouldChange($shift));
             } else {
                 return false;
             }

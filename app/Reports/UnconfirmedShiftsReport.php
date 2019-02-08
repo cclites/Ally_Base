@@ -4,14 +4,13 @@ namespace App\Reports;
 
 use App\Shift;
 use App\Shifts\ShiftStatusManager;
-use App\Business;
 
 class UnconfirmedShiftsReport extends BaseReport
 {
     /**
      * @var int
      */
-    protected $client;
+    protected $clients;
 
     /**
      * Flag to include CLOCKED_IN status as 'unconfirmed'
@@ -29,12 +28,11 @@ class UnconfirmedShiftsReport extends BaseReport
     protected $include_confirmed;
 
     /**
-     * Flag to idenfiy that the report is being build
-     * for the email report.
+     * Flag to include shifts currently in progress.
      *
      * @var bool
      */
-    protected $for_email;
+    protected $include_in_progress;
 
     /**
      * Optionally mask the caregiver names in the report.
@@ -48,7 +46,7 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = Shift::with(['client', 'caregiver', 'business'])
+        $this->query = Shift::with(['client', 'caregiver', 'business', 'business.chain', 'client.defaultPayment', 'client.backupPayment', 'costHistory'])
             ->orderBy('checked_in_time', 'asc');
     }
 
@@ -63,6 +61,23 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
+     * Filter the results for only the given business.
+     *
+     * @param mixed business_id
+     * @return self
+     */
+    public function forBusinesses($business_ids)
+    {
+        if (is_array($business_ids)) {
+            $this->businesses = $business_ids;
+        } else {
+            $this->businesses = [$business_ids];
+        }
+
+        return $this;
+    }
+
+    /**
      * Filter the results for only the given client.
      *
      * @param int $client_id
@@ -70,7 +85,20 @@ class UnconfirmedShiftsReport extends BaseReport
      */
     public function forClient($client_id)
     {
-        $this->client = $client_id;
+        $this->clients = [$client_id];
+
+        return $this;
+    }
+
+    /**
+     * Filter the results for only the given client.
+     *
+     * @param array $client_ids
+     * @return UnconfirmedShiftsReport
+     */
+    public function forClients(array $client_ids)
+    {
+        $this->clients = $client_ids;
 
         return $this;
     }
@@ -88,13 +116,13 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
-     * Set for email flag
+     * Set include in progress flag.
      *
-     * @return UnconfirmedShiftsReport
+     * @return self
      */
-    public function forEmail()
+    public function includeInProgress()
     {
-        $this->for_email = true;
+        $this->include_in_progress = true;
 
         return $this;
     }
@@ -124,20 +152,6 @@ class UnconfirmedShiftsReport extends BaseReport
     }
 
     /**
-     * Get the businesses that are set up to send shift confirmation emails.
-     * Returns an empty array if report is not for email.
-     *
-     * @return array
-     */
-    public function getIncludedBusinessIds()
-    {
-        return Business::where('shift_confirmation_email', true)
-            ->get()
-            ->pluck('id')
-            ->toArray();
-    }
-
-    /**
      * Get the applicable statuses according to the report settings.
      *
      * @return array
@@ -164,16 +178,16 @@ class UnconfirmedShiftsReport extends BaseReport
     protected function results()
     {
         $query = $this->query();
-        if ($this->for_email) {
-            $query = $query->forBusinesses($this->getIncludedBusinessIds());
+        if (! empty($this->businesses)) {
+            $query = $query->forBusinesses($this->businesses);
         }
 
         return $query
-            ->forClient($this->client)
+            ->forClients($this->clients)
             ->whereIn('status', $this->getShiftStatuses())
             ->get()
             ->filter(function (Shift $s) {
-                if ($this->for_email) {
+                if ($this->include_in_progress) {
                     if ($s->status == Shift::CLOCKED_IN && ! $s->business->sce_shifts_in_progress) {
                         // if business does not choose to include in progress shifts, skip
                         return false;
@@ -184,17 +198,19 @@ class UnconfirmedShiftsReport extends BaseReport
             ->map(function (Shift $s) {
                 $total = floatval($s->hours) * floatval($s->caregiver_rate);
 
+                $costs = $s->costs();
+
                 return (object) [
                     'id' => $s->id,
                     'date' => $s->checked_in_time,
                     'client_id' => $s->client_id,
                     'client' => $s->client,
-                    'business_name' => $s->business->name,
+                    'business_name' => $s->business->chain->name ?? $s->business->name ?? 'Caregiver Service',
                     'caregiver' => $this->mask_names ? $s->caregiver->user->maskedName : $s->caregiver->user->name,
                     'hours' => $s->hours,
                     'confirmed' => $s->statusManager()->isConfirmed(),
-                    'rate' => $s->costs()->getTotalHourlyCost(),
-                    'total' => $s->costs()->getTotalCost(),
+                    'rate' => $costs->getTotalHourlyCost(),
+                    'total' => $costs->getTotalCost(),
                 ];
             });
     }

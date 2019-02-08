@@ -10,6 +10,7 @@ use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Shifts\ShiftStatusManager;
 use App\Shifts\AllyFeeCalculator;
+use App\Events\ShiftFlagsCouldChange;
 
 class UnconfirmedShiftsController extends Controller
 {
@@ -117,7 +118,7 @@ class UnconfirmedShiftsController extends Controller
 
         if ($shift->update($data)) {
             $shift->activities()->sync($request->input('activities', []));
-
+            event(new ShiftFlagsCouldChange($shift));
             return new SuccessResponse('You have successfully updated this shift.');
         }
 

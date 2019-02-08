@@ -46,8 +46,10 @@
         },
 
         watch: {
-            businessId(val) {
-                window.location.href = '/business/settings/bank-accounts/' + val;
+            businessId(newVal, oldVal) {
+                if (newVal && newVal != oldVal) {
+                    window.location.href = '/business/settings/bank-accounts/' + newVal;
+                }
             }
         }
     }

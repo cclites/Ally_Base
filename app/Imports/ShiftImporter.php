@@ -4,9 +4,14 @@ namespace App\Imports;
 
 use App\Business;
 use App\Businesses\Timezone;
+use App\Caregiver;
+use App\Client;
 use App\Shift;
+use App\Shifts\Data\ClockOutData;
+use App\Shifts\ShiftFactory;
 use App\Shifts\ShiftStatusManager;
 use Carbon\Carbon;
+use App\Events\ShiftFlagsCouldChange;
 
 class ShiftImporter
 {
@@ -40,21 +45,24 @@ class ShiftImporter
         return $shifts;
     }
 
-    public function importShiftFromRow(int $row)
+    public function importShiftFromRow(int $row): Shift
     {
-        $data = $this->getDataFromRow($row);
-        return Shift::create($data);
+        $factory = $this->getShiftFactory($row);
+        $shift = $factory->create();
+        event(new ShiftFlagsCouldChange($shift));
+        return $shift;
     }
 
-    public function validateRow(int $row)
+    public function validateRow(int $row): void
     {
+        $businessId = $this->sheet->getValue('business_id', $row);
         $data = $this->getDataFromRow($row);
         if (Carbon::now()->diffInSeconds($data['checked_in_time']) < 10) {
             dd($data['checked_in_time'], $data['checked_out_time']);
             throw new \Exception('The checked_in_time is invalid on row ' . $row . '. Too close to current timestamp.');
         }
 
-        if (!$business = Business::find($data['business_id'])) {
+        if (!$business = Business::find($businessId)) {
             throw new \Exception('The business ID is invalid on row ' . $row);
         }
 
@@ -79,37 +87,55 @@ class ShiftImporter
         }
     }
 
-    public function getDataFromRow(int $row)
+    public function getShiftFactory(int $row): ShiftFactory
     {
-        $data = [
-            'business_id'    => $this->sheet->getValue('business_id', $row),
-            'client_id'      => $this->sheet->getValue('client_id', $row),
-            'caregiver_id'   => $this->sheet->getValue('caregiver_id', $row),
-            'caregiver_rate' => floatval($this->sheet->getValue('caregiver_rate', $row)),
-            'provider_fee'   => floatval($this->sheet->getValue('provider_fee', $row)),
-            'hours_type'     => $this->sheet->getValue('hours_type', $row) ?? 'default',
-            'mileage'        => floatval($this->sheet->getValue('mileage', $row)),
-            'other_expenses' => floatval($this->sheet->getValue('other_expenses', $row)),
-            'status'         => $this->sheet->getValue('status', $row) ?? Shift::WAITING_FOR_AUTHORIZATION,
-        ];
+        // Get client and caregiver records
+        $client = Client::findOrFail($this->sheet->getValue('client_id', $row));
+        $caregiver = Caregiver::findOrFail($this->sheet->getValue('caregiver_id', $row));
 
         // Calculate timing
+        $businessId = (int) $this->sheet->getValue('business_id', $row);
         $checkIn = $this->sheet->getValue('checked_in_time', $row);
-        $timezone = Timezone::getTimezone($data['business_id']);
+        $timezone = Timezone::getTimezone($businessId);
         $duration = floatval($this->sheet->getValue('duration', $row));
+        $caregiverComments = null;
 
         if ($checkIn) {
-            $data['checked_in_time'] = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
-            $data['checked_out_time'] = $data['checked_in_time']->copy()->addMinutes(round($duration * 60));
+            $checkIn = (new Carbon($checkIn, $timezone))->setTimezone('UTC');
+            $checkOut = $checkIn->copy()->addMinutes(round($duration * 60));
         }
         else {
             // Allow for an expense only record, set in/out time equal to midnight, 0 duration
-            $data['checked_in_time'] = (new Carbon('now', $timezone))->setTime(0,0,0)->setTimezone('UTC');
-            $data['checked_out_time'] = $data['checked_in_time']->copy();
-            $data['caregiver_comments'] = 'Individual expense record imported on ' . (new Carbon('now', $timezone))->format('m/d/Y');
+            $checkIn = (new Carbon('now', $timezone))->setTime(0,0,0)->setTimezone('UTC');
+            $checkOut = $checkIn->copy();
+            $caregiverComments = 'Individual expense record imported on ' . (new Carbon('now', $timezone))->format('m/d/Y');
         }
 
-        return $data;
+        $clockOutData = new ClockOutData(
+            floatval($this->sheet->getValue('mileage', $row)),
+            floatval($this->sheet->getValue('other_expenses', $row)),
+            null,
+            $caregiverComments
+        );
+
+        return ShiftFactory::withoutSchedule(
+            $client,
+            $caregiver,
+            $this->sheet->getValue('hours_type', $row) ?? Shift::HOURS_DEFAULT,
+            false,
+            floatval($this->sheet->getValue('client_rate', $row)),
+            floatval($this->sheet->getValue('caregiver_rate', $row)),
+            Shift::METHOD_IMPORTED,
+            $checkIn,
+            Shift::METHOD_IMPORTED,
+            $checkOut,
+            $this->sheet->getValue('status', $row) ?? Shift::WAITING_FOR_AUTHORIZATION
+        )->withData($clockOutData);
+    }
+
+    public function getDataFromRow(int $row): array
+    {
+        return $this->getShiftFactory($row)->toArray();
     }
 
 }
