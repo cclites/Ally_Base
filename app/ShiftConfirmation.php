@@ -4,6 +4,25 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\ShiftConfirmation
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property string $token
+ * @property \Carbon\Carbon|null $confirmed_at
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read \App\Client $client
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereConfirmedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class ShiftConfirmation extends Model
 {
     /**

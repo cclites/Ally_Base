@@ -17,7 +17,7 @@ class UpdateExistingFailedTransactions extends Migration
             return;
         }
 
-        $transactions = \App\GatewayTransaction::whereHas('history', function($q) {
+        $transactions = \App\Billing\GatewayTransaction::whereHas('history', function($q) {
             $q->where('status', 'failed');
         })->get();
 

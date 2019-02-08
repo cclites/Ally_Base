@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read \App\Client $client
+ * @property-read void $is_owner
  */
 class ClientNarrative extends Model
 {

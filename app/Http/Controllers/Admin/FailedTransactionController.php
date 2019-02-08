@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
@@ -22,11 +22,13 @@ class FailedTransactionController extends Controller
                 'deposit',
                 'payment',
                 'deposit.caregiver',
-                'deposit.caregiver.businesses',
+                'deposit.caregiver.businessChains',
                 'deposit.business',
+                'deposit.business.chain',
                 'payment.client',
-                'payment.client.business',
+                'payment.client.business.chain',
                 'payment.business',
+                'payment.business.chain',
                 'lastHistory'
             ]);
             return $query->has('failedTransaction')
@@ -41,7 +43,7 @@ class FailedTransactionController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  \App\GatewayTransaction $failedTransaction
+     * @param  \App\Billing\GatewayTransaction $failedTransaction
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, GatewayTransaction $failedTransaction)
@@ -59,7 +61,7 @@ class FailedTransactionController extends Controller
     /**
      * Disregard the failed transaction, and clean up any holds.
      *
-     * @param  \App\GatewayTransaction $failedTransaction
+     * @param  \App\Billing\GatewayTransaction $failedTransaction
      * @return \Illuminate\Http\Response
      */
     public function destroy(GatewayTransaction $failedTransaction)

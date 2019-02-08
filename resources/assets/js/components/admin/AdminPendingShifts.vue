@@ -56,13 +56,19 @@
                 <template slot="authorized" scope="row">
                     <authorized-payment-checkbox :item.sync="row.item" :key="row.item.shift_id"></authorized-payment-checkbox>
                 </template>
+                <template slot="start_time" scope="data">
+                    {{ formatTimeFromUTC(data.item.shift_time) }}
+                </template>
             </b-table>
         </div>
     </b-card>
 </template>
 
 <script>
+    import FormatsDates from '../../mixins/FormatsDates';
+
     export default {
+        mixins: [FormatsDates],
 
         props: {},
 
@@ -80,6 +86,11 @@
                     {
                         key: 'shift_time',
                         label: 'Date',
+                        sortable: true,
+                    },
+                    {
+                        key: 'start_time',
+                        label: 'Clock In Time',
                         sortable: true,
                     },
                     {

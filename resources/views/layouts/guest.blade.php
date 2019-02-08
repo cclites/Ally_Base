@@ -43,9 +43,14 @@
         @if (config('app.env') == 'staging')
             style="background:#ce4747;" 
         @endif
-        class="topbar">
+        @if(is_mobile_app() && is_ios())
+            class="topbar extra-top-pad"
+        @else
+            class="topbar"
+        @endif
+        >
         <nav class="navbar top-navbar navbar-expand-md navbar-light">
-
+        
             @include('layouts.partials.logo')
 
         </nav>
@@ -56,7 +61,11 @@
     <!-- ============================================================== -->
     <!-- Page wrapper  -->
     <!-- ============================================================== -->
-    <div class="page-wrapper">
+    <div class="page-wrapper"
+        @if(is_mobile_app() && is_ios())
+            style="padding-top: 100px;"
+        @endif
+    >
         <!-- ============================================================== -->
         <!-- Container fluid  -->
         <!-- ============================================================== -->

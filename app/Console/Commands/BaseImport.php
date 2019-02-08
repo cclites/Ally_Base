@@ -283,7 +283,7 @@ abstract class BaseImport extends Command
      *
      * @param int $row
      * @param $cellValue
-     * @return int|null
+     * @return bool
      */
     protected function resolveActive(int $row, $cellValue)
     {
