@@ -7,7 +7,7 @@
         </b-row>
         <b-row class="mb-2">
             <b-col lg="3">
-                <b-form-select v-model="caseManager" class="mr-2 mb-2">
+                <b-form-select v-model="filters.caseManager" class="mr-2 mb-2">
                     <template slot="first">
                         <!-- this slot appears above the options from 'options' prop -->
                         <option :value="null">-- Case Manager --</option>
@@ -16,37 +16,50 @@
                 </b-form-select>
             </b-col>
             <b-col lg="3">
-                <business-location-form-group :label="null" v-model="business_id" :allow-all="true" />
+                <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" />
             </b-col>
             <b-col lg="3">
-                <b-form-select v-model="active">
+                <b-form-select v-model="filters.active">
                     <option :value="null">All Clients</option>
                     <option :value="1">Active Clients</option>
                     <option :value="0">Inactive Clients</option>
                 </b-form-select>
             </b-col>
+            <b-col lg="3">
+                <b-form-select v-model="filters.client_type">
+                    <option value="">--Select--</option>
+                    <option value="private_pay">Private Pay</option>
+                    <option value="medicaid">Medicaid</option>
+                    <option value="VA">VA</option>
+                    <option value="LTCI">LTC Insurance</option>
+                </b-form-select>
+            </b-col>
             <b-col lg="3" class="text-right">
-                <b-form-input v-model="filter" placeholder="Type to Search" />
+                <b-form-input v-model="filters.search" placeholder="Type to Search" />
             </b-col>
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
         <div v-if="!loading">
             <div class="table-responsive">
-                <b-table bordered striped hover show-empty
-                         :items="filteredClients"
-                         :fields="fields"
-                         :current-page="currentPage"
-                         :per-page="perPage"
-                         :filter="filter"
-                         :sort-by.sync="sortBy"
-                         :sort-desc.sync="sortDesc"
-                         @filtered="onFiltered"
+                <b-table 
+                    bordered striped hover show-empty
+                    :items="filteredClients"
+                    :fields="fields"
+                    :current-page="currentPage"
+                    :per-page="perPage"
+                    :sort-by.sync="sortBy"
+                    :sort-desc.sync="sortDesc"
+                    :filter="filters.search"
+                    @filtered="onFiltered"
                 >
+                    <template slot="payment_type" scope="row">
+                        {{ paymentTypes.find(type => type.value == row.item.payment_type).text }}
+                    </template>
                     <template slot="actions" scope="row">
                         <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
                         <b-btn size="sm" :href="'/business/clients/' + row.item.id">
-                            <i class="fa fa-edit"></i>
+                            <i class="fa fa-edit" />
                         </b-btn>
                     </template>
                 </b-table>
@@ -61,7 +74,6 @@
                 </b-col>
             </b-row>
         </div>
-
     </b-card>
 </template>
 
@@ -75,24 +87,25 @@
         components: {BusinessLocationFormGroup, BusinessLocationSelect},
         mixins: [FormatsListData],
 
-        props: {},
-
         data() {
             return {
-                active: 1,
+                filters: {
+                    active: 1,
+                    client_type: '',
+                    business_id: '',
+                    search: null,
+                    caseManager: '',
+                },
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
                 sortBy: 'lastname',
                 sortDesc: false,
                 editModalVisible: false,
-                filter: null,
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
-                business_id: "",
                 clients: [],
                 caseManagers: [],
-                caseManager: null,
                 filteredCaseManagers: [],
                 filteredClients: [],
                 fields: [
@@ -149,9 +162,34 @@
 
         computed: {
             listUrl() {
-                let active = (this.active !== null) ? this.active : '';
-                return '/business/clients?json=1&address=1&active=' + active + '&businesses[]=' + this.business_id;
-            }
+                const {business_id, active, caseManager} = this.filters;
+                const activeValue = (active !== null) ? active : '';
+
+                return `/business/clients?json=1&address=1&active=${activeValue}&businesses[]=${business_id}`;
+            },
+
+            items() {
+                const {search, active} = this.filters;
+                let simpleMatches = ['client_type', 'business_id'];
+                let results = this.clients;
+                
+                simpleMatches = simpleMatches.filter(key => !!this.filters[key]);
+                results = results.filter((client) => {
+                    const val = simpleMatches.every(key => client[key] == this.filters[key])
+                    debugger;
+                    return val;
+                });
+                
+                if(active === 1 || active === 0) {
+                    results = results.filter((client) => client.active == active);
+                } 
+
+                if(caseManager) {
+                    results = results.filter((client) => client.case_manager_id === caseManager);
+                }
+
+                return results;
+            },
         },
 
         methods: {
@@ -163,7 +201,6 @@
                     client.case_manager_name = client.case_manager ? client.case_manager.name : null;
                     return client;
                 });
-                this.filterClients();
                 this.loading = false;
             },
             async loadOfficeUsers() {
@@ -187,13 +224,6 @@
                 this.totalRows = filteredItems.length;
                 this.currentPage = 1;
             },
-            filterClients() {
-                if (! this.caseManager) {
-                    this.filteredClients = this.clients;
-                } else {
-                    this.filteredClients = this.clients.filter(x => x.case_manager_id === this.caseManager);
-                }
-            },
             filterCaseManagers() {
                 if (this.business_id == '') {
                     this.filteredCaseManagers = this.caseManagers;
@@ -207,12 +237,8 @@
             listUrl() {
                 this.loadClients();
             },
-            caseManager(value) {
-                this.filterClients();
-            },
             business_id(value) {
                 this.filterCaseManagers();
-                this.filterClients();
             }
         }
     }

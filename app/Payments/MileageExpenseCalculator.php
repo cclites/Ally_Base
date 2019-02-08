@@ -14,6 +14,7 @@ class MileageExpenseCalculator
 
     /**
      * @var \App\Client
+     * @deprecated
      */
     private $client;
 
@@ -22,6 +23,9 @@ class MileageExpenseCalculator
      */
     private $business;
 
+    /**
+     * @deprecated
+     */
     private $method;
 
     /**
@@ -29,7 +33,7 @@ class MileageExpenseCalculator
      */
     private $mileage;
 
-    public function __construct(Client $client, Business $business, $method, $mileage)
+    public function __construct(?Client $client, Business $business, $method, $mileage)
     {
         if ($mileage < 0) $mileage = 0;
 
@@ -49,11 +53,13 @@ class MileageExpenseCalculator
         return round($this->mileage * $this->getMileageRate(), 2);
     }
 
+    /** @deprecated  */
     public function getAllyFee()
     {
         return AllyFeeCalculator::getFee($this->client, $this->method, $this->getCaregiverReimbursement());
     }
 
+    /** @deprecated  */
     public function getTotalCost()
     {
         return bcadd($this->getAllyFee(), $this->getCaregiverReimbursement(), 2);

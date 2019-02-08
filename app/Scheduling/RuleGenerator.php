@@ -9,6 +9,24 @@ class RuleGenerator extends When
     const LOCAL_DATETIME_FORMAT = 'Ymd\THis';
     const UTC_DATETIME_FORMAT = 'Ymd\THis\Z';
 
+    const INTERVAL_WEEKLY = 'weekly';
+    const INTERVAL_BIWEEKLY = 'biweekly';
+    const INTERVAL_MONTHLY = 'monthly';
+    const INTERVAL_BIMONTHLY = 'bimonthly';
+    const INTERVAL_QUARTERLY = 'quarterly';
+    const INTERVAL_SEMIANNUALLY = 'semiannually';
+    const INTERVAL_ANNUALLY = 'annually';
+
+    protected $dayMapping = [
+        0 => 'su',
+        1 => 'mo',
+        2 => 'tu',
+        3 => 'we',
+        4 => 'th',
+        5 => 'fr',
+        6 => 'sa',
+    ];
+
     //make rrule format
     public function getRule()
     {
@@ -41,31 +59,31 @@ class RuleGenerator extends When
     public function setIntervalType($type)
     {
         switch(strtolower($type)) {
-            case 'weekly':
+            case self::INTERVAL_WEEKLY:
                 $this->interval(1);
                 $this->freq('WEEKLY');
                 break;
-            case 'biweekly':
+            case self::INTERVAL_BIWEEKLY:
                 $this->interval(2);
                 $this->freq('WEEKLY');
                 break;
-            case 'monthly':
+            case self::INTERVAL_MONTHLY:
                 $this->interval(1);
                 $this->freq('MONTHLY');
                 break;
-            case 'bimonthly':
+            case self::INTERVAL_BIMONTHLY:
                 $this->interval(2);
                 $this->freq('MONTHLY');
                 break;
-            case 'quarterly':
+            case self::INTERVAL_QUARTERLY:
                 $this->interval(3);
                 $this->freq('MONTHLY');
                 break;
-            case 'semiannually':
+            case self::INTERVAL_SEMIANNUALLY:
                 $this->interval(6);
                 $this->freq('MONTHLY');
                 break;
-            case 'annually':
+            case self::INTERVAL_ANNUALLY:
                 $this->interval(12);
                 $this->freq('MONTHLY');
                 break;
@@ -79,23 +97,23 @@ class RuleGenerator extends When
             case 'WEEKLY':
                 switch($this->interval) {
                     case 1:
-                        return 'weekly';
+                        return self::INTERVAL_WEEKLY;
                     case 2:
-                        return 'biweekly';
+                        return self::INTERVAL_BIWEEKLY;
                 }
                 break;
             case 'MONTHLY':
                 switch($this->interval) {
                     case 1:
-                        return 'monthly';
+                        return self::INTERVAL_MONTHLY;
                     case 2:
-                        return 'bimonthly';
+                        return self::INTERVAL_BIMONTHLY;
                     case 3:
-                        return 'quarterly';
+                        return self::INTERVAL_QUARTERLY;
                     case 6:
-                        return 'semiannually';
+                        return self::INTERVAL_SEMIANNUALLY;
                     case 12:
-                        return 'annually';
+                        return self::INTERVAL_ANNUALLY;
                 }
         }
         return null;
@@ -109,5 +127,20 @@ class RuleGenerator extends When
         $date = clone $date;
         $date->setTimezone(new \DateTimeZone('UTC'));
         return $date->format(self::UTC_DATETIME_FORMAT);
+    }
+
+    public function setWeekdays(int... $days): void
+    {
+        $bydays = array_map(function($int) {
+            return $this->dayMapping[$int];
+        }, $days);
+        $this->byday(implode(',', $bydays), ',');
+    }
+
+    public function getWeekdays(): array
+    {
+        return array_map(function($str) {
+            return array_search(preg_replace('/\d/', '', $str), $this->dayMapping);
+        }, $this->bydays ?? []);
     }
 }

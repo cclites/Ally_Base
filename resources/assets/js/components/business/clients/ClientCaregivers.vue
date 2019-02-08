@@ -552,6 +552,7 @@
                         if (this.clientCaregiverModal) {
                             this.clientCaregiverModal = false;
                         }
+                        this.fetchCaregivers();
                     });
             },
 

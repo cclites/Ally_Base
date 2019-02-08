@@ -14,7 +14,7 @@ class Caregiver1099Csv extends Command
      *
      * @var string
      */
-    protected $signature = 'csv:caregiver_1099 {year?} {--output=}';
+    protected $signature = 'csv:caregiver_1099 {year} {--threshold=} {--output=}';
 
     /**
      * The console command description.
@@ -31,7 +31,7 @@ class Caregiver1099Csv extends Command
     /**
      * @var int|float
      */
-    protected $minimumThreshold = 650;
+    protected $defaultThreshold = 600;
 
 
     /**
@@ -51,8 +51,8 @@ class Caregiver1099Csv extends Command
      */
     public function handle()
     {
-        $rows = [];
-        $year = (int) $this->argument('year') ?? date('Y');
+        $threshold = intval($this->option('threshold') ?? $this->defaultThreshold);
+        $year = (int) $this->argument('year');
 
         // Disable full group by mode
         \DB::statement('set session sql_mode=\'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\';');
@@ -76,7 +76,7 @@ LEFT JOIN addresses a1 ON a1.id = (SELECT id FROM addresses WHERE user_id = u1.i
 LEFT JOIN addresses a2 ON a2.id = (SELECT id FROM addresses WHERE user_id = u2.id ORDER BY `type` LIMIT 1)
 WHERE p.created_at BETWEEN '{$year}-01-01 00:00:00' AND '{$year}-12-31 23:59:59'
 GROUP BY s.client_id, s.caregiver_id
-HAVING payment_total > ?", [$this->minimumThreshold]);
+HAVING payment_total > ?", [$threshold]);
 
         $csv = implode($this->csvSeparator, array_keys((array) $rows[0])) . "\n";
         foreach($rows as $row) {

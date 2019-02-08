@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Clients;
 
 use App\Client;
 use App\Http\Controllers\Controller;
-use App\Payment;
+use App\Billing\Payment;
 use App\Reports\ShiftsReport;
 use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Carbon;
 
+/**
+ * Class PaymentHistoryController
+ * @package App\Http\Controllers\Clients
+ * @deprecated
+ */
 class PaymentHistoryController extends Controller
 {
     public function index()

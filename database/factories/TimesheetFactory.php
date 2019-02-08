@@ -24,7 +24,7 @@ $factory->define(Timesheet::class, function (Faker $faker) {
         }
     }
 
-    $caregiver = $client->caregivers->shuffle()->first();
+    $caregiver = $client->fresh()->caregivers->shuffle()->first();
 
     return [
         'client_id' => ($client) ? $client->id : null,

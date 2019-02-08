@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Businesses\Timezone;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -54,6 +55,11 @@ class ClientShiftSummaryEmail extends Mailable
     public $confirmToken;
 
     /**
+     * @var string
+     */
+    public $timezone;
+
+    /**
      * Create a new message instance.
      *
      * @return void
@@ -66,6 +72,7 @@ class ClientShiftSummaryEmail extends Mailable
         $this->businessName = $businessName;
         $this->token = $token;
         $this->confirmToken = $token;
+        $this->timezone = Timezone::getTimezone($client->business_id) ?: 'America/New_York';
     }
 
     /**

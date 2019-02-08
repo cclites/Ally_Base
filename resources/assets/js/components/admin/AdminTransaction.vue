@@ -75,7 +75,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="transaction.refunds">
+        <b-row v-if="transaction.refunds.length > 0">
             <b-col lg="12">
                 <b-card
                         header="This Transaction Has Refunds"
@@ -127,6 +127,10 @@
             </b-col>
         </b-row>
 
+        <b-card v-if="transaction.deposit && transaction.deposit.adjustment">
+            <div class="text-warning text-uppercase mb-1">Was Adjustment</div>
+            <p>{{ transaction.deposit.notes }}</p>
+        </b-card>
     </div>
 </template>
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

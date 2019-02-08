@@ -9,36 +9,52 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
+            <b-col lg="2">
+                <b-form-group label="Caregiver Status">
+                    <b-form-select v-model="form.active">
+                        <option value="">All</option>
+                        <option :value="1">Active</option>
+                        <option :value="0">Inactive</option>
+                    </b-form-select>
+                </b-form-group>
+            </b-col>
+            <b-col lg="2">
+                <b-form-group label="Expiration Name">
+                    <b-form-input v-model="form.name" placeholder="Example: CNA" />
+                </b-form-group>
+            </b-col>
             <b-col lg="3">
                 <b-form-group label="Show licenses expiring:">
-                <b-form-input
-                    type="number"
-                    v-model="form.days_range"
-                    placeholder="Number of days"
-                    class="days"
-                    :min="0"
-                    :max="999"
-                    :disabled="form.show_expired"
-                ></b-form-input> <span class="ml-2">Days from today</span>
-            </b-form-group>
+                    <b-form-input
+                        type="number"
+                        v-model="form.days_range"
+                        placeholder="Number of days"
+                        class="days"
+                        :min="0"
+                        :max="999"
+                        :disabled="form.show_expired"
+                    />
+                    <span class="ml-2">Days from today</span>
+                </b-form-group>
             </b-col>
             <b-col lg="3" class="vertical-center">
-                <b-form-checkbox 
-                    v-model="form.show_expired"
-                >Show expired Licenses</b-form-checkbox>
+                <b-form-checkbox v-model="form.show_expired">Show expired Licenses</b-form-checkbox>
             </b-col>
         </b-row>
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
-                     :items="items"
-                     :fields="fields"
-                     :current-page="currentPage"
-                     :per-page="perPage"
-                     :filter="filter"
-                     :sort-by.sync="sortBy"
-                     :sort-desc.sync="sortDesc"
-                     @filtered="onFiltered"
+                :items="items"
+                :fields="fields"
+                :current-page="currentPage"
+                :per-page="perPage"
+                :filter="filter"
+                :sort-by.sync="sortBy"
+                :sort-desc.sync="sortDesc"
+                @filtered="onFiltered"
             >
+                <template slot="countdown" scope="row">
+                    {{ getCountdown(row.item.expiration_date) }}
+                </template>
                 <template slot="actions" scope="row">
                     <b-btn size="sm" :href="'/business/caregivers/' + row.item.caregiver_id">View Caregiver</b-btn>
                     <b-btn size="sm" @click="sendEmailReminder(row.item)">
@@ -63,12 +79,12 @@
 
 <script>
     import FormatsDates from '../mixins/FormatsDates';
+
     export default {
         props: {
-            'certifications': {
-                default() {
-                    return [];
-                }
+            certifications: {
+                type: Array,
+                default: () => [],
             },
         },
 
@@ -84,6 +100,8 @@
                     caregiver_id: '',
                     days_range: 30,
                     show_expired: false,
+                    active: '',
+                    name: '',
                 },
                 totalRows: 0,
                 perPage: 15,
@@ -95,24 +113,24 @@
                 sendingEmail: false,
                 fields: [
                     {
-                        key: 'name',
-                        label: 'Name',
+                        key: 'caregiver_name',
+                        label: 'Caregiver',
                         sortable: true,
                     },
                     {
-                        key: 'caregiver_name',
-                        label: 'Caregiver',
+                        key: 'name',
+                        label: 'Expiration Name',
                         sortable: true,
                     },
                     {
                         key: 'expiration_date',
                         label: 'Expiration Date',
                         sortable: true,
-                        formatter: (value) => { return this.formatDate(value) }
+                        formatter: (value) => this.formatDate(value, 'MMM D YYYY'),
                     },
                     {
-                        key: 'caregiver_name',
-                        label: 'Caregiver',
+                        key: 'countdown',
+                        label: 'Time Until Expiration',
                         sortable: true,
                     },
                     {
@@ -125,7 +143,7 @@
 
         computed: {
             items() {
-                const {caregiver_id, show_expired, days_range} = this.form;
+                const {caregiver_id, show_expired, days_range, active, name} = this.form;
                 let certifications = this.certifications.map(cert => {
                     cert.sendingEmail = false;
                     return cert;
@@ -133,6 +151,10 @@
 
                 if(caregiver_id) {
                     certifications = certifications.filter(cert => cert.caregiver_id == caregiver_id);
+                }
+
+                if(name) {
+                    certifications = certifications.filter(cert => cert.name.match(new RegExp(name, 'i')));
                 }
                 
                 if(show_expired) {
@@ -144,6 +166,10 @@
                         const expirateAt = moment(cert.expiration_date, 'YYYY-MM-DD');
                         return expirateAt.isBetween(moment(), moment().add(days_range, 'days'));
                     });
+                }
+
+                if(active !== '') {
+                    certifications = certifications.filter(cert => cert.caregiver_active == active);   
                 }
 
                 return certifications;
@@ -195,7 +221,15 @@
                         console.error(error.response);
                         item.sendingEmail = false;
                     });
-            }
+            },
+
+            getCountdown(date) {
+                if(moment().isSameOrAfter(date)) {
+                    return 'Already Expired';
+                }
+
+                return moment(date).toNow(true);
+            },
         }
 
         ,

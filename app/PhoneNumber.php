@@ -31,6 +31,8 @@ use libphonenumber\PhoneNumberUtil;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereUserId($value)
  * @mixin \Eloquent
+ * @property int $receives_sms
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereReceivesSms($value)
  */
 class PhoneNumber extends AuditableModel
 {
