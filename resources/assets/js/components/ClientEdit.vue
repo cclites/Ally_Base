@@ -477,7 +477,7 @@
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updated_at,
                     receive_summary_email: this.client.receive_summary_email,
-                    sales_person_id: this.client.sales_person_id
+                    sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
                 }),
                 preferences: new Form({
