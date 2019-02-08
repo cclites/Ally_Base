@@ -56,7 +56,11 @@
     <!-- ============================================================== -->
     <!-- Left Sidebar - style you can find in sidebar.scss  -->
     <!-- ============================================================== -->
-    <aside class="left-sidebar">
+    <aside class="left-sidebar"
+        @if(is_mobile_app() && is_ios())
+            style="padding-top: 100px;"
+        @endif
+    >
         <!-- Sidebar scroll-->
         <div class="scroll-sidebar">
             <!-- Sidebar navigation-->
@@ -84,7 +88,11 @@
     <!-- ============================================================== -->
     <!-- Page wrapper  -->
     <!-- ============================================================== -->
-    <div class="page-wrapper">
+    <div class="page-wrapper"
+        @if(is_mobile_app() && is_ios())
+            style="padding-top: 100px;"
+        @endif
+    >
         <!-- ============================================================== -->
         <!-- Container fluid  -->
         <!-- ============================================================== -->

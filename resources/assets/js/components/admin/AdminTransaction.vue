@@ -75,7 +75,7 @@
             </b-col>
         </b-row>
 
-        <b-row v-if="transaction.refunds">
+        <b-row v-if="transaction.refunds.length > 0">
             <b-col lg="12">
                 <b-card
                         header="This Transaction Has Refunds"
