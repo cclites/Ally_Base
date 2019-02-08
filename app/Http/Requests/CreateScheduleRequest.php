@@ -3,6 +3,7 @@ namespace App\Http\Requests;
 
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use App\Schedule;
 
 class CreateScheduleRequest extends BusinessClientRequest
 {
@@ -37,6 +38,7 @@ class CreateScheduleRequest extends BusinessClientRequest
             'services.*.duration' => 'required_with:services|numeric|min:0|max:999.99',
             'services.*.client_rate' => 'nullable|numeric|min:0|max:999.99',
             'services.*.caregiver_rate' => 'nullable|numeric|min:0|max:999.99', // add any other schedule service fields to getServices below
+            'status' => 'required|in:' . join(',', [Schedule::OK, Schedule::ATTENTION_REQUIRED, Schedule::CAREGIVER_CANCELED, Schedule::CLIENT_CANCELED, Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT]),
         ];
     }
 
@@ -56,7 +58,14 @@ class CreateScheduleRequest extends BusinessClientRequest
 
     public function getScheduleData(): array
     {
-        return Arr::except($this->validated(), ['services', 'notes', 'group_update']);
+        $data = Arr::except($this->validated(), ['services', 'notes', 'group_update']);
+
+        // unset caregiver on certain statuses
+        if (in_array($data['status'], [Schedule::CAREGIVER_NOSHOW, Schedule::OPEN_SHIFT])) {
+            $data['caregiver_id'] = null;
+        }
+
+        return $data;
     }
 
     public function getNotes(): string
