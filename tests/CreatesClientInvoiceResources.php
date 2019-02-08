@@ -161,8 +161,12 @@ trait CreatesClientInvoiceResources
         return $adjustment;
     }
 
-    private function createCreditCard($type = 'visa')
+    private function createCreditCard($type = null)
     {
-        return factory(CreditCard::class)->create(['type' => $type]);
+        $number = (strtolower($type) === 'amex')
+            ? "340415772202528"
+            : "4111111111111111";
+
+        return factory(CreditCard::class)->create(['number' => $number]);
     }
 }
