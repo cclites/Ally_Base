@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class ClientController extends BaseController
 {
-    protected $includedRelations = ['evvAddress', 'evvPhone', 'careDetails'];
+    protected $includedRelations = ['evvAddress', 'evvPhone', 'careDetails', 'medications'];
 
     /**
      * List all clients the caregiver is assigned to
