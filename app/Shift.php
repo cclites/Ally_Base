@@ -481,8 +481,13 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
      */
     public function getNextAndPreviousShiftCaregiverInfo(): array
     {
-        $start = Carbon::parse($this->schedule->starts_at);
-        $end = $start->copy()->addMinutes($this->schedule->duration);
+        $start = $this->checked_in_time;
+        $end = Carbon::now();
+        if (! empty($this->schedule)) {
+            $start = Carbon::parse($this->schedule->starts_at);
+            $end = $start->copy()->addMinutes($this->schedule->duration);
+        }
+
         $beforeWindow = [
             $start->copy()->subHours(4),
             $start->subMinute()
