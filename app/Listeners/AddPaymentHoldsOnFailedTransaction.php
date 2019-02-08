@@ -2,9 +2,9 @@
 
 namespace App\Listeners;
 
-use App\Deposit;
+use App\Billing\Deposit;
 use App\Events\FailedTransactionRecorded;
-use App\Payment;
+use App\Billing\Payment;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 

@@ -16,8 +16,8 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property string|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar
@@ -42,6 +42,10 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin whereName($firstname = null, $lastname = null)
  * @mixin \Eloquent
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class Admin extends AuditableModel implements UserRole
 {
@@ -72,5 +76,15 @@ class Admin extends AuditableModel implements UserRole
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
         return;
+    }
+
+    function getAddress(): ?Address
+    {
+        return null;
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        return null;
     }
 }

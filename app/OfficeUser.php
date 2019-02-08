@@ -16,10 +16,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $chain_id
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Address[] $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\BankAccount[] $bankAccounts
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\BankAccount[] $bankAccounts
  * @property-read \App\BusinessChain|null $businessChain
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Business[] $businesses
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\CreditCard[] $creditCards
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payments\Methods\CreditCard[] $creditCards
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Document[] $documents
  * @property-read mixed $active
  * @property mixed $avatar
@@ -48,6 +48,10 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser whereName($firstname = null, $lastname = null)
  * @mixin \Eloquent
+ * @property-read mixed $created_at
+ * @property-read mixed $masked_name
+ * @property-read mixed $updated_at
+ * @property-read \App\PhoneNumber $smsNumber
  */
 class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface
 {
@@ -99,6 +103,17 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+
+    function getAddress(): ?Address
+    {
+        return $this->addresses()->first();
+    }
+
+    function getPhoneNumber(): ?PhoneNumber
+    {
+        return $this->phoneNumbers()->first();
+    }
 
     /**
      * Return an array of business IDs the entity is attached to

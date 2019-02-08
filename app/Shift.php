@@ -1,11 +1,23 @@
 <?php
 namespace App;
 
+use App\Billing\CaregiverInvoice;
+use App\Billing\ClientInvoice;
+use App\Billing\ClientInvoiceItem;
+use App\Billing\ClientPayer;
+use App\Billing\Deposit;
+use App\Billing\Invoiceable\InvoiceableModel;
+use App\Billing\Invoiceable\ShiftExpense;
+use App\Billing\Invoiceable\ShiftService;
+use App\Billing\Payment;
+use App\Billing\Queries\InvoiceableQuery;
+use App\Billing\Service;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\HasAllyFeeInterface;
 use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
+use App\Payments\MileageExpenseCalculator;
 use App\Shifts\CostCalculator;
 use App\Shifts\DurationCalculator;
 use App\Shifts\ShiftFlagManager;
@@ -15,6 +27,7 @@ use App\Traits\HasAllyFeeTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use App\Events\ShiftDeleted;
+use Illuminate\Support\Collection;
 
 /**
  * App\Shift
@@ -66,8 +79,9 @@ use App\Events\ShiftDeleted;
  * @property-read \App\Caregiver|null $caregiver
  * @property-read \App\Client|null $client
  * @property-read \App\ShiftCostHistory $costHistory
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Deposit[] $deposits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $notifications
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Deposit[] $deposits
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemException[] $exceptions
  * @property-read mixed $ally_pct
  * @property-read mixed $charged_at
  * @property-read mixed $confirmed_at
@@ -77,7 +91,7 @@ use App\Events\ShiftDeleted;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientGoal[] $goals
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftIssue[] $issues
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftActivity[] $otherActivities
- * @property-read \App\Payment|null $payment
+ * @property-read \App\Billing\Payment|null $payment
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \App\Schedule|null $schedule
  * @property-read \App\Signature $signature
@@ -139,8 +153,17 @@ use App\Events\ShiftDeleted;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereVerified($value)
  * @mixin \Eloquent
+ * @property int $client_confirmed
+ * @property int|null $duplicated_by
+ * @property-read \App\Shift|null $duplicatedBy
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $duplicates
+ * @property-read array $flags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ShiftFlag[] $shiftFlags
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereClientConfirmed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  */
-class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
+class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;
     use HasAllyFeeTrait;
@@ -189,7 +212,8 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     const CLOCKED_OUT = 'CLOCKED_OUT'; // not currently used
     const WAITING_FOR_CONFIRMATION = 'WAITING_FOR_CONFIRMATION';  // Unconfirmed shift that needs to be approved
     const WAITING_FOR_AUTHORIZATION = 'WAITING_FOR_AUTHORIZATION';  // Confirmed shift that needs to be authorized for payment
-    const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Authorized shift that is waiting for batch processing
+    const WAITING_FOR_INVOICE = 'WAITING_FOR_INVOICE';  // Authorized shift that is waiting for invoicing
+    const WAITING_FOR_CHARGE = 'WAITING_FOR_CHARGE';  // Invoiced shift that is waiting for payment
     // Read-only statuses from here down (see isReadOnly())
     const WAITING_FOR_PAYOUT = 'WAITING_FOR_PAYOUT';  // Charged shift that is waiting for payout (settlement)
     const PAID_BUSINESS_ONLY = 'PAID_BUSINESS_ONLY'; // Shift that failed payment to the caregiver, but paid successfully to the business
@@ -208,7 +232,16 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     const METHOD_OFFICE = 'Office';  //  The shift was manually created or clocked out from the office user interface
     const METHOD_TELEPHONY = 'Telephony';  //  The shift was clocked in/out from the telephony system
     const METHOD_TIMESHEET = 'Timesheet';  //  The shift was created from a manual timesheet submitted by the caregiver
+    const METHOD_IMPORTED = 'Imported';  //  The shift was imported manually or through a third party interface
     const METHOD_UNKNOWN = 'Unknown';  //  The check in/out method is unknown, most likely from before we implemented this logic
+
+    ////////////////////////////////////
+    //// Shift Hour Types
+    ////////////////////////////////////
+
+    const HOURS_DEFAULT = 'default';
+    const HOURS_OVERTIME = 'overtime';
+    const HOURS_HOLIDAY = 'holiday';
 
     //////////////////////////////////////
     /// Relationship Methods
@@ -217,7 +250,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     /**
      * Get the shift's address relation.
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function address()
     {
@@ -340,13 +373,34 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
         return $this->belongsTo(Shift::class, 'duplicated_by');
     }
 
+    public function services()
+    {
+        return $this->hasMany(ShiftService::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(ShiftExpense::class);
+    }
+
+    public function clientPayer()
+    {
+        return $this->belongsTo(ClientPayer::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
 
     public function getTimezoneAttribute()
     {
-        return Timezone::getTimezone($this->business_id);
+        return $this->getTimezone();
     }
 
     public function getDurationAttribute()
@@ -428,6 +482,32 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function flagManager() : ShiftFlagManager
     {
         return new ShiftFlagManager($this);
+    }
+
+    /**
+     * @param iterable $services
+     */
+    public function syncServices(iterable $services)
+    {
+        $savedIds = [];
+        foreach($services as $data) {
+            $service = null;
+            if (isset($data['id'])) {
+                $service = $this->services()->find($data['id']);
+            }
+            if (!$service) {
+                $service = new ShiftService();
+            }
+            $service->fill($data);
+            $this->services()->save($service);
+            $savedIds[] = $service->id;
+        }
+        // Delete Others
+        $this->services()->whereNotIn('id', $savedIds)->delete();
+        if (count($savedIds)) {
+            // Enforce either a single service shift or a service breakout shift, not both
+            $this->update(['service_id' => null]);
+        }
     }
 
     /**
@@ -666,7 +746,7 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     public function addFlag($flag)
     {
         if ($this->hasFlag($flag)) {
-            return false;
+            return;
         }
 
         $this->shiftFlags()->create(['flag' => $flag]);
@@ -700,6 +780,201 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
             $this->removeFlag($flag);
         }
     }
+
+
+    /**
+     * @return string
+     */
+    public function getTimezone()
+    {
+        return Timezone::getTimezone($this->business_id);
+    }
+
+    protected function breakOutExpenses(): ?ShiftExpense
+    {
+        if ($this->other_expenses > 0) {
+            return ShiftExpense::create([
+                'shift_id' => $this->id,
+                'name' => 'Other Expenses',
+                'units' => 1,
+                'rate' => $this->other_expenses,
+                'notes' => $this->other_expenses_desc,
+            ]);
+        }
+        return null;
+    }
+
+    protected function breakOutMileage(): ?ShiftExpense
+    {
+        if ($this->mileage > 0) {
+            $mileageCalc = new MileageExpenseCalculator(null, $this->business, null, $this->mileage);
+            return ShiftExpense::create([
+                'shift_id' => $this->id,
+                'name' => 'Mileage',
+                'units' => $this->mileage,
+                'rate' => $mileageCalc->getMileageRate(),
+                'notes' => null,
+            ]);
+        }
+        return null;
+    }
+
+    /**
+     * Collect all applicable invoiceables of this type eligible for the client payment
+     *
+     * @param \App\Client $client
+     * @param \Carbon\Carbon $endDateUtc
+     * @return \Illuminate\Support\Collection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         \App\Billing\Contracts\InvoiceableInterface[]
+     */
+    public function getItemsForPayment(Client $client, Carbon $endDateUtc): Collection
+    {
+        $query = new InvoiceableQuery($this);
+        $shifts = $query->doesntHaveClientInvoice()
+            ->where('client_id', $client->id)
+            ->where('status', Shift::WAITING_FOR_INVOICE)
+            ->where('checked_in_time', '<=', $endDateUtc->toDateTimeString())
+            ->get();
+
+        $collection = new Collection();
+        foreach($shifts as $shift) {
+            $expense = $shift->breakOutExpenses();
+            if ($expense) $collection->push($expense);
+
+            $mileage = $shift->breakOutMileage();
+            if ($mileage) $collection->push($mileage);
+
+            if ($shift->services->count()) {
+                $collection->push(...$shift->services->all());
+            } else {
+                $collection->push($shift);
+            }
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Get the number of units to be invoiced
+     *
+     * @return float
+     */
+    public function getItemUnits(): float
+    {
+        return $this->duration();
+    }
+
+    /**
+     * Get the name of this item to display on the invoice
+     *
+     * @param string $invoiceModel
+     * @return string
+     */
+    public function getItemName(string $invoiceModel): string
+    {
+        if ($service = $this->service) {
+            /** @var Service $service */
+            return $service->name;
+        }
+
+        // Fallback
+        return $this->getItemGroup($invoiceModel);
+    }
+
+    /**
+     * Get the group this item should be listed under on the invoice
+     *
+     * @param string $invoiceModel
+     * @return string|null
+     */
+    public function getItemGroup(string $invoiceModel): ?string
+    {
+        $name = optional($this->client)->name() . ' - ' . optional($this->caregiver)->name();
+
+        switch($invoiceModel) {
+            case ClientInvoice::class:
+                $name = optional($this->caregiver)->name();
+                break;
+            case CaregiverInvoice::class:
+                $name = optional($this->client)->name();
+                break;
+        }
+
+
+        return $this->checked_in_time->setTimezone($this->getTimezone())->format('F j g:iA') . ': ' . $name;
+    }
+
+    /**
+     * Get the date & time that this item's "service" occurred.   SHOULD respect the client/business timezone.
+     * Note: This is used for sorting items on the invoice and determining payer allowances.
+     *
+     * @return string|null
+     */
+    public function getItemDate(): ?string
+    {
+        return $this->checked_in_time->setTimezone($this->getTimezone())->toDateTimeString();
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getItemNotes(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Check if the client rate includes the ally fee (ex. true for shifts, false for expenses)
+     *
+     * @return bool
+     */
+    public function hasFeeIncluded(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the client rate of this item (payment rate).  The total charged will be this rate multiplied by the units.
+     *
+     * @return float
+     */
+    public function getClientRate(): float
+    {
+        return $this->client_rate;
+    }
+
+    /**
+     * TODO Implement caregiver deposit invoicing
+     * @return float
+     */
+    public function getCaregiverRate(): float
+    {
+        return $this->caregiver_rate;
+    }
+
+    /**
+     * Get the client payer record
+     *
+     * @return \App\Billing\ClientPayer|null
+     */
+    public function getClientPayer(): ?ClientPayer
+    {
+        return $this->clientPayer;
+    }
+
+    /**
+     * Add an amount that has been invoiced to a payer
+     *
+     * @param \App\Billing\ClientInvoiceItem $invoiceItem
+     * @param float $amount
+     * @param float $allyFee  The value of $amount that represents the Ally Fee
+     */
+    public function addAmountInvoiced(ClientInvoiceItem $invoiceItem, float $amount, float $allyFee): void
+    {
+        if ($this->getAmountDue() === 0) {
+            $this->statusManager()->ackClientInvoice();
+        }
+    }
+
 
     ///////////////////////////////////////////
     /// Query Scopes
@@ -750,6 +1025,18 @@ class Shift extends AuditableModel implements HasAllyFeeInterface, BelongsToBusi
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
+    }
+
+    /**
+     * A query scope for filtering invoicables by related caregiver IDs
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $builder
+     * @param array $caregiverIds
+     * @return void
+     */
+    public function scopeForCaregivers(Builder $builder, array $caregiverIds)
+    {
+        $builder->whereIn('caregiver_id', $caregiverIds);
     }
 
     /**

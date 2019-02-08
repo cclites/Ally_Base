@@ -33,6 +33,8 @@ use App\Events\SmsThreadReplyCreated;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply whereUserId($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  */
 class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
 {

@@ -17,7 +17,7 @@ class AlterAddTypeToCreditCards extends Migration
             $table->string('type')->after('name_on_card')->nullable();
         });
 
-        foreach(\App\CreditCard::all() as $card) {
+        foreach(\App\Billing\Payments\Methods\CreditCard::all() as $card) {
             $validator = \Inacho\CreditCard::validCreditCard($card->number);
             $card->update(['type' => $validator['type']]);
         }

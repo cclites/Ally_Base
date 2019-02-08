@@ -2,8 +2,8 @@
 namespace App\Traits;
 
 use App\Address;
-use App\BankAccount;
-use App\CreditCard;
+use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Payments\Methods\CreditCard;
 use App\EmergencyContact;
 use App\PhoneNumber;
 use App\User;
@@ -136,12 +136,12 @@ trait IsUserRole
     /// Name Concatenation Forwarders
     ///////////////////////////////////////////
 
-    public function name()
+    public function name(): string
     {
         return $this->user->name();
     }
 
-    public function nameLastFirst()
+    public function nameLastFirst(): string
     {
         return $this->user->nameLastFirst();
     }

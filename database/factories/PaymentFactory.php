@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use App\Payment;
+use App\Billing\Payment;
 use App\Client;
 
 $factory->define(Payment::class, function(Faker $faker) {

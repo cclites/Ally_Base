@@ -117,7 +117,9 @@ class CustomFieldController extends Controller
      * @param \Illuminate\Http\Request $request
      * @param string $account The type of account to service
      * @param string $id The ID of the account
-     * @return void
+     * @return \App\Responses\ErrorResponse|\App\Responses\SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Packages\MetaData\Exceptions\ModelNotSavedException
      */
     public function storeValue(Request $request, string $account, string $id)
     {
@@ -125,7 +127,6 @@ class CustomFieldController extends Controller
             return new ErrorResponse(422, 'An error occured while trying to save your custom fields, please try again.');
         }
 
-        $instance;
         if($account == 'caregiver') {
             $instance = Caregiver::findOrFail($id);
             $this->authorize('update', $instance);

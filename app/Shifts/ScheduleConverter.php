@@ -150,24 +150,17 @@ class ScheduleConverter
             return false;
         }
 
-
         // Create Shift
         $start = $clockIn->setTimezone('UTC');
-        $shift = Shift::create([
-            'business_id'       => $schedule->business_id,
-            'caregiver_id'      => $schedule->caregiver_id,
-            'client_id'         => $schedule->client_id,
-            'checked_in_method' => Shift::METHOD_CONVERTED,
-            'checked_in_time'   => $start,
-            'checked_out_method'=> Shift::METHOD_CONVERTED,
-            'checked_out_time'  => $start->copy()->addMinutes($schedule->duration),
-            'schedule_id'       => $schedule->id,
-            'hours_type'        => $schedule->hours_type,
-            'fixed_rates'       => $schedule->fixed_rates,
-            'caregiver_rate'    => $schedule->getCaregiverRate(),
-            'provider_fee'      => $schedule->getProviderFee(),
-            'status'            => $status,
-        ]);
+        $factory = ShiftFactory::withSchedule(
+            $schedule,
+            Shift::METHOD_CONVERTED,
+            $start,
+            Shift::METHOD_CONVERTED,
+            $start->copy()->addMinutes($schedule->duration),
+            $status
+        );
+        $shift = $factory->create();
 
         if ($shift) {
             $schedule->update(['converted_at' => Carbon::now()]);
