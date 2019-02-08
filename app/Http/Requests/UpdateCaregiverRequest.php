@@ -36,6 +36,7 @@ class UpdateCaregiverRequest extends FormRequest
                 'nullable',
                 new Avatar()
             ],
+            'referral_source_id' => 'nullable|exists:referral_sources,id',
         ];
     }
 

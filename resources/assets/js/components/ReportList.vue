@@ -310,9 +310,16 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Referral Sources',
-                        url: 'reports/referral-sources',
+                        name: 'Client Referral Sources',
+                        url: 'reports/client-referral-sources',
                         description: 'List of referral sources and how many clients have been referred by each',
+                        category: 1,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Caregiver Referral Sources',
+                        url: 'reports/caregiver-referral-sources',
+                        description: 'List of referral sources and how many caregivers have been referred by each',
                         category: 1,
                         allowed: ['office_user'],
                     },

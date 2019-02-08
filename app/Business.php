@@ -112,7 +112,6 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Question[] $questions
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\RateCode[] $rateCodes
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\ReferralSource[] $referralSources
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThread[] $smsThreads
@@ -331,11 +330,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function rateCodes()
     {
         return $this->hasMany(RateCode::class, 'business_id');
-    }
-
-    public function referralSources()
-    {
-        return $this->hasMany(ReferralSource::class, 'business_id');
     }
 
     public function users()

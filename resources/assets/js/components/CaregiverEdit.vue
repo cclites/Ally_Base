@@ -56,6 +56,10 @@
                         </b-form-input>
                         <input-help :form="form" field="medicaid_id" text="The caregiver ID, or license number, for Medicaid"></input-help>
                     </b-form-group>
+                    <b-form-group>
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver"></business-referral-source-select>
+                        <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -175,6 +179,7 @@
                     gender: this.caregiver.gender,
                     medicaid_id: this.caregiver.medicaid_id,
                     avatar: this.caregiver.avatar,
+                    referral_source_id: this.caregiver.referral_source_id ? this.caregiver.referral_source_id : "",
                 }),
                 passwordModal: false,
                 welcomeEmailModal: false,
