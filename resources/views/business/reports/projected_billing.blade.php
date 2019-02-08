@@ -9,8 +9,8 @@
 @endsection
 
 @section('content')
-    <projected-billing :client-options="{{ $clientOptions }}"
+    <projected-billing-report :client-options="{{ $clientOptions }}"
                        :client-type-options="{{ $clientTypeOptions }}"
                        :caregiver-options="{{ $caregiverOptions }}">
-    </projected-billing>
+    </projected-billing-report>
 @endsection
