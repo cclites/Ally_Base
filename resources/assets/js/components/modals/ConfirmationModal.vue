@@ -18,7 +18,7 @@
 
                     <div class="modal-footer">
                         <slot name="footer">
-                            <b-btn variant="danger" @click="emitAndClose('confirm')">{{ localConfirmText }}</b-btn>
+                            <b-btn :variant="localConfirmVariant" @click="emitAndClose('confirm')">{{ localConfirmText }}</b-btn>
                             <b-btn variant="default" @click="emitAndClose('cancel')">{{ localCancelText }}</b-btn>
                         </slot>
                     </div>
@@ -31,7 +31,7 @@
 <script>
     export default {
         name: "ConfirmationModal",
-        props: ['title', 'message', 'value', 'cancelText', 'confirmText'],
+        props: ['title', 'message', 'value', 'cancelText', 'confirmText', 'confirmVariant'],
         computed: {
             localTitle() {
                 return this.title || "Confirm";
@@ -49,6 +49,9 @@
             },
             localConfirmText() {
                 return this.confirmText || "Yes, Continue";
+            },
+            localConfirmVariant() {
+                return this.confirmVariant || "danger";
             },
         },
         methods: {

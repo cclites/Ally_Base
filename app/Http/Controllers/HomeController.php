@@ -45,7 +45,7 @@ class HomeController extends Controller
 
     public function clientDashboard()
     {
-        return redirect()->route('payment-history.index');
+        return redirect()->route('client.invoices');
     }
 
     public function caregiverDashboard(Caregiver $caregiver)
