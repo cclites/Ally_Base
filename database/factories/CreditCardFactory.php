@@ -1,7 +1,7 @@
 <?php
 
 use Faker\Generator as Faker;
-use App\CreditCard;
+use App\Billing\Payments\Methods\CreditCard;
 use App\Client;
 
 $factory->define(CreditCard::class, function (Faker $faker) {
@@ -9,7 +9,6 @@ $factory->define(CreditCard::class, function (Faker $faker) {
         'user_id' => factory(Client::class)->create()->user->id,
         'nickname' => $faker->word,
         'name_on_card' => $faker->name,
-        'type' => $faker->creditCardType,
         'number' => $faker->creditCardNumber,
         'expiration_month' => $faker->creditCardExpirationDate->format('m'),
         'expiration_year' => $faker->creditCardExpirationDate->format('Y')

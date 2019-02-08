@@ -7,15 +7,15 @@ use App\ReferralSource;
 use App\Reports\PayrollReport;
 use App\Shifts\ShiftStatusManager;
 use Auth;
-use App\BankAccount;
+use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Prospect;
 use App\Client;
-use App\CreditCard;
-use App\Deposit;
-use App\GatewayTransaction;
-use App\Payment;
+use App\Billing\Payments\Methods\CreditCard;
+use App\Billing\Deposit;
+use App\Billing\GatewayTransaction;
+use App\Billing\Payment;
 use App\Reports\CaregiverPaymentsReport;
 use App\Reports\CertificationExpirationReport;
 use App\Reports\ClientCaregiversReport;
@@ -37,6 +37,7 @@ use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
 use App\CustomField;
+use App\OfficeUser;
 
 class ReportsController extends BaseController
 {
@@ -768,6 +769,22 @@ class ReportsController extends BaseController
         return view('business.reports.referral_sources', compact('reports'));
     }
 
+    public function caseManager()
+    {
+        $clients = Client::forRequestedBusinesses()
+            ->whereNotNull('case_manager_id')
+            ->with('caseManager')
+            ->with(['notes' => function($query) {
+                return $query->where('type', 'phone');
+            }])
+            ->get();
+        $ids = $clients->pluck('case_manager_id');
+        $caseManagers = OfficeUser::forRequestedBusinesses()
+            ->whereIn('id', $ids)
+            ->get();
+        return view('business.reports.case_manager', compact('caseManagers', 'clients'));
+    }
+
     /**
      * Shows the list of prospective clients
      *
@@ -1189,6 +1206,8 @@ class ReportsController extends BaseController
         $prospects = Prospect::select([
                 'id',
                 'business_id', 
+                'firstname',
+                'lastname',
                 'closed_loss', 
                 'closed_win', 
                 'referred_by',

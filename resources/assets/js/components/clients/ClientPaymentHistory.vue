@@ -1,31 +1,37 @@
 <template>
-    <b-card title="Payment History">
-        <div class="table-responsive">
-            <b-table hover
-                     sort-by="created_at"
-                    :items="items"
-                    :fields="fields">
-                <template slot="created_at" scope="data">
-                    {{ formatDate(data.item.created_at) }}
-                </template>
-                <template slot="week" scope="data">
-                    {{ start_end(data) }}
-                </template>
-                <template slot="success" scope="data">
-                    <span style="color: green;" v-if="data.value">Complete</span>
-                    <span style="color: darkred;" v-else>Failed</span>
-                </template>
-                <template slot="actions" scope="data">
-                    <a :href="'/payment-history/' + data.item.id" class="btn btn-secondary">
-                        View Statement
+    <div class="table-responsive">
+        <b-table hover
+                 :sort-by="sortBy"
+                 :sort-desc="sortDesc"
+                 :items="items"
+                 :fields="fields">
+            <template slot="created_at" scope="data">
+                {{ formatDate(data.item.created_at) }}
+            </template>
+            <template slot="week" scope="data">
+                {{ start_end(data) }}
+            </template>
+            <template slot="success" scope="data">
+                <span style="color: green;" v-if="data.value">Complete</span>
+                <span style="color: darkred;" v-else>Failed</span>
+            </template>
+            <template slot="actions" scope="data">
+                <slot name="actions" :item="data.item">
+                    <a :href="'/client/payments/' + data.item.id" class="btn btn-secondary" target="_blank">
+                        <i class="fa fa-external-link"></i> View
                     </a>
-                    <a :href="'/payment-history/' + data.item.id + '/print'" class="btn btn-secondary">
-                        Download Statement
+                    <a :href="'/client/payments/' + data.item.id + '/pdf'" class="btn btn-secondary">
+                        <i class="fa fa-file-pdf-o"></i> Download
                     </a>
-                </template>
-            </b-table>
-        </div>
-    </b-card>
+                </slot>
+            </template>
+            <template slot="invoices" scope="data">
+                <div v-for="invoice in data.item.invoices" :key="invoice.id">
+                    <a :href="`/business/client/invoices/${invoice.id}`">#{{ invoice.name }}</a>
+                </div>
+            </template>
+        </b-table>
+    </div>
 </template>
 
 <script>
@@ -33,27 +39,31 @@
     import FormatsNumbers from '../../mixins/FormatsNumbers';
 
     export default {
-        props: ['client'],
+        props: ['client', 'payments'],
 
         mixins: [FormatsDates, FormatsNumbers],
 
         data() {
             return {
-                items: this.client.payments,
+                items: this.payments,
                 fields: [
-                    { key: 'created_at', label: 'Date Paid' },
+                    { key: 'created_at', label: 'Date Paid', sortable: true },
                     { key: 'week', label: 'Week' },
-                    { key: 'success', label: 'Payment Status' },
                     {
                         key: 'amount',
                         label: 'Amount',
-                        formatter: (value) => { return this.moneyFormat(value) }
+                        formatter: (value) => { return this.moneyFormat(value) },
+                        sortable: true,
                     },
+                    { key: 'success', label: 'Payment Status' },
+                    { key: 'invoices', label: 'Related Invoices' },
                     {
                         key: 'actions',
                         class: 'hidden-print'                        
                     }
-                ]
+                ],
+                sortBy: 'created_at',
+                sortDesc: true,
             }
         },
         methods: {

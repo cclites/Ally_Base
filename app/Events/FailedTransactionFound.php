@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\GatewayTransaction;
+use App\Billing\GatewayTransaction;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,7 +12,7 @@ class FailedTransactionFound
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * @var \App\GatewayTransaction
+     * @var \App\Billing\GatewayTransaction
      */
     public $transaction;
 
